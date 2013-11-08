@@ -24,20 +24,34 @@ describe Cli do
     end
   end
 
-  context 'when given the "publish" command' do
-    let(:arguments) { ['publish'] }
-    let(:fake_publish) { double }
+  shared_examples_for 'a cli that dispatches commands' do
+    let(:arguments) { [command_string] + extra_args}
+    let(:extra_args) { ['arg1', 'arg2'] }
+    let(:fake_command) { double }
     it 'should run the publish command' do
-      fake_publish.should_receive(:run).with([])
-      Cli::Publish.stub(:new) { fake_publish }
+      fake_command.should_receive(:run).with(['arg1', 'arg2'])
+      command_class.stub(:new) { fake_command }
       run
     end
 
     it 'returns whatever the publish command returned' do
-      fake_publish.should_receive(:run).with([]).and_return(42)
-      Cli::Publish.stub(:new) { fake_publish }
+      fake_command.should_receive(:run).and_return(42)
+      command_class.stub(:new) { fake_command }
       expect(run).to eq(42)
     end
   end
+
+  context 'when given the "publish" command' do
+    let(:command_string) { 'publish' }
+    let(:command_class) { Cli::Publish }
+    it_should_behave_like 'a cli that dispatches commands'
+  end
+
+  context 'when given the "build_and_push_tarball" command' do
+    let(:command_string) { 'build_and_push_tarball' }
+    let(:command_class) { Cli::BuildAndPushTarball }
+    it_should_behave_like 'a cli that dispatches commands'
+  end
+
 
 end

@@ -5,14 +5,16 @@ class Cli
   def run(args)
     log 'No command supplied' and return if args.empty?
     command = args[0]
+    command_arguments = args[1..-1]
     case command
       when 'publish'
-        Publish.new.run args[1..-1]
+        Publish.new.run command_arguments
+      when 'build_and_push_tarball'
+        BuildAndPushTarball.new.run command_arguments
       else
         log "Unrecognized command '#{command}'"
     end
   end
-
 
   class Publish
     def run(args_array)
@@ -32,13 +34,12 @@ class Cli
       local_repo_dir = (args_array[0] == 'local') ? File.absolute_path('../') : nil
 
       config = YAML.load File.read('./config.yml')
-      repos = config['repos']
 
       # TODO: general solution to turn all string keys to symbols
       pdf_hash = config['pdf'] ? {page: config['pdf']['page'], filename: config['pdf']['filename']} : nil
 
       publisher = Publisher.new
-      success = publisher.publish repos: repos,
+      success = publisher.publish repos: config['repos'],
                                   output_dir: File.absolute_path('output'),
                                   master_middleman_dir: File.absolute_path('master_middleman'),
                                   local_repo_dir: local_repo_dir,
@@ -48,6 +49,18 @@ class Cli
                                   pdf: pdf_hash
 
       success ? 0 : 1
+    end
+  end
+
+  class BuildAndPushTarball
+    def run(unused)
+      config = YAML.load File.read('config.yml')
+
+      build_number = ENV['BUILD_NUMBER']
+      repository = GreenBuildRepository.new config['aws_credentials']['access_key'],
+                                            config['aws_credentials']['secret_key']
+      tarball_path = repository.create build_number, 'final_app', config['green_builds_bucket']
+      FileUtils.cp tarball_path, 'output'
     end
   end
 
