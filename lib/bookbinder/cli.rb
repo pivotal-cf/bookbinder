@@ -8,7 +8,8 @@ class Cli
     command_arguments = args[1..-1]
     hash = {'publish' => Publish,
             'build_and_push_tarball' => BuildAndPushTarball,
-            'doc_repos_updated' => DocReposUpdated}
+            'doc_repos_updated' => DocReposUpdated,
+            'push_local_to_staging' => PushLocalToStaging}
     if hash[command]
       hash[command].new.run command_arguments
     else
@@ -76,6 +77,16 @@ class Cli
                                                 config['github_password']
 
       change_monitor.build_necessary? ? 0 : 42
+    end
+  end
+
+  class PushLocalToStaging
+    def run(unused)
+      config = YAML.load File.read('config.yml')
+
+      Pusher.new.push_to_staging './final_app',
+                                 config['cf_credentials']['username'],
+                                 config['cf_credentials']['password']
     end
   end
 

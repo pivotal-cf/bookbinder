@@ -58,4 +58,10 @@ describe Cli do
     let(:command_class) { Cli::DocReposUpdated }
     it_should_behave_like 'a cli that dispatches commands'
   end
+
+  context 'when given the "push_local_to_staging" command' do
+    let(:command_string) { 'push_local_to_staging' }
+    let(:command_class) { Cli::PushLocalToStaging }
+    it_should_behave_like 'a cli that dispatches commands'
+  end
 end
