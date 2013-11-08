@@ -2,8 +2,8 @@ class Pusher
 
   include BookbinderLogger
 
-  def push_to_staging(app_dir)
-    push 'docs-pivotalone-staging', app_dir, 'cfaccounts+cfdocs@pivotallabs.com', 'hyrax4baseball'
+  def push_to_staging(app_dir, username, password)
+    push 'docs-pivotalone-staging', app_dir, username, password
   end
 
   def push_to_production(app_dir)
