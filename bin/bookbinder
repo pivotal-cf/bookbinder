@@ -29,6 +29,4 @@ success = publisher.publish repos: repos,
                             github_password: config["github_password"],
                             pdf: config["pdf"]
 
-# TODO: take username/password out of here and put it into a config file loaded like doc_repos.yml. Also point
-# doc_repos_updated.rb @ this config file and also all other context-specific data in scripts/ directory
 exit success ? 0 : 1
