@@ -64,4 +64,10 @@ describe Cli do
     let(:command_class) { Cli::PushLocalToStaging }
     it_should_behave_like 'a cli that dispatches commands'
   end
+
+  context 'when given the "push_to_prod" command' do
+    let(:command_string) { 'push_to_prod' }
+    let(:command_class) { Cli::PushToProd }
+    it_should_behave_like 'a cli that dispatches commands'
+  end
 end

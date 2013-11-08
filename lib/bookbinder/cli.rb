@@ -9,7 +9,8 @@ class Cli
     hash = {'publish' => Publish,
             'build_and_push_tarball' => BuildAndPushTarball,
             'doc_repos_updated' => DocReposUpdated,
-            'push_local_to_staging' => PushLocalToStaging}
+            'push_local_to_staging' => PushLocalToStaging,
+            'push_to_prod' => PushToProd}
     if hash[command]
       hash[command].new.run command_arguments
     else
@@ -19,21 +20,21 @@ class Cli
   end
 
   class Publish
-    def run(args_array)
+    def run(arguments)
 
       usage_message = 'usage: publish <local|github>'
 
-      unless args_array.size == 1
+      unless arguments.size == 1
         puts usage_message
         return 1
       end
 
-      unless %w(local github).include?(args_array[0])
+      unless %w(local github).include?(arguments[0])
         puts usage_message
         return 1
       end
 
-      local_repo_dir = (args_array[0] == 'local') ? File.absolute_path('../') : nil
+      local_repo_dir = (arguments[0] == 'local') ? File.absolute_path('../') : nil
 
       config = YAML.load File.read('./config.yml')
 
@@ -87,6 +88,22 @@ class Cli
       Pusher.new.push_to_staging './final_app',
                                  config['cf_credentials']['username'],
                                  config['cf_credentials']['password']
+
+      0
+    end
+  end
+
+  class PushToProd
+    def run(arguments)
+      config = YAML.load File.read('config.yml')
+
+      app_dir = Dir.mktmpdir
+      repository = GreenBuildRepository.new config['aws_credentials']['access_key'],
+                                            config['aws_credentials']['secret_key']
+      repository.download app_dir, config['green_builds_bucket'], arguments[0]
+      Pusher.new.push_to_production app_dir
+
+      0
     end
   end
 
