@@ -53,5 +53,9 @@ describe Cli do
     it_should_behave_like 'a cli that dispatches commands'
   end
 
-
+  context 'when given the "doc_repos_updated" command' do
+    let(:command_string) { 'doc_repos_updated' }
+    let(:command_class) { Cli::DocReposUpdated }
+    it_should_behave_like 'a cli that dispatches commands'
+  end
 end
