@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+
+require 'bookbinder'
+
+usage_message = 'usage: publish <local|github>'
+
+unless ARGV.size == 1
+  puts usage_message
+  exit
+end
+
+unless %w(local github).include?(ARGV[0])
+  puts usage_message
+  exit
+end
+
+local_repo_dir = (ARGV[0] == 'local') ? File.absolute_path('../') : nil
+
+config = YAML.load File.read('./config.yml')
+repos = config["repos"]
+
+publisher = Publisher.new
+success = publisher.publish repos: repos,
+                            output_dir: File.absolute_path('output'),
+                            master_middleman_dir: File.absolute_path('master_middleman'),
+                            local_repo_dir: local_repo_dir,
+                            final_app_dir: File.absolute_path('final_app'),
+                            github_username: config["github_username"],
+                            github_password: config["github_password"],
+                            pdf: config["pdf"]
+
+# TODO: take username/password out of here and put it into a config file loaded like doc_repos.yml. Also point
+# doc_repos_updated.rb @ this config file and also all other context-specific data in scripts/ directory
+exit success ? 0 : 1

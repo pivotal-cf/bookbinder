@@ -6,10 +6,11 @@ Gem::Specification.new do |s|
   s.description = 'Documentation generator for Cloud Foundry'
   s.authors     = ['Mike Grafton', 'Lucas Marks']
   s.email       = 'mike@pivotallabs.com'
-  s.files =     Dir['lib/**/*'] + Dir['template_app/**/*']
+  s.files =     Dir['lib/**/*'] + Dir['template_app/**/*'] + Dir['bin/*']
   s.homepage    =
     'http://github.com/cloudfoundry/bookbinder'
   s.license       = 'MIT'
+  s.executable = 'bookbinder'
 
   s.add_runtime_dependency 'fog', ['~> 1.17']
   s.add_runtime_dependency 'ansi', ['~> 1.4']
