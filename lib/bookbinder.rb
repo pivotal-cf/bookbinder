@@ -1,0 +1,16 @@
+require 'fog'
+require 'tmpdir'
+require 'ansi'
+require 'httparty'
+
+require_relative 'bookbinder/shell_out'
+require_relative 'bookbinder/bookbinder_logger'
+require_relative 'bookbinder/doc_repo'
+require_relative 'bookbinder/spider'
+
+require_relative 'bookbinder/green_build_repository'
+require_relative 'bookbinder/pdf_generator'
+require_relative 'bookbinder/middleman_runner'
+require_relative 'bookbinder/publisher'
+require_relative 'bookbinder/doc_repo_change_monitor'
+require_relative 'bookbinder/pusher'

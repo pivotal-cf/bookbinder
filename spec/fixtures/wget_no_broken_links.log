@@ -1,0 +1,31 @@
+Spider mode enabled. Check if remote file exists.
+--2013-10-25 17:32:10--  http://google.com/
+Resolving google.com... 74.125.239.101, 74.125.239.105, 74.125.239.99, ...
+Connecting to google.com|74.125.239.101|:80... connected.
+HTTP request sent, awaiting response... 301 Moved Permanently
+Location: http://www.google.com/ [following]
+Spider mode enabled. Check if remote file exists.
+--2013-10-25 17:32:11--  http://www.google.com/
+Resolving www.google.com... 74.125.239.115, 74.125.239.116, 74.125.239.114, ...
+Connecting to www.google.com|74.125.239.115|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: unspecified [text/html]
+Remote file exists and could contain links to other resources -- retrieving.
+
+--2013-10-25 17:32:11--  http://www.google.com/
+Reusing existing connection to www.google.com:80.
+HTTP request sent, awaiting response... 200 OK
+Length: unspecified [text/html]
+Saving to: ‘index.html.1’
+
+     0K .......... ........                                    3.13M=0.006s
+
+2013-10-25 17:32:11 (3.13 MB/s) - ‘index.html.1’ saved [18721]
+
+Removing index.html.1.
+
+Found no broken links.
+
+FINISHED --2013-10-25 17:32:11--
+Total wall clock time: 0.2s
+Downloaded: 1 files, 18K in 0.006s (3.13 MB/s)
