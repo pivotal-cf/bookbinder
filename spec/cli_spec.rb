@@ -93,7 +93,7 @@ describe Cli do
       fake_publish.should_receive(:run).with(['github']).and_return(0)
       fake_push_local_to_staging.should_receive(:run).with([]).and_return(0)
       fake_build_and_push_tarball.should_receive(:run).with([]).and_return(0)
-      result = Cli::RunPublishCI.new.run
+      result = Cli::RunPublishCI.new.run []
       expect(result).to eq(0)
     end
 
@@ -101,7 +101,7 @@ describe Cli do
       fake_publish.should_receive(:run).with(['github']).and_return(1)
       fake_push_local_to_staging.should_not_receive(:run)
       fake_build_and_push_tarball.should_not_receive(:run)
-      result = Cli::RunPublishCI.new.run
+      result = Cli::RunPublishCI.new.run []
       expect(result).to eq(1)
     end
 
@@ -109,7 +109,7 @@ describe Cli do
       fake_publish.should_receive(:run).with(['github']).and_return(0)
       fake_push_local_to_staging.should_receive(:run).with([]).and_return(1)
       fake_build_and_push_tarball.should_not_receive(:run)
-      result = Cli::RunPublishCI.new.run
+      result = Cli::RunPublishCI.new.run []
       expect(result).to eq(1)
     end
   end

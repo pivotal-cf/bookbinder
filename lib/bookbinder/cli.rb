@@ -109,7 +109,7 @@ class Cli
   end
 
   class RunPublishCI
-    def run
+    def run(unused)
       if 0 == Publish.new.run(['github'])
         if 0 == PushLocalToStaging.new.run([])
           if 0 == BuildAndPushTarball.new.run([])
