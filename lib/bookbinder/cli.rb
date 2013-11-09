@@ -10,7 +10,8 @@ class Cli
             'build_and_push_tarball' => BuildAndPushTarball,
             'doc_repos_updated' => DocReposUpdated,
             'push_local_to_staging' => PushLocalToStaging,
-            'push_to_prod' => PushToProd}
+            'push_to_prod' => PushToProd,
+            'run_publish_ci' => RunPublishCI}
     if hash[command]
       hash[command].new.run command_arguments
     else
@@ -107,5 +108,17 @@ class Cli
     end
   end
 
+  class RunPublishCI
+    def run
+      if 0 == Publish.new.run(['github'])
+        if 0 == PushLocalToStaging.new.run([])
+          if 0 == BuildAndPushTarball.new.run([])
+            return 0
+          end
+        end
+      end
+      1
+    end
+  end
 end
 
