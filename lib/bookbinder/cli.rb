@@ -65,6 +65,7 @@ class Cli
                                             config['aws_credentials']['secret_key']
       tarball_path = repository.create build_number, 'final_app', config['green_builds_bucket']
       FileUtils.cp tarball_path, 'output'
+      0
     end
   end
 
@@ -89,7 +90,6 @@ class Cli
       Pusher.new.push_to_staging './final_app',
                                  config['cf_credentials']['username'],
                                  config['cf_credentials']['password']
-
       0
     end
   end
