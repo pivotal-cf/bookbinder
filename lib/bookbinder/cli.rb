@@ -90,6 +90,7 @@ class Cli
       Pusher.new.push config['cloud_foundry']['api_endpoint'],
                       config['cloud_foundry']['organization'],
                       config['cloud_foundry']['staging_space'],
+                      config['cloud_foundry']['app_name'],
                       './final_app',
                       config['cloud_foundry']['username'],
                       config['cloud_foundry']['password']
@@ -112,6 +113,7 @@ class Cli
       Pusher.new.push config['cloud_foundry']['api_endpoint'],
                       config['cloud_foundry']['organization'],
                       config['cloud_foundry']['production_space'],
+                      config['cloud_foundry']['app_name'],
                       app_dir
 
       0
