@@ -85,3 +85,65 @@ The publish command creates 2 output directories, one named `output/` and one na
 `final_app/` contains bookbinder's ultimate output: a Sinatra web-app that can be pushed to cloud foundry or run locally.
 
 `output/` contains intermediary state, including the final prepared directory that the `publish` script ran middleman against, in `output/master_middleman`.
+
+## CI
+
+### Bookbinder Gem Unit Tests
+Bookbinder has a [CI on Travis](https://travis-ci.org/pivotal-cf/docs-bookbinder) that runs all its unit tests.
+
+### CI for Books
+
+Part of what makes bookbinder awesome is that it can drive a continuous integration process for your book, using Jenkins.
+
+The goal of this CI is to run a full publish operation every time either of the following changes:
+
+- Your book's configuration, i.e. any change to your main book git repo.
+- Any of the document sub-repositories that the configuration depends on (listed in config.yml).
+
+The book CI should have 2 Jenkins builds to accomplish this. Both should link to the same repository (the book repository). Both use scripts from the bookbinder gem.
+
+The **Change Monitor Build** build is simply a cron-like build that runs every minute, and detects if any of the document repositories have changed; if they have, it triggers the publish build to run. The **Publish Build**, when triggered, runs a full publish operation. If the publish build goes green (i.e. there are no broken links), it will deploy to staging and also generate a tarball of the green build, which is stored on S3 with a build number in the filename.
+
+### CI Technical Details
+
+CIBorg can be used to stand up an AWS box running jenkins. The CloudFoundry Go CLI should be installed on the Jenkins box to ~jenkins/bin/go-cf (bookbinder's scripts expect it to be in the ~/bin of the current user). Here's how to copy down the prebuilt binary.
+
+    curl http://go-cli.s3.amazonaws.com/go-cf-linux-amd64.tgz > go-cf-linux-amd64.tgz
+    tar xzf go-cf-linux-amd64.tgz
+
+The following Jenkins plugins are necessary:
+
+- Rbenv (configured to use ruby version 2.0.0p195)
+- Jenkins GIT
+
+#### *Change Monitor Build*
+This build executes this shell command
+
+    bundle install
+    bundle exec bookbinder doc_repos_updated
+
+and builds the **Publish Build** project on success as a post-build action.
+
+This build determines whether a full publish build should be triggered, based on some cached state that it stores in a file. This file, called cached_shas.yml, is kept in the job folder of the change monitor build (i.e. one level above the actual workspace), so that it persists between builds.
+
+#### *Publish Build*
+This build should executes this shell command:
+
+    bundle install
+    bundle exec bookbinder run_publish_ci
+
+## Deploying
+
+Bookbinder has the ability to deploy the finished product to either staging or production.
+
+Deploying to staging is not normally something a human needs to do: the book's Jenkins CI script does this automatically every time a build passes.
+
+To deploy to production, you need to have CloudFoundry Go CLI installed; assuming you have the go-cf command-line tool installed and on your PATH, the following command will deploy the build in your local 'final_app' directory to staging:
+
+    bookbinder push_local_to_staging
+
+Deploying to prod can be done from any machine with the book project checked out, but does not depend on the results from a local publish (or the contents of your `final_app` directory). Instead, it pulls the latest green build from S3, untars it locally, and then pushes it up to prod:
+
+    bookbinder push_to_prod <build_number>
+
+If the build_number argument is left out, the latest green build will be deployed to production.
