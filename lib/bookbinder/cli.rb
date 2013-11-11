@@ -48,8 +48,8 @@ class Cli
                                   master_middleman_dir: File.absolute_path('master_middleman'),
                                   local_repo_dir: local_repo_dir,
                                   final_app_dir: File.absolute_path('final_app'),
-                                  github_username: config['github_username'],
-                                  github_password: config['github_password'],
+                                  github_username: config['github']['username'],
+                                  github_password: config['github']['password'],
                                   pdf: pdf_hash
 
       success ? 0 : 1
@@ -61,9 +61,9 @@ class Cli
       config = YAML.load File.read('config.yml')
 
       build_number = ENV['BUILD_NUMBER']
-      repository = GreenBuildRepository.new config['aws_credentials']['access_key'],
-                                            config['aws_credentials']['secret_key']
-      tarball_path = repository.create build_number, 'final_app', config['green_builds_bucket']
+      repository = GreenBuildRepository.new config['aws']['access_key'],
+                                            config['aws']['secret_key']
+      tarball_path = repository.create build_number, 'final_app', config['aws']['green_builds_bucket']
       FileUtils.cp tarball_path, 'output'
       0
     end
@@ -76,8 +76,8 @@ class Cli
       workspace_dir = File.join('..')
       change_monitor = DocRepoChangeMonitor.new config['repos'],
                                                 workspace_dir,
-                                                config['github_username'],
-                                                config['github_password']
+                                                config['github']['username'],
+                                                config['github']['password']
 
       change_monitor.build_necessary? ? 0 : 42
     end
@@ -88,8 +88,8 @@ class Cli
       config = YAML.load File.read('config.yml')
 
       Pusher.new.push_to_staging './final_app',
-                                 config['cf_credentials']['username'],
-                                 config['cf_credentials']['password']
+                                 config['cloud_foundry']['username'],
+                                 config['cloud_foundry']['password']
       0
     end
   end
@@ -99,9 +99,9 @@ class Cli
       config = YAML.load File.read('config.yml')
 
       app_dir = Dir.mktmpdir
-      repository = GreenBuildRepository.new config['aws_credentials']['access_key'],
-                                            config['aws_credentials']['secret_key']
-      repository.download app_dir, config['green_builds_bucket'], arguments[0]
+      repository = GreenBuildRepository.new config['aws']['access_key'],
+                                            config['aws']['secret_key']
+      repository.download app_dir, config['aws']['green_builds_bucket'], arguments[0]
       Pusher.new.push_to_production app_dir
 
       0
