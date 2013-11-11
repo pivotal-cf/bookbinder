@@ -87,14 +87,20 @@ class Cli
     def run(unused)
       config = YAML.load File.read('config.yml')
 
-      Pusher.new.push_to_staging './final_app',
-                                 config['cloud_foundry']['username'],
-                                 config['cloud_foundry']['password']
+      Pusher.new.push config['cloud_foundry']['api_endpoint'],
+                      config['cloud_foundry']['organization'],
+                      config['cloud_foundry']['staging_space'],
+                      './final_app',
+                      config['cloud_foundry']['username'],
+                      config['cloud_foundry']['password']
       0
     end
   end
 
   class PushToProd
+
+    include BookbinderLogger
+
     def run(arguments)
       config = YAML.load File.read('config.yml')
 
@@ -102,7 +108,11 @@ class Cli
       repository = GreenBuildRepository.new config['aws']['access_key'],
                                             config['aws']['secret_key']
       repository.download app_dir, config['aws']['green_builds_bucket'], arguments[0]
-      Pusher.new.push_to_production app_dir
+      log 'Warning: You are pushing to CF Docs production. Be careful.'.yellow
+      Pusher.new.push config['cloud_foundry']['api_endpoint'],
+                      config['cloud_foundry']['organization'],
+                      config['cloud_foundry']['production_space'],
+                      app_dir
 
       0
     end

@@ -86,6 +86,14 @@ The publish command creates 2 output directories, one named `output/` and one na
 
 `output/` contains intermediary state, including the final prepared directory that the `publish` script ran middleman against, in `output/master_middleman`.
 
+## Running the App Locally
+
+    cd final_app
+    bundle
+    ruby app.rb
+
+You should only need to run the `bundle` the first time around.
+
 ## CI
 
 ### Bookbinder Gem Unit Tests
