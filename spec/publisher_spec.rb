@@ -31,7 +31,10 @@ describe Publisher do
                           output_dir: output_dir,
                           master_middleman_dir: File.join('spec', 'fixtures', 'non_broken_master_middleman'),
                           final_app_dir: final_app_dir,
-                          pdf: {page: 'pretty_path/index.html', filename: 'DocGuide.pdf'}
+                          pdf: { page: 'pretty_path/index.html',
+                                 filename: 'DocGuide.pdf',
+                                 header: 'pretty_path/header.html'
+                          }
 
         index_html = File.read File.join(final_app_dir, 'public', 'pretty_path', 'index.html')
         index_html.should include 'This is a Markdown Page'

@@ -2,6 +2,8 @@ class Cli
 
   include BookbinderLogger
 
+  # TODO: test code in this file (we only test #run and the RunPublishCi command)
+
   def run(args)
     log 'No command supplied' and return if args.empty?
     command = args[0]
@@ -40,7 +42,10 @@ class Cli
       config = YAML.load File.read('./config.yml')
 
       # TODO: general solution to turn all string keys to symbols
-      pdf_hash = config['pdf'] ? {page: config['pdf']['page'], filename: config['pdf']['filename']} : nil
+      pdf_hash = config['pdf'] ? {page: config['pdf']['page'],
+                                  filename: config['pdf']['filename'],
+                                  header: config['pdf']['header']}
+                               : nil
 
       publisher = Publisher.new
       success = publisher.publish repos: config['repos'],

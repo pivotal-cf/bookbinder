@@ -23,7 +23,8 @@ class Publisher
     if options[:pdf]
       source_page = File.join(final_app_dir, 'public', options[:pdf][:page])
       generated_pdf_file = File.join(final_app_dir, 'public', options[:pdf][:filename])
-      PdfGenerator.new.generate source_page, generated_pdf_file
+      header_file = File.join(final_app_dir, 'public', options[:pdf][:header])
+      PdfGenerator.new.generate source_page, generated_pdf_file, header_file
     end
 
     log "Bookbinder bound your book into #{options[:final_app_dir].green}"
