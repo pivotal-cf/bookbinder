@@ -6,10 +6,11 @@ class PdfGenerator
     raise "Could not find file #{source_page}" unless File.exist?(source_page)
     command = <<CMD
 wkhtmltopdf \
-    --margin-top 0mm \
+    --margin-top 10mm \
     --margin-left 0mm \
     --margin-right 0mm \
-    --margin-bottom 7mm \
+    --margin-bottom 13mm \
+    --footer-spacing 5 \
     --footer-font-size 10 \
     --footer-left "   © Copyright 2013, Pivotal" \
     --footer-center '[page] of [toPage]' \
