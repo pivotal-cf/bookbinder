@@ -32,8 +32,10 @@ CMD
   end
 
   def check_file_exists(required_file)
-    log "\nPDF Generation failed (could not find file)!".red
-    raise "Could not find file #{required_file}" unless File.exist?(required_file)
+    unless File.exist? required_file
+      log "\nPDF Generation failed (could not find file)!".red
+      raise "Could not find file #{required_file}"
+    end
   end
 end
 
