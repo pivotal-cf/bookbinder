@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.description = 'Documentation generator for Cloud Foundry'
   s.authors     = ['Mike Grafton', 'Lucas Marks']
   s.email       = 'mike@pivotallabs.com'
-  s.files =     Dir['lib/**/*'] + Dir['template_app/**/*'] + Dir['bin/*']
+  s.files =     Dir['lib/**/*'] + Dir['template_app/**/*'] + Dir['master_middleman/**/*'] + Dir['bin/*']
   s.homepage    =
     'http://github.com/cloudfoundry/bookbinder'
   s.license       = 'MIT'

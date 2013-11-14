@@ -10,7 +10,8 @@ class Publisher
     prepare_app final_app_dir, output_dir
 
     output_master_middleman_dir = File.join output_dir, 'master_middleman'
-    FileUtils.cp_r options[:master_middleman_dir], output_master_middleman_dir
+    copy_gem_dir 'master_middleman', output_master_middleman_dir
+    FileUtils.cp_r "#{options[:master_middleman_dir]}/.", output_master_middleman_dir
 
     options[:repos].each do |repo_hash|
       get_repo options, output_master_middleman_dir, repo_hash
@@ -63,10 +64,13 @@ class Publisher
     public_dir = File.join(final_app_dir, 'public')
     FileUtils.mkdir_p public_dir
 
-    spec = Gem::Specification.find_by_name("bookbinder")
-    gem_root = spec.gem_dir
+    copy_gem_dir 'template_app', final_app_dir
+  end
 
-    FileUtils.cp_r File.join(gem_root, 'template_app/.'), final_app_dir
+  def copy_gem_dir(dir, output_dir)
+    spec = Gem::Specification.find_by_name('bookbinder')
+    gem_root = spec.gem_dir
+    FileUtils.cp_r File.join(gem_root, "#{dir}/."), output_dir
   end
 
 end
