@@ -61,10 +61,6 @@ class SubmoduleAwareAssets < ::Middleman::Extension
   end
 
   helpers do
-    # asset_url override for relative assets
-    # @param [String] path
-    # @param [String] prefix
-    # @return [String]
     def asset_url(path, prefix="")
       path = super(path, prefix)
       url = if path.include?('//') || path.start_with?('data:') || !current_resource
@@ -74,16 +70,16 @@ class SubmoduleAwareAssets < ::Middleman::Extension
         Pathname(path).relative_path_from(current_dir.dirname).to_s
       end
 
-      # TODO: find a way for sub-modules to reference their own stylesheets
-      if (url.include?('stylesheets') || url.include?('javascripts'))
-        url
-      else
-        # TODO: change algorithm to work with middleman repos, no matter what the site directory structure looks like
-        # we want image_tag to work with paths that are relative to the subrepo. but middleman assumes
-        # your images live at the top level. so here we defeat middleman's logic by removing the extra
-        # parent directory elements.
-        url.gsub(/^\.\.\/\.\.\//, "")
+      # middleman assumes your assets live at the top level, but they may be in the subrepo instead
+      # here we start at top level and dive down until we find the real asset
+      current_page_path_parts = current_resource.destination_path.split('/')
+      current_page_path_parts.pop
+      current_page_dir = File.join('source', current_page_path_parts, '')
+      while (!File.exists? "#{current_page_dir}#{url}") && url.match(/^\.\.\//) do
+        url = url.gsub(/^\.\.\//, "")
       end
+
+      url
     end
   end
 end
