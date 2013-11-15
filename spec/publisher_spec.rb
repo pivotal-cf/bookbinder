@@ -61,8 +61,10 @@ describe Publisher do
     end
 
     context 'unit' do
-
       let(:master_middleman_dir) { tmp_subdir 'irrelevant'}
+      let(:pdf_config) { nil }
+      let(:local_repo_dir) { nil }
+      let(:repos) { [] }
 
       before do
         MiddlemanRunner.any_instance.stub(:run) {}
@@ -71,9 +73,11 @@ describe Publisher do
 
       def publish
         publisher.publish output_dir: output_dir,
-                          repos: [],
+                          repos: repos,
                           master_middleman_dir: master_middleman_dir,
-                          final_app_dir: final_app_dir
+                          final_app_dir: final_app_dir,
+                          pdf: pdf_config,
+                          local_repo_dir: local_repo_dir
       end
 
       context 'when the output directory does not yet exist' do
@@ -116,6 +120,40 @@ describe Publisher do
         BookbinderLogger.should_receive(:log).with(/No broken links!/)
         result = publish
         expect(result).to be_true
+      end
+
+      context 'when asked to find repos locally' do
+        let(:local_repo_dir) { Dir.mktmpdir }
+
+        context 'when the repository used to generate the pdf was skipped' do
+          let(:repos) { [ {'github_repo' => 'org/repo', 'directory' => 'pretty_dir'}] }
+          let(:pdf_config) do
+            {page: 'pretty_dir/index.html', filename: 'irrelevant.pdf', header: 'pretty_dir/header.html'}
+          end
+          it 'runs successfully' do
+            expect {publish}.to_not raise_error
+          end
+        end
+
+        context 'when the repository used to generate the pdf is not in the repo list' do
+          let(:pdf_config) do
+            {page: 'pretty_dir/index.html', filename: 'irrelevant.pdf', header: 'pretty_dir/header.html'}
+          end
+          it 'fails' do
+            expect {publish}.to raise_error
+          end
+        end
+
+        context 'when the repository used to generate the pdf is in in the repo list, but the pdf source file is not' do
+          let(:repos) { [ {'github_repo' => 'org/my-docs-repo', 'directory' => 'pretty_dir'}] }
+          let(:local_repo_dir) { MarkdownRepoFixture.copy_to_tmp_repo_dir }
+          let(:pdf_config) do
+            {page: 'pretty_dir/unknown_file.html', filename: 'irrelevant.pdf', header: 'pretty_dir/unknown_header.html'}
+          end
+          it 'fails' do
+            expect {publish}.to raise_error
+          end
+        end
       end
     end
   end

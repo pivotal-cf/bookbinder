@@ -55,13 +55,16 @@ class DocRepo
 
       from = File.join output_dir, "#{name}-#{sha}"
       FileUtils.mv from, File.join(destination_dir, directory)
+      true
     else
       path_to_local_repo = File.join(@local_repo_dir, name)
       if File.exist?(path_to_local_repo)
         log '  copying '.yellow + path_to_local_repo
         FileUtils.cp_r path_to_local_repo, File.join(destination_dir, directory)
+        true
       else
         log '  skipping (not found) '.magenta + path_to_local_repo
+        false
       end
     end
   end

@@ -13,15 +13,26 @@ class Publisher
     copy_gem_dir 'master_middleman', output_master_middleman_dir
     FileUtils.cp_r "#{options[:master_middleman_dir]}/.", output_master_middleman_dir
 
+    skip_pdf_generation = options[:pdf].nil?
     options[:repos].each do |repo_hash|
-      get_repo options, output_master_middleman_dir, repo_hash
+      doc_repo = DocRepo.new repo_hash,
+                             options[:github_username],
+                             options[:github_password],
+                             options[:local_repo_dir]
+      log 'Processing ' + doc_repo.full_name.cyan
+      repo_copied_successfully = doc_repo.copy_to(File.join(output_master_middleman_dir, 'source'))
+      requested_pdf_in_this_repo = options[:pdf] && options[:pdf][:page].start_with?(doc_repo.directory)
+      if !repo_copied_successfully && requested_pdf_in_this_repo
+        skip_pdf_generation = true
+        log "  skipping PDF generation because repo #{doc_repo.full_name} was not found".magenta
+      end
     end
 
     MiddlemanRunner.new.run final_app_dir, output_master_middleman_dir
 
     has_no_broken_links = check_broken_links options
 
-    if options[:pdf]
+    unless skip_pdf_generation
       source_page = File.join(final_app_dir, 'public', options[:pdf][:page])
       generated_pdf_file = File.join(final_app_dir, 'public', options[:pdf][:filename])
       header_file = File.join(final_app_dir, 'public', options[:pdf][:header])
@@ -48,14 +59,6 @@ class Publisher
     broken_links.size > 0 ? false : true
   end
 
-  def get_repo(options, output_master_middleman_dir, repo_hash)
-    doc_repo = DocRepo.new repo_hash,
-                           options[:github_username],
-                           options[:github_password],
-                           options[:local_repo_dir]
-    log 'Processing ' + doc_repo.full_name.cyan
-    doc_repo.copy_to File.join(output_master_middleman_dir, 'source')
-  end
 
   def prepare_app(final_app_dir, output_dir)
     FileUtils.mkdir_p output_dir

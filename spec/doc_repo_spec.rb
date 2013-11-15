@@ -58,4 +58,66 @@ describe DocRepo do
       end
     end
   end
+
+  describe '#copy_to' do
+    let(:repo_hash) { {'github_repo' => 'org/my-docs-repo', 'sha' => 'some-sha'} }
+    let(:repo) { DocRepo.new(repo_hash, nil, nil, local_repo_dir) }
+    let(:destination_dir) { tmp_subdir('destination') }
+    let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
+
+    def copy_to
+      repo.copy_to destination_dir
+    end
+
+    context 'when given a local repo dir' do
+      let(:local_repo_dir) { tmp_subdir 'local_repo_dir' }
+
+      context 'and the local repo is there' do
+        before do
+          Dir.mkdir repo_dir
+          FileUtils.touch File.join(repo_dir, 'my_aunties_goat.txt')
+        end
+
+        it 'returns true' do
+          expect(copy_to).to be_true
+        end
+
+        it 'copies the repo' do
+          copy_to
+          expect(File.exist? File.join(destination_dir, 'my-docs-repo', 'my_aunties_goat.txt')).to be_true
+        end
+      end
+
+      context 'and the local repo is not there' do
+        before do
+          expect(File.exist? repo_dir).to be_false
+        end
+        it 'returns false' do
+          expect(copy_to).to be_false
+        end
+      end
+    end
+
+    context 'when not given a local repo dir' do
+      let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
+      let(:local_repo_dir) { nil }
+
+      before do
+        zipped_repo_url = 'https://github.com/org/my-docs-repo/archive/some-sha.tar.gz'
+        stub_request(:get, zipped_repo_url).to_return(
+            :body => zipped_markdown_repo, :headers => {'Content-Type' => 'application/x-gzip'}
+        )
+      end
+
+      it 'retrieves the repo from github' do
+        copy_to
+        expect(File.exist? File.join(destination_dir, 'my-docs-repo', 'index.html.md')).to be_true
+      end
+
+      it 'returns true' do
+        expect(copy_to).to be_true
+      end
+
+    end
+  end
 end
