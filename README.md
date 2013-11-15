@@ -160,3 +160,9 @@ Deploying to prod can be done from any machine with the book project checked out
     bookbinder push_to_prod <build_number>
 
 If the build_number argument is left out, the latest green build will be deployed to production.
+
+## Generating a Sitemap for Google
+
+Assuming your URL is docs.foo.com:
+
+`grep \\.html output/wget.log | grep "\-\-" | sed s/^.*localhost:4534/http:\\/\\/docs.foo.com/ | uniq`
