@@ -10,9 +10,12 @@ class MarkdownRepoFixture
   end
 
   def self.copy_to_tmp_repo_dir
+
+    # TODO: better way to just pull in the repos you need (not all of them)
     local_repo_dir = Dir.mktmpdir
     FileUtils.cp_r File.join(markdown_repos_dir, 'my-docs-repo-some-sha'), File.join(local_repo_dir, 'my-docs-repo')
     FileUtils.cp_r File.join(markdown_repos_dir, 'my-other-docs-repo-some-other-sha'), File.join(local_repo_dir, 'my-other-docs-repo')
+    FileUtils.cp_r File.join(markdown_repos_dir, 'dogs-repo-some-sha'), File.join(local_repo_dir, 'dogs-repo')
     local_repo_dir
   end
 

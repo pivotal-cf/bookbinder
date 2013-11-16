@@ -11,6 +11,7 @@ describe Publisher do
     let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
     let(:other_zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-other-docs-repo', 'some-other-sha' }
     let(:non_broken_master_middleman_dir) { File.join('spec', 'fixtures', 'non_broken_master_middleman') }
+    let(:dogs_master_middleman_dir) { File.join('spec', 'fixtures', 'dogs_master_middleman') }
 
     context 'integration' do
 
@@ -57,6 +58,18 @@ describe Publisher do
 
         index_html = File.read File.join(final_app_dir, 'public', 'my-docs-repo', 'index.html')
         index_html.should include 'This is a Markdown Page'
+      end
+
+      it 'generates non-broken links appropriately' do
+        # tests our SubmoduleAwareAssets middleman extension, which is hard to test in isolation :(
+        repos = [{'github_repo' => 'org/dogs-repo'}]
+        local_repo_dir = MarkdownRepoFixture.copy_to_tmp_repo_dir
+        no_broken_links = publisher.publish repos: repos,
+                          output_dir: output_dir,
+                          master_middleman_dir: dogs_master_middleman_dir,
+                          local_repo_dir: local_repo_dir,
+                          final_app_dir: final_app_dir
+        no_broken_links.should be_true
       end
     end
 
