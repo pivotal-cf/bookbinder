@@ -10,8 +10,8 @@ describe Publisher do
     let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
     let(:other_zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-other-docs-repo', 'some-other-sha' }
-    let(:non_broken_master_middleman_dir) { File.join('spec', 'fixtures', 'non_broken_master_middleman') }
-    let(:dogs_master_middleman_dir) { File.join('spec', 'fixtures', 'dogs_master_middleman') }
+    let(:non_broken_master_middleman_dir) { generate_middleman_with 'non_broken_index.html' }
+    let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html'}
 
     context 'integration' do
 
@@ -30,7 +30,7 @@ describe Publisher do
                  {'github_repo' => 'my-other-docs-org/my-other-docs-repo', 'sha' => 'some-other-sha'}]
         publisher.publish repos: repos,
                           output_dir: output_dir,
-                          master_middleman_dir: File.join('spec', 'fixtures', 'non_broken_master_middleman'),
+                          master_middleman_dir: non_broken_master_middleman_dir,
                           final_app_dir: final_app_dir,
                           pdf: { page: 'pretty_path/index.html',
                                  filename: 'DocGuide.pdf',
@@ -169,5 +169,14 @@ describe Publisher do
         end
       end
     end
+
+    def generate_middleman_with(index_page)
+      dir = tmp_subdir 'master_middleman'
+      source_dir = File.join(dir, 'source')
+      FileUtils.mkdir source_dir
+      FileUtils.cp File.join('spec', 'fixtures', index_page), File.join(source_dir, 'index.html')
+      dir
+    end
+
   end
 end
