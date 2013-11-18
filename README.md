@@ -101,9 +101,6 @@ You should only need to run the `bundle` the first time around.
 
 ## CI
 
-### Bookbinder Gem Unit Tests
-Bookbinder has a [CI on Travis](https://travis-ci.org/pivotal-cf/docs-bookbinder) that runs all its unit tests.
-
 ### CI for Books
 
 Part of what makes bookbinder awesome is that it can drive a continuous integration process for your book, using Jenkins.
@@ -166,3 +163,14 @@ If the build_number argument is left out, the latest green build will be deploye
 Assuming your URL is docs.foo.com:
 
 `grep \\.html output/wget.log | grep "\-\-" | sed s/^.*localhost:4534/http:\\/\\/docs.foo.com/ | uniq`
+
+
+## Contributing to Bookbinder
+
+### Running Tests
+
+To run bookbinder's rspec suite, use bundler like this: `bundle exec rspec`.
+
+### CI
+
+Bookbinder has a [CI on Travis](https://travis-ci.org/pivotal-cf/docs-bookbinder) that runs all its unit tests.
