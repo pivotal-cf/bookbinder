@@ -14,6 +14,7 @@ describe Publisher do
     let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html'}
 
     context 'integration' do
+      let(:local_repo_dir) { File.join('spec', 'fixtures', 'markdown_repos')}
 
       it 'it creates a directory per repo with the generated html from middleman' do
         zipped_repo_url = 'https://github.com/my-docs-org/my-docs-repo/archive/some-sha.tar.gz'
@@ -48,7 +49,6 @@ describe Publisher do
 
       it 'when in local mode, it can find repos locally rather than going to github' do
         repos = [{'github_repo' => 'my-docs-org/my-docs-repo'}]
-        local_repo_dir = MarkdownRepoFixture.copy_to_tmp_repo_dir
 
         publisher.publish repos: repos,
                           output_dir: output_dir,
@@ -63,7 +63,6 @@ describe Publisher do
       it 'generates non-broken links appropriately' do
         # tests our SubmoduleAwareAssets middleman extension, which is hard to test in isolation :(
         repos = [{'github_repo' => 'org/dogs-repo'}]
-        local_repo_dir = MarkdownRepoFixture.copy_to_tmp_repo_dir
         no_broken_links = publisher.publish repos: repos,
                           output_dir: output_dir,
                           master_middleman_dir: dogs_master_middleman_dir,
@@ -136,7 +135,7 @@ describe Publisher do
       end
 
       context 'when asked to find repos locally' do
-        let(:local_repo_dir) { Dir.mktmpdir }
+        let(:local_repo_dir) { File.join('spec', 'fixtures', 'markdown_repos')}
 
         context 'when the repository used to generate the pdf was skipped' do
           let(:repos) { [ {'github_repo' => 'org/repo', 'directory' => 'pretty_dir'}] }
@@ -159,7 +158,6 @@ describe Publisher do
 
         context 'when the repository used to generate the pdf is in in the repo list, but the pdf source file is not' do
           let(:repos) { [ {'github_repo' => 'org/my-docs-repo', 'directory' => 'pretty_dir'}] }
-          let(:local_repo_dir) { MarkdownRepoFixture.copy_to_tmp_repo_dir }
           let(:pdf_config) do
             {page: 'pretty_dir/unknown_file.html', filename: 'irrelevant.pdf', header: 'pretty_dir/unknown_header.html'}
           end

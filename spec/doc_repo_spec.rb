@@ -25,7 +25,7 @@ describe DocRepo do
     end
 
     context 'when told to look for repos locally' do
-      let(:local_repo_dir) { MarkdownRepoFixture.copy_to_tmp_repo_dir }
+      let(:local_repo_dir) { File.join('spec', 'fixtures', 'markdown_repos') }
 
       it 'finds them in the supplied directory' do
         repo.copy_to destination_dir
@@ -44,11 +44,11 @@ describe DocRepo do
     end
 
     context 'when a custom directory is specified for the repo' do
-      let(:local_repo_dir) { MarkdownRepoFixture.copy_to_tmp_repo_dir }
+      let(:local_repo_dir) { File.join('spec', 'fixtures', 'markdown_repos') }
       let(:repo_hash) { {'github_repo' => 'my-docs-org/my-docs-repo',
                          'sha' => 'some-sha', 'directory' => 'pretty_url_path'} }
 
-      it "puts the repo into that directory" do
+      it 'puts the repo into that directory' do
         stub_request(:get, 'https://github.com/my-docs-org/my-docs-repo/archive/some-sha.tar.gz').to_return(
             :body => zipped_markdown_repo, :headers => { 'Content-Type' => 'application/x-gzip' }
         )
