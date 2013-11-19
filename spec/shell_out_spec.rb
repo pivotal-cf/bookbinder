@@ -12,15 +12,15 @@ describe ShellOut do
     end
 
     it 'raises an error with stderr in the message if a non-zero exit status was returned' do
-      expect {shell_out('blah blah')}.to raise_error(/No such file or directory - blah/)
+      expect {shell_out('ruby spec/fixtures/failing_script_with_stderr.rb')}.to raise_error(/This is stderr/)
     end
 
     it 'raises an error with stdout in the mesasge if the command returned a non-zero exit code and had empty stderr' do
-      expect {shell_out('ruby spec/fixtures/script.rb')}.to raise_error(/This is stdout/)
+      expect {shell_out('ruby spec/fixtures/failing_script_with_no_stderr.rb')}.to raise_error(/This is stdout/)
     end
 
     it 'does not raise an error if the command returned a non-zero exit code and the no-error flag was passed' do
-      expect {shell_out('cd blah', true)}.not_to raise_error
+      expect {shell_out('ruby spec/fixtures/failing_script_with_stderr.rb', true)}.not_to raise_error
     end
   end
 end
