@@ -77,6 +77,12 @@ describe Cli do
     it_should_behave_like 'a cli that dispatches commands'
   end
 
+  context 'when given the "update_local_doc_repos" command' do
+    let(:command_string) { 'update_local_doc_repos' }
+    let(:command_class) { Cli::UpdateLocalDocRepos }
+    it_should_behave_like 'a cli that dispatches commands'
+  end
+
   describe Cli::RunPublishCI do
 
     let(:fake_publish) { double }

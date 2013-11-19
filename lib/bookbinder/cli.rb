@@ -13,7 +13,8 @@ class Cli
             'doc_repos_updated' => DocReposUpdated,
             'push_local_to_staging' => PushLocalToStaging,
             'push_to_prod' => PushToProd,
-            'run_publish_ci' => RunPublishCI}
+            'run_publish_ci' => RunPublishCI,
+            'update_local_doc_repos' => UpdateLocalDocRepos}
     if hash[command]
       hash[command].new.run command_arguments
     else
@@ -137,5 +138,15 @@ class Cli
       1
     end
   end
+
+  class UpdateLocalDocRepos
+    def run(unused)
+      config = YAML.load File.read('config.yml')
+      local_repo_dir = File.absolute_path('../')
+      LocalDocReposUpdater.new.update config['repos'], local_repo_dir
+      0
+    end
+  end
+
 end
 
