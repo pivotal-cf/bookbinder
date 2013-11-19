@@ -25,7 +25,7 @@ describe DocRepo do
     end
 
     context 'when told to look for repos locally' do
-      let(:local_repo_dir) { File.join('spec', 'fixtures', 'markdown_repos') }
+      let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir }
 
       it 'finds them in the supplied directory' do
         repo.copy_to destination_dir
@@ -44,7 +44,7 @@ describe DocRepo do
     end
 
     context 'when a custom directory is specified for the repo' do
-      let(:local_repo_dir) { File.join('spec', 'fixtures', 'markdown_repos') }
+      let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir }
       let(:repo_hash) { {'github_repo' => 'my-docs-org/my-docs-repo',
                          'sha' => 'some-sha', 'directory' => 'pretty_url_path'} }
 
