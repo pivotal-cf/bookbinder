@@ -18,5 +18,9 @@ describe ShellOut do
     it 'raises an error with stdout in the mesasge if the command returned a non-zero exit code and had empty stderr' do
       expect {shell_out('ruby spec/fixtures/script.rb')}.to raise_error(/This is stdout/)
     end
+
+    it 'does not raise an error if the command returned a non-zero exit code and the no-error flag was passed' do
+      expect {shell_out('cd blah', true)}.not_to raise_error
+    end
   end
 end

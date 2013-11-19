@@ -16,8 +16,7 @@ class Spider
 
   def spider_page(url)
     log_file = File.join(@output_dir, 'wget.log')
-    # TODO: use ShellOut when it can be told to not blow up just because there's a non-zero exit code
-    `wget --spider --output-file=#{log_file} --execute robots=off --wait 0 --recursive --level=10 --no-directories --page-requisites #{url}`
+    shell_out "wget --spider --output-file=#{log_file} --execute robots=off --wait 0 --recursive --level=10 --no-directories --page-requisites #{url}", true
   end
 
   def find_broken_links
