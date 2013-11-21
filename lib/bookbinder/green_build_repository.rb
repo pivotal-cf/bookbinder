@@ -20,8 +20,6 @@ class GreenBuildRepository
     directory.files.create :key => "#{build_number}.tgz",
                            :body => File.read(tarball),
                            :public => true
-
-    tarball
   end
 
   def download(empty_app_dir, bucket, build_number = nil)

@@ -69,8 +69,7 @@ class Cli
       build_number = ENV['BUILD_NUMBER']
       repository = GreenBuildRepository.new config['aws']['access_key'],
                                             config['aws']['secret_key']
-      tarball_path = repository.create build_number, 'final_app', config['aws']['green_builds_bucket']
-      FileUtils.cp tarball_path, 'output'
+      repository.create build_number, 'final_app', config['aws']['green_builds_bucket']
       0
     end
   end

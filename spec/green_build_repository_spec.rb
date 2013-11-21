@@ -48,11 +48,6 @@ describe GreenBuildRepository do
         contents = File.read(File.join(exploded_dir, 'stuff.txt'))
         expect(contents).to eq('this is stuff')
       end
-
-      it 'returns the tarball path' do
-        tarball_path = create
-        tarball_path.should include ".tgz"
-      end
     end
 
     context 'when the bucket does not yet exist' do
