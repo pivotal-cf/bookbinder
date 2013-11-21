@@ -11,10 +11,10 @@ describe 'middleman helpers' do
 
   end
 
-  let(:source_dir) {File.join(tmpdir, 'source')}
+  let(:source_dir) { tmp_subdir 'source' }
 
-  describe '#trail_nav' do
-    let(:source_file_content) { '<%= trail_nav %>' }
+  describe '#breadcrumbs' do
+    let(:source_file_content) { '<%= breadcrumbs %>' }
 
     context 'when invoked in the top-level index file' do
       let(:source_file_under_test) { 'index.md.erb' }
@@ -28,18 +28,55 @@ describe 'middleman helpers' do
     end
 
     context 'when invoked in an index file in a sub-dir, when the parent has a title' do
-      let(:source_file_under_test) { File.join('sub-dir', 'index.md.erb') }
+      let(:source_file_under_test) { File.join('big-dogs', 'index.md.erb') }
       let(:source_file_title) { 'Big Dogs' }
-      let(:output) { File.read File.join(tmpdir, 'build', 'sub-dir', 'index.html') }
+      let(:output) { File.read File.join(tmpdir, 'build', 'big-dogs', 'index.html') }
 
       before do
         write_markdown_source_file 'index.md.erb', 'Dogs'
       end
 
-      it 'creates a two-level breadcrumb for the two levels of the hierarchy' do
+      it 'creates a two level breadcrumb' do
         run_middleman
         doc = Nokogiri::HTML(output)
-        expect(doc.at('ul li:first-child').text).to eq('Dogs')
+        expect(doc.css('ul li').length).to eq(2)
+      end
+
+      it 'creates entries for each level of the hierarchy' do
+        run_middleman
+        doc = Nokogiri::HTML(output)
+        expect(doc.css('ul li')[0].text).to eq('Dogs')
+        expect(doc.css('ul li')[1].text).to eq('Big Dogs')
+      end
+
+      it 'gives the last entry an "active" class' do
+          run_middleman
+          doc = Nokogiri::HTML(output)
+          expect(doc.css('ul li')[0]['class']).to be_nil
+          expect(doc.css('ul li')[1]['class']).to eq('active')
+      end
+    end
+
+    context 'when invoked in an index file in a sub-dir, when the parent is not markdown' do
+      let(:source_file_under_test) { File.join('big-dogs', 'index.md.erb') }
+      let(:source_file_title) { 'Big Dogs' }
+      let(:output) { File.read File.join(tmpdir, 'build', 'big-dogs', 'index.html') }
+
+      before do
+        full_path = File.join(source_dir, 'index.md.erb')
+        File.open(full_path, 'w') {|f| f.write('<html><head><title>Dogs</title></head><body>Dogs are great!</body></html>')}
+      end
+
+      it 'creates a one level breadcrumb' do
+        run_middleman
+        doc = Nokogiri::HTML(output)
+        expect(doc.css('ul li').length).to eq(1)
+      end
+
+      it 'creates an entry for the bottom level' do
+        run_middleman
+        doc = Nokogiri::HTML(output)
+        expect(doc.css('ul li')[0].text).to eq('Big Dogs')
       end
     end
   end
@@ -56,7 +93,7 @@ describe 'middleman helpers' do
     write_markdown_source_file source_file_under_test, source_file_title, source_file_content
     Dir.chdir(tmpdir) do
       build_command = Middleman::Cli::Build.new [], {}, {}
-      build_command.invoke :build, [], {'instrument' => 'false'}
+      build_command.invoke :build, [], {}
     end
   end
 
