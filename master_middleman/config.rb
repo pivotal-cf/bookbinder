@@ -125,9 +125,6 @@ configure :build do
   # set :http_path, "/Content/images/"
 end
 
-# For syntax highlighting .. middleman-syntax
-activate :syntax
-
 # For navigation breadcrumbs
 activate :navigation
 
