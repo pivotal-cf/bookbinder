@@ -11,11 +11,12 @@ describe 'middleman helpers' do
 
   let(:source_dir) {File.join(tmpdir, 'source')}
 
-  def write_source_file(path_under_source_dir, content)
+  def write_markdown_source_file(path_under_source_dir, title, content = nil)
     full_path = File.join(source_dir, path_under_source_dir)
     full_pathname = Pathname.new(full_path)
     FileUtils.mkdir_p full_pathname.dirname
-    File.open(full_path, 'w') {|f| f.write(content)}
+    final_content = "---\ntitle: #{title}\n---\n#{content}"
+    File.open(full_path, 'w') {|f| f.write(final_content)}
   end
 
   def run_middleman
@@ -32,11 +33,7 @@ describe 'middleman helpers' do
   describe '#trail_nav' do
     context 'when invoked in the top-level index file' do
       before do
-        write_source_file 'index.md.erb', <<MARKDOWN
----
-title: Dogs
----
-MARKDOWN
+        write_markdown_source_file 'index.md.erb', 'dogs'
       end
 
       it 'displays nothing' do
@@ -48,17 +45,8 @@ MARKDOWN
 
     context 'when invoked in an index file in a sub-dir' do
       before do
-        write_source_file 'index.md.erb', <<MARKDOWN
----
-title: Dogs
----
-MARKDOWN
-        write_source_file File.join('sub-dir', 'index.md.erb'), <<MARKDOWN
----
-title: Big Dogs
----
-<%= trail_nav %>
-MARKDOWN
+        write_markdown_source_file 'index.md.erb', 'Dogs'
+        write_markdown_source_file File.join('sub-dir', 'index.md.erb'), 'Big Dogs', '<%= trail_nav %>'
       end
 
       it 'creates a two-level breadcrumb for the two levels of the hierarchy' do
