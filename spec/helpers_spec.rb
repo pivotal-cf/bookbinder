@@ -7,6 +7,8 @@ describe 'middleman helpers' do
   before do
     FileUtils.cp_r File.join('master_middleman/.'), tmpdir
     FileUtils.mkdir_p source_dir
+    prepare_middleman
+
   end
 
   let(:source_dir) {File.join(tmpdir, 'source')}
@@ -51,14 +53,19 @@ describe 'middleman helpers' do
   end
 
   def run_middleman
-    # awful hacks to eliminate the impact of global state in middleman. when will it end?
     write_markdown_source_file source_file_under_test, source_file_title, source_file_content
-    Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
-    ENV["MM_ROOT"] = tmpdir
-
     Dir.chdir(tmpdir) do
       build_command = Middleman::Cli::Build.new [], {}, {}
       build_command.invoke :build, [], {'instrument' => 'false'}
     end
+  end
+
+  def prepare_middleman
+    # squelch some output from Thor
+    Thor::Actions::CreateFile.any_instance.stub(:say_status) {}
+
+    # awful hacks to eliminate the impact of global state in middleman. when will it end?
+    Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
+    ENV["MM_ROOT"] = tmpdir
   end
 end
