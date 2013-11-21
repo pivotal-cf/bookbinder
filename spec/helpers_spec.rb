@@ -11,25 +11,6 @@ describe 'middleman helpers' do
 
   let(:source_dir) {File.join(tmpdir, 'source')}
 
-  def write_markdown_source_file(path_under_source_dir, title, content = nil)
-    full_path = File.join(source_dir, path_under_source_dir)
-    full_pathname = Pathname.new(full_path)
-    FileUtils.mkdir_p full_pathname.dirname
-    final_content = "---\ntitle: #{title}\n---\n#{content}"
-    File.open(full_path, 'w') {|f| f.write(final_content)}
-  end
-
-  def run_middleman
-    # awful hacks to eliminate the impact of global state in middleman. when will it end?
-    Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
-    ENV["MM_ROOT"] = tmpdir
-
-    Dir.chdir(tmpdir) do
-      build_command = Middleman::Cli::Build.new [], {}, {}
-      build_command.invoke :build, [], {'instrument' => 'false'}
-    end
-  end
-
   describe '#trail_nav' do
     context 'when invoked in the top-level index file' do
       before do
@@ -57,4 +38,24 @@ describe 'middleman helpers' do
       end
     end
   end
+
+  def write_markdown_source_file(path_under_source_dir, title, content = nil)
+    full_path = File.join(source_dir, path_under_source_dir)
+    full_pathname = Pathname.new(full_path)
+    FileUtils.mkdir_p full_pathname.dirname
+    final_content = "---\ntitle: #{title}\n---\n#{content}"
+    File.open(full_path, 'w') {|f| f.write(final_content)}
+  end
+
+  def run_middleman
+    # awful hacks to eliminate the impact of global state in middleman. when will it end?
+    Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
+    ENV["MM_ROOT"] = tmpdir
+
+    Dir.chdir(tmpdir) do
+      build_command = Middleman::Cli::Build.new [], {}, {}
+      build_command.invoke :build, [], {'instrument' => 'false'}
+    end
+  end
+
 end
