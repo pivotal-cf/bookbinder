@@ -64,6 +64,9 @@ describe 'middleman helpers' do
     # squelch some output from Thor
     Thor::Actions::CreateFile.any_instance.stub(:say_status) {}
 
+    # squelch some output from middleman
+    Middleman::Logger.any_instance.stub(:add) {}
+
     # awful hacks to eliminate the impact of global state in middleman. when will it end?
     Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
     ENV["MM_ROOT"] = tmpdir
