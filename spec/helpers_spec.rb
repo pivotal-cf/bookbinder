@@ -20,13 +20,13 @@ describe 'middleman helpers' do
   end
 
   def run_middleman
-    # awful hacks to eliminate the impact of global state. when will it end?
+    # awful hacks to eliminate the impact of global state in middleman. when will it end?
     Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
     ENV["MM_ROOT"] = tmpdir
 
     Dir.chdir(tmpdir) do
       build_command = Middleman::Cli::Build.new [], {}, {}
-      build_command.invoke :build, [], {'verbssose' => ''}
+      build_command.invoke :build, [], {'instrument' => 'false'}
     end
   end
 
