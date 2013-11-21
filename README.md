@@ -59,6 +59,17 @@ A book project needs a few things to allow bookbinder to run. Here's the minimal
 
 `.ruby-version` is used by [rbenv](https://github.com/sstephenson/rbenv) to find the right ruby. We haven't tested bookinbder with RVM so we don't know if it will work, so we recommend rbenv unless you are feeling experimental. WARNING: If you install rbenv, you MUST uninstall RVM first (http://robots.thoughtbot.com/post/47273164981/using-rbenv-to-manage-rubies-and-gems).
 
+## Middleman Templating Helpers
+
+Bookbinder comes with a Middleman configuration that provides a handful of helpful functions (documented below), and should work for most Book Projects. To use a custom Middleman configuration instead, place a config.rb file in the `master_middleman` directory of the Book Project (this will overwrite Bookbinder's config.rb).
+
+Bookbinder provides two helper functions that can be called from within a .erb file in a doc repo, such as a layout file.
+
+`<%= quick_links %>` produces a table of contents based on in-page anchors.
+`<%= breadcrumbs %>` generates a series of breadcrumbs up to the site's top-level, based on the title of each page.
+
+Bookbinder also includes helper code to correctly find image, stylesheet, and javascript assets. When using `<% image_tag ...`, `<% stylesheet_link_tag ...`, or `<% javascript_include_tag ...` to include assets, Bookbinder will search the entire directory structure starting at the top-level until it finds an asset with the provided name. For example, when resolving `<% image_tag 'great_dane.png' %>` called from the page `dogs/big_dogs/index.html.md.erb`, Middleman will first look in `images/great_dane.png.` If that file does not exist, it will try `dogs/images/great_dane.png`, then `dogs/big_dogs/images/great_dang.png`.
+
 ## Bootstrapping with Bundler
 
 Bookbinder uses bundler and we recommend installing [rbenv](https://github.com/sstephenson/rbenv).
@@ -77,11 +88,11 @@ Bookbinder's entry point is the `bookbinder` executable. The following commands 
 
 Bookbinder's most important command is `publish`. It takes one argument on the command line:
 
-        bookbinder publish local
+        bundle exec bookbinder publish local
 
 will find documentation repositories in directories that are siblings to your current directory, while
 
-        bookbinder publish github
+        bundle exec bookbinder publish github
 
 will find doc repos by downloading the latest version from github.
 
@@ -90,6 +101,10 @@ The publish command creates 2 output directories, one named `output/` and one na
 `final_app/` contains bookbinder's ultimate output: a Sinatra web-app that can be pushed to cloud foundry or run locally.
 
 `output/` contains intermediary state, including the final prepared directory that the `publish` script ran middleman against, in `output/master_middleman`.
+
+As a convenience, Bookbinder provides a command to update all your local doc repos, performing a git pull on each one:
+
+        bundle exec bookbinder update_local_doc_repos
 
 ## Running the App Locally
 
@@ -150,11 +165,11 @@ Deploying to staging is not normally something a human needs to do: the book's J
 
 To deploy to production, you need to have CloudFoundry Go CLI installed; assuming you have the go-cf command-line tool installed and on your PATH, the following command will deploy the build in your local 'final_app' directory to staging:
 
-    bookbinder push_local_to_staging
+    bundle exec bookbinder push_local_to_staging
 
 Deploying to prod can be done from any machine with the book project checked out, but does not depend on the results from a local publish (or the contents of your `final_app` directory). Instead, it pulls the latest green build from S3, untars it locally, and then pushes it up to prod:
 
-    bookbinder push_to_prod <build_number>
+    bundle exec bookbinder push_to_prod <build_number>
 
 If the build_number argument is left out, the latest green build will be deployed to production.
 
