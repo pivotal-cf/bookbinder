@@ -15,11 +15,11 @@ class Publisher
 
     skip_pdf_generation = options[:pdf].nil?
     options[:repos].each do |repo_hash|
+      log 'Processing ' + repo_hash['github_repo'].cyan
       doc_repo = DocRepo.new repo_hash,
                              options[:github_username],
                              options[:github_password],
                              options[:local_repo_dir]
-      log 'Processing ' + doc_repo.full_name.cyan
       repo_copied_successfully = doc_repo.copy_to(File.join(output_master_middleman_dir, 'source'))
       requested_pdf_in_this_repo = options[:pdf] && options[:pdf][:page].start_with?(doc_repo.directory)
       if !repo_copied_successfully && requested_pdf_in_this_repo

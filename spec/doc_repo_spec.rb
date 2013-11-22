@@ -119,9 +119,9 @@ describe DocRepo do
     context 'when not given a local repo dir' do
       let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
       let(:local_repo_dir) { nil }
+      let(:zipped_repo_url) { 'https://github.com/org/my-docs-repo/archive/some-sha.tar.gz' }
 
       before do
-        zipped_repo_url = 'https://github.com/org/my-docs-repo/archive/some-sha.tar.gz'
         stub_request(:get, zipped_repo_url).to_return(
             :body => zipped_markdown_repo, :headers => {'Content-Type' => 'application/x-gzip'}
         )
@@ -134,6 +134,16 @@ describe DocRepo do
 
       it 'returns true' do
         expect(copy_to).to be_true
+      end
+
+      context 'when given an invalid request URL' do
+        before do
+          stub_request(:get, zipped_repo_url).to_return( :body => '', :status => 406  )
+        end
+
+        it 'raises an error' do
+          expect{copy_to}.to raise_exception(/Bad API Request/)
+        end
       end
 
     end

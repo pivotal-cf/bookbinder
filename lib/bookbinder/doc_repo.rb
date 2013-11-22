@@ -50,7 +50,9 @@ class DocRepo
       output_dir = Dir.mktmpdir
       log '  downloading '.yellow + github_tarball_url
       response = HTTParty.get(github_tarball_url)
-      # TODO handle an invalid response caused by user entering an invalid sha or pointing to a password protected repo
+      if response.code != 200
+        raise 'Bad API Request. Check to make sure your sha is valid and the repo is not password protected'
+      end
       downloaded_tarball_path = File.join(output_dir, "#{name}.tar.gz")
       File.open(downloaded_tarball_path, 'w') { |f| f.write(response.body) }
 
