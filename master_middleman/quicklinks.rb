@@ -11,7 +11,6 @@ module QuickLinks
 
   module HelperMethods
     def quick_links()
-      links = []
       page_src = File.read(current_page.source_file)
       sections = page_src.scan /\n\#{2,3}[^#]+\#{2,3}\n/
 

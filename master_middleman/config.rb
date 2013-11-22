@@ -158,6 +158,10 @@ helpers do
     sitemap.resources.select do |resource|
       resource.path.start_with?(dir)
     end
-  end 
+  end
+
+  def vars
+    config[:template_variables]
+  end
 
 end

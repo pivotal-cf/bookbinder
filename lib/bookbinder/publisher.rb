@@ -28,7 +28,7 @@ class Publisher
       end
     end
 
-    MiddlemanRunner.new.run output_master_middleman_dir
+    MiddlemanRunner.new.run output_master_middleman_dir, options[:template_variables] || {}
     FileUtils.cp_r File.join(output_master_middleman_dir, 'build/.'), File.join(final_app_dir, 'public')
 
     has_no_broken_links = check_broken_links options

@@ -40,7 +40,9 @@ describe GreenBuildRepository do
         create
         s3_file = fog_connection.directories.get(bucket_key).files.get('42.tgz')
 
-        File.open(File.join(tmpdir, 'uploaded.tgz'), 'w') { |f| f.write(s3_file.body) }
+        File.open(File.join(tmpdir, 'uploaded.tgz'), 'wb') do |f|
+          f.write(s3_file.body)
+        end
 
         exploded_dir = tmp_subdir('exploded')
         `cd #{exploded_dir} && tar xzf ../uploaded.tgz`

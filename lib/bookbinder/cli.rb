@@ -56,7 +56,8 @@ class Cli
                                   final_app_dir: File.absolute_path('final_app'),
                                   github_username: config['github']['username'],
                                   github_password: config['github']['password'],
-                                  pdf: pdf_hash
+                                  pdf: pdf_hash,
+                                  template_variables: config['template_variables']
 
       success ? 0 : 1
     end

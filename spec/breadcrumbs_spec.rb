@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+# TODO: do we need this top-level describe?
 describe 'middleman helpers' do
 
   include_context 'tmp_dirs'
@@ -90,7 +91,7 @@ describe 'middleman helpers' do
 
   def run_middleman
     write_markdown_source_file source_file_under_test, source_file_title, source_file_content
-    MiddlemanRunner.new.run tmpdir
+    MiddlemanRunner.new.run tmpdir, {}
   end
 
 end

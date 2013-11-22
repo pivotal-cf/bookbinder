@@ -72,6 +72,21 @@ describe Publisher do
                           final_app_dir: final_app_dir
         no_broken_links.should be_true
       end
+
+      it 'includes template variables into middleman' do
+        variable_master_middleman_dir = generate_middleman_with 'variable_index.html.md.erb'
+        repos = []
+
+        publisher.publish repos: repos,
+                          output_dir: output_dir,
+                          master_middleman_dir: variable_master_middleman_dir,
+                          local_repo_dir: local_repo_dir,
+                          final_app_dir: final_app_dir,
+                          template_variables: {'name' => 'Alexander'}
+
+        index_html = File.read File.join(final_app_dir, 'public', 'index.html')
+        index_html.should include 'My variable name is Alexander.'
+      end
     end
 
     context 'unit' do
@@ -176,7 +191,7 @@ describe Publisher do
       dir = tmp_subdir 'master_middleman'
       source_dir = File.join(dir, 'source')
       FileUtils.mkdir source_dir
-      FileUtils.cp File.join('spec', 'fixtures', index_page), File.join(source_dir, 'index.html')
+      FileUtils.cp File.join('spec', 'fixtures', index_page), File.join(source_dir, 'index.html.md.erb')
       dir
     end
 

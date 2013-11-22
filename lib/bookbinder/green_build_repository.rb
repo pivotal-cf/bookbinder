@@ -31,7 +31,9 @@ class GreenBuildRepository
 
     tmpdir = Dir.mktmpdir
     downloaded_file = File.join(tmpdir, 'downloaded.tgz')
-    File.open(downloaded_file, 'w') { |f| f.write(s3_file.body) }
+    File.open(downloaded_file, 'wb') do |f|
+      f.write(s3_file.body)
+    end
 
     Dir.chdir empty_app_dir do
       `tar xzf #{downloaded_file}`
