@@ -14,11 +14,9 @@ set :js_dir, 'javascripts'
 
 set :images_dir, 'images'
 
-configure :build do
-  # TODO: why is this stuff build-specific?
-  set :relative_links, true
-  activate :submodule_aware_assets
-end
+set :relative_links, true
+
+activate :submodule_aware_assets
 
 activate :navigation
 
