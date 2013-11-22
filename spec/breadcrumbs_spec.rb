@@ -8,10 +8,12 @@ describe '#breadcrumbs' do
     FileUtils.cp_r File.join('master_middleman/.'), tmpdir
     FileUtils.mkdir_p source_dir
     squelch_middleman_output
+    write_markdown_source_file source_file_under_test, source_file_title, source_file_content, breadcrumb_title
   end
 
   let(:source_dir) { tmp_subdir 'source' }
   let(:source_file_content) { '<%= breadcrumbs %>' }
+  let(:breadcrumb_title) { nil }
 
   context 'when invoked in the top-level index file' do
     let(:source_file_under_test) { 'index.md.erb' }
@@ -51,6 +53,16 @@ describe '#breadcrumbs' do
       doc = Nokogiri::HTML(output)
       expect(doc.css('ul li')[0]['class']).to be_nil
       expect(doc.css('ul li')[1]['class']).to eq('active')
+    end
+
+    context 'when the parent also has a breadcrumb title' do
+      let(:breadcrumb_title) { 'Fancy Schmancy New Title' }
+      it 'uses the breadcrumb title instead of the title' do
+        run_middleman
+        doc = Nokogiri::HTML(output)
+        expect(doc.css('ul li')[0].text).to eq('Dogs')
+        expect(doc.css('ul li')[1].text).to eq('Fancy Schmancy New Title')
+      end
     end
   end
 

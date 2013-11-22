@@ -56,16 +56,14 @@ module Navigation
     end
 
     def make_breadcrumb(page, is_current_page)
-      text = page.data.title
-      return nil if !text
-
+      return nil unless (text = page.data.breadcrumb || page.data.title)
       if is_current_page
         css_class = 'active'
         link = content_tag :span, text
       else
         link = link_to(text, '/' + page.path)
       end
-      return content_tag :li, link, :class => css_class
+      content_tag :li, link, :class => css_class
     end
 
   end

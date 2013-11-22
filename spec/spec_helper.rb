@@ -30,16 +30,16 @@ RSpec.configure do |config|
       Middleman::Logger.any_instance.stub(:add) {}
     end
 
-    def write_markdown_source_file(path_under_source_dir, title, content = nil)
+    def write_markdown_source_file(path_under_source_dir, title, content = nil, breadcrumb_title = nil)
       full_path = File.join(source_dir, path_under_source_dir)
       full_pathname = Pathname.new(full_path)
       FileUtils.mkdir_p full_pathname.dirname
-      final_content = "---\ntitle: #{title}\n---\n#{content}"
+      breadcrumb_code = breadcrumb_title ? "breadcrumb: #{breadcrumb_title}\n" : ''
+      final_content = "---\ntitle: #{title}\n#{breadcrumb_code}---\n#{content}"
       File.open(full_path, 'w') { |f| f.write(final_content) }
     end
 
     def run_middleman(template_variables = {})
-      write_markdown_source_file source_file_under_test, source_file_title, source_file_content
       MiddlemanRunner.new.run tmpdir, template_variables
     end
 
