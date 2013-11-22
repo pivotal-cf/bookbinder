@@ -161,7 +161,7 @@ helpers do
   end
 
   def vars
-    config[:template_variables]
+    OpenStruct.new config[:template_variables]
   end
 
 end

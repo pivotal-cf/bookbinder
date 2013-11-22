@@ -13,7 +13,7 @@ describe 'middleman helpers' do
   let(:source_dir) { tmp_subdir 'source' }
 
   describe '#vars' do
-    let(:source_file_content) { "<%= vars['var_name'] %>" }
+    let(:source_file_content) { '<%= vars.var_name %>' }
 
     context 'when the variable is defined' do
       let(:source_file_under_test) { 'index.md.erb' }
