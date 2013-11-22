@@ -13,14 +13,9 @@ module Navigation
 
     def breadcrumbs
       return if current_page.parent.nil?
-      page = current_page
-      breadcrumbs = Array.new
-
-      # TODO: test logic about current page
-      breadcrumbs << make_breadcrumb(page, page == current_page)
-      while page = page.parent
-        breadcrumb = make_breadcrumb(page, page == current_page)
-        breadcrumbs << breadcrumb if breadcrumb
+      ancestors = add_ancestors_of(current_page, [])
+      breadcrumbs = ancestors.map do |page|
+        make_breadcrumb(page, page == current_page)
       end
       return content_tag :ul, breadcrumbs.reverse.join(' '), class: 'breadcrumbs'
     end
@@ -54,6 +49,11 @@ module Navigation
     end
 
     private
+
+    def add_ancestors_of(page, ancestors)
+      return ancestors if !page
+      add_ancestors_of(page.parent, ancestors << page)
+    end
 
     def make_breadcrumb(page, is_current_page)
       text = page.data.title
