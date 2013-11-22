@@ -15,8 +15,14 @@ class Cli
             'push_to_prod' => PushToProd,
             'run_publish_ci' => RunPublishCI,
             'update_local_doc_repos' => UpdateLocalDocRepos}
+
     if hash[command]
-      hash[command].new.run command_arguments
+      begin
+        hash[command].new.run command_arguments
+      rescue => e
+        log e.message.red
+        1
+      end
     else
       log "Unrecognized command '#{command}'"
     end

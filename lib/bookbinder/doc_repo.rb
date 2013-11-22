@@ -9,9 +9,12 @@ class DocRepo
   def self.head_sha_for(full_name, github_username, github_password)
     party_options = {basic_auth: {username: github_username, password: github_password}}
     response = HTTParty.get(github_master_head_ref_url(full_name), party_options)
-    # TODO: throw a useful error if this fails (could be either a bad repo name or bad auth)
     result = JSON.parse(response.body)
-    result['object']['sha']
+    if response.code != 200
+      raise "Github API error: #{result['message']}"
+    else
+      result['object']['sha']
+    end
   end
 
   def self.github_master_head_ref_url(full_name)

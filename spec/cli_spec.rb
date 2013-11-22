@@ -28,16 +28,30 @@ describe Cli do
     let(:arguments) { [command_string] + extra_args}
     let(:extra_args) { ['arg1', 'arg2'] }
     let(:fake_command) { double }
+
+    before {  command_class.stub(:new) { fake_command } }
+
     it 'should run the publish command' do
       fake_command.should_receive(:run).with(['arg1', 'arg2'])
-      command_class.stub(:new) { fake_command }
       run
     end
 
     it 'returns whatever the publish command returned' do
       fake_command.should_receive(:run).and_return(42)
-      command_class.stub(:new) { fake_command }
       expect(run).to eq(42)
+    end
+
+    context 'when the command raises an exception' do
+      before { fake_command.should_receive(:run).and_raise('Aaaaaah!!') }
+
+      it 'should return a non-zero exit status' do
+        expect(run).to eq(1)
+      end
+
+      it "should log a message with the exception's message" do
+        BookbinderLogger.should_receive(:log).with(/Aaaaaah!!/)
+        run
+      end
     end
   end
 

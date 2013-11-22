@@ -5,6 +5,24 @@ describe DocRepo do
   include ShellOut
   include_context 'tmp_dirs'
 
+  describe '#initialize' do
+    context 'when in github mode and github returns a non-200 status code' do
+
+      before do
+        head_sha_url = 'https://api.github.com/repos/some_org/some_repo/git/refs/heads/master'
+        json_response = '{"message": "Bad credentials", "documentation_url": "http://developer.github.com/v3"}'
+        stub_request(:get, head_sha_url).to_return(:body => json_response, :status => 401)
+      end
+
+      it 'raises an exception with a helpful error' do
+        expected_message = /Github API error: Bad credentials/
+        expect do
+          DocRepo.new({'github_repo' => 'some_org/some_repo'}, nil, nil, nil)
+        end.to raise_exception(expected_message)
+      end
+    end
+  end
+
   describe '#download_and_unzip' do
     let(:destination_dir) { tmp_subdir 'middleman_source_dir' }
     let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
