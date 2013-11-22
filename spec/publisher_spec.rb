@@ -14,6 +14,8 @@ describe Publisher do
     let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html'}
 
     context 'integration' do
+      before { squelch_middleman_output }
+
       let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir}
 
       it 'it creates a directory per repo with the generated html from middleman' do
@@ -79,7 +81,9 @@ describe Publisher do
       let(:repos) { [] }
 
       before do
-        MiddlemanRunner.any_instance.stub(:run) {}
+        MiddlemanRunner.any_instance.stub(:run) do |middleman_dir|
+          Dir.mkdir File.join(middleman_dir, 'build')
+        end
         Spider.any_instance.stub(:find_broken_links) {[]}
       end
 

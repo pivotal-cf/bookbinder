@@ -7,8 +7,7 @@ describe 'middleman helpers' do
   before do
     FileUtils.cp_r File.join('master_middleman/.'), tmpdir
     FileUtils.mkdir_p source_dir
-    prepare_middleman
-
+    squelch_middleman_output
   end
 
   let(:source_dir) { tmp_subdir 'source' }
@@ -91,21 +90,7 @@ describe 'middleman helpers' do
 
   def run_middleman
     write_markdown_source_file source_file_under_test, source_file_title, source_file_content
-    Dir.chdir(tmpdir) do
-      build_command = Middleman::Cli::Build.new [], {}, {}
-      build_command.invoke :build, [], {}
-    end
+    MiddlemanRunner.new.run tmpdir
   end
 
-  def prepare_middleman
-    # squelch some output from Thor
-    Thor::Actions::CreateFile.any_instance.stub(:say_status) {}
-
-    # squelch some output from middleman
-    Middleman::Logger.any_instance.stub(:add) {}
-
-    # awful hacks to eliminate the impact of global state in middleman. when will it end?
-    Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
-    ENV["MM_ROOT"] = tmpdir
-  end
 end

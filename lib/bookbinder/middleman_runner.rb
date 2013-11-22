@@ -3,9 +3,16 @@ class MiddlemanRunner
   include BookbinderLogger
   include ShellOut
 
-  def run(final_app_dir, output_master_middleman_dir)
+  def run(middleman_dir)
     log 'Running middleman...'
-    shell_out "(cd #{output_master_middleman_dir} && middleman build)"
-    FileUtils.cp_r File.join(output_master_middleman_dir, 'build/.'), File.join(final_app_dir, 'public')
+
+    # awful hacks to eliminate the impact of global state in middleman. when will it end?
+    Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
+    ENV['MM_ROOT'] = middleman_dir
+
+    Dir.chdir(middleman_dir) do
+      build_command = Middleman::Cli::Build.new [], {:quiet => true}, {}
+      build_command.invoke :build, [], {:instrument => false}
+    end
   end
 end

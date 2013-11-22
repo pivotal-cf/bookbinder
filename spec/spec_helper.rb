@@ -11,11 +11,6 @@ shared_context 'tmp_dirs' do
 end
 
 require_relative '../lib/bookbinder'
-
-require 'middleman-core/cli'
-require 'middleman-core/profiling'
-require 'middleman-core/load_paths'
-
 require_relative 'fixtures/markdown_repo_fixture'
 
 RSpec.configure do |config|
@@ -28,6 +23,15 @@ RSpec.configure do |config|
   config.before do
     BookbinderLogger.stub(:log) {  }
   end
+
+  module SpecHelperMethods
+    def squelch_middleman_output
+      Thor::Shell::Basic.any_instance.stub(:say_status) {}
+      Middleman::Logger.any_instance.stub(:add) {}
+    end
+  end
+
+  config.include SpecHelperMethods
 end
 
 

@@ -2,6 +2,8 @@ require 'fog'
 require 'tmpdir'
 require 'ansi'
 require 'httparty'
+require 'middleman-core/cli'
+require 'middleman-core/profiling'
 
 require_relative 'bookbinder/shell_out'
 require_relative 'bookbinder/bookbinder_logger'
