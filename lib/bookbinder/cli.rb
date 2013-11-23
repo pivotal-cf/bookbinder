@@ -2,8 +2,6 @@ class Cli
 
   include BookbinderLogger
 
-  # TODO: test code in this file (we only test #run and the RunPublishCi command)
-
   def run(args)
     log 'No command supplied' and return if args.empty?
     command = args[0]
@@ -29,7 +27,16 @@ class Cli
 
   end
 
-  class Publish
+  class BookbinderCommand
+
+    include BookbinderLogger
+
+    def config
+      @config ||= YAML.load(File.read('./config.yml'))
+    end
+  end
+
+  class Publish < BookbinderCommand
     def run(arguments)
 
       usage_message = 'usage: publish <local|github>'
@@ -45,8 +52,6 @@ class Cli
       end
 
       local_repo_dir = (arguments[0] == 'local') ? File.absolute_path('../') : nil
-
-      config = YAML.load File.read('./config.yml')
 
       # TODO: general solution to turn all string keys to symbols
       pdf_hash = config['pdf'] ? {page: config['pdf']['page'],
@@ -69,10 +74,8 @@ class Cli
     end
   end
 
-  class BuildAndPushTarball
+  class BuildAndPushTarball < BookbinderCommand
     def run(unused)
-      config = YAML.load File.read('config.yml')
-
       build_number = ENV['BUILD_NUMBER']
       repository = GreenBuildRepository.new config['aws']['access_key'],
                                             config['aws']['secret_key']
@@ -81,10 +84,8 @@ class Cli
     end
   end
 
-  class DocReposUpdated
+  class DocReposUpdated < BookbinderCommand
     def run(unused)
-      config = YAML.load File.read('config.yml')
-
       workspace_dir = File.join('..')
       change_monitor = DocRepoChangeMonitor.new config['repos'],
                                                 workspace_dir,
@@ -95,10 +96,8 @@ class Cli
     end
   end
 
-  class PushLocalToStaging
+  class PushLocalToStaging < BookbinderCommand
     def run(unused)
-      config = YAML.load File.read('config.yml')
-
       Pusher.new.push config['cloud_foundry']['api_endpoint'],
                       config['cloud_foundry']['organization'],
                       config['cloud_foundry']['staging_space'],
@@ -110,13 +109,8 @@ class Cli
     end
   end
 
-  class PushToProd
-
-    include BookbinderLogger
-
+  class PushToProd < BookbinderCommand
     def run(arguments)
-      config = YAML.load File.read('config.yml')
-
       app_dir = Dir.mktmpdir
       repository = GreenBuildRepository.new config['aws']['access_key'],
                                             config['aws']['secret_key']
@@ -145,9 +139,8 @@ class Cli
     end
   end
 
-  class UpdateLocalDocRepos
+  class UpdateLocalDocRepos < BookbinderCommand
     def run(unused)
-      config = YAML.load File.read('config.yml')
       local_repo_dir = File.absolute_path('../')
       LocalDocReposUpdater.new.update config['repos'], local_repo_dir
       0
