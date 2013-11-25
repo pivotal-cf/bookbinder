@@ -34,8 +34,8 @@ class DocRepo
     @local_repo_dir = local_repo_dir
   end
 
-  def github_tarball_url
-    "https://github.com/#{full_name}/archive/#{sha}.tar.gz"
+  def github_tarball_path
+    "#{full_name}/archive/#{sha}.tar.gz"
   end
 
   def directory
@@ -49,8 +49,12 @@ class DocRepo
   def copy_to(destination_dir)
     if @local_repo_dir.nil?
       output_dir = Dir.mktmpdir
-      log '  downloading '.yellow + github_tarball_url
-      response = Faraday.get(github_tarball_url)
+      log '  downloading '.yellow + "https://github.com/#{github_tarball_path}"
+      conn = Faraday.new(url: "https://github.com") do |builder|
+        builder.use FaradayMiddleware::FollowRedirects, limit: 5
+        builder.adapter Faraday.default_adapter
+      end
+      response = conn.get(github_tarball_path)
       if response.status != 200
         raise 'Bad API Request. Check to make sure your sha is valid and the repo is not password protected'
       end

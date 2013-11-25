@@ -2,6 +2,7 @@ require 'fog'
 require 'tmpdir'
 require 'ansi'
 require 'faraday'
+require 'faraday_middleware'
 require 'middleman-core/cli'
 require 'middleman-core/profiling'
 
