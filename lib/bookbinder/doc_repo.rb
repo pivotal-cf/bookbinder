@@ -7,18 +7,19 @@ class DocRepo
   attr_reader :full_name, :sha
 
   def self.head_sha_for(full_name, github_username, github_password)
-    party_options = {basic_auth: {username: github_username, password: github_password}}
-    response = HTTParty.get(github_master_head_ref_url(full_name), party_options)
+    conn = Faraday.new(url: "https://api.github.com")
+    conn.basic_auth(github_username, github_password)
+    response = conn.get(github_master_head_ref_path(full_name))
     result = JSON.parse(response.body)
-    if response.code != 200
+    if response.status != 200
       raise "Github API error: #{result['message']}"
     else
       result['object']['sha']
     end
   end
 
-  def self.github_master_head_ref_url(full_name)
-    "https://api.github.com/repos/#{full_name}/git/refs/heads/master"
+  def self.github_master_head_ref_path(full_name)
+    "repos/#{full_name}/git/refs/heads/master"
   end
 
   def initialize(repo_hash, github_username, github_password, local_repo_dir)
@@ -49,8 +50,8 @@ class DocRepo
     if @local_repo_dir.nil?
       output_dir = Dir.mktmpdir
       log '  downloading '.yellow + github_tarball_url
-      response = HTTParty.get(github_tarball_url)
-      if response.code != 200
+      response = Faraday.get(github_tarball_url)
+      if response.status != 200
         raise 'Bad API Request. Check to make sure your sha is valid and the repo is not password protected'
       end
       downloaded_tarball_path = File.join(output_dir, "#{name}.tar.gz")

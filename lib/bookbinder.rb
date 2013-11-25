@@ -1,7 +1,7 @@
 require 'fog'
 require 'tmpdir'
 require 'ansi'
-require 'httparty'
+require 'faraday'
 require 'middleman-core/cli'
 require 'middleman-core/profiling'
 

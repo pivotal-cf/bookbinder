@@ -128,14 +128,11 @@ class Cli
 
   class RunPublishCI
     def run(unused)
-      if 0 == Publish.new.run(['github'])
-        if 0 == PushLocalToStaging.new.run([])
-          if 0 == BuildAndPushTarball.new.run([])
-            return 0
-          end
-        end
-      end
-      1
+      (
+        (0 == Publish.new.run(['github'])) &&
+        (0 == PushLocalToStaging.new.run([])) &&
+        (0 == BuildAndPushTarball.new.run([]))
+      ) ? 0 : 1
     end
   end
 
