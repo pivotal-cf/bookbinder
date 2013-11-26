@@ -11,7 +11,7 @@ describe Cli do
   context 'when no arguments are supplied' do
     let(:arguments) { [] }
     it 'should print a helpful message' do
-      BookbinderLogger.should_receive(:log).with(/No command supplied/)
+      BookbinderLogger.should_receive(:log).with(/Unrecognized command ''/)
       run
     end
   end

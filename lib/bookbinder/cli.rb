@@ -2,29 +2,44 @@ class Cli
 
   include BookbinderLogger
 
+  def command_to_class_mapping
+    {'publish' => Publish,
+     'build_and_push_tarball' => BuildAndPushTarball,
+     'doc_repos_updated' => DocReposUpdated,
+     'push_local_to_staging' => PushLocalToStaging,
+     'push_to_prod' => PushToProd,
+     'run_publish_ci' => RunPublishCI,
+     'update_local_doc_repos' => UpdateLocalDocRepos}
+    # breaking this command => class naming convention will break usage_messages!
+  end
+
   def run(args)
-    log 'No command supplied' and return if args.empty?
     command = args[0]
     command_arguments = args[1..-1]
-    hash = {'publish' => Publish,
-            'build_and_push_tarball' => BuildAndPushTarball,
-            'doc_repos_updated' => DocReposUpdated,
-            'push_local_to_staging' => PushLocalToStaging,
-            'push_to_prod' => PushToProd,
-            'run_publish_ci' => RunPublishCI,
-            'update_local_doc_repos' => UpdateLocalDocRepos}
 
-    if hash[command]
+    if command_to_class_mapping[command]
       begin
-        hash[command].new.run command_arguments
+        command_to_class_mapping[command].new.run command_arguments
       rescue => e
         log e.message.red
         1
       end
     else
       log "Unrecognized command '#{command}'"
-    end
+      log <<TEXT
 
+Bookbinder documentation can be found at https://github.com/pivotal-cf/docs-bookbinder
+
+Usage (preface with 'bundle exec ' when using rbenv):
+TEXT
+      log usage_messages
+    end
+  end
+
+  def usage_messages
+    command_to_class_mapping.values.map do |command_class|
+      "  #{command_class.new.usage_message}"
+    end.sort
   end
 
   class BookbinderCommand
@@ -34,16 +49,21 @@ class Cli
     def config
       @config ||= YAML.load(File.read('./config.yml'))
     end
+
+    def usage_message
+      "bookbinder #{self.class.name.split('::').last.underscore} #{usage}"
+    end
+
+    def usage
+      ""
+    end
   end
 
   class Publish < BookbinderCommand
     def run(arguments)
-
-      usage_message = 'usage: publish <local|github> [--verbose]'
-
       unless %w(local github).include?(arguments[0]) &&
-            (arguments[1] == nil || arguments[1] == '--verbose')
-        puts usage_message
+          (arguments[1] == nil || arguments[1] == '--verbose')
+        puts "usage: #{usage_message}"
         return 1
       end
 
@@ -53,7 +73,7 @@ class Cli
       pdf_hash = config['pdf'] ? {page: config['pdf']['page'],
                                   filename: config['pdf']['filename'],
                                   header: config['pdf']['header']}
-                               : nil
+      : nil
 
       publisher = Publisher.new
       success = publisher.publish repos: config['repos'],
@@ -69,10 +89,14 @@ class Cli
 
       success ? 0 : 1
     end
+
+    def usage
+      "<local|github> [--verbose]"
+    end
   end
 
   class BuildAndPushTarball < BookbinderCommand
-    def run(unused)
+    def run(_)
       build_number = ENV['BUILD_NUMBER']
       repository = GreenBuildRepository.new config['aws']['access_key'],
                                             config['aws']['secret_key']
@@ -82,7 +106,7 @@ class Cli
   end
 
   class DocReposUpdated < BookbinderCommand
-    def run(unused)
+    def run(_)
       workspace_dir = File.join('..')
       change_monitor = DocRepoChangeMonitor.new config['repos'],
                                                 workspace_dir,
@@ -94,7 +118,7 @@ class Cli
   end
 
   class PushLocalToStaging < BookbinderCommand
-    def run(unused)
+    def run(_)
       Pusher.new.push config['cloud_foundry']['api_endpoint'],
                       config['cloud_foundry']['organization'],
                       config['cloud_foundry']['staging_space'],
@@ -121,20 +145,24 @@ class Cli
 
       0
     end
+
+    def usage
+      "[build_#]"
+    end
   end
 
-  class RunPublishCI
-    def run(unused)
+  class RunPublishCI < BookbinderCommand
+    def run(_)
       (
-        (0 == Publish.new.run(['github'])) &&
-        (0 == PushLocalToStaging.new.run([])) &&
-        (0 == BuildAndPushTarball.new.run([]))
+      (0 == Publish.new.run(['github'])) &&
+          (0 == PushLocalToStaging.new.run([])) &&
+          (0 == BuildAndPushTarball.new.run([]))
       ) ? 0 : 1
     end
   end
 
   class UpdateLocalDocRepos < BookbinderCommand
-    def run(unused)
+    def run(_)
       local_repo_dir = File.absolute_path('../')
       LocalDocReposUpdater.new.update config['repos'], local_repo_dir
       0
