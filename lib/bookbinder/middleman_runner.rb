@@ -3,7 +3,7 @@ class MiddlemanRunner
   include BookbinderLogger
   include ShellOut
 
-  def run(middleman_dir, template_variables)
+  def run(middleman_dir, template_variables, verbose = false)
     log 'Running middleman...'
 
     # awful hacks to eliminate the impact of global state in middleman. when will it end?
@@ -11,9 +11,9 @@ class MiddlemanRunner
     ENV['MM_ROOT'] = middleman_dir
 
     Dir.chdir(middleman_dir) do
-      build_command = Middleman::Cli::Build.new [], {:quiet => true}, {}
-      Middleman::Cli::Build.shared_instance.config[:template_variables] = template_variables
-      build_command.invoke :build, [], {:instrument => false}
+      build_command = Middleman::Cli::Build.new [], {:quiet => !verbose}, {}
+      Middleman::Cli::Build.shared_instance(verbose).config[:template_variables] = template_variables
+      build_command.invoke :build, [], {:verbose => verbose}
     end
   end
 end

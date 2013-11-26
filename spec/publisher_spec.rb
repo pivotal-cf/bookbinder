@@ -16,7 +16,7 @@ describe Publisher do
     context 'integration' do
       before { squelch_middleman_output }
 
-      let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir}
+      let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir }
 
       it 'it creates a directory per repo with the generated html from middleman' do
         zipped_repo_url = 'https://github.com/my-docs-org/my-docs-repo/archive/some-sha.tar.gz'
@@ -35,9 +35,9 @@ describe Publisher do
                           output_dir: output_dir,
                           master_middleman_dir: non_broken_master_middleman_dir,
                           final_app_dir: final_app_dir,
-                          pdf: { page: 'pretty_path/index.html',
-                                 filename: 'DocGuide.pdf',
-                                 header: 'pretty_path/header.html'
+                          pdf: {page: 'pretty_path/index.html',
+                                filename: 'DocGuide.pdf',
+                                header: 'pretty_path/header.html'
                           }
 
         index_html = File.read File.join(final_app_dir, 'public', 'pretty_path', 'index.html')
@@ -66,10 +66,10 @@ describe Publisher do
         # tests our SubmoduleAwareAssets middleman extension, which is hard to test in isolation :(
         repos = [{'github_repo' => 'org/dogs-repo'}]
         no_broken_links = publisher.publish repos: repos,
-                          output_dir: output_dir,
-                          master_middleman_dir: dogs_master_middleman_dir,
-                          local_repo_dir: local_repo_dir,
-                          final_app_dir: final_app_dir
+                                            output_dir: output_dir,
+                                            master_middleman_dir: dogs_master_middleman_dir,
+                                            local_repo_dir: local_repo_dir,
+                                            final_app_dir: final_app_dir
         no_broken_links.should be_true
       end
 
@@ -82,15 +82,68 @@ describe Publisher do
                           master_middleman_dir: variable_master_middleman_dir,
                           local_repo_dir: local_repo_dir,
                           final_app_dir: final_app_dir,
-                          template_variables: {'name' => 'Alexander'}
+                          template_variables: {'name' => 'Alexander'},
+                          verbose: true
 
         index_html = File.read File.join(final_app_dir, 'public', 'index.html')
         index_html.should include 'My variable name is Alexander.'
       end
     end
 
+    context 'verbose testing' do
+      let(:local_repo_dir) { nil }
+
+      it 'suppresses detailed output when the verbose flag is not set' do
+        begin
+          real_stdout = $stdout
+          $stdout = StringIO.new
+
+          expect { publisher.publish repos: [],
+                                     output_dir: output_dir,
+                                     master_middleman_dir: generate_middleman_with('erroneous_middleman.html.md.erb'),
+                                     local_repo_dir: local_repo_dir,
+                                     final_app_dir: final_app_dir,
+                                     verbose: false }.to raise_error
+
+          $stdout.rewind
+          collected_output = $stdout.read
+
+          expect(collected_output).to_not match(/== Building files/)
+          expect(collected_output).to_not match(/== Request: \/index.html/)
+          expect(collected_output).to_not match(/error.*build\/index.html/)
+          expect(collected_output).to_not match(/undefined local variable or method `function_that_does_not_exist'/)
+        ensure
+          $stdout = real_stdout
+        end
+      end
+
+      it 'shows more detailed output when the verbose flag is set' do
+        begin
+          real_stdout = $stdout
+          $stdout = StringIO.new
+
+          expect { publisher.publish repos: [],
+                                     output_dir: output_dir,
+                                     master_middleman_dir: generate_middleman_with('erroneous_middleman.html.md.erb'),
+                                     local_repo_dir: local_repo_dir,
+                                     final_app_dir: final_app_dir,
+                                     verbose: true }.to raise_error
+
+          $stdout.rewind
+          collected_output = $stdout.read
+
+          expect(collected_output).to match(/== Building files/)
+          expect(collected_output).to match(/== Request: \/index.html/)
+          expect(collected_output).to match(/error.*build\/index.html/)
+          expect(collected_output).to match(/undefined local variable or method `function_that_does_not_exist'/)
+        ensure
+          $stdout = real_stdout
+        end
+      end
+    end
+
     context 'unit' do
-      let(:master_middleman_dir) { tmp_subdir 'irrelevant'}
+      let(:master_middleman_dir) { tmp_subdir 'irrelevant' }
       let(:pdf_config) { nil }
       let(:local_repo_dir) { nil }
       let(:repos) { [] }
@@ -99,7 +152,7 @@ describe Publisher do
         MiddlemanRunner.any_instance.stub(:run) do |middleman_dir|
           Dir.mkdir File.join(middleman_dir, 'build')
         end
-        Spider.any_instance.stub(:find_broken_links) {[]}
+        Spider.any_instance.stub(:find_broken_links) { [] }
       end
 
       def publish
@@ -138,7 +191,7 @@ describe Publisher do
 
       context 'when the spider reports broken links' do
 
-        before { Spider.any_instance.stub(:find_broken_links) {['one.html', 'two.html']} }
+        before { Spider.any_instance.stub(:find_broken_links) { ['one.html', 'two.html'] } }
 
         it 'reports the broken links and returns false' do
           BookbinderLogger.should_receive(:log).with(/2 broken links!/)
@@ -154,15 +207,15 @@ describe Publisher do
       end
 
       context 'when asked to find repos locally' do
-        let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir}
+        let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir }
 
         context 'when the repository used to generate the pdf was skipped' do
-          let(:repos) { [ {'github_repo' => 'org/repo', 'directory' => 'pretty_dir'}] }
+          let(:repos) { [{'github_repo' => 'org/repo', 'directory' => 'pretty_dir'}] }
           let(:pdf_config) do
             {page: 'pretty_dir/index.html', filename: 'irrelevant.pdf', header: 'pretty_dir/header.html'}
           end
           it 'runs successfully' do
-            expect {publish}.to_not raise_error
+            expect { publish }.to_not raise_error
           end
         end
 
@@ -171,19 +224,20 @@ describe Publisher do
             {page: 'pretty_dir/index.html', filename: 'irrelevant.pdf', header: 'pretty_dir/header.html'}
           end
           it 'fails' do
-            expect {publish}.to raise_error
+            expect { publish }.to raise_error
           end
         end
 
         context 'when the repository used to generate the pdf is in in the repo list, but the pdf source file is not' do
-          let(:repos) { [ {'github_repo' => 'org/my-docs-repo', 'directory' => 'pretty_dir'}] }
+          let(:repos) { [{'github_repo' => 'org/my-docs-repo', 'directory' => 'pretty_dir'}] }
           let(:pdf_config) do
             {page: 'pretty_dir/unknown_file.html', filename: 'irrelevant.pdf', header: 'pretty_dir/unknown_header.html'}
           end
           it 'fails' do
-            expect {publish}.to raise_error
+            expect { publish }.to raise_error
           end
         end
+
       end
     end
 

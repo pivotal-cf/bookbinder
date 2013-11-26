@@ -39,14 +39,10 @@ class Cli
   class Publish < BookbinderCommand
     def run(arguments)
 
-      usage_message = 'usage: publish <local|github>'
+      usage_message = 'usage: publish <local|github> [--verbose]'
 
-      unless arguments.size == 1
-        puts usage_message
-        return 1
-      end
-
-      unless %w(local github).include?(arguments[0])
+      unless %w(local github).include?(arguments[0]) &&
+            (arguments[1] == nil || arguments[1] == '--verbose')
         puts usage_message
         return 1
       end
@@ -68,7 +64,8 @@ class Cli
                                   github_username: config['github']['username'],
                                   github_password: config['github']['password'],
                                   pdf: pdf_hash,
-                                  template_variables: config['template_variables']
+                                  template_variables: config['template_variables'],
+                                  verbose: arguments[1] == '--verbose'
 
       success ? 0 : 1
     end
