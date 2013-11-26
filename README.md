@@ -135,15 +135,15 @@ The **Change Monitor Build** build is simply a cron-like build that runs every m
 
 ### CI Technical Details
 
-CIBorg can be used to stand up an AWS box running jenkins. The CloudFoundry Go CLI should be installed on the Jenkins box to ~jenkins/bin/go-cf (bookbinder's scripts expect it to be in the ~/bin of the current user). Here's how to copy down the prebuilt binary.
-
-    curl http://go-cli.s3.amazonaws.com/go-cf-linux-amd64.tgz > go-cf-linux-amd64.tgz
-    tar xzf go-cf-linux-amd64.tgz
+CIBorg can be used to stand up an AWS box running jenkins.
 
 The following Jenkins plugins are necessary:
 
 - Rbenv (configured to use ruby version 2.0.0p195)
 - Jenkins GIT
+- Jenkins java.io.tmpdir cleaner plugin
+
+You will also want to select the Discard Old Builds checkbox in the configuration for each Jenkins build so that your disk does not fill up.
 
 #### *Change Monitor Build*
 This build executes this shell command
@@ -163,11 +163,11 @@ This build should executes this shell command:
 
 ## Deploying
 
-Bookbinder has the ability to deploy the finished product to either staging or production.
+Bookbinder has the ability to deploy the finished product to either staging or production. The deployment scripts use the gem's pre-packaged CloudFoundry Go CLI binary (separate versions for darwin-amd64 and linux-amd64 are included); any pre-installed version of gcf on your system will not be used.
 
 Deploying to staging is not normally something a human needs to do: the book's Jenkins CI script does this automatically every time a build passes.
 
-To deploy to production, you need to have CloudFoundry Go CLI installed; assuming you have the go-cf command-line tool installed and on your PATH, the following command will deploy the build in your local 'final_app' directory to staging:
+The following command will deploy the build in your local 'final_app' directory to staging:
 
     bundle exec bookbinder push_local_to_staging
 
