@@ -12,11 +12,11 @@ module Navigation
   module HelperMethods
 
     def breadcrumbs
-      return if current_page.parent.nil?
-      ancestors = add_ancestors_of(current_page, [])
-      breadcrumbs = ancestors.map do |page|
+      page_chain = add_ancestors_of(current_page, [])
+      breadcrumbs = page_chain.map do |page|
         make_breadcrumb(page, page == current_page)
-      end
+      end.compact
+      return if breadcrumbs.size < 2
       return content_tag :ul, breadcrumbs.reverse.join(' '), class: 'breadcrumbs'
     end
 
@@ -45,7 +45,7 @@ module Navigation
 
       md = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
       result = md.render(markdown)
-      result == '' ? '' : "<div class=\"quick-links\">#{result}</div>"
+      result.empty? ? '' : "<div class=\"quick-links\">#{result}</div>"
     end
 
     private

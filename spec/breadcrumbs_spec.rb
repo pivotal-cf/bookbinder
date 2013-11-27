@@ -76,16 +76,10 @@ describe '#breadcrumbs' do
       File.open(full_path, 'w') { |f| f.write('<html><head><title>Dogs</title></head><body>Dogs are great!</body></html>') }
     end
 
-    it 'creates a one level breadcrumb' do
+    it 'does not create a breadcrumb' do
       run_middleman
       doc = Nokogiri::HTML(output)
-      expect(doc.css('ul li').length).to eq(1)
-    end
-
-    it 'creates an entry for the bottom level' do
-      run_middleman
-      doc = Nokogiri::HTML(output)
-      expect(doc.css('ul li')[0].text).to eq('Big Dogs')
+      expect(doc.css('ul li').length).to eq(0)
     end
   end
 end
