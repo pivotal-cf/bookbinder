@@ -45,7 +45,7 @@ module Navigation
 
       md = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
       result = md.render(markdown)
-      "<div class=\"quick-links\">#{result}</div>"
+      result == '' ? '' : "<div class=\"quick-links\">#{result}</div>"
     end
 
     private
