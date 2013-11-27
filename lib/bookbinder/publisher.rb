@@ -31,7 +31,10 @@ class Publisher
     MiddlemanRunner.new.run(output_master_middleman_dir, options[:template_variables] || {}, options[:verbose])
     FileUtils.cp_r File.join(output_master_middleman_dir, 'build/.'), File.join(final_app_dir, 'public')
 
-    has_no_broken_links = check_broken_links options
+    log_file = File.join(output_dir, 'wget.log')
+    has_no_broken_links = check_broken_links log_file, options
+
+    generate_site_map(options[:host_for_sitemap], log_file, final_app_dir)
 
     unless skip_pdf_generation
       source_page = File.join(final_app_dir, 'public', options[:pdf][:page])
@@ -47,9 +50,9 @@ class Publisher
 
   private
 
-  def check_broken_links(options)
+  def check_broken_links(log_file, options)
     spider = Spider.new options[:output_dir], options[:final_app_dir]
-    broken_links = spider.find_broken_links
+    broken_links = spider.find_broken_links log_file
     if broken_links.size > 0
       log "\nFound #{broken_links.count} broken links!".red
       broken_links.each { |line| log line }
@@ -60,6 +63,12 @@ class Publisher
     broken_links.size > 0 ? false : true
   end
 
+  def generate_site_map(host, log_file, final_app_dir)
+    sitemap_file = File.join(final_app_dir, 'public', 'sitemap.txt')
+    File.open( sitemap_file, 'w') do |file|
+      file.write(shell_out "grep \\\\.html #{log_file} | grep \"\\-\\-\" | sed s/^.*localhost:4534/http:\\\\/\\\\/#{host}/ | uniq")
+    end
+  end
 
   def prepare_app(final_app_dir, output_dir)
     FileUtils.mkdir_p output_dir

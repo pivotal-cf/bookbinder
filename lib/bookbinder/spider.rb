@@ -14,12 +14,11 @@ class Spider
     matchLines.map { |url| url[/^http:\/\/localhost[^\/]*(.*)/, 1] }.compact
   end
 
-  def spider_page(url)
-    log_file = File.join(@output_dir, 'wget.log')
+  def spider_page(url, log_file)
     shell_out "wget --spider --output-file=#{log_file} --execute robots=off --wait 0 --recursive --level=10 --no-directories --page-requisites #{url}", true
   end
 
-  def find_broken_links
+  def find_broken_links(log_file)
     Dir.chdir @app_dir do
       begin
         open_results = Open3.popen3('ruby app.rb 4534')
@@ -33,14 +32,14 @@ class Spider
 
         log 'Sinatra appears to have taken the stage!'
         consume_stream_in_separate_thread stderr
-        spider_page 'http://localhost:4534/index.html'
+        spider_page('http://localhost:4534/index.html', log_file)
 
       ensure
         Process.kill 'KILL', wait_thread[:pid]
       end
     end
 
-    parse_log File.read(File.join(@output_dir, 'wget.log'))
+    parse_log File.read(log_file)
   end
 
   # avoids deadlocks by ensuring sinatra doesn't hang waiting to write to stderr

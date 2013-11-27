@@ -11,7 +11,7 @@ describe Publisher do
     let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
     let(:other_zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-other-docs-repo', 'some-other-sha' }
     let(:non_broken_master_middleman_dir) { generate_middleman_with 'non_broken_index.html' }
-    let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html'}
+    let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html' }
 
     context 'integration' do
       before { squelch_middleman_output }
@@ -88,6 +88,26 @@ describe Publisher do
         index_html = File.read File.join(final_app_dir, 'public', 'index.html')
         index_html.should include 'My variable name is Alexander.'
       end
+
+      it 'generates a sitemap' do
+        repos = [{'github_repo' => 'org/dogs-repo'}]
+
+        publisher.publish repos: repos,
+                          output_dir: output_dir,
+                          master_middleman_dir: dogs_master_middleman_dir,
+                          local_repo_dir: local_repo_dir,
+                          final_app_dir: final_app_dir,
+                          host_for_sitemap: "docs.dogs.com"
+
+        sitemap = File.read File.join(final_app_dir, 'public', 'sitemap.txt')
+        expect(sitemap).to eq <<DOGS
+http://docs.dogs.com/index.html
+http://docs.dogs.com/dogs-repo/index.html
+http://docs.dogs.com/dogs-repo/big_dogs/index.html
+http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
+DOGS
+      end
+
     end
 
     context 'verbose testing' do
@@ -152,7 +172,10 @@ describe Publisher do
         MiddlemanRunner.any_instance.stub(:run) do |middleman_dir|
           Dir.mkdir File.join(middleman_dir, 'build')
         end
-        Spider.any_instance.stub(:find_broken_links) { [] }
+        Spider.any_instance.stub(:find_broken_links) {
+          File.open(File.join(output_dir, 'wget.log'), 'w') { |f| f.write("some logged stuff") }
+          []
+        }
       end
 
       def publish
@@ -172,7 +195,7 @@ describe Publisher do
         end
       end
 
-      it 'clear the output directory before running' do
+      it 'clears the output directory before running' do
         pre_existing_file = File.join(output_dir, 'kill_me')
         FileUtils.touch pre_existing_file
         publish
@@ -190,8 +213,12 @@ describe Publisher do
       end
 
       context 'when the spider reports broken links' do
-
-        before { Spider.any_instance.stub(:find_broken_links) { ['one.html', 'two.html'] } }
+        before {
+          Spider.any_instance.stub(:find_broken_links) {
+            File.open(File.join(output_dir, 'wget.log'), 'w') { |f| f.write("some logged stuff") }
+            ['one.html', 'two.html']
+          }
+        }
 
         it 'reports the broken links and returns false' do
           BookbinderLogger.should_receive(:log).with(/2 broken links!/)
