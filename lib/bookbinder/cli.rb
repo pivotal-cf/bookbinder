@@ -120,6 +120,7 @@ TEXT
   class PushLocalToStaging < BookbinderCommand
     def run(_)
       Pusher.new.push config['cloud_foundry']['api_endpoint'],
+                      config['cloud_foundry']['staging_host'],
                       config['cloud_foundry']['organization'],
                       config['cloud_foundry']['staging_space'],
                       config['cloud_foundry']['app_name'],
@@ -138,6 +139,7 @@ TEXT
       repository.download app_dir, config['aws']['green_builds_bucket'], arguments[0]
       log 'Warning: You are pushing to CF Docs production. Be careful.'.yellow
       Pusher.new.push config['cloud_foundry']['api_endpoint'],
+                      config['cloud_foundry']['production_host'],
                       config['cloud_foundry']['organization'],
                       config['cloud_foundry']['production_space'],
                       config['cloud_foundry']['app_name'],
