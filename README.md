@@ -15,7 +15,6 @@ Please read this entire document (and )to understand how to set up a new book pr
 - Create a git repo for the book and populate it with the required files (or use an existing book repo as a template)
 - Put github credentials into `config.yml` (any user will do)
 - Add list of included doc repos (must be public) to `config.yml`
-- Install rbenv and bundler for local Bookbinder use
 - Publish and run the server locally to test your book
 
 #### Deploying your book
@@ -83,7 +82,7 @@ A book project needs a few things to allow bookbinder to run. Here's the minimal
 
 `master_middleman` is a directory which forms the basis of your site. [Middleman](http://middlemanapp.com/) configuration and top-level assets, javascripts, and stylesheets should all be placed in here. You can also have ERB layout files. Each time a publish operation is run, this directory is copied to `output/master_middleman`. Then each doc-repo is copied (as a directory) into `output/master_middleman/source/`, before middleman is run to generate the final app.
 
-`.ruby-version` is used by [rbenv](https://github.com/sstephenson/rbenv) to find the right ruby. We haven't tested bookinbder with RVM so we don't know if it will work, so we recommend rbenv unless you are feeling experimental. WARNING: If you install rbenv, you MUST uninstall RVM first: [see details here](http://robots.thoughtbot.com/post/47273164981/using-rbenv-to-manage-rubies-and-gems).
+`.ruby-version` is used by [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/) to find the right ruby.  WARNING: If you install rbenv, you MUST uninstall RVM first: [see details here](http://robots.thoughtbot.com/post/47273164981/using-rbenv-to-manage-rubies-and-gems).
 
 ## Middleman Templating Helpers
 
@@ -99,9 +98,7 @@ Bookbinder also includes helper code to correctly find image, stylesheet, and ja
 
 ## Bootstrapping with Bundler
 
-Bookbinder uses bundler and we recommend installing [rbenv](https://github.com/sstephenson/rbenv).
-
-Once rbenv is set up and the correct ruby version is set up (2.0.0-p195), run (in your book project)
+Once rbenv or rvm is set up and the correct ruby version is set up (2.0.0-p195), run (in your book project)
 
     gem install bundler
     bundle
@@ -167,7 +164,7 @@ The **Publish Build**, when triggered, runs a full publish operation. If the pub
 
 The following Jenkins plugins are necessary:
 
-- Rbenv (configured to use ruby version 2.0.0p195)
+- Rbenv (configured to use ruby version 2.0.0p195) (this may be optional, haven't tested yet)
 - Jenkins GIT
 - Jenkins java.io.tmpdir cleaner plugin
 
