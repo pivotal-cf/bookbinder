@@ -8,6 +8,26 @@ Bookbinder is meant to be used from within a "book" project. The book project pr
 
 ## Setting Up a Book Project
 
+### Setup Checklist
+Please read this entire document (and )to understand how to set up a new book project.  You can refer to this checklist for a list of all the steps that must completed manually when setting up your book:
+
+#### Creating and configuring your book
+- Create a git repo for the book and populate it with the required files (or use an existing book repo as a template)
+- Put github credentials into `config.yml` (any user will do)
+- Add list of included doc repos (must be public) to `config.yml`
+- Install rbenv and bundler for local Bookbinder use
+- Publish and run the server locally to test your book
+
+#### Deploying your book
+- Create AWS bucket for green builds and put info into `config.yml`
+- Set up CF spaces for staging and production and put details into `config.yml`
+- Start a Jenkins CI server 
+- Set up Jenkins CI with required plugins and two-build setup
+- Verify that Jenkins builds are running and that it deploys to staging after successful builds
+- Deploy to production
+- (optional) Register your sitemap with Google Webmaster Tools
+
+### Book Repository Structure
 A book project needs a few things to allow bookbinder to run. Here's the minimal directory structure you need in a book project:
 
 ```
@@ -52,7 +72,7 @@ A book project needs a few things to allow bookbinder to run. Here's the minimal
     - **staging_host**: (subdomain of cfapps.io) e.g. cf-p1-docs-staging
     - **production_host**: (subdomain of cfapps.io) e.g. cf-p1-docs-prod
     - **public_host**: (domain, used for sitemap generation) e.g. docs.gopivotal.com
-- **template_variables**: a hash of variables that can be used by ERB templates, like so: <%= vars.var_name %>
+- **template_variables**: (optional) a hash of variables that can be used by ERB templates, like so: <%= vars.var_name %>
     - **var_name**: var_val
     - ...
 
@@ -143,7 +163,7 @@ The **Publish Build**, when triggered, runs a full publish operation. If the pub
 
 ### CI Technical Details
 
-CIBorg can be used to stand up an AWS box running jenkins.
+[Ciborg](https://github.com/pivotal/ciborg) can be used to set up an AWS box running Jenkins.
 
 The following Jenkins plugins are necessary:
 
@@ -154,7 +174,7 @@ The following Jenkins plugins are necessary:
 You will also want to select the Discard Old Builds checkbox in the configuration for each Jenkins build so that your disk does not fill up.
 
 #### *Change Monitor Build*
-This jenkins build executes the following shell command
+This Jenkins build executes the following shell command
 
     bundle install
     bundle exec bookbinder doc_repos_updated
@@ -172,6 +192,13 @@ This build executes this shell command:
 ## <a name="deploying"></a>Deploying
 
 Bookbinder has the ability to deploy the finished product to either staging or production. The deployment scripts use the gem's pre-packaged CloudFoundry Go CLI binary (separate versions for darwin-amd64 and linux-amd64 are included); any pre-installed version of gcf on your system will **not** be used.
+
+### Setting up CF Apps
+
+Each book should have a dedicated CF space and host for its staging and production servers.
+The Cloud Foundry organization and spaces must be created manually and specified as values for "organization", "staging_space" and "production_space" in `config.yml`.
+Upon the first and second deploy, bookbinder will create two apps in the space to which it is deploying. The apps will be named `"app_name"-blue` and `"app_name"-green`.  These will be used for a [blue-green deployment](http://martinfowler.com/bliki/BlueGreenDeployment.html) scheme.  Upon successful deploy, the subdomain of `cfapps.io` specified by "staging_host" or "production_host" will point to the most recently deployed of these two apps.
+
 
 ### Deploy to Staging
 Deploying to staging is not normally something a human needs to do: the book's Jenkins CI script does this automatically every time a build passes.
