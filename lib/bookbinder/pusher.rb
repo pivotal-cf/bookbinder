@@ -14,6 +14,11 @@ class Pusher
 
       # deploy to the other instance
 
+      # Theoretically we shouldn't need this (and corresponding "stop" below), but we've seen CF pull files from both
+      # green and blue when a DNS redirect points to HOST.cfapps.io
+      # Also, shutting down the unused app saves $$
+      system("#{gcf_binary_path} start #{deploy_target_app}")
+
       # --no-route is a hack that may need to be removed soon. Sheel can help.
       # it's a workaround for a bug in gcf that fails deployment for apps that have been deployed previously,
       # claiming that their hostname is already taken (instead of just re-deploying)
@@ -27,6 +32,7 @@ class Pusher
             print "\r#{seconds}...    "
             sleep 1
           end
+          system("#{gcf_binary_path} stop #{deploy_old_target_app}")
           system("#{gcf_binary_path} unmap-route #{deploy_old_target_app} cfapps.io -n #{host}")
         else
           raise "Deployed app to #{deploy_target_app} but failed to map hostname #{host}.cfapps.io to it."
