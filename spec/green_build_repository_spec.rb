@@ -71,7 +71,6 @@ describe GreenBuildRepository do
   end
 
   describe '#download' do
-
     let(:app_dir) { tmp_subdir 'app_dir' }
     let(:bucket) { fog_connection.directories.create key: bucket_key }
     let(:download) { green_build_repository.download app_dir, bucket_key, build_number }
@@ -103,13 +102,12 @@ describe GreenBuildRepository do
         end
 
         it 'is blows up rather than trying to download it' do
-          expect {download}.to raise_error
+          expect {download}.to raise_error(GreenBuildRepository::FileDoesNotExist)
         end
       end
     end
 
     context 'when given a specific build number and that build is in the bucket' do
-
       let(:build_number) { 3 }
       before do
         create_s3_file '3'
@@ -120,6 +118,18 @@ describe GreenBuildRepository do
         untarred_file = File.join(app_dir, 'stuff.txt')
         contents = File.read(untarred_file)
         expect(contents).to eq('contents of 3')
+      end
+    end
+
+    context 'when given a specific build number and that build does not exist in the bucket' do
+      let(:build_number) { 99 }
+
+      before do
+        bucket
+      end
+
+      it 'prints an error message and returns nil' do
+        expect{ download }.to raise_error(GreenBuildRepository::FileDoesNotExist)
       end
     end
 

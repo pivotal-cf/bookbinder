@@ -1,5 +1,7 @@
 class GreenBuildRepository
 
+  class FileDoesNotExist < StandardError; end
+
   include BookbinderLogger
 
   def initialize(aws_key, aws_secret_key)
@@ -28,6 +30,7 @@ class GreenBuildRepository
     build_number_to_download = build_number || highest_build_number(directory)
     filename = "#{build_number_to_download}.tgz"
     s3_file = directory.files.get(filename)
+    raise FileDoesNotExist, "Unable to find tarball on AWS for build number: #{build_number}" if s3_file.nil?
 
     tmpdir = Dir.mktmpdir
     downloaded_file = File.join(tmpdir, 'downloaded.tgz')
