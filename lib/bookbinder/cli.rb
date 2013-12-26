@@ -47,7 +47,7 @@ TEXT
     include BookbinderLogger
 
     def config
-      @config ||= YAML.load(File.read('./config.yml'))
+      @config ||= YAML.load(ERB.new(IO.read(@config_yml_path)).result)
     end
 
     def usage_message
@@ -60,14 +60,25 @@ TEXT
   end
 
   class Publish < BookbinderCommand
-    def run(arguments)
+
+    def set_config(arguments)
       unless %w(local github).include?(arguments[0]) &&
-          (arguments[1] == nil || arguments[1] == '--verbose')
+          (arguments[2] == nil || arguments[2] == '--verbose')
         puts "usage: #{usage_message}"
         return 1
       end
 
+      @config_yml_path = (arguments[1] || './config.yml')
+      log "Reading configuration from #{@config_yml_path}"
+
+    end
+
+    def run(arguments)
+
+      set_config(arguments)
+
       local_repo_dir = (arguments[0] == 'local') ? File.absolute_path('../') : nil
+
 
       # TODO: general solution to turn all string keys to symbols
       pdf_hash = config['pdf'] ? {page: config['pdf']['page'],
