@@ -108,7 +108,7 @@ TEXT
 
   class DocReposUpdated < BookbinderCommand
     def run(_)
-      workspace_dir = File.join('..')
+      workspace_dir = File.join('.')
       change_monitor = DocRepoChangeMonitor.new config['repos'],
                                                 workspace_dir,
                                                 config['github']['username'],
