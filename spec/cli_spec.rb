@@ -24,23 +24,15 @@ describe Cli do
     end
   end
 
-  context 'when a config file is supplied' do
-    let(:arguments) { [ 'publish', 'local', './spec/fixtures/config.yml' ] }
-    it 'should read the config file' do
-      BookbinderLogger.should_receive(:log).with(/Reading configuration from #{arguments[2]}/)
-      run
-    end
-  end
-
   shared_examples_for 'a cli that dispatches commands' do
     let(:arguments) { [command_string] + extra_args}
-    let(:extra_args) { ['arg1', 'arg2', 'arg3'] }
+    let(:extra_args) { ['arg1', 'arg2'] }
     let(:fake_command) { double }
 
     before {  command_class.stub(:new) { fake_command } }
 
     it 'should run the publish command' do
-      fake_command.should_receive(:run).with(['arg1', 'arg2', 'arg3'])
+      fake_command.should_receive(:run).with(['arg1', 'arg2'])
       run
     end
 
@@ -66,24 +58,7 @@ describe Cli do
   context 'when given the "publish" command' do
     let(:command_string) { 'publish' }
     let(:command_class) { Cli::Publish }
-
     it_should_behave_like 'a cli that dispatches commands'
-
-    context 'and a custom config file' do
-      let(:publisher) { Cli::Publish.new }
-      before { publisher.set_config(['local', './spec/fixtures/config.yml']) }
-
-
-      it "should parse the repos from the config file" do
-        expect(publisher.config['repos']).to eq [{"github_repo"=>"samplerepo", "directory"=>"sampledir"}]
-      end
-
-      it "should parse erb values" do
-        ENV.stub(:[]).with("GITHUB_USER").and_return("testuser")
-        ENV.stub(:[]).with("GITHUB_PASSWORD").and_return("s33kr1t")
-        expect(publisher.config['github']).to eq ({'username'=>'testuser', 'password'=>'s33kr1t'})
-      end
-    end
   end
 
   context 'when given the "build_and_push_tarball" command' do

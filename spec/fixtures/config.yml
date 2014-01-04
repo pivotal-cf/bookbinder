@@ -1,7 +1,0 @@
----
-repos:
-- github_repo: samplerepo
-  directory: sampledir
-github:
-  username: <%= ENV['GITHUB_USER'] %>
-  password: <%= ENV['GITHUB_PASSWORD'] %>
