@@ -48,46 +48,52 @@ class DocRepo
 
   def copy_to(destination_dir)
     if @local_repo_dir.nil?
-      output_dir = Dir.mktmpdir
-      log '  downloading '.yellow + "https://github.com/#{github_tarball_path}"
-      conn = Faraday.new(url: "https://github.com") do |builder|
-        builder.use FaradayMiddleware::FollowRedirects, limit: 5
-        builder.adapter Faraday.default_adapter
-      end
-      response = conn.get(github_tarball_path)
-      if response.status != 200
-        raise 'Bad API Request. Check to make sure your sha is valid and the repo is not password protected'
-      end
-      downloaded_tarball_path = File.join(output_dir, "#{name}.tar.gz")
-      File.open(downloaded_tarball_path, 'w') { |f| f.write(response.body) }
-
-      shell_out "tar xzf #{downloaded_tarball_path} -C #{output_dir}"
-
-      from = File.join output_dir, "#{name}-#{sha}"
-      FileUtils.mv from, File.join(destination_dir, directory)
-      true
+      copy_from_remote(destination_dir)
     else
-      path_to_local_repo = File.join(@local_repo_dir, name)
-      if File.exist?(path_to_local_repo)
-        log '  copying '.yellow + path_to_local_repo
-        FileUtils.cp_r path_to_local_repo, File.join(destination_dir, directory)
-        true
-      else
-        log '  skipping (not found) '.magenta + path_to_local_repo
-        false
-      end
+      copy_from_local(destination_dir)
     end
   end
 
   private
 
+  def copy_from_local(destination_dir)
+    path_to_local_repo = File.join(@local_repo_dir, name)
+    if File.exist?(path_to_local_repo)
+      log '  copying '.yellow + path_to_local_repo
+      FileUtils.cp_r path_to_local_repo, File.join(destination_dir, directory)
+      true
+    else
+      log '  skipping (not found) '.magenta + path_to_local_repo
+      false
+    end
+  end
+
+  def copy_from_remote(destination_dir)
+    output_dir = Dir.mktmpdir
+    log '  downloading '.yellow + "https://github.com/#{github_tarball_path}"
+    conn = Faraday.new(url: "https://github.com") do |builder|
+      builder.use FaradayMiddleware::FollowRedirects, limit: 5
+      builder.adapter Faraday.default_adapter
+    end
+    response = conn.get(github_tarball_path)
+    if response.status != 200
+      raise 'Bad API Request. Check to make sure your sha is valid and the repo is not password protected'
+    end
+    downloaded_tarball_path = File.join(output_dir, "#{name}.tar.gz")
+    File.open(downloaded_tarball_path, 'w') { |f| f.write(response.body) }
+
+    shell_out "tar xzf #{downloaded_tarball_path} -C #{output_dir}"
+
+    from = File.join output_dir, "#{name}-#{sha}"
+    FileUtils.mv from, File.join(destination_dir, directory)
+    true
+  end
+
   def initialize(repo_hash, github_username, github_password, local_repo_dir, destination_dir)
     if repo_hash['sha'].nil? && !local_repo_dir
-      repo_hash['sha'] = DocRepo.head_sha_for repo_hash['github_repo'],
-                                              github_username,
-                                              github_password
+      repo_hash['sha'] = DocRepo.head_sha_for repo_hash['github_repo'], github_username, github_password
     end
-    @full_name = repo_hash['github_repo']
+    @full_name = repo_hash.fetch('github_repo')
     @sha = repo_hash['sha']
     @directory = repo_hash['directory']
     @local_repo_dir = local_repo_dir
