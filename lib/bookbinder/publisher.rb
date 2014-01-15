@@ -8,25 +8,29 @@ class Publisher
     final_app_dir = options.fetch(:final_app_dir)
     log_file = File.join(intermediate_directory, 'wget.log')
     pdf_requested = options.has_key?(:pdf) && options[:pdf]
-    output_master_middleman_dir = File.join intermediate_directory, 'master_middleman'
-    destination_dir = File.join(output_master_middleman_dir, 'source')
+    middleman_dir = File.join intermediate_directory, 'master_middleman'
+    middleman_source_directory = File.join(middleman_dir, 'source')
+    build_directory = File.join(middleman_dir, 'build/.')
+    public_directory = File.join(final_app_dir, 'public')
 
-    prepare_final_app_directories final_app_dir, intermediate_directory
-    copy_directory_from_gem 'master_middleman', output_master_middleman_dir
-    FileUtils.cp_r "#{options[:master_middleman_dir]}/.", output_master_middleman_dir
-    repos = download_repos(destination_dir, options)
+    prepare_directories final_app_dir, intermediate_directory, middleman_source_directory
+    copy_directory_from_gem 'master_middleman', middleman_dir
+    FileUtils.cp_r "#{options[:master_middleman_dir]}/.", middleman_dir
+
+    repos = download_repos(middleman_source_directory, options)
 
     #The lede
-    generate_site(options, output_master_middleman_dir)
+    generate_site(options, middleman_dir)
 
-    FileUtils.cp_r File.join(output_master_middleman_dir, 'build/.'), File.join(final_app_dir, 'public')
+    FileUtils.cp_r build_directory, public_directory
+
     has_broken_links = has_broken_links? log_file, intermediate_directory, final_app_dir
 
     #Subledes
     generate_site_map(options.fetch(:host_for_sitemap), log_file, final_app_dir)
     generate_pdf(final_app_dir, options.fetch(:pdf)) if pdf_requested && pdf_page_present?(options, repos)
 
-    log "Bookbinder bound your book into #{options[:final_app_dir].green}"
+    log "Bookbinder bound your book into #{final_app_dir.green}"
 
     has_broken_links
   end
@@ -42,25 +46,24 @@ class Publisher
     repos.find { |repo| pdf_page.start_with?(repo.directory) }.copied?
   end
 
-  def download_repos(destination_dir, options)
+  def download_repos(middleman_source_directory, options)
     options.fetch(:repos).map do |repo_hash|
       log 'Processing ' + repo_hash['github_repo'].cyan
-      download_repo_to(destination_dir, options, repo_hash)
+      download_repo_to(middleman_source_directory, options, repo_hash)
     end
   end
 
-  def download_repo_to(destination_dir, options, repo_hash)
-    shared_arguments = {repo_hash: repo_hash, destination_dir: destination_dir}
+  def download_repo_to(destination, options, repo_hash)
+    shared_arguments = {repo_hash: repo_hash, destination_dir: destination}
 
     if options.has_key?(:local_repo_dir)
-      local_repo_arguments = {local_dir: options.fetch(:local_repo_dir), }
-      DocRepo.from_local shared_arguments.merge local_repo_arguments
+      DocRepo.from_local shared_arguments.merge(local_dir: options.fetch(:local_repo_dir))
     else
-      remote_repo_arguments = {
+      github_credentials = {
           github_username: options.fetch(:github_username),
           github_password: options.fetch(:github_password),
       }
-      DocRepo.from_remote shared_arguments.merge remote_repo_arguments
+      DocRepo.from_remote shared_arguments.merge github_credentials
     end
   end
 
@@ -92,13 +95,14 @@ class Publisher
     end
   end
 
-  def prepare_final_app_directories(final_app_dir, output_dir)
-    FileUtils.mkdir_p output_dir
-    FileUtils.rm_rf File.join output_dir, '.'
-    FileUtils.rm_rf File.join final_app_dir, '.'
-    FileUtils.mkdir_p File.join final_app_dir, 'public'
+  def prepare_directories(final_app, output, middleman_source)
+    FileUtils.mkdir_p output
+    FileUtils.rm_rf File.join output, '.'
+    FileUtils.rm_rf File.join final_app, '.'
+    FileUtils.mkdir_p File.join final_app, 'public'
+    FileUtils.mkdir_p middleman_source
 
-    copy_directory_from_gem 'template_app', final_app_dir
+    copy_directory_from_gem 'template_app', final_app
   end
 
   def copy_directory_from_gem(dir, output_dir)

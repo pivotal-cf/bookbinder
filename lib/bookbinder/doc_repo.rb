@@ -39,7 +39,7 @@ class DocRepo
   end
 
   def directory
-    @directory ? @directory : name
+    @directory || name
   end
 
   def name

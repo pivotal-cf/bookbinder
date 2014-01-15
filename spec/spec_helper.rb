@@ -13,8 +13,9 @@ end
 require_relative '../lib/bookbinder'
 require_relative 'fixtures/markdown_repo_fixture'
 
-RSpec.configure do |config|
+APP_ROOT = Dir.pwd
 
+RSpec.configure do |config|
   config.before do
     # awful hack to prevent tests that invoke middleman directly from polluting code that shells out to call it
     ENV['MM_ROOT'] = nil
@@ -42,8 +43,6 @@ RSpec.configure do |config|
     def run_middleman(template_variables = {})
       MiddlemanRunner.new.run tmpdir, template_variables
     end
-
-
   end
 
   config.include SpecHelperMethods

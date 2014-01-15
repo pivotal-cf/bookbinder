@@ -5,7 +5,7 @@ describe '#breadcrumbs' do
   include_context 'tmp_dirs'
 
   before do
-    FileUtils.cp_r File.join('master_middleman/.'), tmpdir
+    FileUtils.cp_r 'master_middleman/.', tmpdir
     FileUtils.mkdir_p source_dir
     squelch_middleman_output
     write_markdown_source_file source_file_under_test, source_file_title, source_file_content, breadcrumb_title

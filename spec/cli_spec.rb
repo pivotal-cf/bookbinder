@@ -24,6 +24,45 @@ describe Cli do
     end
   end
 
+  context 'when config.yml is missing a required key' do
+    before do
+      File.stub(:read)
+      YAML.stub(:load).and_return({foo: 'bar'})
+    end
+
+    let(:arguments) { ['publish', 'local'] }
+
+    it 'should print a helpful message' do
+      BookbinderLogger.should_receive(:log).with(/key not found:.*in config\.yml/)
+      run
+    end
+  end
+
+  context 'when config.yml is missing' do
+    before { File.stub(:read).and_raise(Errno::ENOENT) }
+
+    let(:arguments) { ['publish', 'local'] }
+
+    it 'should print a helpful message' do
+      BookbinderLogger.should_receive(:log).with(/No such file or directory/)
+      run
+    end
+  end
+
+  context 'when config.yml is empty' do
+    before do
+      File.stub(:read)
+      YAML.stub(:load).and_return(false)
+    end
+
+    let(:arguments) { ['publish', 'local'] }
+
+    it 'should print a helpful message' do
+      BookbinderLogger.should_receive(:log).with(/config.yml is empty/)
+      run
+    end
+  end
+
   shared_examples_for 'a cli that dispatches commands' do
     let(:arguments) { [command_string] + extra_args}
     let(:extra_args) { ['arg1', 'arg2'] }

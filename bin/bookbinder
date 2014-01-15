@@ -4,4 +4,3 @@ require 'bookbinder'
 
 return_code = Cli.new.run ARGV
 exit return_code.to_i
-

@@ -20,6 +20,9 @@ class Cli
     if command_to_class_mapping[command]
       begin
         command_to_class_mapping[command].new.run command_arguments
+      rescue KeyError => e
+        # assumes that invalid fetches are into the config hash
+        log "#{e.message}, in config.yml".red
       rescue => e
         log e.message.red
         1
