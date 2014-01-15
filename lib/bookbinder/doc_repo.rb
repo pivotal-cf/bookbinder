@@ -26,21 +26,8 @@ class DocRepo
     self.new(repo_hash, github_username, github_password, nil, destination_dir)
   end
 
-  def self.from_local(repo_hash: {}, local_dir: '', destination_dir: '')
+  def self.from_local(repo_hash: {}, local_dir: '', destination_dir: nil)
     self.new(repo_hash, nil, nil, local_dir, destination_dir)
-  end
-
-  def initialize(repo_hash, github_username, github_password, local_repo_dir, destination_dir)
-    if repo_hash['sha'].nil? && !local_repo_dir
-      repo_hash['sha'] = DocRepo.head_sha_for repo_hash['github_repo'],
-                                              github_username,
-                                              github_password
-    end
-    @full_name = repo_hash['github_repo']
-    @sha = repo_hash['sha']
-    @directory = repo_hash['directory']
-    @local_repo_dir = local_repo_dir
-    @copied = copy_to(destination_dir) if destination_dir
   end
 
   def copied?
@@ -90,5 +77,20 @@ class DocRepo
         false
       end
     end
+  end
+
+  private
+
+  def initialize(repo_hash, github_username, github_password, local_repo_dir, destination_dir)
+    if repo_hash['sha'].nil? && !local_repo_dir
+      repo_hash['sha'] = DocRepo.head_sha_for repo_hash['github_repo'],
+                                              github_username,
+                                              github_password
+    end
+    @full_name = repo_hash['github_repo']
+    @sha = repo_hash['sha']
+    @directory = repo_hash['directory']
+    @local_repo_dir = local_repo_dir
+    @copied = copy_to(destination_dir) if destination_dir
   end
 end
