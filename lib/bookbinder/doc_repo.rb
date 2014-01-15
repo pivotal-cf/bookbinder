@@ -14,7 +14,7 @@ class DocRepo
     if response.status != 200
       raise "Github API error: #{result['message']}"
     else
-      result['object']['sha']
+      result.fetch('object').fetch('sha')
     end
   end
 
@@ -22,7 +22,15 @@ class DocRepo
     "repos/#{full_name}/git/refs/heads/master"
   end
 
-  def initialize(repo_hash, github_username, github_password, local_repo_dir)
+  def self.from_remote(repo_hash: {}, github_username: '', github_password: '', destination_dir: nil)
+    self.new(repo_hash, github_username, github_password, nil, destination_dir)
+  end
+
+  def self.from_local(repo_hash: {}, local_dir: '', destination_dir: '')
+    self.new(repo_hash, nil, nil, local_dir, destination_dir)
+  end
+
+  def initialize(repo_hash, github_username, github_password, local_repo_dir, destination_dir)
     if repo_hash['sha'].nil? && !local_repo_dir
       repo_hash['sha'] = DocRepo.head_sha_for repo_hash['github_repo'],
                                               github_username,
@@ -32,6 +40,11 @@ class DocRepo
     @sha = repo_hash['sha']
     @directory = repo_hash['directory']
     @local_repo_dir = local_repo_dir
+    @copied = copy_to(destination_dir) if destination_dir
+  end
+
+  def copied?
+    @copied
   end
 
   def github_tarball_path

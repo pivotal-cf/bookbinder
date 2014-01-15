@@ -5,8 +5,8 @@ describe DocRepo do
   include ShellOut
   include_context 'tmp_dirs'
 
-  describe '#initialize' do
-    context 'when in github mode and github returns a non-200 status code' do
+  describe '.from_remote' do
+    context 'and github returns a non-200 status code' do
 
       before do
         head_sha_url = 'https://api.github.com/repos/some_org/some_repo/git/refs/heads/master'
@@ -17,9 +17,54 @@ describe DocRepo do
       it 'raises an exception with a helpful error' do
         expected_message = /Github API error: Bad credentials/
         expect do
-          DocRepo.new({'github_repo' => 'some_org/some_repo'}, nil, nil, nil)
+          DocRepo.from_remote repo_hash: {'github_repo' => 'some_org/some_repo'}
         end.to raise_exception(expected_message)
       end
+    end
+
+    context 'and github returns a 200 status code' do
+      before do
+        sha_request_url = "https://api.github.com/repos/great_org/dogs-repo/git/refs/heads/master"
+        response_body = {object: {sha: sha}}
+        stub_request(:get, sha_request_url).to_return(:status => 200, :body => response_body.to_json)
+
+        download_url = "https://github.com/great_org/dogs-repo/archive/#{sha}.tar.gz"
+        stub_request(:get, download_url).
+            to_return(
+            :status => 200,
+            :body => zipped_markdown_repo,
+            :headers => {'Content-Type' => 'application/x-gzip'}
+        )
+      end
+
+      let(:sha) { 'fantastic-sha' }
+      let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'dogs-repo', sha }
+      let(:destination_dir) { tmp_subdir('output') }
+
+      it 'copies the repo from github' do
+        DocRepo.from_remote(repo_hash: {'github_repo' => 'great_org/dogs-repo'},
+                            destination_dir: destination_dir)
+        expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
+      end
+    end
+  end
+
+  describe '.from_local' do
+    let(:repo_name) { 'aunties-repo' }
+    let(:local_repo_dir) { tmp_subdir 'local_repo_dir' }
+    let(:destination_dir) { tmp_subdir('output') }
+    let(:repo_dir) { File.join(local_repo_dir, repo_name) }
+
+    before do
+      Dir.mkdir repo_dir
+      FileUtils.touch File.join(repo_dir, 'my_aunties_goat.txt')
+    end
+
+    it 'copies the repo from nearby' do
+      DocRepo.from_local(repo_hash: {'github_repo' => 'crazy_family_of_mine/' + repo_name},
+                         local_dir: local_repo_dir,
+                         destination_dir: destination_dir)
+      expect(File.exist? File.join(destination_dir, repo_name, 'my_aunties_goat.txt')).to be_true
     end
   end
 
@@ -27,14 +72,14 @@ describe DocRepo do
     let(:destination_dir) { tmp_subdir 'middleman_source_dir' }
     let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
     let(:repo_hash) { {'github_repo' => 'my-docs-org/my-docs-repo', 'sha' => 'some-sha'} }
-    let(:repo) { DocRepo.new(repo_hash, nil, nil, local_repo_dir) }
+    let(:repo) { DocRepo.new(repo_hash, nil, nil, local_repo_dir, nil) }
 
     context 'when told to look for repos on github' do
       let(:local_repo_dir) { nil }
 
       it 'downloads and unzips the repo' do
         stub_request(:get, 'https://github.com/my-docs-org/my-docs-repo/archive/some-sha.tar.gz').to_return(
-            :body => zipped_markdown_repo, :headers => { 'Content-Type' => 'application/x-gzip' }
+            :body => zipped_markdown_repo, :headers => {'Content-Type' => 'application/x-gzip'}
         )
         repo.copy_to destination_dir
         index_html = File.read File.join(destination_dir, 'my-docs-repo', 'index.html.md')
@@ -68,7 +113,7 @@ describe DocRepo do
 
       it 'puts the repo into that directory' do
         stub_request(:get, 'https://github.com/my-docs-org/my-docs-repo/archive/some-sha.tar.gz').to_return(
-            :body => zipped_markdown_repo, :headers => { 'Content-Type' => 'application/x-gzip' }
+            :body => zipped_markdown_repo, :headers => {'Content-Type' => 'application/x-gzip'}
         )
         repo.copy_to destination_dir
         index_html = File.read File.join(destination_dir, 'pretty_url_path', 'index.html.md')
@@ -79,7 +124,7 @@ describe DocRepo do
 
   describe '#copy_to' do
     let(:repo_hash) { {'github_repo' => 'org/my-docs-repo', 'sha' => 'some-sha'} }
-    let(:repo) { DocRepo.new(repo_hash, nil, nil, local_repo_dir) }
+    let(:repo) { DocRepo.new(repo_hash, nil, nil, local_repo_dir, nil) }
     let(:destination_dir) { tmp_subdir('destination') }
     let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
 
@@ -138,14 +183,17 @@ describe DocRepo do
 
       context 'when given an invalid request URL' do
         before do
-          stub_request(:get, zipped_repo_url).to_return( :body => '', :status => 406  )
+          stub_request(:get, zipped_repo_url).to_return(:body => '', :status => 406)
         end
 
         it 'raises an error' do
-          expect{copy_to}.to raise_exception(/Bad API Request/)
+          expect { copy_to }.to raise_exception(/Bad API Request/)
         end
       end
 
     end
   end
 end
+
+
+

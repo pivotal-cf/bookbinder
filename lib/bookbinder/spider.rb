@@ -19,7 +19,7 @@ class Spider
   end
 
   def find_broken_links(log_file)
-    Dir.chdir @app_dir do
+    Dir.chdir(@app_dir) do
       begin
         open_results = Open3.popen3('ruby app.rb 4534')
         stderr = open_results[2]

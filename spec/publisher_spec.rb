@@ -35,6 +35,9 @@ describe Publisher do
                           output_dir: output_dir,
                           master_middleman_dir: non_broken_master_middleman_dir,
                           final_app_dir: final_app_dir,
+                          github_username: 'no-body-cares',
+                          github_password: 'hunter2',
+                          host_for_sitemap: 'example.com',
                           pdf: {page: 'pretty_path/index.html',
                                 filename: 'DocGuide.pdf',
                                 header: 'pretty_path/header.html'
@@ -55,6 +58,7 @@ describe Publisher do
         publisher.publish repos: repos,
                           output_dir: output_dir,
                           master_middleman_dir: non_broken_master_middleman_dir,
+                          host_for_sitemap: 'example.com',
                           local_repo_dir: local_repo_dir,
                           final_app_dir: final_app_dir
 
@@ -68,6 +72,7 @@ describe Publisher do
         no_broken_links = publisher.publish repos: repos,
                                             output_dir: output_dir,
                                             master_middleman_dir: dogs_master_middleman_dir,
+                                            host_for_sitemap: 'example.com',
                                             local_repo_dir: local_repo_dir,
                                             final_app_dir: final_app_dir
         no_broken_links.should be_true
@@ -80,6 +85,7 @@ describe Publisher do
         publisher.publish repos: repos,
                           output_dir: output_dir,
                           master_middleman_dir: variable_master_middleman_dir,
+                          host_for_sitemap: 'example.com',
                           local_repo_dir: local_repo_dir,
                           final_app_dir: final_app_dir,
                           template_variables: {'name' => 'Alexander'},
@@ -121,6 +127,7 @@ DOGS
           expect { publisher.publish repos: [],
                                      output_dir: output_dir,
                                      master_middleman_dir: generate_middleman_with('erroneous_middleman.html.md.erb'),
+                                     host_for_sitemap: 'example.com',
                                      local_repo_dir: local_repo_dir,
                                      final_app_dir: final_app_dir,
                                      verbose: false }.to raise_error
@@ -145,6 +152,7 @@ DOGS
           expect { publisher.publish repos: [],
                                      output_dir: output_dir,
                                      master_middleman_dir: generate_middleman_with('erroneous_middleman.html.md.erb'),
+                                     host_for_sitemap: 'example.com',
                                      local_repo_dir: local_repo_dir,
                                      final_app_dir: final_app_dir,
                                      verbose: true }.to raise_error
@@ -182,6 +190,7 @@ DOGS
         publisher.publish output_dir: output_dir,
                           repos: repos,
                           master_middleman_dir: master_middleman_dir,
+                          host_for_sitemap: 'example.com',
                           final_app_dir: final_app_dir,
                           pdf: pdf_config,
                           local_repo_dir: local_repo_dir

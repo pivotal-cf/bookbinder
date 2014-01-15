@@ -81,7 +81,7 @@ TEXT
                                   master_middleman_dir: File.absolute_path('master_middleman'),
                                   local_repo_dir: local_repo_dir,
                                   final_app_dir: File.absolute_path('final_app'),
-                                  host_for_sitemap: config['cloud_foundry']['public_host'],
+                                  host_for_sitemap: config.fetch('cloud_foundry').fetch('public_host'),
                                   github_username: config['github']['username'],
                                   github_password: config['github']['password'],
                                   pdf: pdf_hash,
