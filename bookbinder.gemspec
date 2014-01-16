@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'bookbinder'
-  s.version     = '0.0.4'
+  s.version     = '0.0.5'
   s.date        = '2013-01-04'
   s.summary     = 'Documentation generator for Cloud Foundry'
   s.description = 'Documentation generator for Cloud Foundry'
