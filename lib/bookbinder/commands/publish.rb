@@ -28,22 +28,28 @@ class Cli
           repos: config.fetch('repos'),
           output_dir: File.absolute_path('output'),
           master_middleman_dir: File.absolute_path('master_middleman'),
-          local_repo_dir: (location == 'local') ? File.absolute_path('../') : nil,
           final_app_dir: File.absolute_path('final_app'),
           pdf: pdf_hash,
           verbose: verbosity
       }
 
-      arguments.merge!({template_variables: config.fetch('template_variables')}) if config.has_key?('template_variables')
+      arguments.merge!(local_repo_dir: File.absolute_path('..')) if location == 'local'
+      arguments.merge!(template_variables: config.fetch('template_variables')) if config.has_key?('template_variables')
       arguments.merge!(host_for_sitemap: config['cloud_foundry'].fetch('public_host')) if config.has_key?('cloud_foundry') and config['cloud_foundry']
-      arguments.merge!({github_username: config['github']['username'],
-                        github_password: config['github']['password']}) if config.has_key?('github')
+      arguments.merge!(github_credentials) if config.has_key?('github')
 
       arguments
     end
 
     def arguments_are_valid?(arguments)
       %w(local github).include?(arguments[0]) && (arguments[1] == nil || arguments[1] == '--verbose')
+    end
+
+    def github_credentials
+      {
+        github_username: config.fetch('github').fetch('username'),
+        github_password: config.fetch('github').fetch('password')
+      }
     end
   end
 end

@@ -10,12 +10,13 @@ class Publisher
     pdf_requested = options.has_key?(:pdf) && options[:pdf]
     middleman_dir = File.join intermediate_directory, 'master_middleman'
     middleman_source_directory = File.join(middleman_dir, 'source')
+    master_middleman_dir = options[:master_middleman_dir]
     build_directory = File.join(middleman_dir, 'build/.')
     public_directory = File.join(final_app_dir, 'public')
 
     prepare_directories final_app_dir, intermediate_directory, middleman_source_directory
     copy_directory_from_gem 'master_middleman', middleman_dir
-    FileUtils.cp_r "#{options[:master_middleman_dir]}/.", middleman_dir
+    FileUtils.cp_r File.join(master_middleman_dir, '.'), middleman_dir
 
     repos = download_repos(middleman_source_directory, options)
 

@@ -13,7 +13,7 @@ end
 require_relative '../lib/bookbinder'
 require_relative 'fixtures/markdown_repo_fixture'
 
-APP_ROOT = Dir.pwd
+GEM_ROOT = Dir.pwd
 
 RSpec.configure do |config|
   config.before do
