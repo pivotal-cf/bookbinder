@@ -50,6 +50,7 @@ A book project needs a few things to allow bookbinder to run. Here's the minimal
     - **github_repo**: the path on github to this repository, i.e. 'organization/repository'. The organization is ignored when finding repositories locally. The repository must be public (unless finding repositories locally).
     - **directory**: (optional) a "pretty" directory path under the main root that the webapp will use for this sub-repo.
     - **sha**: (optional) the sha of the repo to use when downloading it from github. Ignored when finding repositories locally.
+- **public_host**: (domain, used for sitemap generation) e.g. docs.gopivotal.com
 - **github**: Github credentials - used for Github API calls. We recommend using a non-person "role" account for this.
     - **username**: github username
     - **password**: github password
@@ -70,7 +71,6 @@ A book project needs a few things to allow bookbinder to run. Here's the minimal
     - **production_space**: e.g. docs-pivotalone-prod
     - **staging_host**: (subdomain of cfapps.io) e.g. cf-p1-docs-staging
     - **production_host**: (subdomain of cfapps.io) e.g. cf-p1-docs-prod
-    - **public_host**: (domain, used for sitemap generation) e.g. docs.gopivotal.com
 - **template_variables**: (optional) a hash of variables that can be used by ERB templates, like so: <%= vars.var_name %>
     - **var_name**: var_val
     - ...

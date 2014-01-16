@@ -11,7 +11,7 @@ describe '$ bookbinder publish' do
               {'github_repo' => 'baz/my-docs-repo', 'directory' => 'docs-for-now'},
           ],
           'template_variables' => {'a' => 'b'},
-          'cloud_foundry' => { 'public_host' => 'example.com' }
+          'public_host' => 'example.com'
       }.to_yaml
     end
 
