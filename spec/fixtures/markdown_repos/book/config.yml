@@ -1,0 +1,13 @@
+---
+repos:
+- github_repo: fantastic/dogs-repo
+  directory: dogs
+- github_repo: fantastic/my-docs-repo
+  directory: docs
+- github_repo: fantastic/my-other-docs-repo
+  directory: others
+
+public_host: docs.example.com
+
+template_variables:
+  app_domain: example.com
