@@ -28,7 +28,7 @@ class Spider
         begin
           stderr_line = stderr.gets
           log "Sinatra says: #{stderr_line.chomp}"
-        end until stderr_line.include?('WEBrick::HTTPServer#start')
+        end until stderr_line.include?('has taken the stage')
 
         log 'Sinatra appears to have taken the stage!'
         consume_stream_in_separate_thread stderr
