@@ -18,11 +18,9 @@ class Publisher
     copy_directory_from_gem 'master_middleman', middleman_dir
     FileUtils.cp_r File.join(master_middleman_dir, '.'), middleman_dir
 
-    repos = download_repos(middleman_source_directory, options)
-
+    repos = import_repos(middleman_source_directory, options)
     #The lede
     generate_site(options, middleman_dir)
-
     FileUtils.cp_r build_directory, public_directory
 
     has_broken_links = has_broken_links? log_file, intermediate_directory, final_app_dir
@@ -47,14 +45,14 @@ class Publisher
     repos.find { |repo| pdf_page.start_with?(repo.directory) }.copied?
   end
 
-  def download_repos(middleman_source_directory, options)
+  def import_repos(middleman_source_directory, options)
     options.fetch(:repos).map do |repo_hash|
       log 'Processing ' + repo_hash['github_repo'].cyan
-      download_repo_to(middleman_source_directory, options, repo_hash)
+      import_repo_to(middleman_source_directory, options, repo_hash)
     end
   end
 
-  def download_repo_to(destination, options, repo_hash)
+  def import_repo_to(destination, options, repo_hash)
     shared_arguments = {repo_hash: repo_hash, destination_dir: destination}
 
     if options.has_key?(:local_repo_dir)
