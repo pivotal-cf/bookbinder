@@ -11,6 +11,6 @@ class MarkdownRepoFixture
   end
 
   def self.markdown_repos_dir
-    File.join('spec', 'fixtures', 'markdown_repos')
+    File.join(GEM_ROOT, 'spec', 'fixtures', 'markdown_repos')
   end
 end

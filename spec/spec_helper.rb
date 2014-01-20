@@ -10,6 +10,19 @@ shared_context 'tmp_dirs' do
   let(:tmpdir) { Dir.mktmpdir }
 end
 
+def stub_github_for(repo_name, some_sha)
+  Octokit::Client.any_instance.stub(:octocat).and_return 'ascii kitten proves auth validity'
+  Octokit::Client.any_instance.stub(:commits).with(repo_name).and_return [OpenStruct.new(sha: some_sha)]
+
+  zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_sha}.tar.gz"
+  Octokit::Client.any_instance.stub(:archive_link).with(repo_name).and_return(zipped_repo_url)
+
+  zipped_repo = MarkdownRepoFixture.tarball repo_name.split('/').last, some_sha
+  stub_request(:get, zipped_repo_url).to_return(
+      :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
+  )
+end
+
 require_relative '../lib/bookbinder'
 require_relative 'fixtures/markdown_repo_fixture'
 

@@ -3,39 +3,22 @@ class DocRepo
   include ShellOut
   include BookbinderLogger
 
-
-  attr_reader :full_name, :sha
-
-  def self.head_sha_for(full_name, github_username, github_password)
-    conn = Faraday.new(url: "https://api.github.com")
-    conn.basic_auth(github_username, github_password)
-    response = conn.get(github_master_head_ref_path(full_name))
-    result = JSON.parse(response.body)
-    if response.status != 200
-      raise "Github API error: #{result['message']}"
-    else
-      result.fetch('object').fetch('sha')
-    end
-  end
+  attr_reader :full_name
 
   def self.github_master_head_ref_path(full_name)
     "repos/#{full_name}/git/refs/heads/master"
   end
 
-  def self.from_remote(repo_hash: {}, github_username: '', github_password: '', destination_dir: nil)
-    self.new(repo_hash, github_username, github_password, nil, destination_dir)
+  def self.from_remote(repo_hash: {}, github_token: ENV['GITHUB_API_TOKEN'], destination_dir: nil)
+    self.new(repo_hash, github_token, nil, destination_dir)
   end
 
   def self.from_local(repo_hash: {}, local_dir: '', destination_dir: nil)
-    self.new(repo_hash, nil, nil, local_dir, destination_dir)
+    self.new(repo_hash, nil, local_dir, destination_dir)
   end
 
   def copied?
     @copied
-  end
-
-  def github_tarball_path
-    "#{full_name}/archive/#{sha}.tar.gz"
   end
 
   def directory
@@ -54,6 +37,10 @@ class DocRepo
     end
   end
 
+  def sha
+    @sha ||= @github.commits(@full_name).first.sha
+  end
+
   private
 
   def copy_from_local(destination_dir)
@@ -70,33 +57,42 @@ class DocRepo
 
   def copy_from_remote(destination_dir)
     output_dir = Dir.mktmpdir
-    log '  downloading '.yellow + "https://github.com/#{github_tarball_path}"
-    conn = Faraday.new(url: "https://github.com") do |builder|
-      builder.use FaradayMiddleware::FollowRedirects, limit: 5
-      builder.adapter Faraday.default_adapter
-    end
-    response = conn.get(github_tarball_path)
-    if response.status != 200
-      raise 'Bad API Request. Check to make sure your sha is valid and the repo is not password protected'
-    end
-    downloaded_tarball_path = File.join(output_dir, "#{name}.tar.gz")
-    File.open(downloaded_tarball_path, 'w') { |f| f.write(response.body) }
+    archive_link = @github.archive_link @full_name
+    log '  downloading '.yellow + archive_link.blue
 
-    shell_out "tar xzf #{downloaded_tarball_path} -C #{output_dir}"
+    response = Faraday.new.get(archive_link)
+    raise "Unable to download repository #{@full_name}: server response #{response.status}" unless response.status == 200
 
-    from = File.join output_dir, "#{name}-#{sha}"
+    tarball_path = File.join(output_dir, "#{name}.tar.gz")
+    File.open(tarball_path, 'w') { |f| f.write(response.body) }
+
+    directory_listing_before = Dir.entries output_dir
+    shell_out "tar xzf #{tarball_path} -C #{output_dir}"
+    directory_listing_after = Dir.entries output_dir
+
+    from = File.join output_dir, (directory_listing_after - directory_listing_before).first
     FileUtils.mv from, File.join(destination_dir, directory)
+
     true
   end
 
-  def initialize(repo_hash, github_username, github_password, local_repo_dir, destination_dir)
-    if repo_hash['sha'].nil? && !local_repo_dir
-      repo_hash['sha'] = DocRepo.head_sha_for repo_hash['github_repo'], github_username, github_password
+  def initialize(repo_hash, github_token, local_repo_dir, destination_dir)
+    unless local_repo_dir
+      @github = Octokit::Client.new(access_token: github_token)
+      validate_authorization @github
     end
+
     @full_name = repo_hash.fetch('github_repo')
-    @sha = repo_hash['sha']
     @directory = repo_hash['directory']
     @local_repo_dir = local_repo_dir
     @copied = copy_to(destination_dir) if destination_dir
+  end
+
+  def validate_authorization(client)
+    # octocat raises an exception with invalid credentials,
+    # but will return truthy for a NIL access_token!
+    raise Octokit::Unauthorized unless ENV['GITHUB_API_TOKEN'] && client.octocat
+  rescue Octokit::Unauthorized
+    raise 'Github Unauthorized error: set GITHUB_API_TOKEN correctly.'
   end
 end

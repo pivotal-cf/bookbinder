@@ -3,6 +3,7 @@ require 'tmpdir'
 require 'ansi'
 require 'faraday'
 require 'faraday_middleware'
+require 'octokit'
 require 'middleman-core/cli'
 require 'middleman-core/profiling'
 

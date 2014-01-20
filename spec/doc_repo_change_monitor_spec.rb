@@ -9,14 +9,17 @@ describe DocRepoChangeMonitor do
 
     let(:cached_sha_dir) { tmpdir }
     let(:cached_sha_file) { File.join(cached_sha_dir, 'cached_shas.yml') }
-    let(:monitor) { DocRepoChangeMonitor.new repos, cached_sha_dir, 'github-username', 'github-password' }
+    let(:monitor) { DocRepoChangeMonitor.new repos, cached_sha_dir }
     let(:repos) {  [{"github_repo" => "my-docs-org/my-docs-repo"},
                     {"github_repo" => "some-other-org/some-other-repo"}]
                 }
 
     before do
-      stub_github_ref_response 'my-docs-org/my-docs-repo', 'shaA'
-      stub_github_ref_response 'some-other-org/some-other-repo', 'shaB'
+      Octokit::Client.any_instance.stub(:octocat).and_return 'ascii kitten proves auth validity'
+      Octokit::Client.any_instance.stub(:commits)
+      .with('my-docs-org/my-docs-repo').and_return [OpenStruct.new(sha: 'shaA')]
+      Octokit::Client.any_instance.stub(:commits)
+      .with('some-other-org/some-other-repo').and_return [OpenStruct.new(sha: 'shaB')]
     end
 
     context 'when no cached sha file is available' do
@@ -56,22 +59,6 @@ describe DocRepoChangeMonitor do
 
       it { should be_true }
     end
-  end
-
-  def stub_github_ref_response(repo_full_name, sha)
-    json = <<JSON
-{
-  "ref": "refs/heads/master",
-  "url": "https://api.github.com/repos/#{repo_full_name}/git/refs/heads/master",
-  "object": {
-    "sha": "#{sha}",
-    "type": "commit",
-    "url": "https://api.github.com/repos/#{repo_full_name}/git/commits/#{sha}"
-  }
-}
-JSON
-    head_ref_url = "https://github-username:github-password@api.github.com/repos/#{repo_full_name}/git/refs/heads/master"
-    stub_request(:get, head_ref_url).to_return(:body => json, :headers => {'Content-Type' => 'application/json'})
   end
 
   def write_cached_SHAs(shas)

@@ -4,15 +4,15 @@ class Publisher
   include BookbinderLogger
 
   def publish(options)
-    intermediate_directory = options.fetch(:output_dir)
-    final_app_dir = options.fetch(:final_app_dir)
-    log_file = File.join(intermediate_directory, 'wget.log')
-    pdf_requested = options.has_key?(:pdf) && options[:pdf]
-    middleman_dir = File.join intermediate_directory, 'master_middleman'
-    middleman_source_directory = File.join(middleman_dir, 'source')
-    master_middleman_dir = options[:master_middleman_dir]
-    build_directory = File.join(middleman_dir, 'build/.')
-    public_directory = File.join(final_app_dir, 'public')
+    intermediate_directory          = options.fetch(:output_dir)
+    final_app_dir                   = options.fetch(:final_app_dir)
+    pdf_requested                   = options.has_key?(:pdf) && options[:pdf]
+    master_middleman_dir            = options[:master_middleman_dir]
+    log_file                        = File.join intermediate_directory, 'wget.log'
+    middleman_dir                   = File.join intermediate_directory, 'master_middleman'
+    middleman_source_directory      = File.join middleman_dir, 'source'
+    build_directory                 = File.join middleman_dir, 'build/.'
+    public_directory                = File.join final_app_dir, 'public'
 
     prepare_directories final_app_dir, intermediate_directory, middleman_source_directory
     copy_directory_from_gem 'master_middleman', middleman_dir
@@ -58,11 +58,7 @@ class Publisher
     if options.has_key?(:local_repo_dir)
       DocRepo.from_local shared_arguments.merge(local_dir: options.fetch(:local_repo_dir))
     else
-      github_credentials = {
-          github_username: options.fetch(:github_username),
-          github_password: options.fetch(:github_password),
-      }
-      DocRepo.from_remote shared_arguments.merge github_credentials
+      DocRepo.from_remote shared_arguments
     end
   end
 

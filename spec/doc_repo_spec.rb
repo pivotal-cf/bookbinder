@@ -6,16 +6,29 @@ describe DocRepo do
   include_context 'tmp_dirs'
 
   describe '.from_remote' do
-    context 'and github returns a non-200 status code' do
+    context 'when the provided github token is invalid' do
+      let(:octo) { double }
 
       before do
-        head_sha_url = 'https://api.github.com/repos/some_org/some_repo/git/refs/heads/master'
-        json_response = '{"message": "Bad credentials", "documentation_url": "http://developer.github.com/v3"}'
-        stub_request(:get, head_sha_url).to_return(:body => json_response, :status => 401)
+        Octokit::Client.any_instance.stub(:octocat).and_raise Octokit::Unauthorized
       end
 
       it 'raises an exception with a helpful error' do
-        expected_message = /Github API error: Bad credentials/
+        expected_message = /Github Unauthorized error: set GITHUB_API_TOKEN correctly/
+        expect do
+          DocRepo.from_remote repo_hash: {'github_repo' => 'some_org/some_repo'}
+        end.to raise_exception(expected_message)
+      end
+    end
+
+    context 'when no GITHUB_API_TOKEN is set' do
+      before do
+        ENV.stub(:[])
+        ENV.stub(:[]).with('GITHUB_API_TOKEN').and_return nil
+      end
+
+      it 'raises an exception with a helpful error' do
+        expected_message = /Github Unauthorized error: set GITHUB_API_TOKEN correctly/
         expect do
           DocRepo.from_remote repo_hash: {'github_repo' => 'some_org/some_repo'}
         end.to raise_exception(expected_message)
@@ -24,11 +37,12 @@ describe DocRepo do
 
     context 'and github returns a 200 status code' do
       before do
-        sha_request_url = "https://api.github.com/repos/great_org/dogs-repo/git/refs/heads/master"
-        response_body = {object: {sha: sha}}
-        stub_request(:get, sha_request_url).to_return(:status => 200, :body => response_body.to_json)
-
         download_url = "https://github.com/great_org/dogs-repo/archive/#{sha}.tar.gz"
+
+        Octokit::Client.any_instance.stub(:commits).and_return [OpenStruct.new(sha: sha)]
+        Octokit::Client.any_instance.stub(:archive_link).and_return download_url
+        Octokit::Client.any_instance.stub(:octocat).and_return 'ascii kitten proves auth validity'
+
         stub_request(:get, download_url).
             to_return(
             :status => 200,
@@ -72,13 +86,20 @@ describe DocRepo do
     let(:destination_dir) { tmp_subdir 'middleman_source_dir' }
     let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
     let(:repo_hash) { {'github_repo' => 'my-docs-org/my-docs-repo', 'sha' => 'some-sha'} }
-    let(:repo) { DocRepo.new(repo_hash, nil, nil, local_repo_dir, nil) }
+    let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil) }
 
     context 'when told to look for repos on github' do
       let(:local_repo_dir) { nil }
+      let(:tarball_url) { 'https://github.com/my-docs-org/my-docs-repo/archive/some-sha.tar.gz' }
+
+      before do
+        Octokit::Client.any_instance.stub(:commits).and_return [OpenStruct.new(sha: 'some-sha')]
+        Octokit::Client.any_instance.stub(:octocat).and_return 'ascii kitten proves auth validity'
+        Octokit::Client.any_instance.stub(:archive_link).and_return tarball_url
+      end
 
       it 'downloads and unzips the repo' do
-        stub_request(:get, 'https://github.com/my-docs-org/my-docs-repo/archive/some-sha.tar.gz').to_return(
+        stub_request(:get, tarball_url).to_return(
             :body => zipped_markdown_repo, :headers => {'Content-Type' => 'application/x-gzip'}
         )
         repo.copy_to destination_dir
@@ -123,8 +144,11 @@ describe DocRepo do
   end
 
   describe '#copy_to' do
-    let(:repo_hash) { {'github_repo' => 'org/my-docs-repo', 'sha' => 'some-sha'} }
-    let(:repo) { DocRepo.new(repo_hash, nil, nil, local_repo_dir, nil) }
+    let(:repo_name) { 'org/my-docs-repo' }
+    let(:some_sha) { 'some-sha' }
+    let(:repo_hash) { {'github_repo' => repo_name, 'sha' => some_sha} }
+    # Testing private interfaces!!!
+    let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil) }
     let(:destination_dir) { tmp_subdir('destination') }
     let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
 
@@ -162,15 +186,9 @@ describe DocRepo do
     end
 
     context 'when not given a local repo dir' do
-      let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
       let(:local_repo_dir) { nil }
-      let(:zipped_repo_url) { 'https://github.com/org/my-docs-repo/archive/some-sha.tar.gz' }
 
-      before do
-        stub_request(:get, zipped_repo_url).to_return(
-            :body => zipped_markdown_repo, :headers => {'Content-Type' => 'application/x-gzip'}
-        )
-      end
+      before { stub_github_for repo_name, some_sha }
 
       it 'retrieves the repo from github' do
         copy_to
@@ -183,14 +201,14 @@ describe DocRepo do
 
       context 'when given an invalid request URL' do
         before do
+          zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_sha}.tar.gz"
           stub_request(:get, zipped_repo_url).to_return(:body => '', :status => 406)
         end
 
         it 'raises an error' do
-          expect { copy_to }.to raise_exception(/Bad API Request/)
+          expect { copy_to }.to raise_exception(/Unable to download/)
         end
       end
-
     end
   end
 end

@@ -2,11 +2,11 @@ class DocRepoChangeMonitor
 
   include BookbinderLogger
 
-  def initialize(repo_hashes, cached_sha_dir, github_username, github_password)
+  def initialize(repo_hashes, cached_sha_dir)
     @repo_full_names = repo_hashes.map { |repo_hash| repo_hash["github_repo"] }
     @cached_sha_dir = cached_sha_dir
     @repos = repo_hashes.map do |repo_hash|
-      DocRepo.from_remote repo_hash: repo_hash, github_username: github_username, github_password: github_password
+      DocRepo.from_remote repo_hash: repo_hash
     end
     @cached_sha_file = File.join(cached_sha_dir, 'cached_shas.yml')
     @cached_shas = find_cached_shas

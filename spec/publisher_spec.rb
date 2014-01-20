@@ -8,8 +8,6 @@ describe Publisher do
     let(:publisher) { Publisher.new }
     let(:output_dir) { tmp_subdir 'output' }
     let(:final_app_dir) { tmp_subdir 'final_app' }
-    let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
-    let(:other_zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-other-docs-repo', 'some-other-sha' }
     let(:non_broken_master_middleman_dir) { generate_middleman_with 'non_broken_index.html' }
     let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html' }
 
@@ -19,34 +17,33 @@ describe Publisher do
       let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir }
 
       it 'it creates a directory per repo with the generated html from middleman' do
-        zipped_repo_url = 'https://github.com/my-docs-org/my-docs-repo/archive/some-sha.tar.gz'
-        stub_request(:get, zipped_repo_url).to_return(
-            :body => zipped_markdown_repo, :headers => {'Content-Type' => 'application/x-gzip'}
-        )
+        Octokit::Client.any_instance.stub(:octocat).and_return 'ascii kitty proves auth validity'
+        some_repo       = 'my-docs-org/my-docs-repo'
+        some_other_repo = 'my-other-docs-org/my-other-docs-repo'
+        some_sha        = 'some-sha'
+        some_other_sha  = 'some-other-sha'
 
-        other_zipped_repo_url = 'https://github.com/my-other-docs-org/my-other-docs-repo/archive/some-other-sha.tar.gz'
-        stub_request(:get, other_zipped_repo_url).to_return(
-            :body => other_zipped_markdown_repo, :headers => {'Content-Type' => 'application/x-gzip'}
-        )
+        stub_github_for(some_repo, some_sha)
+        stub_github_for(some_other_repo, some_other_sha)
 
-        repos = [{'github_repo' => 'my-docs-org/my-docs-repo', 'sha' => 'some-sha', 'directory' => 'pretty_path'},
-                 {'github_repo' => 'my-other-docs-org/my-other-docs-repo', 'sha' => 'some-other-sha'}]
-        publisher.publish repos: repos,
-                          output_dir: output_dir,
+        repos = [{'github_repo' => some_repo, 'sha' => some_sha, 'directory' => 'pretty_path'},
+                 {'github_repo' => some_other_repo, 'sha' => some_other_sha}]
+
+        #the lede
+        publisher.publish repos: repos, output_dir: output_dir,
                           master_middleman_dir: non_broken_master_middleman_dir,
                           final_app_dir: final_app_dir,
-                          github_username: 'no-body-cares',
-                          github_password: 'hunter2',
                           host_for_sitemap: 'example.com',
-                          pdf: {page: 'pretty_path/index.html',
-                                filename: 'DocGuide.pdf',
-                                header: 'pretty_path/header.html'
+                          pdf: {
+                              page: 'pretty_path/index.html',
+                              filename: 'DocGuide.pdf',
+                              header: 'pretty_path/header.html'
                           }
 
         index_html = File.read File.join(final_app_dir, 'public', 'pretty_path', 'index.html')
         index_html.should include 'This is a Markdown Page'
 
-        other_index_html = File.read File.join(final_app_dir, 'public', 'my-other-docs-repo', 'index.html')
+        other_index_html = File.read File.join(final_app_dir, 'public', some_other_repo.split('/').last, 'index.html')
         other_index_html.should include 'This is another Markdown Page'
 
         expect(File.exist? File.join(final_app_dir, 'public', 'DocGuide.pdf')).to be_true

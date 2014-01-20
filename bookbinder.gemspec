@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.executable = 'bookbinder'
 
   s.add_runtime_dependency 'fog', ['~> 1.17']
+  s.add_runtime_dependency 'octokit', ['1.25.0']
   s.add_runtime_dependency 'ansi', ['~> 1.4']
   s.add_runtime_dependency 'unf', ['~> 0.1']
   s.add_runtime_dependency 'middleman', ['~> 3.1']
