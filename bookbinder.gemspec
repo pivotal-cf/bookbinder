@@ -1,11 +1,10 @@
 Gem::Specification.new do |s|
   s.name        = 'bookbinder'
-  s.version     = '0.0.5'
-  s.date        = '2013-01-04'
+  s.version     = '0.0.6'
   s.summary     = 'Documentation generator for Cloud Foundry'
   s.description = 'Documentation generator for Cloud Foundry'
-  s.authors     = ['Mike Grafton', 'Lucas Marks']
-  s.email       = 'mike@pivotallabs.com'
+  s.authors     = ['Mike Grafton', 'Lucas Marks', 'Gavin Morgan', 'Nikhil Gajwani']
+  s.email       = 'gmorgan@gopivotal.com'
   s.files =     Dir['lib/**/*'] + Dir['template_app/**/*'] + Dir['master_middleman/**/*'] + Dir['bin/**/*']
   s.homepage    =
     'https://github.com/pivotal-cf/docs-bookbinder'
