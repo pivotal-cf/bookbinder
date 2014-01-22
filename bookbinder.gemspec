@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'bookbinder'
-  s.version     = '0.0.6'
+  s.version     = '0.0.7'
   s.summary     = 'Documentation generator for Cloud Foundry'
   s.description = 'Documentation generator for Cloud Foundry'
   s.authors     = ['Mike Grafton', 'Lucas Marks', 'Gavin Morgan', 'Nikhil Gajwani']
