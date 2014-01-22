@@ -11,11 +11,13 @@ shared_context 'tmp_dirs' do
 end
 
 def stub_github_for(repo_name, some_sha)
+  latest_commit = OpenStruct.new(sha: some_sha)
+
   Octokit::Client.any_instance.stub(:octocat).and_return 'ascii kitten proves auth validity'
-  Octokit::Client.any_instance.stub(:commits).with(repo_name).and_return [OpenStruct.new(sha: some_sha)]
+  Octokit::Client.any_instance.stub(:commits).with(repo_name).and_return [latest_commit]
 
   zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_sha}.tar.gz"
-  Octokit::Client.any_instance.stub(:archive_link).with(repo_name).and_return(zipped_repo_url)
+  Octokit::Client.any_instance.stub(:archive_link).with(repo_name, ref: latest_commit.sha).and_return(zipped_repo_url)
 
   zipped_repo = MarkdownRepoFixture.tarball repo_name.split('/').last, some_sha
   stub_request(:get, zipped_repo_url).to_return(

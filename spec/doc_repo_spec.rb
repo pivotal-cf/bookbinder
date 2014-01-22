@@ -37,10 +37,7 @@ describe DocRepo do
 
     context 'and github returns a 200 status code' do
       before do
-        download_url = "https://github.com/great_org/dogs-repo/archive/#{sha}.tar.gz"
-
-        Octokit::Client.any_instance.stub(:commits).and_return [OpenStruct.new(sha: sha)]
-        Octokit::Client.any_instance.stub(:archive_link).and_return download_url
+        Octokit::Client.any_instance.stub(:commits).and_return [latest_commit]
         Octokit::Client.any_instance.stub(:octocat).and_return 'ascii kitten proves auth validity'
 
         stub_request(:get, download_url).
@@ -51,15 +48,38 @@ describe DocRepo do
         )
       end
 
+      let(:latest_commit) { OpenStruct.new(sha: sha) }
       let(:sha) { 'fantastic-sha' }
       let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'dogs-repo', sha }
       let(:destination_dir) { tmp_subdir('output') }
+      let(:repo_name) { 'great_org/dogs-repo' }
+      let(:download_url) { "https://github.com/great_org/dogs-repo/archive/#{latest_commit.sha}.tar.gz" }
 
       it 'copies the repo from github' do
-        DocRepo.from_remote(repo_hash: {'github_repo' => 'great_org/dogs-repo'},
+        Octokit::Client.any_instance.stub(:archive_link).and_return download_url
+        DocRepo.from_remote(repo_hash: {'github_repo' => repo_name},
                             destination_dir: destination_dir)
         expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
       end
+
+      it 'uses the latest SHA to make requests for the archive link' do
+        Octokit::Client.any_instance.should_receive(:archive_link)
+          .with(repo_name, ref: latest_commit.sha).and_return download_url
+
+        DocRepo.from_remote(repo_hash: {'github_repo' => repo_name}, destination_dir: destination_dir)
+      end
+
+      context 'when a SHA is provided' do
+        let(:provided_sha) { 'this-is-the-commit-i-want' }
+
+        it 'uses the provided SHA to make requests for the archive link' do
+          Octokit::Client.any_instance.should_receive(:archive_link)
+            .with(repo_name, ref: provided_sha).and_return download_url
+          DocRepo.from_remote(repo_hash: {'github_repo' => repo_name, 'sha' => provided_sha},
+                              destination_dir: destination_dir)
+        end
+      end
+
     end
   end
 

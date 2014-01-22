@@ -64,7 +64,7 @@ class DocRepo
 
   def copy_from_remote(destination_dir)
     output_dir = Dir.mktmpdir
-    archive_link = @github.archive_link @full_name
+    archive_link = @github.archive_link @full_name, ref: sha
     log '  downloading '.yellow + archive_link.blue
 
     response = Faraday.new.get(archive_link)
@@ -89,6 +89,7 @@ class DocRepo
       validate_authorization @github
     end
 
+    @sha = repo_hash['sha']
     @full_name = repo_hash.fetch('github_repo')
     @directory = repo_hash['directory']
     @local_repo_dir = local_repo_dir
