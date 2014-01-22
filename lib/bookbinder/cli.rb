@@ -9,7 +9,8 @@ class Cli
      'push_local_to_staging' => PushLocalToStaging,
      'push_to_prod' => PushToProd,
      'run_publish_ci' => RunPublishCI,
-     'update_local_doc_repos' => UpdateLocalDocRepos}
+     'update_local_doc_repos' => UpdateLocalDocRepos,
+     'tag' => Tag}
     # breaking this command => class naming convention will break usage_messages!
   end
 

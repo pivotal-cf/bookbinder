@@ -2,8 +2,7 @@ class DocRepo
 
   include ShellOut
   include BookbinderLogger
-
-  attr_reader :full_name
+  include Repository
 
   def self.github_master_head_ref_path(full_name)
     "repos/#{full_name}/git/refs/heads/master"
@@ -37,11 +36,19 @@ class DocRepo
     end
   end
 
-  def sha
-    @sha ||= @github.commits(@full_name).first.sha
+  def has_tag?(tagname)
+    tags.any? { |tag| tag.name == tagname }
+  end
+
+  def repos
+
   end
 
   private
+
+  def tags
+    @github.tags @full_name
+  end
 
   def copy_from_local(destination_dir)
     path_to_local_repo = File.join(@local_repo_dir, name)
@@ -86,13 +93,5 @@ class DocRepo
     @directory = repo_hash['directory']
     @local_repo_dir = local_repo_dir
     @copied = copy_to(destination_dir) if destination_dir
-  end
-
-  def validate_authorization(client)
-    # octocat raises an exception with invalid credentials,
-    # but will return truthy for a NIL access_token!
-    raise Octokit::Unauthorized unless ENV['GITHUB_API_TOKEN'] && client.octocat
-  rescue Octokit::Unauthorized
-    raise 'Github Unauthorized error: set GITHUB_API_TOKEN correctly.'
   end
 end

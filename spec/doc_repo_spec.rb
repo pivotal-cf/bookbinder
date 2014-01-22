@@ -143,11 +143,70 @@ describe DocRepo do
     end
   end
 
+  describe '#has_tag?' do
+    let(:repo_hash) { {'github_repo' => 'my-docs-org/my-docs-repo',
+                       'sha' => 'some-sha', 'directory' => 'pretty_url_path'} }
+    let(:repo) { DocRepo.new(repo_hash, nil, nil, nil) }
+    let(:my_tag) { '#hashtag' }
+
+    before do
+      Octokit::Client.any_instance.stub(:octocat).and_return 'Kitty means authenticated.'
+      Octokit::Client.any_instance.stub(:tags).and_return(tags)
+    end
+
+    context 'when a tag has been applied' do
+      let(:tags) do
+        [OpenStruct.new(name: my_tag)]
+      end
+
+      it 'is true when checking that tag' do
+        repo.should have_tag(my_tag)
+      end
+      it 'is false when checking a different tag' do
+        repo.should_not have_tag('nobody_uses_me')
+      end
+    end
+
+    context 'when no tag has been applied' do
+      let(:tags) { [] }
+
+      it 'is false' do
+        repo.should_not have_tag(my_tag)
+      end
+    end
+  end
+
+  describe '#tag_with' do
+    let(:repo_sha) { 'some-sha' }
+    let(:repo_hash) do
+      {
+          'github_repo' => 'my-docs-org/my-docs-repo',
+          'sha' => repo_sha,
+          'directory' => 'pretty_url_path'
+      }
+    end
+    let(:repo) { DocRepo.from_remote repo_hash: repo_hash }
+    let(:my_tag) { '#hashtag' }
+
+    before do
+      Octokit::Client.any_instance.stub(:octocat).and_return 'Kitty means authenticated.'
+      Octokit::Client.any_instance.stub(:commits).with(repo.full_name)
+      .and_return([OpenStruct.new(sha: repo_sha)])
+    end
+
+    it 'should apply a tag' do
+      Octokit::Client.any_instance.should_receive(:create_ref)
+      .with(repo.full_name, 'tags/'+my_tag, repo.sha)
+      repo.tag_with(my_tag)
+    end
+  end
+
   describe '#copy_to' do
     let(:repo_name) { 'org/my-docs-repo' }
     let(:some_sha) { 'some-sha' }
     let(:repo_hash) { {'github_repo' => repo_name, 'sha' => some_sha} }
-    # Testing private interfaces!!!
+    # Testing private interfaces? Typically,
+    # I'd rather come in through the front door...
     let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil) }
     let(:destination_dir) { tmp_subdir('destination') }
     let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
@@ -212,6 +271,5 @@ describe DocRepo do
     end
   end
 end
-
 
 

@@ -100,6 +100,12 @@ describe Cli do
     it_should_behave_like 'a cli that dispatches commands'
   end
 
+  context 'when given the "tag" command' do
+    let(:command_string) { 'tag' }
+    let(:command_class) { Cli::Tag }
+    it_should_behave_like 'a cli that dispatches commands'
+  end
+
   context 'when given the "build_and_push_tarball" command' do
     let(:command_string) { 'build_and_push_tarball' }
     let(:command_class) { Cli::BuildAndPushTarball }
