@@ -1,20 +1,22 @@
 # Bookbinder
 
-Bookbinder is a gem that binds together a unified documentation web-app from disparate source material, stored as repositories of markdown on GitHub. It runs [middleman](http://middlemanapp.com/) to produce a (CF-pushable) Sinatra app.
+Bookbinder is a gem that binds together a unified documentation web-app from disparate source material, stored as repositories of markdown or plain HTML on GitHub. It runs [middleman](http://middlemanapp.com/) to produce a (CF-pushable) Sinatra app.
 
 ## About
 
-Bookbinder is meant to be used from within a "book" project. The book project provides a configuration of which documentation repositories to pull in; the bookbinder gem provides a set of scripts to aggregate those repositories and publish them to various locations. It also provides scripts for running a CI system that can detect when a documentation repository has been updated with new content, and then verify that the composed book is free of any dead links.
+Bookbinder is meant to be used from within a "book" project. The book project provides a configuration of which documentation repositories to pull in; the bookbinder gem provides a set of scripts to aggregate those repositories and publish them to various locations.
+It also provides scripts for running a CI system that can detect when a documentation repository has been updated with new content, and then verify that the composed book is free of any dead links.
 
 ## Setting Up a Book Project
 
 ### Setup Checklist
-Please read this entire document (and )to understand how to set up a new book project.  You can refer to this checklist for a list of all the steps that must completed manually when setting up your book:
+Please read this document to understand how to set up a new book project.  You can refer to this checklist for the steps that must completed manually when setting up your book:
 
 #### Creating and configuring your book
 - Create a git repo for the book and populate it with the required files (or use an existing book repo as a template)
-- Put github credentials into `config.yml` (any user will do)
-- Add list of included doc repos (must be public) to `config.yml`
+- Add list of included doc repos to `config.yml`
+- (For private repositories) Create a github [Personal Access Token](https://github.com/settings/applications) for bookbinder from an account that has access to the documentation repositories
+- (For private repositories) Set your Personal Access Token as the environment variable GITHUB_API_TOKEN
 - Publish and run the server locally to test your book
 
 #### Deploying your book
@@ -44,16 +46,13 @@ A book project needs a few things to allow bookbinder to run. Here's the minimal
 
 `Gemfile` needs to point to this bookbinder gem, and probably no other gems. `Gemfile.lock` can be created by bundler automatically (see below).
 
-`config.yml` is a YAML file that represents a hash. The following keys are used:
+`config.yml` is a YAML file that holds all the information bookbinder needs. The following keys are used:
 
-- **repos**: an array of hashes which specifies which documentation repositories to pull in. Each hash needs to specify
+- **repos**: an array of hashes which specifies which documentation repositories to pull in. Each hash needs to specify:
     - **github_repo**: the path on github to this repository, i.e. 'organization/repository'. The organization is ignored when finding repositories locally. The repository must be public (unless finding repositories locally).
     - **directory**: (optional) a "pretty" directory path under the main root that the webapp will use for this sub-repo.
     - **sha**: (optional) the sha of the repo to use when downloading it from github. Ignored when finding repositories locally.
 - **public_host**: (domain, used for sitemap generation) e.g. docs.gopivotal.com
-- **github**: Github credentials - used for Github API calls. We recommend using a non-person "role" account for this.
-    - **username**: github username
-    - **password**: github password
 - **pdf**: (optional) Bookbinder can generate a PDF from one output (.html) file. To format it properly, you need to include print-specific stylesheets.
     - **page**: path of webpage to turn into a PDF (remember to use the "pretty" path if using the 'directory' key in the repo)
     - **filename**: name of the outputted PDF
