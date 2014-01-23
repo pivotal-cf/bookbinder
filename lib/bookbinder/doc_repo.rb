@@ -21,11 +21,7 @@ class DocRepo
   end
 
   def directory
-    @directory || name
-  end
-
-  def name
-    @full_name.split('/')[1]
+    @directory || short_name
   end
 
   def copy_to(destination_dir)
@@ -40,10 +36,6 @@ class DocRepo
     tags.any? { |tag| tag.name == tagname }
   end
 
-  def repos
-
-  end
-
   private
 
   def tags
@@ -51,7 +43,7 @@ class DocRepo
   end
 
   def copy_from_local(destination_dir)
-    path_to_local_repo = File.join(@local_repo_dir, name)
+    path_to_local_repo = File.join(@local_repo_dir, short_name)
     if File.exist?(path_to_local_repo)
       log '  copying '.yellow + path_to_local_repo
       FileUtils.cp_r path_to_local_repo, File.join(destination_dir, directory)
@@ -70,7 +62,7 @@ class DocRepo
     response = Faraday.new.get(archive_link)
     raise "Unable to download repository #{@full_name}: server response #{response.status}" unless response.status == 200
 
-    tarball_path = File.join(output_dir, "#{name}.tar.gz")
+    tarball_path = File.join(output_dir, "#{short_name}.tar.gz")
     File.open(tarball_path, 'w') { |f| f.write(response.body) }
 
     directory_listing_before = Dir.entries output_dir

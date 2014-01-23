@@ -9,6 +9,10 @@ module Repository
     @sha || @github.commits(full_name).first.sha
   end
 
+  def short_name
+    @full_name.split('/')[1]
+  end
+
   private
 
   def validate_authorization(client)

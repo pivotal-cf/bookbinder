@@ -19,8 +19,4 @@ class Book
   def tag_constituents_with(tag)
     @constituents.each { |repo| repo.tag_with tag }
   end
-
-  def short_name
-    @full_name.split('/')[1]
-  end
 end
