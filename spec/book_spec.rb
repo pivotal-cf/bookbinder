@@ -26,4 +26,10 @@ describe Book do
       @book.tag_constituents_with(desired_tag)
     end
   end
+
+  describe '#short_name' do
+    it 'should be returned' do
+      @book.short_name.should eq(book_name.split('/')[1])
+    end
+  end
 end

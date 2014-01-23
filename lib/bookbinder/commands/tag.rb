@@ -2,8 +2,7 @@ class Cli
   class Tag < BookbinderCommand
     def run(params)
       tag = params.pop
-      name = `grep url .git/config`.match(/([\w-]+\/[\w-]+)\.git/)[1]
-      book = Book.new full_name: name, constituent_params: config.fetch('repos')
+      book = Book.from_current_repo constituent_params: config.fetch('repos')
 
       book.tag_with tag
       book.tag_constituents_with tag
