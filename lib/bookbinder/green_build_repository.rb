@@ -4,12 +4,12 @@ class GreenBuildRepository
 
   include BookbinderLogger
 
-  def initialize(aws_key, aws_secret_key)
-    @aws_key = aws_key
-    @aws_secret_key = aws_secret_key
+  def initialize(key: '', secret: '')
+    @aws_key = key
+    @aws_secret_key = secret
   end
 
-  def create(build_number, app_dir, bucket)
+  def create(build_number: nil, app_dir: 'final_app', bucket: '')
     directory = connection.directories.create key: bucket
 
     tmp_dir = Dir.mktmpdir
@@ -24,7 +24,7 @@ class GreenBuildRepository
                            :public => true
   end
 
-  def download(empty_app_dir, bucket, build_number = nil)
+  def download(download_dir: '', bucket: '', build_number: nil)
     directory = connection.directories.get bucket
 
     build_number_to_download = build_number || highest_build_number(directory)
@@ -38,12 +38,12 @@ class GreenBuildRepository
       f.write(s3_file.body)
     end
 
-    Dir.chdir empty_app_dir do
+    Dir.chdir download_dir do
       `tar xzf #{downloaded_file}`
     end
 
     log 'Green build ' + "##{build_number_to_download}".green +
-        " has been downloaded from S3 and untarred into #{empty_app_dir.cyan}"
+        " has been downloaded from S3 and untarred into #{download_dir.cyan}"
   end
 
   private

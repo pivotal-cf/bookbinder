@@ -17,12 +17,12 @@ describe GreenBuildRepository do
                      :aws_secret_access_key => 'aws-secret-key'
   end
   let(:bucket_key) { 'pivotal-cf-docs-green-builds' }
-  let(:green_build_repository) { GreenBuildRepository.new 'aws-key', 'aws-secret-key' }
+  let(:green_build_repository) { GreenBuildRepository.new key: 'aws-key', secret: 'aws-secret-key' }
 
 
   describe '#create' do
     let(:build_number) { 42 }
-    let(:create) { green_build_repository.create 42, final_app_dir, bucket_key }
+    let(:create) { green_build_repository.create build_number: 42, app_dir: final_app_dir, bucket: bucket_key }
     let(:final_app_dir) { tmp_subdir 'final_app' }
 
     before do
@@ -73,7 +73,11 @@ describe GreenBuildRepository do
   describe '#download' do
     let(:app_dir) { tmp_subdir 'app_dir' }
     let(:bucket) { fog_connection.directories.create key: bucket_key }
-    let(:download) { green_build_repository.download app_dir, bucket_key, build_number }
+    let(:download) do
+      green_build_repository.download download_dir: app_dir,
+                                      bucket: bucket_key,
+                                      build_number: build_number
+    end
 
     before do
       expect(fog_connection.directories).to be_empty
