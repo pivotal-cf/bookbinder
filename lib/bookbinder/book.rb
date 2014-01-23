@@ -1,6 +1,6 @@
 class Book
   include Repository
-  def self.from_current_repo(constituent_params: {})
+  def self.from_current_repo(constituent_params: [])
     grepped_full_name = `grep url .git/config`.match(/([\w-]+\/[\w-]+)\.git/)[1]
     new full_name: grepped_full_name, constituent_params: constituent_params
   end

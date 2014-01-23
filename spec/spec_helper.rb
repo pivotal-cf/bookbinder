@@ -41,6 +41,7 @@ RSpec.configure do |config|
 
   config.before do
     BookbinderLogger.stub(:log) {  }
+    Pusher.any_instance.stub(:push)
   end
 
   module SpecHelperMethods

@@ -7,6 +7,22 @@ repos:
 - github_repo: fantastic/my-other-docs-repo
   directory: others
 
+aws:
+  access_key: abcdef
+  secret_key: ghijkl
+  green_builds_bucket: bucket-name-in-fixture-config
+
+cloud_foundry:
+  api_endpoint: https://api.uvw-xyz.example.com
+  production_host: example.com
+  organization: org-name-in-fixture-config
+  production_space: labski
+  app_name: novel-ideas
+#  username: foo@example.com
+#  password: shadoop-doop
+#  staging_space: docs-all-alone-staging
+#  staging_host: cf-is-awesome-staging
+
 public_host: docs.example.com
 
 template_variables:
