@@ -13,6 +13,7 @@ class MiddlemanRunner
     Dir.chdir(middleman_dir) do
       build_command = Middleman::Cli::Build.new [], {:quiet => !verbose}, {}
       Middleman::Cli::Build.shared_instance(verbose).config[:template_variables] = template_variables
+      Middleman::Cli::Build.shared_instance(verbose).config[:relative_links] = false
       build_command.invoke :build, [], {:verbose => verbose}
     end
   end
