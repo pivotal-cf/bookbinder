@@ -1,23 +1,5 @@
 require 'spec_helper'
 
-def arrange_fixture_book_and_constituents
-  temp_library = tmp_subdir 'markdown_repos'
-  book_dir = File.join temp_library, 'book'
-
-  git_dir = File.join book_dir, '.git'
-  FileUtils.mkdir_p git_dir
-  File.open(File.join(git_dir, 'config'), 'w') do |config|
-    config.puts(<<-GIT)
-[remote "origin"]
-  url = https://github.com/wow-org/such-book.git
-	fetch = +refs/heads/*:refs/remotes/origin/*
-    GIT
-  end
-
-  FileUtils.cp_r 'spec/fixtures/markdown_repos/.', temp_library
-  book_dir
-end
-
 describe Cli::Tag do
   include_context 'tmp_dirs'
 

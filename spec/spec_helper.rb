@@ -8,6 +8,24 @@ shared_context 'tmp_dirs' do
   end
 
   let(:tmpdir) { Dir.mktmpdir }
+
+  def arrange_fixture_book_and_constituents
+    temp_library = tmp_subdir 'markdown_repos'
+    FileUtils.cp_r "#{GEM_ROOT}/spec/fixtures/markdown_repos/.", temp_library
+
+    book_dir = File.join temp_library, 'book'
+    git_dir = File.join book_dir, '.git'
+    FileUtils.mkdir_p git_dir
+    File.open(File.join(git_dir, 'config'), 'w') do |config|
+      config.puts(<<-GIT)
+[remote "origin"]
+  url = https://github.com/wow-org/such-book.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+      GIT
+    end
+
+    book_dir
+  end
 end
 
 def stub_github_for(repo_name, some_sha)
@@ -28,7 +46,7 @@ end
 require_relative '../lib/bookbinder'
 require_relative 'fixtures/markdown_repo_fixture'
 
-GEM_ROOT = Dir.pwd
+#GEM_ROOT = Dir.pwd
 
 RSpec.configure do |config|
   config.before do

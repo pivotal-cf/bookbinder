@@ -75,9 +75,7 @@ class Pusher
   end
 
   def get_gcf_binary_path
-    spec = Gem::Specification.find_by_name('bookbinder')
-    gem_root = spec.gem_dir
     arch = `uname`.downcase.strip
-    File.join(gem_root, 'bin', arch, 'gcf')
+    File.join(GEM_ROOT, 'bin', arch, 'gcf')
   end
 end

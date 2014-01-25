@@ -2,28 +2,10 @@ require 'spec_helper'
 
 describe '$ bookbinder' do
   include_context 'tmp_dirs'
-  let(:config_body) do
-    {
-        'repos' => [
-            {'github_repo' => 'foo/dogs-repo', 'directory' => 'temporarily-dogs'},
-            {'github_repo' => 'baz/my-docs-repo', 'directory' => 'docs-for-now'},
-        ],
-        'template_variables' => {'a' => 'b'},
-        'public_host' => 'example.com'
-    }.to_yaml
-  end
 
-  around do |example|
-    temp_library = tmp_subdir 'fantastic-library'
-    temp_book = FileUtils.mkdir_p(File.join temp_library, 'fantastic-book').pop
-
-    `touch #{temp_book}/config.yml`
-    `mkdir #{temp_book}/master_middleman`
-    `echo '#{config_body}' > #{temp_book}/config.yml`
-    FileUtils.cp_r 'spec/fixtures/markdown_repos/my-docs-repo', temp_library
-    FileUtils.cp_r 'spec/fixtures/markdown_repos/dogs-repo', temp_library
-
-    FileUtils.cd(temp_book) { example.run }
+  around do |spec|
+    book_dir = arrange_fixture_book_and_constituents
+    FileUtils.cd(book_dir) { spec.run }
   end
 
   describe 'publish' do
@@ -31,8 +13,20 @@ describe '$ bookbinder' do
       it 'generates a sinatra app' do
         `#{GEM_ROOT}/bin/bookbinder publish local`
 
-        index_html = File.read File.join('final_app', 'public', 'docs-for-now', 'index.html')
+        index_html = File.read File.join('final_app', 'public', 'docs', 'index.html')
         index_html.should include 'This is a Markdown Page'
+      end
+
+      it 'respects subnav includes' do
+        `#{GEM_ROOT}/bin/bookbinder publish local`
+
+        dogs_index = File.read File.join('final_app', 'public', 'dogs', 'index.html')
+        dogs_index.should include 'Woof'
+        dogs_index.should_not include 'Honorificabilitudinitatibus'
+
+        papers_index = File.read File.join('final_app', 'public', 'docs', 'index.html')
+        papers_index.should_not include 'Woof'
+        papers_index.should include 'Honorificabilitudinitatibus'
       end
 
       it 'creates a PDF file'
@@ -42,7 +36,7 @@ describe '$ bookbinder' do
       xit 'generates a sinatra app' do
         `#{GEM_ROOT}/bin/bookbinder publish github`
 
-        index_html = File.read File.join('final_app', 'public', 'docs-for-now', 'index.html')
+        index_html = File.read File.join('final_app', 'public', 'papers', 'index.html')
         index_html.should include 'This is a Markdown Page'
       end
 

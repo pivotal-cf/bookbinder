@@ -11,6 +11,12 @@ module Navigation
 
   module HelperMethods
 
+    def yield_for_subnav
+      ignore_list = ['index', 'x404']
+      topic = page_classes.split(' ')[0].chomp
+      partial "subnavs/#{topic}" unless ignore_list.include? topic
+    end
+
     def breadcrumbs
       page_chain = add_ancestors_of(current_page, [])
       breadcrumbs = page_chain.map do |page|
@@ -24,7 +30,7 @@ module Navigation
       OpenStruct.new config[:template_variables]
     end
 
-    def quick_links()
+    def quick_links
       page_src = File.read(current_page.source_file)
       sections = page_src.scan /\n\#{2,3}[^#]+\#{2,3}\n/
 
@@ -69,4 +75,4 @@ module Navigation
   end
 end
 
-::Middleman::Extensions.register(:navigation, Navigation) 
+::Middleman::Extensions.register(:navigation, Navigation)

@@ -5,7 +5,7 @@ repos:
 - github_repo: fantastic/my-docs-repo
   directory: docs
 - github_repo: fantastic/my-other-docs-repo
-  directory: others
+  directory: docs
 
 aws:
   access_key: abcdef

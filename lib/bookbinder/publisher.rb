@@ -101,7 +101,6 @@ class Publisher
   end
 
   def copy_directory_from_gem(dir, output_dir)
-    gem_root = Gem::Specification.find_by_name('bookbinder').gem_dir
-    FileUtils.cp_r File.join(gem_root, "#{dir}/."), output_dir
+    FileUtils.cp_r File.join(GEM_ROOT, "#{dir}/."), output_dir
   end
 end

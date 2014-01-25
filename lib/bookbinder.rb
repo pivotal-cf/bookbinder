@@ -32,3 +32,5 @@ require_relative 'bookbinder/commands/push_to_prod'
 require_relative 'bookbinder/commands/run_publish_ci'
 require_relative 'bookbinder/commands/update_local_doc_repos'
 require_relative 'bookbinder/commands/tag'
+
+GEM_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
