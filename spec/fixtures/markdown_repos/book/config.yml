@@ -2,10 +2,15 @@
 repos:
 - github_repo: fantastic/dogs-repo
   directory: dogs
+  subnav_template: dogs
+
 - github_repo: fantastic/my-docs-repo
-  directory: docs
+  directory: foods/sweet
+  subnav_template: fruits
+
 - github_repo: fantastic/my-other-docs-repo
-  directory: docs
+  directory: foods/savory
+  subnav_template: vegetables
 
 aws:
   access_key: abcdef

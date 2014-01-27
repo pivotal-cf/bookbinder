@@ -11,11 +11,9 @@ module Navigation
   end
 
   module HelperMethods
-
     def yield_for_subnav
-      ignore_list = ['index', 'x404']
-      topic = page_classes.split(' ')[0].chomp
-      partial "subnavs/#{topic}" unless ignore_list.include? topic
+      topic = page_classes.split(' ')[0...-1].reverse.map { |key| config[:topics][key] }.compact.pop
+      partial "subnavs/#{topic}" if topic
     end
 
     def breadcrumbs

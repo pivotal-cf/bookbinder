@@ -1,5 +1,7 @@
 class DocRepo
 
+  attr_reader :subnav_template
+
   include ShellOut
   include BookbinderLogger
   include Repository
@@ -86,5 +88,6 @@ class DocRepo
     @directory = repo_hash['directory']
     @local_repo_dir = local_repo_dir
     @copied = copy_to(destination_dir) if destination_dir
+    @subnav_template = repo_hash.fetch('subnav_template', 'default')
   end
 end

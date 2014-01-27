@@ -13,8 +13,8 @@ describe Cli::Publish do
     it 'creates some static HTML' do
       Cli::Publish.new.run ['local']
 
-      index_html = File.read File.join('final_app', 'public', 'docs', 'index.html')
-      index_html.should include 'This is a Markdown Page'
+      index_html = File.read File.join('final_app', 'public', 'dogs', 'index.html')
+      index_html.should include 'Woof'
     end
   end
 
@@ -29,7 +29,7 @@ describe Cli::Publish do
     it 'creates some static HTML' do
       Cli::Publish.new.run ['github']
 
-      index_html = File.read File.join('final_app', 'public', 'docs', 'index.html')
+      index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
       index_html.should include 'This is a Markdown Page'
     end
   end

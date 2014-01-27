@@ -20,7 +20,7 @@ class Publisher
 
     repos = import_repos(middleman_source_directory, options)
     #The lede
-    generate_site(options, middleman_dir)
+    generate_site(options, middleman_dir, repos)
     FileUtils.cp_r build_directory, public_directory
 
     has_broken_links = has_broken_links? log_file, intermediate_directory, final_app_dir
@@ -36,8 +36,11 @@ class Publisher
 
   private
 
-  def generate_site(options, output_master_middleman_dir)
-    MiddlemanRunner.new.run(output_master_middleman_dir, options.fetch(:template_variables, {}), options[:verbose])
+  def generate_site(options, output_master_middleman_dir, repos)
+    MiddlemanRunner.new.run(output_master_middleman_dir,
+                            options.fetch(:template_variables, {}),
+                            options[:verbose], repos
+    )
   end
 
   def pdf_page_present?(options, repos)

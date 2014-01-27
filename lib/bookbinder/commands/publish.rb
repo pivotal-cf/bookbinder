@@ -36,7 +36,6 @@ class Cli
       arguments.merge!(local_repo_dir: File.absolute_path('..')) if location == 'local'
       arguments.merge!(template_variables: config.fetch('template_variables')) if config.has_key?('template_variables')
       arguments.merge!(host_for_sitemap: config.fetch('public_host'))
-      arguments.merge!(github_credentials) if config.has_key?('github')
 
       arguments
     end
