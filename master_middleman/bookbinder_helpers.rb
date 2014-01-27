@@ -1,4 +1,5 @@
 # mostly from https://github.com/multiscan/middleman-navigation but modified slightly
+I18n.enforce_available_locales = false
 
 module Navigation
   class << self
