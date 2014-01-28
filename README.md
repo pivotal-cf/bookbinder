@@ -40,8 +40,14 @@ A book project needs a few things to allow bookbinder to run. Here's the minimal
 ├── config.yml
 └── master_middleman
     ├── config.rb
-    └── source
-        └── index.html.md
+    ├── source
+    |   ├── index.html.md
+    |   ├── layouts
+    |   |   └── layout.erb
+    |   └── subnavs
+    |       └── _default.erb
+    └── <Top level folder of "pretty" directory path>
+        └── (optional) index(.html)(.md)(.erb)
 ```
 
 `Gemfile` needs to point to this bookbinder gem, and probably no other gems. `Gemfile.lock` can be created by bundler automatically (see below).
