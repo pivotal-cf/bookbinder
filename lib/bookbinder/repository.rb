@@ -15,6 +15,10 @@ module Repository
 
   private
 
+  def archive_link
+    @archive_link ||= @github.archive_link full_name, ref: sha
+  end
+
   def validate_authorization(client)
     # octocat raises an exception with invalid credentials,
     # but will return truthy for a NIL access_token!
