@@ -3,14 +3,17 @@ repos:
 - github_repo: fantastic/dogs-repo
   directory: dogs
   subnav_template: dogs
+  sha: 'dog-sha'
 
 - github_repo: fantastic/my-docs-repo
   directory: foods/sweet
   subnav_template: fruits
+  sha: 'my-docs-sha'
 
 - github_repo: fantastic/my-other-docs-repo
   directory: foods/savory
   subnav_template: vegetables
+  sha: 'my-other-sha'
 
 aws:
   access_key: abcdef

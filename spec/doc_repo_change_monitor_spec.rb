@@ -15,11 +15,10 @@ describe DocRepoChangeMonitor do
                 }
 
     before do
-      Octokit::Client.any_instance.stub(:octocat).and_return 'ascii kitten proves auth validity'
-      Octokit::Client.any_instance.stub(:commits)
-      .with('my-docs-org/my-docs-repo').and_return [OpenStruct.new(sha: 'shaA')]
-      Octokit::Client.any_instance.stub(:commits)
-      .with('some-other-org/some-other-repo').and_return [OpenStruct.new(sha: 'shaB')]
+      GitClient.any_instance.stub(:commits).with('my-docs-org/my-docs-repo')
+        .and_return [OpenStruct.new(sha: 'shaA')]
+      GitClient.any_instance.stub(:commits).with('some-other-org/some-other-repo')
+        .and_return [OpenStruct.new(sha: 'shaB')]
     end
 
     context 'when no cached sha file is available' do

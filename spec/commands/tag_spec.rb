@@ -13,9 +13,7 @@ describe Cli::Tag do
   let(:desired_tag) { 12.times.map { (65 + rand(26)).chr }.join  }
 
   before do
-    Octokit::Client.any_instance.stub(:octocat).and_return 'truthy kitten string'
-    Octokit::Client.any_instance.stub(:commits).and_return [OpenStruct.new(sha: 'some-sha')]
-    Octokit::Client.any_instance.stub(:create_ref).and_return 'something truthy'
+    GitClient.any_instance.stub :create_tag!
     @book = Book.new(full_name: book_name)
     Book.stub(:new).with { |args| args[:full_name].should eq book_name }.and_return(@book)
     DocRepo.any_instance.stub(:tag_with)

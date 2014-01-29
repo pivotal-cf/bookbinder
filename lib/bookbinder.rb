@@ -9,6 +9,7 @@ require 'middleman-core/profiling'
 
 require_relative 'bookbinder/shell_out'
 require_relative 'bookbinder/bookbinder_logger'
+require_relative 'bookbinder/git_client'
 require_relative 'bookbinder/repository'
 require_relative 'bookbinder/doc_repo'
 require_relative 'bookbinder/book'

@@ -44,7 +44,7 @@ class DocRepoChangeMonitor
   end
 
   def fetch_head_SHAs_by_repo
-    head_shas_as_array = @repos.map { |repo| [repo.full_name, repo.sha] }
+    head_shas_as_array = @repos.map { |repo| [repo.full_name, repo.head_sha] }
     Hash[*head_shas_as_array.flatten]
   end
 

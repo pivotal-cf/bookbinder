@@ -12,8 +12,7 @@ class Book
       DocRepo.from_remote repo_hash: repo_hash
     end
 
-    @github = Octokit::Client.new(access_token: ENV['GITHUB_API_TOKEN'])
-    validate_authorization @github
+    @github = GitClient.new(access_token: ENV['GITHUB_API_TOKEN'])
   end
 
   def tag_constituents_with(tag)

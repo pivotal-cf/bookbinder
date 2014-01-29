@@ -17,7 +17,6 @@ describe Publisher do
       let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir }
 
       it 'it creates a directory per repo with the generated html from middleman' do
-        Octokit::Client.any_instance.stub(:octocat).and_return 'ascii kitty proves auth validity'
         some_repo       = 'my-docs-org/my-docs-repo'
         some_other_repo = 'my-other-docs-org/my-other-docs-repo'
         some_sha        = 'some-sha'

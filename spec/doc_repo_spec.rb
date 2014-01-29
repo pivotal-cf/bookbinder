@@ -6,40 +6,8 @@ describe DocRepo do
   include_context 'tmp_dirs'
 
   describe '.from_remote' do
-    context 'when the provided github token is invalid' do
-      let(:octo) { double }
-
-      before do
-        Octokit::Client.any_instance.stub(:octocat).and_raise Octokit::Unauthorized
-      end
-
-      it 'raises an exception with a helpful error' do
-        expected_message = /Github Unauthorized error: set GITHUB_API_TOKEN correctly/
-        expect do
-          DocRepo.from_remote repo_hash: {'github_repo' => 'some_org/some_repo'}
-        end.to raise_exception(expected_message)
-      end
-    end
-
-    context 'when no GITHUB_API_TOKEN is set' do
-      before do
-        ENV.stub(:[])
-        ENV.stub(:[]).with('GITHUB_API_TOKEN').and_return nil
-      end
-
-      it 'raises an exception with a helpful error' do
-        expected_message = /Github Unauthorized error: set GITHUB_API_TOKEN correctly/
-        expect do
-          DocRepo.from_remote repo_hash: {'github_repo' => 'some_org/some_repo'}
-        end.to raise_exception(expected_message)
-      end
-    end
-
     context 'and github returns a 200 status code' do
       before do
-        Octokit::Client.any_instance.stub(:commits).and_return [latest_commit]
-        Octokit::Client.any_instance.stub(:octocat).and_return 'ascii kitten proves auth validity'
-
         stub_request(:get, download_url).
             to_return(
             :status => 200,
@@ -48,35 +16,41 @@ describe DocRepo do
         )
       end
 
-      let(:latest_commit) { OpenStruct.new(sha: sha) }
-      let(:sha) { 'fantastic-sha' }
       let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'dogs-repo', sha }
       let(:destination_dir) { tmp_subdir('output') }
       let(:repo_name) { 'great_org/dogs-repo' }
-      let(:download_url) { "https://github.com/great_org/dogs-repo/archive/#{latest_commit.sha}.tar.gz" }
+      let(:download_url) { "https://github.com/great_org/dogs-repo/archive/#{sha}.tar.gz" }
 
-      it 'copies the repo from github' do
-        Octokit::Client.any_instance.stub(:archive_link).and_return download_url
-        DocRepo.from_remote(repo_hash: {'github_repo' => repo_name},
-                            destination_dir: destination_dir)
-        expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
-      end
 
-      it 'uses the latest SHA to make requests for the archive link' do
-        Octokit::Client.any_instance.should_receive(:archive_link)
-          .with(repo_name, ref: latest_commit.sha).and_return download_url
+      context 'when no SHA is provided' do
+        let(:sha) { 'master' }
+        let(:repo_hash) { {'github_repo' => repo_name} }
 
-        DocRepo.from_remote(repo_hash: {'github_repo' => repo_name}, destination_dir: destination_dir)
+        it 'uses "master" to make requests for the archive link' do
+          GitClient.any_instance.should_receive(:archive_link).with(repo_name, ref: sha).and_return(download_url)
+          DocRepo.from_remote(repo_hash: repo_hash, destination_dir: destination_dir)
+        end
+
+        it 'copies the repo from github' do
+          GitClient.any_instance.stub(:archive_link).and_return download_url
+          DocRepo.from_remote(repo_hash: repo_hash, destination_dir: destination_dir)
+          expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
+        end
       end
 
       context 'when a SHA is provided' do
-        let(:provided_sha) { 'this-is-the-commit-i-want' }
+        let(:sha) { 'this-is-the-commit-i-want' }
+        let(:repo_hash) { {'github_repo' => repo_name, 'sha' => sha} }
 
         it 'uses the provided SHA to make requests for the archive link' do
-          Octokit::Client.any_instance.should_receive(:archive_link)
-            .with(repo_name, ref: provided_sha).and_return download_url
-          DocRepo.from_remote(repo_hash: {'github_repo' => repo_name, 'sha' => provided_sha},
-                              destination_dir: destination_dir)
+          GitClient.any_instance.should_receive(:archive_link).with(repo_name, ref: sha).and_return download_url
+          DocRepo.from_remote(repo_hash: repo_hash, destination_dir: destination_dir)
+        end
+
+        it 'copies the repo from github' do
+          GitClient.any_instance.stub(:archive_link).and_return download_url
+          DocRepo.from_remote(repo_hash: repo_hash, destination_dir: destination_dir)
+          expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
         end
       end
 
@@ -113,9 +87,9 @@ describe DocRepo do
       let(:tarball_url) { 'https://github.com/my-docs-org/my-docs-repo/archive/some-sha.tar.gz' }
 
       before do
-        Octokit::Client.any_instance.stub(:commits).and_return [OpenStruct.new(sha: 'some-sha')]
-        Octokit::Client.any_instance.stub(:octocat).and_return 'ascii kitten proves auth validity'
-        Octokit::Client.any_instance.stub(:archive_link).and_return tarball_url
+        GitClient.any_instance.stub(:commits).and_return [OpenStruct.new(sha: 'some-sha')]
+        GitClient.any_instance.stub(:validate_authorization)
+        GitClient.any_instance.stub(:archive_link).and_return tarball_url
       end
 
       it 'downloads and unzips the repo' do
@@ -170,8 +144,8 @@ describe DocRepo do
     let(:my_tag) { '#hashtag' }
 
     before do
-      Octokit::Client.any_instance.stub(:octocat).and_return 'Kitty means authenticated.'
-      Octokit::Client.any_instance.stub(:tags).and_return(tags)
+      GitClient.any_instance.stub(:validate_authorization)
+      GitClient.any_instance.stub(:tags).and_return(tags)
     end
 
     context 'when a tag has been applied' do
@@ -209,14 +183,15 @@ describe DocRepo do
     let(:my_tag) { '#hashtag' }
 
     before do
-      Octokit::Client.any_instance.stub(:octocat).and_return 'Kitty means authenticated.'
-      Octokit::Client.any_instance.stub(:commits).with(repo.full_name)
-      .and_return([OpenStruct.new(sha: repo_sha)])
+      GitClient.any_instance.stub(:validate_authorization)
+      GitClient.any_instance.stub(:commits).with(repo.full_name)
+        .and_return([OpenStruct.new(sha: repo_sha)])
     end
 
     it 'should apply a tag' do
-      Octokit::Client.any_instance.should_receive(:create_ref)
-      .with(repo.full_name, 'tags/'+my_tag, repo.sha)
+      GitClient.any_instance.should_receive(:create_tag!)
+      .with(repo.full_name, my_tag, repo.sha)
+
       repo.tag_with(my_tag)
     end
   end
@@ -225,8 +200,6 @@ describe DocRepo do
     let(:repo_name) { 'org/my-docs-repo' }
     let(:some_sha) { 'some-sha' }
     let(:repo_hash) { {'github_repo' => repo_name, 'sha' => some_sha} }
-    # Testing private interfaces? Typically,
-    # I'd rather come in through the front door...
     let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil) }
     let(:destination_dir) { tmp_subdir('destination') }
     let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }

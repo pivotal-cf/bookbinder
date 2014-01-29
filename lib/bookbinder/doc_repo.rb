@@ -40,10 +40,6 @@ class DocRepo
 
   private
 
-  def tags
-    @github.tags @full_name
-  end
-
   def copy_from_local(destination_dir)
     path_to_local_repo = File.join(@local_repo_dir, short_name)
     if File.exist?(path_to_local_repo)
@@ -77,10 +73,7 @@ class DocRepo
   end
 
   def initialize(repo_hash, github_token, local_repo_dir, destination_dir)
-    unless local_repo_dir
-      @github = Octokit::Client.new(access_token: github_token)
-      validate_authorization @github
-    end
+    @github = GitClient.new(access_token: github_token) unless local_repo_dir
 
     @sha = repo_hash['sha']
     @full_name = repo_hash.fetch('github_repo')

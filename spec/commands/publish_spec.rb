@@ -20,7 +20,6 @@ describe Cli::Publish do
 
   context 'github' do
     before do
-      Octokit::Client.any_instance.stub(:octocat).and_return 'ascii kitten proves auth validity'
       stub_github_for 'fantastic/dogs-repo', 'dog-sha'
       stub_github_for 'fantastic/my-docs-repo', 'my-docs-sha'
       stub_github_for 'fantastic/my-other-docs-repo', 'my-other-sha'

@@ -11,10 +11,7 @@ describe Book do
   before do
     @constituent = double
     DocRepo.stub(:from_remote).and_return(@constituent)
-    Octokit::Client.any_instance.stub(:octocat).and_return 'truthy kitten string'
     @book = Book.new(full_name: book_name, constituent_params: repos)
-    Octokit::Client.any_instance.stub(:commits).and_return [OpenStruct.new(sha: 'some-sha')]
-    Octokit::Client.any_instance.stub(:create_ref).and_return 'something truthy'
     Book.stub(:new).with(full_name: book_name, constituent_params: repos).and_return(@book)
   end
 
