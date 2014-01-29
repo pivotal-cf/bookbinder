@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'octokit', ['1.25.0']
   s.add_runtime_dependency 'ansi', ['~> 1.4']
   s.add_runtime_dependency 'unf', ['~> 0.1']
-  s.add_runtime_dependency 'middleman', ['~> 3.1']
+  s.add_runtime_dependency 'middleman', ['3.2.1']
   s.add_runtime_dependency 'redcarpet', ['~> 3.0']
   s.add_runtime_dependency 'sinatra', ['~> 1.4']
   s.add_runtime_dependency 'wkhtmltopdf-binary', ['~> 0.9.9']
