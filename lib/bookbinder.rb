@@ -1,9 +1,15 @@
+puts "Loading Fog..."
 require 'fog'
+puts "Loading tmpdir..."
 require 'tmpdir'
+puts "Loading ansi..."
 require 'ansi'
+puts "Loading Faraday..."
 require 'faraday'
 require 'faraday_middleware'
+puts "Loading Octokit..."
 require 'octokit'
+puts "Loading Middleman..."
 require 'middleman-core/cli'
 require 'middleman-core/profiling'
 
@@ -33,4 +39,5 @@ require_relative 'bookbinder/commands/run_publish_ci'
 require_relative 'bookbinder/commands/update_local_doc_repos'
 require_relative 'bookbinder/commands/tag'
 
+# Finds the project root for both spec & production
 GEM_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))

@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-#require 'bookbinder'
-require_relative '../lib/bookbinder'
+require 'bookbinder'
 
 return_code = Cli.new.run ARGV
 exit return_code.to_i
