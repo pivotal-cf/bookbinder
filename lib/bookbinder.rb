@@ -1,15 +1,9 @@
-puts "Loading Fog..."
 require 'fog'
-puts "Loading tmpdir..."
 require 'tmpdir'
-puts "Loading ansi..."
 require 'ansi'
-puts "Loading Faraday..."
 require 'faraday'
 require 'faraday_middleware'
-puts "Loading Octokit..."
 require 'octokit'
-puts "Loading Middleman..."
 require 'middleman-core/cli'
 require 'middleman-core/profiling'
 
