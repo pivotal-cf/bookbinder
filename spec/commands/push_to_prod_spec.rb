@@ -5,7 +5,6 @@ describe Cli::PushToProd do
 
   around do |spec|
     @build_number = '17'
-    @namespace = 'pdubs'
 
     temp_library = tmp_subdir 'markdown_repos'
     book_dir = File.join temp_library, 'book'
@@ -14,10 +13,6 @@ describe Cli::PushToProd do
   end
 
   it 'should call GreenBuildRepository#download with correct parameters' do
-    fake_book = double
-    fake_book.stub(:short_name).and_return @namespace
-    Book.stub(:from_current_repo).and_return(fake_book)
-
     GreenBuildRepository.any_instance.should_receive(:download) do |args|
       args.should have_key(:download_dir)
       args.should have_key(:bucket)
@@ -26,8 +21,9 @@ describe Cli::PushToProd do
 
       args.fetch(:bucket).should == 'bucket-name-in-fixture-config'
       args.fetch(:build_number).should == @build_number
-      args.fetch(:namespace).should == @namespace
+      args.fetch(:namespace).should == 'fixture-book-title'
     end
+
     Cli::PushToProd.new.run [@build_number]
   end
 

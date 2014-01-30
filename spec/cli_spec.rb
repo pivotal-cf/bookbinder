@@ -147,10 +147,15 @@ describe Cli do
     let(:fake_publish) { double }
     let(:fake_push_local_to_staging) { double }
     let(:fake_build_and_push_tarball) { double }
+    let(:config_params) { {'github_repo' => 'foo/bar'} }
 
     before do
       ENV.stub(:[])
       ENV.stub(:[]).with('BUILD_NUMBER').and_return('42424242')
+
+      File.stub(:read)
+      YAML.stub(:load).and_return(config_params)
+
       Cli::Publish.stub(:new) { fake_publish }
       Cli::PushLocalToStaging.stub(:new) { fake_push_local_to_staging }
       Cli::BuildAndPushTarball.stub(:new) { fake_build_and_push_tarball }

@@ -1,14 +1,14 @@
 class Cli
   class PushLocalToStaging < BookbinderCommand
     def run(_)
-      Pusher.new.push config['cloud_foundry']['api_endpoint'],
-                      config['cloud_foundry']['staging_host'],
-                      config['cloud_foundry']['organization'],
-                      config['cloud_foundry']['staging_space'],
-                      config['cloud_foundry']['app_name'],
+      Pusher.new.push config.fetch('cloud_foundry').fetch('api_endpoint'),
+                      config.fetch('cloud_foundry').fetch('staging_host'),
+                      config.fetch('cloud_foundry').fetch('organization'),
+                      config.fetch('cloud_foundry').fetch('staging_space'),
+                      config.fetch('cloud_foundry').fetch('app_name'),
                       './final_app',
-                      config['cloud_foundry']['username'],
-                      config['cloud_foundry']['password']
+                      config.fetch('cloud_foundry').fetch('username'),
+                      config.fetch('cloud_foundry').fetch('password')
       0
     end
   end

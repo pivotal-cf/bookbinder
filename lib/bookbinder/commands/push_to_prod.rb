@@ -8,7 +8,7 @@ class Cli
       repository.download download_dir: app_dir,
                           bucket: config.fetch('aws').fetch('green_builds_bucket'),
                           build_number: arguments[0],
-                          namespace: Book.from_current_repo.short_name
+                          namespace: Book.new(full_name: config.fetch('github_repo')).short_name
 
       log 'Warning: You are pushing to CF Docs production. Be careful.'.yellow
 

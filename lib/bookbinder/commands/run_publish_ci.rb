@@ -1,12 +1,17 @@
 class Cli
   class RunPublishCI < BookbinderCommand
     def run(_)
-      raise 'You must set $BUILD_NUMBER to push an identifiable build.' unless ENV['BUILD_NUMBER']
+      check_params
       (
       (0 == Publish.new.run(['github'])) &&
           (0 == PushLocalToStaging.new.run([])) &&
           (0 == BuildAndPushTarball.new.run([]))
       ) ? 0 : 1
+    end
+
+    def check_params
+      raise BuildAndPushTarball::MissingBuildNumber unless ENV['BUILD_NUMBER']
+      config.fetch('github_repo')
     end
   end
 end

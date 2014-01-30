@@ -1,4 +1,6 @@
 ---
+github_repo: fantastic/fixture-book-title
+
 repos:
 - github_repo: fantastic/dogs-repo
   directory: dogs
