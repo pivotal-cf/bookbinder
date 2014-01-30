@@ -149,6 +149,8 @@ describe Cli do
     let(:fake_build_and_push_tarball) { double }
 
     before do
+      ENV.stub(:[])
+      ENV.stub(:[]).with('BUILD_NUMBER').and_return('42424242')
       Cli::Publish.stub(:new) { fake_publish }
       Cli::PushLocalToStaging.stub(:new) { fake_push_local_to_staging }
       Cli::BuildAndPushTarball.stub(:new) { fake_build_and_push_tarball }
