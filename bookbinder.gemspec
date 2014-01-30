@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'bookbinder'
-  s.version     = '0.0.10'
+  s.version     = '0.0.11'
   s.summary     = 'Markdown to Sinatra application documentation generator'
   s.description = 'A command line utility to be run in Book repositories to stitch together their constituent Markdown repos into a static-HTML-serving application'
   s.authors     = ['Mike Grafton', 'Lucas Marks', 'Gavin Morgan', 'Nikhil Gajwani']
