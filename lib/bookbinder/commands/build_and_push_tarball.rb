@@ -5,7 +5,9 @@ class Cli
                                             secret: config.fetch('aws')['secret_key']
 
       raise 'You must set $BUILD_NUMBER to push an identifiable build.' unless ENV['BUILD_NUMBER']
-      repository.create build_number: ENV['BUILD_NUMBER'], bucket: config.fetch('aws')['green_builds_bucket']
+      repository.create build_number: ENV['BUILD_NUMBER'],
+                        bucket: config.fetch('aws')['green_builds_bucket'],
+                        namespace: Book.from_current_repo.short_name
       0
     end
   end

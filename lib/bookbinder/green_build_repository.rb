@@ -10,7 +10,7 @@ class GreenBuildRepository
     @aws_secret_key = secret
   end
 
-  def create(build_number: nil, app_dir: 'final_app', bucket: '', namespace: '')
+  def create(build_number: nil, app_dir: 'final_app', bucket: '', namespace: nil)
     raise 'You must provide a build_number to push an identifiable build.' unless build_number
     raise 'You must provide a namespace to push an identifiable build.' unless namespace
 
