@@ -190,7 +190,7 @@ describe DocRepo do
 
     it 'should apply a tag' do
       GitClient.any_instance.should_receive(:create_tag!)
-      .with(repo.full_name, my_tag, repo.sha)
+        .with(repo.full_name, my_tag, repo.target_ref)
 
       repo.tag_with(my_tag)
     end

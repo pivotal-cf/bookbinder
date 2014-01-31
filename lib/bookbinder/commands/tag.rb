@@ -8,7 +8,7 @@ class Cli
       book.tag_constituents_with tag
 
       log 'Success!'.green
-      log " #{book.full_name.yellow} at #{book.sha[0..7]} and its document repositories were tagged with #{tag.blue}"
+      log " #{book.full_name.yellow} at #{book.target_ref[0..7]} and its document repositories were tagged with #{tag.blue}"
 
       0
     end

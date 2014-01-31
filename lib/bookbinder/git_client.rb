@@ -9,8 +9,8 @@ class GitClient < Octokit::Client
     ENV['GITHUB_API_TOKEN'] ? raise(INVALID_TOKEN_MESSAGE) : raise(ABSENT_TOKEN_MESSAGE)
   end
 
-  def create_tag!(full_name, tagname, sha)
-    self.create_ref(full_name, "tags/#{tagname}", sha)
+  def create_tag!(full_name, tagname, ref)
+    self.create_ref(full_name, "tags/#{tagname}", ref)
   end
 
   def archive_link(*args)

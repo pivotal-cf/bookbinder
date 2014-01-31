@@ -2,11 +2,11 @@ module Repository
   attr_reader :full_name
 
   def tag_with(tagname)
-    @github.create_tag! full_name, tagname, sha
+    @github.create_tag! full_name, tagname, target_ref
   end
 
-  def sha
-    @sha || 'master'
+  def target_ref
+    @ref || 'master'
   end
 
   def short_name
@@ -20,7 +20,7 @@ module Repository
   private
 
   def archive_link
-    @archive_link ||= @github.archive_link full_name, ref: sha
+    @archive_link ||= @github.archive_link full_name, ref: target_ref
   end
 
   def tags

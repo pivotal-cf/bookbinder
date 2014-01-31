@@ -15,7 +15,7 @@ describe Cli::Tag do
     GitClient.any_instance.stub :create_tag!
     @book = double
     @book.stub(:full_name).and_return 'anything'
-    @book.stub(:sha).and_return 'anything'
+    @book.stub(:target_ref).and_return 'anything'
 
     Book.stub(:new).with { |args| args[:full_name].should eq 'fantastic/fixture-book-title' }
       .and_return(@book)

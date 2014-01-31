@@ -75,7 +75,7 @@ class DocRepo
   def initialize(repo_hash, github_token, local_repo_dir, destination_dir)
     @github = GitClient.new(access_token: github_token) unless local_repo_dir
 
-    @sha = repo_hash['sha']
+    @ref = repo_hash['sha']
     @full_name = repo_hash.fetch('github_repo')
     @directory = repo_hash['directory']
     @local_repo_dir = local_repo_dir
