@@ -27,7 +27,7 @@ class Publisher
 
     #Subledes
     generate_site_map(options.fetch(:host_for_sitemap), log_file, final_app_dir)
-    generate_pdf(final_app_dir, options.fetch(:pdf)) if pdf_requested && pdf_page_present?(options, repos)
+    generate_pdf(final_app_dir, options.fetch(:pdf)) if pdf_requested && repo_with_pdf_page_present?(options, repos)
 
     log "Bookbinder bound your book into #{final_app_dir.green}"
 
@@ -43,9 +43,10 @@ class Publisher
     )
   end
 
-  def pdf_page_present?(options, repos)
+  def repo_with_pdf_page_present?(options, repos)
     pdf_page = options.fetch(:pdf).fetch(:page)
-    repos.find { |repo| pdf_page.start_with?(repo.directory) }.copied?
+    pdf_repo = repos.find { |repo| pdf_page.start_with?(repo.directory) }
+    pdf_repo.copied?
   end
 
   def import_repos(middleman_source_directory, options)

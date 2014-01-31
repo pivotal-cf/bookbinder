@@ -265,8 +265,9 @@ DOGS
           let(:pdf_config) do
             {page: 'pretty_dir/unknown_file.html', filename: 'irrelevant.pdf', header: 'pretty_dir/unknown_header.html'}
           end
+
           it 'fails' do
-            expect { publish }.to raise_error
+            expect { publish }.to raise_error PdfGenerator::MissingSource
           end
         end
 

@@ -11,44 +11,38 @@ class DocRepo
   end
 
   def self.from_remote(repo_hash: {}, github_token: ENV['GITHUB_API_TOKEN'], destination_dir: nil)
-    self.new(repo_hash, github_token, nil, destination_dir)
+    repo = self.new(repo_hash, github_token, nil, destination_dir)
+    repo.copy_from_remote(destination_dir) if destination_dir
+    repo
   end
 
   def self.from_local(repo_hash: {}, local_dir: '', destination_dir: nil)
-    self.new(repo_hash, nil, local_dir, destination_dir)
+    repo = self.new(repo_hash, nil, local_dir, destination_dir)
+    repo.copy_from_local(destination_dir) if destination_dir
+    repo
   end
 
   def copied?
-    @copied
+    @copied || false
   end
 
   def directory
     @directory || short_name
   end
 
-  def copy_to(destination_dir)
-    if @local_repo_dir.nil?
-      copy_from_remote(destination_dir)
-    else
-      copy_from_local(destination_dir)
-    end
-  end
-
   def has_tag?(tagname)
     tags.any? { |tag| tag.name == tagname }
   end
-
-  private
 
   def copy_from_local(destination_dir)
     path_to_local_repo = File.join(@local_repo_dir, short_name)
     if File.exist?(path_to_local_repo)
       log '  copying '.yellow + path_to_local_repo
       FileUtils.cp_r path_to_local_repo, File.join(destination_dir, directory)
-      true
+      @copied = true
     else
       log '  skipping (not found) '.magenta + path_to_local_repo
-      false
+      @copied = false
     end
   end
 
@@ -69,7 +63,7 @@ class DocRepo
     from = File.join output_dir, (directory_listing_after - directory_listing_before).first
     FileUtils.mv from, File.join(destination_dir, directory)
 
-    true
+    @copied = true
   end
 
   def initialize(repo_hash, github_token, local_repo_dir, destination_dir)
@@ -79,7 +73,6 @@ class DocRepo
     @full_name = repo_hash.fetch('github_repo')
     @directory = repo_hash['directory']
     @local_repo_dir = local_repo_dir
-    @copied = copy_to(destination_dir) if destination_dir
     @subnav_template = repo_hash.fetch('subnav_template', 'default')
   end
 end

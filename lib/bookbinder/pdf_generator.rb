@@ -2,6 +2,12 @@ class PdfGenerator
   include ShellOut
   include BookbinderLogger
 
+  class MissingSource < StandardError
+    def initialize(required_file)
+      super "Could not find file #{required_file}"
+    end
+  end
+
   def generate(source_page, target_pdf_file, pdf_header)
 
     check_file_exists source_page
@@ -34,7 +40,7 @@ CMD
   def check_file_exists(required_file)
     unless File.exist? required_file
       log "\nPDF Generation failed (could not find file)!".red
-      raise "Could not find file #{required_file}"
+      raise MissingSource, required_file
     end
   end
 end
