@@ -15,7 +15,7 @@ class GitClient < Octokit::Client
 
   def archive_link(*args)
     super
-  rescue Octokit::Unauthorized
+  rescue Octokit::Unauthorized, Octokit::NotFound
     ENV['GITHUB_API_TOKEN'] ? raise(INVALID_TOKEN_MESSAGE) : raise(ABSENT_TOKEN_MESSAGE)
   end
 end
