@@ -62,7 +62,7 @@ class Publisher
     if options.has_key?(:local_repo_dir)
       DocRepo.from_local shared_arguments.merge(local_dir: options.fetch(:local_repo_dir))
     else
-      DocRepo.from_remote shared_arguments
+      DocRepo.from_remote shared_arguments.merge(target_tag: options[:target_tag])
     end
   end
 

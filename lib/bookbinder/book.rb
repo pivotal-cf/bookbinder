@@ -1,8 +1,9 @@
 class Book
   include Repository
 
-  def initialize(full_name: nil, constituent_params: [])
+  def initialize(full_name: nil, constituent_params: [], ref: nil)
     @full_name = full_name
+    @ref = ref
 
     @constituents = constituent_params.map do |repo_hash|
       DocRepo.from_remote repo_hash: repo_hash

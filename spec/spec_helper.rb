@@ -28,11 +28,11 @@ shared_context 'tmp_dirs' do
   end
 end
 
-def stub_github_for(repo_name, some_sha)
-  zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_sha}.tar.gz"
-  GitClient.any_instance.stub(:archive_link).with(repo_name, ref: some_sha).and_return(zipped_repo_url)
+def stub_github_for(repo_name, some_ref)
+  zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
+  GitClient.any_instance.stub(:archive_link).with(repo_name, ref: some_ref).and_return(zipped_repo_url)
 
-  zipped_repo = MarkdownRepoFixture.tarball repo_name.split('/').last, some_sha
+  zipped_repo = MarkdownRepoFixture.tarball repo_name.split('/').last, some_ref
   stub_request(:get, zipped_repo_url).to_return(
       :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
   )

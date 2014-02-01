@@ -21,7 +21,6 @@ describe DocRepo do
       let(:repo_name) { 'great_org/dogs-repo' }
       let(:download_url) { "https://github.com/great_org/dogs-repo/archive/#{sha}.tar.gz" }
 
-
       context 'when no SHA is provided' do
         let(:sha) { 'master' }
         let(:repo_hash) { {'github_repo' => repo_name} }
@@ -35,6 +34,15 @@ describe DocRepo do
           GitClient.any_instance.stub(:archive_link).and_return download_url
           DocRepo.from_remote(repo_hash: repo_hash, destination_dir: destination_dir)
           expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
+        end
+
+        context 'and a target_tag is provided' do
+          let(:target_tag) { 'oh-dot-three-dot-oh' }
+
+          it 'uses the tag to make requests for the archive link' do
+            GitClient.any_instance.should_receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
+            DocRepo.from_remote(repo_hash: repo_hash, destination_dir: destination_dir, target_tag: target_tag)
+          end
         end
       end
 
@@ -52,8 +60,15 @@ describe DocRepo do
           DocRepo.from_remote(repo_hash: repo_hash, destination_dir: destination_dir)
           expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
         end
-      end
 
+        context 'and a target_tag is provided' do
+          let(:target_tag) { 'oh-dot-three-dot-oh' }
+          it 'uses the tag to make requests for the archive link' do
+            GitClient.any_instance.should_receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
+            DocRepo.from_remote(repo_hash: repo_hash, destination_dir: destination_dir, target_tag: target_tag)
+          end
+        end
+      end
     end
   end
 
@@ -80,7 +95,7 @@ describe DocRepo do
     let(:destination_dir) { tmp_subdir 'middleman_source_dir' }
     let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
     let(:repo_hash) { {'github_repo' => 'my-docs-org/my-docs-repo', 'sha' => 'some-sha'} }
-    let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil) }
+    let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil, nil) }
 
     context 'when told to look for repos on github' do
       let(:local_repo_dir) { nil }
@@ -137,7 +152,7 @@ describe DocRepo do
   describe '#has_tag?' do
     let(:repo_hash) { {'github_repo' => 'my-docs-org/my-docs-repo',
                        'sha' => 'some-sha', 'directory' => 'pretty_url_path'} }
-    let(:repo) { DocRepo.new(repo_hash, nil, nil, nil) }
+    let(:repo) { DocRepo.new(repo_hash, nil, nil, nil, nil) }
     let(:my_tag) { '#hashtag' }
 
     before do
@@ -197,7 +212,7 @@ describe DocRepo do
     let(:repo_name) { 'org/my-docs-repo' }
     let(:some_sha) { 'some-sha' }
     let(:repo_hash) { {'github_repo' => repo_name, 'sha' => some_sha} }
-    let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil) }
+    let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil, nil) }
     let(:destination_dir) { tmp_subdir('destination') }
     let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
 
