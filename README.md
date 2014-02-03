@@ -207,7 +207,7 @@ This build executes this shell command:
 
 ## <a name="deploying"></a>Deploying
 
-Bookbinder has the ability to deploy the finished product to either staging or production. The deployment scripts use the gem's pre-packaged CloudFoundry Go CLI binary (separate versions for darwin-amd64 and linux-amd64 are included); any pre-installed version of gcf on your system will **not** be used.
+Bookbinder has the ability to deploy the finished product to either staging or production. The deployment scripts use the gem's pre-packaged CloudFoundry Go CLI binary (separate versions for darwin-amd64 and linux-amd64 are included); any pre-installed version of the CLI on your system will **not** be used.
 
 ### Setting up CF Apps
 
