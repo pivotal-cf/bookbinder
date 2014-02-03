@@ -95,7 +95,7 @@ describe DocRepo do
     let(:destination_dir) { tmp_subdir 'middleman_source_dir' }
     let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
     let(:repo_hash) { {'github_repo' => 'my-docs-org/my-docs-repo', 'sha' => 'some-sha'} }
-    let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil, nil) }
+    let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil) }
 
     context 'when told to look for repos on github' do
       let(:local_repo_dir) { nil }
@@ -152,7 +152,7 @@ describe DocRepo do
   describe '#has_tag?' do
     let(:repo_hash) { {'github_repo' => 'my-docs-org/my-docs-repo',
                        'sha' => 'some-sha', 'directory' => 'pretty_url_path'} }
-    let(:repo) { DocRepo.new(repo_hash, nil, nil, nil, nil) }
+    let(:repo) { DocRepo.new(repo_hash, nil, nil, nil) }
     let(:my_tag) { '#hashtag' }
 
     before do
@@ -212,7 +212,7 @@ describe DocRepo do
     let(:repo_name) { 'org/my-docs-repo' }
     let(:some_sha) { 'some-sha' }
     let(:repo_hash) { {'github_repo' => repo_name, 'sha' => some_sha} }
-    let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil, nil) }
+    let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil) }
     let(:destination_dir) { tmp_subdir('destination') }
     let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
 

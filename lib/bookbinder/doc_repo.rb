@@ -10,13 +10,13 @@ class DocRepo
   end
 
   def self.from_remote(repo_hash: {}, github_token: ENV['GITHUB_API_TOKEN'], destination_dir: nil, target_tag: nil)
-    repo = self.new(repo_hash, github_token, nil, destination_dir, target_tag)
+    repo = self.new(repo_hash, github_token, nil, target_tag)
     repo.copy_from_remote(destination_dir) if destination_dir
     repo
   end
 
   def self.from_local(repo_hash: {}, local_dir: '', destination_dir: nil)
-    repo = self.new(repo_hash, nil, local_dir, destination_dir, nil)
+    repo = self.new(repo_hash, nil, local_dir, nil)
     repo.copy_from_local(destination_dir) if destination_dir
     repo
   end
@@ -41,7 +41,7 @@ class DocRepo
     end
   end
 
-  def initialize(repo_hash, github_token, local_repo_dir, destination_dir, target_tag)
+  def initialize(repo_hash, github_token, local_repo_dir, target_tag)
     @github = GitClient.new(access_token: github_token) unless local_repo_dir
 
     @ref = target_tag || repo_hash['sha']
