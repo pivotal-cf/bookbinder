@@ -44,7 +44,7 @@ class Cli
     end
 
     def usage
-      "<local|github> [--verbose]"
+      "<local|github> [tag] [--verbose]"
     end
 
     def publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir)
