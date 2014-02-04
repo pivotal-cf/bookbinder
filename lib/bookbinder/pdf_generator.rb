@@ -22,7 +22,7 @@ wkhtmltopdf \
     --header-spacing 10 \
     --footer-spacing 5 \
     --footer-font-size 10 \
-    --footer-left "   © Copyright 2013, Pivotal" \
+    --footer-left "   © Copyright 2013-#{Time.now.year}, Pivotal" \
     --footer-center '[page] of [toPage]' \
     --print-media-type \
     --header-html #{pdf_header} \
