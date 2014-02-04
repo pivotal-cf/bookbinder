@@ -17,7 +17,7 @@ module Repository
   end
 
   def head_sha
-    @github.commits(full_name).first.sha
+    @head_sha ||= @github.commits(full_name).first.sha
   end
 
   def directory
