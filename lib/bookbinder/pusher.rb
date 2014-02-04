@@ -9,15 +9,15 @@ class Pusher
       first_routed_app_name_for_host = `CF_COLOR=false #{cf_binary_path} routes | grep #{host}`.split(/,?\s+/)[2] || ""
       currently_deployed_to_green = first_routed_app_name_for_host.include? "green"
 
-      deploy_target_app = "#{app_name}-#{currently_deployed_to_green ? "blue" : "green"}"
-      deploy_old_target_app = "#{app_name}-#{currently_deployed_to_green ? "green" : "blue"}"
+      new_app = "#{app_name}-#{currently_deployed_to_green ? "blue" : "green"}"
+      old_app = "#{app_name}-#{currently_deployed_to_green ? "green" : "blue"}"
 
       # deploy to the other instance
-      cf_start(deploy_target_app)
+      cf_start(new_app)
 
-      raise push_failure_msg(deploy_target_app) unless cf_push(deploy_target_app)
-      raise map_failure_msg(deploy_target_app, host) unless cf_map_route(deploy_target_app, host)
-      takedown_old_target_app(deploy_old_target_app, host)
+      raise push_failure_msg(new_app) unless cf_push(new_app)
+      raise map_failure_msg(new_app, host) unless cf_map_route(new_app, host)
+      takedown_old_target_app(old_app, host)
     end
   end
 

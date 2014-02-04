@@ -2,8 +2,7 @@ class DocRepoChangeMonitor
 
   include BookbinderLogger
 
-  def initialize(book, cached_sha_dir)
-    @cached_sha_dir = cached_sha_dir
+  def initialize(book, cached_sha_dir=File.join('.'))
     @book = book
     @cached_sha_file = File.join(cached_sha_dir, 'cached_shas.yml')
   end
@@ -19,10 +18,9 @@ class DocRepoChangeMonitor
   private
 
   def sha_changed?(cache, repo)
+    log "Checking repo #{repo.full_name.cyan}..."
     cached_sha = cache[repo.full_name] || ''
     sha_changed = cached_sha != repo.head_sha
-
-    log "Checked repo #{repo.full_name.cyan}:"
     log "  Old SHA: #{sha_color(sha_changed, cached_sha)}"
     log "  New SHA: #{sha_color(sha_changed, repo.head_sha)}"
 
