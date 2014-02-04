@@ -2,7 +2,8 @@ class Cli
   class DocReposUpdated < BookbinderCommand
     def run(_)
       workspace_dir = File.join('.')
-      change_monitor = DocRepoChangeMonitor.new config.fetch('repos'), workspace_dir
+      book = Book.new full_name: config.fetch('github_repo'), constituent_params: config.fetch('repos')
+      change_monitor = DocRepoChangeMonitor.new book, workspace_dir
       change_monitor.build_necessary? ? 0 : 42
     end
   end

@@ -2,31 +2,27 @@ class DocRepoChangeMonitor
 
   include BookbinderLogger
 
-  def initialize(repo_hashes, cached_sha_dir)
-    @repo_full_names = repo_hashes.map { |repo_hash| repo_hash["github_repo"] }
+  def initialize(book, cached_sha_dir)
     @cached_sha_dir = cached_sha_dir
-    @repos = repo_hashes.map do |repo_hash|
-      DocRepo.from_remote repo_hash: repo_hash
-    end
+    @book = book
     @cached_sha_file = File.join(cached_sha_dir, 'cached_shas.yml')
     @cached_shas = find_cached_shas
   end
 
   def build_necessary?
-    head_shas_by_repo = fetch_head_SHAs_by_repo
-    yaml = YAML.dump(head_shas_by_repo)
-    File.open(@cached_sha_file, 'w') { |f| f.write(yaml) }
-    shas_not_up_to_date = @repo_full_names.map do |repo_full_name|
-      cached_sha = @cached_shas[repo_full_name] || ''
-      sha_changed = cached_sha != head_shas_by_repo[repo_full_name]
-      log "Checked repo #{repo_full_name}:"
+    File.open(@cached_sha_file, 'w') { |f| f.write(YAML.dump(head_SHAs_by_repo)) }
+
+    outdated_SHAs = repositories.map do |repo|
+      cached_sha = @cached_shas[repo.full_name] || ''
+      sha_changed = cached_sha != head_SHAs_by_repo[repo.full_name]
+      log "Checked repo #{repo.full_name}:"
       log "  Old SHA: #{sha_color(sha_changed, cached_sha)}"
-      log "  New SHA: #{sha_color(sha_changed, head_shas_by_repo[repo_full_name])}"
+      log "  New SHA: #{sha_color(sha_changed, head_SHAs_by_repo[repo.full_name])}"
       sha_changed
     end
 
-    log_final_message shas_not_up_to_date
-    shas_not_up_to_date.any?
+    log_final_message outdated_SHAs
+    outdated_SHAs.any?
   end
 
   private
@@ -43,13 +39,17 @@ class DocRepoChangeMonitor
     end
   end
 
-  def fetch_head_SHAs_by_repo
-    head_shas_as_array = @repos.map { |repo| [repo.full_name, repo.head_sha] }
-    Hash[*head_shas_as_array.flatten]
+  def head_SHAs_by_repo
+    @shas_by_repo ||= repositories.reduce({}) do |hash, repo|
+      hash.merge(repo.full_name => repo.head_sha)
+    end
   end
 
   def find_cached_shas
     File.exist?(@cached_sha_file) ? YAML.load(File.read(@cached_sha_file)) : {}
   end
 
+  def repositories
+    @book.constituents + [@book]
+  end
 end

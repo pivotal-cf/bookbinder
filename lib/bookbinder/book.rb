@@ -1,5 +1,6 @@
 class Book
   include Repository
+  attr_reader :constituents
 
   def initialize(full_name: nil, constituent_params: [], ref: nil)
     @full_name = full_name

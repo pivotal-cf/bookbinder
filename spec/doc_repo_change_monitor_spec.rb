@@ -9,7 +9,8 @@ describe DocRepoChangeMonitor do
 
     let(:cached_sha_dir) { tmpdir }
     let(:cached_sha_file) { File.join(cached_sha_dir, 'cached_shas.yml') }
-    let(:monitor) { DocRepoChangeMonitor.new repos, cached_sha_dir }
+    let(:monitor) { DocRepoChangeMonitor.new book, cached_sha_dir }
+    let(:book) { Book.new(full_name: 'wow-org/such-book', constituent_params: repos) }
     let(:repos) {  [{"github_repo" => "my-docs-org/my-docs-repo"},
                     {"github_repo" => "some-other-org/some-other-repo"}]
                 }
@@ -19,6 +20,8 @@ describe DocRepoChangeMonitor do
         .and_return [OpenStruct.new(sha: 'shaA')]
       GitClient.any_instance.stub(:commits).with('some-other-org/some-other-repo')
         .and_return [OpenStruct.new(sha: 'shaB')]
+      GitClient.any_instance.stub(:commits).with('wow-org/such-book')
+        .and_return [OpenStruct.new(sha: 'old-book-sha')]
     end
 
     context 'when no cached sha file is available' do
@@ -35,7 +38,7 @@ describe DocRepoChangeMonitor do
       end
     end
 
-    context 'when the cached sha file is available but no entry exists for the repo' do
+    context 'when the cached sha file is available but at least one repo is missing an entry' do
       before do
         write_cached_SHAs 'my-docs-org/my-docs-repo' => 'shaA'
       end
@@ -45,10 +48,24 @@ describe DocRepoChangeMonitor do
 
     context 'when cached SHAS are available and all SHAs are up to date' do
       before do
-        write_cached_SHAs 'my-docs-org/my-docs-repo' => 'shaA', 'some-other-org/some-other-repo' => 'shaB'
+        write_cached_SHAs 'my-docs-org/my-docs-repo' => 'shaA',
+                          'some-other-org/some-other-repo' => 'shaB',
+                          'wow-org/such-book' => 'old-book-sha'
       end
 
       it { should be_false }
+    end
+
+    context 'when cached SHAs are available but the Book is out of date' do
+      before do
+        GitClient.any_instance.stub(:commits).with('wow-org/such-book')
+          .and_return [OpenStruct.new(sha: 'new-book-sha')]
+        write_cached_SHAs 'my-docs-org/my-docs-repo' => 'shaA',
+                          'some-other-org/some-other-repo' => 'shaB',
+                          'wow-org/such-book' => 'old-book-sha'
+      end
+
+      it { should be_true }
     end
 
     context 'when cached SHAs are available but one is out of date' do
