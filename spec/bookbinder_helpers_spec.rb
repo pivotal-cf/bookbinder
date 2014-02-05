@@ -11,14 +11,8 @@ describe Navigation::HelperMethods do
 
       Foo.new.yield_for_code_snippet(from: repo, at: excerpt_mark)
     end
-
-    let(:repo) { 'fantastic/code-example-repo' }
-    let(:excerpt_mark) { 'complicated_function' }
-
-    before { stub_github_for repo }
-
-    it 'returns markdown' do
-      markdown_snippet = <<-MARKDOWN
+    let(:markdown_snippet) do
+      <<-MARKDOWN
 ```
 fib = Enumerator.new do |yielder|
   i = 0
@@ -33,6 +27,12 @@ p fib.take_while { |n| n <= 4E6 }
 # => [1, 1, 2 ... 1346269, 2178309, 3524578]
 ```
       MARKDOWN
+    end
+    let(:repo) { 'fantastic/code-example-repo' }
+    let(:excerpt_mark) { 'complicated_function' }
+
+    it 'returns markdown' do
+      stub_github_for repo
       yielded_snippet.should == markdown_snippet.chomp
     end
   end
