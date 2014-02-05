@@ -7,7 +7,7 @@ class Publisher
     intermediate_directory          = options.fetch(:output_dir)
     final_app_dir                   = options.fetch(:final_app_dir)
     pdf_requested                   = options.has_key?(:pdf) && options[:pdf]
-    master_middleman_dir            = options[:master_middleman_dir]
+    master_middleman_dir            = options.fetch(:master_middleman_dir)
     log_file                        = File.join intermediate_directory, 'wget.log'
     middleman_dir                   = File.join intermediate_directory, 'master_middleman'
     middleman_source_directory      = File.join middleman_dir, 'source'
