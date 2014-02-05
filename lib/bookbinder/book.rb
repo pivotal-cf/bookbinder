@@ -10,7 +10,7 @@ class Book
       DocRepo.from_remote repo_hash: repo_hash
     end
 
-    @github = GitClient.new(access_token: ENV['GITHUB_API_TOKEN'])
+    @github = GitClient.get_instance(access_token: ENV['GITHUB_API_TOKEN'])
   end
 
   def tag_constituents_with(tag)

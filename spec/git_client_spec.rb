@@ -11,7 +11,7 @@ describe GitClient do
 
     it 'passes the right tag to OctoKit' do
       Octokit::Client.any_instance.should_receive(:create_ref).with(full_name, "tags/#{tagname}", sha)
-      GitClient.new.create_tag!(full_name, tagname, sha)
+      GitClient.get_instance.create_tag!(full_name, tagname, sha)
     end
   end
 end
