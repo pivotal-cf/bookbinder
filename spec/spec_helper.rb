@@ -28,7 +28,7 @@ shared_context 'tmp_dirs' do
   end
 end
 
-def stub_github_for(repo_name, some_ref)
+def stub_github_for(repo_name, some_ref='master')
   zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
   GitClient.any_instance.stub(:archive_link).with(repo_name, ref: some_ref).and_return(zipped_repo_url)
 

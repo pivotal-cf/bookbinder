@@ -11,6 +11,14 @@ module Navigation
   end
 
   module HelperMethods
+
+    def yield_for_code_snippet(from: nil, at: nil)
+      repo = DocRepo.from_remote(repo_hash: {'github_repo' => from}, destination_dir: Dir.mktmpdir)
+      snippet = repo.get_snippet_at at
+      delimiter = '```'
+      snippet.prepend("#{delimiter}\n").concat("\n#{delimiter}")
+    end
+
     def yield_for_subnav
       topic = page_classes.split(' ')[0...-1].reverse.map { |key| config[:topics][key] }.compact.pop
       partial "subnavs/#{topic}" if topic

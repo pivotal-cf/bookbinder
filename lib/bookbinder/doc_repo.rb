@@ -1,9 +1,7 @@
 class DocRepo
-
-  attr_reader :subnav_template
-
-
   include Repository
+
+  attr_reader :subnav_template, :copied_to
 
   def self.github_master_head_ref_path(full_name)
     "repos/#{full_name}/git/refs/heads/master"
@@ -21,8 +19,14 @@ class DocRepo
     repo
   end
 
+  def get_snippet_at(marker)
+    snippet = '' # FileUtils.cd does not return anything.
+    FileUtils.cd(copied_to) { snippet = `find . -exec sed -ne '/#{marker}/,/#{marker}/ p' {} \\;` }
+    snippet.split("\n")[1..-2].join("\n")
+  end
+
   def copied?
-    @copied || false
+    !@copied_to.nil?
   end
 
   def has_tag?(tagname)
@@ -34,10 +38,9 @@ class DocRepo
     if File.exist?(path_to_local_repo)
       log '  copying '.yellow + path_to_local_repo
       FileUtils.cp_r path_to_local_repo, File.join(destination_dir, directory)
-      @copied = true
+      @copied_to = File.join(destination_dir, directory)
     else
       log '  skipping (not found) '.magenta + path_to_local_repo
-      @copied = false
     end
   end
 

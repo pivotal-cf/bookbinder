@@ -48,19 +48,26 @@ describe Publisher do
         expect(File.exist? File.join(final_app_dir, 'public', 'DocGuide.pdf')).to be_true
       end
 
-      it 'when in local mode, it can find repos locally rather than going to github' do
-        repos = [{'github_repo' => 'my-docs-org/my-docs-repo'}]
+      context 'when in local mode' do
+        let(:publication_arguments) do
+          {
+              repos: [{'github_repo' => 'my-docs-org/my-docs-repo'}],
+              output_dir: output_dir,
+              master_middleman_dir: non_broken_master_middleman_dir,
+              host_for_sitemap: 'example.com',
+              local_repo_dir: local_repo_dir,
+              final_app_dir: final_app_dir
+          }
+        end
 
-        publisher.publish repos: repos,
-                          output_dir: output_dir,
-                          master_middleman_dir: non_broken_master_middleman_dir,
-                          host_for_sitemap: 'example.com',
-                          local_repo_dir: local_repo_dir,
-                          final_app_dir: final_app_dir
+        it 'it can find repos locally rather than going to github' do
+          publisher.publish publication_arguments
 
-        index_html = File.read File.join(final_app_dir, 'public', 'my-docs-repo', 'index.html')
-        index_html.should include 'This is a Markdown Page'
+          index_html = File.read File.join(final_app_dir, 'public', 'my-docs-repo', 'index.html')
+          index_html.should include 'This is a Markdown Page'
+        end
       end
+
 
       it 'generates non-broken links appropriately' do
         # tests our SubmoduleAwareAssets middleman extension, which is hard to test in isolation :(
@@ -89,6 +96,21 @@ describe Publisher do
 
         index_html = File.read File.join(final_app_dir, 'public', 'index.html')
         index_html.should include 'My variable name is Alexander.'
+      end
+
+      it 'includes code snippets' do
+        stub_github_for 'cloudfoundry/code-example-repo'
+        stub_github_for 'org/dogs-repo'
+
+        publisher.publish({
+          output_dir: output_dir,
+          final_app_dir: final_app_dir,
+          master_middleman_dir: generate_middleman_with('code_snippet_index.html.md.erb'),
+          host_for_sitemap: 'example.com',
+          repos: [{'github_repo' => 'org/dogs-repo'}]
+                          })
+        index_html = File.read File.join(final_app_dir, 'public', 'index.html')
+        index_html.should include 'fib = Enumerator.new do |yielder|'
       end
 
       it 'generates a sitemap' do

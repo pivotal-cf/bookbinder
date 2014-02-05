@@ -40,7 +40,7 @@ module Repository
     from = File.join output_dir, (directory_listing_after - directory_listing_before).first
     FileUtils.mv from, File.join(destination_dir, directory)
 
-    @copied = true
+    @copied_to = File.join(destination_dir, directory)
   end
 
   private
