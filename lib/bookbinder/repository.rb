@@ -31,7 +31,7 @@ module Repository
     archive = download_archive
 
     tarball_path = File.join(output_dir, "#{short_name}.tar.gz")
-    File.open(tarball_path, 'w') { |f| f.write(archive) }
+    File.open(tarball_path, 'wb') { |f| f.write(archive) }
 
     directory_listing_before = Dir.entries output_dir
     shell_out "tar xzf #{tarball_path} -C #{output_dir}"
