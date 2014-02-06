@@ -68,7 +68,6 @@ describe Publisher do
         end
       end
 
-
       it 'generates non-broken links appropriately' do
         # tests our SubmoduleAwareAssets middleman extension, which is hard to test in isolation :(
         repos = [{'github_repo' => 'org/dogs-repo'}]
@@ -98,19 +97,39 @@ describe Publisher do
         index_html.should include 'My variable name is Alexander.'
       end
 
-      it 'includes code snippets' do
-        stub_github_for 'cloudfoundry/code-example-repo'
-        stub_github_for 'org/dogs-repo'
+      describe 'including code snippets' do
+        let(:constituent_repo) { 'org/dogs-repo' }
+        let(:code_repo) { 'cloudfoundry/code-example-repo' }
+        let(:middleman_dir) { generate_middleman_with('code_snippet_index.html.md.erb') }
+        let(:publication_arguments) do
+          {
+              output_dir: output_dir,
+              final_app_dir: final_app_dir,
+              master_middleman_dir: middleman_dir,
+              host_for_sitemap: 'example.com',
+              repos: [{'github_repo' => constituent_repo}]
+          }
+        end
 
-        publisher.publish({
-          output_dir: output_dir,
-          final_app_dir: final_app_dir,
-          master_middleman_dir: generate_middleman_with('code_snippet_index.html.md.erb'),
-          host_for_sitemap: 'example.com',
-          repos: [{'github_repo' => 'org/dogs-repo'}]
-                          })
-        index_html = File.read File.join(final_app_dir, 'public', 'index.html')
-        index_html.should include 'fib = Enumerator.new do |yielder|'
+        it 'pulls content from code example repositories' do
+          stub_github_for constituent_repo
+          stub_github_for code_repo
+
+          publisher.publish(publication_arguments)
+          index_html = File.read File.join(final_app_dir, 'public', 'index.html')
+          index_html.should include 'fib = Enumerator.new do |yielder|'
+          index_html.should include 'this_is_yaml'
+        end
+
+        it 'makes only one request per code example repository' do
+          #Guard against leaky global constant
+          CodeRepo::Store.keys.each {|key| CodeRepo::Store.delete(key) }
+
+          stub_github_for constituent_repo
+          mock_github_for code_repo
+
+          publisher.publish publication_arguments
+        end
       end
 
       it 'generates a sitemap' do
@@ -131,7 +150,6 @@ http://docs.dogs.com/dogs-repo/big_dogs/index.html
 http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
 DOGS
       end
-
     end
 
     context 'verbose testing' do

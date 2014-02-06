@@ -29,8 +29,23 @@ shared_context 'tmp_dirs' do
 end
 
 def stub_github_for(repo_name, some_ref='master')
+  github = GitClient.get_instance access_token: 'foo'
   zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
-  GitClient.any_instance.stub(:archive_link).with(repo_name, ref: some_ref).and_return(zipped_repo_url)
+  github.stub(:archive_link).with(repo_name, ref: some_ref)
+    .and_return(zipped_repo_url)
+
+  zipped_repo = MarkdownRepoFixture.tarball repo_name.split('/').last, some_ref
+  stub_request(:get, zipped_repo_url).to_return(
+      :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
+  )
+end
+
+def mock_github_for(repo_name, some_ref='master')
+  github = GitClient.get_instance access_token: 'foo'
+  zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
+  github.should_receive(:archive_link).with(repo_name, ref: some_ref)
+    .once
+    .and_return(zipped_repo_url)
 
   zipped_repo = MarkdownRepoFixture.tarball repo_name.split('/').last, some_ref
   stub_request(:get, zipped_repo_url).to_return(

@@ -25,6 +25,7 @@ this.is.code('whee')
 
 {:some => 'more'}
 
+'
 # code_snippet simple_configuration start
 
 repo:
@@ -32,3 +33,4 @@ repo:
 - whyyyyyyyyy
 
 # code_snippet simple_configuration end
+'

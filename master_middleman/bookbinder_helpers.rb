@@ -13,7 +13,7 @@ module Navigation
   module HelperMethods
 
     def yield_for_code_snippet(from: nil, at: nil)
-      repo = DocRepo.from_remote(repo_hash: {'github_repo' => from}, destination_dir: Dir.mktmpdir)
+      repo = CodeRepo.get_instance from
       snippet = repo.get_snippet_at at
       delimiter = '```'
       snippet.prepend("#{delimiter}\n").concat("\n#{delimiter}")

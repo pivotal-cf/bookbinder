@@ -43,7 +43,10 @@ describe Cli::Publish do
         stub_github_for 'fantastic/my-other-docs-repo', desired_tag
 
         zipped_repo_url = "https://github.com/#{'fantastic/fixture-book-title'}/archive/#{desired_tag}.tar.gz"
-        GitClient.any_instance.stub(:archive_link).with('fantastic/fixture-book-title', ref: desired_tag).and_return zipped_repo_url
+        GitClient.get_instance.should_receive(:archive_link)
+          .with('fantastic/fixture-book-title', ref: desired_tag)
+          .once
+          .and_return zipped_repo_url
 
         zipped_repo = MarkdownRepoFixture.tarball 'fantastic/book'.split('/').last, desired_tag
         stub_request(:get, zipped_repo_url).to_return(
