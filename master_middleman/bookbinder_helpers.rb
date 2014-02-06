@@ -20,8 +20,17 @@ module Navigation
     end
 
     def yield_for_subnav
-      topic = page_classes.split(' ')[0...-1].reverse.map { |key| config[:topics][key] }.compact.pop
-      partial "subnavs/#{topic}" if topic
+      namespaces = decreasingly_specific_namespaces
+
+      template = namespaces.map do |namespace|
+        config[:subnav_templates][namespace]
+      end.compact.pop || 'default'
+
+      partial "subnavs/#{template}"
+    end
+
+    def decreasingly_specific_namespaces
+      page_classes.split(' ')[0...-1].reverse
     end
 
     def breadcrumbs

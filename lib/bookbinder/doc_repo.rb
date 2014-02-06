@@ -44,6 +44,6 @@ class DocRepo < Repository
     @full_name = repo_hash.fetch('github_repo')
     @directory = repo_hash['directory']
     @local_repo_dir = local_repo_dir
-    @subnav_template = repo_hash.fetch('subnav_template', 'default')
+    @subnav_template = repo_hash['subnav_template']
   end
 end
