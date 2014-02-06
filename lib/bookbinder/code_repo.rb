@@ -1,7 +1,7 @@
 class CodeRepo < DocRepo
   class InvalidSnippet < StandardError
     def initialize(repo, marker)
-      super "Error with marker #{marker} in #{repo}."
+      super "Error with marker #{marker.cyan} #{'in'.red} #{repo.cyan}#{'.'.red}"
     end
   end
 
@@ -17,9 +17,17 @@ class CodeRepo < DocRepo
   end
 
   def get_snippet_at(marker)
-    snippet = '' # FileUtils.cd does not return anything.
-    FileUtils.cd(copied_to) { snippet = `find . -exec sed -ne '/#{marker}/,/#{marker}/ p' {} \\;` }
+    snippet = '' # snippet needs to persist through FileUtils.cd scope; buckets!
+    FileUtils.cd(copied_to) { snippet = scrape_for(marker) }
+
     raise InvalidSnippet.new(full_name, marker) if snippet.empty?
     snippet.split("\n")[1..-2].join("\n")
+  end
+
+  private
+
+  def scrape_for(marker)
+    locale = 'LC_CTYPE=C LANG=C' # Quiets 'sed: RE error: illegal byte sequence'
+    `#{locale} find . -exec sed -ne '/#{marker}/,/#{marker}/ p' {} \\;`
   end
 end
