@@ -1,5 +1,4 @@
-class DocRepo
-  include Repository
+class DocRepo < Repository
 
   attr_reader :subnav_template, :copied_to
 
@@ -17,12 +16,6 @@ class DocRepo
     repo = self.new(repo_hash, nil, local_dir, nil)
     repo.copy_from_local(destination_dir) if destination_dir
     repo
-  end
-
-  def get_snippet_at(marker)
-    snippet = '' # FileUtils.cd does not return anything.
-    FileUtils.cd(copied_to) { snippet = `find . -exec sed -ne '/#{marker}/,/#{marker}/ p' {} \\;` }
-    snippet.split("\n")[1..-2].join("\n")
   end
 
   def copied?

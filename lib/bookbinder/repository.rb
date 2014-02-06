@@ -1,4 +1,4 @@
-module Repository
+class Repository
   include BookbinderLogger
   include ShellOut
 

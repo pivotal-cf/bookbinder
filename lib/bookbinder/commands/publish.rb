@@ -36,11 +36,12 @@ class Cli
     def checkout_book_at(target_tag, &doc_generation)
       temp_workspace     = Dir.mktmpdir
       initial_config     = YAML.load(File.read('./config.yml'))
-      book               = Book.new(full_name: initial_config.fetch('github_repo'), ref: target_tag)
+      book               = Book.from_remote(full_name: initial_config.fetch('github_repo'),
+                                            destination_dir: temp_workspace, ref: target_tag)
       expected_book_path = File.join temp_workspace, book.directory
 
       log "Binding \"#{book.short_name.cyan}\" at #{target_tag.magenta}"
-      FileUtils.chdir(expected_book_path) { doc_generation.call(config, target_tag) } if book.copy_from_remote(temp_workspace)
+      FileUtils.chdir(expected_book_path) { doc_generation.call(config, target_tag) }
     end
 
     def usage
