@@ -27,7 +27,7 @@ class MiddlemanRunner
   include ShellOut
 
   def run(middleman_dir, template_variables, verbose = false, repos = [])
-    log 'Running middleman...'
+    log "\nRunning middleman...\n\n"
 
     # awful hacks to eliminate the impact of global state in middleman. when will it end?
     Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)

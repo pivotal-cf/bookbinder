@@ -8,12 +8,7 @@ class CodeRepo < DocRepo
   Store = {}
 
   def self.get_instance(full_name)
-    Store.fetch(full_name) { make(full_name) }
-  end
-
-  def self.make(full_name)
-    repo = from_remote(repo_hash: {'github_repo' => full_name}, destination_dir: Dir.mktmpdir)
-    Store[repo.full_name] = repo
+    Store.fetch(full_name) { download(full_name) }
   end
 
   def get_snippet_at(marker)
@@ -25,6 +20,12 @@ class CodeRepo < DocRepo
   end
 
   private
+
+  def self.download(full_name)
+    BookbinderLogger.log "Excerpting #{full_name.cyan}"
+    repo = from_remote(repo_hash: {'github_repo' => full_name}, destination_dir: Dir.mktmpdir)
+    Store[repo.full_name] = repo
+  end
 
   def scrape_for(marker)
     locale = 'LC_CTYPE=C LANG=C' # Quiets 'sed: RE error: illegal byte sequence'
