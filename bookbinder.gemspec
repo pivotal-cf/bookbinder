@@ -2,11 +2,11 @@ require 'base64'
 
 Gem::Specification.new do |s|
   s.name        = 'bookbinder'
-  s.version     = '0.0.14'
+  s.version     = '0.1.0'
   s.summary     = 'Markdown to Sinatra application documentation generator'
   s.description = 'A command line utility to be run in Book repositories to stitch together their constituent Markdown repos into a static-HTML-serving application'
   s.authors     = ['Mike Grafton', 'Lucas Marks', 'Gavin Morgan', 'Nikhil Gajwani']
-  s.email       = Base64.decode64("Z21vcmdhbkBnb3Bpdm90YWwuY29t\n") # Gavin's
+  s.email       = Base64.decode64('Z21vcmdhbkBnb3Bpdm90YWwuY29t') # Gavin's
 
 
   s.files =     Dir['lib/**/*'] + Dir['template_app/**/*'] + Dir['master_middleman/**/*'] + Dir['bin/**/*']
