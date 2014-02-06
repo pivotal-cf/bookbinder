@@ -44,5 +44,12 @@ p fib.take_while { |n| n <= 4E6 }
       snippet_from_repo = repo.get_snippet_at('complicated_function')
       snippet_from_repo.should eq(code_snippet.chomp)
     end
+
+    context 'when the snippet is not found' do
+      it 'raises an InvalidSnippet error' do
+        repo = CodeRepo.from_remote(repo_hash: constituent, destination_dir: Dir.mktmpdir)
+        expect { repo.get_snippet_at('missing_snippet') }.to raise_exception(CodeRepo::InvalidSnippet)
+      end
+    end
   end
 end

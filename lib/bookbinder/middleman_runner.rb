@@ -1,6 +1,6 @@
 class Middleman::Cli::BuildAction
   def handle_error(file_name, response, e=Thor::Error.new(response))
-    our_errors = [GitClient::TokenException]
+    our_errors = [GitClient::TokenException, CodeRepo::InvalidSnippet]
     raise e if our_errors.include?(e.class)
 
     original_handle_error(e, file_name, response)

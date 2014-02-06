@@ -1,4 +1,10 @@
 class CodeRepo < DocRepo
+  class InvalidSnippet < StandardError
+    def initialize(repo, marker)
+      super "Error with marker #{marker} in #{repo}."
+    end
+  end
+
   Store = {}
 
   def self.get_instance(full_name)
@@ -13,6 +19,7 @@ class CodeRepo < DocRepo
   def get_snippet_at(marker)
     snippet = '' # FileUtils.cd does not return anything.
     FileUtils.cd(copied_to) { snippet = `find . -exec sed -ne '/#{marker}/,/#{marker}/ p' {} \\;` }
+    raise InvalidSnippet.new(full_name, marker) if snippet.empty?
     snippet.split("\n")[1..-2].join("\n")
   end
 end
