@@ -1,3 +1,26 @@
+class Middleman::Cli::BuildAction
+  def handle_error(file_name, response, e=Thor::Error.new(response))
+    our_errors = [GitClient::TokenException]
+    raise e if our_errors.include?(e.class)
+
+    original_handle_error(e, file_name, response)
+  end
+
+  private
+
+  def original_handle_error(e, file_name, response)
+    base.had_errors = true
+
+    base.say_status :error, file_name, :red
+    if base.debugging
+      raise e
+      exit(1)
+    elsif base.options["verbose"]
+      base.shell.say response, :red
+    end
+  end
+end
+
 class MiddlemanRunner
 
   include BookbinderLogger
