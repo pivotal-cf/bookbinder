@@ -1,8 +1,8 @@
 class Cli
   class BuildAndPushTarball < BookbinderCommand
     class MissingBuildNumber < StandardError
-      def initialize(message = 'You must set $BUILD_NUMBER to push an identifiable build.')
-        super
+      def initialize
+        super 'You must set $BUILD_NUMBER to push an identifiable build.'
       end
     end
 

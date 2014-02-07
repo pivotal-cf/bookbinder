@@ -2,10 +2,6 @@ class DocRepo < Repository
 
   attr_reader :subnav_template, :copied_to
 
-  def self.github_master_head_ref_path(full_name)
-    "repos/#{full_name}/git/refs/heads/master"
-  end
-
   def self.from_remote(repo_hash: {}, github_token: ENV['GITHUB_API_TOKEN'], destination_dir: nil, target_tag: nil)
     repo = self.new(repo_hash, github_token, nil, target_tag)
     repo.copy_from_remote(destination_dir) if destination_dir
