@@ -4,8 +4,7 @@ describe Spider do
 
   include_context 'tmp_dirs'
 
-  describe '#find_broken_links' do
-
+  describe '#has_broken_links?' do
     let(:output_dir) { tmp_subdir 'output' }
     let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:log_file) { File.join(output_dir, 'wget.log') }
@@ -16,43 +15,43 @@ describe Spider do
       FileUtils.mkdir_p public_directory
       FileUtils.cp_r 'template_app/.', final_app_dir
       FileUtils.cp portal_page, File.join(public_directory, 'index.html')
-      spider = Spider.new output_dir, final_app_dir
+      spider = Spider.new final_app_dir
     end
 
-    it 'generates a log file' do
-      spider.find_broken_links(log_file)
-      log_file_contents = File.read(log_file)
-      expect(log_file_contents).to include "Found no broken links"
-    end
-
-    it 'returns an empty array when there are no broken links' do
-      broken_links = spider.find_broken_links(log_file)
-      expect(broken_links).to eq([])
-    end
-
-    context 'when there are broken links' do
-      let(:portal_page) { File.join('spec', 'fixtures', 'broken_index.html') }
-
-      it 'finds all broken links and returns them as a list' do
-        broken_links = spider.find_broken_links(log_file)
-        broken_links.should =~ ['/non_existent/index.html', '/also_non_existent/index.html']
-      end
+    it 'returns an false when there are no broken links' do
+      expect(spider.has_broken_links?).to be_false
     end
   end
 
-  describe '#parse_log' do
-    it 'reports the broken links' do
-      spider = Spider.new 'ignored', 'ignored'
-      broken_links = spider.parse_log File.read(File.join('spec', 'fixtures', 'wget_broken_links.log'))
-      expect(broken_links.size).to eq(4)
-      expect(broken_links[3]).to eq('/docs/using/services.html')
-    end
+  describe '#generate_sitemap' do
+    let(:public_dir) { tmp_subdir 'public' }
+    let(:intermediate_dir) { File.join('spec', 'fixtures') }
+    let(:log_file) { File.join(intermediate_dir, 'wget_broken_links.log') }
+    let(:spider) { Spider.new 'some_final_app_dir', log_file }
+    let(:host) { 'example.com' }
 
-    it 'handles the case where there are no broken links' do
-      spider = Spider.new 'ignored', 'ignored'
-      broken_links = spider.parse_log File.read(File.join('spec', 'fixtures', 'wget_no_broken_links.log'))
-      expect(broken_links.size).to eq(0)
+    it 'generates a sitemap' do
+      spider.generate_sitemap host, public_dir
+
+      sitemap = File.read File.join(public_dir, 'sitemap.txt')
+      expect(sitemap).to eq <<MAP
+http://#{host}/index.html
+http://#{host}/deploy-apps-docs/index.html
+http://#{host}/extend-cf-docs/index.html
+http://#{host}/ops-guide-docs/index.html
+http://#{host}/administer-cf-docs/index.html
+http://#{host}/pcf-docs/index.html
+http://#{host}/docs/using/services.html
+http://#{host}/docs/running/managing-cf/index.html
+http://#{host}/docs/reference/cc-api.html
+http://#{host}/getting_started.html
+http://#{host}/private_networks.html
+http://#{host}/pcf-docs/guide_tempest.html
+http://#{host}/pcf-docs/troubleshooting.html
+http://#{host}/getting-started/hawq.html
+http://#{host}/getting-started/Hive.html
+http://#{host}/getting-started/pig.html
+MAP
     end
   end
-
 end

@@ -258,12 +258,7 @@ DOGS
       end
 
       context 'when the spider reports broken links' do
-        before {
-          Spider.any_instance.stub(:find_broken_links) {
-            File.open(File.join(output_dir, 'wget.log'), 'w') { |f| f.write("some logged stuff") }
-            ['one.html', 'two.html']
-          }
-        }
+        before { Spider.any_instance.stub(:find_broken_links).and_return ['one.html', 'two.html'] }
 
         it 'reports the broken links and returns false' do
           BookbinderLogger.should_receive(:log).with(/2 broken links!/)
@@ -310,17 +305,7 @@ DOGS
             expect { publish }.to raise_error PdfGenerator::MissingSource
           end
         end
-
       end
     end
-
-    def generate_middleman_with(index_page)
-      dir = tmp_subdir 'master_middleman'
-      source_dir = File.join(dir, 'source')
-      FileUtils.mkdir source_dir
-      FileUtils.cp File.join('spec', 'fixtures', index_page), File.join(source_dir, 'index.html.md.erb')
-      dir
-    end
-
   end
 end

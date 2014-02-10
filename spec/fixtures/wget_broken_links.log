@@ -1,13 +1,13 @@
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/index.html
+--2013-10-25 17:20:15--  http://localhost:4534/index.html
 Resolving localhost... ::1, 127.0.0.1, fe80::1
-Connecting to localhost|::1|:4567... connected.
+Connecting to localhost|::1|:4534... connected.
 HTTP request sent, awaiting response... 200 OK
 Length: 1000 [text/html]
 Remote file exists and could contain links to other resources -- retrieving.
 
---2013-10-25 17:20:15--  http://localhost:4567/index.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/index.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 1000 [text/html]
 Saving to: ‘index.html.1’
@@ -19,14 +19,14 @@ Saving to: ‘index.html.1’
 Removing index.html.1.
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/deploy-apps-docs/index.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/deploy-apps-docs/index.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 12063 (12K) [text/html]
 Remote file exists and could contain links to other resources -- retrieving.
 
---2013-10-25 17:20:15--  http://localhost:4567/deploy-apps-docs/index.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/deploy-apps-docs/index.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 12063 (12K) [text/html]
 Saving to: ‘index.html.1’
@@ -38,14 +38,14 @@ Saving to: ‘index.html.1’
 Removing index.html.1.
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/extend-cf-docs/index.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/extend-cf-docs/index.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 12064 (12K) [text/html]
 Remote file exists and could contain links to other resources -- retrieving.
 
---2013-10-25 17:20:15--  http://localhost:4567/extend-cf-docs/index.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/extend-cf-docs/index.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 12064 (12K) [text/html]
 Saving to: ‘index.html.1’
@@ -57,26 +57,26 @@ Saving to: ‘index.html.1’
 Removing index.html.1.
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/ops-guide-docs/index.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/ops-guide-docs/index.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/administer-cf-docs/index.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/administer-cf-docs/index.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/index.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/index.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 4840 (4.7K) [text/html]
 Remote file exists and could contain links to other resources -- retrieving.
 
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/index.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/index.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 4840 (4.7K) [text/html]
 Saving to: ‘index.html.1’
@@ -88,62 +88,62 @@ Saving to: ‘index.html.1’
 Removing index.html.1.
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/stylesheets/master.css
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/stylesheets/master.css
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/stylesheets/style.css
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/stylesheets/style.css
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/javascripts/all.js
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/javascripts/all.js
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/images/favicon.ico
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/images/favicon.ico
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/images/bg-plain-x.jpg
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/images/bg-plain-x.jpg
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/images/logo-cloudfoundry.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/images/logo-cloudfoundry.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/images/logo-pivotal.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/images/logo-pivotal.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/images/signup_freetrial.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/images/signup_freetrial.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 1000 [text/html]
 Remote file exists and could contain links to other resources -- retrieving.
 
---2013-10-25 17:20:15--  http://localhost:4567/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 1000 [text/html]
 Saving to: ‘index.html.1’
@@ -155,140 +155,140 @@ Saving to: ‘index.html.1’
 Removing index.html.1.
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/using/app-arch/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/using/app-arch/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/using/deploying-apps/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/using/deploying-apps/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/using/managing-apps/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/using/managing-apps/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/using/services.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/using/services.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/using/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/using/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/running/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/running/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/running/architecture/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/running/architecture/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/running/bosh/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/running/bosh/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/running/deploying-cf/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/running/deploying-cf/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/running/deploying-cf-with-chef/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/running/deploying-cf-with-chef/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/running/micro_cloud_foundry/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/running/micro_cloud_foundry/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/running/managing-cf/index.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/running/managing-cf/index.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/reference/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/reference/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/reference/cc-api.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/reference/cc-api.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/dotcom/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/dotcom/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/dotcom/integration/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/dotcom/integration/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/docs/community/
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/docs/community/
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/images/ribbon_forkme.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/images/ribbon_forkme.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/images/twitter_large.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/images/twitter_large.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/images/g+_large.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/images/g+_large.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/images/facebook_large.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/images/facebook_large.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/images/youtube_large.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/images/youtube_large.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/stylesheets/master.css
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/stylesheets/master.css
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 47806 (47K) [text/css]
 Remote file exists but does not contain any link -- not retrieving.
@@ -298,8 +298,8 @@ Removing master.css.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/stylesheets/styles.css
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/stylesheets/styles.css
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 5942 (5.8K) [text/css]
 Remote file exists but does not contain any link -- not retrieving.
@@ -309,8 +309,8 @@ Removing styles.css.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/stylesheets/documentation.css
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/stylesheets/documentation.css
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 8217 (8.0K) [text/css]
 Remote file exists but does not contain any link -- not retrieving.
@@ -320,8 +320,8 @@ Removing documentation.css.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/javascripts/all.js
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/javascripts/all.js
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 96600 (94K) [application/javascript]
 Remote file exists but does not contain any link -- not retrieving.
@@ -330,26 +330,26 @@ Removing all.js.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/getting_started.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/getting_started.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/private_networks.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/private_networks.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/guide_tempest.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/guide_tempest.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 33557 (33K) [text/html]
 Remote file exists and could contain links to other resources -- retrieving.
 
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/guide_tempest.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/guide_tempest.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 33557 (33K) [text/html]
 Saving to: ‘guide_tempest.html’
@@ -361,8 +361,8 @@ Saving to: ‘guide_tempest.html’
 Removing guide_tempest.html.
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/favicon.ico
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/favicon.ico
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 1150 (1.1K) [image/vnd.microsoft.icon]
 Remote file exists but does not contain any link -- not retrieving.
@@ -371,14 +371,14 @@ Removing favicon.ico.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/troubleshooting.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/troubleshooting.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 17273 (17K) [text/html]
 Remote file exists and could contain links to other resources -- retrieving.
 
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/troubleshooting.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/troubleshooting.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 17273 (17K) [text/html]
 Saving to: ‘troubleshooting.html’
@@ -390,26 +390,26 @@ Saving to: ‘troubleshooting.html’
 Removing troubleshooting.html.
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/getting-started/hawq.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/getting-started/hawq.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/getting-started/Hive.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/getting-started/Hive.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/getting-started/pig.html
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/getting-started/pig.html
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 404 Not Found
 Remote file does not exist -- broken link!!!
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/vm_template_view.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/vm_template_view.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 61865 (60K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -418,8 +418,8 @@ Removing vm_template_view.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/new_folder.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/new_folder.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 60134 (59K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -428,8 +428,8 @@ Removing new_folder.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/folder_name.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/folder_name.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 54276 (53K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -438,8 +438,8 @@ Removing folder_name.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/deploy_ova.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/deploy_ova.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 77205 (75K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -448,8 +448,8 @@ Removing deploy_ova.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/next.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/next.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 66053 (65K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -458,8 +458,8 @@ Removing next.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/vm_name.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/vm_name.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 66112 (65K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -468,8 +468,8 @@ Removing vm_name.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/anchovy-cluster.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/anchovy-cluster.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 54120 (53K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -478,8 +478,8 @@ Removing anchovy-cluster.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/host.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/host.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 63165 (62K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -488,8 +488,8 @@ Removing host.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/storage.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/storage.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 68664 (67K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -498,8 +498,8 @@ Removing storage.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/disk_format.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/disk_format.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 60335 (59K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -508,8 +508,8 @@ Removing disk_format.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/network.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/network.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 60271 (59K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -518,8 +518,8 @@ Removing network.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/vm_admin.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/vm_admin.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 81080 (79K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -528,8 +528,8 @@ Removing vm_admin.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/pivotal_cf.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/pivotal_cf.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 84963 (83K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -538,8 +538,8 @@ Removing pivotal_cf.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/pill_vsphere.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/pill_vsphere.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 29882 (29K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -548,8 +548,8 @@ Removing pill_vsphere.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/vcenter_cred.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/vcenter_cred.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 65149 (64K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -558,8 +558,8 @@ Removing vcenter_cred.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/config_vcenter.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/config_vcenter.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 76867 (75K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -568,8 +568,8 @@ Removing config_vcenter.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/config_network.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/config_network.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 73023 (71K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -578,8 +578,8 @@ Removing config_network.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/ntp_servers.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/ntp_servers.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 56385 (55K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -588,8 +588,8 @@ Removing ntp_servers.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/add_prod.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/add_prod.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 50665 (49K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -598,8 +598,8 @@ Removing add_prod.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/pill_runtime.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/pill_runtime.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 33230 (32K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -608,8 +608,8 @@ Removing pill_runtime.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/cloud_cont.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/cloud_cont.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 58806 (57K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -618,8 +618,8 @@ Removing cloud_cont.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/router.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/router.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 58010 (57K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -628,8 +628,8 @@ Removing router.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/saml_login.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/saml_login.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 59719 (58K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -638,8 +638,8 @@ Removing saml_login.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/console.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/console.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 396672 (387K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -648,8 +648,8 @@ Removing console.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/pill_mysql.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/pill_mysql.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 33507 (33K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -658,8 +658,8 @@ Removing pill_mysql.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/install.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/install.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 7054 (6.9K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -668,8 +668,8 @@ Removing install.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/deploy_prog.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/deploy_prog.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 476777 (466K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -678,8 +678,8 @@ Removing deploy_prog.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/deploy_success.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/deploy_success.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 46540 (45K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -688,8 +688,8 @@ Removing deploy_success.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/uaa_login.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/uaa_login.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 150490 (147K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -698,8 +698,8 @@ Removing uaa_login.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/console_org.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/console_org.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 295982 (289K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -708,8 +708,8 @@ Removing console_org.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/create_org.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/create_org.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 88070 (86K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -718,8 +718,8 @@ Removing create_org.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/name_org.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/name_org.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 175919 (172K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -728,8 +728,8 @@ Removing name_org.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/select_users.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/select_users.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 86506 (84K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -738,8 +738,8 @@ Removing select_users.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/add.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/add.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 127419 (124K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -748,8 +748,8 @@ Removing add.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/eclipse-marketplace.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/eclipse-marketplace.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 110038 (107K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -758,8 +758,8 @@ Removing eclipse-marketplace.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/confirm-selected-features.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/confirm-selected-features.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 55575 (54K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -768,8 +768,8 @@ Removing confirm-selected-features.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/define-new-server.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/define-new-server.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 71864 (70K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -778,8 +778,8 @@ Removing define-new-server.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:15--  http://localhost:4567/pcf-docs/images/guide/cloud-foundry-account.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:15--  http://localhost:4534/pcf-docs/images/guide/cloud-foundry-account.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 57693 (56K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -788,8 +788,8 @@ Removing cloud-foundry-account.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:16--  http://localhost:4567/pcf-docs/images/guide/new-server.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:16--  http://localhost:4534/pcf-docs/images/guide/new-server.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 63447 (62K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -798,8 +798,8 @@ Removing new-server.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:16--  http://localhost:4567/pcf-docs/images/guide/ui-eclipse-overview.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:16--  http://localhost:4534/pcf-docs/images/guide/ui-eclipse-overview.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 527892 (516K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -808,8 +808,8 @@ Removing ui-eclipse-overview.png.
 unlink: No such file or directory
 
 Spider mode enabled. Check if remote file exists.
---2013-10-25 17:20:16--  http://localhost:4567/pcf-docs/images/guide/ui-eclipse-apps-services.png
-Reusing existing connection to [localhost]:4567.
+--2013-10-25 17:20:16--  http://localhost:4534/pcf-docs/images/guide/ui-eclipse-apps-services.png
+Reusing existing connection to [localhost]:4534.
 HTTP request sent, awaiting response... 200 OK
 Length: 103025 (101K) [image/png]
 Remote file exists but does not contain any link -- not retrieving.
@@ -819,10 +819,10 @@ unlink: No such file or directory
 
 Found 4 broken links.
 
-http://localhost:4567/docs/using/
-http://localhost:4567/docs/reference/cc-api.html
-http://localhost:4567/stylesheets/master.css
-http://localhost:4567/docs/using/services.html
+http://localhost:4534/docs/using/
+http://localhost:4534/docs/reference/cc-api.html
+http://localhost:4534/stylesheets/master.css
+http://localhost:4534/docs/using/services.html
 
 FINISHED --2013-10-25 17:20:16--
 Total wall clock time: 0.2s

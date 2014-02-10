@@ -8,7 +8,7 @@ class Publisher
     final_app_dir                   = options.fetch(:final_app_dir)
     pdf_requested                   = options.has_key?(:pdf) && options[:pdf]
     master_middleman_dir            = options.fetch(:master_middleman_dir)
-    log_file                        = File.join intermediate_directory, 'wget.log'
+    spider                          = Spider.new final_app_dir
     middleman_dir                   = File.join intermediate_directory, 'master_middleman'
     middleman_source_directory      = File.join middleman_dir, 'source'
     build_directory                 = File.join middleman_dir, 'build/.'
@@ -23,15 +23,15 @@ class Publisher
     generate_site(options, middleman_dir, repos)
     FileUtils.cp_r build_directory, public_directory
 
-    has_broken_links = has_broken_links? log_file, intermediate_directory, final_app_dir
+    has_broken_links = spider.has_broken_links?
 
     #Subledes
-    generate_site_map(options.fetch(:host_for_sitemap), log_file, final_app_dir)
+    spider.generate_sitemap(options.fetch(:host_for_sitemap), public_directory)
     generate_pdf(final_app_dir, options.fetch(:pdf)) if pdf_requested && repo_with_pdf_page_present?(options, repos)
 
     log "Bookbinder bound your book into #{final_app_dir.green}"
 
-    has_broken_links
+    !has_broken_links
   end
 
   private
@@ -71,27 +71,6 @@ class Publisher
     generated_pdf_file = File.join(final_app_dir, 'public', options.fetch(:filename))
     header_file = File.join(final_app_dir, 'public', options.fetch(:header))
     PdfGenerator.new.generate source_page, generated_pdf_file, header_file
-  end
-
-  def has_broken_links?(log_file, output_dir, final_app_dir)
-    spider = Spider.new output_dir, final_app_dir
-    broken_links = spider.find_broken_links log_file
-
-    if broken_links.size > 0
-      log "\nFound #{broken_links.count} broken links!".red
-      broken_links.each { |line| log line }
-    else
-      log "\nNo broken links!".green
-    end
-
-    broken_links.size > 0 ? false : true
-  end
-
-  def generate_site_map(host, log_file, final_app_dir)
-    sitemap_file = File.join(final_app_dir, 'public', 'sitemap.txt')
-    File.open(sitemap_file, 'w') do |file|
-      file.write(shell_out "grep \\\\.html #{log_file} | grep \"\\-\\-\" | sed s/^.*localhost:4534/http:\\\\/\\\\/#{host}/ | uniq")
-    end
   end
 
   def prepare_directories(final_app, output, middleman_source)

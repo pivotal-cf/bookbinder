@@ -28,6 +28,14 @@ shared_context 'tmp_dirs' do
   end
 end
 
+def generate_middleman_with(index_page)
+  dir = tmp_subdir 'master_middleman'
+  source_dir = File.join(dir, 'source')
+  FileUtils.mkdir source_dir
+  FileUtils.cp File.join('spec', 'fixtures', index_page), File.join(source_dir, 'index.html.md.erb')
+  dir
+end
+
 def stub_github_for(repo_name, some_ref='master')
   github = GitClient.get_instance access_token: 'foo'
   zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
