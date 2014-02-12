@@ -3,22 +3,26 @@ class Spider
   include ShellOut
   include BookbinderLogger
 
-  def initialize(final_app_dir=nil, log_file=nil)
+  def initialize(final_app_dir=nil)
     @app_dir = final_app_dir
-    @log_file = log_file || File.join(Dir.mktmpdir, 'wget.log')
   end
 
-  def generate_sitemap(host, final_public_dir)
-    sitemap_file = File.join(final_public_dir, 'sitemap.txt')
+  def generate_sitemap(host)
+    @broken_links, working_links = find_all_links
+    announce_broken_links @broken_links
+
+    sitemap_file = File.join(@app_dir, 'public', 'sitemap.txt')
     File.open(sitemap_file, 'w') do |file|
-      file.write(shell_out "grep \\\\.html #{@log_file} | grep \"\\-\\-\" | sed s/^.*localhost:4534/http:\\\\/\\\\/#{host}/ | uniq")
+      file.write substitute_hostname(host, working_links.join("\n"))
     end
   end
 
   def has_broken_links?
-    links = find_broken_links
-    announce_broken_links(links)
-    links.any?
+    @broken_links.any? if @broken_links
+  end
+
+  def port
+    4534
   end
 
   private
@@ -32,35 +36,42 @@ class Spider
     end
   end
 
-  def find_broken_links
-    Dir.chdir(@app_dir) { log_broken_links }
-    parse_log
+  def find_all_links
+    links = []
+    Dir.chdir(@app_dir) { links = capture_links }
+    links
   end
 
-  def log_broken_links
-    open_results  = Open3.popen3('ruby app.rb 4534')
+  def capture_links
+    open_results  = Open3.popen3("ruby app.rb #{port}")
     stderr        = open_results[2]
     wait_thread   = open_results[3]
 
     once_sinatra_has_started(stderr) do
       consume_stream_in_separate_thread(stderr)
-      crawl_from 'http://localhost:4534/index.html'
+      crawl_from "http://localhost:#{port}/index.html"
     end
-
   ensure
     Process.kill 'KILL', wait_thread[:pid]
   end
 
   def crawl_from(url)
-    shell_out "wget --spider --output-file=#{@log_file} --execute robots=off --wait 0 --recursive --level=10 --no-directories --page-requisites #{url}", true
+    broken_links = []
+    sitemap = [url]
+
+    Anemone.crawl(url) do |anemone|
+      anemone.on_every_page do |page|
+        if page.not_found?
+          broken_links << page.url.to_s
+        else
+          sitemap.concat page.links.map(&:to_s)
+        end
+      end
+    end
+
+    [broken_links.uniq, sitemap.uniq]
   end
 
-  def parse_log
-    contents = File.read(@log_file)
-    return [] if contents.include? 'Found no broken links.'
-    matchLines = contents.match('Found [0-9]+ broken[^~]+FINISHED').to_s.lines
-    matchLines.map { |url| url[/^http:\/\/localhost[^\/]*(.*)/, 1] }.compact
-  end
 
   def once_sinatra_has_started(stderr)
     begin
@@ -79,5 +90,9 @@ class Spider
       while io_stream.read(1024, s)
       end
     end
+  end
+
+  def substitute_hostname(host, links_string)
+    links_string.gsub(/localhost:#{port}/, host)
   end
 end

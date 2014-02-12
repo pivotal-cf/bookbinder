@@ -12,7 +12,12 @@ describe Publisher do
     let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html' }
 
     context 'integration' do
-      before { squelch_middleman_output }
+      before do
+        squelch_middleman_output
+        WebMock.disable_net_connect!(:allow_localhost => true)
+      end
+
+      after { WebMock.disable_net_connect! }
 
       let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir }
 
@@ -143,7 +148,7 @@ describe Publisher do
                           host_for_sitemap: "docs.dogs.com"
 
         sitemap = File.read File.join(final_app_dir, 'public', 'sitemap.txt')
-        expect(sitemap).to eq <<DOGS
+        expect(sitemap).to eq (<<DOGS).chomp
 http://docs.dogs.com/index.html
 http://docs.dogs.com/dogs-repo/index.html
 http://docs.dogs.com/dogs-repo/big_dogs/index.html
@@ -216,10 +221,6 @@ DOGS
         MiddlemanRunner.any_instance.stub(:run) do |middleman_dir|
           Dir.mkdir File.join(middleman_dir, 'build')
         end
-        Spider.any_instance.stub(:find_broken_links) {
-          File.open(File.join(output_dir, 'wget.log'), 'w') { |f| f.write("some logged stuff") }
-          []
-        }
       end
 
       def publish
@@ -258,7 +259,7 @@ DOGS
       end
 
       context 'when the spider reports broken links' do
-        before { Spider.any_instance.stub(:find_broken_links).and_return ['one.html', 'two.html'] }
+        before { Spider.any_instance.stub(:find_all_links).and_return [['one.html', 'two.html'], []] }
 
         it 'reports the broken links and returns false' do
           BookbinderLogger.should_receive(:log).with(/2 broken links!/)

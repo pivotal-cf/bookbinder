@@ -1,57 +1,71 @@
 require 'spec_helper'
 
 describe Spider do
-
   include_context 'tmp_dirs'
+
+  let(:other_page) {File.join('spec', 'fixtures', 'page_with_no_links.html')}
+
+  before do
+    public_directory = File.join(final_app_dir, 'public')
+    FileUtils.mkdir_p public_directory
+    FileUtils.cp_r 'template_app/.', final_app_dir
+    FileUtils.cp portal_page, File.join(public_directory, 'index.html')
+    FileUtils.cp other_page, File.join(public_directory, 'other_page.html')
+    WebMock.disable_net_connect!(:allow_localhost => true)
+    spider.generate_sitemap 'example.com'
+  end
 
   describe '#has_broken_links?' do
     let(:output_dir) { tmp_subdir 'output' }
     let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:log_file) { File.join(output_dir, 'wget.log') }
-    let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
+    let(:spider) { Spider.new final_app_dir }
+    let(:port) { spider.port }
 
-    let(:spider) do
-      public_directory = File.join(final_app_dir, 'public')
-      FileUtils.mkdir_p public_directory
-      FileUtils.cp_r 'template_app/.', final_app_dir
-      FileUtils.cp portal_page, File.join(public_directory, 'index.html')
-      spider = Spider.new final_app_dir
+    after { WebMock.disable_net_connect! }
+
+    context 'when there are no broken links' do
+      let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
+
+      it 'returns false' do
+        spider.should_not have_broken_links
+      end
     end
 
-    it 'returns an false when there are no broken links' do
-      expect(spider.has_broken_links?).to be_false
+    context 'when there are broken links' do
+      let(:portal_page) { File.join('spec', 'fixtures', 'broken_index.html') }
+
+      it 'returns true' do
+        spider.should have_broken_links
+      end
     end
   end
 
   describe '#generate_sitemap' do
-    let(:public_dir) { tmp_subdir 'public' }
+    let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:intermediate_dir) { File.join('spec', 'fixtures') }
-    let(:log_file) { File.join(intermediate_dir, 'wget_broken_links.log') }
-    let(:spider) { Spider.new 'some_final_app_dir', log_file }
+    let(:spider) { Spider.new final_app_dir }
     let(:host) { 'example.com' }
+    let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
 
     it 'generates a sitemap' do
-      spider.generate_sitemap host, public_dir
+      spider.generate_sitemap host
 
-      sitemap = File.read File.join(public_dir, 'sitemap.txt')
-      expect(sitemap).to eq <<MAP
+      sitemap = File.read File.join(final_app_dir, 'public', 'sitemap.txt')
+      sitemap.split("\n").should  =~ (<<-MAP).split("\n")
 http://#{host}/index.html
-http://#{host}/deploy-apps-docs/index.html
-http://#{host}/extend-cf-docs/index.html
-http://#{host}/ops-guide-docs/index.html
-http://#{host}/administer-cf-docs/index.html
-http://#{host}/pcf-docs/index.html
-http://#{host}/docs/using/services.html
-http://#{host}/docs/running/managing-cf/index.html
-http://#{host}/docs/reference/cc-api.html
-http://#{host}/getting_started.html
-http://#{host}/private_networks.html
-http://#{host}/pcf-docs/guide_tempest.html
-http://#{host}/pcf-docs/troubleshooting.html
-http://#{host}/getting-started/hawq.html
-http://#{host}/getting-started/Hive.html
-http://#{host}/getting-started/pig.html
+http://#{host}/other_page.html
 MAP
+    end
+
+    context 'when there are broken links' do
+      let(:portal_page) { File.join('spec', 'fixtures', 'broken_index.html') }
+
+      it 'announces broken links' do
+        BookbinderLogger.should_receive(:log).with(/broken links!/).once
+
+        spider.generate_sitemap host
+      end
     end
   end
 end

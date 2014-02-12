@@ -23,15 +23,14 @@ class Publisher
     generate_site(options, middleman_dir, repos)
     FileUtils.cp_r build_directory, public_directory
 
-    has_broken_links = spider.has_broken_links?
 
     #Subledes
-    spider.generate_sitemap(options.fetch(:host_for_sitemap), public_directory)
+    spider.generate_sitemap options.fetch(:host_for_sitemap)
     generate_pdf(final_app_dir, options.fetch(:pdf)) if pdf_requested && repo_with_pdf_page_present?(options, repos)
 
     log "Bookbinder bound your book into #{final_app_dir.green}"
 
-    !has_broken_links
+    !spider.has_broken_links?
   end
 
   private
