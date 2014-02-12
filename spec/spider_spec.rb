@@ -1,5 +1,9 @@
 require 'spec_helper'
 
+def write_arbitrary_yaml_to(location)
+  File.open(File.join(location, 'yaml_page.yml'), 'w').puts({foo: 'bar'}.to_yaml)
+end
+
 describe Spider do
   include_context 'tmp_dirs'
 
@@ -11,8 +15,8 @@ describe Spider do
     FileUtils.cp_r 'template_app/.', final_app_dir
     FileUtils.cp portal_page, File.join(public_directory, 'index.html')
     FileUtils.cp other_page, File.join(public_directory, 'other_page.html')
+    write_arbitrary_yaml_to(public_directory)
     WebMock.disable_net_connect!(:allow_localhost => true)
-    spider.generate_sitemap 'example.com'
   end
 
   describe '#has_broken_links?' do
@@ -21,6 +25,8 @@ describe Spider do
     let(:log_file) { File.join(output_dir, 'wget.log') }
     let(:spider) { Spider.new final_app_dir }
     let(:port) { spider.port }
+
+    before { spider.generate_sitemap 'example.com' }
 
     after { WebMock.disable_net_connect! }
 
@@ -55,16 +61,34 @@ describe Spider do
       sitemap.split("\n").should  =~ (<<-MAP).split("\n")
 http://#{host}/index.html
 http://#{host}/other_page.html
+http://#{host}/yaml_page.yml
 MAP
     end
 
     context 'when there are broken links' do
       let(:portal_page) { File.join('spec', 'fixtures', 'broken_index.html') }
 
-      it 'announces broken links' do
-        BookbinderLogger.should_receive(:log).with(/broken links!/).once
+      it 'counts and names them' do
+        broken_links = [
+          "\nFound 6 broken links!".red,
+          'http://localhost:4534/non_existent.yml',
+          'http://localhost:4534/non_existent/index.html',
+          'http://localhost:4534/also_non_existent/index.html',
+          '#missing-anchor',
+          '#ill-formed.anchor',
+          #'#missing',         These fragment identifiers may exist
+          #'#missing.and.bad', on another page, but we don't currently check.
+          '#still-bad=anchor'
+        ]
+
+        announcements = []
+        BookbinderLogger.stub(:log) do |announcement|
+          announcements << announcement unless announcement.match(/Sinatra/)
+        end
 
         spider.generate_sitemap host
+
+        announcements.should =~ broken_links
       end
     end
   end

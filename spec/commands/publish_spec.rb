@@ -9,6 +9,8 @@ describe Cli::Publish do
     FileUtils.cd(book_dir) { spec.run }
   end
 
+  before { Spider.any_instance.stub(:generate_sitemap) }
+
   context 'local' do
     it 'creates some static HTML' do
       Cli::Publish.new.run ['local']

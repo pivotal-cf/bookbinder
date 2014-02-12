@@ -148,7 +148,7 @@ describe Publisher do
                           host_for_sitemap: "docs.dogs.com"
 
         sitemap = File.read File.join(final_app_dir, 'public', 'sitemap.txt')
-        expect(sitemap).to eq (<<DOGS).chomp
+        sitemap.split("\n").should =~ (<<DOGS).split("\n")
 http://docs.dogs.com/index.html
 http://docs.dogs.com/dogs-repo/index.html
 http://docs.dogs.com/dogs-repo/big_dogs/index.html
@@ -216,11 +216,14 @@ DOGS
       let(:pdf_config) { nil }
       let(:local_repo_dir) { nil }
       let(:repos) { [] }
+      let(:spider) { double }
 
       before do
         MiddlemanRunner.any_instance.stub(:run) do |middleman_dir|
           Dir.mkdir File.join(middleman_dir, 'build')
         end
+        spider.stub(:generate_sitemap)
+        spider.stub(:has_broken_links?)
       end
 
       def publish
@@ -230,7 +233,8 @@ DOGS
                           host_for_sitemap: 'example.com',
                           final_app_dir: final_app_dir,
                           pdf: pdf_config,
-                          local_repo_dir: local_repo_dir
+                          local_repo_dir: local_repo_dir,
+                          spider: spider
       end
 
       context 'when the output directory does not yet exist' do
@@ -259,19 +263,15 @@ DOGS
       end
 
       context 'when the spider reports broken links' do
-        before { Spider.any_instance.stub(:find_all_links).and_return [['one.html', 'two.html'], []] }
+        before { spider.stub(:has_broken_links?).and_return true }
 
-        it 'reports the broken links and returns false' do
-          BookbinderLogger.should_receive(:log).with(/2 broken links!/)
-          result = publish
-          expect(result).to be_false
+        it 'returns false' do
+          expect(publish).to be_false
         end
       end
 
-      it 'reports if there are no broken links and returns true' do
-        BookbinderLogger.should_receive(:log).with(/No broken links!/)
-        result = publish
-        expect(result).to be_true
+      it 'returns true when everything is happy' do
+        expect(publish).to be_true
       end
 
       context 'when asked to find repos locally' do

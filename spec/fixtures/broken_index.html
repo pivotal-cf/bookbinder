@@ -17,6 +17,12 @@
       <h2>Deploy Other Apps</h2>
     </a>
   </li>
+
+  <li>
+    <a class="title" href="non_existent.yml">
+      <h2>Deploy Other Apps</h2>
+    </a>
+  </li>
 </ol>
 
 <h2>Broken Internal Anchors</h2>
@@ -28,6 +34,13 @@
   </li>
 
   <li>
+    <a class="title" href="other_page.html#heading">
+      <h2>This Anchor actually DOES exist! Whouldathunkit?</h2>
+      <p>It exists as a potential false positive.  Link-finder better not bork over it!</p>
+    </a>
+  </li>
+
+  <li>
     <a class="title" href="#missing-anchor">
       <h2>Deploy Other Apps</h2>
     </a>
@@ -35,6 +48,24 @@
     <a name="definitely-not-the-right-anchor">
       <h2>Deploy Other Apps</h2>
     </a>
+
+    <a class="title" href="#ill-formed.anchor">
+      <h2>Deploy Other Apps</h2>
+    </a>
+    <a id='ill-formed.anchor'>Even if they match!</a>
+
+    <a class="title" href="other_page.html#missing.and.bad">
+      <h2>Deploy Other Apps</h2>
+    </a>
+  </li>
+
+  <li>
+
+    <a class="title" href="#still-bad=anchor">
+      <h2>Deploy Other Apps</h2>
+    </a>
+    <a id='still-bad=anchor'>Like, seriously, even if they match!</a>
+
   </li>
 </ol>
 </body>
