@@ -1,14 +1,17 @@
 class Spider
+  attr_reader :port
 
   include ShellOut
   include BookbinderLogger
 
-  def initialize(final_app_dir=nil)
+  def initialize(final_app_dir=nil, root_page=nil, port=4534)
     @app_dir = final_app_dir
+    @root_page = root_page || "http://localhost:#{port}/index.html"
+    @port = port
   end
 
   def generate_sitemap(host)
-    @broken_links, working_links = find_all_links
+    @broken_links, working_links = find_all_links_through root_page
     announce_broken_links @broken_links
 
     sitemap_file = File.join(@app_dir, 'public', 'sitemap.txt')
@@ -21,11 +24,8 @@ class Spider
     @broken_links.any? if @broken_links
   end
 
-  def port
-    4534
-  end
-
   private
+  attr_reader :root_page
 
   def announce_broken_links(broken_links)
     if broken_links.any?
@@ -36,20 +36,20 @@ class Spider
     end
   end
 
-  def find_all_links
+  def find_all_links_through(page)
     links = []
-    Dir.chdir(@app_dir) { links = capture_links }
+    Dir.chdir(@app_dir) { links = capture_links page }
     links
   end
 
-  def capture_links
+  def capture_links(page)
     open_results  = Open3.popen3("ruby app.rb #{port}")
     stderr        = open_results[2]
     wait_thread   = open_results[3]
 
     once_sinatra_has_started(stderr) do
       consume_stream_in_separate_thread(stderr)
-      crawl_from "http://localhost:#{port}/index.html"
+      crawl_from page
     end
   ensure
     Process.kill 'KILL', wait_thread[:pid]
