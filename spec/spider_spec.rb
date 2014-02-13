@@ -67,17 +67,20 @@ MAP
 
     context 'when there are broken links' do
       let(:portal_page) { File.join('spec', 'fixtures', 'broken_index.html') }
+      let(:other_page) {File.join('spec', 'fixtures', 'page_with_broken_links.html')}
 
       it 'counts and names them' do
         broken_links = [
-          "\nFound 6 broken links!".red,
+          "\nFound 10 broken links!".red,
           'http://localhost:4534/non_existent.yml',
           'http://localhost:4534/non_existent/index.html',
           'http://localhost:4534/also_non_existent/index.html',
           '#missing-anchor',
           '#ill-formed.anchor',
-          #'#missing',         These fragment identifiers may exist
-          #'#missing.and.bad', on another page, but we don't currently check.
+          '#missing',
+          '#this-doesnt',
+          '#this-doesnt',
+          '#missing.and.bad',
           '#still-bad=anchor'
         ]
 

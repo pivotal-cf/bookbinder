@@ -6,18 +6,20 @@ class Spider
 
   def initialize(final_app_dir=nil, root_page=nil, port=4534)
     @app_dir = final_app_dir
-    @root_page = root_page || "http://localhost:#{port}/index.html"
+    domain = "http://localhost:#{port}"
+    @root_page = root_page || "#{domain}/index.html"
+    @sieve = Sieve.new domain: domain
     @port = port
   end
 
   def generate_sitemap(host)
-    @broken_links, working_links = find_all_links_through root_page
+    links = []
+    Dir.chdir(@app_dir) { links = capture_links @root_page }
+    @broken_links, working_links = links
+
     announce_broken_links @broken_links
 
-    sitemap_file = File.join(@app_dir, 'public', 'sitemap.txt')
-    File.open(sitemap_file, 'w') do |file|
-      file.write substitute_hostname(host, working_links.join("\n"))
-    end
+    write_sitemap_txt(host, working_links)
   end
 
   def has_broken_links?
@@ -25,7 +27,13 @@ class Spider
   end
 
   private
-  attr_reader :root_page
+
+  def write_sitemap_txt(host, working_links)
+    sitemap_file = File.join(@app_dir, 'public', 'sitemap.txt')
+    File.open(sitemap_file, 'w') do |file|
+      file.write substitute_hostname(host, working_links.join("\n"))
+    end
+  end
 
   def announce_broken_links(broken_links)
     if broken_links.any?
@@ -34,12 +42,6 @@ class Spider
     else
       log "\nNo broken links!".green
     end
-  end
-
-  def find_all_links_through(page)
-    links = []
-    Dir.chdir(@app_dir) { links = capture_links page }
-    links
   end
 
   def capture_links(page)
@@ -59,49 +61,14 @@ class Spider
     broken_links = []
     sitemap = [url]
 
-    Anemone.crawl(url) do |anemone|
-      anemone.focus_crawl { |page| page.links.reject {|link| link.to_s.match(/%23/)} }
-      anemone.on_every_page { |page| sieve_links_into page, broken_links, sitemap }
+    2.times do |i|
+      Anemone.crawl(url) do |anemone|
+        anemone.focus_crawl { |page| page.links.reject {|link| link.to_s.match(/%23/)} }
+        anemone.on_every_page { |page| @sieve.links_into page, broken_links, sitemap, i == 0 }
+      end
     end
 
     [broken_links.compact, sitemap.compact.uniq]
-  end
-
-  def sieve_links_into(page, broken_links, sitemap)
-    if page.not_found?
-      broken_links << page.url.to_s
-    else
-      broken_links.concat broken_anchors(page) if page.doc
-      sitemap << page.url.to_s
-    end
-  end
-
-  def broken_anchors(page)
-    fragment_identifiers(page).select { |identifier| no_target_for identifier, on: page }
-  end
-
-  def fragment_identifiers(page)
-    anchor_tags = page.doc.css('a')
-    anchor_tags.reduce([]) do |identifiers, anchor|
-      id = fragment_id(anchor)
-      identifiers << id if id
-      identifiers
-    end
-  end
-
-  def fragment_id(anchor)
-    if anchor['href']
-      possible_tag = anchor['href'].match(/^#.*/).to_s
-      possible_tag unless possible_tag.empty?
-    end
-  end
-
-  def no_target_for(anchor, on: nil)
-    id_selector = anchor
-    name_selector = "[name=#{anchor.to_s.gsub('#', '')}]"
-    on.doc.css(id_selector).none? && on.doc.css(name_selector).none?
-  rescue Nokogiri::CSS::SyntaxError
-    true
   end
 
   def once_sinatra_has_started(stderr)

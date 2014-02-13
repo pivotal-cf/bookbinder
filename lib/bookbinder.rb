@@ -15,6 +15,7 @@ require_relative 'bookbinder/repository'
 require_relative 'bookbinder/doc_repo'
 require_relative 'bookbinder/book'
 require_relative 'bookbinder/code_repo'
+require_relative 'bookbinder/sieve'
 require_relative 'bookbinder/spider'
 
 require_relative 'bookbinder/green_build_repository'
