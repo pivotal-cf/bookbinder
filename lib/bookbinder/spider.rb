@@ -64,7 +64,7 @@ class Spider
     2.times do |i|
       Anemone.crawl(url) do |anemone|
         anemone.focus_crawl { |page| page.links.reject {|link| link.to_s.match(/%23/)} }
-        anemone.on_every_page { |page| @sieve.links_into page, broken_links, sitemap, i == 0 }
+        anemone.on_every_page { |page| @sieve.links_into Stabilimentum.new(page), broken_links, sitemap, i == 0 }
       end
     end
 
