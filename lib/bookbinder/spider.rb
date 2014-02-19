@@ -23,7 +23,7 @@ class Spider
   end
 
   def has_broken_links?
-    @broken_links.any? if @broken_links
+    @broken_links.any? {|link| !link.include?('#') } if @broken_links
   end
 
   private
@@ -38,7 +38,10 @@ class Spider
   def announce_broken_links(broken_links)
     if broken_links.any?
       log "\nFound #{broken_links.count} broken links!".red
-      broken_links.each { |line| log line }
+      broken_links.each do |link|
+        color = link.include?('#') ? :yellow : :blue
+        log link.send(color)
+      end
     else
       log "\nNo broken links!".green
     end

@@ -72,16 +72,16 @@ MAP
       it 'counts and names them' do
         broken_links = [
           "\nFound 10 broken links!".red,
-          'http://localhost:4534/non_existent.yml',
-          'http://localhost:4534/non_existent/index.html',
-          'http://localhost:4534/also_non_existent/index.html',
-          '#missing-anchor',
-          '#ill-formed.anchor',
-          '#missing',
-          '#this-doesnt',
-          '#this-doesnt',
-          '#missing.and.bad',
-          '#still-bad=anchor'
+          'http://localhost:4534/non_existent.yml'.blue,
+          'http://localhost:4534/non_existent/index.html'.blue,
+          'http://localhost:4534/also_non_existent/index.html'.blue,
+          '#missing-anchor'.yellow,
+          '#ill-formed.anchor'.yellow,
+          '#missing'.yellow,
+          '#this-doesnt'.yellow,
+          '#this-doesnt'.yellow,
+          '#missing.and.bad'.yellow,
+          '#still-bad=anchor'.yellow
         ]
 
         announcements = []
