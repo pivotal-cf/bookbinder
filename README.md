@@ -1,6 +1,6 @@
 # Bookbinder
 
-Bookbinder is a gem that binds together a unified documentation web-app from disparate source material, stored as repositories of markdown or plain HTML on GitHub. It runs [middleman](http://middlemanapp.com/) to produce a (CF-pushable) Sinatra app.
+Bookbinder is a gem that binds together a unified documentation web-app from disparate source material, stored as repositories of markdown or plain HTML on GitHub. It runs [middleman](http://middlemanapp.com/) to produce a (CF-pushable) Rackup app.
 
 ## About
 
@@ -142,7 +142,7 @@ will find doc repos by downloading the latest version from github.
 
 The publish command creates 2 output directories, one named `output/` and one named `final_app/`. These are placed in the current directory and are cleared each time you run bookbinder.
 
-`final_app/` contains bookbinder's ultimate output: a Sinatra web-app that can be pushed to cloud foundry or run locally.
+`final_app/` contains bookbinder's ultimate output: a Rackup web-app that can be pushed to cloud foundry or run locally.
 
 `output/` contains intermediary state, including the final prepared directory that the `publish` script ran middleman against, in `output/master_middleman`.
 
@@ -168,7 +168,7 @@ Books can be published from a tag, like so:
     bundle
     ruby app.rb
 
-This will start a Sinatra server to serve your documentation website locally at [http://localhost:4567/](http://localhost:4567/). While making edits in documentation repos, we recommend leaving this running in a dedicated shell window.  It can be terminated by hitting `ctrl-c`.
+This will start a Rackup server to serve your documentation website locally at [http://localhost:4567/](http://localhost:4567/). While making edits in documentation repos, we recommend leaving this running in a dedicated shell window.  It can be terminated by hitting `ctrl-c`.
 
 You should only need to run the `bundle` the first time around. 
 

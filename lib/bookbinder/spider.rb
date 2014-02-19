@@ -1,3 +1,5 @@
+require 'pty'
+
 class Spider
   attr_reader :port
 
@@ -48,16 +50,22 @@ class Spider
   end
 
   def capture_links(page)
-    open_results  = Open3.popen3("ruby app.rb #{port}")
-    stderr        = open_results[2]
-    wait_thread   = open_results[3]
+    io, wait_thread_pid = start_web_server
 
-    once_sinatra_has_started(stderr) do
-      consume_stream_in_separate_thread(stderr)
+    once_server_has_started(io) do
+      consume_stream_in_separate_thread(io)
       crawl_from page
     end
   ensure
-    Process.kill 'KILL', wait_thread[:pid]
+    Process.kill 'KILL', wait_thread_pid
+  end
+
+  def start_web_server
+    open_results  = PTY.spawn("rackup -p #{port}")
+    stdouts       = open_results[0]
+    pid           = open_results[2]
+
+    return stdouts, pid
   end
 
   def crawl_from(url)
@@ -74,17 +82,17 @@ class Spider
     [broken_links.compact, sitemap.compact.uniq]
   end
 
-  def once_sinatra_has_started(stderr)
+  def once_server_has_started(io)
     begin
-      stderr_line = stderr.gets
-      log "Sinatra says: #{stderr_line.chomp}"
-    end until stderr_line.include?('has taken the stage')
+      line = io.gets
+      log "Vienna says, #{line}"
+    end until line && line.include?('Listening on')
 
-    log 'Sinatra appears to have taken the stage!'
+    log 'Vienna is lovely, this time of year.'
     yield
   end
 
-  # avoids deadlocks by ensuring sinatra doesn't hang waiting to write to stderr
+  # avoids deadlocks by ensuring rack doesn't hang waiting to write to stderr
   def consume_stream_in_separate_thread(io_stream)
     Thread.new do
       s = nil

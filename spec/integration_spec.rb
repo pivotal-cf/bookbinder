@@ -10,7 +10,7 @@ describe '$ bookbinder' do
 
   describe 'publish' do
     describe 'local' do
-      it 'generates a sinatra app' do
+      it 'generates a rack app' do
         `#{GEM_ROOT}/bin/bookbinder publish local`
 
         index_html = File.read File.join('final_app', 'public', 'foods', 'sweet','index.html')

@@ -10,13 +10,12 @@ class SubmoduleAwareAssets < ::Middleman::Extension
 
   helpers do
     def asset_url(path, prefix="")
-      path = super(path, prefix)
-      url = if path.include?('//') || path.start_with?('data:') || !current_resource
-              path
-            else
-              current_dir = Pathname('/' + current_resource.destination_path)
-              Pathname(path).relative_path_from(current_dir.dirname).to_s
-            end
+      url = super(path, prefix)
+
+      unless global_asset_at? url
+        current_dir = Pathname('/' + current_resource.destination_path)
+        url = Pathname(url).relative_path_from(current_dir.dirname).to_s
+      end
 
       # middleman assumes your assets live at the top level, but they may be in the subrepo instead
       # here we start at top level and dive down until we find the real asset
@@ -29,7 +28,18 @@ class SubmoduleAwareAssets < ::Middleman::Extension
 
       url
     end
+
+    private
+
+    def global_asset_at?(path)
+      path.include?('//') ||
+        path.start_with?('data:') ||
+        !current_resource ||
+        path.index('.css') ||
+        path.index('.js')
+    end
   end
+
 end
 
 ::Middleman::Extensions.register(:submodule_aware_assets, SubmoduleAwareAssets)

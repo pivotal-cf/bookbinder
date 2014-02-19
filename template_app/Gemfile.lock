@@ -33,6 +33,8 @@ GEM
       multi_json (~> 1.7)
       multipart-post (~> 1.1)
       rubyzip (~> 0.9)
+    daemons (1.1.9)
+    eventmachine (1.0.3)
     i18n (0.6.5)
     interact (0.5.2)
     json_pure (1.8.1)
@@ -42,24 +44,24 @@ GEM
     multi_json (1.8.2)
     multipart-post (1.2.0)
     rack (1.5.2)
-    rack-protection (1.5.1)
-      rack
     rest-client (1.6.7)
       mime-types (>= 1.16)
     rubyzip (0.9.9)
-    sinatra (1.4.4)
-      rack (~> 1.4)
-      rack-protection (~> 1.4)
-      tilt (~> 1.3, >= 1.3.4)
+    thin (1.6.1)
+      daemons (>= 1.0.9)
+      eventmachine (>= 1.0.0)
+      rack (>= 1.0.0)
     thread_safe (0.1.3)
       atomic
-    tilt (1.4.1)
     tzinfo (0.3.38)
     uuidtools (2.1.4)
+    vienna (0.4.0)
+      rack (~> 1.5)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   cf
-  sinatra
+  thin
+  vienna

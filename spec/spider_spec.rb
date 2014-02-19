@@ -86,7 +86,7 @@ MAP
 
         announcements = []
         BookbinderLogger.stub(:log) do |announcement|
-          announcements << announcement unless announcement.match(/Sinatra/)
+          announcements << announcement unless announcement.match(/Vienna/)
         end
 
         spider.generate_sitemap host
