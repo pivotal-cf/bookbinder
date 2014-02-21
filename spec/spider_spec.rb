@@ -33,7 +33,7 @@ describe Spider do
     let(:output_dir) { tmp_subdir 'output' }
     let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:log_file) { File.join(output_dir, 'wget.log') }
-    let(:spider) { Spider.new final_app_dir, nil, port }
+    let(:spider) { Spider.new app_dir: final_app_dir, port: port }
 
     after { WebMock.disable_net_connect! }
 
@@ -63,7 +63,7 @@ describe Spider do
   describe '#generate_sitemap' do
     let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:intermediate_dir) { File.join('spec', 'fixtures') }
-    let(:spider) { Spider.new final_app_dir, nil, port }
+    let(:spider) { Spider.new app_dir: final_app_dir, port: port }
     let(:host) { 'example.com' }
     let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
 

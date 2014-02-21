@@ -8,7 +8,7 @@ class Publisher
     final_app_dir                   = options.fetch(:final_app_dir)
     pdf_requested                   = options.has_key?(:pdf) && options[:pdf]
     master_middleman_dir            = options.fetch(:master_middleman_dir)
-    spider                          = options.fetch(:spider) { Spider.new(final_app_dir) }
+    spider                          = options.fetch(:spider) { Spider.new(app_dir: final_app_dir) }
     middleman_dir                   = File.join intermediate_directory, 'master_middleman'
     middleman_source_directory      = File.join middleman_dir, 'source'
     build_directory                 = File.join middleman_dir, 'build/.'

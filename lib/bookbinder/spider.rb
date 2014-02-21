@@ -4,8 +4,8 @@ class Spider
   include ShellOut
   include BookbinderLogger
 
-  def initialize(final_app_dir=nil, root_page=nil, port=1024+rand(65535-1024))
-    @app_dir = final_app_dir
+  def initialize(app_dir:nil, root_page:nil, port:1024+rand(65535-1024))
+    @app_dir = app_dir || raise('Spiders must be initialized with an app directory.')
     domain = "http://localhost:#{port}"
     @root_page = root_page || "#{domain}/index.html"
     @sieve = Sieve.new domain: domain
@@ -76,10 +76,12 @@ class Spider
     sitemap = [url]
 
     2.times do |i|
+      is_first_pass = (i==0)
+
       Anemone.crawl(url) do |anemone|
-        anemone.focus_crawl { |page| page.links.reject {|link| link.to_s.match(/%23/)} }
+        dont_visit_fragments(anemone)
         anemone.on_every_page do |page|
-          broken, working = @sieve.links_from Stabilimentum.new(page), i == 0
+          broken, working = @sieve.links_from Stabilimentum.new(page), is_first_pass
           broken_links.concat broken
           sitemap.concat working
         end
@@ -88,6 +90,10 @@ class Spider
 
     broken_links.concat @sieve.broken_links_in_all_stylesheets
     [broken_links.compact.uniq, sitemap.compact.uniq]
+  end
+
+  def dont_visit_fragments(anemone)
+    anemone.focus_crawl { |page| page.links.reject { |link| link.to_s.match(/%23/) } }
   end
 
   def once_server_has_started(io)
