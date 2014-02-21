@@ -1,4 +1,4 @@
-require_relative '../template_app/app.rb'
+require 'spec_helper'
 
 describe Vienna::Application do
   it 'adds / to paths without them' do

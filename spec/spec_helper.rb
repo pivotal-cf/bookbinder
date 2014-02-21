@@ -62,6 +62,7 @@ def mock_github_for(repo_name, some_ref='master')
 end
 
 require_relative '../lib/bookbinder'
+require_relative '../template_app/app.rb'
 require_relative 'fixtures/markdown_repo_fixture'
 
 #GEM_ROOT = Dir.pwd
@@ -102,6 +103,4 @@ RSpec.configure do |config|
 
   config.include SpecHelperMethods
 end
-
-
 
