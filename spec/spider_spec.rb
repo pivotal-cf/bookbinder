@@ -75,16 +75,14 @@ describe Spider do
 http://#{host}/index.html
 http://#{host}/other_page.html
 http://#{host}/yaml_page.yml
-MAP
+      MAP
     end
 
     context 'when there are broken links' do
       let(:portal_page) { File.join('spec', 'fixtures', 'broken_index.html') }
       let(:other_page) {File.join('spec', 'fixtures', 'page_with_broken_links.html')}
-
-      it 'counts and names them' do
-        broken_links = [
-          "\nFound 13 broken links!".red,
+      let(:broken_links) do
+        [
           "/index.html => http://localhost:#{port}/non_existent.yml".blue,
           "/index.html => http://localhost:#{port}/non_existent/index.html".blue,
           "/index.html => http://localhost:#{port}/also_non_existent/index.html".blue,
@@ -100,15 +98,30 @@ MAP
           'public/stylesheet.css => /absent-absolute.gif'.blue,
           'public/stylesheet.css => http://something-nonexistent.com/absent-remote.gif'.blue,
         ]
+      end
 
+      it 'names them' do
         announcements = []
         BookbinderLogger.stub(:log) do |announcement|
-          announcements << announcement unless announcement.match(/Vienna/)
+          announcements << announcement unless announcement.match(/Vienna|broken links!/)
         end
 
         spider.generate_sitemap host
 
         announcements.should =~ broken_links
+      end
+
+      it 'logs a count of them' do
+        broken_link_counts = 2.times.map { "\nFound #{broken_links.count} broken links!".red }
+
+        announcements = []
+        BookbinderLogger.stub(:log) do |announcement|
+          announcements << announcement if announcement.match(/broken links!/)
+        end
+
+        spider.generate_sitemap host
+
+        announcements.should =~ broken_link_counts
       end
     end
   end
