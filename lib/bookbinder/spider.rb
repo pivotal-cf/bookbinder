@@ -12,6 +12,7 @@ class Spider
     @root_page = root_page || "#{domain}/index.html"
     @sieve = Sieve.new domain: domain
     @port = port
+    @broken_links = []
   end
 
   def generate_sitemap(host)
@@ -26,6 +27,10 @@ class Spider
 
   def has_broken_links?
     @broken_links.any? {|link| !link.include?('#') } if @broken_links
+  end
+
+  def self.prepend_location(location, url)
+    "#{URI(location).path} => #{url}"
   end
 
   private
@@ -75,11 +80,16 @@ class Spider
     2.times do |i|
       Anemone.crawl(url) do |anemone|
         anemone.focus_crawl { |page| page.links.reject {|link| link.to_s.match(/%23/)} }
-        anemone.on_every_page { |page| @sieve.links_into Stabilimentum.new(page), broken_links, sitemap, i == 0 }
+        anemone.on_every_page do |page|
+          broken, working = @sieve.links_from Stabilimentum.new(page), i == 0
+          broken_links.concat broken
+          sitemap.concat working
+        end
       end
     end
 
-    [broken_links.compact, sitemap.compact.uniq]
+    broken_links.concat @sieve.broken_links_in_all_stylesheets
+    [broken_links.compact.uniq, sitemap.compact.uniq]
   end
 
   def once_server_has_started(io)

@@ -1,0 +1,28 @@
+body {
+    background-image:url(http://something-nonexistent.com/absent-remote.gif);
+}
+
+.foo {
+    background-image:url(absent-relative.gif);
+}
+
+.bar {
+    background-image:url(/absent-absolute.gif);
+}
+
+div {
+    background-image:url(http://something-surely-existenz.com/present-remote.png);
+}
+
+.baz {
+    background-image:url(../images/present-relative.png);
+}
+
+.quux {
+    background-image:url(/present-absolute.png);
+}
+
+.balrog {
+    background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAPFBMVEX///+1tbWwsLCtra3///+Li4v5+fnZ2dn8/PzT09PPz8+rq6uhoaHR0dFycnJwcHB6enp4eHiDg4OAgIBkVnOaAAAADnRSTlMAIiJV3e7u7u7u7u7u7rDOyYEAAABQSURBVHhevcpJEoAwCAVRop8MDhD1/nc1Booj2MtXTUQLq8roWsni3jKArN1FCma6+yNwwGFPwOhyiORHyAHV4AwoE/jeqkF7+IPE4iknegHp3AV/ch9HbQAAAABJRU5ErkJggg==);
+    color: magenta;
+}

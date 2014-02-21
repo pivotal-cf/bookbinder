@@ -8,11 +8,20 @@ describe Spider do
   include_context 'tmp_dirs'
 
   let(:other_page) {File.join('spec', 'fixtures', 'page_with_no_links.html')}
+  let(:stylesheet) {File.join('spec', 'fixtures', 'stylesheet.css')}
+  let(:present_image) {File.join('spec', 'fixtures', '$!.png')}
+  let(:public_directory) { File.join(final_app_dir, 'public') }
 
   before do
-    public_directory = File.join(final_app_dir, 'public')
+    stub_request(:get, "http://something-nonexistent.com/absent-remote.gif").to_return(:status => 404, :body => "", :headers => {})
+    stub_request(:get, "http://something-surely-existenz.com/present-remote.png").to_return(:status => 200, :body => "", :headers => {})
+
     FileUtils.mkdir_p public_directory
     FileUtils.cp_r 'template_app/.', final_app_dir
+    FileUtils.mkdir(File.join public_directory, 'images')
+    FileUtils.cp present_image, File.join(public_directory, 'images', 'present-relative.png')
+    FileUtils.cp present_image, File.join(public_directory, 'present-absolute.png')
+    FileUtils.cp stylesheet, File.join(public_directory, 'stylesheet.css')
     FileUtils.cp portal_page, File.join(public_directory, 'index.html')
     FileUtils.cp other_page, File.join(public_directory, 'other_page.html')
     write_arbitrary_yaml_to(public_directory)
@@ -26,14 +35,17 @@ describe Spider do
     let(:spider) { Spider.new final_app_dir }
     let(:port) { spider.port }
 
-    before { spider.generate_sitemap 'example.com' }
-
     after { WebMock.disable_net_connect! }
 
     context 'when there are no broken links' do
       let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
 
+      before do
+        FileUtils.rm File.join(public_directory, 'stylesheet.css')
+      end
+
       it 'returns false' do
+        spider.generate_sitemap 'example.com'
         spider.should_not have_broken_links
       end
     end
@@ -42,6 +54,7 @@ describe Spider do
       let(:portal_page) { File.join('spec', 'fixtures', 'broken_index.html') }
 
       it 'returns true' do
+        spider.generate_sitemap 'example.com'
         spider.should have_broken_links
       end
     end
@@ -71,7 +84,7 @@ MAP
 
       it 'counts and names them' do
         broken_links = [
-          "\nFound 10 broken links!".red,
+          "\nFound 12 broken links!".red,
           '/index.html => http://localhost:4534/non_existent.yml'.blue,
           '/index.html => http://localhost:4534/non_existent/index.html'.blue,
           '/index.html => http://localhost:4534/also_non_existent/index.html'.blue,
@@ -79,9 +92,12 @@ MAP
           '/index.html => #ill-formed.anchor'.yellow,
           '/index.html => #missing'.yellow,
           '/other_page.html => #this-doesnt'.yellow,
-          '/other_page.html => #this-doesnt'.yellow,
+          #'/other_page.html => #this-doesnt'.yellow, #Even though this shows up twice, we ignore duplicates
           '/index.html => #missing.and.bad'.yellow,
-          '/index.html => #still-bad=anchor'.yellow
+          '/index.html => #still-bad=anchor'.yellow,
+          'public/stylesheet.css => absent-relative.gif'.blue,
+          'public/stylesheet.css => /absent-absolute.gif'.blue,
+          'public/stylesheet.css => http://something-nonexistent.com/absent-remote.gif'.blue
         ]
 
         announcements = []

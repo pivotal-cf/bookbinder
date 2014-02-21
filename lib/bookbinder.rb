@@ -7,6 +7,7 @@ require 'octokit'
 require 'middleman-core/cli'
 require 'middleman-core/profiling'
 require 'anemone'
+require 'css_parser'
 
 require_relative 'bookbinder/shell_out'
 require_relative 'bookbinder/bookbinder_logger'

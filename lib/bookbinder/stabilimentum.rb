@@ -1,8 +1,6 @@
 class Spider
   private
 
-  # Please direct anger/frustration regarding this name to
-  # Gavin Morgan, mailto: gmorgan@gopivotal.com
   class Stabilimentum # Decorates a piece of the web.
     def initialize(page)
       @page = page

@@ -25,4 +25,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'faraday', ['~> 0.8.8']
   s.add_runtime_dependency 'faraday_middleware', ['~> 0.9.0']
   s.add_runtime_dependency 'anemone'
+  s.add_runtime_dependency 'css_parser'
 end
