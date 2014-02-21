@@ -43,10 +43,13 @@ class Spider
   def announce_broken_links(broken_links)
     if broken_links.any?
       log "\nFound #{broken_links.count} broken links!".red
+
       broken_links.each do |link|
         color = link.include?('#') ? :yellow : :blue
         log link.send(color)
       end
+
+      log "\nFound #{broken_links.count} broken links!".red
     else
       log "\nNo broken links!".green
     end
