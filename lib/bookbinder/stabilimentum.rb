@@ -2,6 +2,8 @@ class Spider
   private
 
   class Stabilimentum # Decorates a piece of the web.
+    FudgedUri = Struct.new(:path, :fragment, :to_s)
+
     def initialize(page)
       @page = page
     end
@@ -28,20 +30,25 @@ class Spider
     end
 
     def fragment_identifiers(targeting_locally: false)
-      anchors.map do |anchor|
-        uri = URI anchor['href'].to_s
-        uri if target_scoped_appropriately?(uri, targeting_locally) && has_fragment(uri)
-      end.compact
+      anchors.map { |anchor| appropriately_scoped_fragment_uri(anchor, targeting_locally) }.compact
     end
 
+
     private
+
+    def appropriately_scoped_fragment_uri(anchor, targeting_locally)
+      uri = URI anchor['href'].to_s
+      uri if destination_scoped_appropriately?(uri, targeting_locally) && has_fragment(uri)
+    rescue URI::InvalidURIError => e
+      FudgedUri.new('', anchor['href'], anchor['href'])
+    end
 
     def has_fragment(uri)
       !uri.fragment.to_s.empty?
     end
 
-    def target_scoped_appropriately?(uri, local_targets_desired)
-      local_targets_desired ? uri.path.to_s.empty? : !uri.path.to_s.empty?
+    def destination_scoped_appropriately?(uri, local_anchors_sought)
+      local_anchors_sought ? uri.path.to_s.empty? : !uri.path.to_s.empty?
     end
 
     def anchors

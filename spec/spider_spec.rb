@@ -7,6 +7,7 @@ end
 describe Spider do
   include_context 'tmp_dirs'
 
+  let(:port) { 4354 }
   let(:other_page) {File.join('spec', 'fixtures', 'page_with_no_links.html')}
   let(:stylesheet) {File.join('spec', 'fixtures', 'stylesheet.css')}
   let(:present_image) {File.join('spec', 'fixtures', '$!.png')}
@@ -32,8 +33,7 @@ describe Spider do
     let(:output_dir) { tmp_subdir 'output' }
     let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:log_file) { File.join(output_dir, 'wget.log') }
-    let(:spider) { Spider.new final_app_dir }
-    let(:port) { spider.port }
+    let(:spider) { Spider.new final_app_dir, nil, port }
 
     after { WebMock.disable_net_connect! }
 
@@ -63,7 +63,7 @@ describe Spider do
   describe '#generate_sitemap' do
     let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:intermediate_dir) { File.join('spec', 'fixtures') }
-    let(:spider) { Spider.new final_app_dir }
+    let(:spider) { Spider.new final_app_dir, nil, port }
     let(:host) { 'example.com' }
     let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
 
@@ -84,10 +84,10 @@ MAP
 
       it 'counts and names them' do
         broken_links = [
-          "\nFound 12 broken links!".red,
-          '/index.html => http://localhost:4534/non_existent.yml'.blue,
-          '/index.html => http://localhost:4534/non_existent/index.html'.blue,
-          '/index.html => http://localhost:4534/also_non_existent/index.html'.blue,
+          "\nFound 13 broken links!".red,
+          "/index.html => http://localhost:#{port}/non_existent.yml".blue,
+          "/index.html => http://localhost:#{port}/non_existent/index.html".blue,
+          "/index.html => http://localhost:#{port}/also_non_existent/index.html".blue,
           '/index.html => #missing-anchor'.yellow,
           '/index.html => #ill-formed.anchor'.yellow,
           '/index.html => #missing'.yellow,
@@ -95,9 +95,10 @@ MAP
           #'/other_page.html => #this-doesnt'.yellow, #Even though this shows up twice, we ignore duplicates
           '/index.html => #missing.and.bad'.yellow,
           '/index.html => #still-bad=anchor'.yellow,
+          '/other_page.html => #another"bad"anchor'.yellow,
           'public/stylesheet.css => absent-relative.gif'.blue,
           'public/stylesheet.css => /absent-absolute.gif'.blue,
-          'public/stylesheet.css => http://something-nonexistent.com/absent-remote.gif'.blue
+          'public/stylesheet.css => http://something-nonexistent.com/absent-remote.gif'.blue,
         ]
 
         announcements = []

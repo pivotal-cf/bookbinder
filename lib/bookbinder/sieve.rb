@@ -50,9 +50,9 @@ class Sieve
   def target_exists?(localized_identifier)
     link = strip_location(localized_identifier)
 
-    data_uri      = /^data:image\//
-    remote_uri    = /^https?:\/\//
-    absolute_uri  = /^\//
+    data_uri      = /^['"]?data:image\//
+    remote_uri    = /^['"]?https?:\/\//
+    absolute_uri  = /^['"]?\//
     relative_uri  = //
 
     case link

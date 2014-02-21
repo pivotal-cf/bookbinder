@@ -1,12 +1,10 @@
 require 'pty'
 
 class Spider
-  attr_reader :port
-
   include ShellOut
   include BookbinderLogger
 
-  def initialize(final_app_dir=nil, root_page=nil, port=4534)
+  def initialize(final_app_dir=nil, root_page=nil, port=1024+rand(65535-1024))
     @app_dir = final_app_dir
     domain = "http://localhost:#{port}"
     @root_page = root_page || "#{domain}/index.html"
@@ -66,7 +64,7 @@ class Spider
   end
 
   def start_web_server
-    open_results  = PTY.spawn("rackup -p #{port}")
+    open_results  = PTY.spawn("rackup -p #{@port}")
     stdouts       = open_results[0]
     pid           = open_results[2]
 
@@ -112,6 +110,6 @@ class Spider
   end
 
   def substitute_hostname(host, links_string)
-    links_string.gsub(/localhost:#{port}/, host)
+    links_string.gsub(/localhost:#{@port}/, host)
   end
 end
