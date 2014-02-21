@@ -1,3 +1,4 @@
+[![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/pivotal-cf/docs-bookbinder) [![Build Status](https://travis-ci.org/pivotal-cf/docs-bookbinder.png?branch=master)](https://travis-ci.org/pivotal-cf/docs-bookbinder)
 # Bookbinder
 
 Bookbinder is a gem that binds together a unified documentation web-app from disparate source material, stored as repositories of markdown or plain HTML on GitHub. It runs [middleman](http://middlemanapp.com/) to produce a (CF-pushable) Rackup app.
