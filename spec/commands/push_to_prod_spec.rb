@@ -6,10 +6,9 @@ describe Cli::PushToProd do
   around do |spec|
     @build_number = '17'
 
-    temp_library = tmp_subdir 'markdown_repos'
-    book_dir = File.join temp_library, 'book'
-    FileUtils.cp_r 'spec/fixtures/markdown_repos/.', temp_library
-    FileUtils.cd(book_dir) { spec.run }
+    temp_library = tmp_subdir 'repositories'
+    FileUtils.cp_r File.join(RepoFixture.repos_dir, '.'), temp_library
+    FileUtils.cd(File.join temp_library, 'book') { spec.run }
   end
 
   it 'should call GreenBuildRepository#download with correct parameters' do

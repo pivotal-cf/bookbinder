@@ -19,7 +19,7 @@ describe Publisher do
 
       after { WebMock.disable_net_connect! }
 
-      let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir }
+      let(:local_repo_dir) { RepoFixture.repos_dir }
 
       it 'it creates a directory per repo with the generated html from middleman' do
         some_repo       = 'my-docs-org/my-docs-repo'
@@ -275,7 +275,7 @@ DOGS
       end
 
       context 'when asked to find repos locally' do
-        let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir }
+        let(:local_repo_dir) { RepoFixture.repos_dir }
 
         context 'when the repository used to generate the pdf was skipped' do
           let(:repos) { [{'github_repo' => 'org/repo', 'directory' => 'pretty_dir'}] }

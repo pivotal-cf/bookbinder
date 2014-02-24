@@ -10,8 +10,8 @@ shared_context 'tmp_dirs' do
   let(:tmpdir) { Dir.mktmpdir }
 
   def arrange_fixture_book_and_constituents
-    temp_library = tmp_subdir 'markdown_repos'
-    FileUtils.cp_r "#{GEM_ROOT}/spec/fixtures/markdown_repos/.", temp_library
+    temp_library = tmp_subdir 'repositories'
+    FileUtils.cp_r File.join(RepoFixture.repos_dir, '.'),  temp_library
 
     book_dir = File.join temp_library, 'book'
     git_dir = File.join book_dir, '.git'
@@ -42,7 +42,7 @@ def stub_github_for(repo_name, some_ref='master')
   github.stub(:archive_link).with(repo_name, ref: some_ref)
     .and_return(zipped_repo_url)
 
-  zipped_repo = MarkdownRepoFixture.tarball repo_name.split('/').last, some_ref
+  zipped_repo = RepoFixture.tarball repo_name.split('/').last, some_ref
   stub_request(:get, zipped_repo_url).to_return(
       :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
   )
@@ -55,7 +55,7 @@ def mock_github_for(repo_name, some_ref='master')
     .once
     .and_return(zipped_repo_url)
 
-  zipped_repo = MarkdownRepoFixture.tarball repo_name.split('/').last, some_ref
+  zipped_repo = RepoFixture.tarball repo_name.split('/').last, some_ref
   stub_request(:get, zipped_repo_url).to_return(
       :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
   )
@@ -63,7 +63,7 @@ end
 
 require_relative '../lib/bookbinder'
 require_relative '../template_app/app.rb'
-require_relative 'fixtures/markdown_repo_fixture'
+require_relative 'fixtures/repo_fixture'
 
 #GEM_ROOT = Dir.pwd
 

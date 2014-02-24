@@ -16,7 +16,7 @@ describe DocRepo do
         )
       end
 
-      let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'dogs-repo', sha }
+      let(:zipped_markdown_repo) { RepoFixture.tarball 'dogs-repo', sha }
       let(:destination_dir) { tmp_subdir('output') }
       let(:repo_name) { 'great_org/dogs-repo' }
       let(:download_url) { "https://github.com/great_org/dogs-repo/archive/#{sha}.tar.gz" }
@@ -93,7 +93,7 @@ describe DocRepo do
 
   describe '#download_and_unzip' do
     let(:destination_dir) { tmp_subdir 'middleman_source_dir' }
-    let(:zipped_markdown_repo) { MarkdownRepoFixture.tarball 'my-docs-repo', 'some-sha' }
+    let(:zipped_markdown_repo) { RepoFixture.tarball 'my-docs-repo', 'some-sha' }
     let(:repo_hash) { {'github_repo' => 'my-docs-org/my-docs-repo', 'sha' => 'some-sha'} }
     let(:repo) { DocRepo.new(repo_hash, nil, local_repo_dir, nil) }
 
@@ -118,7 +118,7 @@ describe DocRepo do
     end
 
     context 'when told to look for repos locally' do
-      let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir }
+      let(:local_repo_dir) { RepoFixture.repos_dir }
 
       it 'finds them in the supplied directory' do
         repo.copy_from_local destination_dir
@@ -137,7 +137,7 @@ describe DocRepo do
     end
 
     context 'when a custom directory is specified for the repo' do
-      let(:local_repo_dir) { MarkdownRepoFixture.markdown_repos_dir }
+      let(:local_repo_dir) { RepoFixture.repos_dir }
       let(:repo_hash) { {'github_repo' => 'my-docs-org/my-docs-repo',
                          'sha' => 'some-sha', 'directory' => 'pretty_url_path'} }
 

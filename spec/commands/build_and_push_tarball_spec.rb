@@ -5,9 +5,9 @@ describe Cli::BuildAndPushTarball do
   around do |spec|
     @build_number = '17'
 
-    temp_library = tmp_subdir 'markdown_repos'
+    temp_library = tmp_subdir 'repositories'
     book_dir = File.join temp_library, 'book'
-    FileUtils.cp_r 'spec/fixtures/markdown_repos/.', temp_library
+    FileUtils.cp_r File.join(RepoFixture.repos_dir, '.'), temp_library
     FileUtils.cd(book_dir) { spec.run }
   end
 

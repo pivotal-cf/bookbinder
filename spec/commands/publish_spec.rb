@@ -3,9 +3,9 @@ require 'spec_helper'
 describe Cli::Publish do
   include_context 'tmp_dirs'
   around do |spec|
-    temp_library = tmp_subdir 'markdown_repos'
+    temp_library = tmp_subdir 'repositories'
     book_dir = File.join temp_library, 'book'
-    FileUtils.cp_r 'spec/fixtures/markdown_repos/.', temp_library
+    FileUtils.cp_r File.join(RepoFixture.repos_dir, '.'), temp_library
     FileUtils.cd(book_dir) { spec.run }
   end
 
@@ -50,7 +50,7 @@ describe Cli::Publish do
           .once
           .and_return zipped_repo_url
 
-        zipped_repo = MarkdownRepoFixture.tarball 'fantastic/book'.split('/').last, desired_tag
+        zipped_repo = RepoFixture.tarball 'fantastic/book'.split('/').last, desired_tag
         stub_request(:get, zipped_repo_url).to_return(
             :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
         )
