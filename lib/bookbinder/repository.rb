@@ -25,12 +25,9 @@ class Repository
   end
 
   def copy_from_remote(destination_dir)
-    output_dir = Dir.mktmpdir
-    log '  downloading '.yellow + archive_link.blue
-
-    archive = download_archive
-
-    tarball_path = File.join(output_dir, "#{short_name}.tar.gz")
+    output_dir    = Dir.mktmpdir
+    archive       = download_archive
+    tarball_path  = File.join(output_dir, "#{short_name}.tar.gz")
     File.open(tarball_path, 'wb') { |f| f.write(archive) }
 
     directory_listing_before = Dir.entries output_dir
@@ -46,6 +43,7 @@ class Repository
   private
 
   def download_archive
+    log '  downloading '.yellow + archive_link.blue
     response = Faraday.new.get(archive_link)
     raise "Unable to download repository #{@full_name}: server response #{response.status}" unless response.status == 200
     response.body

@@ -55,6 +55,8 @@ A book project needs a few things to allow bookbinder to run. Here's the minimal
 
 `config.yml` is a YAML file that holds all the information bookbinder needs. The following keys are used:
 
+- **book_repo**: the org-name/repo-name of the book's github repository.
+- **cred_repo**: the org-name/repo-name of a private repository in which AWS and CF credentials may be kept to facilitate secure CI
 - **repos**: an array of hashes which specifies which documentation repositories to pull in. Each hash needs to specify:
     - **github_repo**: the path on github to this repository, i.e. 'organization/repository'. The organization is ignored when finding repositories locally. The repository must be public (unless finding repositories locally).
     - **directory**: (optional) a "pretty" directory path under the main root that the webapp will use for this sub-repo.

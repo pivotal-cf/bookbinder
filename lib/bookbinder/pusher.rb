@@ -1,6 +1,6 @@
 class Pusher
 
-  def push(api_endpoint, host, organization, space, app_name, app_dir, username = nil, password = nil)
+  def push(api_endpoint, host, organization, space, app_name, app_dir='./final_app', username = nil, password = nil)
     creds_string = (username && password) ? "-u '#{username}' -p '#{password}'" : ''
     Dir.chdir(app_dir) do
       system "#{cf_binary_path} login #{creds_string} -a '#{api_endpoint}' -o '#{organization}' -s '#{space}'"

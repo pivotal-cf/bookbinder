@@ -11,7 +11,7 @@ class Cli
 
     def check_params
       raise BuildAndPushTarball::MissingBuildNumber unless ENV['BUILD_NUMBER']
-      config.fetch('github_repo')
+      config.fetch('book_repo')
     end
   end
 end

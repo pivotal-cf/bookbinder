@@ -36,7 +36,7 @@ class Cli
     def checkout_book_at(target_tag, &doc_generation)
       temp_workspace     = Dir.mktmpdir
       initial_config     = YAML.load(File.read('./config.yml'))
-      book               = Book.from_remote(full_name: initial_config.fetch('github_repo'),
+      book               = Book.from_remote(full_name: initial_config.fetch('book_repo'),
                                             destination_dir: temp_workspace, ref: target_tag)
       expected_book_path = File.join temp_workspace, book.directory
 
@@ -71,13 +71,6 @@ class Cli
       nothing_special   = arguments[1..-1].empty?
 
       %w(local github).include?(arguments[0]) && (tag_provided or verbose or nothing_special)
-    end
-
-    def github_credentials
-      {
-        github_username: config.fetch('github').fetch('username'),
-        github_password: config.fetch('github').fetch('password')
-      }
     end
   end
 end

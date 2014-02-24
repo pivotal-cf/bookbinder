@@ -1,7 +1,7 @@
 class Cli
   class DocReposUpdated < BookbinderCommand
     def run(_)
-      book = Book.new full_name: config.fetch('github_repo'),
+      book = Book.new full_name: config.fetch('book_repo'),
                       constituent_params: config.fetch('repos')
 
       change_monitor = DocRepoChangeMonitor.new book

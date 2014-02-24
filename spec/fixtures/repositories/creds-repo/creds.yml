@@ -1,0 +1,3 @@
+secure_site:
+  pass: 'secret'
+  handle: 'agent'

@@ -38,6 +38,20 @@ describe Cli do
     end
   end
 
+  context 'when the credentials file is missing a required key' do
+    before do
+      File.stub(:read)
+      YAML.stub(:load).and_return({foo: 'bar'})
+    end
+
+    let(:arguments) { ['push_local_to_staging'] }
+
+    it 'should print a helpful message' do
+      BookbinderLogger.should_receive(:log).with(/key not found:.*in credentials\.yml/)
+      run
+    end
+  end
+
   context 'when config.yml is missing' do
     before { File.stub(:read).and_raise(Errno::ENOENT) }
 
@@ -147,7 +161,7 @@ describe Cli do
     let(:fake_publish) { double }
     let(:fake_push_local_to_staging) { double }
     let(:fake_build_and_push_tarball) { double }
-    let(:config_params) { {'github_repo' => 'foo/bar'} }
+    let(:config_params) { {'book_repo' => 'foo/bar'} }
 
     before do
       ENV.stub(:[])

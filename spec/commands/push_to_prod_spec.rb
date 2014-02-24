@@ -11,6 +11,25 @@ describe Cli::PushToProd do
     FileUtils.cd(File.join temp_library, 'book') { spec.run }
   end
 
+  before do
+    CredRepo.any_instance.stub(:credentials) do
+      {
+        'aws' => {
+          'access_key' => 'something',
+          'secret_key' => 'something-else',
+          'green_builds_bucket' => 'bucket-name-in-fixture-config'
+        },
+        'cloud_foundry' => {
+          'api_endpoint' => 'http://get.your.apis.here.io',
+          'production_host' => 'http://get.your.apis.here.io',
+          'organization' => 'foooo',
+          'production_space' => 'foooo',
+          'app_name' => 'foooo',
+        }
+      }
+    end
+  end
+
   it 'should call GreenBuildRepository#download with correct parameters' do
     GreenBuildRepository.any_instance.should_receive(:download) do |args|
       args.should have_key(:download_dir)
@@ -26,7 +45,7 @@ describe Cli::PushToProd do
     Cli::PushToProd.new.run [@build_number]
   end
 
-  context 'when config is missing required keys' do
+  context 'when missing credentials' do
     before do
       File.stub(:read)
       YAML.stub(:load).and_return({foo: 'bar'})
@@ -34,7 +53,7 @@ describe Cli::PushToProd do
 
     it 'raises a "key not found" error' do
       expect { Cli::PushToProd.new.run @build_number }
-        .to raise_exception KeyError
+        .to raise_exception Cli::CredentialKeyError
     end
   end
 end
