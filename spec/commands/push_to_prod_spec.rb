@@ -3,12 +3,9 @@ require 'spec_helper'
 describe Cli::PushToProd do
   include_context 'tmp_dirs'
 
-  around do |spec|
-    @build_number = '17'
-
-    temp_library = tmp_subdir 'repositories'
-    FileUtils.cp_r File.join(RepoFixture.repos_dir, '.'), temp_library
-    FileUtils.cd(File.join temp_library, 'book') { spec.run }
+  let(:build_number) { '17' }
+  around_with_fixture_repo do |spec|
+    spec.run
   end
 
   before do
@@ -38,11 +35,11 @@ describe Cli::PushToProd do
       args.should have_key(:namespace)
 
       args.fetch(:bucket).should == 'bucket-name-in-fixture-config'
-      args.fetch(:build_number).should == @build_number
+      args.fetch(:build_number).should == build_number
       args.fetch(:namespace).should == 'fixture-book-title'
     end
 
-    Cli::PushToProd.new.run [@build_number]
+    Cli::PushToProd.new.run [build_number]
   end
 
   context 'when missing credentials' do
@@ -52,7 +49,7 @@ describe Cli::PushToProd do
     end
 
     it 'raises a "key not found" error' do
-      expect { Cli::PushToProd.new.run @build_number }
+      expect { Cli::PushToProd.new.run build_number }
         .to raise_exception Cli::CredentialKeyError
     end
   end

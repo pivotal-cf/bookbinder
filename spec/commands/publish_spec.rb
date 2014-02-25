@@ -2,11 +2,9 @@ require 'spec_helper'
 
 describe Cli::Publish do
   include_context 'tmp_dirs'
-  around do |spec|
-    temp_library = tmp_subdir 'repositories'
-    book_dir = File.join temp_library, 'book'
-    FileUtils.cp_r File.join(RepoFixture.repos_dir, '.'), temp_library
-    FileUtils.cd(book_dir) { spec.run }
+
+  around_with_fixture_repo do |spec|
+    spec.run
   end
 
   before { Spider.any_instance.stub(:generate_sitemap) }

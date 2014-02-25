@@ -8,24 +8,6 @@ shared_context 'tmp_dirs' do
   end
 
   let(:tmpdir) { Dir.mktmpdir }
-
-  def arrange_fixture_book_and_constituents
-    temp_library = tmp_subdir 'repositories'
-    FileUtils.cp_r File.join(RepoFixture.repos_dir, '.'),  temp_library
-
-    book_dir = File.join temp_library, 'book'
-    git_dir = File.join book_dir, '.git'
-    FileUtils.mkdir_p git_dir
-    File.open(File.join(git_dir, 'config'), 'w') do |config|
-      config.puts(<<-GIT)
-[remote "origin"]
-  url = https://github.com/wow-org/such-book.git
-	fetch = +refs/heads/*:refs/remotes/origin/*
-      GIT
-    end
-
-    book_dir
-  end
 end
 
 def generate_middleman_with(index_page)
@@ -59,6 +41,16 @@ def mock_github_for(repo_name, some_ref='master')
   stub_request(:get, zipped_repo_url).to_return(
       :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
   )
+end
+
+def around_with_fixture_repo(&block)
+  around do |spec|
+    temp_library = tmp_subdir 'repositories'
+    FileUtils.cp_r File.join(RepoFixture.repos_dir, '.'), temp_library
+    FileUtils.cd(File.join(temp_library, 'book')) do
+      block.call(spec)
+    end
+  end
 end
 
 require_relative '../lib/bookbinder'

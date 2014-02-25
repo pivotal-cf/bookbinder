@@ -2,13 +2,11 @@ require 'spec_helper'
 
 describe Cli::BuildAndPushTarball do
   include_context 'tmp_dirs'
-  around do |spec|
-    @build_number = '17'
 
-    temp_library = tmp_subdir 'repositories'
-    book_dir = File.join temp_library, 'book'
-    FileUtils.cp_r File.join(RepoFixture.repos_dir, '.'), temp_library
-    FileUtils.cd(book_dir) { spec.run }
+  let(:build_number) { '17' }
+
+  around_with_fixture_repo do |spec|
+    spec.run
   end
 
   before do
@@ -23,7 +21,7 @@ describe Cli::BuildAndPushTarball do
     end
 
     ENV.stub(:[])
-    ENV.stub(:[]).with('BUILD_NUMBER').and_return(@build_number)
+    ENV.stub(:[]).with('BUILD_NUMBER').and_return(build_number)
   end
 
   let(:access_key) { 'access-key' }
@@ -38,7 +36,7 @@ describe Cli::BuildAndPushTarball do
       args.should have_key(:namespace)
 
       args.fetch(:bucket).should == bucket
-      args.fetch(:build_number).should == @build_number
+      args.fetch(:build_number).should == build_number
       args.fetch(:namespace).should == 'fixture-book-title'
     end
 

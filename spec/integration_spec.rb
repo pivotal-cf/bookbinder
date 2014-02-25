@@ -3,9 +3,8 @@ require 'spec_helper'
 describe '$ bookbinder' do
   include_context 'tmp_dirs'
 
-  around do |spec|
-    book_dir = arrange_fixture_book_and_constituents
-    FileUtils.cd(book_dir) { spec.run }
+  around_with_fixture_repo do |spec|
+    spec.run
   end
 
   describe 'publish' do
