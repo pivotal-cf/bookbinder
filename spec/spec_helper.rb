@@ -70,7 +70,7 @@ RSpec.configure do |config|
 
   config.before do
     BookbinderLogger.stub(:log) {  }
-    Pusher.any_instance.stub(:push)
+    Pusher.any_instance.stub(:push) unless self.class.metadata[:enable_pusher]
   end
 
   module SpecHelperMethods

@@ -9,6 +9,7 @@ require 'middleman-core/profiling'
 require 'anemone'
 require 'css_parser'
 require 'vienna'
+require 'open4'
 
 require_relative 'bookbinder/shell_out'
 require_relative 'bookbinder/bookbinder_logger'
