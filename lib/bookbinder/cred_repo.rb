@@ -27,7 +27,7 @@ def untar(tarball)
   our_yaml = ''
   Gem::Package::TarReader.new unzipped do |tar|
     tar.each do |file|
-       if file.full_name.match('creds.yml')
+       if file.full_name.match('credentials.yml')
          our_yaml = YAML.load file.read
        end
     end
