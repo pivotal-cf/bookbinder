@@ -2,8 +2,8 @@ class Pusher
   def push(api_endpoint, host, organization, space, app_name, app_dir='./final_app', username = nil, password = nil)
     creds_string = (username && password) ? "-u '#{username}' -p '#{password}'" : ''
     Dir.chdir(app_dir) do
-      result = Open4::popen4("#{cf_binary_path} login #{creds_string} -a '#{api_endpoint}' -o '#{organization}' -s '#{space}'")
-      raise "Could not log in to #{api_endpoint}" unless result.success?
+      result = Kernel::system "#{cf_binary_path} login #{creds_string} -a '#{api_endpoint}' -o '#{organization}' -s '#{space}'"
+      raise "Could not log in to #{api_endpoint}" unless result
 
       # query which app (green/blue) the hostname currently points to
       first_routed_app_name_for_host = `CF_COLOR=false #{cf_binary_path} routes | grep #{host}`.split(/,?\s+/)[2] || ""

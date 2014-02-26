@@ -8,7 +8,7 @@ describe Pusher, enable_pusher: true do
       let(:app_dir) { tmp_subdir "some_dir" }
 
       before do
-        Open4.stub(:popen4).and_return(double 'status', success?: false)
+        Kernel.stub(:system).and_return(false)
       end
 
       it 'raises an error and does not deploy' do
@@ -17,8 +17,8 @@ describe Pusher, enable_pusher: true do
         expect(Open4).not_to receive(:popen4).with(/map-route/)
 
         expect {
-          Pusher.new.push("", "", "", "", "", app_dir)
-        }.to raise_error(/Could not log in/)
+          Pusher.new.push("endpoint", "", "", "", "", app_dir)
+        }.to raise_error(/Could not log in to.*endpoint/)
       end
     end
   end
