@@ -44,13 +44,13 @@ describe Cli::Publish do
 
         zipped_repo_url = "https://github.com/#{'fantastic/fixture-book-title'}/archive/#{desired_tag}.tar.gz"
         GitClient.get_instance.should_receive(:archive_link)
-          .with('fantastic/fixture-book-title', ref: desired_tag)
-          .once
-          .and_return zipped_repo_url
+        .with('fantastic/fixture-book-title', ref: desired_tag)
+        .once
+        .and_return zipped_repo_url
 
         zipped_repo = RepoFixture.tarball 'fantastic/book'.split('/').last, desired_tag
         stub_request(:get, zipped_repo_url).to_return(
-            :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
+          :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
         )
 
         Cli::Publish.new.run cli_args
