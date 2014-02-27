@@ -12,7 +12,7 @@ class Cli
     private
 
     def credentials
-      if @config['cred_repo']
+      @credentials ||= if @config['cred_repo']
         repo = CredRepo.new full_name: @config['cred_repo']
         repo.credentials
       else
