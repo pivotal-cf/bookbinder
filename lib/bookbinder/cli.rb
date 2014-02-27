@@ -19,16 +19,7 @@ class Cli
     command_arguments = args[1..-1]
 
     if command_to_class_mapping[command]
-      begin
-        command_to_class_mapping[command].new.run command_arguments
-      rescue Cli::CredentialKeyError => e
-        log "#{e.message}, in credentials.yml".red
-      rescue KeyError => e
-        log "#{e.message}, in config.yml".red
-      rescue => e
-        log e.message.red
-        1
-      end
+      command_to_class_mapping[command].new.run command_arguments
     else
       log "Unrecognized command '#{command}'"
       log <<TEXT

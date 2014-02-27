@@ -48,9 +48,9 @@ describe Cli::PushToProd do
       YAML.stub(:load).and_return({foo: 'bar'})
     end
 
-    it 'raises a "key not found" error' do
-      expect { Cli::PushToProd.new.run build_number }
-        .to raise_exception Cli::CredentialKeyError
+    it 'logs a "key not found" error' do
+      expect(BookbinderLogger).to receive(:log).with(/key.*not found.*in credentials/)
+      Cli::PushToProd.new.run build_number
     end
   end
 end

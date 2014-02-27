@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe Cli do
-
   let(:cli) { Cli.new }
 
   def run
@@ -15,7 +14,6 @@ describe Cli do
       run
     end
   end
-
   context 'when a command that is not recognized is supplied' do
     let(:arguments) { ['foo'] }
     it 'should print a helpful message' do
@@ -36,6 +34,10 @@ describe Cli do
       BookbinderLogger.should_receive(:log).with(/key not found:.*in config\.yml/)
       run
     end
+
+    it 'should return 1' do
+      expect(run).to eq 1
+    end
   end
 
   context 'when the credentials file is missing a required key' do
@@ -49,6 +51,10 @@ describe Cli do
     it 'should print a helpful message' do
       BookbinderLogger.should_receive(:log).with(/key not found:.*in credentials\.yml/)
       run
+    end
+
+    it 'should return 1' do
+      expect(run).to eq 1
     end
   end
 
@@ -92,19 +98,6 @@ describe Cli do
     it 'returns whatever the publish command returned' do
       fake_command.should_receive(:run).and_return(42)
       expect(run).to eq(42)
-    end
-
-    context 'when the command raises an exception' do
-      before { fake_command.should_receive(:run).and_raise('Aaaaaah!!') }
-
-      it 'should return a non-zero exit status' do
-        expect(run).to eq(1)
-      end
-
-      it "should log a message with the exception's message" do
-        BookbinderLogger.should_receive(:log).with(/Aaaaaah!!/)
-        run
-      end
     end
   end
 

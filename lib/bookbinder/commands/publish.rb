@@ -1,6 +1,6 @@
 class Cli
   class Publish < BookbinderCommand
-    def run(cli_arguments)
+    def child_run(cli_arguments)
       raise "usage: #{usage_message}" unless arguments_are_valid?(cli_arguments)
 
       target_tag    = (cli_arguments[1..-1] - ['--verbose']).pop

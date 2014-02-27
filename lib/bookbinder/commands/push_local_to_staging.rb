@@ -2,7 +2,7 @@ class Cli
   class PushLocalToStaging < BookbinderCommand
     include CommandRequiringCredentials
 
-    def run(_)
+    def child_run(_)
       Pusher.new.push *cf_credentials
       0
     end

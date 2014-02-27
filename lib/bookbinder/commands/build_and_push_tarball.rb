@@ -8,7 +8,7 @@ class Cli
       end
     end
 
-    def run(_)
+    def child_run(_)
       raise MissingBuildNumber unless ENV['BUILD_NUMBER']
       bucket, key, secret = aws_credentials
       repository = GreenBuildRepository.new key: key, secret: secret

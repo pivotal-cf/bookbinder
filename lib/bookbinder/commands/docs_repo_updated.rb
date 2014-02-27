@@ -1,6 +1,6 @@
 class Cli
   class DocReposUpdated < BookbinderCommand
-    def run(_)
+    def child_run(_)
       book = Book.new full_name: config.fetch('book_repo'),
                       constituent_params: config.fetch('repos')
 

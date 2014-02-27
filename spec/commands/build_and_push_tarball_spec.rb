@@ -50,8 +50,9 @@ describe Cli::BuildAndPushTarball do
       end
     end
 
-    it 'raises a CredentialKeyError' do
-      ->(){ Cli::BuildAndPushTarball.new.run [] }.should raise_exception(Cli::CredentialKeyError)
+    it 'logs a "key not found" error' do
+      expect(BookbinderLogger).to receive(:log).with(/key.*not found.*in credentials/)
+      Cli::BuildAndPushTarball.new.run []
     end
   end
 end
