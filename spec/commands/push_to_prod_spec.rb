@@ -20,6 +20,17 @@ describe Cli::PushToProd do
       'app_name' => 'foooo',
     }
   end
+
+  let(:book_repo_name) { 'fixture-book-title' }
+  let(:org) { 'my-user' }
+  let(:config) do
+    {
+      'book_repo' => "#{org}/#{book_repo_name}",
+      'cred_repo' => 'whatever'
+    }
+  end
+  let(:command) { Cli::PushToProd.new(config) }
+
   around_with_fixture_repo do |spec|
     spec.run
   end
@@ -42,29 +53,31 @@ describe Cli::PushToProd do
 
       args.fetch(:bucket).should == 'bucket-name-in-fixture-config'
       args.fetch(:build_number).should == build_number
-      args.fetch(:namespace).should == 'fixture-book-title'
+      args.fetch(:namespace).should == book_repo_name
     end
 
-    Cli::PushToProd.new.run [build_number]
+    command.run [build_number]
   end
 
   context 'when missing aws credentials' do
     let(:aws_credentials) { {} }
 
     it 'logs a "key not found" error' do
-      expect(BookbinderLogger).to receive(:log).with(/key.*not found.*in credentials/)
-      Cli::PushToProd.new.run build_number
+      expect {
+        command.run build_number
+      }.to raise_error(Cli::CredentialKeyError)
     end
   end
 
   context 'when missing cf credentials' do
     let(:cf_credentials) { {} }
 
-    it 'logs a "key not found" error' do
+    it 'raises a "key not found" error' do
       GreenBuildRepository.any_instance.stub(:download)
 
-      expect(BookbinderLogger).to receive(:log).with(/key.*not found.*in credentials/)
-      Cli::PushToProd.new.run build_number
+      expect {
+        command.run build_number
+      }.to raise_error(Cli::CredentialKeyError)
     end
   end
 end

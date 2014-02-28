@@ -2,7 +2,7 @@ class Cli
   class PushToProd < BookbinderCommand
     include CommandRequiringCredentials
 
-    def child_run(arguments)
+    def run(arguments)
       app_dir = Dir.mktmpdir
 
       bucket, key, secret = aws_credentials

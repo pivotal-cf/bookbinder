@@ -3,6 +3,7 @@ require 'spec_helper'
 describe Cli::BuildAndPushTarball do
   include_context 'tmp_dirs'
 
+  let(:build_and_push_tarball_command) { Cli::BuildAndPushTarball.new(nil) }
   let(:build_number) { '17' }
 
   around_with_fixture_repo do |spec|
@@ -40,19 +41,6 @@ describe Cli::BuildAndPushTarball do
       args.fetch(:namespace).should == 'fixture-book-title'
     end
 
-    Cli::BuildAndPushTarball.new.run []
-  end
-
-  context 'when missing credentials' do
-    before do
-      CredRepo.any_instance.stub(:credentials) do
-        {'aws' => {}}
-      end
-    end
-
-    it 'logs a "key not found" error' do
-      expect(BookbinderLogger).to receive(:log).with(/key.*not found.*in credentials/)
-      Cli::BuildAndPushTarball.new.run []
-    end
+    build_and_push_tarball_command.run []
   end
 end

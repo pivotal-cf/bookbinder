@@ -1,6 +1,6 @@
 class Cli
   class RunPublishCI < BookbinderCommand
-    def child_run(_)
+    def run(_)
       check_params
       (
       (0 == Publish.new.run(['github'])) &&

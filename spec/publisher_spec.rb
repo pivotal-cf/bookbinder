@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe Publisher do
-
   describe '#publish' do
     include_context 'tmp_dirs'
 

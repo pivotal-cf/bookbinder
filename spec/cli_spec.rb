@@ -1,7 +1,11 @@
 require 'spec_helper'
 
 describe Cli do
+  include_context 'tmp_dirs'
+
   let(:cli) { Cli.new }
+
+  around_with_fixture_repo &:run
 
   def run
     cli.run arguments
@@ -22,21 +26,56 @@ describe Cli do
     end
   end
 
-  context 'when config.yml is missing a required key' do
-    before do
-      File.stub(:read)
-      YAML.stub(:load).and_return({foo: 'bar'})
+  context 'when run raises' do
+    context 'a KeyError' do
+      before do
+        Cli::Publish.any_instance.stub(:run).and_raise KeyError.new 'I broke'
+      end
+
+      let(:arguments) { ['publish', 'local'] }
+
+      it 'logs the error with the config file name' do
+        BookbinderLogger.should_receive(:log).with(/I broke.*in config\.yml/)
+        run
+      end
+
+      it 'should return 1' do
+        expect(run).to eq 1
+      end
     end
 
-    let(:arguments) { ['publish', 'local'] }
+    context 'a Cli::CredentialKeyError' do
+      before do
+        Cli::Publish.any_instance.stub(:run).and_raise Cli::CredentialKeyError.new 'I broke'
+      end
 
-    it 'should print a helpful message' do
-      BookbinderLogger.should_receive(:log).with(/key not found:.*in config\.yml/)
-      run
+      let(:arguments) { ['publish', 'local'] }
+
+      it 'logs the error with the credentials file name' do
+        BookbinderLogger.should_receive(:log).with(/I broke.*in credentials\.yml/)
+        run
+      end
+
+      it 'should return 1' do
+        expect(run).to eq 1
+      end
     end
 
-    it 'should return 1' do
-      expect(run).to eq 1
+    context 'any other error' do
+      before do
+        Cli::Publish.any_instance.stub(:run).and_raise 'I broke'
+      end
+
+      let(:arguments) { ['publish', 'local'] }
+
+      it 'logs the error message' do
+        BookbinderLogger.should_receive(:log).with(/I broke/)
+        run
+      end
+
+      it 'should return 1' do
+        expect(run).to eq 1
+      end
     end
   end
 
@@ -129,49 +168,5 @@ describe Cli do
     let(:command_string) { 'update_local_doc_repos' }
     let(:command_class) { Cli::UpdateLocalDocRepos }
     it_should_behave_like 'a cli that dispatches commands'
-  end
-
-  describe Cli::RunPublishCI do
-
-    let(:fake_publish) { double }
-    let(:fake_push_local_to_staging) { double }
-    let(:fake_build_and_push_tarball) { double }
-    let(:config_params) { {'book_repo' => 'foo/bar'} }
-
-    before do
-      ENV.stub(:[])
-      ENV.stub(:[]).with('BUILD_NUMBER').and_return('42424242')
-
-      File.stub(:read)
-      YAML.stub(:load).and_return(config_params)
-
-      Cli::Publish.stub(:new) { fake_publish }
-      Cli::PushLocalToStaging.stub(:new) { fake_push_local_to_staging }
-      Cli::BuildAndPushTarball.stub(:new) { fake_build_and_push_tarball }
-    end
-
-    it 'runs three commands and returns 0 if all three do so' do
-      fake_publish.should_receive(:run).with(['github']).and_return(0)
-      fake_push_local_to_staging.should_receive(:run).with([]).and_return(0)
-      fake_build_and_push_tarball.should_receive(:run).with([]).and_return(0)
-      result = Cli::RunPublishCI.new.run []
-      expect(result).to eq(0)
-    end
-
-    it 'does not execute PushLocalToStaging if Publish fails' do
-      fake_publish.should_receive(:run).with(['github']).and_return(1)
-      fake_push_local_to_staging.should_not_receive(:run)
-      fake_build_and_push_tarball.should_not_receive(:run)
-      result = Cli::RunPublishCI.new.run []
-      expect(result).to eq(1)
-    end
-
-    it 'does not execute BuildAndPushTarball if PushLocalToStaging fails' do
-      fake_publish.should_receive(:run).with(['github']).and_return(0)
-      fake_push_local_to_staging.should_receive(:run).with([]).and_return(1)
-      fake_build_and_push_tarball.should_not_receive(:run)
-      result = Cli::RunPublishCI.new.run []
-      expect(result).to eq(1)
-    end
   end
 end

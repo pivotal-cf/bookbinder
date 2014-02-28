@@ -7,11 +7,21 @@ describe Cli::Publish do
     spec.run
   end
 
+  let(:config) { {
+    'repos' => [
+      {"github_repo"=>"fantastic/dogs-repo", "directory"=>"dogs", "subnav_template"=>"dogs", "sha"=>"dog-sha"},
+      {"github_repo"=>"fantastic/my-docs-repo", "directory"=>"foods/sweet", "subnav_template"=>"fruits", "sha"=>"my-docs-sha"},
+      {"github_repo"=>"fantastic/my-other-docs-repo", "directory"=>"foods/savory", "subnav_template"=>"vegetables", "sha"=>"my-other-sha"}
+    ],
+    'public_host' => 'host.example.com'
+  } }
+  let(:publish_command) { Cli::Publish.new(config) }
+
   before { Spider.any_instance.stub(:generate_sitemap) }
 
   context 'local' do
     it 'creates some static HTML' do
-      Cli::Publish.new.run ['local']
+      publish_command.run ['local']
 
       index_html = File.read File.join('final_app', 'public', 'dogs', 'index.html')
       index_html.should include 'Woof'
@@ -27,7 +37,7 @@ describe Cli::Publish do
     end
 
     it 'creates some static HTML' do
-      Cli::Publish.new.run ['github']
+      publish_command.run ['github']
 
       index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
       index_html.should include 'This is a Markdown Page'
@@ -53,11 +63,15 @@ describe Cli::Publish do
           :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
         )
 
-        Cli::Publish.new.run cli_args
+        publish_command.run cli_args
       end
 
       context 'when a constituent repository does not have the tag'
       context 'when a book does not have the tag'
     end
+  end
+
+  context 'when a pdf is specified' do
+    it 'creates the pdf'
   end
 end
