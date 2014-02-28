@@ -1,6 +1,5 @@
 class Cli
-  class CredentialKeyError < KeyError
-  end
+  class CredentialKeyError < KeyError; end
 
   module CommandRequiringCredentials
     def config
@@ -12,12 +11,12 @@ class Cli
     private
 
     def credentials
-      @credentials ||= if @config['cred_repo']
-        repo = CredRepo.new full_name: @config['cred_repo']
-        repo.credentials
-      else
-        {}
-      end
+      raise missing_repository_key unless @config['cred_repo']
+      @credentials ||= CredRepo.new(full_name: @config['cred_repo']).credentials
+    end
+
+    def missing_repository_key
+      'A credentials repository must be specified'
     end
   end
 end

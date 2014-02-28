@@ -4,6 +4,22 @@ describe Cli::PushToProd do
   include_context 'tmp_dirs'
 
   let(:build_number) { '17' }
+  let(:aws_credentials) do
+    {
+      'access_key' => 'something',
+      'secret_key' => 'something-else',
+      'green_builds_bucket' => 'bucket-name-in-fixture-config'
+    }
+  end
+  let(:cf_credentials) do
+    {
+      'api_endpoint' => 'http://get.your.apis.here.io',
+      'production_host' => 'http://get.your.apis.here.io',
+      'organization' => 'foooo',
+      'production_space' => 'foooo',
+      'app_name' => 'foooo',
+    }
+  end
   around_with_fixture_repo do |spec|
     spec.run
   end
@@ -11,18 +27,8 @@ describe Cli::PushToProd do
   before do
     CredRepo.any_instance.stub(:credentials) do
       {
-        'aws' => {
-          'access_key' => 'something',
-          'secret_key' => 'something-else',
-          'green_builds_bucket' => 'bucket-name-in-fixture-config'
-        },
-        'cloud_foundry' => {
-          'api_endpoint' => 'http://get.your.apis.here.io',
-          'production_host' => 'http://get.your.apis.here.io',
-          'organization' => 'foooo',
-          'production_space' => 'foooo',
-          'app_name' => 'foooo',
-        }
+        'aws' => aws_credentials,
+        'cloud_foundry' => cf_credentials
       }
     end
   end
@@ -42,13 +48,21 @@ describe Cli::PushToProd do
     Cli::PushToProd.new.run [build_number]
   end
 
-  context 'when missing credentials' do
-    before do
-      File.stub(:read)
-      YAML.stub(:load).and_return({foo: 'bar'})
-    end
+  context 'when missing aws credentials' do
+    let(:aws_credentials) { {} }
 
     it 'logs a "key not found" error' do
+      expect(BookbinderLogger).to receive(:log).with(/key.*not found.*in credentials/)
+      Cli::PushToProd.new.run build_number
+    end
+  end
+
+  context 'when missing cf credentials' do
+    let(:cf_credentials) { {} }
+
+    it 'logs a "key not found" error' do
+      GreenBuildRepository.any_instance.stub(:download)
+
       expect(BookbinderLogger).to receive(:log).with(/key.*not found.*in credentials/)
       Cli::PushToProd.new.run build_number
     end

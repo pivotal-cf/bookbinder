@@ -40,24 +40,6 @@ describe Cli do
     end
   end
 
-  context 'when the credentials file is missing a required key' do
-    before do
-      File.stub(:read)
-      YAML.stub(:load).and_return({foo: 'bar'})
-    end
-
-    let(:arguments) { ['push_local_to_staging'] }
-
-    it 'should print a helpful message' do
-      BookbinderLogger.should_receive(:log).with(/key not found:.*in credentials\.yml/)
-      run
-    end
-
-    it 'should return 1' do
-      expect(run).to eq 1
-    end
-  end
-
   context 'when config.yml is missing' do
     before { File.stub(:read).and_raise(Errno::ENOENT) }
 
