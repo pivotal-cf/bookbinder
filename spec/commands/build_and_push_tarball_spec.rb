@@ -3,24 +3,26 @@ require 'spec_helper'
 describe Cli::BuildAndPushTarball do
   include_context 'tmp_dirs'
 
-  let(:build_and_push_tarball_command) { Cli::BuildAndPushTarball.new(nil) }
+  let(:build_and_push_tarball_command) { Cli::BuildAndPushTarball.new(config) }
   let(:build_number) { '17' }
+  let(:book_repo) { 'org/fixture-book-title' }
 
   around_with_fixture_repo do |spec|
     spec.run
   end
 
-  before do
-    CredRepo.any_instance.stub(:credentials) do
-      {
-        'aws' => {
-          'green_builds_bucket' => bucket,
-          'access_key' => access_key,
-          'secret_key' => secret_key,
-        }
+  let(:config) do
+    {
+      'book_repo' => book_repo,
+      'aws' => {
+        'green_builds_bucket' => bucket,
+        'access_key' => access_key,
+        'secret_key' => secret_key,
       }
-    end
+    }
+  end
 
+  before do
     ENV.stub(:[])
     ENV.stub(:[]).with('BUILD_NUMBER').and_return(build_number)
   end

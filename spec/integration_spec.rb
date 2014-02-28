@@ -7,6 +7,12 @@ describe '$ bookbinder' do
     spec.run
   end
 
+  before do
+    config = YAML.load(File.read('./config.yml'))
+    config.delete('cred_repo')
+    File.write('./config.yml', config.to_yaml)
+  end
+
   describe 'publish' do
     describe 'local' do
       it 'generates a rack app' do

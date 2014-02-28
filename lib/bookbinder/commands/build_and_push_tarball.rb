@@ -1,7 +1,5 @@
 class Cli
   class BuildAndPushTarball < BookbinderCommand
-    include CommandRequiringCredentials
-
     class MissingBuildNumber < StandardError
       def initialize
         super 'You must set $BUILD_NUMBER to push an identifiable build.'

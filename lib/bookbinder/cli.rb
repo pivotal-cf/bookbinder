@@ -1,6 +1,7 @@
 class Cli
-
   include BookbinderLogger
+
+  class CredentialKeyError < StandardError; end
 
   def command_to_class_mapping
     {'publish' => Publish,
@@ -44,7 +45,12 @@ class Cli
   def config
     @config ||= YAML.load(File.read('./config.yml'))
     raise 'config.yml is empty' unless @config
-    @config
+    @config.merge(credentials)
+  end
+
+  def credentials
+    return {} unless @config['cred_repo']
+    @credentials ||= CredRepo.new(full_name: @config['cred_repo']).credentials
   end
 
   def display_usage(name)

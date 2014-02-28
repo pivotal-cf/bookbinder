@@ -31,7 +31,6 @@ require_relative 'bookbinder/pusher'
 require_relative 'bookbinder/local_doc_repos_updater'
 require_relative 'bookbinder/cli'
 
-require_relative 'bookbinder/command_requiring_credentials'
 require_relative 'bookbinder/bookbinder_command'
 require_relative 'bookbinder/commands/build_and_push_tarball'
 require_relative 'bookbinder/commands/docs_repo_updated'

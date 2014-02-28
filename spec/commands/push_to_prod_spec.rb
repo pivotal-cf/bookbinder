@@ -26,22 +26,15 @@ describe Cli::PushToProd do
   let(:config) do
     {
       'book_repo' => "#{org}/#{book_repo_name}",
-      'cred_repo' => 'whatever'
+      'cred_repo' => 'whatever',
+      'aws' => aws_credentials,
+      'cloud_foundry' => cf_credentials
     }
   end
   let(:command) { Cli::PushToProd.new(config) }
 
   around_with_fixture_repo do |spec|
     spec.run
-  end
-
-  before do
-    CredRepo.any_instance.stub(:credentials) do
-      {
-        'aws' => aws_credentials,
-        'cloud_foundry' => cf_credentials
-      }
-    end
   end
 
   it 'should call GreenBuildRepository#download with correct parameters' do

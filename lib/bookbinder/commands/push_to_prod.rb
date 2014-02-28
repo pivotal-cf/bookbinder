@@ -1,7 +1,5 @@
 class Cli
   class PushToProd < BookbinderCommand
-    include CommandRequiringCredentials
-
     def run(arguments)
       app_dir = Dir.mktmpdir
 
