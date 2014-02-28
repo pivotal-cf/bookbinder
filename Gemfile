@@ -3,4 +3,3 @@ gemspec
 
 gem 'rspec'
 gem 'webmock'
-gem 'open4'

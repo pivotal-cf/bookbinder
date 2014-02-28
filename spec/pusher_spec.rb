@@ -12,9 +12,9 @@ describe Pusher, enable_pusher: true do
       end
 
       it 'raises an error and does not deploy' do
-        expect(Open4).not_to receive(:popen4).with(/start/)
-        expect(Open4).not_to receive(:popen4).with(/push/)
-        expect(Open4).not_to receive(:popen4).with(/map-route/)
+        expect(Kernel).not_to receive(:system).with(/start/)
+        expect(Kernel).not_to receive(:system).with(/push/)
+        expect(Kernel).not_to receive(:system).with(/map-route/)
 
         expect {
           Pusher.new.push("endpoint", "", "", "", "", app_dir)

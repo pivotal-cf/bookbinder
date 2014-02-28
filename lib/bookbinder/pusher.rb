@@ -44,30 +44,30 @@ class Pusher
   end
 
   def cf_unmap_route(app, host)
-    Open4::popen4("#{cf_binary_path} unmap-route #{app} cfapps.io -n #{host}")
+    Kernel::system("#{cf_binary_path} unmap-route #{app} cfapps.io -n #{host}")
   end
 
   def cf_stop(app)
-    Open4::popen4("#{cf_binary_path} stop #{app}")
+    Kernel::system("#{cf_binary_path} stop #{app}")
   end
 
   def cf_start(deploy_target_app)
     # Theoretically we shouldn't need this (and corresponding "stop" below), but we've seen CF pull files from both
     # green and blue when a DNS redirect points to HOST.cfapps.io
     # Also, shutting down the unused app saves $$
-    Open4::popen4("#{cf_binary_path} start #{deploy_target_app}")
+    Kernel::system("#{cf_binary_path} start #{deploy_target_app}")
   end
 
   def cf_map_route(deploy_target_app, host)
     # map hostname to newly deployed app
-    Open4::popen4("#{cf_binary_path} map-route #{deploy_target_app} cfapps.io -n #{host}")
+    Kernel::system("#{cf_binary_path} map-route #{deploy_target_app} cfapps.io -n #{host}")
   end
 
   def cf_push(deploy_target_app)
     # --no-route is a hack that may need to be removed soon. Sheel can help.
     # it's a workaround for a bug in cf that fails deployment for apps that have been deployed previously,
     # claiming that their hostname is already taken (instead of just re-deploying)
-    Open4::popen4("#{cf_binary_path} push #{deploy_target_app} --no-route -m 256M -i 2")
+    Kernel::system("#{cf_binary_path} push #{deploy_target_app} --no-route -m 256M -i 2")
   end
 
   def cf_binary_path
