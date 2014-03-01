@@ -7,10 +7,6 @@ describe Cli::BuildAndPushTarball do
   let(:build_number) { '17' }
   let(:book_repo) { 'org/fixture-book-title' }
 
-  around_with_fixture_repo do |spec|
-    spec.run
-  end
-
   let(:config) do
     {
       'book_repo' => book_repo,

@@ -33,10 +33,6 @@ describe Cli::PushToProd do
   end
   let(:command) { Cli::PushToProd.new(config) }
 
-  around_with_fixture_repo do |spec|
-    spec.run
-  end
-
   it 'should call GreenBuildRepository#download with correct parameters' do
     GreenBuildRepository.any_instance.should_receive(:download) do |args|
       args.should have_key(:download_dir)
