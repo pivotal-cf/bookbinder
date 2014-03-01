@@ -6,10 +6,6 @@ class Cli
       @config = configuration
     end
 
-    def self.usage
-      ""
-    end
-
     private
     attr_accessor :config
   end

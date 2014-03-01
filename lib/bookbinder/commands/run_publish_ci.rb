@@ -9,6 +9,12 @@ class Cli
       ) ? 0 : 1
     end
 
+    def self.usage
+      ''
+    end
+
+    private
+
     def check_params
       raise BuildAndPushTarball::MissingBuildNumber unless ENV['BUILD_NUMBER']
       config.fetch('book_repo')

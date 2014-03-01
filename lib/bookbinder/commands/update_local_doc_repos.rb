@@ -5,5 +5,9 @@ class Cli
       LocalDocReposUpdater.new.update config['repos'], local_repo_dir
       0
     end
+
+    def self.usage
+      ''
+    end
   end
 end

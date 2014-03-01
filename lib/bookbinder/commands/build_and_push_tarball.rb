@@ -15,6 +15,10 @@ class Cli
       0
     end
 
+    def self.usage
+      ''
+    end
+
     private
 
     def aws_credentials

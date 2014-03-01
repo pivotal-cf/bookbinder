@@ -38,8 +38,8 @@ class Cli
       raise CredentialKeyError, e
     end
 
-    def usage
-      "[build_#]"
+    def self.usage
+      '[build_#]'
     end
   end
 end

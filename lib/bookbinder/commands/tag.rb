@@ -13,8 +13,8 @@ class Cli
       0
     end
 
-    def usage
-      '[arbitrary label]'
+    def self.usage
+      '<git tag>'
     end
   end
 end
