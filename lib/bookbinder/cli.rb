@@ -2,6 +2,7 @@ class Cli
   include BookbinderLogger
 
   class CredentialKeyError < StandardError; end
+  class InvalidArguments < StandardError; end
 
   def command_to_class_mapping
     {'publish' => Publish,
@@ -37,6 +38,9 @@ class Cli
   rescue KeyError => e
     log "#{e.message}, in config.yml".red
     1
+  rescue Cli::InvalidArguments
+    log usage_message(command)
+    1
   rescue => e
     log e.message.red
     1
@@ -61,8 +65,12 @@ class Cli
 
   def usage_messages
     command_to_class_mapping.values.map do |command_class|
-      "  #{command_class.usage_message}"
+      "  #{usage_message(command_class)}"
     end.sort
+  end
+
+  def usage_message(command_class)
+    "bookbinder #{command_class.name.split('::').last.underscore} #{command_class.usage}"
   end
 
   def usage_header

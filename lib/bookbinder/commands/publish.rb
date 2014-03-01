@@ -1,7 +1,7 @@
 class Cli
   class Publish < BookbinderCommand
     def run(cli_arguments)
-      raise "usage: #{usage_message}" unless arguments_are_valid?(cli_arguments)
+      raise Cli::InvalidArguments unless arguments_are_valid?(cli_arguments)
 
       target_tag    = (cli_arguments[1..-1] - ['--verbose']).pop
       final_app_dir = File.absolute_path('final_app')
@@ -15,6 +15,10 @@ class Cli
       else
         generate_site_and_pdf_for(cli_args: cli_arguments, final_app_dir: final_app_dir)
       end
+    end
+
+    def self.usage
+      "<local|github> [tag] [--verbose]"
     end
 
     private
@@ -42,10 +46,6 @@ class Cli
 
       log "Binding \"#{book.short_name.cyan}\" at #{target_tag.magenta}"
       FileUtils.chdir(expected_book_path) { doc_generation.call(config, target_tag) }
-    end
-
-    def usage
-      "<local|github> [tag] [--verbose]"
     end
 
     def publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir)

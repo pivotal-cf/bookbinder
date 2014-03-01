@@ -88,6 +88,23 @@ describe Cli do
         end
       end
 
+      context 'for InvalidArguments' do
+        before do
+          Cli::Publish.any_instance.stub(:run).and_raise Cli::InvalidArguments.new
+        end
+
+        let(:arguments) { ['publish', 'local'] }
+
+        it 'shows the command usage' do
+          expect(BookbinderLogger).to receive(:log).with(/publish #{Regexp.escape(Cli::Publish.usage)}/)
+          run
+        end
+
+        it 'should return 1' do
+          expect(run).to eq 1
+        end
+      end
+
       context 'any other error' do
         before do
           Cli::Publish.any_instance.stub(:run).and_raise 'I broke'

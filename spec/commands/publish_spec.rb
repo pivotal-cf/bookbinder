@@ -74,4 +74,12 @@ describe Cli::Publish do
   context 'when a pdf is specified' do
     it 'creates the pdf'
   end
+
+  describe 'invalid arguments' do
+    it 'raises Cli::InvalidArguments' do
+      expect {
+        publish_command.run ['blah', 'blah', 'whatever']
+      }.to raise_error(Cli::InvalidArguments)
+    end
+  end
 end
