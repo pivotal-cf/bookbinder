@@ -14,6 +14,16 @@ class DocRepo < Repository
     repo
   end
 
+  def initialize(repo_hash, github_token, local_repo_dir, target_tag)
+    @github = GitClient.get_instance(access_token: github_token) unless local_repo_dir
+
+    @ref = target_tag || repo_hash['sha']
+    @full_name = repo_hash.fetch('github_repo')
+    @directory = repo_hash['directory']
+    @local_repo_dir = local_repo_dir
+    @subnav_template = repo_hash['subnav_template']
+  end
+
   def copied?
     !@copied_to.nil?
   end
@@ -31,15 +41,5 @@ class DocRepo < Repository
     else
       log '  skipping (not found) '.magenta + path_to_local_repo
     end
-  end
-
-  def initialize(repo_hash, github_token, local_repo_dir, target_tag)
-    @github = GitClient.get_instance(access_token: github_token) unless local_repo_dir
-
-    @ref = target_tag || repo_hash['sha']
-    @full_name = repo_hash.fetch('github_repo')
-    @directory = repo_hash['directory']
-    @local_repo_dir = local_repo_dir
-    @subnav_template = repo_hash['subnav_template']
   end
 end

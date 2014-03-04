@@ -1,8 +1,8 @@
 class Cli
   class Tag < BookbinderCommand
     def run(params)
-      tag = params.pop
-      book = Book.new full_name: config.fetch('book_repo'), constituent_params: config.fetch('repos')
+      tag = params.first
+      book = Book.new(full_name: config.book_repo, constituent_params: config.repos)
 
       book.tag_with tag
       book.tag_constituents_with tag
