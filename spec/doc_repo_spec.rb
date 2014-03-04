@@ -245,33 +245,6 @@ describe DocRepo do
         end
       end
     end
-
-    describe '_remote' do
-      let(:copy_to) { repo.copy_from_remote destination_dir }
-      let(:local_repo_dir) { nil }
-
-      before { stub_github_for repo_name, some_sha }
-
-      it 'retrieves the repo from github' do
-        copy_to
-        expect(File.exist? File.join(destination_dir, 'my-docs-repo', 'index.html.md')).to be_true
-      end
-
-      it 'returns true' do
-        expect(copy_to).to be_true
-      end
-
-      context 'when given an invalid request URL' do
-        before do
-          zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_sha}.tar.gz"
-          stub_request(:get, zipped_repo_url).to_return(:body => '', :status => 406)
-        end
-
-        it 'raises an error' do
-          expect { copy_to }.to raise_exception(/Unable to download/)
-        end
-      end
-    end
   end
 end
 
