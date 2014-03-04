@@ -13,14 +13,14 @@ class Cli
 
     def cf_credentials
       [
-        config.fetch('cloud_foundry').fetch('api_endpoint'),
-        config.fetch('cloud_foundry').fetch('staging_host'),
-        config.fetch('cloud_foundry').fetch('organization'),
-        config.fetch('cloud_foundry').fetch('staging_space'),
-        config.fetch('cloud_foundry').fetch('app_name'),
+        config.cf_credentials.api_endpoint,
+        config.cf_credentials.staging_host,
+        config.cf_credentials.organization,
+        config.cf_credentials.staging_space,
+        config.cf_credentials.app_name,
         './final_app',
-        config.fetch('cloud_foundry').fetch('username'),
-        config.fetch('cloud_foundry').fetch('password')
+        config.cf_credentials.username,
+        config.cf_credentials.password
       ]
     rescue KeyError => e
       raise CredentialKeyError, e

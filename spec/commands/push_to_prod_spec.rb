@@ -23,7 +23,7 @@ describe Cli::PushToProd do
 
   let(:book_repo_name) { 'fixture-book-title' }
   let(:org) { 'my-user' }
-  let(:config) do
+  let(:config_hash) do
     {
       'book_repo' => "#{org}/#{book_repo_name}",
       'cred_repo' => 'whatever',
@@ -31,7 +31,15 @@ describe Cli::PushToProd do
       'cloud_foundry' => cf_credentials
     }
   end
+  let(:config) { Configuration.new(config_hash) }
   let(:command) { Cli::PushToProd.new(config) }
+
+  before do
+    fake_cred_repo = double
+    fake_cred_repo.stub(:credentials).and_return({'aws' => aws_credentials,
+                                                  'cloud_foundry' => cf_credentials})
+    CredRepo.stub(:new).and_return(fake_cred_repo)
+  end
 
   it 'should call GreenBuildRepository#download with correct parameters' do
     GreenBuildRepository.any_instance.should_receive(:download) do |args|

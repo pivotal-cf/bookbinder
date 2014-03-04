@@ -7,7 +7,7 @@ class Cli
       repository = GreenBuildRepository.new key: key, secret: secret
 
       repository.download download_dir: app_dir, bucket: bucket, build_number: arguments[0],
-                          namespace: Book.new(full_name: config.fetch('book_repo')).short_name
+                          namespace: Book.new(full_name: config.book_repo).short_name
 
       log 'Warning: You are pushing to CF Docs production. Be careful.'.yellow
 
@@ -18,11 +18,11 @@ class Cli
 
     def cf_credentials
       [
-        config.fetch('cloud_foundry').fetch('api_endpoint'),
-        config.fetch('cloud_foundry').fetch('production_host'),
-        config.fetch('cloud_foundry').fetch('organization'),
-        config.fetch('cloud_foundry').fetch('production_space'),
-        config.fetch('cloud_foundry').fetch('app_name')
+        config.cf_credentials.api_endpoint,
+        config.cf_credentials.production_host,
+        config.cf_credentials.organization,
+        config.cf_credentials.production_space,
+        config.cf_credentials.app_name
       ]
     rescue KeyError => e
       raise CredentialKeyError, e
@@ -30,9 +30,9 @@ class Cli
 
     def aws_credentials
       [
-        config.fetch('aws').fetch('green_builds_bucket'),
-        config.fetch('aws').fetch('access_key'),
-        config.fetch('aws').fetch('secret_key')
+        config.aws_credentials.green_builds_bucket,
+        config.aws_credentials.access_key,
+        config.aws_credentials.secret_key
       ]
     rescue KeyError => e
       raise CredentialKeyError, e

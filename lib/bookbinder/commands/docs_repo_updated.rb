@@ -1,8 +1,8 @@
 class Cli
   class DocReposUpdated < BookbinderCommand
     def run(_)
-      book = Book.new full_name: config.fetch('book_repo'),
-                      constituent_params: config.fetch('repos')
+      book = Book.new full_name: config.book_repo,
+                      constituent_params: config.repos
 
       change_monitor = DocRepoChangeMonitor.new book
       change_monitor.build_necessary? ? 0 : 42

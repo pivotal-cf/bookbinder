@@ -1,24 +1,26 @@
 class Cli
   include BookbinderLogger
 
-  class CredentialKeyError < StandardError; end
-  class InvalidArguments < StandardError; end
-
-  def command_to_class_mapping
-    {'publish' => Publish,
-     'build_and_push_tarball' => BuildAndPushTarball,
-     'doc_repos_updated' => DocReposUpdated,
-     'push_local_to_staging' => PushLocalToStaging,
-     'push_to_prod' => PushToProd,
-     'run_publish_ci' => RunPublishCI,
-     'update_local_doc_repos' => UpdateLocalDocRepos,
-     'tag' => Tag}
-    # breaking this command => class naming convention will break usage_messages!
+  class CredentialKeyError < StandardError;
+  end
+  class InvalidArguments < StandardError;
   end
 
+  # breaking this command => class naming convention will break usage_messages!
+  COMMAND_TO_CLASS_MAPPING = {
+    'publish' => Publish,
+    'build_and_push_tarball' => BuildAndPushTarball,
+    'doc_repos_updated' => DocReposUpdated,
+    'push_local_to_staging' => PushLocalToStaging,
+    'push_to_prod' => PushToProd,
+    'run_publish_ci' => RunPublishCI,
+    'update_local_doc_repos' => UpdateLocalDocRepos,
+    'tag' => Tag
+  }.freeze
+
   def run(args)
-    command_name      = args[0]
-    command           = command_to_class_mapping[command_name]
+    command_name = args[0]
+    command = COMMAND_TO_CLASS_MAPPING[command_name]
     command_arguments = args[1..-1]
 
     if command
@@ -47,14 +49,11 @@ class Cli
   end
 
   def config
-    @config ||= YAML.load(File.read('./config.yml'))
-    raise 'config.yml is empty' unless @config
-    @config.merge(credentials)
-  end
+    return @config if @config
 
-  def credentials
-    return {} unless @config['cred_repo']
-    @credentials ||= CredRepo.new(full_name: @config['cred_repo']).credentials
+    config_hash = YAML.load(File.read('./config.yml'))
+    raise 'config.yml is empty' unless config_hash
+    @config = Configuration.new(config_hash)
   end
 
   def display_usage(name)
@@ -64,7 +63,7 @@ class Cli
   end
 
   def usage_messages
-    command_to_class_mapping.values.map do |command_class|
+    COMMAND_TO_CLASS_MAPPING.values.map do |command_class|
       "  #{usage_message(command_class)}"
     end.sort
   end

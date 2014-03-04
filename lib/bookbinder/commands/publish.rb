@@ -25,9 +25,9 @@ class Cli
 
     def generate_site_and_pdf_for(cli_args: {}, target_tag: nil, final_app_dir: nil)
       # TODO: general solution to turn all string keys to symbols
-      pdf_hash = config['pdf'] ? {page: config['pdf']['page'],
-                                  filename: config['pdf']['filename'],
-                                  header: config['pdf']['header']}
+      pdf_hash = config.respond_to?(:pdf) ? {page: config.pdf.fetch('page'),
+                                  filename: config.pdf.fetch('filename'),
+                                  header: config.pdf.fetch('header')}
       : nil
 
       verbosity = cli_args.include?('--verbose')
@@ -50,7 +50,7 @@ class Cli
 
     def publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir)
       arguments = {
-          repos: config.fetch('repos'),
+          repos: config.repos,
           output_dir: File.absolute_path('output'),
           master_middleman_dir: File.absolute_path('master_middleman'),
           final_app_dir: final_app_dir,
@@ -59,8 +59,8 @@ class Cli
       }
 
       arguments.merge!(local_repo_dir: File.absolute_path('..')) if location == 'local'
-      arguments.merge!(template_variables: config.fetch('template_variables')) if config.has_key?('template_variables')
-      arguments.merge!(host_for_sitemap: config.fetch('public_host'))
+      arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
+      arguments.merge!(host_for_sitemap: config.public_host)
       arguments.merge!(target_tag: target_tag) if target_tag
       arguments
     end

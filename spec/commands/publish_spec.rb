@@ -7,7 +7,7 @@ describe Cli::Publish do
     spec.run
   end
 
-  let(:config) { {
+  let(:config_hash) { {
     'repos' => [
       {"github_repo"=>"fantastic/dogs-repo", "directory"=>"dogs", "subnav_template"=>"dogs", "sha"=>"dog-sha"},
       {"github_repo"=>"fantastic/my-docs-repo", "directory"=>"foods/sweet", "subnav_template"=>"fruits", "sha"=>"my-docs-sha"},
@@ -15,6 +15,7 @@ describe Cli::Publish do
     ],
     'public_host' => 'host.example.com'
   } }
+  let(:config) { Configuration.new(config_hash) }
   let(:publish_command) { Cli::Publish.new(config) }
 
   before { Spider.any_instance.stub(:generate_sitemap) }
@@ -66,13 +67,13 @@ describe Cli::Publish do
         publish_command.run cli_args
       end
 
-      context 'when a constituent repository does not have the tag'
-      context 'when a book does not have the tag'
+      pending 'when a constituent repository does not have the tag'
+      pending 'when a book does not have the tag'
     end
   end
 
   context 'when a pdf is specified' do
-    it 'creates the pdf'
+    pending 'creates the pdf'
   end
 
   describe 'invalid arguments' do

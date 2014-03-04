@@ -8,33 +8,32 @@ describe Cli do
 
   around_with_fixture_repo &:run
 
-  before { stub_github_for cred_repo } # TODO rip off bandaid
-
-  shared_examples_for 'a cli that dispatches commands' do
-    let(:arguments) { [command_string] + extra_args }
-    let(:extra_args) { ['arg1', 'arg2'] }
-    let(:fake_command) { double }
-
-    def run
-      cli.run arguments
-    end
-
-    before { command_class.stub(:new) { fake_command } }
-
-    it 'should run the publish command' do
-      fake_command.should_receive(:run).with(['arg1', 'arg2'])
-      run
-    end
-
-    it 'returns whatever the publish command returned' do
-      fake_command.should_receive(:run).and_return(42)
-      expect(run).to eq(42)
-    end
-  end
-
   describe '#run' do
     def run
       cli.run arguments
+    end
+
+    Cli::COMMAND_TO_CLASS_MAPPING.each do |command, klass|
+      let(:extra_args) { ['arg1', 'arg2'] }
+      let(:fake_command) { double }
+
+      context "running the #{command} command" do
+        let(:arguments) { [command] + extra_args }
+
+        before do
+          klass.stub(:new).and_return(fake_command)
+        end
+
+        it "calls run #{klass} for the #{command} command" do
+          fake_command.should_receive(:run).with(['arg1', 'arg2'])
+          cli.run arguments
+        end
+
+        it "returns the return value of #{klass} for the #{command} command" do
+          fake_command.should_receive(:run).and_return(42)
+          expect(cli.run arguments).to eq(42)
+        end
+      end
     end
 
     context 'when no arguments are supplied' do
@@ -123,17 +122,6 @@ describe Cli do
       end
     end
 
-    context 'when config.yml is missing' do
-      before { File.stub(:read).and_raise(Errno::ENOENT) }
-
-      let(:arguments) { ['publish', 'local'] }
-
-      it 'should print a helpful message' do
-        BookbinderLogger.should_receive(:log).with(/No such file or directory/)
-        run
-      end
-    end
-
     context 'when config.yml is empty' do
       before do
         File.stub(:read)
@@ -149,75 +137,15 @@ describe Cli do
     end
 
     describe 'the configuration' do
-      let(:configuration) { {cool: 'config', without: 'credentials'} }
-      before { File.write('./config.yml', configuration.to_yaml) }
+      let(:config_hash) { {cool: 'config', without: 'credentials'} }
+      let(:configuration) { Configuration.new(config_hash) }
+
+      before { File.write('./config.yml', config_hash.to_yaml) }
 
       it 'passes configuration to the given command' do
         expect(Cli::Publish).to receive(:new).with(configuration)
         cli.run ['publish', 'local']
       end
-
-      context 'when credentals repo is defined in the config' do
-        let(:configuration) { {'cred_repo' => cred_repo, 'arbitrary' => 'values'} }
-        let(:credentials) do
-          {
-            'secure_site'=>{'pass'=>'secret', 'handle'=>'agent'}
-          }
-        end
-
-        it "includes the fetched credentials in the Command's configuration" do
-          expect(Cli::Publish).to receive(:new).with configuration.merge(credentials)
-          cli.run ['publish', 'local']
-        end
-      end
     end
-  end
-
-  context 'when given the "publish" command' do
-    let(:command_string) { 'publish' }
-    let(:command_class) { Cli::Publish }
-    it_should_behave_like 'a cli that dispatches commands'
-  end
-
-  context 'when given the "tag" command' do
-    let(:command_string) { 'tag' }
-    let(:command_class) { Cli::Tag }
-    it_should_behave_like 'a cli that dispatches commands'
-  end
-
-  context 'when given the "build_and_push_tarball" command' do
-    let(:command_string) { 'build_and_push_tarball' }
-    let(:command_class) { Cli::BuildAndPushTarball }
-    it_should_behave_like 'a cli that dispatches commands'
-  end
-
-  context 'when given the "doc_repos_updated" command' do
-    let(:command_string) { 'doc_repos_updated' }
-    let(:command_class) { Cli::DocReposUpdated }
-    it_should_behave_like 'a cli that dispatches commands'
-  end
-
-  context 'when given the "push_local_to_staging" command' do
-    let(:command_string) { 'push_local_to_staging' }
-    let(:command_class) { Cli::PushLocalToStaging }
-    it_should_behave_like 'a cli that dispatches commands'
-  end
-
-  context 'when given the "push_to_prod" command' do
-    let(:command_string) { 'push_to_prod' }
-    let(:command_class) { Cli::PushToProd }
-    it_should_behave_like 'a cli that dispatches commands'
-  end
-
-  context 'when given the "run_publish_ci" command' do
-    let(:command_string) { 'run_publish_ci' }
-    let(:command_class) { Cli::RunPublishCI }
-    it_should_behave_like 'a cli that dispatches commands'
-  end
-
-  context 'when given the "update_local_doc_repos" command' do
-    let(:command_string) { 'update_local_doc_repos' }
-    let(:command_class) { Cli::UpdateLocalDocRepos }
-    it_should_behave_like 'a cli that dispatches commands'
   end
 end

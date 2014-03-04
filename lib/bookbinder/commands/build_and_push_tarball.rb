@@ -11,7 +11,7 @@ class Cli
       bucket, key, secret = aws_credentials
       repository = GreenBuildRepository.new key: key, secret: secret
       repository.create build_number: ENV['BUILD_NUMBER'], bucket: bucket,
-                        namespace: Book.new(full_name: config.fetch('book_repo')).short_name
+                        namespace: Book.new(full_name: config.book_repo).short_name
       0
     end
 
@@ -23,9 +23,9 @@ class Cli
 
     def aws_credentials
       [
-        config.fetch('aws').fetch('green_builds_bucket'),
-        config.fetch('aws').fetch('access_key'),
-        config.fetch('aws').fetch('secret_key')
+        config.aws_credentials.green_builds_bucket,
+        config.aws_credentials.access_key,
+        config.aws_credentials.secret_key
       ]
     rescue KeyError => e
       raise CredentialKeyError, e

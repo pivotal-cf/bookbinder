@@ -7,9 +7,8 @@ describe Cli::BuildAndPushTarball do
   let(:build_number) { '17' }
   let(:book_repo) { 'org/fixture-book-title' }
 
-  let(:config) do
+  let(:aws_hash) do
     {
-      'book_repo' => book_repo,
       'aws' => {
         'green_builds_bucket' => bucket,
         'access_key' => access_key,
@@ -18,9 +17,20 @@ describe Cli::BuildAndPushTarball do
     }
   end
 
+  let(:config_hash) do
+    {
+      'book_repo' => book_repo,
+      'cred_repo' => 'some/repo'
+    }
+  end
+  let(:config) { Configuration.new(config_hash) }
+
   before do
     ENV.stub(:[])
     ENV.stub(:[]).with('BUILD_NUMBER').and_return(build_number)
+    fake_creds = double
+    fake_creds.stub(:credentials).and_return(aws_hash)
+    CredRepo.stub(:new).and_return(fake_creds)
   end
 
   let(:access_key) { 'access-key' }
