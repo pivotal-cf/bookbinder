@@ -8,10 +8,10 @@ class PdfGenerator
     end
   end
 
-  def generate(source_page, target_pdf_file, pdf_header)
+  def generate(source, target, header)
 
-    check_file_exists source_page
-    check_file_exists pdf_header
+    check_file_exists source
+    check_file_exists header
 
     command = <<CMD
 wkhtmltopdf \
@@ -25,15 +25,15 @@ wkhtmltopdf \
     --footer-left "   © Copyright 2013-#{Time.now.year}, Pivotal" \
     --footer-center '[page] of [toPage]' \
     --print-media-type \
-    --header-html #{pdf_header} \
-    #{source_page} \
-    #{target_pdf_file}
+    --header-html #{header} \
+    #{source} \
+    #{target}
 CMD
     shell_out command
 
-    raise "'wkhtmltopdf' appears to have failed" unless File.exist?(target_pdf_file)
+    raise "'wkhtmltopdf' appears to have failed" unless File.exist?(target)
 
-    log "\nYour PDF file was generated to #{target_pdf_file.green}"
+    log "\nYour PDF file was generated to #{target.green}"
 
   end
 
