@@ -1,8 +1,6 @@
 class Cli
   include BookbinderLogger
 
-  class CredentialKeyError < StandardError;
-  end
   class InvalidArguments < StandardError;
   end
 
@@ -34,7 +32,7 @@ class Cli
 
   def run_command(command, command_arguments)
     command.new(config).run command_arguments
-  rescue Cli::CredentialKeyError => e
+  rescue Configuration::CredentialKeyError => e
     log "#{e.message}, in credentials.yml".red
     1
   rescue KeyError => e

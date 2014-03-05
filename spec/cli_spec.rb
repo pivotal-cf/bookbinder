@@ -70,9 +70,9 @@ describe Cli do
         end
       end
 
-      context 'a Cli::CredentialKeyError' do
+      context 'a Configuration::CredentialKeyError' do
         before do
-          Cli::Publish.any_instance.stub(:run).and_raise Cli::CredentialKeyError.new 'I broke'
+          Cli::Publish.any_instance.stub(:run).and_raise Configuration::CredentialKeyError.new 'I broke'
         end
 
         let(:arguments) { ['publish', 'local'] }

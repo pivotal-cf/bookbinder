@@ -1,4 +1,7 @@
 class Configuration
+  class CredentialKeyError < StandardError;
+  end
+
   class AwsCredentials
     REQUIRED_KEYS = %w(access_key secret_key green_builds_bucket).freeze
 
@@ -8,7 +11,11 @@ class Configuration
 
     REQUIRED_KEYS.each do |method_name|
       define_method(method_name) do
-        creds.fetch(method_name)
+        begin
+          creds.fetch(method_name)
+        rescue KeyError => e
+          raise CredentialKeyError, e
+        end
       end
     end
 
@@ -28,7 +35,7 @@ class Configuration
 
     REQUIRED_KEYS.each do |method_name|
       define_method(method_name) do
-        creds.fetch(method_name)
+        fetch(method_name)
       end
     end
 
@@ -40,17 +47,23 @@ class Configuration
 
     def host
       key = is_production ? 'production_host' : 'staging_host'
-      creds.fetch(key)
+      fetch(key)
     end
 
     def space
       key = is_production ? 'production_space' : 'staging_space'
-      creds.fetch(key)
+      fetch(key)
     end
 
     private
 
     attr_reader :creds, :is_production
+
+    def fetch(key)
+      creds.fetch(key)
+    rescue KeyError => e
+      raise CredentialKeyError, e
+    end
   end
 
   def initialize(config_hash)
