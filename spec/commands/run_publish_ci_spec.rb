@@ -9,9 +9,9 @@ describe Cli::RunPublishCI do
   let(:command) { Cli::RunPublishCI.new(config) }
 
   before do
-    Cli::Publish.stub(:new) { fake_publish }
-    Cli::PushLocalToStaging.stub(:new) { fake_push_local_to_staging }
-    Cli::BuildAndPushTarball.stub(:new) { fake_build_and_push_tarball }
+    allow(Cli::Publish).to receive(:new).with(config) { fake_publish }
+    allow(Cli::PushLocalToStaging).to receive(:new).with(config) { fake_push_local_to_staging }
+    allow(Cli::BuildAndPushTarball).to receive(:new).with(config) { fake_build_and_push_tarball }
   end
 
   context 'when ENV["BUILD_NUMBER"] is set' do
@@ -21,25 +21,25 @@ describe Cli::RunPublishCI do
     end
 
     it 'runs three commands and returns 0 if all three do so' do
-      fake_publish.should_receive(:run).with(['github']).and_return(0)
-      fake_push_local_to_staging.should_receive(:run).with([]).and_return(0)
-      fake_build_and_push_tarball.should_receive(:run).with([]).and_return(0)
+      expect(fake_publish).to receive(:run).with(['github']).and_return(0)
+      expect(fake_push_local_to_staging).to receive(:run).with([]).and_return(0)
+      expect(fake_build_and_push_tarball).to receive(:run).with([]).and_return(0)
       result = command.run []
       expect(result).to eq(0)
     end
 
     it 'does not execute PushLocalToStaging if Publish fails' do
-      fake_publish.should_receive(:run).with(['github']).and_return(1)
-      fake_push_local_to_staging.should_not_receive(:run)
-      fake_build_and_push_tarball.should_not_receive(:run)
+      expect(fake_publish).to receive(:run).with(['github']).and_return(1)
+      expect(fake_push_local_to_staging).not_to receive(:run)
+      expect(fake_build_and_push_tarball).not_to receive(:run)
       result = command.run []
       expect(result).to eq(1)
     end
 
     it 'does not execute BuildAndPushTarball if PushLocalToStaging fails' do
-      fake_publish.should_receive(:run).with(['github']).and_return(0)
-      fake_push_local_to_staging.should_receive(:run).with([]).and_return(1)
-      fake_build_and_push_tarball.should_not_receive(:run)
+      expect(fake_publish).to receive(:run).with(['github']).and_return(0)
+      expect(fake_push_local_to_staging).to receive(:run).with([]).and_return(1)
+      expect(fake_build_and_push_tarball).not_to receive(:run)
       result = command.run []
       expect(result).to eq(1)
     end

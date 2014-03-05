@@ -3,9 +3,9 @@ class Cli
     def run(_)
       check_params
       (
-      (0 == Publish.new.run(['github'])) &&
-          (0 == PushLocalToStaging.new.run([])) &&
-          (0 == BuildAndPushTarball.new.run([]))
+      (0 == Publish.new(config).run(['github'])) &&
+          (0 == PushLocalToStaging.new(config).run([])) &&
+          (0 == BuildAndPushTarball.new(config).run([]))
       ) ? 0 : 1
     end
 

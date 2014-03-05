@@ -44,10 +44,10 @@ describe Configuration do
     let(:aws_hash) { {'access_key' => 'some-secret', 'secret_key' => 'wow-agent', 'green_builds_bucket' => 'its_a_pail'} }
     let(:cf_hash) do
       {
-        'api_endpoint' =>'http://some-api-endpoint.example.com',
-        'production_host' => 'http://some-prod-host.example.com',
+        'api_endpoint' => 'http://some-api-endpoint.example.com',
+        'production_host' => 'some-prod-host',
         'production_space' => 'some-prod-space',
-        'staging_host' => 'http://some-staging-host.example.com',
+        'staging_host' => 'some-staging-host',
         'staging_space' => 'some-staging-space',
         'app_name' => 'some-app',
         'username' => 'some-user',
@@ -55,7 +55,7 @@ describe Configuration do
         'organization' => 'some-org'
       }
     end
-    let(:creds_hash) { { 'aws' => aws_hash, 'cloud_foundry' => cf_hash } }
+    let(:creds_hash) { {'aws' => aws_hash, 'cloud_foundry' => cf_hash} }
     let(:cred_repo) { double(credentials: creds_hash) }
 
     before do
@@ -68,40 +68,85 @@ describe Configuration do
         expect(config.aws_credentials.secret_key).to eq('wow-agent')
         expect(config.aws_credentials.green_builds_bucket).to eq('its_a_pail')
       end
+
+      it 'memoizes' do
+        expect(config.aws_credentials).to equal(config.aws_credentials)
+      end
     end
 
-    describe '#cf_credentials' do
+    describe Configuration::CfCredentials do
+      let(:is_production) { nil }
+      let(:cf_credentials) { Configuration::CfCredentials.new(cf_hash, is_production) }
+
       it 'returns a Configuration with the CF credentials from the credentials repository' do
-        expect(config.cf_credentials.api_endpoint).to eq('http://some-api-endpoint.example.com')
-        expect(config.cf_credentials.production_host).to eq('http://some-prod-host.example.com')
-        expect(config.cf_credentials.production_space).to eq('some-prod-space')
-        expect(config.cf_credentials.staging_host).to eq('http://some-staging-host.example.com')
-        expect(config.cf_credentials.staging_space).to eq('some-staging-space')
-        expect(config.cf_credentials.app_name).to eq('some-app')
-        expect(config.cf_credentials.username).to eq('some-user')
-        expect(config.cf_credentials.password).to eq('some-pass')
-        expect(config.cf_credentials.organization).to eq('some-org')
+        expect(cf_credentials.api_endpoint).to eq('http://some-api-endpoint.example.com')
+        expect(cf_credentials.app_name).to eq('some-app')
+        expect(cf_credentials.username).to eq('some-user')
+        expect(cf_credentials.password).to eq('some-pass')
+        expect(cf_credentials.organization).to eq('some-org')
+      end
+
+      it 'memoizes' do
+        expect(cf_credentials).to be(cf_credentials)
       end
 
       describe 'default values' do
-        it 'defaults production_host to nil' do
-          cf_hash.delete('production_host')
-          expect(config.cf_credentials.production_host).to be_nil
-        end
-
-        it 'defaults production_space to nil' do
-          cf_hash.delete('production_space')
-          expect(config.cf_credentials.production_space).to be_nil
-        end
-
         it 'defaults username to nil' do
           cf_hash.delete('username')
-          expect(config.cf_credentials.username).to be_nil
+          expect(cf_credentials.username).to be_nil
         end
 
         it 'defaults password to nil' do
           cf_hash.delete('password')
-          expect(config.cf_credentials.password).to be_nil
+          expect(cf_credentials.password).to be_nil
+        end
+      end
+
+      describe 'is_production' do
+        context 'when production' do
+          let(:is_production) { true }
+
+          it 'uses production values for host and space' do
+            expect(cf_credentials.host).to eq('some-prod-host')
+            expect(cf_credentials.space).to eq('some-prod-space')
+          end
+        end
+
+        context 'when staging' do
+          let(:is_production) { false }
+
+          it 'uses staging values for host and space' do
+            expect(cf_credentials.host).to eq('some-staging-host')
+            expect(cf_credentials.space).to eq('some-staging-space')
+          end
+        end
+      end
+    end
+
+    describe '#cf_production_credentials' do
+      describe '#host' do
+        it 'is the production host' do
+          expect(config.cf_production_credentials.host).to eq('some-prod-host')
+        end
+      end
+
+      describe '#space' do
+        it 'is the production space' do
+          expect(config.cf_production_credentials.space).to eq('some-prod-space')
+        end
+      end
+    end
+
+    describe '#cf_staging_credentials' do
+      describe '#host' do
+        it 'is the staging host' do
+          expect(config.cf_staging_credentials.host).to eq('some-staging-host')
+        end
+      end
+
+      describe '#space' do
+        it 'is the staging space' do
+          expect(config.cf_staging_credentials.space).to eq('some-staging-space')
         end
       end
     end
@@ -116,18 +161,19 @@ describe Configuration do
     it 'only fetches the credentials repository once' do
       expect(CredRepo).to receive(:new).once
       config.aws_credentials
-      config.cf_credentials
+      config.cf_staging_credentials
+      config.cf_production_credentials
       config.aws_credentials
     end
   end
 
   describe 'equality' do
     let(:config_hash_1) do
-      { 'a' => 'b', c: 'd'}
+      {'a' => 'b', c: 'd'}
     end
 
     let(:config_hash_2) do
-      { 'a' => 'b', c: 'e'}
+      {'a' => 'b', c: 'e'}
     end
 
     it 'is true for identical configurations' do

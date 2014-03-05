@@ -24,6 +24,7 @@ describe Cli::PushLocalToStaging do
 
   let(:fake_cred_repo) { double(credentials: credentials) }
   let(:fake_pusher) { double }
+  let(:fake_cf) { double }
   let(:config) { Configuration.new(config_hash) }
 
   before do
@@ -31,8 +32,9 @@ describe Cli::PushLocalToStaging do
   end
 
   it 'calls Pusher#push with CF credentials' do
-    Pusher.stub(:new).and_return(fake_pusher)
-    expect(fake_pusher).to receive(:push).with(*%w[end host org space app ./final_app user pass])
+    expect(CfCommandRunner).to receive(:new).with(config.cf_staging_credentials).and_return(fake_cf)
+    expect(Pusher).to receive(:new).with(fake_cf).and_return(fake_pusher)
+    expect(fake_pusher).to receive(:push).with('./final_app')
     Cli::PushLocalToStaging.new(config).run(nil)
   end
 

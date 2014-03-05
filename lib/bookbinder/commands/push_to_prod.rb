@@ -3,7 +3,10 @@ class Cli
     def run(arguments)
       app_dir = Dir.mktmpdir
 
-      bucket, key, secret = aws_credentials
+      bucket = config.aws_credentials.green_builds_bucket
+      key = config.aws_credentials.access_key
+      secret = config.aws_credentials.secret_key
+
       repository = GreenBuildRepository.new key: key, secret: secret
 
       repository.download download_dir: app_dir, bucket: bucket, build_number: arguments[0],
@@ -11,31 +14,10 @@ class Cli
 
       log 'Warning: You are pushing to CF Docs production. Be careful.'.yellow
 
-      Pusher.new.push *cf_credentials.push(app_dir)
+      cf_command_runner = CfCommandRunner.new(config.cf_production_credentials)
+      Pusher.new(cf_command_runner).push(app_dir)
 
       0
-    end
-
-    def cf_credentials
-      [
-        config.cf_credentials.api_endpoint,
-        config.cf_credentials.production_host,
-        config.cf_credentials.organization,
-        config.cf_credentials.production_space,
-        config.cf_credentials.app_name
-      ]
-    rescue KeyError => e
-      raise CredentialKeyError, e
-    end
-
-    def aws_credentials
-      [
-        config.aws_credentials.green_builds_bucket,
-        config.aws_credentials.access_key,
-        config.aws_credentials.secret_key
-      ]
-    rescue KeyError => e
-      raise CredentialKeyError, e
     end
 
     def self.usage

@@ -28,6 +28,7 @@ require_relative 'bookbinder/pdf_generator'
 require_relative 'bookbinder/middleman_runner'
 require_relative 'bookbinder/publisher'
 require_relative 'bookbinder/doc_repo_change_monitor'
+require_relative 'bookbinder/cf_command_runner'
 require_relative 'bookbinder/pusher'
 require_relative 'bookbinder/local_doc_repos_updater'
 

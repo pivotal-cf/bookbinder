@@ -18,11 +18,12 @@ class Configuration
   end
 
   class CfCredentials
-    REQUIRED_KEYS = %w(api_endpoint staging_host organization staging_space app_name).freeze
-    OPTIONAL_KEYS = %w(production_host production_space username password).freeze
+    REQUIRED_KEYS = %w(api_endpoint organization app_name).freeze
+    OPTIONAL_KEYS = %w(username password).freeze
 
-    def initialize(cred_hash)
+    def initialize(cred_hash, is_production)
       @creds = cred_hash
+      @is_production = is_production
     end
 
     REQUIRED_KEYS.each do |method_name|
@@ -37,9 +38,19 @@ class Configuration
       end
     end
 
+    def host
+      key = is_production ? 'production_host' : 'staging_host'
+      creds.fetch(key)
+    end
+
+    def space
+      key = is_production ? 'production_space' : 'staging_space'
+      creds.fetch(key)
+    end
+
     private
 
-    attr_reader :creds
+    attr_reader :creds, :is_production
   end
 
   def initialize(config_hash)
@@ -57,11 +68,15 @@ class Configuration
   end
 
   def aws_credentials
-    AwsCredentials.new(credentials.fetch('aws'))
+    @aws_creds ||= AwsCredentials.new(credentials.fetch('aws'))
   end
 
-  def cf_credentials
-    CfCredentials.new(credentials.fetch('cloud_foundry'))
+  def cf_staging_credentials
+    @cf_staging_creds ||= CfCredentials.new(credentials.fetch('cloud_foundry'), false)
+  end
+
+  def cf_production_credentials
+    @cf_prod_creds ||= CfCredentials.new(credentials.fetch('cloud_foundry'), true)
   end
 
   def ==(o)

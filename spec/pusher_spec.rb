@@ -3,22 +3,57 @@ require 'spec_helper'
 describe Pusher, enable_pusher: true do
   include_context 'tmp_dirs'
 
-  describe '#push' do
-    context 'incorrectly logging in' do
-      let(:app_dir) { tmp_subdir "some_dir" }
+  let(:creds) do
+    Configuration::CfCredentials.new(
+      {
+        'api_endpoint' => nil,
+        'app_name' => 'app'
+      },
+      false
+    )
+  end
 
+  let(:cf) do
+    double(
+      creds: creds,
+      find_green_blue: 'app-green',
+      host: 'host.example.com'
+    )
+  end
+
+  subject(:pusher) { Pusher.new(cf) }
+  let(:app_dir) { tmp_subdir "pusher_spec" }
+
+  describe '#push' do
+    describe 'when the hostname points to green' do
       before do
-        Kernel.stub(:system).and_return(false)
+        expect(cf).to receive(:login).with(no_args).ordered
+        expect(cf).to receive(:apps).with(no_args).and_return(['app-green']).ordered
       end
 
-      it 'raises an error and does not deploy' do
-        expect(Kernel).not_to receive(:system).with(/start/)
-        expect(Kernel).not_to receive(:system).with(/push/)
-        expect(Kernel).not_to receive(:system).with(/map-route/)
+      it 'makes the right CF calls' do
+        expect(cf).to receive(:start).with('app-blue').ordered
+        expect(cf).to receive(:push).with('app-blue').ordered
+        expect(cf).to receive(:map_route).with('app-blue').ordered
+        expect(cf).to receive(:takedown_old_target_app).with('app-green').ordered
 
-        expect {
-          Pusher.new.push("endpoint", "", "", "", "", app_dir)
-        }.to raise_error(/Could not log in to.*endpoint/)
+        pusher.push(app_dir)
+      end
+    end
+
+    describe 'when the hostname points to blue' do
+      before do
+        expect(cf).to receive(:login).with(no_args).ordered
+        expect(cf).to receive(:apps).with(no_args).and_return(['app-blue']).ordered
+      end
+
+      it 'makes the right CF calls' do
+        expect(cf).to receive(:start).with('app-green').ordered
+        expect(cf).to receive(:push).with('app-green').ordered
+        expect(cf).to receive(:map_route).with('app-green').ordered
+        expect(cf).to receive(:takedown_old_target_app).with('app-blue').ordered
+
+        pusher.push(app_dir)
       end
     end
   end
