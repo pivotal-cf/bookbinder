@@ -3,79 +3,111 @@ require 'spec_helper'
 describe Configuration do
   let(:config_hash) do
     {
-      meat: 'balogna',
-      'first_name' => 'oscar',
-      last_name: 'meyer',
-      cred_repo: 'owner/place'
+      'book_repo' => 'some-org/some-repo',
+      'cred_repo' => 'some-org/cred-repo',
+      'repos' => [{'github_repo' => 'some-org/some-docs', 'directory' => 'docs'}],
+      'public_host' => 'http://www.example.com',
+      'template_variables' => {'some-var' => 'some-value'}
     }
   end
 
-  let(:config) { Configuration.new(config_hash) }
+  subject(:config) { Configuration.new(config_hash) }
 
-  describe 'fetching values' do
-    context 'when the key exists' do
-      it 'has a method that returns the value for a symbol key' do
-        expect(config.meat).to eq('balogna')
-      end
-
-      it 'has a method that returns the value for a string key' do
-        expect(config.first_name).to eq('oscar')
-      end
+  describe 'accessing configuration values' do
+    it 'exposes #book_repo' do
+      expect(config.book_repo).to eq('some-org/some-repo')
     end
 
-    context 'when the key does not exist' do
-      it 'raises' do
-        expect {
-          config.johnsonville_brats
-        }.to raise_error(KeyError)
-      end
-    end
-  end
-
-  describe '#respond_to?' do
-    context 'for a key that exists' do
-      it 'is true' do
-        expect(config.respond_to?(:last_name)).to be_true
-        expect(config.respond_to?(:aws_credentials)).to be_true
-      end
+    it 'exposes #cred_repo' do
+      expect(config.cred_repo).to eq('some-org/cred-repo')
     end
 
-    context 'for a key that does not exist' do
-      it 'is false' do
-        expect(config.respond_to?(:johnsonville_brats)).to be_false
-      end
+    it 'exposes #repos' do
+      expect(config.repos).to eq([{'github_repo' => 'some-org/some-docs', 'directory' => 'docs'}])
+    end
+
+    it 'exposes #public_host' do
+      expect(config.public_host).to eq('http://www.example.com')
+    end
+
+    it 'exposes #template_variables' do
+      expect(config.template_variables).to eq({'some-var' => 'some-value'})
+    end
+
+    it 'returns an empty hash when template_variables is not provided' do
+      config_hash.delete('template_variables')
+      expect(config.template_variables).to eq({})
     end
   end
 
   describe 'credentials' do
-    let(:aws_hash) { {secret: 'some-secret', agent: 'wow-agent'} }
-    let(:cf_hash) { {cf_secret: 'some-cf-secret', agent: 'wow-cf-agent'} }
+    let(:aws_hash) { {'access_key' => 'some-secret', 'secret_key' => 'wow-agent', 'green_builds_bucket' => 'its_a_pail'} }
+    let(:cf_hash) do
+      {
+        'api_endpoint' =>'http://some-api-endpoint.example.com',
+        'production_host' => 'http://some-prod-host.example.com',
+        'production_space' => 'some-prod-space',
+        'staging_host' => 'http://some-staging-host.example.com',
+        'staging_space' => 'some-staging-space',
+        'app_name' => 'some-app',
+        'username' => 'some-user',
+        'password' => 'some-pass',
+        'organization' => 'some-org'
+      }
+    end
     let(:creds_hash) { { 'aws' => aws_hash, 'cloud_foundry' => cf_hash } }
-    let(:cred_repo) { double }
+    let(:cred_repo) { double(credentials: creds_hash) }
 
     before do
-      cred_repo.stub(:credentials).and_return(creds_hash)
-      CredRepo.stub(:new).with(full_name: 'owner/place').and_return(cred_repo)
+      CredRepo.stub(:new).with(full_name: 'some-org/cred-repo').and_return(cred_repo)
     end
 
     describe '#aws_credentials' do
       it 'returns a Configuration with the AWS credentials from the credentials repository' do
-        aws_hash.keys.each do |k|
-          expect(config.aws_credentials.send(k)).to eq(aws_hash[k])
-        end
+        expect(config.aws_credentials.access_key).to eq('some-secret')
+        expect(config.aws_credentials.secret_key).to eq('wow-agent')
+        expect(config.aws_credentials.green_builds_bucket).to eq('its_a_pail')
       end
     end
 
-    describe '#cloud_foundry_credentials' do
-      it 'returns a Configuration with the AWS credentials from the credentials repository' do
-        cf_hash.keys.each do |k|
-          expect(config.cf_credentials.send(k)).to eq(cf_hash[k])
+    describe '#cf_credentials' do
+      it 'returns a Configuration with the CF credentials from the credentials repository' do
+        expect(config.cf_credentials.api_endpoint).to eq('http://some-api-endpoint.example.com')
+        expect(config.cf_credentials.production_host).to eq('http://some-prod-host.example.com')
+        expect(config.cf_credentials.production_space).to eq('some-prod-space')
+        expect(config.cf_credentials.staging_host).to eq('http://some-staging-host.example.com')
+        expect(config.cf_credentials.staging_space).to eq('some-staging-space')
+        expect(config.cf_credentials.app_name).to eq('some-app')
+        expect(config.cf_credentials.username).to eq('some-user')
+        expect(config.cf_credentials.password).to eq('some-pass')
+        expect(config.cf_credentials.organization).to eq('some-org')
+      end
+
+      describe 'default values' do
+        it 'defaults production_host to nil' do
+          cf_hash.delete('production_host')
+          expect(config.cf_credentials.production_host).to be_nil
+        end
+
+        it 'defaults production_space to nil' do
+          cf_hash.delete('production_space')
+          expect(config.cf_credentials.production_space).to be_nil
+        end
+
+        it 'defaults username to nil' do
+          cf_hash.delete('username')
+          expect(config.cf_credentials.username).to be_nil
+        end
+
+        it 'defaults password to nil' do
+          cf_hash.delete('password')
+          expect(config.cf_credentials.password).to be_nil
         end
       end
     end
 
     it 'fetches the credentials repository only when the credentials are asked for' do
-      config.last_name
+      config.book_repo
       expect(CredRepo).to_not have_received(:new)
       config.aws_credentials
       expect(CredRepo).to have_received(:new)

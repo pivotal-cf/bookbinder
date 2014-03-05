@@ -2,24 +2,26 @@ require 'spec_helper'
 
 describe Cli::PushLocalToStaging do
   let(:cred_repo) { 'some-repo' }
-  let(:config_hash) {
+  let(:config_hash) do
     {
-      cred_repo: cred_repo
+      'cred_repo' => cred_repo
     }
-  }
-  let(:credentials) {
+  end
+
+  let(:credentials) do
     {
-      cloud_foundry: {
-        api_endpoint: 'end',
-        staging_host: 'host',
-        organization: 'org',
-        staging_space: 'space',
-        app_name: 'app',
-        username: 'user',
-        password: 'pass',
+      'cloud_foundry' => {
+        'api_endpoint' => 'end',
+        'staging_host' => 'host',
+        'organization' => 'org',
+        'staging_space' => 'space',
+        'app_name' => 'app',
+        'username' => 'user',
+        'password' => 'pass',
       }
     }
-  }
+  end
+
   let(:fake_cred_repo) { double(credentials: credentials) }
   let(:fake_pusher) { double }
   let(:config) { Configuration.new(config_hash) }
