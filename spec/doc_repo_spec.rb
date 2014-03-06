@@ -208,6 +208,35 @@ describe DocRepo do
     end
   end
 
+  describe '#subnav_template' do
+    let(:repo_hash) { {'subnav_template' => subnav_template_name, 'github_repo' => ''} }
+    let(:repo) { DocRepo.new(repo_hash, nil, 'dir', nil) }
+
+    context 'when the incoming template does not look like a partial file' do
+      let(:subnav_template_name) { 'my_template' }
+
+      it 'is unchanged' do
+        expect(repo.subnav_template).to eq('my_template')
+      end
+    end
+
+    context 'when the incoming template looks like a partial file' do
+      let(:subnav_template_name) { '_my_tem.erbplate.erb' }
+
+      it 'is trimmed' do
+        expect(repo.subnav_template).to eq('my_tem.erbplate')
+      end
+    end
+
+    context 'when the incoming template is not defined' do
+      let(:repo_hash) { {'github_repo' => ''} }
+
+      it 'is nil' do
+        expect(repo.subnav_template).to be_nil
+      end
+    end
+  end
+
   describe '#copy_from_*' do
     let(:repo_name) { 'org/my-docs-repo' }
     let(:some_sha) { 'some-sha' }

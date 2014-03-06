@@ -1,6 +1,6 @@
 class DocRepo < Repository
 
-  attr_reader :subnav_template, :copied_to
+  attr_reader :copied_to
 
   def self.from_remote(repo_hash: {}, github_token: ENV['GITHUB_API_TOKEN'], destination_dir: nil, target_tag: nil)
     repo = self.new(repo_hash, github_token, nil, target_tag)
@@ -22,6 +22,11 @@ class DocRepo < Repository
     @directory = repo_hash['directory']
     @local_repo_dir = local_repo_dir
     @subnav_template = repo_hash['subnav_template']
+  end
+
+  def subnav_template
+    return unless @subnav_template
+    @subnav_template.gsub(/^_/, '').gsub(/\.erb$/, '')
   end
 
   def copied?
