@@ -1,4 +1,6 @@
 # mostly from https://github.com/multiscan/middleman-navigation but modified slightly
+require_relative 'quicklinks_renderer'
+
 I18n.enforce_available_locales = false
 
 module Navigation
@@ -44,26 +46,7 @@ module Navigation
 
     def quick_links
       page_src = File.read(current_page.source_file)
-      sections = page_src.scan /\n\#{2,3}[^#]+\#{2,3}\n/
-
-      markdown = ''
-
-      sections.each do |s|
-
-        next if s.match(/id=['"](.+)['"]/).nil? or s.match(/<\/a>([^#.]+)\#{2,3}/).nil?
-
-        anchor_name = s.match(/id=['"](.+)['"]/)[1]
-        title = s.match(/<\/a>([^#.]+)\#{2,3}/)[1].strip!
-        indent = (s.count('#') / 2) - 2
-
-        markdown << '  ' * indent
-        markdown << "* [#{title}](##{anchor_name})\n"
-
-      end
-
-      md = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
-      result = md.render(markdown)
-      result.empty? ? '' : "<div class=\"quick-links\">#{result}</div>"
+      Redcarpet::Markdown.new(QuicklinksRenderer).render(page_src)
     end
 
     private
@@ -87,7 +70,6 @@ module Navigation
       end
       content_tag :li, link, :class => css_class
     end
-
   end
 end
 

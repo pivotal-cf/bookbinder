@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 require './master_middleman/bookbinder_helpers'
+require 'redcarpet'
 
 describe Navigation::HelperMethods do
   describe '#yield_for_code_snippet' do
@@ -150,6 +151,104 @@ p fib.take_while { |n| n <= 4E6 }
   end
 
   describe '#quick_links' do
-    pending
+    let(:quick_links) do
+      class TestClass
+        include Navigation::HelperMethods
+
+        def current_page
+          double(:source_file)
+        end
+      end
+
+      test_class = TestClass.new
+      allow(test_class).to receive(:current_page).and_return(double(:current_page, source_file: nil))
+      test_class.quick_links
+    end
+
+    let(:sample_markdown) do
+      <<MARKDOWN
+title: Dummy title
+#####
+
+Dummy content
+
+## <a id='target'></a>Target run.pivotal.io ##
+
+## <a id='hug'>Target run.pivotal.io with a hug</a> ##
+
+## <a id='no-closing'></a> No closing octothorpes
+
+## <a id="double-quote"></a> Double quotation
+
+Dummy content
+
+## <a id='sample-apps'></a>Sample Applications ##
+
+  ## <a id='sample-apps'></a>I am not a header, I am indented ##
+
+Dummy content
+
+More dummy content
+
+## <a id='prepare-app'></a>Prepare Your Own Application for Deployment ##
+MARKDOWN
+    end
+
+    let(:expected_output) do
+      <<HTML
+<div class=\"quick-links\"><ul>
+<li><a href=\"#target\">Target run.pivotal.io</a></li>
+<li><a href=\"#hug\">Target run.pivotal.io with a hug</a></li>
+<li><a href=\"#no-closing\">No closing octothorpes</a></li>
+<li><a href=\"#double-quote\">Double quotation</a></li>
+<li><a href=\"#sample-apps\">Sample Applications</a></li>
+<li><a href=\"#prepare-app\">Prepare Your Own Application for Deployment</a></li>
+</ul></div>
+HTML
+    end
+
+    before do
+      expect(File).to receive(:read).and_return(sample_markdown)
+    end
+
+    it 'returns a div with all linkable places' do
+      expect(quick_links).to eq(expected_output.strip)
+    end
+
+    context 'when smaller headers follow larger headers' do
+      let(:sample_markdown) do
+        <<MARKDOWN
+## <a id='prepare-app'></a>Prepare Your Own Application for Deployment ##
+
+## <a id='parent'></a>AKA, the Nest ##
+
+### <a id='child'></a>The Nestee ###
+
+### <a id='bro'></a>The Nestee's Brother ###
+
+## <a id='uncle'></a>Not nested ##
+
+MARKDOWN
+      end
+
+      let(:expected_output) do
+        <<HTML
+<div class=\"quick-links\"><ul>
+<li><a href=\"#prepare-app\">Prepare Your Own Application for Deployment</a></li>
+<li>
+<a href=\"#parent\">AKA, the Nest</a><ul>
+<li><a href=\"#child\">The Nestee</a></li>
+<li><a href=\"#bro\">The Nestee's Brother</a></li>
+</ul>
+</li>
+<li><a href=\"#uncle\">Not nested</a></li>
+</ul></div>
+HTML
+      end
+
+      it 'nests links' do
+        expect(quick_links).to eq(expected_output.strip)
+      end
+    end
   end
 end
