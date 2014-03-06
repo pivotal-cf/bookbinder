@@ -81,6 +81,10 @@ describe Cli::Publish do
       expect {
         publish_command.run ['blah', 'blah', 'whatever']
       }.to raise_error(Cli::InvalidArguments)
+
+      expect {
+        publish_command.run []
+      }.to raise_error(Cli::InvalidArguments)
     end
   end
 end

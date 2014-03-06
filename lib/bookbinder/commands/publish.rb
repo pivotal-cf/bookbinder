@@ -66,11 +66,13 @@ class Cli
     end
 
     def arguments_are_valid?(arguments)
-      verbose           = arguments[1..-1].include?('--verbose')
-      tag_provided      = (arguments[1..-1] - ['--verbose']).any?
+      return false unless arguments.any?
+
+      verbose           = arguments[1] && arguments[1..-1].include?('--verbose')
+      tag_provided      = arguments[1] && (arguments[1..-1] - ['--verbose']).any?
       nothing_special   = arguments[1..-1].empty?
 
-      %w(local github).include?(arguments[0]) && (tag_provided or verbose or nothing_special)
+      %w(local github).include?(arguments[0]) && (tag_provided || verbose || nothing_special)
     end
   end
 end
