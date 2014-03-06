@@ -13,6 +13,7 @@ class QuicklinksRenderer < Redcarpet::Render::Base
 
   def header(text, header_level, anchor)
     return unless [2, 3].include?(header_level)
+    return unless anchor_for(text)
 
     li = Nokogiri::XML::Node.new('li', document)
     li.add_child anchor_for(text)
@@ -25,8 +26,11 @@ class QuicklinksRenderer < Redcarpet::Render::Base
 
   def anchor_for(text)
     doc = Nokogiri::HTML(text)
+    target_anchor = doc.css('a').first
+    return unless target_anchor && target_anchor['id']
+
     anchor = Nokogiri::XML::Node.new('a', document)
-    anchor['href'] = "##{doc.css('a').first['id']}"
+    anchor['href'] = "##{target_anchor['id']}"
     anchor.content = doc.text.strip
     anchor
   end

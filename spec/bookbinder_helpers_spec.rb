@@ -250,5 +250,25 @@ HTML
         expect(quick_links).to eq(expected_output.strip)
       end
     end
+
+    context 'when a header contains no anchors' do
+      let(:sample_markdown) do
+        <<MARKDOWN
+## <a id='my-id'></a> With an anchor
+## <a></a> Without an id
+## Without an anchor
+MARKDOWN
+      end
+
+      let(:expected_output) do
+        <<HTML
+<div class=\"quick-links\"><ul><li><a href=\"#my-id\">With an anchor</a></li></ul></div>
+HTML
+      end
+
+      it 'is not linked to' do
+        expect(quick_links).to eq(expected_output.strip)
+      end
+    end
   end
 end
