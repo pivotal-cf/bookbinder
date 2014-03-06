@@ -29,10 +29,6 @@ module Navigation
       partial "subnavs/#{template}"
     end
 
-    def decreasingly_specific_namespaces
-      page_classes.split(' ')[0...-1].reverse
-    end
-
     def breadcrumbs
       page_chain = add_ancestors_of(current_page, [])
       breadcrumbs = page_chain.map do |page|
@@ -71,6 +67,10 @@ module Navigation
     end
 
     private
+
+    def decreasingly_specific_namespaces
+      page_classes.split(' ')[0...-1].reverse
+    end
 
     def add_ancestors_of(page, ancestors)
       return ancestors if !page
