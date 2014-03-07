@@ -180,4 +180,8 @@ describe Archive do
     end
 
   end
+
+  describe '#upload_file' do
+    pending
+  end
 end

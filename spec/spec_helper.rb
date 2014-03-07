@@ -53,6 +53,12 @@ def around_with_fixture_repo(&block)
   end
 end
 
+def expect_to_receive_and_return_real_now(subject, method, *args)
+  real_obj = subject.public_send(method, *args)
+  expect(subject).to receive(method).with(*args).and_return(real_obj)
+  real_obj
+end
+
 require_relative '../lib/bookbinder'
 require_relative '../template_app/app.rb'
 require_relative 'fixtures/repo_fixture'

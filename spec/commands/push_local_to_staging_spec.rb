@@ -1,52 +1,42 @@
 require 'spec_helper'
 
 describe Cli::PushLocalToStaging do
-  let(:cred_repo) { 'some-repo' }
-  let(:config_hash) do
-    {
-      'cred_repo' => cred_repo,
-      'book_repo' => "book/#{shortname}"
-    }
-  end
-  let(:shortname) { 'sojurn' }
+  let(:book_repo) { 'my-user/fixture-book-title' }
+  let(:config_hash) { {'book_repo' => book_repo, 'cred_repo' => 'whatever'} }
 
-  let(:credentials) do
+  let(:fake_distributor) { double(Distributor, distribute: nil) }
+
+  let(:options) do
     {
-      'cloud_foundry' => {
-        'api_endpoint' => 'end',
-        'staging_host' => 'host',
-        'organization' => 'org',
-        'staging_space' => 'space',
-        'app_name' => 'app',
-        'username' => 'user',
-        'password' => 'pass',
-      }
+      app_dir: './final_app',
+      build_number: nil,
+
+      aws_credentials: config.aws_credentials,
+      cf_credentials: config.cf_staging_credentials,
+
+      book_repo: book_repo,
+      production: false
     }
   end
 
-  let(:fake_cred_repo) { double(credentials: credentials) }
-  let(:fake_pusher) { double }
-  let(:fake_cf) { double }
   let(:config) { Configuration.new(config_hash) }
+  let(:command) { described_class.new(config) }
 
   before do
-    CredRepo.stub(:new).and_return(fake_cred_repo)
-  end
+    fake_cred_repo = double(CredRepo, credentials: {'aws' => {}, 'cloud_foundry' => {}})
+    allow(CredRepo).to receive(:new).and_return(fake_cred_repo)
 
-  it 'calls Pusher#push with CF credentials' do
-    allow(CfCommandRunner).to receive(:new).and_return(fake_cf)
-    expect(Pusher).to receive(:new).with(fake_cf).and_return(fake_pusher)
-    expect(fake_pusher).to receive(:push).with('./final_app')
-    Cli::PushLocalToStaging.new(config).run(nil)
-  end
-
-  it "names the Command Runner's tracefile after the book" do
-    trace_file_path = "/tmp/#{shortname}-.log"
-    expect(CfCommandRunner).to receive(:new).with(config.cf_staging_credentials, trace_file_path)
-    Cli::PushLocalToStaging.new(config).run(nil)
+    allow(Distributor).to receive(:build).and_return(fake_distributor)
   end
 
   it 'returns 0' do
-    expect(Cli::PushLocalToStaging.new(config).run(nil)).to eq(0)
+    expect(command.run([])).to eq(0)
+  end
+
+  it 'builds a distributor with the right options and asks it to distribute' do
+    real_distributor = expect_to_receive_and_return_real_now(Distributor, :build, options)
+    expect(real_distributor).to receive(:distribute)
+
+    command.run([])
   end
 end
