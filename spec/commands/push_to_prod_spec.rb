@@ -59,10 +59,19 @@ describe Cli::PushToProd do
     }
     expect(fake_repo).to receive(:download).with(download_args)
 
-    expect(CfCommandRunner).to receive(:new).with(config.cf_production_credentials).and_return(fake_cf)
+    allow(CfCommandRunner).to receive(:new).and_return(fake_cf)
     expect(Pusher).to receive(:new).with(fake_cf).and_return(fake_pusher)
     expect(fake_pusher).to receive(:push).with(fake_dir)
 
     expect(command.run([build_number])).to eq(0)
+  end
+
+  it "names the Command Runner's tracefile after the book" do
+    allow(GreenBuildRepository).to receive(:new).and_return(fake_repo)
+    allow(fake_repo).to receive(:download)
+
+    trace_file_path = "/tmp/#{book_repo_name}-#{build_number}.log"
+    expect(CfCommandRunner).to receive(:new).with(config.cf_production_credentials, trace_file_path)
+    command.run([build_number])
   end
 end

@@ -13,7 +13,7 @@ class Repository
   end
 
   def short_name
-    @full_name.split('/')[1]
+    full_name.split('/')[1]
   end
 
   def head_sha

@@ -5,8 +5,9 @@ class CfCommandRunner
 
   attr_reader :creds
 
-  def initialize(cf_credentials)
+  def initialize(cf_credentials, trace_file)
     @creds = cf_credentials
+    @trace_file = trace_file
   end
 
   def login
@@ -17,7 +18,7 @@ class CfCommandRunner
     space = creds.space
     creds_string = (username && password) ? "-u '#{username}' -p '#{password}'" : ''
 
-    success = Kernel::system "#{cf_binary_path} login #{creds_string} -a '#{api_endpoint}' -o '#{organization}' -s '#{space}'"
+    success = Kernel.system("#{cf_binary_path} login #{creds_string} -a '#{api_endpoint}' -o '#{organization}' -s '#{space}'")
     raise "Could not log in to #{creds.api_endpoint}" unless success
   end
 
@@ -35,15 +36,19 @@ class CfCommandRunner
     # Theoretically we shouldn't need this (and corresponding "stop" below), but we've seen CF pull files from both
     # green and blue when a DNS redirect points to HOST.cfapps.io
     # Also, shutting down the unused app saves $$
-    Kernel.system("#{cf_binary_path} start #{deploy_target_app}")
+    Kernel.system("#{cf_binary_path} start #{deploy_target_app} ")
   end
 
   def push(deploy_target_app)
     # --no-route is a hack that may need to be removed soon. Sheel can help.
     # it's a workaround for a bug in cf that fails deployment for apps that have been deployed previously,
     # claiming that their hostname is already taken (instead of just re-deploying)
-    success = Kernel.system("#{cf_binary_path} push #{deploy_target_app} --no-route -m 256M -i 2")
+    success = Kernel.system(environment_variables, "#{cf_binary_path} push #{deploy_target_app} --no-route -m 256M -i 2")
     raise "Could not deploy app to #{deploy_target_app}" unless success
+  end
+
+  def environment_variables
+    {'CF_TRACE' => @trace_file}
   end
 
   def map_route(deploy_target_app)

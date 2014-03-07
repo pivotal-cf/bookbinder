@@ -4,9 +4,11 @@ describe Cli::PushLocalToStaging do
   let(:cred_repo) { 'some-repo' }
   let(:config_hash) do
     {
-      'cred_repo' => cred_repo
+      'cred_repo' => cred_repo,
+      'book_repo' => "book/#{shortname}"
     }
   end
+  let(:shortname) { 'sojurn' }
 
   let(:credentials) do
     {
@@ -32,9 +34,15 @@ describe Cli::PushLocalToStaging do
   end
 
   it 'calls Pusher#push with CF credentials' do
-    expect(CfCommandRunner).to receive(:new).with(config.cf_staging_credentials).and_return(fake_cf)
+    allow(CfCommandRunner).to receive(:new).and_return(fake_cf)
     expect(Pusher).to receive(:new).with(fake_cf).and_return(fake_pusher)
     expect(fake_pusher).to receive(:push).with('./final_app')
+    Cli::PushLocalToStaging.new(config).run(nil)
+  end
+
+  it "names the Command Runner's tracefile after the book" do
+    trace_file_path = "/tmp/#{shortname}-.log"
+    expect(CfCommandRunner).to receive(:new).with(config.cf_staging_credentials, trace_file_path)
     Cli::PushLocalToStaging.new(config).run(nil)
   end
 

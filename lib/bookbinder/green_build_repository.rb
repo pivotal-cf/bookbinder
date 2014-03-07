@@ -16,7 +16,7 @@ class GreenBuildRepository
 
     directory = connection.directories.create key: bucket
 
-    tarball_filename = "#{namespace}-#{build_number}.tgz"
+    tarball_filename = GreenBuildRepository.filename_scheme(namespace, build_number, 'tgz')
     tarball_path = File.join(Dir.mktmpdir, tarball_filename)
 
     Dir.chdir(app_dir) { `tar czf #{tarball_path} *` }
@@ -32,7 +32,7 @@ class GreenBuildRepository
 
     directory = connection.directories.get bucket
     build_number ||= highest_build_number_for_namespace(directory, namespace)
-    filename = "#{namespace}-#{build_number}.tgz"
+    filename = GreenBuildRepository.filename_scheme(namespace, build_number, 'tgz')
 
     s3_file = directory.files.get(filename)
     raise FileDoesNotExist, "Unable to find tarball on AWS for book '#{namespace}', build number: #{build_number}" unless s3_file
@@ -42,6 +42,10 @@ class GreenBuildRepository
     Dir.chdir(download_dir) { `tar xzf #{downloaded_file}` }
 
     log "Green build ##{build_number.to_s.green} has been downloaded from S3 and untarred into #{download_dir.cyan}"
+  end
+
+  def self.filename_scheme(namespace, build_number, extension)
+    "#{namespace}-#{build_number}.#{extension}"
   end
 
   private

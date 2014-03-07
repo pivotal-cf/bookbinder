@@ -2,7 +2,8 @@ require 'spec_helper'
 
 describe CfCommandRunner do
   let(:credentials) { Configuration::CfCredentials.new(config_hash, false) }
-  let(:cf) { CfCommandRunner.new(credentials) }
+  let(:cf) { CfCommandRunner.new(credentials, trace_file) }
+  let(:trace_file) { 'path/to/log' }
 
   describe '#login' do
     let(:config_hash) do
@@ -119,12 +120,34 @@ OUTPUT
 
   describe '#push' do
     let(:config_hash) { {} }
+    let(:namespace) { 'namespace' }
+    let(:build_number) { 'build-number' }
+    let(:command_success) { true }
+
     before do
-      expect(Kernel).to receive(:system).with(/cf push my-app-name --no-route -m 256M -i 2/).and_return(command_success)
+      allow(Kernel).to receive(:system).and_return(command_success)
+    end
+
+    it 'sets the trace file environment variable for system calls' do
+      expect(Kernel).to receive(:system) do |variables, command|
+        expect(variables['CF_TRACE']).to eq(trace_file)
+        expect(command).to match(/push/)
+      end
+
+      cf.push('my-app-name')
+    end
+
+    it 'send the right args' do
+      expect(Kernel).to receive(:system) do |variables, command|
+        expect(command).to match(/cf push my-app-name --no-route -m 256M -i 2/)
+      end
+
+      cf.push('my-app-name')
     end
 
     context 'when the command fails' do
       let(:command_success) { false }
+
       it 'raises' do
         expect { cf.push('my-app-name') }.to raise_error(/Could not deploy app to my-app-name/)
       end
@@ -132,6 +155,7 @@ OUTPUT
 
     context 'when the command passes' do
       let(:command_success) { true }
+
       it 'does not raise' do
         expect { cf.push('my-app-name') }.not_to raise_error
       end
