@@ -38,8 +38,8 @@ describe Cli::BuildAndPushTarball do
   let(:bucket) { 'bucket-name-in-fixture-config' }
 
   it 'should call GreenBuildRepository#create with correct parameters' do
-    GreenBuildRepository.should_receive(:new).with(key: access_key, secret: secret_key).and_call_original
-    GreenBuildRepository.any_instance.should_receive(:create) do |args|
+    Archive.should_receive(:new).with(key: access_key, secret: secret_key).and_call_original
+    Archive.any_instance.should_receive(:create_and_upload_tarball) do |args|
       args.should have_key(:build_number)
       args.should have_key(:bucket)
       args.should have_key(:namespace)

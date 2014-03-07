@@ -50,7 +50,7 @@ describe Cli::PushToProd do
 
   it 'downloads the repo and pushes it' do
     expect(Dir).to receive(:mktmpdir).and_return(fake_dir)
-    expect(GreenBuildRepository).to receive(:new).with(key: key, secret: secret).and_return(fake_repo)
+    expect(Archive).to receive(:new).with(key: key, secret: secret).and_return(fake_repo)
     download_args = {
       download_dir: fake_dir,
       bucket: bucket,
@@ -67,7 +67,7 @@ describe Cli::PushToProd do
   end
 
   it "names the Command Runner's tracefile after the book" do
-    allow(GreenBuildRepository).to receive(:new).and_return(fake_repo)
+    allow(Archive).to receive(:new).and_return(fake_repo)
     allow(fake_repo).to receive(:download)
 
     trace_file_path = "/tmp/#{book_repo_name}-#{build_number}.log"

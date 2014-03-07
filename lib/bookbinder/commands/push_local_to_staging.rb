@@ -14,7 +14,7 @@ class Cli
 
     def tracefile
       namespace = Book.new(full_name: config.book_repo).short_name
-      File.join '/tmp', GreenBuildRepository.filename_scheme(namespace, ENV['BUILD_NUMBER'], 'log')
+      File.join '/tmp', Archive.filename_scheme(namespace, ENV['BUILD_NUMBER'], 'log')
     end
   end
 end

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe GreenBuildRepository do
+describe Archive do
 
   around do |example|
     Fog.mock!
@@ -17,17 +17,17 @@ describe GreenBuildRepository do
                      :aws_secret_access_key => 'aws-secret-key'
   end
   let(:bucket_key) { 'pivotal-cf-docs-green-builds' }
-  let(:green_build_repository) { GreenBuildRepository.new key: 'aws-key', secret: 'aws-secret-key' }
+  let(:archive) { Archive.new key: 'aws-key', secret: 'aws-secret-key' }
 
 
   describe '#create' do
     let(:build_number) { 42 }
     let(:namespace) { 'pcf' }
     let(:create) do
-      green_build_repository.create build_number: build_number,
-                                    namespace: namespace,
-                                    app_dir: final_app_dir,
-                                    bucket: bucket_key
+      archive.create_and_upload_tarball build_number: build_number,
+                                        namespace: namespace,
+                                        app_dir: final_app_dir,
+                                        bucket: bucket_key
     end
     let(:final_app_dir) { tmp_subdir 'final_app' }
 
@@ -35,7 +35,7 @@ describe GreenBuildRepository do
       File.open(File.join(final_app_dir, 'stuff.txt'), 'w') { |f| f.write('this is stuff') }
     end
 
-    shared_examples_for 'a green_build_repository' do
+    shared_examples_for 'an archive' do
       it 'uploads a file with the build number in the key' do
         create
         directory = fog_connection.directories.get(bucket_key)
@@ -65,14 +65,14 @@ describe GreenBuildRepository do
         expect(directory).not_to be_nil
       end
 
-      it_behaves_like 'a green_build_repository'
+      it_behaves_like 'an archive'
     end
 
     context 'when the bucket is already there' do
       before do
         fog_connection.directories.create key: bucket_key
       end
-      it_behaves_like 'a green_build_repository'
+      it_behaves_like 'an archive'
     end
   end
 
@@ -80,10 +80,10 @@ describe GreenBuildRepository do
     let(:app_dir) { tmp_subdir 'app_dir' }
     let(:bucket) { fog_connection.directories.create key: bucket_key }
     let(:download) do
-      green_build_repository.download download_dir: app_dir,
-                                      bucket: bucket_key,
-                                      build_number: build_number,
-                                      namespace: namespace
+      archive.download download_dir: app_dir,
+                       bucket: bucket_key,
+                       build_number: build_number,
+                       namespace: namespace
     end
 
     before do
@@ -113,7 +113,7 @@ describe GreenBuildRepository do
         before { create_s3_file namespace, '178-1.618' }
 
         it 'is blows up rather than trying to download it' do
-          expect {download}.to raise_error(GreenBuildRepository::FileDoesNotExist)
+          expect {download}.to raise_error(Archive::FileDoesNotExist)
         end
       end
     end
@@ -139,7 +139,7 @@ describe GreenBuildRepository do
       before { bucket }
 
       it 'prints an error message and returns nil' do
-        expect{ download }.to raise_error(GreenBuildRepository::FileDoesNotExist)
+        expect{ download }.to raise_error(Archive::FileDoesNotExist)
       end
     end
 
@@ -150,7 +150,7 @@ describe GreenBuildRepository do
       context 'such as nil' do
         let(:namespace) { nil }
         it 'prints an error message and returns nil' do
-          expect{ download }.to raise_error(GreenBuildRepository::NoNamespaceGiven)
+          expect{ download }.to raise_error(Archive::NoNamespaceGiven)
         end
       end
 
@@ -158,7 +158,7 @@ describe GreenBuildRepository do
         let(:namespace) { 'my-renamed-book-repo' }
 
         it 'prints an error message and returns nil' do
-          expect{ download }.to raise_error(GreenBuildRepository::FileDoesNotExist)
+          expect{ download }.to raise_error(Archive::FileDoesNotExist)
         end
       end
     end

@@ -8,7 +8,7 @@ class Cli
       key = config.aws_credentials.access_key
       secret = config.aws_credentials.secret_key
 
-      repository = GreenBuildRepository.new key: key, secret: secret
+      repository = Archive.new key: key, secret: secret
 
       repository.download download_dir: app_dir, bucket: bucket, build_number: build_number,
                           namespace: Book.new(full_name: config.book_repo).short_name
@@ -29,7 +29,7 @@ class Cli
 
     def tracefile(build_number)
       namespace = Book.new(full_name: config.book_repo).short_name
-      File.join '/tmp', GreenBuildRepository.filename_scheme(namespace, build_number, 'log')
+      File.join '/tmp', Archive.filename_scheme(namespace, build_number, 'log')
     end
   end
 end

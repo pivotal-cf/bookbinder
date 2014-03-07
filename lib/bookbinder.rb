@@ -23,7 +23,7 @@ require_relative 'bookbinder/sieve'
 require_relative 'bookbinder/stabilimentum'
 require_relative 'bookbinder/spider'
 
-require_relative 'bookbinder/green_build_repository'
+require_relative 'bookbinder/archive'
 require_relative 'bookbinder/pdf_generator'
 require_relative 'bookbinder/middleman_runner'
 require_relative 'bookbinder/publisher'
