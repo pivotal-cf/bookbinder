@@ -194,8 +194,6 @@ describe Archive do
 
       expect(uploaded_file).to be_a(Fog::Storage::AWS::File)
       expect(uploaded_file.url(0)).to match(/^https:\/\/#{bucket}.s3.amazonaws.com\/#{filename}/)
-      puts uploaded_file.url(0)
-      puts uploaded_file.url(1000)
     end
   end
 end

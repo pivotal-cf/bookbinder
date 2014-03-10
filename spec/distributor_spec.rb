@@ -38,61 +38,94 @@ describe Distributor do
   let(:fake_archive) { double }
   let(:fake_cf) { double }
   let(:fake_pusher) { double }
+  let(:fake_uploaded_file) { double(url: fake_url) }
+  let(:fake_url) { 'http://example.com/trace_log_file' }
   let(:production) { false }
 
   before do
     allow(fake_pusher).to receive(:push)
-    allow(fake_archive).to receive(:upload_file)
+    allow(fake_archive).to receive(:upload_file).and_return(fake_uploaded_file)
   end
 
-  context 'when in production' do
-    let(:production) { true }
-
-    before do
-      allow(fake_archive).to receive(:download)
+  describe '#distribute' do
+    it 'returns nil' do
+      expect(distributor.distribute).to be_nil
     end
 
-    it 'downloads the repo' do
-      download_args = {
-        download_dir: fake_dir,
-        bucket: bucket,
-        build_number: build_number,
-        namespace: book_repo_short_name
-      }
-      expect(fake_archive).to receive(:download).with(download_args)
+    context 'uploading the trace' do
+      it 'uploads the tracefile to the archive after pushing' do
+        expect(fake_pusher).to receive(:push).ordered
+        expect(fake_archive).to receive(:upload_file).with(bucket, namer_filename, namer_full_path).ordered
+        distributor.distribute
+      end
+
+      it "logs the tracefile's URL" do
+        expect(fake_archive).to receive(:upload_file).and_return(fake_uploaded_file)
+        allow(distributor).to receive(:log)
+        expect(distributor).to receive(:log).with(/#{Regexp.escape(fake_url)}/)
+        distributor.distribute
+      end
+
+      it 'uploads despite push raising' do
+        allow(fake_pusher).to receive(:push).and_raise('Hi there')
+        expect(fake_archive).to receive(:upload_file)
+        expect { distributor.distribute }.to raise_error('Hi there')
+      end
+
+      context 'when download raises' do
+        let(:production) { true }
+        it 'uploads despite download raising' do
+          allow(fake_archive).to receive(:download).and_raise('Hi there')
+          expect(fake_archive).to receive(:upload_file)
+          expect { distributor.distribute }.to raise_error('Hi there')
+        end
+      end
+    end
+
+    context 'when in production' do
+      let(:production) { true }
+
+      before do
+        allow(fake_archive).to receive(:download)
+      end
+
+      it 'downloads the repo' do
+        download_args = {
+          download_dir: fake_dir,
+          bucket: bucket,
+          build_number: build_number,
+          namespace: book_repo_short_name
+        }
+        expect(fake_archive).to receive(:download).with(download_args)
+        distributor.distribute
+      end
+
+      it 'warns' do
+        allow(distributor).to receive(:log)
+        expect(distributor).to receive(:log).with(/Warning.*production/)
+        distributor.distribute
+      end
+    end
+
+    context 'when not in production' do
+      let(:production) { false }
+
+      it 'does not download the repo' do
+        expect(fake_archive).to_not receive(:download)
+        distributor.distribute
+      end
+
+      it 'does not warn' do
+        expect(distributor).not_to receive(:log).with(/Warning.*production/)
+        distributor.distribute
+      end
+    end
+
+    it 'pushes the repo' do
+      expect(fake_pusher).to receive(:push).with(fake_dir)
+
       distributor.distribute
     end
-
-    it 'warns' do
-      expect(distributor).to receive(:log).with(/Warning.*production/)
-      distributor.distribute
-    end
-  end
-
-  context 'when not in production' do
-    let(:production) { false }
-
-    it 'does not download the repo' do
-      expect(fake_archive).to_not receive(:download)
-      distributor.distribute
-    end
-
-    it 'does not warn' do
-      expect(distributor).not_to receive(:log).with(/Warning.*production/)
-      distributor.distribute
-    end
-  end
-
-  it 'pushes the repo' do
-    expect(fake_pusher).to receive(:push).with(fake_dir)
-
-    distributor.distribute
-  end
-
-  it 'uploads the tracefile to the archive after pushing' do
-    expect(fake_pusher).to receive(:push).ordered
-    expect(fake_archive).to receive(:upload_file).with(bucket, namer_filename, namer_full_path).ordered
-    distributor.distribute
   end
 
   describe '.build' do

@@ -51,16 +51,17 @@ describe CfCommandRunner do
     let(:host) { 'docs' }
     let(:apps) { ['docs-green'] }
     let(:routes_output) do
+      space = ' ' # for the editors that trim off trailing whitespace...
       <<OUTPUT
 Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
 
 host                    domain                apps
 no-cat-pictures         cfapps.io
-less-cat-pictures       cfapps.io             cats
+less-cat-pictures       cfapps.io             cats #{space}
 cat-pictures            cfapps.io
 #{host}misleading       cfapps.io
-#{host}                 cfapps.io             #{apps.join(', ')}
-more-cat-pictures       cfapps.io             many-cats, too-many-cats
+#{host}                 cfapps.io             #{apps.join(', ')} #{space}
+more-cat-pictures       cfapps.io             many-cats, too-many-cats #{space}
 OUTPUT
     end
 
@@ -98,7 +99,7 @@ OUTPUT
     context 'when the host is not found' do
       let(:routes_output) { '' }
       it 'raises' do
-        expect { cf.apps }.to raise_error(/no apps found/)
+        expect { cf.apps }.to raise_error(/no routes found/)
       end
     end
 

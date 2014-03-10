@@ -25,11 +25,11 @@ class CfCommandRunner
   def apps
     output, status = Open3.capture2("CF_COLOR=false #{cf_binary_path} routes")
     raise 'failure executing cf routes' unless status.success?
-
     route = output.lines.grep(/^#{Regexp.escape(creds.host)}\s+cfapps\.io\s+/)[0]
-    match = /((\S|, )+)$/.match(route)
+    raise 'no routes found' if route.nil?
+    match = /cfapps\.io\s+(.+)$/.match(route.rstrip)
     raise 'no apps found' if match.nil?
-    match[0].split(', ')
+    match[1].split(', ')
   end
 
   def start(deploy_target_app)
