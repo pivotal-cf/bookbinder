@@ -20,3 +20,4 @@ activate :submodule_aware_assets
 
 activate :navigation
 
+activate :syntax

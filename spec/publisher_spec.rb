@@ -115,14 +115,19 @@ describe Publisher do
           }
         end
 
-        it 'pulls content from code example repositories' do
+        it 'applies the syntax highlighting CSS' do
           stub_github_for constituent_repo
           stub_github_for code_repo
 
           publisher.publish(publication_arguments)
-          index_html = File.read File.join(final_app_dir, 'public', 'index.html')
-          index_html.should include 'fib = Enumerator.new do |yielder|'
-          index_html.should include 'this_is_yaml'
+          index_html = File.read(File.join(final_app_dir, 'public', 'index.html'))
+          doc = Nokogiri::HTML(index_html)
+
+          expect(doc.css('.highlight.ruby').text).to include('fib = Enumerator.new do |yielder|')
+          expect(doc.css('.highlight.ruby').text).not_to include('this_is_yaml')
+
+          expect(doc.css('.highlight.yaml').text).to include('this_is_yaml')
+          expect(doc.css('.highlight.yaml').text).not_to include('Enumerator')
         end
 
         it 'makes only one request per code example repository' do

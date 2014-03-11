@@ -18,7 +18,7 @@ describe CodeRepo do
     end
   end
 
-  describe '#get_snippet_at' do
+  describe '#get_snippet_and_language_at' do
     let(:constituent) { {'github_repo' => 'my-docs-org/code-example-repo'} }
 
     before do
@@ -41,14 +41,15 @@ p fib.take_while { |n| n <= 4E6 }
 # => [1, 1, 2 ... 1346269, 2178309, 3524578]
       RUBY
 
-      snippet_from_repo = repo.get_snippet_at('complicated_function')
-      snippet_from_repo.should eq(code_snippet.chomp)
+      snippet_from_repo, language = repo.get_snippet_and_language_at('complicated_function')
+      expect(snippet_from_repo).to eq(code_snippet.chomp)
+      expect(language).to eq('ruby')
     end
 
     context 'when the snippet is not found' do
       it 'raises an InvalidSnippet error' do
         repo = CodeRepo.from_remote(repo_hash: constituent, destination_dir: Dir.mktmpdir)
-        expect { repo.get_snippet_at('missing_snippet') }.to raise_exception(CodeRepo::InvalidSnippet)
+        expect { repo.get_snippet_and_language_at('missing_snippet') }.to raise_exception(CodeRepo::InvalidSnippet)
       end
     end
   end

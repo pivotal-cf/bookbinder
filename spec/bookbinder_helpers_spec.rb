@@ -14,7 +14,7 @@ describe Navigation::HelperMethods do
     end
     let(:markdown_snippet) do
       <<-MARKDOWN
-```
+```ruby
 fib = Enumerator.new do |yielder|
   i = 0
   j = 1
@@ -34,7 +34,7 @@ p fib.take_while { |n| n <= 4E6 }
 
     it 'returns markdown' do
       stub_github_for repo
-      yielded_snippet.should == markdown_snippet.chomp
+      expect(yielded_snippet).to eq(markdown_snippet.chomp)
     end
   end
 

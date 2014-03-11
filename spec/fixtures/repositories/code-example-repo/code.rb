@@ -7,7 +7,7 @@ numbers.reduce(:+) / numbers.length
 
 puts 'second_example'
 
-# code_snippet complicated_function start
+# code_snippet complicated_function start ruby
 fib = Enumerator.new do |yielder|
   i = 0
   j = 1
@@ -26,7 +26,7 @@ this.is.code('whee')
 {:some => 'more'}
 
 '
-# code_snippet simple_configuration start
+# code_snippet simple_configuration start yaml
 
 repo:
 - this_is_yaml

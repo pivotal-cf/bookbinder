@@ -16,9 +16,10 @@ module Navigation
 
     def yield_for_code_snippet(from: nil, at: nil)
       repo = CodeRepo.get_instance from
-      snippet = repo.get_snippet_at at
+      snippet, language = repo.get_snippet_and_language_at(at)
       delimiter = '```'
-      snippet.prepend("#{delimiter}\n").concat("\n#{delimiter}")
+
+      snippet.prepend("#{delimiter}#{language}\n").concat("\n#{delimiter}")
     end
 
     def yield_for_subnav
