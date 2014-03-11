@@ -20,4 +20,19 @@ module BookbinderLogger
     BookbinderLogger.log_print message
   end
 
+
+  def self.included(base)
+    base.extend ClassMethods
+  end
+
+  module ClassMethods
+    def self.log(message)
+      BookbinderLogger.log message
+    end
+
+    def self.log_print(message)
+      BookbinderLogger.log_print message
+    end
+  end
+
 end
