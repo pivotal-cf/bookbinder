@@ -124,11 +124,14 @@ Bookbinder provides several helper functions that can be called from within a .e
 
 `<%= yield_for_subnav %>` inserts the appropriate template in /subnavs, based on each constituent repositories' `subnav_template:` parameter in config.yml. The default template (`\_default.erb`) uses the label `default` and is applied to all repos unless another template is specified with subnav\_template. Template labels are the name of the template file with extensions removed. ("sample" for a template named "sample.erb") 
 
-`<%= yield_for_code_snippet from: 'my-org/code-repo', at: 'myCodeSnippetA' %>` inserts code snippets extracted from code repositories. Wrap excerpts with their corresponding markers:
+`<%= yield_for_code_snippet from: 'my-org/code-repo', at: 'myCodeSnippetA' %>` inserts code snippets extracted from code repositories.
+
+To delimit where a code snippet begins and ends, you must use the format of `code_snippet MARKER_OF_YOUR_CHOOSING start OPTIONAL_LANGUAGE`, followed by the code, and then finished with `code_snippet MARKER_OF_YOUR_CHOOSING end`:
+If the `OPTIONAL_LANGUAGE` is omitted, your snippet will still be formatted as code but will not have any syntax highlighting.
 
 ```clojure
 
-; code_snippet myCodeSnippetA start
+; code_snippet myCodeSnippetA start clojure
 	(def fib-seq
    	  (lazy-cat [0 1] (map + (rest fib-seq) fib-seq)))
 	user> (take 20 fib-seq)
