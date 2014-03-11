@@ -34,3 +34,10 @@ repo:
 
 # code_snippet simple_configuration end
 '
+
+
+# code_snippet typeless_stuff start
+
+this = untyped_code
+
+# code_snippet typeless_stuff end

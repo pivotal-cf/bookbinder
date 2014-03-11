@@ -123,11 +123,24 @@ describe Publisher do
           index_html = File.read(File.join(final_app_dir, 'public', 'index.html'))
           doc = Nokogiri::HTML(index_html)
 
-          expect(doc.css('.highlight.ruby').text).to include('fib = Enumerator.new do |yielder|')
-          expect(doc.css('.highlight.ruby').text).not_to include('this_is_yaml')
+          ruby_part = 'fib = Enumerator.new do |yielder|'
+          yaml_part = 'this_is_yaml'
+          typeless_part = 'this = untyped_code'
 
-          expect(doc.css('.highlight.yaml').text).to include('this_is_yaml')
-          expect(doc.css('.highlight.yaml').text).not_to include('Enumerator')
+          ruby_text = doc.css('.highlight.ruby').text
+          expect(ruby_text).to include(ruby_part)
+          expect(ruby_text).not_to include(yaml_part)
+          expect(ruby_text).not_to include(typeless_part)
+
+          yaml_text = doc.css('.highlight.yaml').text
+          expect(yaml_text).to include(yaml_part)
+          expect(yaml_text).not_to include(ruby_part)
+          expect(yaml_text).not_to include(typeless_part)
+
+          typeless_text = doc.css('.highlight.plaintext').text
+          expect(typeless_text).to include(typeless_part)
+          expect(typeless_text).not_to include(yaml_part)
+          expect(typeless_text).not_to include(ruby_part)
         end
 
         it 'makes only one request per code example repository' do
