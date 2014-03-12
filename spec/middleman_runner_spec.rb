@@ -10,9 +10,10 @@ describe MiddlemanRunner do
     double(:repo, directory: 'my/place/rocks', subnav_template: 'my_subnav_template'),
     double(:repo, directory: 'fraggles/rock', subnav_template: nil)
   ] }
+  let(:local_repo_dir) { '/dev/null' }
 
   def run_middleman
-    middleman_runner.run(target_dir_path, template_variables, verbose, repos)
+    middleman_runner.run(target_dir_path, template_variables, local_repo_dir, verbose, repos)
   end
 
   it 'behaves likes a BookbinderLogger'
@@ -53,6 +54,13 @@ describe MiddlemanRunner do
 
     middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
     expect(middleman_instance.config[:subnav_templates]).to eq(templates)
+  end
+
+  it 'tells middleman about local_repo_dir' do
+    run_middleman
+
+    middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
+    expect(middleman_instance.config[:local_repo_dir]).to eq local_repo_dir
   end
 
   it 'builds with middleman and passes the verbose parameter' do

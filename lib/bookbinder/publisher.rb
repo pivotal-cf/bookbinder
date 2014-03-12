@@ -38,6 +38,7 @@ class Publisher
   def generate_site(options, output_master_middleman_dir, repos)
     MiddlemanRunner.new.run(output_master_middleman_dir,
                             options.fetch(:template_variables, {}),
+                            options[:local_repo_dir],
                             options[:verbose], repos
     )
   end

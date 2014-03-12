@@ -38,13 +38,22 @@ class DocRepo < Repository
   end
 
   def copy_from_local(destination_dir)
-    path_to_local_repo = File.join(@local_repo_dir, short_name)
     if File.exist?(path_to_local_repo)
       log '  copying '.yellow + path_to_local_repo
       FileUtils.cp_r path_to_local_repo, File.join(destination_dir, directory)
       @copied_to = File.join(destination_dir, directory)
     else
-      log '  skipping (not found) '.magenta + path_to_local_repo
+      announce_skip
     end
+  end
+
+  private
+
+  def path_to_local_repo
+    File.join(@local_repo_dir, short_name)
+  end
+
+  def announce_skip
+    log '  skipping (not found) '.magenta + path_to_local_repo
   end
 end

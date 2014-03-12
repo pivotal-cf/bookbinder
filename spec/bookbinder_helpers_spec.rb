@@ -4,13 +4,28 @@ require './master_middleman/bookbinder_helpers'
 require 'redcarpet'
 
 describe Navigation::HelperMethods do
-  describe '#yield_for_code_snippet' do
-    let(:yielded_snippet) do
-      class Foo
-        include Navigation::HelperMethods
-      end
+  include_context 'tmp_dirs'
 
-      Foo.new.yield_for_code_snippet(from: repo, at: excerpt_mark)
+  def run_middleman(template_variables = {})
+    MiddlemanRunner.new.run tmpdir, template_variables, '/dev/null'
+  end
+
+  describe '#yield_for_code_snippet' do
+    let(:klass) do
+      Class.new do
+        include Navigation::HelperMethods
+
+        attr_reader :config
+
+        def initialize(config)
+          @config = config
+        end
+      end
+    end
+
+    let(:config) { {} }
+    let(:yielded_snippet) do
+      klass.new(config).yield_for_code_snippet(from: repo, at: excerpt_mark)
     end
     let(:markdown_snippet) do
       <<-MARKDOWN
@@ -32,9 +47,22 @@ p fib.take_while { |n| n <= 4E6 }
     let(:repo) { 'fantastic/code-example-repo' }
     let(:excerpt_mark) { 'complicated_function' }
 
-    it 'returns markdown' do
-      stub_github_for repo
-      expect(yielded_snippet).to eq(markdown_snippet.chomp)
+    context 'when not local' do
+      let(:config) { {local_repo_dir: nil} }
+
+      it 'returns markdown from github' do
+        mock_github_for repo
+        expect(yielded_snippet).to eq(markdown_snippet.chomp)
+      end
+    end
+
+    context 'when local' do
+      let(:config) { {local_repo_dir: '..'} }
+      around_with_fixture_repo &:run
+
+      it 'returns markdown from the local repo' do
+        expect(yielded_snippet).to eq(markdown_snippet.chomp)
+      end
     end
   end
 

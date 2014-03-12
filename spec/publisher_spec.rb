@@ -70,6 +70,28 @@ describe Publisher do
           index_html = File.read File.join(final_app_dir, 'public', 'my-docs-repo', 'index.html')
           index_html.should include 'This is a Markdown Page'
         end
+
+        context 'when code snippets are yielded' do
+          let(:non_broken_master_middleman_dir) { generate_middleman_with 'remote_code_snippets_index.html' }
+
+          context 'and the code repo is present' do
+            it 'can find code example repos locally rather than going to github' do
+              #stub_request(:any, 'https://api.github.com/repos/fantastic/code-example-repo/tarball/master')
+              publisher.publish publication_arguments
+              expect(WebMock).not_to have_requested(:any, /.*git.*/)
+            end
+          end
+
+          context 'but the code repo is absent' do
+            let(:local_repo_dir) { '/dev/null' }
+
+            it 'fails out' do
+              expect(BookbinderLogger).to receive(:log).with /skipping \(not found\)/
+              publisher.publish publication_arguments
+              expect(WebMock).not_to have_requested(:get, 'https://api.github.com/repos/fantastic/code-example-repo/tarball/master')
+            end
+          end
+        end
       end
 
       it 'generates non-broken links appropriately' do

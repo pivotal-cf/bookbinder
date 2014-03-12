@@ -7,12 +7,23 @@ class CodeRepo < DocRepo
 
   Store = {}
 
-  def self.get_instance(full_name)
-    Store.fetch(full_name) { download(full_name) }
+  def self.get_instance(full_name, local_repo_dir=nil)
+    Store.fetch([full_name, local_repo_dir]) { acquire(full_name, local_repo_dir) }
   end
 
   def get_snippet_and_language_at(marker)
-    snippet = '' # snippet needs to persist through FileUtils.cd scope; buckets!
+    copied? ? prepared_snippet_at(marker) : noisy_failure
+  end
+
+  private
+
+  def noisy_failure
+    announce_skip
+    ''
+  end
+
+  def prepared_snippet_at(marker)
+    snippet = ''
     FileUtils.cd(copied_to) { snippet = scrape_for(marker) }
 
     raise InvalidSnippet.new(full_name, marker) if snippet.empty?
@@ -22,12 +33,22 @@ class CodeRepo < DocRepo
     [lines[1..-2].join("\n"), language]
   end
 
-  private
+  def self.acquire(full_name, local_repo_dir)
+    BookbinderLogger.log "Excerpting #{full_name.cyan}"
+    repo = local_repo_dir ? copy(full_name, local_repo_dir) : download(full_name)
+    keep(repo, local_repo_dir) if repo
+  end
+
+  def self.keep(repo, local_repo_dir)
+    Store[[repo.full_name, local_repo_dir]] = repo
+  end
 
   def self.download(full_name)
-    BookbinderLogger.log "Excerpting #{full_name.cyan}"
-    repo = from_remote(repo_hash: {'github_repo' => full_name}, destination_dir: Dir.mktmpdir)
-    Store[repo.full_name] = repo
+    from_remote({repo_hash: {'github_repo' => full_name}, destination_dir: Dir.mktmpdir})
+  end
+
+  def self.copy(full_name, local_repo_dir)
+    from_local(repo_hash: {'github_repo' => full_name}, local_dir: local_repo_dir, destination_dir: Dir.mktmpdir)
   end
 
   def scrape_for(marker)

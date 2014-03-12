@@ -15,7 +15,7 @@ module Navigation
   module HelperMethods
 
     def yield_for_code_snippet(from: nil, at: nil)
-      repo = CodeRepo.get_instance from
+      repo = CodeRepo.get_instance from, config[:local_repo_dir]
       snippet, language = repo.get_snippet_and_language_at(at)
       delimiter = '```'
 

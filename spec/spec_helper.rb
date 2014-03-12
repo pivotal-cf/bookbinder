@@ -94,10 +94,6 @@ RSpec.configure do |config|
       final_content = "---\ntitle: #{title}\n#{breadcrumb_code}---\n#{content}"
       File.open(full_path, 'w') { |f| f.write(final_content) }
     end
-
-    def run_middleman(template_variables = {})
-      MiddlemanRunner.new.run tmpdir, template_variables
-    end
   end
 
   config.include SpecHelperMethods
