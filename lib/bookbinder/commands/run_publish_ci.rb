@@ -1,9 +1,9 @@
 class Cli
   class RunPublishCI < BookbinderCommand
-    def run(_)
+    def run(cli_args)
       check_params
       (
-      (0 == Publish.new(config).run(['github'])) &&
+      (0 == Publish.new(config).run(['github'] + cli_args)) &&
           (0 == PushLocalToStaging.new(config).run([])) &&
           (0 == BuildAndPushTarball.new(config).run([]))
       ) ? 0 : 1

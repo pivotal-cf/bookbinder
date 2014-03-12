@@ -43,6 +43,12 @@ describe Cli::RunPublishCI do
       result = command.run []
       expect(result).to eq(1)
     end
+
+    it 'respects the --verbose flag' do
+      publish_command = expect_to_receive_and_return_real_now(Cli::Publish, :new, config)
+      expect(publish_command).to receive(:run).with ['github', '--verbose']
+      command.run ['--verbose']
+    end
   end
 
   it 'raises MissingBuildNumber if ENV["BUILD_NUMBER"] is not set' do

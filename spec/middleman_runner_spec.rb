@@ -76,8 +76,6 @@ describe MiddlemanRunner do
     expect(Middleman::Cli::Build.shared_instance(verbose)).to_not eq(old_instance)
   end
 
-
-
   it 'sets the MM root for invocation' do
     build_command = expect_to_receive_and_return_real_now(Middleman::Cli::Build, :new, [], {:quiet => !verbose}, {})
 
