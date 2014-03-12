@@ -27,6 +27,7 @@ class MiddlemanRunner
   include ShellOut
 
   def run(middleman_dir, template_variables, verbose = false, repos = [])
+    original_mm_root = ENV['MM_ROOT']
     log "\nRunning middleman...\n\n"
 
     # awful hacks to eliminate the impact of global state in middleman. when will it end?
@@ -39,6 +40,8 @@ class MiddlemanRunner
       Middleman::Cli::Build.shared_instance(verbose).config[:subnav_templates] = subnavs_by_dir_name(repos)
       build_command.invoke :build, [], {:verbose => verbose}
     end
+
+    ENV['MM_ROOT'] = original_mm_root
   end
 
   private
