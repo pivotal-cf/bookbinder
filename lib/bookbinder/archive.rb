@@ -54,7 +54,8 @@ class Archive
   end
 
   def highest_build_number_for_namespace(directory, namespace)
-    directory.files.map(&:key).map do |key|
+    all_files = all_files_workaround_for_fog_map_limitation(directory.files)
+    all_files.map(&:key).map do |key|
       matches = /^#{namespace}-([\d]+)\.tgz/.match(key)
       matches[1] if matches
     end.map(&:to_i).max
@@ -64,5 +65,11 @@ class Archive
     @connection ||= Fog::Storage.new :provider => 'AWS',
                                      :aws_access_key_id => @aws_key,
                                      :aws_secret_access_key => @aws_secret_key
+  end
+
+  def all_files_workaround_for_fog_map_limitation(files)
+    all_files = []
+    files.each { |f| all_files << f }
+    all_files
   end
 end
