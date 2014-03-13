@@ -46,6 +46,8 @@ class Distributor
     uploaded_file = archive.upload_file(options[:aws_credentials].green_builds_bucket, namer.filename, namer.full_path)
     log("Your cf trace file is available at: #{uploaded_file.url(Time.now.to_i + EXPIRATION_HOURS*60*60).green}")
     log("This URL will expire in #{EXPIRATION_HOURS} hours, so if you need to share it, make sure to save a copy now.")
+  rescue Errno::ENOENT
+    log "Could not find CF trace file: #{namer.full_path}".red
   end
 
   def warn

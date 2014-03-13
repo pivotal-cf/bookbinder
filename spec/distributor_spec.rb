@@ -80,6 +80,17 @@ describe Distributor do
           expect { distributor.distribute }.to raise_error('Hi there')
         end
       end
+
+      context 'fails' do
+        before do
+          fake_archive.stub(:upload_file).and_raise(Errno::ENOENT.new)
+        end
+
+        it 'logs a message' do
+          expect(distributor).to receive(:log).with(/Could not find CF trace file: #{namer_full_path}/)
+          distributor.distribute
+        end
+      end
     end
 
     context 'when in production' do
