@@ -3,3 +3,4 @@ gemspec
 
 gem 'rspec'
 gem 'webmock'
+gem 'license_finder'
