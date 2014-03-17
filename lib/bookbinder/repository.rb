@@ -4,13 +4,14 @@ class Repository
 
   attr_reader :full_name, :target_ref
 
-  def initialize(full_name: nil, target_ref: nil, github_token: nil, directory: nil)
+  def initialize(full_name: nil, target_ref: nil, github_token: nil, directory: nil, local_repo_dir: nil)
     #TODO better error message
     raise 'No full_name provided ' unless full_name
     @full_name = full_name
     @github = GitClient.get_instance(access_token: github_token || ENV['GITHUB_API_TOKEN'])
     @target_ref = target_ref || 'master'
     @directory = directory
+    @local_repo_dir = local_repo_dir
   end
 
   def tag_with(tagname)
@@ -45,6 +46,20 @@ class Repository
     @copied_to = File.join(destination_dir, directory)
   end
 
+  def copy_from_local(destination_dir)
+    if File.exist?(path_to_local_repo)
+      log '  copying '.yellow + path_to_local_repo
+      FileUtils.cp_r path_to_local_repo, File.join(destination_dir, directory)
+      @copied_to = File.join(destination_dir, directory)
+    else
+      announce_skip
+    end
+  end
+
+  def copied?
+    !@copied_to.nil?
+  end
+
   private
 
   def download_archive
@@ -60,5 +75,13 @@ class Repository
 
   def tags
     @github.tags @full_name
+  end
+
+  def path_to_local_repo
+    File.join(@local_repo_dir, short_name)
+  end
+
+  def announce_skip
+    log '  skipping (not found) '.magenta + path_to_local_repo
   end
 end

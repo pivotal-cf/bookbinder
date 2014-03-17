@@ -30,7 +30,7 @@ describe Repository do
 
   describe '#target_ref' do
     it 'uses @ref if set' do
-      expect(Repository.new(full_name: '', target_ref:'foo').target_ref).to eq('foo')
+      expect(Repository.new(full_name: '', target_ref: 'foo').target_ref).to eq('foo')
     end
 
     it 'defaults to "master"' do
@@ -88,6 +88,10 @@ describe Repository do
       expect(repo.copy_from_remote(destination_dir)).to be_true
     end
 
+    it 'sets copied? to true' do
+      expect { repo.copy_from_remote(destination_dir) }.to change { repo.copied? }.to(true)
+    end
+
     context 'when given an invalid request URL' do
       before do
         zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_sha}.tar.gz"
@@ -98,6 +102,55 @@ describe Repository do
         expect {
           repo.copy_from_remote(destination_dir)
         }.to raise_exception(/Unable to download/)
+      end
+
+      it 'does not change copied?' do
+        expect { repo.copy_from_remote(destination_dir) rescue nil }.not_to change { repo.copied? }
+      end
+    end
+  end
+
+  describe '#copy_from_local' do
+    let(:full_name) { 'org/my-docs-repo' }
+    let(:target_ref) { 'some-sha' }
+    let(:local_repo_dir) { tmp_subdir 'local_repo_dir' }
+    let(:repo) { Repository.new(full_name: full_name, target_ref: target_ref, local_repo_dir: local_repo_dir) }
+
+    let(:destination_dir) { tmp_subdir('destination') }
+    let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
+
+    let(:copy_to) { repo.copy_from_local destination_dir }
+
+    context 'and the local repo is there' do
+      before do
+        Dir.mkdir repo_dir
+        FileUtils.touch File.join(repo_dir, 'my_aunties_goat.txt')
+      end
+
+      it 'returns true' do
+        expect(copy_to).to be_true
+      end
+
+      it 'copies the repo' do
+        copy_to
+        expect(File.exist? File.join(destination_dir, 'my-docs-repo', 'my_aunties_goat.txt')).to be_true
+      end
+
+      it 'sets copied? to true' do
+        expect { copy_to }.to change { repo.copied? }.to(true)
+      end
+    end
+
+    context 'and the local repo is not there' do
+      before do
+        expect(File.exist? repo_dir).to be_false
+      end
+      it 'returns false' do
+        expect(copy_to).to be_false
+      end
+
+      it 'does not change copied?' do
+        expect { copy_to }.not_to change { repo.copied? }
       end
     end
   end
