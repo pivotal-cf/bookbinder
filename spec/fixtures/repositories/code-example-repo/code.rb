@@ -41,3 +41,21 @@ repo:
 this = untyped_code
 
 # code_snippet typeless_stuff end
+
+
+
+
+# code_snippet bad_start_tag
+
+this.has bad_start_tag
+
+# code_snippet bad_start_tag end
+
+
+
+
+# code_snippet bad_end_tag start
+
+this.has bad_end_tag
+
+# code_snippet bad_end_tag

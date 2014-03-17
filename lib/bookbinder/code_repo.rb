@@ -53,6 +53,8 @@ class CodeRepo < DocRepo
 
   def scrape_for(marker)
     locale = 'LC_CTYPE=C LANG=C' # Quiets 'sed: RE error: illegal byte sequence'
-    `#{locale} find . -exec sed -ne '/code_snippet #{marker} start/,/code_snippet #{marker} end/ p' {} \\;`
+    result = `#{locale} find . -exec sed -ne '/code_snippet #{marker} start/,/code_snippet #{marker} end/ p' {} \\;`
+    result = "" unless result.lines.last && result.lines.last.match(/code_snippet #{marker} end/)
+    result
   end
 end
