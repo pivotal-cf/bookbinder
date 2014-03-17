@@ -1,6 +1,12 @@
 class DocRepo < Repository
 
+  Store = {}
+
   attr_reader :copied_to
+
+  def self.get_instance(full_name, local_repo_dir=nil)
+    Store.fetch([full_name, local_repo_dir]) { acquire(full_name, local_repo_dir) }
+  end
 
   def self.from_remote(repo_hash: {}, github_token: ENV['GITHUB_API_TOKEN'], destination_dir: nil, target_tag: nil)
     repo = self.new(repo_hash, github_token, nil, target_tag)
@@ -55,5 +61,23 @@ class DocRepo < Repository
 
   def announce_skip
     log '  skipping (not found) '.magenta + path_to_local_repo
+  end
+
+  def self.acquire(full_name, local_repo_dir)
+    BookbinderLogger.log "Excerpting #{full_name.cyan}"
+    repo = local_repo_dir ? copy(full_name, local_repo_dir) : download(full_name)
+    keep(repo, local_repo_dir) if repo
+  end
+
+  def self.keep(repo, local_repo_dir)
+    Store[[repo.full_name, local_repo_dir]] = repo
+  end
+
+  def self.download(full_name)
+    from_remote({repo_hash: {'github_repo' => full_name}, destination_dir: Dir.mktmpdir})
+  end
+
+  def self.copy(full_name, local_repo_dir)
+    from_local(repo_hash: {'github_repo' => full_name}, local_dir: local_repo_dir, destination_dir: Dir.mktmpdir)
   end
 end

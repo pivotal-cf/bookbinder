@@ -15,7 +15,7 @@ describe Cli::Tag do
   let(:config) { Configuration.new(config_hash) }
 
   before do
-    GitClient.any_instance.stub :create_tag!
+    allow(GitClient.get_instance).to receive(:create_tag!)
     @book = double
     @book.stub(:full_name).and_return 'anything'
     @book.stub(:target_ref).and_return 'anything'

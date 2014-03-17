@@ -5,6 +5,55 @@ describe DocRepo do
   include ShellOut
   include_context 'tmp_dirs'
 
+  describe '.get_instance' do
+    let(:local_repo_dir) { '/dev/null' }
+    before do
+      stub_github_for 'foo/book'
+      stub_github_for 'foo/dogs-repo'
+    end
+
+    context 'when called more than once' do
+      it 'always returns the same instance for the same arguments' do
+        first_instance = DocRepo.get_instance('foo/book', local_repo_dir)
+        second_instance = DocRepo.get_instance('foo/book', local_repo_dir)
+        expect(first_instance).to be(second_instance)
+      end
+
+      it 'returns different instances for different repo names' do
+        first_instance = DocRepo.get_instance('foo/dogs-repo', local_repo_dir)
+        second_instance = DocRepo.get_instance('foo/book', local_repo_dir)
+
+        expect(first_instance).not_to be(second_instance)
+      end
+
+      it 'returns different instances for different modes' do
+        local_code_repo = DocRepo.get_instance('foo/book', 'spec/fixtures/repositories')
+        remote_code_repo = DocRepo.get_instance('foo/book', nil)
+
+        expect(local_code_repo).not_to be(remote_code_repo)
+      end
+    end
+
+    context 'in local mode' do
+      context 'if the repo is present, locally' do
+        let(:local_repo_dir) { 'spec/fixtures/repositories' }
+
+        it 'copies repos from local directory' do
+          expect(DocRepo.get_instance('foo/code-example-repo', local_repo_dir)).to be_copied
+        end
+      end
+
+      context 'if the repo is missing' do
+        let(:local_repo_dir) { '/dev/null' }
+
+        it 'logs a warning' do
+          expect(BookbinderLogger).to receive(:log).with /skipping \(not found\)/
+          DocRepo.get_instance('foo/definitely-not-around', local_repo_dir)
+        end
+      end
+    end
+  end
+
   describe '.from_remote' do
     context 'and github returns a 200 status code' do
       before do
