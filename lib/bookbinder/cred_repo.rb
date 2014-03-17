@@ -2,12 +2,6 @@ require 'rubygems/package'
 require 'zlib'
 
 class CredRepo < Repository
-  def initialize(full_name: nil)
-    raise 'foo' unless full_name
-    @full_name = full_name
-    @github = GitClient.get_instance(access_token: ENV['GITHUB_API_TOKEN'])
-  end
-
   def credentials
     log 'Processing ' + full_name.cyan
     untar tarball

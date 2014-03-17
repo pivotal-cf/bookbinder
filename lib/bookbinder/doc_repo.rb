@@ -20,14 +20,14 @@ class DocRepo < Repository
     repo
   end
 
-  def initialize(repo_hash, github_token, local_repo_dir, target_tag)
-    @github = GitClient.get_instance(access_token: github_token) unless local_repo_dir
-
-    @ref = target_tag || repo_hash['sha']
-    @full_name = repo_hash.fetch('github_repo')
-    @directory = repo_hash['directory']
+  def initialize(repo_hash, github_token, local_repo_dir, target_ref)
     @local_repo_dir = local_repo_dir
     @subnav_template = repo_hash['subnav_template']
+
+    directory = repo_hash['directory']
+    full_name = repo_hash.fetch('github_repo')
+    target_ref = target_ref || repo_hash['sha']
+    super(full_name: full_name, target_ref: target_ref, github_token: github_token, directory: directory)
   end
 
   def subnav_template

@@ -42,7 +42,7 @@ describe Book do
   describe '#copy_from_remote' do
     let(:temp_workspace) { tmp_subdir('workspace') }
     let(:ref) { 'this-is-a-tag' }
-    let(:book) { Book.new full_name: 'foo/book', ref: ref }
+    let(:book) { Book.new full_name: 'foo/book', target_ref: ref }
 
     before { stub_github_for book.full_name, ref }
 

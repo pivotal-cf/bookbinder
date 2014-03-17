@@ -2,14 +2,19 @@ class Repository
   include BookbinderLogger
   include ShellOut
 
-  attr_reader :full_name
+  attr_reader :full_name, :target_ref
+
+  def initialize(full_name: nil, target_ref: nil, github_token: nil, directory: nil)
+    #TODO better error message
+    raise 'No full_name provided ' unless full_name
+    @full_name = full_name
+    @github = GitClient.get_instance(access_token: github_token || ENV['GITHUB_API_TOKEN'])
+    @target_ref = target_ref || 'master'
+    @directory = directory
+  end
 
   def tag_with(tagname)
     @github.create_tag! full_name, tagname, target_ref
-  end
-
-  def target_ref
-    @ref || 'master'
   end
 
   def short_name
