@@ -35,10 +35,6 @@ class DocRepo < Repository
     @subnav_template.gsub(/^_/, '').gsub(/\.erb$/, '')
   end
 
-  def has_tag?(tagname)
-    tags.any? { |tag| tag.name == tagname }
-  end
-
   private
 
   def self.acquire(full_name, local_repo_dir)

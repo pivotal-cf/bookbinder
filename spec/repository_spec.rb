@@ -154,4 +154,59 @@ describe Repository do
       end
     end
   end
+
+  describe '#has_tag?' do
+    let(:repo) { Repository.new(full_name: 'my-docs-org/my-docs-repo',
+                                target_ref: 'some_sha',
+                                directory: 'pretty_url_path',
+                                local_repo_dir: '') }
+    let(:my_tag) { '#hashtag' }
+
+    before do
+      allow(GitClient.get_instance).to receive(:tags).and_return(tags)
+    end
+
+    context 'when a tag has been applied' do
+      let(:tags) do
+        [OpenStruct.new(name: my_tag)]
+      end
+
+      it 'is true when checking that tag' do
+        repo.should have_tag(my_tag)
+      end
+      it 'is false when checking a different tag' do
+        repo.should_not have_tag('nobody_uses_me')
+      end
+    end
+
+    context 'when no tag has been applied' do
+      let(:tags) { [] }
+
+      it 'is false' do
+        repo.should_not have_tag(my_tag)
+      end
+    end
+  end
+
+  describe '#tag_with' do
+    let(:repo_sha) { 'some-sha' }
+    let(:repo) { Repository.new(full_name: 'my-docs-org/my-docs-repo',
+                                target_ref: repo_sha,
+                                directory: 'pretty_url_path',
+                                local_repo_dir: '') }
+    let(:my_tag) { '#hashtag' }
+
+    before do
+      GitClient.any_instance.stub(:validate_authorization)
+      GitClient.any_instance.stub(:commits).with(repo.full_name)
+      .and_return([OpenStruct.new(sha: repo_sha)])
+    end
+
+    it 'should apply a tag' do
+      GitClient.any_instance.should_receive(:create_tag!)
+      .with(repo.full_name, my_tag, repo.target_ref)
+
+      repo.tag_with(my_tag)
+    end
+  end
 end

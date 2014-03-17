@@ -60,6 +60,10 @@ class Repository
     !@copied_to.nil?
   end
 
+  def has_tag?(tagname)
+    tags.any? { |tag| tag.name == tagname }
+  end
+
   private
 
   def download_archive
