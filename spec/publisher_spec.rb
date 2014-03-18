@@ -166,9 +166,6 @@ describe Publisher do
         end
 
         it 'makes only one request per code example repository' do
-          #Guard against leaky global constant
-          CodeRepo::Store.keys.each {|key| CodeRepo::Store.delete(key) }
-
           stub_github_for constituent_repo
           mock_github_for code_repo
 

@@ -4,7 +4,7 @@ describe CodeRepo do
   describe '#get_snippet_and_language_at' do
     let(:repo_name) { 'my-docs-org/code-example-repo' }
     before { stub_github_for repo_name }
-    let(:repo) { CodeRepo.get_instance({'github_repo' => repo_name}) }
+    let(:repo) { CodeRepo.get_instance(repo_hash: {'github_repo' => repo_name}) }
 
     it 'produces a string for the given excerpt_marker' do
       code_snippet = <<-RUBY
@@ -45,7 +45,7 @@ p fib.take_while { |n| n <= 4E6 }
     end
 
     context 'when the repo was not copied' do
-      let(:missing_repo) { CodeRepo.get_instance({'github_repo' => 'foo/missing-book'}, '/dev/null') }
+      let(:missing_repo) { CodeRepo.get_instance(repo_hash: {'github_repo' => 'foo/missing-book'}, local_repo_dir: '/dev/null') }
 
       it 'logs a warning' do
         expect(BookbinderLogger).to receive(:log).with /skipping \(not found\)/

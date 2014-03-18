@@ -22,7 +22,7 @@ def stub_github_for(repo_name, some_ref='master')
   github = GitClient.get_instance access_token: 'foo'
   zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
   github.stub(:archive_link).with(repo_name, ref: some_ref)
-    .and_return(zipped_repo_url)
+  .and_return(zipped_repo_url)
 
   zipped_repo = RepoFixture.tarball repo_name.split('/').last, some_ref
   stub_request(:get, zipped_repo_url).to_return(
@@ -34,8 +34,8 @@ def mock_github_for(repo_name, some_ref='master')
   github = GitClient.get_instance access_token: 'foo'
   zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
   github.should_receive(:archive_link).with(repo_name, ref: some_ref)
-    .once
-    .and_return(zipped_repo_url)
+  .once
+  .and_return(zipped_repo_url)
 
   zipped_repo = RepoFixture.tarball repo_name.split('/').last, some_ref
   stub_request(:get, zipped_repo_url).to_return(
@@ -63,8 +63,6 @@ require_relative '../lib/bookbinder'
 require_relative '../template_app/app.rb'
 require_relative 'fixtures/repo_fixture'
 
-#GEM_ROOT = Dir.pwd
-
 RSpec.configure do |config|
   config.before do
     # awful hack to prevent tests that invoke middleman directly from polluting code that shells out to call it
@@ -75,9 +73,11 @@ RSpec.configure do |config|
   end
 
   config.before do
-    BookbinderLogger.stub(:log) {  }
-    BookbinderLogger.stub(:log_print) {  }
+    BookbinderLogger.stub(:log) {}
+    BookbinderLogger.stub(:log_print) {}
     Pusher.any_instance.stub(:push) unless self.class.metadata[:enable_pusher]
+
+    allow(DocRepo).to receive(:store).and_return({})
   end
 
   module SpecHelperMethods

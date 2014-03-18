@@ -57,13 +57,7 @@ class Publisher
   end
 
   def import_repo_to(destination, options, repo_hash)
-    shared_arguments = {repo_hash: repo_hash, destination_dir: destination}
-
-    if options.has_key?(:local_repo_dir)
-      DocRepo.from_local shared_arguments.merge(local_dir: options.fetch(:local_repo_dir))
-    else
-      DocRepo.from_remote shared_arguments.merge(target_tag: options[:target_tag])
-    end
+    DocRepo.get_instance(repo_hash: repo_hash, destination_dir: destination, local_repo_dir: options[:local_repo_dir], target_tag: options[:target_tag])
   end
 
   def generate_pdf(final_app_dir, options)
