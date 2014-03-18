@@ -14,21 +14,21 @@ describe DocRepo do
 
     context 'when called more than once' do
       it 'always returns the same instance for the same arguments' do
-        first_instance = DocRepo.get_instance('foo/book', local_repo_dir)
-        second_instance = DocRepo.get_instance('foo/book', local_repo_dir)
+        first_instance = DocRepo.get_instance({'github_repo' => 'foo/book'}, local_repo_dir)
+        second_instance = DocRepo.get_instance({'github_repo' => 'foo/book'}, local_repo_dir)
         expect(first_instance).to be(second_instance)
       end
 
       it 'returns different instances for different repo names' do
-        first_instance = DocRepo.get_instance('foo/dogs-repo', local_repo_dir)
-        second_instance = DocRepo.get_instance('foo/book', local_repo_dir)
+        first_instance = DocRepo.get_instance({'github_repo' => 'foo/dogs-repo'}, local_repo_dir)
+        second_instance = DocRepo.get_instance({'github_repo' => 'foo/book'}, local_repo_dir)
 
         expect(first_instance).not_to be(second_instance)
       end
 
       it 'returns different instances for different modes' do
-        local_code_repo = DocRepo.get_instance('foo/book', 'spec/fixtures/repositories')
-        remote_code_repo = DocRepo.get_instance('foo/book', nil)
+        local_code_repo = DocRepo.get_instance({'github_repo' => 'foo/book'}, 'spec/fixtures/repositories')
+        remote_code_repo = DocRepo.get_instance({'github_repo' => 'foo/book'}, nil)
 
         expect(local_code_repo).not_to be(remote_code_repo)
       end
@@ -39,7 +39,7 @@ describe DocRepo do
         let(:local_repo_dir) { 'spec/fixtures/repositories' }
 
         it 'copies repos from local directory' do
-          expect(DocRepo.get_instance('foo/code-example-repo', local_repo_dir)).to be_copied
+          expect(DocRepo.get_instance({'github_repo' => 'foo/code-example-repo'}, local_repo_dir)).to be_copied
         end
       end
 
@@ -48,7 +48,7 @@ describe DocRepo do
 
         it 'logs a warning' do
           expect(BookbinderLogger).to receive(:log).with /skipping \(not found\)/
-          DocRepo.get_instance('foo/definitely-not-around', local_repo_dir)
+          DocRepo.get_instance({'github_repo' => 'foo/definitely-not-around'}, local_repo_dir)
         end
       end
     end
