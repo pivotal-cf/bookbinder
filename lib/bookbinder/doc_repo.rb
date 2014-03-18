@@ -1,30 +1,39 @@
-class DocRepo < Repository
+class DocRepo
   def self.store
     @@store ||= {}
   end
-
-  attr_reader :copied_to
 
   def self.get_instance(repo_hash: {}, local_repo_dir: nil, destination_dir: nil, target_tag: nil)
     destination_dir ||= Dir.mktmpdir
     store.fetch([repo_hash['github_repo'], local_repo_dir]) { acquire(repo_hash, local_repo_dir, destination_dir, target_tag) }
   end
 
-  def initialize(repo_hash, github_token, local_repo_dir, target_ref)
-    @subnav_template = repo_hash['subnav_template']
-
-    local_repo_dir = local_repo_dir
-    directory = repo_hash['directory']
-    full_name = repo_hash.fetch('github_repo')
-    target_ref = target_ref || repo_hash['sha']
-    super(full_name: full_name, target_ref: target_ref, github_token: github_token, directory: directory, local_repo_dir: local_repo_dir)
+  def initialize(repository, subnav_template)
+    @subnav_template = subnav_template
+    @repository = repository
   end
 
   def subnav_template
     @subnav_template.gsub(/^_/, '').gsub(/\.erb$/, '') if @subnav_template
   end
 
+  def directory
+    @repository.directory
+  end
+
+  def full_name
+    @repository.full_name
+  end
+
+  def copied?
+    @repository.copied?
+  end
+
   private
+
+  def self.announce_skip(repository)
+    BookbinderLogger.log '  skipping (not found) '.magenta + repository.path_to_local_repo
+  end
 
   def self.acquire(repo_hash, local_repo_dir, destination, target_tag)
     BookbinderLogger.log "Excerpting #{repo_hash.fetch('github_repo').cyan}"
@@ -38,27 +47,32 @@ class DocRepo < Repository
   end
   private_class_method :keep
 
-  def self.download(repo_hash, destination, target_tag)
-    from_remote(repo_hash: repo_hash, destination_dir: destination, target_tag: target_tag)
+  def self.download(repo_hash, destination_dir, target_ref)
+    full_name       = repo_hash.fetch('github_repo')
+    target_ref      = target_ref || repo_hash['sha']
+    directory       = repo_hash['directory']
+
+    repository = Repository.new(full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
+    if destination_dir
+      repository.copy_from_remote(destination_dir) or announce_skip(repository)
+    end
+
+    subnav_template = repo_hash['subnav_template']
+
+    self.new(repository, subnav_template)
   end
   private_class_method :download
 
-  def self.copy(repo_hash, local_repo_dir, destination)
-    from_local(repo_hash: repo_hash, local_repo_dir: local_repo_dir, destination_dir: destination)
+  def self.copy(repo_hash, local_repo_dir, destination_dir)
+    full_name       = repo_hash.fetch('github_repo')
+    directory       = repo_hash['directory']
+
+    repository = Repository.new(full_name: full_name, directory: directory, local_repo_dir: local_repo_dir)
+    if destination_dir
+      repository.copy_from_local(destination_dir) or announce_skip(repository)
+    end
+
+    self.new(repository, repo_hash['subnav_template'])
   end
   private_class_method :copy
-
-  def self.from_remote(repo_hash: {}, github_token: ENV['GITHUB_API_TOKEN'], destination_dir: nil, target_tag: nil)
-    repo = self.new(repo_hash, github_token, nil, target_tag)
-    repo.copy_from_remote(destination_dir) if destination_dir
-    repo
-  end
-  private_class_method :from_remote
-
-  def self.from_local(repo_hash: {}, local_repo_dir: '', destination_dir: nil)
-    repo = self.new(repo_hash, nil, local_repo_dir, nil)
-    repo.copy_from_local(destination_dir) if destination_dir
-    repo
-  end
-  private_class_method :from_local
 end

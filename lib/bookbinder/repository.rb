@@ -2,7 +2,7 @@ class Repository
   include BookbinderLogger
   include ShellOut
 
-  attr_reader :full_name, :target_ref
+  attr_reader :full_name, :target_ref, :copied_to
 
   def initialize(full_name: nil, target_ref: nil, github_token: nil, directory: nil, local_repo_dir: nil)
     #TODO better error message
@@ -51,8 +51,6 @@ class Repository
       log '  copying '.yellow + path_to_local_repo
       FileUtils.cp_r path_to_local_repo, File.join(destination_dir, directory)
       @copied_to = File.join(destination_dir, directory)
-    else
-      announce_skip
     end
   end
 
@@ -73,6 +71,10 @@ class Repository
     end
   end
 
+  def path_to_local_repo
+    File.join(@local_repo_dir, short_name)
+  end
+
   private
 
   def download_archive
@@ -88,13 +90,5 @@ class Repository
 
   def tags
     @github.tags @full_name
-  end
-
-  def path_to_local_repo
-    File.join(@local_repo_dir, short_name)
-  end
-
-  def announce_skip
-    log '  skipping (not found) '.magenta + path_to_local_repo
   end
 end

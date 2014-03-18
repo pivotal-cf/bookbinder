@@ -140,8 +140,7 @@ describe DocRepo do
   end
 
   describe '#subnav_template' do
-    let(:repo_hash) { {'subnav_template' => subnav_template_name, 'github_repo' => ''} }
-    let(:repo) { DocRepo.new(repo_hash, nil, 'dir', nil) }
+    let(:repo) { DocRepo.new(double(:repo), subnav_template_name) }
 
     context 'when the incoming template does not look like a partial file' do
       let(:subnav_template_name) { 'my_template' }
@@ -160,7 +159,7 @@ describe DocRepo do
     end
 
     context 'when the incoming template is not defined' do
-      let(:repo_hash) { {'github_repo' => ''} }
+      let(:subnav_template_name) { nil }
 
       it 'is nil' do
         expect(repo.subnav_template).to be_nil
@@ -168,5 +167,3 @@ describe DocRepo do
     end
   end
 end
-
-

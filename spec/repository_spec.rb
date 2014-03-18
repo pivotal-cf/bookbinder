@@ -234,4 +234,16 @@ describe Repository do
       end
     end
   end
+
+  describe '#path_to_local_repo' do
+    let(:local_repo_dir) { tmpdir }
+    let(:short_name) { 'repo-name' }
+    let(:full_name) { "org/#{short_name}" }
+    let(:repo_dir) { File.join(local_repo_dir, short_name) }
+    let(:repository) { Repository.new(full_name: full_name, local_repo_dir: local_repo_dir)}
+
+    it 'is the local repo directory plus the short name' do
+      expect(repository.path_to_local_repo).to eq(repo_dir)
+    end
+  end
 end

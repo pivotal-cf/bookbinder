@@ -6,19 +6,19 @@ class CodeRepo < DocRepo
   end
 
   def get_snippet_and_language_at(marker)
-    copied? ? prepared_snippet_at(marker) : noisy_failure
+    @repository.copied? ? prepared_snippet_at(marker) : noisy_failure
   end
 
   private
 
   def noisy_failure
-    announce_skip
+    self.class.announce_skip(@repository)
     ''
   end
 
   def prepared_snippet_at(marker)
     snippet = ''
-    FileUtils.cd(copied_to) { snippet = scrape_for(marker) }
+    FileUtils.cd(@repository.copied_to) { snippet = scrape_for(marker) }
 
     raise InvalidSnippet.new(full_name, marker) if snippet.empty?
     lines = snippet.split("\n")
