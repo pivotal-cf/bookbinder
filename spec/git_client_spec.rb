@@ -2,9 +2,8 @@ require 'spec_helper'
 
 describe GitClient do
   describe 'create_tag!' do
-    let(:repo) { DocRepo.new({'github_repo'=>'foo/bar'}, nil, nil, nil) }
     let(:tagname) { 'sofia-1.0.1' }
-    let(:full_name) { repo.full_name }
+    let(:full_name) { 'foo/bar' }
     let(:sha) { 'some-sha' }
 
     before { Octokit::Client.any_instance.stub(:commits) }
