@@ -209,4 +209,29 @@ describe Repository do
       repo.tag_with(my_tag)
     end
   end
+
+  describe '#update_local_copy' do
+    let(:local_repo_dir) { tmpdir }
+    let(:full_name) { 'org/repo-name' }
+    let(:repo_dir) { File.join(local_repo_dir, 'repo-name') }
+    let(:repository) { Repository.new(full_name: full_name, local_repo_dir: local_repo_dir)}
+
+    context 'when the repo dirs are there' do
+      before do
+        Dir.mkdir repo_dir
+      end
+
+      it 'issues a git pull in each repo' do
+        expect(Kernel).to receive(:system).with("cd #{repo_dir} && git pull")
+        repository.update_local_copy
+      end
+    end
+
+    context 'when a repo is not there' do
+      it 'does not attempt a git pull' do
+        expect(Kernel).to_not receive(:system)
+        repository.update_local_copy
+      end
+    end
+  end
 end

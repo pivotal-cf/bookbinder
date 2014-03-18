@@ -64,6 +64,15 @@ class Repository
     tags.any? { |tag| tag.name == tagname }
   end
 
+  def update_local_copy
+    if File.exist?(path_to_local_repo)
+      log 'Updating ' + path_to_local_repo.cyan
+      Kernel.system("cd #{path_to_local_repo} && git pull")
+    else
+      log 'Skipping (non-existent) '.magenta + path_to_local_repo.cyan
+    end
+  end
+
   private
 
   def download_archive
