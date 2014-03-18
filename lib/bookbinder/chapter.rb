@@ -1,4 +1,4 @@
-class DocRepo
+class Chapter
   def self.store
     @@store ||= {}
   end

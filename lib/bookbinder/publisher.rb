@@ -57,7 +57,7 @@ class Publisher
   end
 
   def import_repo_to(destination, options, repo_hash)
-    DocRepo.get_instance(repo_hash: repo_hash, destination_dir: destination, local_repo_dir: options[:local_repo_dir], target_tag: options[:target_tag])
+    Chapter.get_instance(repo_hash: repo_hash, destination_dir: destination, local_repo_dir: options[:local_repo_dir], target_tag: options[:target_tag])
   end
 
   def generate_pdf(final_app_dir, options)

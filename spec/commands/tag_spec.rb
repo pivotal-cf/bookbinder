@@ -23,7 +23,7 @@ describe Cli::Tag do
     Book.stub(:new).with { |args| args[:full_name].should eq book_title }
       .and_return(@book)
 
-    DocRepo.any_instance.stub(:tag_with)
+    Chapter.any_instance.stub(:tag_with)
   end
 
   it 'should tag the book and its constituents' do
