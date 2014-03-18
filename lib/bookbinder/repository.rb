@@ -4,6 +4,29 @@ class Repository
 
   attr_reader :full_name, :target_ref, :copied_to
 
+  def self.build_from_remote(repo_hash, destination_dir, target_ref)
+    full_name       = repo_hash.fetch('github_repo')
+    target_ref      = target_ref || repo_hash['sha']
+    directory       = repo_hash['directory']
+
+    repository = new(full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
+    if destination_dir
+      repository.copy_from_remote(destination_dir)
+    end
+
+    repository
+  end
+
+  def self.build_from_local(repo_hash, local_repo_dir, destination_dir)
+    full_name       = repo_hash.fetch('github_repo')
+    directory       = repo_hash['directory']
+
+    repository = new(full_name: full_name, directory: directory, local_repo_dir: local_repo_dir)
+    repository.copy_from_local(destination_dir) if destination_dir
+
+    repository
+  end
+
   def initialize(full_name: nil, target_ref: nil, github_token: nil, directory: nil, local_repo_dir: nil)
     #TODO better error message
     raise 'No full_name provided ' unless full_name
@@ -51,6 +74,8 @@ class Repository
       log '  copying '.yellow + path_to_local_repo
       FileUtils.cp_r path_to_local_repo, File.join(destination_dir, directory)
       @copied_to = File.join(destination_dir, directory)
+    else
+      announce_skip
     end
   end
 
@@ -67,15 +92,19 @@ class Repository
       log 'Updating ' + path_to_local_repo.cyan
       Kernel.system("cd #{path_to_local_repo} && git pull")
     else
-      log 'Skipping (non-existent) '.magenta + path_to_local_repo.cyan
+      announce_skip
     end
   end
+
+  def announce_skip
+    log '  skipping (not found) '.magenta + path_to_local_repo
+  end
+
+  private
 
   def path_to_local_repo
     File.join(@local_repo_dir, short_name)
   end
-
-  private
 
   def download_archive
     log '  downloading '.yellow + archive_link.blue

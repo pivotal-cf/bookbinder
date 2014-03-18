@@ -6,15 +6,15 @@ class CodeExample < Chapter
   end
 
   def get_snippet_and_language_at(marker)
-    @repository.copied? ? prepared_snippet_at(marker) : noisy_failure
+    unless @repository.copied?
+      @repository.announce_skip
+      return ''
+    end
+
+    prepared_snippet_at(marker)
   end
 
   private
-
-  def noisy_failure
-    self.class.announce_skip(@repository)
-    ''
-  end
 
   def prepared_snippet_at(marker)
     snippet = ''

@@ -31,48 +31,26 @@ class Chapter
 
   private
 
-  def self.announce_skip(repository)
-    BookbinderLogger.log '  skipping (not found) '.magenta + repository.path_to_local_repo
-  end
-
   def self.acquire(repo_hash, local_repo_dir, destination, target_tag)
     BookbinderLogger.log "Excerpting #{repo_hash.fetch('github_repo').cyan}"
-    repo = local_repo_dir ? copy(repo_hash, local_repo_dir, destination) : download(repo_hash, destination, target_tag)
-    keep(repo, local_repo_dir) if repo
+    repository = build_repository(destination, local_repo_dir, repo_hash, target_tag)
+    chapter = new(repository, repo_hash['subnav_template'])
+
+    keep(chapter, local_repo_dir) if chapter
   end
   private_class_method :acquire
+
+  def self.build_repository(destination, local_repo_dir, repo_hash, target_tag)
+    if local_repo_dir
+      Repository.build_from_local(repo_hash, local_repo_dir, destination)
+    else
+      Repository.build_from_remote(repo_hash, destination, target_tag)
+    end
+  end
+  private_class_method :build_repository
 
   def self.keep(repo, local_repo_dir)
     store[[repo.full_name, local_repo_dir]] = repo
   end
   private_class_method :keep
-
-  def self.download(repo_hash, destination_dir, target_ref)
-    full_name       = repo_hash.fetch('github_repo')
-    target_ref      = target_ref || repo_hash['sha']
-    directory       = repo_hash['directory']
-
-    repository = Repository.new(full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
-    if destination_dir
-      repository.copy_from_remote(destination_dir) or announce_skip(repository)
-    end
-
-    subnav_template = repo_hash['subnav_template']
-
-    self.new(repository, subnav_template)
-  end
-  private_class_method :download
-
-  def self.copy(repo_hash, local_repo_dir, destination_dir)
-    full_name       = repo_hash.fetch('github_repo')
-    directory       = repo_hash['directory']
-
-    repository = Repository.new(full_name: full_name, directory: directory, local_repo_dir: local_repo_dir)
-    if destination_dir
-      repository.copy_from_local(destination_dir) or announce_skip(repository)
-    end
-
-    self.new(repository, repo_hash['subnav_template'])
-  end
-  private_class_method :copy
 end
