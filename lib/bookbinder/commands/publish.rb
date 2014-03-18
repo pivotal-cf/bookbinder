@@ -44,7 +44,7 @@ class Cli
                                             destination_dir: temp_workspace, ref: target_tag)
       expected_book_path = File.join temp_workspace, book.directory
 
-      log "Binding \"#{book.short_name.cyan}\" at #{target_tag.magenta}"
+      log "Binding \"#{book.full_name.cyan}\" at #{target_tag.magenta}"
       FileUtils.chdir(expected_book_path) { doc_generation.call(config, target_tag) }
     end
 

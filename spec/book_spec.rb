@@ -9,24 +9,22 @@ describe Book do
 
   let(:book_name) { 'wow-org/such-book' }
 
-  describe '#tag_constituents_with' do
+  describe '#tag_self_and_constituents_with' do
     let(:desired_tag) { 12.times.map { (65 + rand(26)).chr }.join  }
 
-    before do
-      stub_github_for constituents[0]['github_repo']
-    end
-
-    it 'should tag the constituent repos' do
-      allow(Book).to receive(:new).with(full_name: book_name, constituent_params: constituents).and_call_original
-
+    it 'should tag itself and the constituent repos' do
       constituents.each do |c|
-        stub_github_for c['github_repo']
-        doc_repo = expect_to_receive_and_return_real_now(Repository, :new, full_name: c['github_repo'])
+        doc_repo = double
+        expect(Repository).to receive(:new).with(full_name: c['github_repo']).and_return(doc_repo)
         expect(doc_repo).to receive(:tag_with).with(desired_tag)
       end
 
+      self_repo = double
+      expect(Repository).to receive(:new).with(full_name: book_name, target_ref: nil, github_token: nil).and_return(self_repo)
+      expect(self_repo).to receive(:tag_with).with(desired_tag)
+
       book = Book.new(full_name: book_name, constituent_params: constituents)
-      book.tag_constituents_with(desired_tag)
+      book.tag_self_and_constituents_with(desired_tag)
     end
   end
 

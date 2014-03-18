@@ -162,7 +162,6 @@ describe Distributor do
     end
 
     it 'creates the right objects' do
-      expect(Book).to receive(:new).with({full_name: book_repo_name}).and_call_original
       real_namer = expect_to_receive_and_return_real_now(ArtifactNamer, :new, book_repo_short_name, build_number, 'log', '/tmp')
       real_archive = expect_to_receive_and_return_real_now(Archive, :new, key: key, secret: secret)
       real_runner = expect_to_receive_and_return_real_now(CfCommandRunner, :new, cf_credentials, namer_full_path)

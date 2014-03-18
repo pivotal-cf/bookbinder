@@ -27,8 +27,7 @@ describe Cli::Tag do
   end
 
   it 'should tag the book and its constituents' do
-    @book.should_receive(:tag_with).with(desired_tag)
-    @book.should_receive(:tag_constituents_with).with(desired_tag)
+    @book.should_receive(:tag_self_and_constituents_with).with(desired_tag)
     Cli::Tag.new(config).run [desired_tag]
   end
 end
