@@ -32,7 +32,7 @@ class Chapter
   private
 
   def self.acquire(repo_hash, local_repo_dir, destination, target_tag)
-    BookbinderLogger.log "Excerpting #{repo_hash.fetch('github_repo').cyan}"
+    BookbinderLogger.log 'Gathering ' + repo_hash['github_repo'].cyan
     repository = build_repository(destination, local_repo_dir, repo_hash, target_tag)
     chapter = new(repository, repo_hash['subnav_template'])
 

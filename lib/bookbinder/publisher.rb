@@ -51,7 +51,6 @@ class Publisher
 
   def import_repos(middleman_source_directory, options)
     options.fetch(:repos).map do |repo_hash|
-      log 'Processing ' + repo_hash['github_repo'].cyan
       import_repo_to(middleman_source_directory, options, repo_hash)
     end
   end
