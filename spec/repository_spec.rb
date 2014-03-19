@@ -15,28 +15,31 @@ describe Repository do
 
   describe '#tag_with' do
     let(:github_token) { 'blahblah' }
+    let(:head_sha) { 'ha7f'*10 }
 
     it 'calls #create_tag! on the github instance variable' do
-      fake_github = double
-      expect(GitClient).to receive(:get_instance).
-                             with(access_token: github_token).
-                             and_return(fake_github)
-      expect(fake_github).to receive(:create_tag!).
-                               with('org/repo', 'the_tag_name', 'master')
+      git_client = GitClient.get_instance access_token: github_token
+
+      expect(git_client).to receive(:head_sha).with('org/repo').and_return head_sha
+      expect(git_client).to receive(:create_tag!).with('org/repo', 'the_tag_name', head_sha)
 
       Repository.new(github_token: github_token, full_name: 'org/repo').tag_with('the_tag_name')
     end
   end
 
-  describe '#target_ref' do
-    it 'uses @ref if set' do
-      expect(Repository.new(full_name: '', target_ref: 'foo').target_ref).to eq('foo')
-    end
-
-    it 'defaults to "master"' do
-      expect(Repository.new(full_name: 'foo').target_ref).to eq('master')
-    end
-  end
+  #describe '#target_ref' do
+  #  it 'uses @ref if set' do
+  #    repository = Repository.new(full_name: '', target_ref: 'foo')
+  #
+  #    expect(repository.target_ref).to eq('foo')
+  #  end
+  #
+  #  it 'defaults to "master"' do
+  #    repository = Repository.new(full_name: 'foo')
+  #
+  #    expect(repository.target_ref).to eq(head_sha)
+  #  end
+  #end
 
   describe '#short_name' do
     it 'returns the repo name when org and repo name are provided' do
@@ -48,15 +51,16 @@ describe Repository do
     let(:github_token) { 'my_token' }
 
     it "returns the first (most recent) commit's sha if @head_sha is unset" do
-      fake_github = double
-      fake_commit = double(sha: 'dcba')
+      fake_github = double(:github)
+
       expect(GitClient).to receive(:get_instance).
                              with(access_token: github_token).
                              and_return(fake_github)
 
-      expect(fake_github).to receive(:commits).with('org/repo').and_return([fake_commit, '1234', '4567'])
+      expect(fake_github).to receive(:head_sha).with('org/repo').and_return('dcba')
 
-      expect(Repository.new(full_name: 'org/repo', github_token: github_token).head_sha).to eq('dcba')
+      repository = Repository.new(full_name: 'org/repo', github_token: github_token)
+      expect(repository.head_sha).to eq('dcba')
     end
   end
 
@@ -204,7 +208,7 @@ describe Repository do
 
     it 'should apply a tag' do
       GitClient.any_instance.should_receive(:create_tag!)
-      .with(repo.full_name, my_tag, repo.target_ref)
+      .with(repo.full_name, my_tag, repo_sha)
 
       repo.tag_with(my_tag)
     end

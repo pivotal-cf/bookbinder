@@ -6,13 +6,12 @@ class GitClient < Octokit::Client
     @@shared_instance ||= new(*args)
   end
 
-  def commits(full_name)
-    super
-  rescue Octokit::NotFound
-    raise_error_with_context
+  def head_sha(full_name)
+    commits(full_name).first.sha
   end
 
   def create_tag!(full_name, tagname, ref)
+    BookbinderLogger.log 'Tagging ' + full_name.cyan
     create_ref(full_name, "tags/#{tagname}", ref)
     create_tag(full_name, "tags/#{tagname}", 'Tagged by Bookbinder', ref, 'commit', 'Bookbinder', 'bookbinder@cloudfoundry.org', Time.now.iso8601)
   rescue Octokit::Unauthorized, Octokit::NotFound
@@ -26,6 +25,12 @@ class GitClient < Octokit::Client
   end
 
   private
+
+  def commits(full_name)
+    super
+  rescue Octokit::NotFound
+    raise_error_with_context
+  end
 
   def raise_error_with_context
     absent_token_message = '  Cannot access repository! You must set $GITHUB_API_TOKEN.'

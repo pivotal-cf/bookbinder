@@ -2,7 +2,7 @@ class Repository
   include BookbinderLogger
   include ShellOut
 
-  attr_reader :full_name, :target_ref, :copied_to
+  attr_reader :full_name, :copied_to
 
   def self.build_from_remote(repo_hash, destination_dir, target_ref)
     full_name       = repo_hash.fetch('github_repo')
@@ -32,13 +32,13 @@ class Repository
     raise 'No full_name provided ' unless full_name
     @full_name = full_name
     @github = GitClient.get_instance(access_token: github_token || ENV['GITHUB_API_TOKEN'])
-    @target_ref = target_ref || 'master'
+    @target_ref = target_ref
     @directory = directory
     @local_repo_dir = local_repo_dir
   end
 
   def tag_with(tagname)
-    @github.create_tag! full_name, tagname, target_ref
+    @github.create_tag! full_name, tagname, head_sha
   end
 
   def short_name
@@ -46,7 +46,7 @@ class Repository
   end
 
   def head_sha
-    @head_sha ||= @github.commits(full_name).first.sha
+    @head_sha ||= @github.head_sha(full_name)
   end
 
   def directory
@@ -108,6 +108,10 @@ class Repository
   end
 
   private
+
+  def target_ref
+    @target_ref ||= 'master'
+  end
 
   def path_to_local_repo
     File.join(@local_repo_dir, short_name)

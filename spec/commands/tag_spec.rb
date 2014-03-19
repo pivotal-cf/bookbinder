@@ -16,18 +16,11 @@ describe Cli::Tag do
 
   before do
     allow(GitClient.get_instance).to receive(:create_tag!)
-    @book = double
-    @book.stub(:full_name).and_return 'anything'
-    @book.stub(:target_ref).and_return 'anything'
-
-    Book.stub(:new).with { |args| args[:full_name].should eq book_title }
-      .and_return(@book)
-
-    Chapter.any_instance.stub(:tag_with)
+    @book = expect_to_receive_and_return_real_now(Book, :new, {full_name: book_title, constituent_params: []})
   end
 
   it 'should tag the book and its constituents' do
-    @book.should_receive(:tag_self_and_constituents_with).with(desired_tag)
+    expect(@book).to receive(:tag_self_and_constituents_with).with(desired_tag)
     Cli::Tag.new(config).run [desired_tag]
   end
 end
