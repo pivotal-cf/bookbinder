@@ -8,7 +8,7 @@ class QuicklinksRenderer < Redcarpet::Render::Base
   end
 
   def doc_footer
-    document.css('.quick-links').to_html
+    document.css('.quick-links').to_html if any_headers?
   end
 
   def header(text, header_level, anchor)
@@ -23,6 +23,10 @@ class QuicklinksRenderer < Redcarpet::Render::Base
   end
 
   private
+
+  def any_headers?
+    @items[2]
+  end
 
   def anchor_for(text)
     doc = Nokogiri::HTML(text)

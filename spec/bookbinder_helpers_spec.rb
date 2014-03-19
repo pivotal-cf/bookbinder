@@ -298,5 +298,20 @@ HTML
         expect(quick_links).to eq(expected_output.strip)
       end
     end
+
+    context 'when there are no headers' do
+      let(:sample_markdown) do
+        <<MARKDOWN
+## <a></a> Without an id
+## Without an anchor
+MARKDOWN
+      end
+
+      let(:expected_output) { '' }
+
+      it 'is an empty string' do
+        expect(quick_links).to eq(expected_output.strip)
+      end
+    end
   end
 end
