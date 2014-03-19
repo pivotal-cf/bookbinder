@@ -67,7 +67,7 @@ class Spider
   end
 
   def start_web_server
-    open_results  = PTY.spawn("rackup -p #{@port}")
+    open_results  = PTY.spawn("thin start -p #{@port}")
     stdouts       = open_results[0]
     pid           = open_results[2]
 
