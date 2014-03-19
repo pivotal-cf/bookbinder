@@ -23,8 +23,8 @@ describe Cli::PushLocalToStaging do
   let(:command) { described_class.new(config) }
 
   before do
-    fake_cred_repo = double(CredRepo, credentials: {'aws' => {}, 'cloud_foundry' => {}})
-    allow(CredRepo).to receive(:new).and_return(fake_cred_repo)
+    fake_cred_repo = double(CredentialProvider, credentials: {'aws' => {}, 'cloud_foundry' => {}})
+    allow(CredentialProvider).to receive(:new).and_return(fake_cred_repo)
 
     allow(Distributor).to receive(:build).and_return(fake_distributor)
   end

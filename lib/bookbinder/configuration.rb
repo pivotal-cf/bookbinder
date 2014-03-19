@@ -105,6 +105,10 @@ class Configuration
   private
 
   def credentials
-    @credentials ||= CredRepo.new(full_name: cred_repo).credentials
+    @credentials ||= CredentialProvider.new(credentials_repository).credentials
+  end
+
+  def credentials_repository
+    @credentials_repository ||= Repository.new(full_name: cred_repo)
   end
 end

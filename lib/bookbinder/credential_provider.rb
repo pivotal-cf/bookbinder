@@ -1,16 +1,22 @@
 require 'rubygems/package'
 require 'zlib'
 
-class CredRepo < Repository
+class CredentialProvider
+  include BookbinderLogger
+
+  def initialize(repository)
+    @repository = repository
+  end
+
   def credentials
-    log 'Processing ' + full_name.cyan
+    log 'Processing ' + @repository.full_name.cyan
     untar tarball
   end
 
   private
 
   def tarball
-    @tarball ||= download_archive
+    @tarball ||= @repository.download_archive
   end
 
   def untar(tarball)

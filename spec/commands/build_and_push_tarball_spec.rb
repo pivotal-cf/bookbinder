@@ -30,7 +30,7 @@ describe Cli::BuildAndPushTarball do
     ENV.stub(:[]).with('BUILD_NUMBER').and_return(build_number)
     fake_creds = double
     fake_creds.stub(:credentials).and_return(aws_hash)
-    CredRepo.stub(:new).and_return(fake_creds)
+    CredentialProvider.stub(:new).and_return(fake_creds)
   end
 
   let(:access_key) { 'access-key' }

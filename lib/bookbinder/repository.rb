@@ -100,17 +100,17 @@ class Repository
     log '  skipping (not found) '.magenta + path_to_local_repo
   end
 
-  private
-
-  def path_to_local_repo
-    File.join(@local_repo_dir, short_name)
-  end
-
   def download_archive
     log '  downloading '.yellow + archive_link.blue
     response = Faraday.new.get(archive_link)
     raise "Unable to download repository #{@full_name}: server response #{response.status}" unless response.status == 200
     response.body
+  end
+
+  private
+
+  def path_to_local_repo
+    File.join(@local_repo_dir, short_name)
   end
 
   def archive_link

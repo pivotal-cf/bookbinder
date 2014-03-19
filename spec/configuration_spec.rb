@@ -59,7 +59,9 @@ describe Configuration do
     let(:cred_repo) { double(credentials: creds_hash) }
 
     before do
-      CredRepo.stub(:new).with(full_name: 'some-org/cred-repo').and_return(cred_repo)
+      repository = double
+      allow(Repository).to receive(:new).with(full_name: 'some-org/cred-repo').and_return(repository)
+      allow(CredentialProvider).to receive(:new).with(repository).and_return(cred_repo)
     end
 
     describe '#aws_credentials' do
@@ -172,13 +174,13 @@ describe Configuration do
 
     it 'fetches the credentials repository only when the credentials are asked for' do
       config.book_repo
-      expect(CredRepo).to_not have_received(:new)
+      expect(CredentialProvider).to_not have_received(:new)
       config.aws_credentials
-      expect(CredRepo).to have_received(:new)
+      expect(CredentialProvider).to have_received(:new)
     end
 
     it 'only fetches the credentials repository once' do
-      expect(CredRepo).to receive(:new).once
+      expect(CredentialProvider).to receive(:new).once
       config.aws_credentials
       config.cf_staging_credentials
       config.cf_production_credentials
