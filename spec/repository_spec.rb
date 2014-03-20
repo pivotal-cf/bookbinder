@@ -54,8 +54,8 @@ describe Repository do
       fake_github = double(:github)
 
       expect(GitClient).to receive(:get_instance).
-                             with(access_token: github_token).
-                             and_return(fake_github)
+                               with(access_token: github_token).
+                               and_return(fake_github)
 
       expect(fake_github).to receive(:head_sha).with('org/repo').and_return('dcba')
 
@@ -218,7 +218,7 @@ describe Repository do
     let(:local_repo_dir) { tmpdir }
     let(:full_name) { 'org/repo-name' }
     let(:repo_dir) { File.join(local_repo_dir, 'repo-name') }
-    let(:repository) { Repository.new(full_name: full_name, local_repo_dir: local_repo_dir)}
+    let(:repository) { Repository.new(full_name: full_name, local_repo_dir: local_repo_dir) }
 
     context 'when the repo dirs are there' do
       before do
@@ -235,6 +235,58 @@ describe Repository do
       it 'does not attempt a git pull' do
         expect(Kernel).to_not receive(:system)
         repository.update_local_copy
+      end
+    end
+  end
+
+  describe '#download_archive' do
+    let(:full_name) { 'org/my-docs-repo' }
+    let(:existing_ref) { 'some-sha' }
+    let(:target_ref) { existing_ref }
+    let(:archive_head_url) { "https://api.github.com/repos/#{full_name}/tarball/#{target_ref}" }
+    let(:tar_url) { "https://codeload.github.com/#{full_name}/legacy.tar.gz/#{target_ref}" }
+    let(:all_refs_url) { "https://api.github.com/repos/#{full_name}/git/refs" }
+
+    let(:refs) {
+      [
+          {
+              "ref" => "refs/heads/#{existing_ref}",
+              "url" => "https://api.github.com/repos/#{full_name}/git/refs/heads/#{existing_ref}",
+              "object" => {
+                  "sha" => "f9443a1271ee5073c10e80d401daff44d6d3ed85",
+                  "type" => "commit",
+                  "url" => "https://api.github.com/repos/#{full_name}/git/commits/f9443a1271ee5073c10e80d401daff44d6d3ed85"
+              }
+          }
+      ]
+    }
+
+    let(:repo) { Repository.new(full_name: full_name, target_ref: target_ref) }
+
+    before do
+      stub_request(:head, archive_head_url).to_return(status: 302, body: "", headers: {'Location' => tar_url})
+      stub_request(:get, all_refs_url).to_return(status: 200, body: refs.to_json, headers: {'Content-Type' => 'application/json; charset=utf-8'})
+    end
+
+    context 'when the repo and ref is visible' do
+      let(:github_archive) { "my_archive".bytes }
+
+      before do
+        stub_request(:get, tar_url).to_return(
+            body: github_archive, headers: {'Content-Type' => 'application/x-gzip'}
+        )
+      end
+
+      it 'gives us the archive from github for the repository' do
+        expect(repo.download_archive).to eq(github_archive)
+      end
+    end
+
+    context 'when given a non-existent tag' do
+      let(:target_ref) { 'some-nonexistent-sha' }
+
+      it 'gives an informative error message' do
+        expect { repo.download_archive }.to raise_error(/Ref #{target_ref} was not found in #{full_name}/)
       end
     end
   end

@@ -5,9 +5,9 @@ class Repository
   attr_reader :full_name, :copied_to
 
   def self.build_from_remote(repo_hash, destination_dir, target_ref)
-    full_name       = repo_hash.fetch('github_repo')
-    target_ref      = target_ref || repo_hash['sha']
-    directory       = repo_hash['directory']
+    full_name = repo_hash.fetch('github_repo')
+    target_ref = target_ref || repo_hash['sha']
+    directory = repo_hash['directory']
 
     repository = new(full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
     if destination_dir
@@ -18,8 +18,8 @@ class Repository
   end
 
   def self.build_from_local(repo_hash, local_repo_dir, destination_dir)
-    full_name       = repo_hash.fetch('github_repo')
-    directory       = repo_hash['directory']
+    full_name = repo_hash.fetch('github_repo')
+    directory = repo_hash['directory']
 
     repository = new(full_name: full_name, directory: directory, local_repo_dir: local_repo_dir)
     repository.copy_from_local(destination_dir) if destination_dir
@@ -54,9 +54,9 @@ class Repository
   end
 
   def copy_from_remote(destination_dir)
-    output_dir    = Dir.mktmpdir
-    archive       = download_archive
-    tarball_path  = File.join(output_dir, "#{short_name}.tar.gz")
+    output_dir = Dir.mktmpdir
+    archive = download_archive
+    tarball_path = File.join(output_dir, "#{short_name}.tar.gz")
     File.open(tarball_path, 'wb') { |f| f.write(archive) }
 
     directory_listing_before = Dir.entries output_dir
@@ -101,9 +101,10 @@ class Repository
   end
 
   def download_archive
+    raise "Ref #{target_ref} was not found in #{full_name}" unless has_ref?(target_ref)
+
     log '  downloading '.yellow + archive_link.blue
     response = Faraday.new.get(archive_link)
-    raise "Unable to download repository #{@full_name}: server response #{response.status}" unless response.status == 200
     response.body
   end
 
@@ -123,5 +124,10 @@ class Repository
 
   def tags
     @github.tags @full_name
+  end
+
+  def has_ref?(ref)
+    refs = @github.refs(@full_name).map &:ref
+    refs.any?{|r| "refs/heads/#{ref}" == r }
   end
 end
