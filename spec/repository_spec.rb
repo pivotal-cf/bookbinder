@@ -27,20 +27,6 @@ describe Repository do
     end
   end
 
-  #describe '#target_ref' do
-  #  it 'uses @ref if set' do
-  #    repository = Repository.new(full_name: '', target_ref: 'foo')
-  #
-  #    expect(repository.target_ref).to eq('foo')
-  #  end
-  #
-  #  it 'defaults to "master"' do
-  #    repository = Repository.new(full_name: 'foo')
-  #
-  #    expect(repository.target_ref).to eq(head_sha)
-  #  end
-  #end
-
   describe '#short_name' do
     it 'returns the repo name when org and repo name are provided' do
       expect(Repository.new(full_name: 'some-org/some-name').short_name).to eq('some-name')
@@ -81,7 +67,10 @@ describe Repository do
     let(:destination_dir) { tmp_subdir('destination') }
     let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
 
-    before { stub_github_for repo_name, some_sha }
+    before do
+      stub_refs_for_repo repo_name, [some_sha]
+      stub_github_for repo_name, some_sha
+    end
 
     it 'retrieves the repo from github' do
       repo.copy_from_remote(destination_dir)
@@ -94,23 +83,6 @@ describe Repository do
 
     it 'sets copied? to true' do
       expect { repo.copy_from_remote(destination_dir) }.to change { repo.copied? }.to(true)
-    end
-
-    context 'when given an invalid request URL' do
-      before do
-        zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_sha}.tar.gz"
-        stub_request(:get, zipped_repo_url).to_return(:body => '', :status => 406)
-      end
-
-      it 'raises an error' do
-        expect {
-          repo.copy_from_remote(destination_dir)
-        }.to raise_exception(/Unable to download/)
-      end
-
-      it 'does not change copied?' do
-        expect { repo.copy_from_remote(destination_dir) rescue nil }.not_to change { repo.copied? }
-      end
     end
   end
 
@@ -245,27 +217,12 @@ describe Repository do
     let(:target_ref) { existing_ref }
     let(:archive_head_url) { "https://api.github.com/repos/#{full_name}/tarball/#{target_ref}" }
     let(:tar_url) { "https://codeload.github.com/#{full_name}/legacy.tar.gz/#{target_ref}" }
-    let(:all_refs_url) { "https://api.github.com/repos/#{full_name}/git/refs" }
-
-    let(:refs) {
-      [
-          {
-              "ref" => "refs/heads/#{existing_ref}",
-              "url" => "https://api.github.com/repos/#{full_name}/git/refs/heads/#{existing_ref}",
-              "object" => {
-                  "sha" => "f9443a1271ee5073c10e80d401daff44d6d3ed85",
-                  "type" => "commit",
-                  "url" => "https://api.github.com/repos/#{full_name}/git/commits/f9443a1271ee5073c10e80d401daff44d6d3ed85"
-              }
-          }
-      ]
-    }
 
     let(:repo) { Repository.new(full_name: full_name, target_ref: target_ref) }
 
     before do
+      stub_refs_for_repo(full_name, [existing_ref])
       stub_request(:head, archive_head_url).to_return(status: 302, body: "", headers: {'Location' => tar_url})
-      stub_request(:get, all_refs_url).to_return(status: 200, body: refs.to_json, headers: {'Content-Type' => 'application/json; charset=utf-8'})
     end
 
     context 'when the repo and ref is visible' do

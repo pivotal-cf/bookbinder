@@ -62,6 +62,7 @@ describe Chapter do
             :body => zipped_markdown_repo,
             :headers => {'Content-Type' => 'application/x-gzip'}
         )
+        stub_refs_for_repo repo_name, [sha]
       end
 
       let(:zipped_markdown_repo) { RepoFixture.tarball 'dogs-repo', sha }
@@ -87,6 +88,10 @@ describe Chapter do
         context 'and a target_tag is provided' do
           let(:target_tag) { 'oh-dot-three-dot-oh' }
 
+          before do
+            stub_refs_for_repo repo_name, [sha, target_tag]
+          end
+
           it 'uses the tag to make requests for the archive link' do
             GitClient.any_instance.should_receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
             Chapter.get_instance(repo_hash: repo_hash, destination_dir: destination_dir, target_tag: target_tag)
@@ -111,6 +116,11 @@ describe Chapter do
 
         context 'and a target_tag is provided' do
           let(:target_tag) { 'oh-dot-three-dot-oh' }
+
+          before do
+            stub_refs_for_repo repo_name, [sha, target_tag]
+          end
+
           it 'uses the tag to make requests for the archive link' do
             GitClient.any_instance.should_receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
             Chapter.get_instance(repo_hash: repo_hash, destination_dir: destination_dir, target_tag: target_tag)

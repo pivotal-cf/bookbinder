@@ -47,22 +47,23 @@ describe Cli::Publish do
     context 'when a tag is provided' do
       let(:desired_tag) { 'foo-1.7.12' }
       let(:cli_args) { ['github', desired_tag] }
+      let(:fixture_repo_name) { 'fantastic/fixture-book-title' }
 
       it 'gets the book at that tag' do
         stub_github_for 'fantastic/dogs-repo', desired_tag
         stub_github_for 'fantastic/my-docs-repo', desired_tag
         stub_github_for 'fantastic/my-other-docs-repo', desired_tag
 
-        zipped_repo_url = "https://github.com/#{'fantastic/fixture-book-title'}/archive/#{desired_tag}.tar.gz"
-        GitClient.get_instance.should_receive(:archive_link)
-        .with('fantastic/fixture-book-title', ref: desired_tag)
-        .once
-        .and_return zipped_repo_url
+        zipped_repo_url = "https://github.com/#{fixture_repo_name}/archive/#{desired_tag}.tar.gz"
 
         zipped_repo = RepoFixture.tarball 'fantastic/book'.split('/').last, desired_tag
         stub_request(:get, zipped_repo_url).to_return(
           :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
         )
+
+        stub_refs_for_repo(fixture_repo_name, [desired_tag])
+
+        expect(GitClient.get_instance).to receive(:archive_link).with(fixture_repo_name, ref: desired_tag).once.and_return zipped_repo_url
 
         publish_command.run cli_args
       end
