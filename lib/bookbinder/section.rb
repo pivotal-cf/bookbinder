@@ -1,4 +1,4 @@
-class Chapter
+class Section
   def self.store
     @@store ||= {}
   end
@@ -34,9 +34,9 @@ class Chapter
   def self.acquire(section_hash, local_repo_dir, destination, target_tag)
     BookbinderLogger.log 'Gathering ' + section_hash.fetch('repository', {})['name'].cyan
     repository = build_repository(destination, local_repo_dir, section_hash, target_tag)
-    chapter = new(repository, section_hash['subnav_template'])
+    section = new(repository, section_hash['subnav_template'])
 
-    keep(chapter, local_repo_dir) if chapter
+    keep(section, local_repo_dir) if section
   end
   private_class_method :acquire
 
@@ -49,8 +49,8 @@ class Chapter
   end
   private_class_method :build_repository
 
-  def self.keep(repo, local_repo_dir)
-    store[[repo.full_name, local_repo_dir]] = repo
+  def self.keep(section, local_repo_dir)
+    store[[section.full_name, local_repo_dir]] = section
   end
   private_class_method :keep
 end

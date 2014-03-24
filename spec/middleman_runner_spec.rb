@@ -7,8 +7,8 @@ describe MiddlemanRunner do
   let(:template_variables) { {'anybody' => 'nobody'} }
   let(:verbose) { false }
   let(:repos) { [
-      Chapter.new(Repository.new(full_name: '', directory: 'my/place/rocks'), 'my_subnav_template'),
-      Chapter.new(Repository.new(full_name: '', directory: 'fraggles/rock'), nil),
+      Section.new(Repository.new(full_name: '', directory: 'my/place/rocks'), 'my_subnav_template'),
+      Section.new(Repository.new(full_name: '', directory: 'fraggles/rock'), nil),
   ] }
   let(:local_repo_dir) { '/dev/null' }
 

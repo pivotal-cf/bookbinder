@@ -100,7 +100,7 @@ RSpec.configure do |config|
     BookbinderLogger.stub(:log_print) {}
     Pusher.any_instance.stub(:push) unless self.class.metadata[:enable_pusher]
 
-    allow(Chapter).to receive(:store).and_return({})
+    allow(Section).to receive(:store).and_return({})
   end
 
   module SpecHelperMethods

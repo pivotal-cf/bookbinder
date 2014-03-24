@@ -1,4 +1,4 @@
-class CodeExample < Chapter
+class CodeExample < Section
   class InvalidSnippet < StandardError
     def initialize(repo, marker)
       super "Error with marker #{marker.cyan} #{'in'.red} #{repo.cyan}#{'.'.red}"
