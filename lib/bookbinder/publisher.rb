@@ -50,13 +50,13 @@ class Publisher
   end
 
   def import_repos(middleman_source_directory, options)
-    options.fetch(:repos).map do |repo_hash|
-      import_repo_to(middleman_source_directory, options, repo_hash)
+    options.fetch(:sections).map do |section_hash|
+      import_repo_to(middleman_source_directory, options, section_hash)
     end
   end
 
-  def import_repo_to(destination, options, repo_hash)
-    Chapter.get_instance(repo_hash: repo_hash, destination_dir: destination, local_repo_dir: options[:local_repo_dir], target_tag: options[:target_tag])
+  def import_repo_to(destination, options, section_hash)
+    Chapter.get_instance(section_hash: section_hash, destination_dir: destination, local_repo_dir: options[:local_repo_dir], target_tag: options[:target_tag])
   end
 
   def generate_pdf(final_app_dir, options)

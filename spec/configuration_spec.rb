@@ -5,7 +5,7 @@ describe Configuration do
     {
       'book_repo' => 'some-org/some-repo',
       'cred_repo' => 'some-org/cred-repo',
-      'repos' => [{'github_repo' => 'some-org/some-docs', 'directory' => 'docs'}],
+      'sections' => ['section1', 'section2'],
       'public_host' => 'http://www.example.com',
       'template_variables' => {'some-var' => 'some-value'}
     }
@@ -22,8 +22,8 @@ describe Configuration do
       expect(config.cred_repo).to eq('some-org/cred-repo')
     end
 
-    it 'exposes #repos' do
-      expect(config.repos).to eq([{'github_repo' => 'some-org/some-docs', 'directory' => 'docs'}])
+    it 'exposes #sections' do
+      expect(config.sections).to eq(['section1', 'section2'])
     end
 
     it 'exposes #public_host' do

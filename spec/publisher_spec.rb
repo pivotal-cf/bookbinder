@@ -21,19 +21,21 @@ describe Publisher do
       let(:local_repo_dir) { RepoFixture.repos_dir }
 
       it 'it creates a directory per repo with the generated html from middleman' do
-        some_repo       = 'my-docs-org/my-docs-repo'
+        some_repo = 'my-docs-org/my-docs-repo'
         some_other_repo = 'my-other-docs-org/my-other-docs-repo'
-        some_sha        = 'some-sha'
-        some_other_sha  = 'some-other-sha'
+        some_sha = 'some-sha'
+        some_other_sha = 'some-other-sha'
 
         stub_github_for(some_repo, some_sha)
         stub_github_for(some_other_repo, some_other_sha)
 
-        repos = [{'github_repo' => some_repo, 'sha' => some_sha, 'directory' => 'pretty_path'},
-                 {'github_repo' => some_other_repo, 'sha' => some_other_sha}]
+        sections = [
+            {'repository' => {'name' => some_repo, 'ref' => some_sha}, 'directory' => 'pretty_path'},
+            {'repository' => {'name' => some_other_repo, 'ref' => some_other_sha}}
+        ]
 
         #the lede
-        publisher.publish repos: repos, output_dir: output_dir,
+        publisher.publish sections: sections, output_dir: output_dir,
                           master_middleman_dir: non_broken_master_middleman_dir,
                           final_app_dir: final_app_dir,
                           host_for_sitemap: 'example.com',
@@ -44,10 +46,10 @@ describe Publisher do
                           }
 
         index_html = File.read File.join(final_app_dir, 'public', 'pretty_path', 'index.html')
-        index_html.should include 'This is a Markdown Page'
+        expect(index_html).to include 'This is a Markdown Page'
 
         other_index_html = File.read File.join(final_app_dir, 'public', some_other_repo.split('/').last, 'index.html')
-        other_index_html.should include 'This is another Markdown Page'
+        expect(other_index_html).to include 'This is another Markdown Page'
 
         expect(File.exist? File.join(final_app_dir, 'public', 'DocGuide.pdf')).to be_true
       end
@@ -55,7 +57,7 @@ describe Publisher do
       context 'when in local mode' do
         let(:publication_arguments) do
           {
-              repos: [{'github_repo' => 'my-docs-org/my-docs-repo'}],
+              sections: [{'repository' => {'name' => 'my-docs-org/my-docs-repo'}}],
               output_dir: output_dir,
               master_middleman_dir: non_broken_master_middleman_dir,
               host_for_sitemap: 'example.com',
@@ -68,7 +70,7 @@ describe Publisher do
           publisher.publish publication_arguments
 
           index_html = File.read File.join(final_app_dir, 'public', 'my-docs-repo', 'index.html')
-          index_html.should include 'This is a Markdown Page'
+          expect(index_html).to include 'This is a Markdown Page'
         end
 
         context 'when code snippets are yielded' do
@@ -76,7 +78,6 @@ describe Publisher do
 
           context 'and the code repo is present' do
             it 'can find code example repos locally rather than going to github' do
-              #stub_request(:any, 'https://api.github.com/repos/fantastic/code-example-repo/tarball/master')
               publisher.publish publication_arguments
               expect(WebMock).not_to have_requested(:any, /.*git.*/)
             end
@@ -96,21 +97,21 @@ describe Publisher do
 
       it 'generates non-broken links appropriately' do
         # tests our SubmoduleAwareAssets middleman extension, which is hard to test in isolation :(
-        repos = [{'github_repo' => 'org/dogs-repo'}]
-        no_broken_links = publisher.publish repos: repos,
+        sections = [{'repository' => {'name' => 'org/dogs-repo'}}]
+        no_broken_links = publisher.publish sections: sections,
                                             output_dir: output_dir,
                                             master_middleman_dir: dogs_master_middleman_dir,
                                             host_for_sitemap: 'example.com',
                                             local_repo_dir: local_repo_dir,
                                             final_app_dir: final_app_dir
-        no_broken_links.should be_true
+        expect(no_broken_links).to be_true
       end
 
       it 'includes template variables into middleman' do
         variable_master_middleman_dir = generate_middleman_with 'variable_index.html.md.erb'
-        repos = []
+        sections = []
 
-        publisher.publish repos: repos,
+        publisher.publish sections: sections,
                           output_dir: output_dir,
                           master_middleman_dir: variable_master_middleman_dir,
                           host_for_sitemap: 'example.com',
@@ -120,11 +121,11 @@ describe Publisher do
                           verbose: true
 
         index_html = File.read File.join(final_app_dir, 'public', 'index.html')
-        index_html.should include 'My variable name is Alexander.'
+        expect(index_html).to include 'My variable name is Alexander.'
       end
 
       describe 'including code snippets' do
-        let(:constituent_repo) { 'org/dogs-repo' }
+        let(:section_repo_name) { 'org/dogs-repo' }
         let(:code_repo) { 'cloudfoundry/code-example-repo' }
         let(:middleman_dir) { generate_middleman_with('code_snippet_index.html.md.erb') }
         let(:publication_arguments) do
@@ -133,12 +134,12 @@ describe Publisher do
               final_app_dir: final_app_dir,
               master_middleman_dir: middleman_dir,
               host_for_sitemap: 'example.com',
-              repos: [{'github_repo' => constituent_repo}]
+              sections: [{'repository' => {'name' => section_repo_name}}]
           }
         end
 
         it 'applies the syntax highlighting CSS' do
-          stub_github_for constituent_repo
+          stub_github_for section_repo_name
           stub_github_for code_repo
 
           publisher.publish(publication_arguments)
@@ -166,7 +167,7 @@ describe Publisher do
         end
 
         it 'makes only one request per code example repository' do
-          stub_github_for constituent_repo
+          stub_github_for section_repo_name
           mock_github_for code_repo
 
           publisher.publish publication_arguments
@@ -174,9 +175,9 @@ describe Publisher do
       end
 
       it 'generates a sitemap' do
-        repos = [{'github_repo' => 'org/dogs-repo'}]
+        sections = [{'repository' => {'name' => 'org/dogs-repo'}}]
 
-        publisher.publish repos: repos,
+        publisher.publish sections: sections,
                           output_dir: output_dir,
                           master_middleman_dir: dogs_master_middleman_dir,
                           local_repo_dir: local_repo_dir,
@@ -226,7 +227,7 @@ DOGS
           real_stdout = $stdout
           $stdout = StringIO.new
 
-          expect { publisher.publish repos: [],
+          expect { publisher.publish sections: [],
                                      output_dir: output_dir,
                                      master_middleman_dir: generate_middleman_with('erroneous_middleman.html.md.erb'),
                                      host_for_sitemap: 'example.com',
@@ -251,20 +252,20 @@ DOGS
       let(:master_middleman_dir) { tmp_subdir 'irrelevant' }
       let(:pdf_config) { nil }
       let(:local_repo_dir) { nil }
-      let(:repos) { [] }
+      let(:sections) { [] }
       let(:spider) { double }
 
       before do
         MiddlemanRunner.any_instance.stub(:run) do |middleman_dir|
           Dir.mkdir File.join(middleman_dir, 'build')
         end
-        spider.stub(:generate_sitemap)
-        spider.stub(:has_broken_links?)
+        allow(spider).to receive(:generate_sitemap)
+        allow(spider).to receive(:has_broken_links?)
       end
 
       def publish
         publisher.publish output_dir: output_dir,
-                          repos: repos,
+                          sections: sections,
                           master_middleman_dir: master_middleman_dir,
                           host_for_sitemap: 'example.com',
                           final_app_dir: final_app_dir,
@@ -277,7 +278,7 @@ DOGS
         let(:output_dir) { File.join(Dir.mktmpdir, 'uncreated_output') }
         it 'creates the output directory' do
           publish
-          File.exists?(output_dir).should be_true
+          expect(File.exists?(output_dir)).to be_true
         end
       end
 
@@ -285,14 +286,14 @@ DOGS
         pre_existing_file = File.join(output_dir, 'kill_me')
         FileUtils.touch pre_existing_file
         publish
-        File.exists?(pre_existing_file).should_not be_true
+        expect(File.exists?(pre_existing_file)).to be_false
       end
 
       it 'clears and then copies the template_app skeleton inside final_app' do
         pre_existing_file = File.join(final_app_dir, 'kill_me')
         FileUtils.touch pre_existing_file
         publish
-        File.exists?(pre_existing_file).should_not be_true
+        expect(File.exists?(pre_existing_file)).to be_false
         copied_manifest = File.read(File.join(final_app_dir, 'app.rb'))
         template_manifest = File.read(File.join('template_app', 'app.rb'))
         expect(copied_manifest).to eq(template_manifest)
@@ -314,7 +315,7 @@ DOGS
         let(:local_repo_dir) { RepoFixture.repos_dir }
 
         context 'when the repository used to generate the pdf was skipped' do
-          let(:repos) { [{'github_repo' => 'org/repo', 'directory' => 'pretty_dir'}] }
+          let(:sections) { [{'repository' => {'name' => 'org/repo'}, 'directory' => 'pretty_dir'}] }
           let(:pdf_config) do
             {page: 'pretty_dir/index.html', filename: 'irrelevant.pdf', header: 'pretty_dir/header.html'}
           end
@@ -333,7 +334,7 @@ DOGS
         end
 
         context 'when the repository used to generate the pdf is in in the repo list, but the pdf source file is not' do
-          let(:repos) { [{'github_repo' => 'org/my-docs-repo', 'directory' => 'pretty_dir'}] }
+          let(:sections) { [{'repository' => {'name' => 'org/my-docs-repo'}, 'directory' => 'pretty_dir'}] }
           let(:pdf_config) do
             {page: 'pretty_dir/unknown_file.html', filename: 'irrelevant.pdf', header: 'pretty_dir/unknown_header.html'}
           end

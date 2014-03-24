@@ -50,7 +50,7 @@ class Cli
 
     def publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir)
       arguments = {
-          repos: config.repos,
+          sections: config.sections,
           output_dir: File.absolute_path('output'),
           master_middleman_dir: File.absolute_path('master_middleman'),
           final_app_dir: final_app_dir,

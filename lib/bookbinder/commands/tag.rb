@@ -2,9 +2,9 @@ class Cli
   class Tag < BookbinderCommand
     def run(params)
       tag = params.first
-      book = Book.new(full_name: config.book_repo, constituent_params: config.repos)
+      book = Book.new(full_name: config.book_repo, sections: config.sections)
 
-      book.tag_self_and_constituents_with tag
+      book.tag_self_and_sections_with tag
 
       log 'Success!'.green
       log " #{book.full_name.yellow} its document repositories were tagged with #{tag.blue}"

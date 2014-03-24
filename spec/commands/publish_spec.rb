@@ -8,10 +8,10 @@ describe Cli::Publish do
   end
 
   let(:config_hash) { {
-    'repos' => [
-      {"github_repo"=>"fantastic/dogs-repo", "directory"=>"dogs", "subnav_template"=>"dogs", "sha"=>"dog-sha"},
-      {"github_repo"=>"fantastic/my-docs-repo", "directory"=>"foods/sweet", "subnav_template"=>"fruits", "sha"=>"my-docs-sha"},
-      {"github_repo"=>"fantastic/my-other-docs-repo", "directory"=>"foods/savory", "subnav_template"=>"vegetables", "sha"=>"my-other-sha"}
+    'sections' => [
+      {'repository' => {'name'=>'fantastic/dogs-repo', 'ref'=>'dog-sha'}, 'directory'=>'dogs', 'subnav_template'=>'dogs'},
+      {'repository' => {'name' => 'fantastic/my-docs-repo', 'ref'=>'my-docs-sha'}, 'directory'=>'foods/sweet', 'subnav_template'=>'fruits'},
+      {'repository' => {'name' => 'fantastic/my-other-docs-repo', 'ref'=>'my-other-sha'}, 'directory'=>'foods/savory', 'subnav_template'=>'vegetables'}
     ],
     'public_host' => 'host.example.com'
   } }

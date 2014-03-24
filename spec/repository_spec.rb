@@ -148,10 +148,10 @@ describe Repository do
       end
 
       it 'is true when checking that tag' do
-        repo.should have_tag(my_tag)
+        expect(repo).to have_tag(my_tag)
       end
       it 'is false when checking a different tag' do
-        repo.should_not have_tag('nobody_uses_me')
+        expect(repo).to_not have_tag('nobody_uses_me')
       end
     end
 
@@ -159,7 +159,7 @@ describe Repository do
       let(:tags) { [] }
 
       it 'is false' do
-        repo.should_not have_tag(my_tag)
+        expect(repo).to_not have_tag(my_tag)
       end
     end
   end
@@ -173,14 +173,14 @@ describe Repository do
     let(:my_tag) { '#hashtag' }
 
     before do
-      GitClient.any_instance.stub(:validate_authorization)
-      GitClient.any_instance.stub(:commits).with(repo.full_name)
-      .and_return([OpenStruct.new(sha: repo_sha)])
+      allow(GitClient.get_instance).to receive(:validate_authorization)
+      allow(GitClient.get_instance).to receive(:commits).with(repo.full_name)
+                                       .and_return([OpenStruct.new(sha: repo_sha)])
     end
 
     it 'should apply a tag' do
-      GitClient.any_instance.should_receive(:create_tag!)
-      .with(repo.full_name, my_tag, repo_sha)
+      expect(GitClient.get_instance).to receive(:create_tag!)
+                                        .with(repo.full_name, my_tag, repo_sha)
 
       repo.tag_with(my_tag)
     end
@@ -246,5 +246,13 @@ describe Repository do
         expect { repo.download_archive }.to raise_error(/Ref #{target_ref} was not found in #{full_name}/)
       end
     end
+  end
+
+  describe '.build_from_remote' do
+    pending
+  end
+
+  describe '.build_from_local' do
+    pending
   end
 end

@@ -9,18 +9,18 @@ describe Cli::Tag do
   let(:config_hash) do
     {
       'book_repo' => book_title,
-      'repos' => []
+      'sections' => []
     }
   end
   let(:config) { Configuration.new(config_hash) }
 
   before do
     allow(GitClient.get_instance).to receive(:create_tag!)
-    @book = expect_to_receive_and_return_real_now(Book, :new, {full_name: book_title, constituent_params: []})
+    @book = expect_to_receive_and_return_real_now(Book, :new, {full_name: book_title, sections: []})
   end
 
-  it 'should tag the book and its constituents' do
-    expect(@book).to receive(:tag_self_and_constituents_with).with(desired_tag)
+  it 'should tag the book and its sections' do
+    expect(@book).to receive(:tag_self_and_sections_with).with(desired_tag)
     Cli::Tag.new(config).run [desired_tag]
   end
 end

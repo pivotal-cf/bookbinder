@@ -3,11 +3,11 @@ require 'spec_helper'
 describe Cli::DocReposUpdated do
   describe '#run' do
     let(:book_repo) { 'book_repo' }
-    let(:repos) { 'repos' }
+    let(:sections) { [] }
     let(:config_hash) do
       {
         'book_repo' => book_repo,
-        'repos' => repos
+        'sections' => sections
       }
     end
     let(:config) { Configuration.new(config_hash) }
@@ -18,8 +18,8 @@ describe Cli::DocReposUpdated do
     let(:doc_repos_updated) { Cli::DocReposUpdated.new(config) }
 
     before do
-      Book.stub(:new).with(full_name: book_repo, constituent_params: repos).and_return(fake_book)
-      DocRepoChangeMonitor.stub(:new).with(fake_book).and_return(fake_change_monitor)
+      fake_book = expect_to_receive_and_return_real_now(Book, :new, full_name: book_repo, sections: sections)
+      allow(DocRepoChangeMonitor).to receive(:new).with(fake_book).and_return(fake_change_monitor)
     end
 
     context 'when ChangeMonitor reports a build is necessary' do
@@ -34,7 +34,7 @@ describe Cli::DocReposUpdated do
 
     context 'when ChangeMonitor reports a build is not necessary' do
       before do
-        fake_change_monitor.stub(:build_necessary?).and_return(false)
+        allow(fake_change_monitor).to receive(:build_necessary?).and_return(false)
       end
 
       it 'returns 42' do

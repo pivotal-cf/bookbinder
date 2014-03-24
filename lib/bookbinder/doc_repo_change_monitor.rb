@@ -54,6 +54,6 @@ class DocRepoChangeMonitor
   end
 
   def repositories
-    @book.constituents + [@book]
+    @book.sections + [@book]
   end
 end

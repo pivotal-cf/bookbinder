@@ -1,7 +1,7 @@
 class Cli
   class UpdateLocalDocRepos < BookbinderCommand
     def run(_)
-      config.repos.map { |conf| repo_for(conf) }.each(&:update_local_copy)
+      config.sections.map { |conf| repo_for(conf) }.each(&:update_local_copy)
       0
     end
 
@@ -11,9 +11,9 @@ class Cli
 
     private
 
-    def repo_for(repo_config)
+    def repo_for(section_config)
       local_repo_dir = File.absolute_path('../')
-      Repository.new(full_name: repo_config['github_repo'],
+      Repository.new(full_name: section_config['repository']['name'],
                      local_repo_dir: local_repo_dir)
     end
   end

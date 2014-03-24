@@ -13,21 +13,21 @@ describe Chapter do
 
     context 'when called more than once' do
       it 'always returns the same instance for the same arguments' do
-        first_instance = Chapter.get_instance(repo_hash: {'github_repo' => 'foo/book'}, local_repo_dir: local_repo_dir)
-        second_instance = Chapter.get_instance(repo_hash: {'github_repo' => 'foo/book'}, local_repo_dir: local_repo_dir)
+        first_instance = Chapter.get_instance(section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
+        second_instance = Chapter.get_instance(section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
         expect(first_instance).to be(second_instance)
       end
 
       it 'returns different instances for different repo names' do
-        first_instance = Chapter.get_instance(repo_hash: {'github_repo' => 'foo/dogs-repo'}, local_repo_dir: local_repo_dir)
-        second_instance = Chapter.get_instance(repo_hash: {'github_repo' => 'foo/book'}, local_repo_dir: local_repo_dir)
+        first_instance = Chapter.get_instance(section_hash: {'repository' => {'name' => 'foo/dogs-repo'}}, local_repo_dir: local_repo_dir)
+        second_instance = Chapter.get_instance(section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
 
         expect(first_instance).not_to be(second_instance)
       end
 
       it 'returns different instances for different modes' do
-        local_code_repo = Chapter.get_instance(repo_hash: {'github_repo' => 'foo/book'}, local_repo_dir: 'spec/fixtures/repositories')
-        remote_code_repo = Chapter.get_instance(repo_hash: {'github_repo' => 'foo/book'})
+        local_code_repo = Chapter.get_instance(section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: 'spec/fixtures/repositories')
+        remote_code_repo = Chapter.get_instance(section_hash: {'repository' => {'name' => 'foo/book'}})
 
         expect(local_code_repo).not_to be(remote_code_repo)
       end
@@ -38,7 +38,7 @@ describe Chapter do
         let(:local_repo_dir) { 'spec/fixtures/repositories' }
 
         it 'copies repos from local directory' do
-          expect(Chapter.get_instance(repo_hash: {'github_repo' => 'foo/code-example-repo'}, local_repo_dir: local_repo_dir)).to be_copied
+          expect(Chapter.get_instance(section_hash: {'repository' => {'name' => 'foo/code-example-repo'}}, local_repo_dir: local_repo_dir)).to be_copied
         end
       end
 
@@ -47,7 +47,7 @@ describe Chapter do
 
         it 'logs a warning' do
           expect(BookbinderLogger).to receive(:log).with /skipping \(not found\)/
-          Chapter.get_instance(repo_hash: {'github_repo' => 'foo/definitely-not-around'}, local_repo_dir: local_repo_dir)
+          Chapter.get_instance(section_hash: {'repository' => {'name' => 'foo/definitely-not-around'}}, local_repo_dir: local_repo_dir)
         end
       end
     end
@@ -62,26 +62,26 @@ describe Chapter do
             :body => zipped_markdown_repo,
             :headers => {'Content-Type' => 'application/x-gzip'}
         )
-        stub_refs_for_repo repo_name, [sha]
+        stub_refs_for_repo repo_name, [ref]
       end
 
-      let(:zipped_markdown_repo) { RepoFixture.tarball 'dogs-repo', sha }
+      let(:zipped_markdown_repo) { RepoFixture.tarball 'dogs-repo', ref }
       let(:destination_dir) { tmp_subdir('output') }
       let(:repo_name) { 'great_org/dogs-repo' }
-      let(:download_url) { "https://github.com/great_org/dogs-repo/archive/#{sha}.tar.gz" }
+      let(:download_url) { "https://github.com/great_org/dogs-repo/archive/#{ref}.tar.gz" }
 
-      context 'when no SHA is provided' do
-        let(:sha) { 'master' }
-        let(:repo_hash) { {'github_repo' => repo_name} }
+      context 'when no REF is provided' do
+        let(:ref) { 'master' }
+        let(:section_hash) { {'repository' => {'name' => repo_name} } }
 
         it 'uses "master" to make requests for the archive link' do
-          GitClient.any_instance.should_receive(:archive_link).with(repo_name, ref: sha).and_return(download_url)
-          Chapter.get_instance(repo_hash: repo_hash, destination_dir: destination_dir)
+          expect(GitClient.get_instance).to receive(:archive_link).with(repo_name, ref: ref).and_return(download_url)
+          Chapter.get_instance(section_hash: section_hash, destination_dir: destination_dir)
         end
 
         it 'copies the repo from github' do
-          GitClient.any_instance.stub(:archive_link).and_return download_url
-          Chapter.get_instance(repo_hash: repo_hash, destination_dir: destination_dir)
+          allow(GitClient.get_instance).to receive(:archive_link).and_return download_url
+          Chapter.get_instance(section_hash: section_hash, destination_dir: destination_dir)
           expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
         end
 
@@ -89,28 +89,28 @@ describe Chapter do
           let(:target_tag) { 'oh-dot-three-dot-oh' }
 
           before do
-            stub_refs_for_repo repo_name, [sha, target_tag]
+            stub_refs_for_repo repo_name, [ref, target_tag]
           end
 
           it 'uses the tag to make requests for the archive link' do
-            GitClient.any_instance.should_receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
-            Chapter.get_instance(repo_hash: repo_hash, destination_dir: destination_dir, target_tag: target_tag)
+            expect(GitClient.get_instance).to receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
+            Chapter.get_instance(section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
           end
         end
       end
 
-      context 'when a SHA is provided' do
-        let(:sha) { 'this-is-the-commit-i-want' }
-        let(:repo_hash) { {'github_repo' => repo_name, 'sha' => sha} }
+      context 'when a REF is provided' do
+        let(:ref) { 'this-is-the-commit-i-want' }
+        let(:section_hash) { {'repository' => {'name' => repo_name, 'ref' => ref} } }
 
-        it 'uses the provided SHA to make requests for the archive link' do
-          GitClient.any_instance.should_receive(:archive_link).with(repo_name, ref: sha).and_return download_url
-          Chapter.get_instance(repo_hash: repo_hash, destination_dir: destination_dir)
+        it 'uses the provided REF to make requests for the archive link' do
+          expect(GitClient.get_instance).to receive(:archive_link).with(repo_name, ref: ref).and_return download_url
+          Chapter.get_instance(section_hash: section_hash, destination_dir: destination_dir)
         end
 
         it 'copies the repo from github' do
-          GitClient.any_instance.stub(:archive_link).and_return download_url
-          Chapter.get_instance(repo_hash: repo_hash, destination_dir: destination_dir)
+          allow(GitClient.get_instance).to receive(:archive_link).and_return download_url
+          Chapter.get_instance(section_hash: section_hash, destination_dir: destination_dir)
           expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
         end
 
@@ -118,12 +118,12 @@ describe Chapter do
           let(:target_tag) { 'oh-dot-three-dot-oh' }
 
           before do
-            stub_refs_for_repo repo_name, [sha, target_tag]
+            stub_refs_for_repo repo_name, [ref, target_tag]
           end
 
           it 'uses the tag to make requests for the archive link' do
-            GitClient.any_instance.should_receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
-            Chapter.get_instance(repo_hash: repo_hash, destination_dir: destination_dir, target_tag: target_tag)
+            expect(GitClient.get_instance).to receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
+            Chapter.get_instance(section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
           end
         end
       end
@@ -142,7 +142,7 @@ describe Chapter do
     end
 
     it 'copies the repo from nearby' do
-      Chapter.get_instance(repo_hash: {'github_repo' => 'crazy_family_of_mine/' + repo_name},
+      Chapter.get_instance(section_hash: {'repository' => {'name' => 'crazy_family_of_mine/' + repo_name}},
                            local_repo_dir: local_repo_dir,
                            destination_dir: destination_dir)
       expect(File.exist? File.join(destination_dir, repo_name, 'my_aunties_goat.txt')).to be_true

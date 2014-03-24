@@ -3,19 +3,24 @@ require 'spec_helper'
 describe Book do
   include_context 'tmp_dirs'
 
-  let(:constituents) do
-    [{"github_repo" => "fantastic/dogs-repo", "directory" => "dogs"}]
+  let(:sections) do
+    [{
+         'repository' => {
+             'name' => 'fantastic/dogs-repo'
+         },
+         'directory' => 'dogs'
+     }]
   end
 
   let(:book_name) { 'wow-org/such-book' }
 
-  describe '#tag_self_and_constituents_with' do
-    let(:desired_tag) { 12.times.map { (65 + rand(26)).chr }.join  }
+  describe '#tag_self_and_sections_with' do
+    let(:desired_tag) { 12.times.map { (65 + rand(26)).chr }.join }
 
-    it 'should tag itself and the constituent repos' do
-      constituents.each do |c|
+    it 'should tag itself and the repos for each section' do
+      sections.each do |s|
         doc_repo = double
-        expect(Repository).to receive(:new).with(full_name: c['github_repo']).and_return(doc_repo)
+        expect(Repository).to receive(:new).with(full_name: s['repository']['name']).and_return(doc_repo)
         expect(doc_repo).to receive(:tag_with).with(desired_tag)
       end
 
@@ -23,8 +28,8 @@ describe Book do
       expect(Repository).to receive(:new).with(full_name: book_name, target_ref: nil, github_token: nil).and_return(self_repo)
       expect(self_repo).to receive(:tag_with).with(desired_tag)
 
-      book = Book.new(full_name: book_name, constituent_params: constituents)
-      book.tag_self_and_constituents_with(desired_tag)
+      book = Book.new(full_name: book_name, sections: sections)
+      book.tag_self_and_sections_with(desired_tag)
     end
   end
 

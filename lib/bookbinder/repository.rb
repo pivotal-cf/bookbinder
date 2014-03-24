@@ -4,10 +4,10 @@ class Repository
 
   attr_reader :full_name, :copied_to
 
-  def self.build_from_remote(repo_hash, destination_dir, target_ref)
-    full_name = repo_hash.fetch('github_repo')
-    target_ref = target_ref || repo_hash['sha']
-    directory = repo_hash['directory']
+  def self.build_from_remote(section_hash, destination_dir, target_ref)
+    full_name = section_hash.fetch('repository', {}).fetch('name')
+    target_ref = target_ref || section_hash.fetch('repository', {})['ref']
+    directory = section_hash['directory']
 
     repository = new(full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
     if destination_dir
@@ -17,9 +17,9 @@ class Repository
     repository
   end
 
-  def self.build_from_local(repo_hash, local_repo_dir, destination_dir)
-    full_name = repo_hash.fetch('github_repo')
-    directory = repo_hash['directory']
+  def self.build_from_local(section_hash, local_repo_dir, destination_dir)
+    full_name = section_hash.fetch('repository').fetch('name')
+    directory = section_hash['directory']
 
     repository = new(full_name: full_name, directory: directory, local_repo_dir: local_repo_dir)
     repository.copy_from_local(destination_dir) if destination_dir

@@ -15,8 +15,8 @@ module Navigation
   module HelperMethods
 
     def yield_for_code_snippet(from: nil, at: nil)
-      repo = CodeExample.get_instance(repo_hash: {'github_repo' => from}, local_repo_dir: config[:local_repo_dir])
-      snippet, language = repo.get_snippet_and_language_at(at)
+      example = CodeExample.get_instance(section_hash: {'repository' => {'name' => from}}, local_repo_dir: config[:local_repo_dir])
+      snippet, language = example.get_snippet_and_language_at(at)
       delimiter = '```'
 
       snippet.prepend("#{delimiter}#{language}\n").concat("\n#{delimiter}")

@@ -2,21 +2,24 @@
 book_repo: fantastic/fixture-book-title
 cred_repo: fantastic/creds-repo
 
-repos:
-- github_repo: fantastic/dogs-repo
+sections:
+- repository:
+    name: fantastic/dogs-repo
+    ref: 'dog-sha'
   directory: dogs
   subnav_template: dogs
-  sha: 'dog-sha'
 
-- github_repo: fantastic/my-docs-repo
+- repository:
+    name: fantastic/my-docs-repo
+    ref: 'my-docs-sha'
   directory: foods/sweet
   subnav_template: fruits
-  sha: 'my-docs-sha'
 
-- github_repo: fantastic/my-other-docs-repo
+- repository:
+    name: fantastic/my-other-docs-repo
+    ref: 'my-other-sha'
   directory: foods/savory
   subnav_template: vegetables
-  sha: 'my-other-sha'
 
 public_host: docs.example.com
 
