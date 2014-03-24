@@ -8,22 +8,24 @@ describe GitClient do
     let(:tagname) { 'sofia-1.0.1' }
     let(:sha) { 'some-sha' }
     let(:iso_time) { '2014-03-18T17:26:38-07:00' }
+    let(:tag_sha) { 'tag-sha' }
+    let(:tag_result) { double(sha: tag_sha) }
 
     before do
       allow(Time).to receive(:now).and_return(double(:time, iso8601: iso_time))
     end
 
-    it 'passes the right refname to OctoKit' do
-      allow(client).to receive(:create_tag)
+    it 'creates a tag for the incoming ref' do
+      expect(client).to receive(:create_tag).with(repo_name, "tags/#{tagname}", 'Tagged by Bookbinder', sha, 'commit', 'Bookbinder', 'bookbinder@cloudfoundry.org', iso_time).and_return(tag_result).ordered
+      allow(client).to receive(:create_ref).ordered
 
-      expect(client).to receive(:create_ref).with(repo_name, "tags/#{tagname}", sha)
       client.create_tag!(repo_name, tagname, sha)
     end
 
-    it 'passes the right tag to OctoKit' do
-      allow(client).to receive(:create_ref)
+    it 'creates a ref to the newly created tag' do
+      allow(client).to receive(:create_tag).and_return(tag_result).ordered
+      expect(client).to receive(:create_ref).with(repo_name, "tags/#{tagname}", tag_sha).ordered
 
-      expect(client).to receive(:create_tag).with(repo_name, "tags/#{tagname}", 'Tagged by Bookbinder', sha, 'commit', 'Bookbinder', 'bookbinder@cloudfoundry.org', iso_time)
       client.create_tag!(repo_name, tagname, sha)
     end
   end
