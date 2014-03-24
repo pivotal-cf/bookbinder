@@ -36,7 +36,7 @@ require_relative 'bookbinder/distributor'
 
 require_relative 'bookbinder/bookbinder_command'
 require_relative 'bookbinder/commands/build_and_push_tarball'
-require_relative 'bookbinder/commands/docs_repo_updated'
+require_relative 'bookbinder/commands/doc_repos_updated'
 require_relative 'bookbinder/commands/publish'
 require_relative 'bookbinder/commands/push_local_to_staging'
 require_relative 'bookbinder/commands/push_to_prod'
