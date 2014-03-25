@@ -137,7 +137,16 @@ describe Cli do
     end
 
     describe 'the configuration' do
-      let(:config_hash) { {cool: 'config', without: 'credentials'} }
+      let(:section1) do
+        {
+            'repository' => {
+                'name' => 'cloudfoundry/docs-cloudfoundry-concepts'
+            },
+            'directory' => 'concepts'
+        }
+      end
+
+      let(:config_hash) { {cool: 'config', 'sections' => [section1]} }
       let(:configuration) { Configuration.new(config_hash) }
 
       before { File.write('./config.yml', config_hash.to_yaml) }
@@ -145,6 +154,14 @@ describe Cli do
       it 'passes configuration to the given command' do
         expect(Cli::Publish).to receive(:new).with(configuration)
         cli.run ['publish', 'local']
+      end
+
+      context 'when the configuration is invalid' do
+        let(:config_hash) { {cool: 'config', 'sections' => [section1, section1]} }
+        it 'logs an error' do
+          BookbinderLogger.should_receive(:log).with(/Non-unique directory names/)
+          cli.run ['publish', 'local']
+        end
       end
     end
   end

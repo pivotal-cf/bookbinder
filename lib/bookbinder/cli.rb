@@ -31,7 +31,9 @@ class Cli
   private
 
   def run_command(command, command_arguments)
-    command.new(config).run command_arguments
+    configuration = config
+    raise 'Non-unique directory names' unless configuration.valid?
+    command.new(configuration).run command_arguments
   rescue Configuration::CredentialKeyError => e
     log "#{e.message}, in credentials.yml".red
     1

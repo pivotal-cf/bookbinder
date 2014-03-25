@@ -205,4 +205,40 @@ describe Configuration do
       expect(Configuration.new(config_hash_1)).not_to eq(Configuration.new(config_hash_2))
     end
   end
+
+  describe 'validity' do
+    it 'should be valid when directory names are unique' do
+      section1 = {
+          'repository' => {
+              'name' => 'cloudfoundry/docs-cloudfoundry-concepts'
+          },
+          'directory' => 'concepts'
+      }
+
+      section2 = {
+          'repository' => {
+              'name' => 'cloudfoundry/docs-cloudfoundry-foo'
+          },
+          'directory' => 'foo'
+      }
+
+      valid_config_hash = {'sections' => [section1, section2]}
+
+      configuration = Configuration.new(valid_config_hash)
+      expect(configuration.valid?).to eq(true)
+    end
+
+    it 'should be invalid when directory names are not unique' do
+      section1 = {
+          'repository' => {
+              'name' => 'cloudfoundry/docs-cloudfoundry-concepts'
+          },
+          'directory' => 'concepts'
+      }
+      invalid_config_hash = {'sections' => [section1, section1]}
+
+      configuration = Configuration.new(invalid_config_hash)
+      expect(configuration.valid?).to eq(false)
+    end
+  end
 end

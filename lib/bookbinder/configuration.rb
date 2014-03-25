@@ -92,6 +92,11 @@ class Configuration
     @cf_prod_creds ||= CfCredentials.new(credentials.fetch('cloud_foundry'), true)
   end
 
+  def valid?
+    directory_names = @config['sections'].map {|section| section['directory']}
+    directory_names.length == directory_names.uniq.length
+  end
+
   def ==(o)
     (o.class == self.class) && (o.config == self.config)
   end
