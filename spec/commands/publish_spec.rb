@@ -8,12 +8,13 @@ describe Cli::Publish do
   end
 
   let(:config_hash) { {
-    'sections' => [
-      {'repository' => {'name'=>'fantastic/dogs-repo', 'ref'=>'dog-sha'}, 'directory'=>'dogs', 'subnav_template'=>'dogs'},
-      {'repository' => {'name' => 'fantastic/my-docs-repo', 'ref'=>'my-docs-sha'}, 'directory'=>'foods/sweet', 'subnav_template'=>'fruits'},
-      {'repository' => {'name' => 'fantastic/my-other-docs-repo', 'ref'=>'my-other-sha'}, 'directory'=>'foods/savory', 'subnav_template'=>'vegetables'}
-    ],
-    'public_host' => 'host.example.com'
+      'book_repo' => 'fantastic/fixture-book-title',
+      'sections' => [
+          {'repository' => {'name' => 'fantastic/dogs-repo', 'ref' => 'dog-sha'}, 'directory' => 'dogs', 'subnav_template' => 'dogs'},
+          {'repository' => {'name' => 'fantastic/my-docs-repo', 'ref' => 'my-docs-sha'}, 'directory' => 'foods/sweet', 'subnav_template' => 'fruits'},
+          {'repository' => {'name' => 'fantastic/my-other-docs-repo', 'ref' => 'my-other-sha'}, 'directory' => 'foods/savory', 'subnav_template' => 'vegetables'}
+      ],
+      'public_host' => 'host.example.com'
   } }
   let(:config) { Configuration.new(config_hash) }
   let(:publish_command) { Cli::Publish.new(config) }
@@ -58,7 +59,7 @@ describe Cli::Publish do
 
         zipped_repo = RepoFixture.tarball 'fantastic/book'.split('/').last, desired_tag
         stub_request(:get, zipped_repo_url).to_return(
-          :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
+            :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
         )
 
         stub_refs_for_repo(fixture_repo_name, [desired_tag])
