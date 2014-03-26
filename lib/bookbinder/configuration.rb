@@ -70,10 +70,14 @@ class Configuration
     @config = config_hash
   end
 
-  %w(book_repo cred_repo sections public_host).each do |method_name|
+  %w(book_repo cred_repo sections public_host pdf).each do |method_name|
     define_method(method_name) do
       config.fetch(method_name)
     end
+  end
+
+  def has_option?(key)
+    @config.has_key?(key)
   end
 
   def template_variables

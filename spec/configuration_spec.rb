@@ -241,4 +241,20 @@ describe Configuration do
       expect(configuration.valid?).to eq(false)
     end
   end
+
+  describe '#has_option?' do
+    let(:config) { Configuration.new({'foo' => 'bar'}) }
+
+    context 'when the configuration has the option' do
+      it 'should return true' do
+        expect(config.has_option?('foo')).to eq(true)
+      end
+    end
+
+    context 'when the configuration does not have the option' do
+      it 'should return false' do
+        expect(config.has_option?('bar')).to eq(false)
+      end
+    end
+  end
 end

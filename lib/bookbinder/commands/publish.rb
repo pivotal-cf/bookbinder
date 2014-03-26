@@ -25,9 +25,10 @@ class Cli
 
     def generate_site_and_pdf_for(cli_args: {}, target_tag: nil, final_app_dir: nil)
       # TODO: general solution to turn all string keys to symbols
-      pdf_hash = config.respond_to?(:pdf) ? {page: config.pdf.fetch('page'),
-                                  filename: config.pdf.fetch('filename'),
-                                  header: config.pdf.fetch('header')}
+      pdf_hash = config.has_option?('pdf') ? {page: config.pdf.fetch('page'),
+                                             filename: config.pdf.fetch('filename'),
+                                             header: config.pdf.fetch('header')}
+
       : nil
 
       verbosity = cli_args.include?('--verbose')
