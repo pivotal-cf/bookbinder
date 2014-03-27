@@ -64,9 +64,15 @@ class Repository
     directory_listing_after = Dir.entries output_dir
 
     from = File.join output_dir, (directory_listing_after - directory_listing_before).first
-    FileUtils.mv from, File.join(destination_dir, directory)
 
-    @copied_to = File.join(destination_dir, directory)
+    repo_directory = File.join(destination_dir, directory)
+    FileUtils.mkdir repo_directory unless File.exist? repo_directory
+
+    Dir.glob(File.join(from, '*')).each do |file|
+      FileUtils.mv file, repo_directory
+    end
+
+    @copied_to = repo_directory
   end
 
   def copy_from_local(destination_dir)
@@ -128,6 +134,6 @@ class Repository
 
   def has_ref?(ref)
     refs = @github.refs(@full_name).map &:ref
-    refs.any?{|r| "refs/heads/#{ref}" == r }
+    refs.any? { |r| "refs/heads/#{ref}" == r }
   end
 end

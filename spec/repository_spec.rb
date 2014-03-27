@@ -84,6 +84,18 @@ describe Repository do
     it 'sets copied? to true' do
       expect { repo.copy_from_remote(destination_dir) }.to change { repo.copied? }.to(true)
     end
+
+    context 'when the docs directory already exists in the destination' do
+      before do
+        directory = File.join(destination_dir, 'my-docs-repo')
+        FileUtils.mkdir directory
+      end
+
+      it 'moves the contents of the source directory to the top level of the destination' do
+        repo.copy_from_remote(destination_dir)
+        expect(File.exist? File.join(destination_dir, 'my-docs-repo', 'index.html.md')).to be_true
+      end
+    end
   end
 
   describe '#copy_from_local' do
