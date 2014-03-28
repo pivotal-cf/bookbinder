@@ -1,3 +1,5 @@
+require 'net/http'
+
 class PdfGenerator
   include ShellOut
   include BookbinderLogger
@@ -9,9 +11,8 @@ class PdfGenerator
   end
 
   def generate(source, target, header)
-
-    check_file_exists source
-    check_file_exists header
+    check_destination_exists source
+    check_destination_exists header
 
     command = <<CMD
 wkhtmltopdf \
@@ -29,6 +30,8 @@ wkhtmltopdf \
     #{source} \
     #{target}
 CMD
+
+    # want to see the output of this command
     shell_out command
 
     raise "'wkhtmltopdf' appears to have failed" unless File.exist?(target)
@@ -43,5 +46,20 @@ CMD
       raise MissingSource, required_file
     end
   end
-end
 
+  def check_destination_exists(url)
+    uri = URI(url)
+    if uri.class == URI::Generic
+      check_file_exists url
+    elsif uri.class == URI::HTTP
+      check_url_exists url
+    else
+      puts "Malformed destination provided for PDF generation source: #{url}"
+    end
+  end
+
+  def check_url_exists(url)
+    res = Net::HTTP.get_response(URI(url))
+    raise MissingSource, url if res.code == '404'
+  end
+end

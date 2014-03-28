@@ -21,10 +21,12 @@ describe PdfGenerator do
     expect(File.exist? generated_pdf).to be_true
   end
 
-  it 'raises an exception if the specified page does not exist' do
+  it 'raises an exception if the specified source URL does not exist' do
+    bad_website = 'http://website.invalid/pdf.html'
+    stub_request(:get, bad_website).to_return(:status => 404)
     expect do
-      PdfGenerator.new.generate 'not_there.html', 'irrelevant.pdf', header_file
-    end.to raise_error(/Could not find file not_there.html/)
+      PdfGenerator.new.generate bad_website, 'irrelevant.pdf', header_file
+    end.to raise_error(/Could not find file #{Regexp.escape(bad_website)}/)
   end
 
   it 'raises an exception if the specified header file does not exist' do

@@ -34,7 +34,6 @@ describe Publisher do
             {'repository' => {'name' => some_other_repo, 'ref' => some_other_sha}}
         ]
 
-        #the lede
         publisher.publish sections: sections, output_dir: output_dir,
                           master_middleman_dir: non_broken_master_middleman_dir,
                           final_app_dir: final_app_dir,
@@ -337,6 +336,12 @@ DOGS
           let(:sections) { [{'repository' => {'name' => 'org/my-docs-repo'}, 'directory' => 'pretty_dir'}] }
           let(:pdf_config) do
             {page: 'pretty_dir/unknown_file.html', filename: 'irrelevant.pdf', header: 'pretty_dir/unknown_header.html'}
+          end
+
+          around do |example|
+            WebMock.disable_net_connect!(:allow_localhost => true)
+            example.run
+            WebMock.disable_net_connect!
           end
 
           it 'fails' do

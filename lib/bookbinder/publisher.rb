@@ -19,14 +19,15 @@ class Publisher
     FileUtils.cp_r File.join(master_middleman_dir, '.'), middleman_dir
 
     repos = import_repos(middleman_source_directory, options)
-    #The lede
+
     generate_site(options, middleman_dir, repos)
     FileUtils.cp_r build_directory, public_directory
 
-
-    #Subledes
-    spider.generate_sitemap options.fetch(:host_for_sitemap)
-    generate_pdf(final_app_dir, options.fetch(:pdf)) if pdf_requested && repo_with_pdf_page_present?(options, repos)
+    server_director = ServerDirector.new(directory: final_app_dir)
+    server_director.use_server do |port|
+      spider.generate_sitemap options.fetch(:host_for_sitemap), port
+      generate_pdf(final_app_dir, options.fetch(:pdf), port) if pdf_requested && repo_with_pdf_page_present?(options, repos)
+    end
 
     log "Bookbinder bound your book into #{final_app_dir.green}"
 
@@ -59,10 +60,10 @@ class Publisher
     Section.get_instance(section_hash: section_hash, destination_dir: destination, local_repo_dir: options[:local_repo_dir], target_tag: options[:target_tag])
   end
 
-  def generate_pdf(final_app_dir, options)
-    source_page = File.join(final_app_dir, 'public', options.fetch(:page))
+  def generate_pdf(final_app_dir, options, port)
+    source_page = URI::HTTP.build({:host=>"localhost", :port=>port, :protocol=>"http://", :path=>'/'+options.fetch(:page)})
     generated_pdf_file = File.join(final_app_dir, 'public', options.fetch(:filename))
-    header_file = File.join(final_app_dir, 'public', options.fetch(:header))
+    header_file = URI::HTTP.build({:host=>"localhost", :port=>port, :protocol=>"http://", :path=>'/'+options.fetch(:header)})
     PdfGenerator.new.generate source_page, generated_pdf_file, header_file
   end
 

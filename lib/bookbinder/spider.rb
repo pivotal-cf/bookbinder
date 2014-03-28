@@ -4,27 +4,25 @@ class Spider
   include ShellOut
   include BookbinderLogger
 
-  def initialize(app_dir:nil, root_page:nil, port:1024+rand(65535-1024))
+  def initialize(app_dir: nil)
     @app_dir = app_dir || raise('Spiders must be initialized with an app directory.')
-    domain = "http://localhost:#{port}"
-    @root_page = root_page || "#{domain}/index.html"
-    @sieve = Sieve.new domain: domain
-    @port = port
     @broken_links = []
   end
 
-  def generate_sitemap(host)
-    links = []
-    Dir.chdir(@app_dir) { links = capture_links @root_page }
+  def generate_sitemap(target_host, port)
+    temp_host = "localhost:#{port}"
+
+    sieve = Sieve.new domain: "http://#{temp_host}"
+    links = crawl_from "http://#{temp_host}/index.html", sieve
     @broken_links, working_links = links
 
     announce_broken_links @broken_links
 
-    write_sitemap_txt(host, working_links)
+    write_sitemap_txt(target_host, temp_host, working_links)
   end
 
   def has_broken_links?
-    @broken_links.any? {|link| !link.include?('#') } if @broken_links
+    @broken_links.any? { |link| !link.include?('#') } if @broken_links
   end
 
   def self.prepend_location(location, url)
@@ -33,10 +31,10 @@ class Spider
 
   private
 
-  def write_sitemap_txt(host, working_links)
+  def write_sitemap_txt(host, port, working_links)
     sitemap_file = File.join(@app_dir, 'public', 'sitemap.txt')
     File.open(sitemap_file, 'w') do |file|
-      file.write substitute_hostname(host, working_links.join("\n"))
+      file.write substitute_hostname(host, port, working_links.join("\n"))
     end
   end
 
@@ -55,43 +53,23 @@ class Spider
     end
   end
 
-  def capture_links(page)
-    io, wait_thread_pid = start_web_server
-
-    once_server_has_started(io) do
-      consume_stream_in_separate_thread(io)
-      crawl_from page
-    end
-  ensure
-    Process.kill 'KILL', wait_thread_pid
-  end
-
-  def start_web_server
-    open_results  = PTY.spawn("thin start -p #{@port}")
-    stdouts       = open_results[0]
-    pid           = open_results[2]
-
-    return stdouts, pid
-  end
-
-  def crawl_from(url)
+  def crawl_from(url, sieve)
     broken_links = []
     sitemap = [url]
-
     2.times do |i|
       is_first_pass = (i==0)
 
       Anemone.crawl(url) do |anemone|
         dont_visit_fragments(anemone)
         anemone.on_every_page do |page|
-          broken, working = @sieve.links_from Stabilimentum.new(page), is_first_pass
+          broken, working = sieve.links_from Stabilimentum.new(page), is_first_pass
           broken_links.concat broken
           sitemap.concat working
         end
       end
     end
 
-    broken_links.concat @sieve.broken_links_in_all_stylesheets
+    broken_links.concat Dir.chdir(@app_dir) { sieve.broken_links_in_all_stylesheets }
     [broken_links.compact.uniq, sitemap.compact.uniq]
   end
 
@@ -99,26 +77,7 @@ class Spider
     anemone.focus_crawl { |page| page.links.reject { |link| link.to_s.match(/%23/) } }
   end
 
-  def once_server_has_started(io)
-    begin
-      line = io.gets
-      log "Vienna says, #{line}"
-    end until line && line.include?('Listening on')
-
-    log 'Vienna is lovely, this time of year.'
-    yield
-  end
-
-  # avoids deadlocks by ensuring rack doesn't hang waiting to write to stderr
-  def consume_stream_in_separate_thread(io_stream)
-    Thread.new do
-      s = nil
-      while io_stream.read(1024, s)
-      end
-    end
-  end
-
-  def substitute_hostname(host, links_string)
-    links_string.gsub(/localhost:#{@port}/, host)
+  def substitute_hostname(target_host, temp_host, links_string)
+    links_string.gsub(/#{Regexp.escape(temp_host)}/, target_host)
   end
 end
