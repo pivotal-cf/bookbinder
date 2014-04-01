@@ -8,11 +8,11 @@ describe Cli do
 
   around_with_fixture_repo &:run
 
-  describe '#run' do
-    def run
-      cli.run arguments
-    end
+  def run
+    cli.run arguments
+  end
 
+  describe '#run' do
     Cli::COMMAND_TO_CLASS_MAPPING.each do |command, klass|
       let(:extra_args) { ['arg1', 'arg2'] }
       let(:fake_command) { double }
@@ -21,16 +21,16 @@ describe Cli do
         let(:arguments) { [command] + extra_args }
 
         before do
-          klass.stub(:new).and_return(fake_command)
+          allow(klass).to receive(:new).and_return(fake_command)
         end
 
         it "calls run #{klass} for the #{command} command" do
-          fake_command.should_receive(:run).with(['arg1', 'arg2'])
+          expect(fake_command).to receive(:run).with(['arg1', 'arg2'])
           cli.run arguments
         end
 
         it "returns the return value of #{klass} for the #{command} command" do
-          fake_command.should_receive(:run).and_return(42)
+          expect(fake_command).to receive(:run).and_return(42)
           expect(cli.run arguments).to eq(42)
         end
       end
@@ -39,7 +39,7 @@ describe Cli do
     context 'when no arguments are supplied' do
       let(:arguments) { [] }
       it 'should print a helpful message' do
-        BookbinderLogger.should_receive(:log).with(/Unrecognized command ''/)
+        expect(BookbinderLogger).to receive(:log).with(/Unrecognized command ''/)
         run
       end
     end
@@ -47,7 +47,7 @@ describe Cli do
     context 'when a command that is not recognized is supplied' do
       let(:arguments) { ['foo'] }
       it 'should print a helpful message' do
-        BookbinderLogger.should_receive(:log).with(/Unrecognized command 'foo'/)
+        expect(BookbinderLogger).to receive(:log).with(/Unrecognized command 'foo'/)
         run
       end
     end
@@ -61,7 +61,7 @@ describe Cli do
         let(:arguments) { ['publish', 'local'] }
 
         it 'logs the error with the config file name' do
-          BookbinderLogger.should_receive(:log).with(/I broke.*in config\.yml/)
+          expect(BookbinderLogger).to receive(:log).with(/I broke.*in config\.yml/)
           run
         end
 
@@ -78,7 +78,7 @@ describe Cli do
         let(:arguments) { ['publish', 'local'] }
 
         it 'logs the error with the credentials file name' do
-          BookbinderLogger.should_receive(:log).with(/I broke.*in credentials\.yml/)
+          expect(BookbinderLogger).to receive(:log).with(/I broke.*in credentials\.yml/)
           run
         end
 
@@ -112,7 +112,7 @@ describe Cli do
         let(:arguments) { ['publish', 'local'] }
 
         it 'logs the error message' do
-          BookbinderLogger.should_receive(:log).with(/I broke/)
+          expect(BookbinderLogger).to receive(:log).with(/I broke/)
           run
         end
 
@@ -124,14 +124,14 @@ describe Cli do
 
     context 'when config.yml is empty' do
       before do
-        File.stub(:read)
-        YAML.stub(:load).and_return(false)
+        allow(File).to receive(:read)
+        allow(YAML).to receive(:load).and_return(false)
       end
 
       let(:arguments) { ['publish', 'local'] }
 
       it 'should print a helpful message' do
-        BookbinderLogger.should_receive(:log).with(/config.yml is empty/)
+        expect(BookbinderLogger).to receive(:log).with(/config.yml is empty/)
         run
       end
     end
@@ -162,6 +162,37 @@ describe Cli do
           BookbinderLogger.should_receive(:log).with(/Non-unique directory names/)
           cli.run ['publish', 'local']
         end
+      end
+    end
+  end
+
+  describe 'flags' do
+    Cli::FLAGS.each do |flag|
+      let(:arguments) { ["--#{flag}"] }
+
+      context "calling the #{flag} flag" do
+        it "calls the #{flag} method on cli" do
+          expect(cli).to receive(flag.to_sym)
+          run
+        end
+
+        it 'returns 0' do
+          expect(run).to eq(0)
+        end
+      end
+
+      it "the #{flag} is added to the usage list" do
+         expect(BookbinderLogger).to receive(:log).with(/--#{Regexp.escape(flag)}/)
+        cli.run ['--foo']
+      end
+    end
+
+    context 'when a flag that is not recognized is supplied' do
+      let(:arguments) { ['--foo'] }
+
+      it 'should print a helpful message' do
+        expect(BookbinderLogger).to receive(:log).with(/Unrecognized flag '--foo'/)
+        run
       end
     end
   end

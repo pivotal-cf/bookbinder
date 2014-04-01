@@ -47,6 +47,8 @@ require_relative 'bookbinder/commands/run_publish_ci'
 require_relative 'bookbinder/commands/update_local_doc_repos'
 require_relative 'bookbinder/commands/tag'
 
+require_relative 'bookbinder/usage_message'
+
 require_relative 'bookbinder/cli'
 
 # Finds the project root for both spec & production

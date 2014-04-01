@@ -1,8 +1,11 @@
+
 class Cli
   include BookbinderLogger
 
   class InvalidArguments < StandardError;
   end
+
+  FLAGS = %w(version)
 
   # breaking this command => class naming convention will break usage_messages!
   COMMAND_TO_CLASS_MAPPING = {
@@ -21,14 +24,26 @@ class Cli
     command = COMMAND_TO_CLASS_MAPPING[command_name]
     command_arguments = args[1..-1]
 
-    if command
+    if command_name && command_name.match(/^--/)
+      flag = command_name[2..-1]
+      if FLAGS.include? flag
+        self.send flag
+      else
+        unrecognized_flag(flag)
+      end
+      0
+    elsif command
       run_command(command, command_arguments)
     else
-      display_usage command_name
+      unrecognized_command command_name
     end
   end
 
   private
+
+  def version
+    log "bookbinder #{Gem::Specification::load(File.join GEM_ROOT, "bookbinder.gemspec").version}"
+  end
 
   def run_command(command, command_arguments)
     configuration = config
@@ -41,7 +56,7 @@ class Cli
     log "#{e.message}, in config.yml".red
     1
   rescue Cli::InvalidArguments
-    log usage_message(command)
+    log usage_message.command(command)
     1
   rescue => e
     log e.message.red
@@ -56,28 +71,17 @@ class Cli
     @config = Configuration.new(config_hash)
   end
 
-  def display_usage(name)
+  def unrecognized_flag(name)
+    log "Unrecognized flag '--#{name}'"
+    usage_message.print
+  end
+
+  def unrecognized_command(name)
     log "Unrecognized command '#{name}'"
-    log usage_header
-    log usage_messages
+    usage_message.print
   end
 
-  def usage_messages
-    COMMAND_TO_CLASS_MAPPING.values.map do |command_class|
-      "  #{usage_message(command_class)}"
-    end.sort
-  end
-
-  def usage_message(command_class)
-    "bookbinder #{command_class.name.split('::').last.underscore} #{command_class.usage}"
-  end
-
-  def usage_header
-    <<TEXT
-
-Bookbinder documentation can be found at https://github.com/pivotal-cf/docs-bookbinder
-
-Usage (preface with 'bundle exec ' when using rbenv):
-TEXT
+  def usage_message
+    UsageMessage.new(COMMAND_TO_CLASS_MAPPING, FLAGS)
   end
 end
