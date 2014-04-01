@@ -64,11 +64,13 @@ class Cli
   end
 
   def config
-    return @config if @config
+    @config ||= fetch_config
+  end
 
+  def fetch_config
     config_hash = YAML.load(File.read('./config.yml'))
     raise 'config.yml is empty' unless config_hash
-    @config = Configuration.new(config_hash)
+    Configuration.new(config_hash)
   end
 
   def unrecognized_flag(name)
