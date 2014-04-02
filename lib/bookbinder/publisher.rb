@@ -26,7 +26,7 @@ class Publisher
     server_director = ServerDirector.new(directory: final_app_dir)
     server_director.use_server do |port|
       spider.generate_sitemap options.fetch(:host_for_sitemap), port
-      #generate_pdf(final_app_dir, options.fetch(:pdf), port) if pdf_requested && repo_with_pdf_page_present?(options, repos)
+      generate_pdf(final_app_dir, options.fetch(:pdf), port) if pdf_requested && repo_with_pdf_page_present?(options, repos)
     end
 
     log "Bookbinder bound your book into #{final_app_dir.green}"
