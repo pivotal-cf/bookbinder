@@ -7,7 +7,17 @@ describe Navigation::HelperMethods do
   include_context 'tmp_dirs'
 
   def run_middleman(template_variables = {})
-    MiddlemanRunner.new.run tmpdir, template_variables, '/dev/null'
+    original_mm_root = ENV['MM_ROOT']
+
+    Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
+    ENV['MM_ROOT'] = tmpdir
+    Dir.chdir(tmpdir) do
+      build_command = Middleman::Cli::Build.new [], {:quiet => true}, {}
+      Middleman::Cli::Build.shared_instance(false).config[:template_variables] = template_variables
+      build_command.invoke :build, [], {:verbose => false}
+    end
+
+    ENV['MM_ROOT'] = original_mm_root
   end
 
   describe '#yield_for_code_snippet' do

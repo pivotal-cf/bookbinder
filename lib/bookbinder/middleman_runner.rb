@@ -26,7 +26,7 @@ class MiddlemanRunner
   include BookbinderLogger
   include ShellOut
 
-  def run(middleman_dir, template_variables, local_repo_dir, verbose = false, repos = [])
+  def run(middleman_dir, template_variables, local_repo_dir, verbose = false, repos = [], production_host=nil)
     original_mm_root = ENV['MM_ROOT']
     log "\nRunning middleman...\n\n"
 
@@ -35,10 +35,16 @@ class MiddlemanRunner
     ENV['MM_ROOT'] = middleman_dir
     Dir.chdir(middleman_dir) do
       build_command = Middleman::Cli::Build.new [], {:quiet => !verbose}, {}
-      Middleman::Cli::Build.shared_instance(verbose).config[:template_variables] = template_variables
-      Middleman::Cli::Build.shared_instance(verbose).config[:relative_links] = false
-      Middleman::Cli::Build.shared_instance(verbose).config[:subnav_templates] = subnavs_by_dir_name(repos)
-      Middleman::Cli::Build.shared_instance(verbose).config[:local_repo_dir] = local_repo_dir
+      builder = Middleman::Cli::Build.shared_instance(verbose)
+
+      config = {
+          template_variables: template_variables,
+          relative_links: false,
+          subnav_templates: subnavs_by_dir_name(repos),
+          local_repo_dir: local_repo_dir,
+          production_host: production_host
+      }
+      config.each { |k, v| builder.config[k] = v }
       build_command.invoke :build, [], {:verbose => verbose}
     end
 

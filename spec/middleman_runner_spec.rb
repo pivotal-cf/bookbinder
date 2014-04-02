@@ -5,6 +5,7 @@ describe MiddlemanRunner do
 
   let(:target_dir_path) { Dir.mktmpdir }
   let(:template_variables) { {'anybody' => 'nobody'} }
+  let(:production_host) { double }
   let(:verbose) { false }
   let(:repos) { [
       Section.new(Repository.new(full_name: '', directory: 'my/place/rocks'), 'my_subnav_template'),
@@ -13,7 +14,7 @@ describe MiddlemanRunner do
   let(:local_repo_dir) { '/dev/null' }
 
   def run_middleman
-    middleman_runner.run(target_dir_path, template_variables, local_repo_dir, verbose, repos)
+    middleman_runner.run(target_dir_path, template_variables, local_repo_dir, verbose, repos, production_host)
   end
 
   it 'behaves likes a BookbinderLogger'
@@ -35,6 +36,13 @@ describe MiddlemanRunner do
 
     middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
     expect(middleman_instance.config[:template_variables]).to eq(template_variables)
+  end
+
+  it 'tells middleman the production host' do
+    run_middleman
+    middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
+
+    expect(middleman_instance.config[:production_host]).to eq(production_host)
   end
 
   it 'tells middleman not to use relative links' do
