@@ -6,17 +6,17 @@ class Sieve
 
   def links_from(page, is_first_pass)
     broken_links = []
-    workin_links = []
+    working_links = []
 
     if page.not_found? && is_first_pass
       broken_links << Spider.prepend_location(page.referer, page.url)
     else
-      workin_links << page.url.to_s
+      working_links << page.url.to_s
       broken_links.concat broken_fragments_targeting(page, is_first_pass)
       @unverified_fragments_by_url.merge! fragments_targeting_other_pages_from page
     end
 
-    return broken_links, workin_links
+    return broken_links, working_links
   end
 
   def broken_links_in_all_stylesheets
