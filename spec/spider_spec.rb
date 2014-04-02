@@ -56,7 +56,7 @@ describe Spider do
 
       it 'returns false' do
         spider.generate_sitemap 'example.com', port
-        spider.should_not have_broken_links
+        expect(spider).to_not have_broken_links
       end
     end
 
@@ -65,7 +65,7 @@ describe Spider do
 
       it 'returns true' do
         spider.generate_sitemap 'example.com', port
-        spider.should have_broken_links
+        expect(spider).to have_broken_links
       end
     end
   end
@@ -81,11 +81,8 @@ describe Spider do
       spider.generate_sitemap host, port
 
       sitemap = File.read File.join(final_app_dir, 'public', 'sitemap.txt')
-      sitemap.split("\n").should =~ (<<-MAP).split("\n")
-http://#{host}/index.html
-http://#{host}/other_page.html
-http://#{host}/yaml_page.yml
-      MAP
+      sites = sitemap.split("\n")
+      expect(sites).to match_array(["http://#{host}/index.html", "http://#{host}/other_page.html", "http://#{host}/yaml_page.yml"])
     end
 
     context 'when there are broken links' do
@@ -112,26 +109,26 @@ http://#{host}/yaml_page.yml
 
       it 'names them' do
         announcements = []
-        BookbinderLogger.stub(:log) do |announcement|
+        allow(BookbinderLogger).to receive(:log) do |announcement|
           announcements << announcement unless announcement.match(/Vienna|broken links!/)
         end
 
         spider.generate_sitemap host, port
 
-        announcements.should =~ broken_links
+        expect(announcements).to match_array(broken_links)
       end
 
       it 'logs a count of them' do
         broken_link_counts = 2.times.map { "\nFound #{broken_links.count} broken links!".red }
 
         announcements = []
-        BookbinderLogger.stub(:log) do |announcement|
+        allow(BookbinderLogger).to receive(:log) do |announcement|
           announcements << announcement if announcement.match(/broken links!/)
         end
 
         spider.generate_sitemap host, port
 
-        announcements.should =~ broken_link_counts
+        expect(announcements).to match_array(broken_link_counts)
       end
     end
   end
