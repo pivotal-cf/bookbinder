@@ -17,8 +17,8 @@ describe Archive do
                      :aws_secret_access_key => 'aws-secret-key'
   end
   let(:bucket_key) { 'pivotal-cf-docs-green-builds' }
-  let(:archive) { Archive.new key: 'aws-key', secret: 'aws-secret-key' }
-
+  let(:logger) { NilLogger.new }
+  let(:archive) { Archive.new logger: logger, key: 'aws-key', secret: 'aws-secret-key' }
 
   describe '#create' do
     let(:build_number) { 42 }

@@ -9,9 +9,9 @@ describe Distributor do
   let(:bucket) { 'bucket-name-in-fixture-config' }
   let(:aws_credentials) do
     Configuration::AwsCredentials.new({
-                                        'access_key' => key,
-                                        'secret_key' => secret,
-                                        'green_builds_bucket' => bucket
+                                          'access_key' => key,
+                                          'secret_key' => secret,
+                                          'green_builds_bucket' => bucket
                                       })
   end
 
@@ -20,17 +20,19 @@ describe Distributor do
   let(:namer_filename) { "#{book_repo_short_name}-#{build_number}.log" }
   let(:namer_full_path) { "/tmp/#{namer_filename}" }
   let(:fake_namer) { double(ArtifactNamer, filename: namer_filename, full_path: namer_full_path) }
+  let(:logger) { NilLogger.new }
 
   let(:distributor) do
     described_class.new(
-      fake_archive,
-      fake_pusher,
-      book_repo_short_name,
-      fake_namer,
-      app_dir: fake_dir,
-      aws_credentials: aws_credentials,
-      production: production,
-      build_number: build_number
+        logger,
+        fake_archive,
+        fake_pusher,
+        book_repo_short_name,
+        fake_namer,
+        app_dir: fake_dir,
+        aws_credentials: aws_credentials,
+        production: production,
+        build_number: build_number
     )
   end
 
@@ -61,8 +63,8 @@ describe Distributor do
 
       it "logs the tracefile's URL" do
         expect(fake_archive).to receive(:upload_file).and_return(fake_uploaded_file)
-        allow(distributor).to receive(:log)
-        expect(distributor).to receive(:log).with(/#{Regexp.escape(fake_url)}/)
+        allow(logger).to receive(:log)
+        expect(logger).to receive(:log).with(/#{Regexp.escape(fake_url)}/)
         distributor.distribute
       end
 
@@ -87,7 +89,7 @@ describe Distributor do
         end
 
         it 'logs a message' do
-          expect(distributor).to receive(:log).with(/Could not find CF trace file: #{namer_full_path}/)
+          expect(logger).to receive(:error).with(/Could not find CF trace file: #{namer_full_path}/)
           distributor.distribute
         end
       end
@@ -102,18 +104,17 @@ describe Distributor do
 
       it 'downloads the repo' do
         download_args = {
-          download_dir: fake_dir,
-          bucket: bucket,
-          build_number: build_number,
-          namespace: book_repo_short_name
+            download_dir: fake_dir,
+            bucket: bucket,
+            build_number: build_number,
+            namespace: book_repo_short_name
         }
         expect(fake_archive).to receive(:download).with(download_args)
         distributor.distribute
       end
 
       it 'warns' do
-        allow(distributor).to receive(:log)
-        expect(distributor).to receive(:log).with(/Warning.*production/)
+        expect(logger).to receive(:warn).with(/Warning.*production/)
         distributor.distribute
       end
     end
@@ -127,7 +128,7 @@ describe Distributor do
       end
 
       it 'does not warn' do
-        expect(distributor).not_to receive(:log).with(/Warning.*production/)
+        expect(logger).not_to receive(:log).with(/Warning.*production/)
         distributor.distribute
       end
     end
@@ -163,13 +164,13 @@ describe Distributor do
 
     it 'creates the right objects' do
       real_namer = expect_to_receive_and_return_real_now(ArtifactNamer, :new, book_repo_short_name, build_number, 'log', '/tmp')
-      real_archive = expect_to_receive_and_return_real_now(Archive, :new, key: key, secret: secret)
-      real_runner = expect_to_receive_and_return_real_now(CfCommandRunner, :new, cf_credentials, namer_full_path)
+      real_archive = expect_to_receive_and_return_real_now(Archive, :new, logger: logger, key: key, secret: secret)
+      real_runner = expect_to_receive_and_return_real_now(CfCommandRunner, :new, logger, cf_credentials, namer_full_path)
       real_pusher = expect_to_receive_and_return_real_now(Pusher, :new, real_runner)
 
-      expect(described_class).to receive(:new).with(real_archive, real_pusher, book_repo_short_name, real_namer, options)
+      expect(described_class).to receive(:new).with(logger, real_archive, real_pusher, book_repo_short_name, real_namer, options)
 
-      described_class.build(options)
+      described_class.build(logger, options)
     end
   end
 end

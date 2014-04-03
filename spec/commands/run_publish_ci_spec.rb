@@ -5,13 +5,14 @@ describe Cli::RunPublishCI do
   let(:fake_push_local_to_staging) { double }
   let(:fake_build_and_push_tarball) { double }
   let(:config_hash) { {'book_repo' => 'foo/bar'} }
-  let(:config) { Configuration.new(config_hash) }
-  let(:command) { Cli::RunPublishCI.new(config) }
+  let(:config) { Configuration.new(logger, config_hash) }
+  let(:logger) { NilLogger.new }
+  let(:command) { Cli::RunPublishCI.new(logger, config) }
 
   before do
-    allow(Cli::Publish).to receive(:new).with(config) { fake_publish }
-    allow(Cli::PushLocalToStaging).to receive(:new).with(config) { fake_push_local_to_staging }
-    allow(Cli::BuildAndPushTarball).to receive(:new).with(config) { fake_build_and_push_tarball }
+    allow(Cli::Publish).to receive(:new).with(logger, config) { fake_publish }
+    allow(Cli::PushLocalToStaging).to receive(:new).with(logger, config) { fake_push_local_to_staging }
+    allow(Cli::BuildAndPushTarball).to receive(:new).with(logger, config) { fake_build_and_push_tarball }
   end
 
   context 'when ENV["BUILD_NUMBER"] is set' do
@@ -45,7 +46,7 @@ describe Cli::RunPublishCI do
     end
 
     it 'respects the --verbose flag' do
-      publish_command = expect_to_receive_and_return_real_now(Cli::Publish, :new, config)
+      publish_command = expect_to_receive_and_return_real_now(Cli::Publish, :new, logger, config)
       expect(publish_command).to receive(:run).with ['github', '--verbose']
       command.run ['--verbose']
     end

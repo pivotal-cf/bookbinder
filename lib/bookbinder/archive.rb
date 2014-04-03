@@ -2,9 +2,8 @@ class Archive
   class FileDoesNotExist < StandardError; end
   class NoNamespaceGiven < StandardError; end
 
-  include BookbinderLogger
-
-  def initialize(key: '', secret: '')
+  def initialize(logger: nil, key: '', secret: '')
+    @logger = logger
     @aws_key = key
     @aws_secret_key = secret
   end
@@ -16,7 +15,7 @@ class Archive
     tarball_filename, tarball_path = create_tarball(app_dir, build_number, namespace)
 
     upload_file(bucket, tarball_filename, tarball_path)
-    log "Green build ##{build_number.to_s.green} has been uploaded to S3 for #{namespace.cyan}"
+    @logger.log "Green build ##{build_number.to_s.green} has been uploaded to S3 for #{namespace.cyan}"
   end
 
   def upload_file(bucket, name, source_path)
@@ -40,7 +39,7 @@ class Archive
     File.open(downloaded_file, 'wb') { |f| f.write(s3_file.body) }
     Dir.chdir(download_dir) { `tar xzf #{downloaded_file}` }
 
-    log "Green build ##{build_number.to_s.green} has been downloaded from S3 and untarred into #{download_dir.cyan}"
+    @logger.log "Green build ##{build_number.to_s.green} has been downloaded from S3 and untarred into #{download_dir.cyan}"
   end
 
   private

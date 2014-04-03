@@ -5,7 +5,8 @@ describe ServerDirector do
 
   let(:port) { 8000 }
   let(:server_directory) { tmp_subdir 'server_directory' }
-  let(:server_director) { ServerDirector.new(directory: server_directory, port: port) }
+  let(:logger) { NilLogger.new }
+  let(:server_director) { ServerDirector.new(logger, directory: server_directory, port: port) }
 
   before do
     Dir.chdir(server_directory) do
@@ -38,7 +39,7 @@ HERE
     end
 
     context 'when no port is given' do
-      let(:server_director) { ServerDirector.new(directory: server_directory) }
+      let(:server_director) { ServerDirector.new(logger, directory: server_directory) }
 
       it 'defaults to 41722' do
         expect(POpen4).to receive(:popen4).with('puma -p 41722')

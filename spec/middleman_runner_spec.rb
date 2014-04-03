@@ -1,15 +1,16 @@
 require 'spec_helper'
 
 describe MiddlemanRunner do
-  let(:middleman_runner) { MiddlemanRunner.new }
+  let(:logger) { NilLogger.new }
+  let(:middleman_runner) { MiddlemanRunner.new(logger) }
 
   let(:target_dir_path) { Dir.mktmpdir }
   let(:template_variables) { {'anybody' => 'nobody'} }
   let(:production_host) { double }
   let(:verbose) { false }
   let(:repos) { [
-      Section.new(Repository.new(full_name: '', directory: 'my/place/rocks'), 'my_subnav_template'),
-      Section.new(Repository.new(full_name: '', directory: 'fraggles/rock'), nil),
+      Section.new(logger, Repository.new(full_name: '', directory: 'my/place/rocks'), 'my_subnav_template'),
+      Section.new(logger, Repository.new(full_name: '', directory: 'fraggles/rock'), nil),
   ] }
   let(:local_repo_dir) { '/dev/null' }
 
@@ -17,7 +18,6 @@ describe MiddlemanRunner do
     middleman_runner.run(target_dir_path, template_variables, local_repo_dir, verbose, repos, production_host)
   end
 
-  it 'behaves likes a BookbinderLogger'
   it 'behaves like a ShellOut'
 
   it 'invokes Middleman in the requested directory' do

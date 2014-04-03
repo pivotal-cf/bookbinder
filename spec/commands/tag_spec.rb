@@ -6,28 +6,29 @@ describe Cli::Tag do
   let(:book_sha) { 26.times.map { (65 + rand(26)).chr }.join  }
   let(:desired_tag) { 12.times.map { (65 + rand(26)).chr }.join  }
   let(:book_title) { 'fantastic/red-mars' }
+  let(:logger) { NilLogger.new }
   let(:config_hash) do
     {
       'book_repo' => book_title,
       'sections' => []
     }
   end
-  let(:config) { Configuration.new(config_hash) }
+  let(:config) { Configuration.new(logger, config_hash) }
 
   before do
-    allow(GitClient.get_instance).to receive(:create_tag!)
+    allow(GitClient.get_instance(logger)).to receive(:create_tag!)
   end
 
   it 'should tag the book and its sections' do
-    @book = expect_to_receive_and_return_real_now(Book, :new, {full_name: book_title, sections: []})
+    @book = expect_to_receive_and_return_real_now(Book, :new, {logger: logger, full_name: book_title, sections: []})
     expect(@book).to receive(:tag_self_and_sections_with).with(desired_tag)
-    Cli::Tag.new(config).run [desired_tag]
+    Cli::Tag.new(logger, config).run [desired_tag]
   end
 
   context 'when no tag is supplied' do
     it 'raises a Cli::InvalidArguments error' do
       expect {
-        Cli::Tag.new(config).run []
+        Cli::Tag.new(logger, config).run []
       }.to raise_error(Cli::InvalidArguments)
     end
   end

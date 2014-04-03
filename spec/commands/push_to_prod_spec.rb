@@ -21,8 +21,9 @@ describe Cli::PushToProd do
     }
   end
 
-  let(:config) { Configuration.new(config_hash) }
-  let(:command) { described_class.new(config) }
+  let(:logger) { NilLogger.new }
+  let(:config) { Configuration.new(logger, config_hash) }
+  let(:command) { described_class.new(logger, config) }
 
   before do
     fake_cred_repo = double(CredentialProvider, credentials: {'aws' => {}, 'cloud_foundry' => {}})
@@ -37,7 +38,7 @@ describe Cli::PushToProd do
   end
 
   it 'builds a distributor with the right options and asks it to distribute' do
-    real_distributor = expect_to_receive_and_return_real_now(Distributor, :build, options)
+    real_distributor = expect_to_receive_and_return_real_now(Distributor, :build, logger, options)
     expect(real_distributor).to receive(:distribute)
 
     command.run([build_number])

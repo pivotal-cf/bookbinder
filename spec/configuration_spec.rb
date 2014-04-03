@@ -10,8 +10,9 @@ describe Configuration do
       'template_variables' => {'some-var' => 'some-value'}
     }
   end
+  let(:logger) { NilLogger.new }
 
-  subject(:config) { Configuration.new(config_hash) }
+  subject(:config) { Configuration.new(logger, config_hash) }
 
   describe 'accessing configuration values' do
     it 'exposes #book_repo' do
@@ -60,8 +61,8 @@ describe Configuration do
 
     before do
       repository = double
-      allow(Repository).to receive(:new).with(full_name: 'some-org/cred-repo').and_return(repository)
-      allow(CredentialProvider).to receive(:new).with(repository).and_return(cred_repo)
+      allow(Repository).to receive(:new).with(logger:logger, full_name: 'some-org/cred-repo').and_return(repository)
+      allow(CredentialProvider).to receive(:new).with(logger, repository).and_return(cred_repo)
     end
 
     describe '#aws_credentials' do
@@ -198,11 +199,11 @@ describe Configuration do
     end
 
     it 'is true for identical configurations' do
-      expect(Configuration.new(config_hash_1)).to eq(Configuration.new(config_hash_1))
+      expect(Configuration.new(logger, config_hash_1)).to eq(Configuration.new(logger, config_hash_1))
     end
 
     it 'is false for different configurations' do
-      expect(Configuration.new(config_hash_1)).not_to eq(Configuration.new(config_hash_2))
+      expect(Configuration.new(logger, config_hash_1)).not_to eq(Configuration.new(logger, config_hash_2))
     end
   end
 
@@ -224,7 +225,7 @@ describe Configuration do
 
       valid_config_hash = {'sections' => [section1, section2]}
 
-      configuration = Configuration.new(valid_config_hash)
+      configuration = Configuration.new(logger, valid_config_hash)
       expect(configuration.valid?).to eq(true)
     end
 
@@ -237,13 +238,13 @@ describe Configuration do
       }
       invalid_config_hash = {'sections' => [section1, section1]}
 
-      configuration = Configuration.new(invalid_config_hash)
+      configuration = Configuration.new(logger, invalid_config_hash)
       expect(configuration.valid?).to eq(false)
     end
   end
 
   describe '#has_option?' do
-    let(:config) { Configuration.new({'foo' => 'bar'}) }
+    let(:config) { Configuration.new(logger, {'foo' => 'bar'}) }
 
     context 'when the configuration has the option' do
       it 'should return true' do

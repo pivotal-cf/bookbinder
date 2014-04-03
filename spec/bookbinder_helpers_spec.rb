@@ -6,6 +6,11 @@ require 'redcarpet'
 describe Navigation::HelperMethods do
   include_context 'tmp_dirs'
 
+  before do
+    nil_logger = NilLogger.new
+    allow(BookbinderLogger).to receive(:new).and_return(nil_logger)
+  end
+
   def run_middleman(template_variables = {})
     original_mm_root = ENV['MM_ROOT']
 

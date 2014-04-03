@@ -1,18 +1,18 @@
 class Distributor
-  include BookbinderLogger
   EXPIRATION_HOURS = 2
 
-  def self.build(options)
-    namespace = Repository.new(full_name: options[:book_repo]).short_name
+  def self.build(logger, options)
+    namespace = Repository.new(logger: logger, full_name: options[:book_repo]).short_name
     namer = ArtifactNamer.new(namespace, options[:build_number], 'log', '/tmp')
 
-    archive = Archive.new(key: options[:aws_credentials].access_key, secret: options[:aws_credentials].secret_key)
-    command_runner = CfCommandRunner.new(options[:cf_credentials], namer.full_path)
+    archive = Archive.new(logger: logger, key: options[:aws_credentials].access_key, secret: options[:aws_credentials].secret_key)
+    command_runner = CfCommandRunner.new(logger, options[:cf_credentials], namer.full_path)
     pusher = Pusher.new(command_runner)
-    new(archive, pusher, namespace, namer, options)
+    new(logger, archive, pusher, namespace, namer, options)
   end
 
-  def initialize(archive, pusher, namespace, namer, options)
+  def initialize(logger, archive, pusher, namespace, namer, options)
+    @logger = logger
     @archive = archive
     @pusher = pusher
     @namespace = namespace
@@ -44,13 +44,13 @@ class Distributor
 
   def upload_trace
     uploaded_file = archive.upload_file(options[:aws_credentials].green_builds_bucket, namer.filename, namer.full_path)
-    log("Your cf trace file is available at: #{uploaded_file.url(Time.now.to_i + EXPIRATION_HOURS*60*60).green}")
-    log("This URL will expire in #{EXPIRATION_HOURS} hours, so if you need to share it, make sure to save a copy now.")
+    @logger.log("Your cf trace file is available at: #{uploaded_file.url(Time.now.to_i + EXPIRATION_HOURS*60*60).green}")
+    @logger.log("This URL will expire in #{EXPIRATION_HOURS} hours, so if you need to share it, make sure to save a copy now.")
   rescue Errno::ENOENT
-    log "Could not find CF trace file: #{namer.full_path}".red
+    @logger.error "Could not find CF trace file: #{namer.full_path}"
   end
 
   def warn
-    log 'Warning: You are pushing to CF Docs production. Be careful.'.yellow
+    @logger.warn 'Warning: You are pushing to CF Docs production. Be careful.'
   end
 end

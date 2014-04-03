@@ -2,9 +2,9 @@ require 'pty'
 
 class Spider
   include ShellOut
-  include BookbinderLogger
 
-  def initialize(app_dir: nil)
+  def initialize(logger, app_dir: nil)
+    @logger = logger
     @app_dir = app_dir || raise('Spiders must be initialized with an app directory.')
     @broken_links = []
   end
@@ -40,16 +40,19 @@ class Spider
 
   def announce_broken_links(broken_links)
     if broken_links.any?
-      log "\nFound #{broken_links.count} broken links!".red
+      @logger.error "\nFound #{broken_links.count} broken links!"
 
       broken_links.each do |link|
-        color = link.include?('#') ? :yellow : :blue
-        log link.send(color)
+        if link.include?('#')
+          @logger.warn(link)
+        else
+          @logger.notify(link)
+        end
       end
 
-      log "\nFound #{broken_links.count} broken links!".red
+      @logger.error "\nFound #{broken_links.count} broken links!"
     else
-      log "\nNo broken links!".green
+      @logger.success "\nNo broken links!"
     end
   end
 

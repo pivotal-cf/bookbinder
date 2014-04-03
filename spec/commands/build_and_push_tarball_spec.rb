@@ -3,7 +3,8 @@ require 'spec_helper'
 describe Cli::BuildAndPushTarball do
   include_context 'tmp_dirs'
 
-  let(:build_and_push_tarball_command) { Cli::BuildAndPushTarball.new(config) }
+  let(:logger) { NilLogger.new }
+  let(:build_and_push_tarball_command) { Cli::BuildAndPushTarball.new(logger, config) }
   let(:build_number) { '17' }
   let(:book_repo) { 'org/fixture-book-title' }
 
@@ -23,7 +24,7 @@ describe Cli::BuildAndPushTarball do
       'cred_repo' => 'some/repo'
     }
   end
-  let(:config) { Configuration.new(config_hash) }
+  let(:config) { Configuration.new(logger, config_hash) }
 
   before do
     ENV.stub(:[])
@@ -38,7 +39,7 @@ describe Cli::BuildAndPushTarball do
   let(:bucket) { 'bucket-name-in-fixture-config' }
 
   it 'should call GreenBuildRepository#create with correct parameters' do
-    Archive.should_receive(:new).with(key: access_key, secret: secret_key).and_call_original
+    Archive.should_receive(:new).with(logger: logger, key: access_key, secret: secret_key).and_call_original
     Archive.any_instance.should_receive(:create_and_upload_tarball) do |args|
       args.should have_key(:build_number)
       args.should have_key(:bucket)

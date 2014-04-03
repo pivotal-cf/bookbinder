@@ -1,7 +1,7 @@
 class Cli
   class PushToProd < BookbinderCommand
     def run(arguments)
-      Distributor.build(options(arguments)).distribute
+      Distributor.build(@logger, options(arguments)).distribute
       0
     end
 

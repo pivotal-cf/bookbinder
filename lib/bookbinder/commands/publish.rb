@@ -34,17 +34,17 @@ class Cli
       verbosity = cli_args.include?('--verbose')
       location = cli_args[0]
 
-      success = Publisher.new.publish publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir)
+      success = Publisher.new(@logger).publish publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir)
       success ? 0 : 1
     end
 
     def checkout_book_at(target_tag, &doc_generation)
       temp_workspace     = Dir.mktmpdir
-      book               = Book.from_remote(full_name: config.book_repo,
+      book               = Book.from_remote(logger: @logger, full_name: config.book_repo,
                                             destination_dir: temp_workspace, ref: target_tag)
       expected_book_path = File.join temp_workspace, book.directory
 
-      log "Binding \"#{book.full_name.cyan}\" at #{target_tag.magenta}"
+      @logger.log "Binding \"#{book.full_name.cyan}\" at #{target_tag.magenta}"
       FileUtils.chdir(expected_book_path) { doc_generation.call(config, target_tag) }
     end
 

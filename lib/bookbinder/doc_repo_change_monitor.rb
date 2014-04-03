@@ -1,8 +1,6 @@
 class DocRepoChangeMonitor
-
-  include BookbinderLogger
-
-  def initialize(book, cached_sha_dir=File.join('.'))
+  def initialize(logger, book, cached_sha_dir=File.join('.'))
+    @logger = logger
     @book = book
     @cached_sha_file = File.join(cached_sha_dir, 'cached_shas.yml')
   end
@@ -18,11 +16,11 @@ class DocRepoChangeMonitor
   private
 
   def sha_changed?(cache, repo)
-    log "Checking repo #{repo.full_name.cyan}..."
+    @logger.log "Checking repo #{repo.full_name.cyan}..."
     cached_sha = cache[repo.full_name] || ''
     sha_changed = cached_sha != repo.head_sha
-    log "  Old SHA: #{sha_color(sha_changed, cached_sha)}"
-    log "  New SHA: #{sha_color(sha_changed, repo.head_sha)}"
+    @logger.log "  Old SHA: #{sha_color(sha_changed, cached_sha)}"
+    @logger.log "  New SHA: #{sha_color(sha_changed, repo.head_sha)}"
 
     sha_changed
   end
@@ -33,9 +31,9 @@ class DocRepoChangeMonitor
 
   def log_final_message(shas_not_up_to_date)
     if shas_not_up_to_date.any?
-      log "\nThe repos have changed, triggering a rebuild!".green
+      @logger.success "\nThe repos have changed, triggering a rebuild!"
     else
-      log "\nThe repos haven't changed, no build necessary".red
+      @logger.error "\nThe repos haven't changed, no build necessary"
     end
   end
 

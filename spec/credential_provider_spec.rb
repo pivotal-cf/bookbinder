@@ -2,13 +2,14 @@ require 'spec_helper'
 
 describe CredentialProvider do
   describe '#credentials' do
+    let(:logger) { NilLogger.new }
     let(:fixture_creds) do
       {'secure_site' => {'pass' => 'secret', 'handle' => 'agent'}}
     end
     let(:short_name) { 'creds-repo' }
     let(:full_name) { "org-name/#{short_name}" }
-    let(:credentials_repository) { Repository.new(full_name: full_name) }
-    let(:credentials) { CredentialProvider.new credentials_repository }
+    let(:credentials_repository) { Repository.new(logger: logger, full_name: full_name) }
+    let(:credentials) { CredentialProvider.new logger, credentials_repository }
 
     before do
       stub_github_for full_name

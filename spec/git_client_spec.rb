@@ -1,7 +1,8 @@
 require 'spec_helper'
 
 describe GitClient do
-  let(:client) { GitClient.get_instance }
+  let(:logger) { NilLogger.new }
+  let(:client) { GitClient.get_instance(logger) }
   let(:repo_name) { 'foo/bar' }
 
   describe 'create_tag!' do

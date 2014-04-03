@@ -1,11 +1,10 @@
 require 'open3'
 
 class CfCommandRunner
-  include BookbinderLogger
-
   attr_reader :creds
 
-  def initialize(cf_credentials, trace_file)
+  def initialize(logger, cf_credentials, trace_file)
+    @logger = logger
     @creds = cf_credentials
     @trace_file = trace_file
   end
@@ -60,9 +59,9 @@ class CfCommandRunner
   def takedown_old_target_app(app)
     # unmap hostname from old deployed app.
     # Routers flush every 10 seconds (but not guaranteed), so wait a bit longer than that.
-    log "waiting 15 seconds for routes to remap...\n\n"
+    @logger.log "waiting 15 seconds for routes to remap...\n\n"
     (1..15).to_a.reverse.each do |seconds|
-      log_print "\r\r#{seconds}...    "
+      @logger.log_print "\r\r#{seconds}...    "
       Kernel.sleep 1
     end
     stop(app)

@@ -1,7 +1,7 @@
 class Cli
   class PushLocalToStaging < BookbinderCommand
     def run(_)
-      Distributor.build(options).distribute
+      Distributor.build(@logger, options).distribute
       0
     end
 

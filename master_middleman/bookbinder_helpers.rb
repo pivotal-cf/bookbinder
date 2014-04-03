@@ -13,9 +13,8 @@ module Navigation
   end
 
   module HelperMethods
-
     def yield_for_code_snippet(from: nil, at: nil)
-      example = CodeExample.get_instance(section_hash: {'repository' => {'name' => from}}, local_repo_dir: config[:local_repo_dir])
+      example = CodeExample.get_instance(bookbinder_logger, section_hash: {'repository' => {'name' => from}}, local_repo_dir: config[:local_repo_dir])
       snippet, language = example.get_snippet_and_language_at(at)
       delimiter = '```'
 
@@ -70,6 +69,10 @@ module Navigation
         link = link_to(text, '/' + page.path)
       end
       content_tag :li, link, :class => css_class
+    end
+
+    def bookbinder_logger
+      BookbinderLogger.new
     end
   end
 end

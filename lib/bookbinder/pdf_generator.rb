@@ -2,12 +2,15 @@ require 'net/http'
 
 class PdfGenerator
   include ShellOut
-  include BookbinderLogger
 
   class MissingSource < StandardError
     def initialize(required_file)
       super "Could not find file #{required_file}"
     end
+  end
+
+  def initialize(logger)
+    @logger = logger
   end
 
   def generate(source, target, header)
@@ -36,13 +39,13 @@ CMD
 
     raise "'wkhtmltopdf' appears to have failed" unless File.exist?(target)
 
-    log "\nYour PDF file was generated to #{target.green}"
+    @logger.log "\nYour PDF file was generated to #{target.green}"
 
   end
 
   def check_file_exists(required_file)
     unless File.exist? required_file
-      log "\nPDF Generation failed (could not find file)!".red
+      @logger.error "\nPDF Generation failed (could not find file)!"
       raise MissingSource, required_file
     end
   end
@@ -54,7 +57,7 @@ CMD
     elsif uri.class == URI::HTTP
       check_url_exists url
     else
-      puts "Malformed destination provided for PDF generation source: #{url}"
+      @logger.error "Malformed destination provided for PDF generation source: #{url}"
     end
   end
 

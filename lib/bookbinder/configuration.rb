@@ -66,7 +66,8 @@ class Configuration
     end
   end
 
-  def initialize(config_hash)
+  def initialize(logger, config_hash)
+    @logger = logger
     @config = config_hash
   end
 
@@ -114,10 +115,10 @@ class Configuration
   private
 
   def credentials
-    @credentials ||= CredentialProvider.new(credentials_repository).credentials
+    @credentials ||= CredentialProvider.new(@logger, credentials_repository).credentials
   end
 
   def credentials_repository
-    @credentials_repository ||= Repository.new(full_name: cred_repo)
+    @credentials_repository ||= Repository.new(logger: @logger, full_name: cred_repo)
   end
 end

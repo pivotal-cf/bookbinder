@@ -1,14 +1,16 @@
 class Publisher
-
   include ShellOut
-  include BookbinderLogger
+
+  def initialize(logger)
+    @logger = logger
+  end
 
   def publish(options)
     intermediate_directory          = options.fetch(:output_dir)
     final_app_dir                   = options.fetch(:final_app_dir)
     pdf_requested                   = options.has_key?(:pdf) && options[:pdf]
     master_middleman_dir            = options.fetch(:master_middleman_dir)
-    spider                          = options.fetch(:spider) { Spider.new(app_dir: final_app_dir) }
+    spider                          = options.fetch(:spider) { Spider.new(@logger, app_dir: final_app_dir) }
     middleman_dir                   = File.join intermediate_directory, 'master_middleman'
     middleman_source_directory      = File.join middleman_dir, 'source'
     build_directory                 = File.join middleman_dir, 'build/.'
@@ -23,13 +25,13 @@ class Publisher
     generate_site(options, middleman_dir, repos)
     FileUtils.cp_r build_directory, public_directory
 
-    server_director = ServerDirector.new(directory: final_app_dir)
+    server_director = ServerDirector.new(@logger, directory: final_app_dir)
     server_director.use_server do |port|
       spider.generate_sitemap options.fetch(:host_for_sitemap), port
       generate_pdf(final_app_dir, options.fetch(:pdf), port) if pdf_requested && repo_with_pdf_page_present?(options, repos)
     end
 
-    log "Bookbinder bound your book into #{final_app_dir.green}"
+    @logger.log "Bookbinder bound your book into #{final_app_dir.green}"
 
     !spider.has_broken_links?
   end
@@ -37,7 +39,7 @@ class Publisher
   private
 
   def generate_site(options, output_master_middleman_dir, repos)
-    MiddlemanRunner.new.run(output_master_middleman_dir,
+    MiddlemanRunner.new(@logger).run(output_master_middleman_dir,
                             options.fetch(:template_variables, {}),
                             options[:local_repo_dir],
                             options[:verbose], repos, options[:host_for_sitemap]
@@ -57,14 +59,14 @@ class Publisher
   end
 
   def import_repo_to(destination, options, section_hash)
-    Section.get_instance(section_hash: section_hash, destination_dir: destination, local_repo_dir: options[:local_repo_dir], target_tag: options[:target_tag])
+    Section.get_instance(@logger, section_hash: section_hash, destination_dir: destination, local_repo_dir: options[:local_repo_dir], target_tag: options[:target_tag])
   end
 
   def generate_pdf(final_app_dir, options, port)
     source_page = URI::HTTP.build({:host=>"localhost", :port=>port, :protocol=>"http://", :path=>'/'+options.fetch(:page)})
     generated_pdf_file = File.join(final_app_dir, 'public', options.fetch(:filename))
     header_file = URI::HTTP.build({:host=>"localhost", :port=>port, :protocol=>"http://", :path=>'/'+options.fetch(:header)})
-    PdfGenerator.new.generate source_page, generated_pdf_file, header_file
+    PdfGenerator.new(@logger).generate source_page, generated_pdf_file, header_file
   end
 
   def prepare_directories(final_app, output, middleman_source)

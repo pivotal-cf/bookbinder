@@ -2,14 +2,13 @@ require 'rubygems/package'
 require 'zlib'
 
 class CredentialProvider
-  include BookbinderLogger
-
-  def initialize(repository)
+  def initialize(logger, repository)
+    @logger = logger
     @repository = repository
   end
 
   def credentials
-    log 'Processing ' + @repository.full_name.cyan
+    @logger.log 'Processing ' + @repository.full_name.cyan
     untar tarball
   end
 

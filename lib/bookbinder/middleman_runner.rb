@@ -22,13 +22,15 @@ class Middleman::Cli::BuildAction
 end
 
 class MiddlemanRunner
-
-  include BookbinderLogger
   include ShellOut
+
+  def initialize(logger)
+    @logger = logger
+  end
 
   def run(middleman_dir, template_variables, local_repo_dir, verbose = false, repos = [], production_host=nil)
     original_mm_root = ENV['MM_ROOT']
-    log "\nRunning middleman...\n\n"
+    @logger.log "\nRunning middleman...\n\n"
 
     # awful hacks to eliminate the impact of global state in middleman. when will it end?
     Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)

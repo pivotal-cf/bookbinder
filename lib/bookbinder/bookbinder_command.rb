@@ -1,8 +1,7 @@
 class Cli
   class BookbinderCommand
-    include BookbinderLogger
-
-    def initialize(configuration)
+    def initialize(logger, configuration)
+      @logger = logger
       @config = configuration
     end
 

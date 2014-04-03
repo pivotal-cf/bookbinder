@@ -4,6 +4,8 @@ describe Section do
   include ShellOut
   include_context 'tmp_dirs'
 
+  let(:logger) { NilLogger.new }
+
   describe '.get_instance' do
     let(:local_repo_dir) { '/dev/null' }
     before do
@@ -13,21 +15,21 @@ describe Section do
 
     context 'when called more than once' do
       it 'always returns the same instance for the same arguments' do
-        first_instance = Section.get_instance(section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
-        second_instance = Section.get_instance(section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
+        first_instance = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
+        second_instance = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
         expect(first_instance).to be(second_instance)
       end
 
       it 'returns different instances for different repo names' do
-        first_instance = Section.get_instance(section_hash: {'repository' => {'name' => 'foo/dogs-repo'}}, local_repo_dir: local_repo_dir)
-        second_instance = Section.get_instance(section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
+        first_instance = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/dogs-repo'}}, local_repo_dir: local_repo_dir)
+        second_instance = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
 
         expect(first_instance).not_to be(second_instance)
       end
 
       it 'returns different instances for different modes' do
-        local_code_repo = Section.get_instance(section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: 'spec/fixtures/repositories')
-        remote_code_repo = Section.get_instance(section_hash: {'repository' => {'name' => 'foo/book'}})
+        local_code_repo = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: 'spec/fixtures/repositories')
+        remote_code_repo = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/book'}})
 
         expect(local_code_repo).not_to be(remote_code_repo)
       end
@@ -38,7 +40,7 @@ describe Section do
         let(:local_repo_dir) { 'spec/fixtures/repositories' }
 
         it 'copies repos from local directory' do
-          expect(Section.get_instance(section_hash: {'repository' => {'name' => 'foo/code-example-repo'}}, local_repo_dir: local_repo_dir)).to be_copied
+          expect(Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/code-example-repo'}}, local_repo_dir: local_repo_dir)).to be_copied
         end
       end
 
@@ -46,8 +48,9 @@ describe Section do
         let(:local_repo_dir) { '/dev/null' }
 
         it 'logs a warning' do
-          expect(BookbinderLogger).to receive(:log).with /skipping \(not found\)/
-          Section.get_instance(section_hash: {'repository' => {'name' => 'foo/definitely-not-around'}}, local_repo_dir: local_repo_dir)
+          allow(logger).to receive(:log)
+          expect(logger).to receive(:log).with /skipping \(not found\)/
+          Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/definitely-not-around'}}, local_repo_dir: local_repo_dir)
         end
       end
     end
@@ -75,13 +78,13 @@ describe Section do
         let(:section_hash) { {'repository' => {'name' => repo_name} } }
 
         it 'uses "master" to make requests for the archive link' do
-          expect(GitClient.get_instance).to receive(:archive_link).with(repo_name, ref: ref).and_return(download_url)
-          Section.get_instance(section_hash: section_hash, destination_dir: destination_dir)
+          expect(GitClient.get_instance(logger)).to receive(:archive_link).with(repo_name, ref: ref).and_return(download_url)
+          Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
         end
 
         it 'copies the repo from github' do
-          allow(GitClient.get_instance).to receive(:archive_link).and_return download_url
-          Section.get_instance(section_hash: section_hash, destination_dir: destination_dir)
+          allow(GitClient.get_instance(logger)).to receive(:archive_link).and_return download_url
+          Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
           expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
         end
 
@@ -93,8 +96,8 @@ describe Section do
           end
 
           it 'uses the tag to make requests for the archive link' do
-            expect(GitClient.get_instance).to receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
-            Section.get_instance(section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
+            expect(GitClient.get_instance(logger)).to receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
+            Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
           end
         end
       end
@@ -104,13 +107,13 @@ describe Section do
         let(:section_hash) { {'repository' => {'name' => repo_name, 'ref' => ref} } }
 
         it 'uses the provided REF to make requests for the archive link' do
-          expect(GitClient.get_instance).to receive(:archive_link).with(repo_name, ref: ref).and_return download_url
-          Section.get_instance(section_hash: section_hash, destination_dir: destination_dir)
+          expect(GitClient.get_instance(logger)).to receive(:archive_link).with(repo_name, ref: ref).and_return download_url
+          Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
         end
 
         it 'copies the repo from github' do
-          allow(GitClient.get_instance).to receive(:archive_link).and_return download_url
-          Section.get_instance(section_hash: section_hash, destination_dir: destination_dir)
+          allow(GitClient.get_instance(logger)).to receive(:archive_link).and_return download_url
+          Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
           expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
         end
 
@@ -122,8 +125,8 @@ describe Section do
           end
 
           it 'uses the tag to make requests for the archive link' do
-            expect(GitClient.get_instance).to receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
-            Section.get_instance(section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
+            expect(GitClient.get_instance(logger)).to receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
+            Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
           end
         end
       end
@@ -142,7 +145,7 @@ describe Section do
     end
 
     it 'copies the repo from nearby' do
-      Section.get_instance(section_hash: {'repository' => {'name' => 'crazy_family_of_mine/' + repo_name}},
+      Section.get_instance(logger, section_hash: {'repository' => {'name' => 'crazy_family_of_mine/' + repo_name}},
                            local_repo_dir: local_repo_dir,
                            destination_dir: destination_dir)
       expect(File.exist? File.join(destination_dir, repo_name, 'my_aunties_goat.txt')).to be_true
@@ -150,7 +153,7 @@ describe Section do
   end
 
   describe '#subnav_template' do
-    let(:repo) { Section.new(double(:repo), subnav_template_name) }
+    let(:repo) { Section.new(logger, double(:repo), subnav_template_name) }
 
     context 'when the incoming template does not look like a partial file' do
       let(:subnav_template_name) { 'my_template' }

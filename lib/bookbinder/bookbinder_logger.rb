@@ -2,37 +2,28 @@ class String
   include ANSI::Mixin
 end
 
-module BookbinderLogger
-
-  def self.log(message)
+class BookbinderLogger
+  def log(message)
     puts message
   end
 
-  def self.log_print(message)
+  def log_print(message)
     print message
   end
 
-  def log(message)
-    BookbinderLogger.log message
+  def error(message)
+    puts message.red
   end
 
-  def log_print(message)
-    BookbinderLogger.log_print message
+  def success(message)
+    puts message.green
   end
 
-
-  def self.included(base)
-    base.extend ClassMethods
+  def warn(message)
+    puts message.yellow
   end
 
-  module ClassMethods
-    def self.log(message)
-      BookbinderLogger.log message
-    end
-
-    def self.log_print(message)
-      BookbinderLogger.log_print message
-    end
+  def notify(message)
+    puts message.blue
   end
-
 end

@@ -1,7 +1,5 @@
 
 class Cli
-  include BookbinderLogger
-
   class InvalidArguments < StandardError;
   end
 
@@ -42,24 +40,24 @@ class Cli
   private
 
   def version
-    log "bookbinder #{Gem::Specification::load(File.join GEM_ROOT, "bookbinder.gemspec").version}"
+    logger.log "bookbinder #{Gem::Specification::load(File.join GEM_ROOT, "bookbinder.gemspec").version}"
   end
 
   def run_command(command, command_arguments)
     configuration = config
     raise 'Non-unique directory names' unless configuration.valid?
-    command.new(configuration).run command_arguments
+    command.new(logger, configuration).run command_arguments
   rescue Configuration::CredentialKeyError => e
-    log "#{e.message}, in credentials.yml".red
+    logger.error "#{e.message}, in credentials.yml"
     1
   rescue KeyError => e
-    log "#{e.message}, in config.yml".red
+    logger.error "#{e.message}, in config.yml"
     1
   rescue Cli::InvalidArguments
-    log usage_message.command(command)
+    logger.log usage_message.command(command)
     1
   rescue => e
-    log e.message.red
+    logger.error e.message
     1
   end
 
@@ -70,20 +68,24 @@ class Cli
   def fetch_config
     config_hash = YAML.load(File.read('./config.yml'))
     raise 'config.yml is empty' unless config_hash
-    Configuration.new(config_hash)
+    Configuration.new(logger, config_hash)
   end
 
   def unrecognized_flag(name)
-    log "Unrecognized flag '--#{name}'"
+    logger.log "Unrecognized flag '--#{name}'"
     usage_message.print
   end
 
   def unrecognized_command(name)
-    log "Unrecognized command '#{name}'"
+    logger.log "Unrecognized command '#{name}'"
     usage_message.print
   end
 
   def usage_message
-    UsageMessage.new(COMMAND_TO_CLASS_MAPPING, FLAGS)
+    UsageMessage.new(logger, COMMAND_TO_CLASS_MAPPING, FLAGS)
+  end
+
+  def logger
+    @logger ||= BookbinderLogger.new
   end
 end

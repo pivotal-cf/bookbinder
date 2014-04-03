@@ -16,8 +16,9 @@ describe Cli::Publish do
       ],
       'public_host' => 'host.example.com'
   } }
-  let(:config) { Configuration.new(config_hash) }
-  let(:publish_command) { Cli::Publish.new(config) }
+  let(:config) { Configuration.new(logger, config_hash) }
+  let(:logger) { NilLogger.new }
+  let(:publish_command) { Cli::Publish.new(logger, config) }
 
   before { Spider.any_instance.stub(:generate_sitemap) }
 
@@ -64,7 +65,7 @@ describe Cli::Publish do
 
         stub_refs_for_repo(fixture_repo_name, [desired_tag])
 
-        expect(GitClient.get_instance).to receive(:archive_link).with(fixture_repo_name, ref: desired_tag).once.and_return zipped_repo_url
+        expect(GitClient.get_instance(logger)).to receive(:archive_link).with(fixture_repo_name, ref: desired_tag).once.and_return zipped_repo_url
 
         publish_command.run cli_args
       end

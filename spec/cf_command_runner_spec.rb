@@ -1,8 +1,9 @@
 require 'spec_helper'
 
 describe CfCommandRunner do
+  let(:logger) { NilLogger.new }
   let(:credentials) { Configuration::CfCredentials.new(config_hash, false) }
-  let(:cf) { CfCommandRunner.new(credentials, trace_file) }
+  let(:cf) { CfCommandRunner.new(logger, credentials, trace_file) }
   let(:trace_file) { 'path/to/log' }
 
   describe '#login' do

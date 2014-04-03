@@ -1,7 +1,6 @@
 class ServerDirector
-  include BookbinderLogger
-
-  def initialize(directory: nil, port: 41722)
+  def initialize(logger, directory: nil, port: 41722)
+    @logger = logger
     @directory = directory
     @port = port
   end
@@ -28,10 +27,10 @@ class ServerDirector
       line = io.gets
       raise 'Puma could not start' if line.nil?
 
-      log "Vienna says, #{line}"
+      @logger.log "Vienna says, #{line}"
     end until line.include?('Listening on')
 
-    log 'Vienna is lovely this time of year.'
+    @logger.log 'Vienna is lovely this time of year.'
   end
 
   def stop_server(pid)

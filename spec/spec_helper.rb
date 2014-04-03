@@ -19,7 +19,7 @@ def generate_middleman_with(index_page)
 end
 
 def stub_github_for(repo_name, some_ref='master')
-  github = GitClient.get_instance access_token: 'foo'
+  github = GitClient.get_instance(NilLogger.new, access_token: 'foo')
   zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
   github.stub(:archive_link).with(repo_name, ref: some_ref)
   .and_return(zipped_repo_url)
@@ -52,7 +52,7 @@ def stub_refs_for_repo(name, refs)
 end
 
 def mock_github_for(repo_name, some_ref='master')
-  github = GitClient.get_instance access_token: 'foo'
+  github = GitClient.get_instance(NilLogger.new, access_token: 'foo')
   zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
   github.should_receive(:archive_link).with(repo_name, ref: some_ref)
   .once
@@ -85,6 +85,7 @@ end
 require_relative '../lib/bookbinder'
 require_relative '../template_app/app.rb'
 require_relative 'fixtures/repo_fixture'
+Dir[File.expand_path(File.join(File.dirname(__FILE__), 'helpers/*'))].each {|file| require_relative file }
 
 RSpec.configure do |config|
   config.before do
@@ -96,8 +97,6 @@ RSpec.configure do |config|
   end
 
   config.before do
-    BookbinderLogger.stub(:log) {}
-    BookbinderLogger.stub(:log_print) {}
     Pusher.any_instance.stub(:push) unless self.class.metadata[:enable_pusher]
 
     allow(Section).to receive(:store).and_return({})

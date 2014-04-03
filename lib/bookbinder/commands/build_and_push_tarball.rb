@@ -9,9 +9,9 @@ class Cli
     def run(_)
       raise MissingBuildNumber unless ENV['BUILD_NUMBER']
       aws_credentials = config.aws_credentials
-      repository = Archive.new(key: aws_credentials.access_key, secret: aws_credentials.secret_key)
+      repository = Archive.new(logger: @logger, key: aws_credentials.access_key, secret: aws_credentials.secret_key)
       repository.create_and_upload_tarball(build_number: ENV['BUILD_NUMBER'], bucket: aws_credentials.green_builds_bucket,
-                        namespace: Repository.new(full_name: config.book_repo).short_name)
+                        namespace: Repository.new(logger: @logger, full_name: config.book_repo).short_name)
       0
     end
 

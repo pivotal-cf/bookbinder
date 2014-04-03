@@ -4,7 +4,8 @@ describe Publisher do
   describe '#publish' do
     include_context 'tmp_dirs'
 
-    let(:publisher) { Publisher.new }
+    let(:logger) { NilLogger.new }
+    let(:publisher) { Publisher.new(logger) }
     let(:output_dir) { tmp_subdir 'output' }
     let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:non_broken_master_middleman_dir) { generate_middleman_with 'non_broken_index.html' }
@@ -13,6 +14,7 @@ describe Publisher do
     context 'integration' do
       before do
         squelch_middleman_output
+        allow(BookbinderLogger).to receive(:new).and_return(NilLogger.new)
         WebMock.disable_net_connect!(:allow_localhost => true)
       end
 
@@ -86,7 +88,8 @@ describe Publisher do
             let(:local_repo_dir) { '/dev/null' }
 
             it 'fails out' do
-              expect(BookbinderLogger).to receive(:log).with /skipping \(not found\)/
+              allow(logger).to receive(:log)
+              expect(logger).to receive(:log).with /skipping \(not found\)/
               publisher.publish publication_arguments
               expect(WebMock).not_to have_requested(:get, 'https://api.github.com/repos/fantastic/code-example-repo/tarball/master')
             end

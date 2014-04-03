@@ -4,12 +4,12 @@ class Cli
       tag = params.first
       raise Cli::InvalidArguments unless tag
 
-      book = Book.new(full_name: config.book_repo, sections: config.sections)
+      book = Book.new(logger: @logger, full_name: config.book_repo, sections: config.sections)
 
       book.tag_self_and_sections_with tag
 
-      log 'Success!'.green
-      log " #{book.full_name.yellow} its document repositories were tagged with #{tag.blue}"
+      @logger.log 'Success!'.green
+      @logger.log " #{book.full_name.yellow} its document repositories were tagged with #{tag.blue}"
       0
     end
 

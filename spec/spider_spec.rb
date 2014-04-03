@@ -12,6 +12,7 @@ describe Spider do
   let(:stylesheet) { File.join('spec', 'fixtures', 'stylesheet.css') }
   let(:present_image) { File.join('spec', 'fixtures', '$!.png') }
   let(:public_directory) { File.join(final_app_dir, 'public') }
+  let(:logger) { NilLogger.new }
 
   around do |spec|
     stub_request(:get, "http://something-nonexistent.com/absent-remote.gif").to_return(:status => 404, :body => "", :headers => {})
@@ -28,7 +29,7 @@ describe Spider do
     write_arbitrary_yaml_to(public_directory)
     WebMock.disable_net_connect!(:allow_localhost => true)
 
-    server_director = ServerDirector.new(directory: final_app_dir, port: port)
+    server_director = ServerDirector.new(logger, directory: final_app_dir, port: port)
 
     def server_director.log(message)
 
@@ -43,7 +44,8 @@ describe Spider do
     let(:output_dir) { tmp_subdir 'output' }
     let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:log_file) { File.join(output_dir, 'wget.log') }
-    let(:spider) { Spider.new app_dir: final_app_dir }
+    let(:logger) { NilLogger.new }
+    let(:spider) { Spider.new logger, app_dir: final_app_dir }
 
     after { WebMock.disable_net_connect! }
 
@@ -73,7 +75,7 @@ describe Spider do
   describe '#generate_sitemap' do
     let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:intermediate_dir) { File.join('spec', 'fixtures') }
-    let(:spider) { Spider.new app_dir: final_app_dir }
+    let(:spider) { Spider.new logger, app_dir: final_app_dir }
     let(:host) { 'example.com' }
     let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
 
@@ -90,45 +92,42 @@ describe Spider do
       let(:other_page) { File.join('spec', 'fixtures', 'page_with_broken_links.html') }
       let(:broken_links) do
         [
-            "/index.html => http://localhost:#{port}/non_existent.yml".blue,
-            "/index.html => http://localhost:#{port}/non_existent/index.html".blue,
-            "/index.html => http://localhost:#{port}/also_non_existent/index.html".blue,
-            '/index.html => #missing-anchor'.yellow,
-            '/index.html => #ill-formed.anchor'.yellow,
-            '/index.html => #missing'.yellow,
-            '/other_page.html => #this-doesnt'.yellow,
-            #'/other_page.html => #this-doesnt'.yellow, #Even though this shows up twice, we ignore duplicates
-            '/index.html => #missing.and.bad'.yellow,
-            '/index.html => #still-bad=anchor'.yellow,
-            '/other_page.html => #another"bad"anchor'.yellow,
-            'public/stylesheet.css => absent-relative.gif'.blue,
-            'public/stylesheet.css => /absent-absolute.gif'.blue,
-            'public/stylesheet.css => http://something-nonexistent.com/absent-remote.gif'.blue,
+            "/index.html => http://localhost:#{port}/non_existent.yml",
+            "/index.html => http://localhost:#{port}/non_existent/index.html",
+            "/index.html => http://localhost:#{port}/also_non_existent/index.html",
+            'public/stylesheet.css => absent-relative.gif',
+            'public/stylesheet.css => /absent-absolute.gif',
+            'public/stylesheet.css => http://something-nonexistent.com/absent-remote.gif',
+        ]
+      end
+      let(:broken_anchor_links) do
+        [
+            '/index.html => #missing-anchor',
+            '/index.html => #ill-formed.anchor',
+            '/index.html => #missing',
+            '/other_page.html => #this-doesnt',
+            '/index.html => #missing.and.bad',
+            '/index.html => #still-bad=anchor',
+            '/other_page.html => #another"bad"anchor',
         ]
       end
 
       it 'names them' do
-        announcements = []
-        allow(BookbinderLogger).to receive(:log) do |announcement|
-          announcements << announcement unless announcement.match(/Vienna|broken links!/)
+        broken_links.each do |l|
+          expect(logger).to receive(:notify).with(/#{Regexp.escape(l)}/)
+        end
+
+        broken_anchor_links.each do |l|
+          expect(logger).to receive(:warn).with(/#{Regexp.escape(l)}/)
         end
 
         spider.generate_sitemap host, port
-
-        expect(announcements).to match_array(broken_links)
       end
 
       it 'logs a count of them' do
-        broken_link_counts = 2.times.map { "\nFound #{broken_links.count} broken links!".red }
-
-        announcements = []
-        allow(BookbinderLogger).to receive(:log) do |announcement|
-          announcements << announcement if announcement.match(/broken links!/)
-        end
+        expect(logger).to receive(:error).with("\nFound #{broken_links.count + broken_anchor_links.count} broken links!").twice
 
         spider.generate_sitemap host, port
-
-        expect(announcements).to match_array(broken_link_counts)
       end
     end
   end

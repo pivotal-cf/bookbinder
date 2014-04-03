@@ -1,15 +1,14 @@
 class Repository
-  include BookbinderLogger
   include ShellOut
 
   attr_reader :full_name, :copied_to
 
-  def self.build_from_remote(section_hash, destination_dir, target_ref)
+  def self.build_from_remote(logger, section_hash, destination_dir, target_ref)
     full_name = section_hash.fetch('repository', {}).fetch('name')
     target_ref = target_ref || section_hash.fetch('repository', {})['ref']
     directory = section_hash['directory']
 
-    repository = new(full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
+    repository = new(logger: logger, full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
     if destination_dir
       repository.copy_from_remote(destination_dir)
     end
@@ -17,21 +16,22 @@ class Repository
     repository
   end
 
-  def self.build_from_local(section_hash, local_repo_dir, destination_dir)
+  def self.build_from_local(logger, section_hash, local_repo_dir, destination_dir)
     full_name = section_hash.fetch('repository').fetch('name')
     directory = section_hash['directory']
 
-    repository = new(full_name: full_name, directory: directory, local_repo_dir: local_repo_dir)
+    repository = new(logger: logger, full_name: full_name, directory: directory, local_repo_dir: local_repo_dir)
     repository.copy_from_local(destination_dir) if destination_dir
 
     repository
   end
 
-  def initialize(full_name: nil, target_ref: nil, github_token: nil, directory: nil, local_repo_dir: nil)
+  def initialize(logger: nil, full_name: nil, target_ref: nil, github_token: nil, directory: nil, local_repo_dir: nil)
+    @logger = logger
     #TODO better error message
     raise 'No full_name provided ' unless full_name
     @full_name = full_name
-    @github = GitClient.get_instance(access_token: github_token || ENV['GITHUB_API_TOKEN'])
+    @github = GitClient.get_instance(logger, access_token: github_token || ENV['GITHUB_API_TOKEN'])
     @target_ref = target_ref
     @directory = directory
     @local_repo_dir = local_repo_dir
@@ -77,7 +77,7 @@ class Repository
 
   def copy_from_local(destination_dir)
     if File.exist?(path_to_local_repo)
-      log '  copying '.yellow + path_to_local_repo
+      @logger.log '  copying '.yellow + path_to_local_repo
       FileUtils.cp_r path_to_local_repo, File.join(destination_dir, directory)
       @copied_to = File.join(destination_dir, directory)
     else
@@ -95,7 +95,7 @@ class Repository
 
   def update_local_copy
     if File.exist?(path_to_local_repo)
-      log 'Updating ' + path_to_local_repo.cyan
+      @logger.log 'Updating ' + path_to_local_repo.cyan
       Kernel.system("cd #{path_to_local_repo} && git pull")
     else
       announce_skip
@@ -103,13 +103,13 @@ class Repository
   end
 
   def announce_skip
-    log '  skipping (not found) '.magenta + path_to_local_repo
+    @logger.log '  skipping (not found) '.magenta + path_to_local_repo
   end
 
   def download_archive
     raise "Ref #{target_ref} was not found in #{full_name}" unless has_ref?(target_ref)
 
-    log '  downloading '.yellow + archive_link.blue
+    @logger.log '  downloading '.yellow + archive_link.blue
     response = Faraday.new.get(archive_link)
     response.body
   end

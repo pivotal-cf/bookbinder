@@ -10,16 +10,18 @@ describe Cli::DocReposUpdated do
         'sections' => sections
       }
     end
-    let(:config) { Configuration.new(config_hash) }
+
+    let(:logger) { NilLogger.new }
+    let(:config) { Configuration.new(logger, config_hash) }
 
     let(:fake_book) { double }
     let(:fake_change_monitor) { double }
 
-    let(:doc_repos_updated) { Cli::DocReposUpdated.new(config) }
+    let(:doc_repos_updated) { Cli::DocReposUpdated.new(logger, config) }
 
     before do
-      fake_book = expect_to_receive_and_return_real_now(Book, :new, full_name: book_repo, sections: sections)
-      allow(DocRepoChangeMonitor).to receive(:new).with(fake_book).and_return(fake_change_monitor)
+      fake_book = expect_to_receive_and_return_real_now(Book, :new, logger: logger, full_name: book_repo, sections: sections)
+      allow(DocRepoChangeMonitor).to receive(:new).with(logger, fake_book).and_return(fake_change_monitor)
     end
 
     context 'when ChangeMonitor reports a build is necessary' do

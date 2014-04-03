@@ -3,8 +3,9 @@ require 'spec_helper'
 describe CodeExample do
   describe '#get_snippet_and_language_at' do
     let(:repo_name) { 'my-docs-org/code-example-repo' }
+    let(:logger) { NilLogger.new }
     before { stub_github_for repo_name }
-    let(:code_example) { CodeExample.get_instance(section_hash: {'repository' => {'name' => repo_name}}) }
+    let(:code_example) { CodeExample.get_instance(logger, section_hash: {'repository' => {'name' => repo_name}}) }
 
     it 'produces a string for the given excerpt_marker' do
       code_snippet = <<-RUBY
@@ -45,10 +46,11 @@ p fib.take_while { |n| n <= 4E6 }
     end
 
     context 'when the repo was not copied' do
-      let(:missing_repo) { CodeExample.get_instance(section_hash: {'repository' => {'name' => 'foo/missing-book'}}, local_repo_dir: '/dev/null') }
+      let(:missing_repo) { CodeExample.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/missing-book'}}, local_repo_dir: '/dev/null') }
 
       it 'logs a warning' do
-        expect(BookbinderLogger).to receive(:log).with /skipping \(not found\)/
+        allow(logger).to receive(:log)
+        expect(logger).to receive(:log).with /skipping \(not found\)/
         missing_repo.get_snippet_and_language_at('anything_at_all')
       end
     end

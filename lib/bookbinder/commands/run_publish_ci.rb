@@ -18,15 +18,15 @@ class Cli
     end
 
     def publish(cli_args)
-      Publish.new(config).run(['github'] + cli_args)
+      Publish.new(@logger, config).run(['github'] + cli_args)
     end
 
     def push_to_staging
-      PushLocalToStaging.new(config).run []
+      PushLocalToStaging.new(@logger, config).run []
     end
 
     def push_tarball
-      BuildAndPushTarball.new(config).run []
+      BuildAndPushTarball.new(@logger, config).run []
     end
   end
 end
