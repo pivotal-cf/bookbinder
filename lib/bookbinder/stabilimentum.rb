@@ -1,6 +1,4 @@
 class Spider
-  private
-
   class Stabilimentum # Decorates a piece of the web.
     FudgedUri = Struct.new(:path, :fragment, :to_s)
 
@@ -32,7 +30,6 @@ class Spider
     def fragment_identifiers(targeting_locally: false)
       anchors.map { |anchor| appropriately_scoped_fragment_uri(anchor, targeting_locally) }.compact
     end
-
 
     private
 
