@@ -5,14 +5,12 @@ class Sieve
   end
 
   def links_from(page, is_first_pass)
-    broken_links = []
-    working_links = []
-
     if page.not_found? && is_first_pass
-      broken_links << Spider.prepend_location(page.referer, page.url)
+      working_links = []
+      broken_links = [Spider.prepend_location(page.referer, page.url)]
     else
-      working_links << page.url.to_s
-      broken_links.concat broken_fragments_targeting(page, is_first_pass)
+      working_links = [page.url.to_s]
+      broken_links = broken_fragments_targeting(page, is_first_pass)
       @unverified_fragments_by_url.merge! fragments_targeting_other_pages_from page
     end
 
@@ -28,6 +26,10 @@ class Sieve
   def local_fragments_missing_from(page)
     local_fragments = page.fragment_identifiers targeting_locally: true
     local_fragments.map { |uri| Spider.prepend_location(page.url, uri) unless page.has_target_for?(uri) }.compact
+  end
+
+  def remote_fragments_missing_from(page)
+    @unverified_fragments_by_url.fetch(page.url, []).reject { |localized_identifier| page.has_target_for? URI(strip_location(localized_identifier)) }
   end
 
   def fragments_targeting_other_pages_from(page)
@@ -46,10 +48,6 @@ class Sieve
     end
 
     dict
-  end
-
-  def remote_fragments_missing_from(page)
-    @unverified_fragments_by_url.fetch(page.url, []).reject { |localized_identifier| page.has_target_for? URI(strip_location(localized_identifier)) }
   end
 
   def strip_location(id)
