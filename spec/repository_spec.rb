@@ -4,28 +4,32 @@ describe Repository do
   include_context 'tmp_dirs'
 
   let(:logger) { NilLogger.new }
+  let(:github_token) { 'blahblah' }
+  let(:git_client) { GitClient.new(logger, access_token: github_token) }
+
+  before do
+    allow(GitClient).to receive(:new).and_call_original
+    allow(GitClient).to receive(:new).with(logger, access_token: github_token).and_return(git_client)
+  end
 
   it 'requires a full_name' do
     expect {
-      Repository.new(full_name: '')
+      Repository.new(logger: logger, github_token: github_token, full_name: '')
     }.not_to raise_error
 
     expect {
-      Repository.new
+      Repository.new(logger: logger, github_token: github_token)
     }.to raise_error(/full_name/)
   end
 
   describe '#tag_with' do
-    let(:github_token) { 'blahblah' }
     let(:head_sha) { 'ha7f'*10 }
 
     it 'calls #create_tag! on the github instance variable' do
-      git_client = GitClient.get_instance logger, access_token: github_token
-
       expect(git_client).to receive(:head_sha).with('org/repo').and_return head_sha
       expect(git_client).to receive(:create_tag!).with('org/repo', 'the_tag_name', head_sha)
 
-      Repository.new(github_token: github_token, full_name: 'org/repo').tag_with('the_tag_name')
+      Repository.new(logger: logger, github_token: github_token, full_name: 'org/repo').tag_with('the_tag_name')
     end
   end
 
@@ -41,7 +45,7 @@ describe Repository do
     it "returns the first (most recent) commit's sha if @head_sha is unset" do
       fake_github = double(:github)
 
-      expect(GitClient).to receive(:get_instance).
+      expect(GitClient).to receive(:new).
                                with(logger, access_token: github_token).
                                and_return(fake_github)
 
@@ -68,10 +72,11 @@ describe Repository do
     let(:repo) { Repository.new(logger: logger, full_name: repo_name, target_ref: some_sha, github_token: 'foo') }
     let(:destination_dir) { tmp_subdir('destination') }
     let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
+    let(:git_client) { GitClient.new(logger) }
 
     before do
-      stub_refs_for_repo repo_name, [some_sha]
-      stub_github_for repo_name, some_sha
+      stub_github_for git_client, repo_name, some_sha
+      allow(GitClient).to receive(:new).and_return git_client
     end
 
     it 'retrieves the repo from github' do
@@ -153,7 +158,8 @@ describe Repository do
     let(:my_tag) { '#hashtag' }
 
     before do
-      allow(GitClient.get_instance(logger)).to receive(:tags).and_return(tags)
+      allow(GitClient).to receive(:new).and_return(git_client)
+      allow(git_client).to receive(:tags).and_return(tags)
     end
 
     context 'when a tag has been applied' do
@@ -180,20 +186,22 @@ describe Repository do
 
   describe '#tag_with' do
     let(:repo_sha) { 'some-sha' }
-    let(:repo) { Repository.new(full_name: 'my-docs-org/my-docs-repo',
+    let(:repo) { Repository.new(logger: logger,
+                                github_token: github_token,
+                                full_name: 'my-docs-org/my-docs-repo',
                                 target_ref: repo_sha,
                                 directory: 'pretty_url_path',
                                 local_repo_dir: '') }
     let(:my_tag) { '#hashtag' }
 
     before do
-      allow(GitClient.get_instance(logger)).to receive(:validate_authorization)
-      allow(GitClient.get_instance(logger)).to receive(:commits).with(repo.full_name)
+      allow(git_client).to receive(:validate_authorization)
+      allow(git_client).to receive(:commits).with(repo.full_name)
                                        .and_return([OpenStruct.new(sha: repo_sha)])
     end
 
     it 'should apply a tag' do
-      expect(GitClient.get_instance(logger)).to receive(:create_tag!)
+      expect(git_client).to receive(:create_tag!)
                                         .with(repo.full_name, my_tag, repo_sha)
 
       repo.tag_with(my_tag)
@@ -204,7 +212,7 @@ describe Repository do
     let(:local_repo_dir) { tmpdir }
     let(:full_name) { 'org/repo-name' }
     let(:repo_dir) { File.join(local_repo_dir, 'repo-name') }
-    let(:repository) { Repository.new(logger: logger, full_name: full_name, local_repo_dir: local_repo_dir) }
+    let(:repository) { Repository.new(logger: logger, github_token: github_token, full_name: full_name, local_repo_dir: local_repo_dir) }
 
     context 'when the repo dirs are there' do
       before do
@@ -232,7 +240,7 @@ describe Repository do
     let(:archive_head_url) { "https://api.github.com/repos/#{full_name}/tarball/#{target_ref}" }
     let(:tar_url) { "https://codeload.github.com/#{full_name}/legacy.tar.gz/#{target_ref}" }
 
-    let(:repo) { Repository.new(logger: logger, full_name: full_name, target_ref: target_ref) }
+    let(:repo) { Repository.new(logger: logger, github_token: github_token, full_name: full_name, target_ref: target_ref) }
 
     before do
       stub_refs_for_repo(full_name, [existing_ref])

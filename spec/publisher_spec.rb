@@ -10,6 +10,7 @@ describe Publisher do
     let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:non_broken_master_middleman_dir) { generate_middleman_with 'non_broken_index.html' }
     let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html' }
+    let(:git_client) { GitClient.new(logger) }
 
     context 'integration' do
       before do
@@ -28,8 +29,9 @@ describe Publisher do
         some_sha = 'some-sha'
         some_other_sha = 'some-other-sha'
 
-        stub_github_for(some_repo, some_sha)
-        stub_github_for(some_other_repo, some_other_sha)
+        stub_github_for(git_client, some_repo, some_sha)
+        stub_github_for(git_client, some_other_repo, some_other_sha)
+        allow(GitClient).to receive(:new).and_return(git_client)
 
         sections = [
             {'repository' => {'name' => some_repo, 'ref' => some_sha}, 'directory' => 'pretty_path'},
@@ -141,8 +143,9 @@ describe Publisher do
         end
 
         it 'applies the syntax highlighting CSS' do
-          stub_github_for section_repo_name
-          stub_github_for code_repo
+          stub_github_for git_client, section_repo_name
+          stub_github_for git_client, code_repo
+          allow(GitClient).to receive(:new).and_return(git_client)
 
           publisher.publish(publication_arguments)
           index_html = File.read(File.join(final_app_dir, 'public', 'index.html'))
@@ -169,8 +172,9 @@ describe Publisher do
         end
 
         it 'makes only one request per code example repository' do
-          stub_github_for section_repo_name
-          mock_github_for code_repo
+          stub_github_for git_client, section_repo_name
+          mock_github_for git_client, code_repo
+          allow(GitClient).to receive(:new).and_return git_client
 
           publisher.publish publication_arguments
         end

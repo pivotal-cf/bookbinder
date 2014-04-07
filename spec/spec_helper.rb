@@ -18,11 +18,9 @@ def generate_middleman_with(index_page)
   dir
 end
 
-def stub_github_for(repo_name, some_ref='master')
-  github = GitClient.get_instance(NilLogger.new, access_token: 'foo')
+def stub_github_for(git_client, repo_name, some_ref = 'master')
   zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
-  github.stub(:archive_link).with(repo_name, ref: some_ref)
-  .and_return(zipped_repo_url)
+  allow(git_client).to receive(:archive_link).with(repo_name, ref: some_ref).and_return(zipped_repo_url)
 
   zipped_repo = RepoFixture.tarball repo_name.split('/').last, some_ref
   stub_request(:get, zipped_repo_url).to_return(
@@ -51,10 +49,9 @@ def stub_refs_for_repo(name, refs)
   stub_request(:get, all_refs_url).to_return(status: 200, body: ref_response.to_json, headers: {'Content-Type' => 'application/json; charset=utf-8'})
 end
 
-def mock_github_for(repo_name, some_ref='master')
-  github = GitClient.get_instance(NilLogger.new, access_token: 'foo')
+def mock_github_for(git_client, repo_name, some_ref='master')
   zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
-  github.should_receive(:archive_link).with(repo_name, ref: some_ref)
+  expect(git_client).to receive(:archive_link).with(repo_name, ref: some_ref)
   .once
   .and_return(zipped_repo_url)
 
@@ -85,7 +82,7 @@ end
 require_relative '../lib/bookbinder'
 require_relative '../template_app/app.rb'
 require_relative 'fixtures/repo_fixture'
-Dir[File.expand_path(File.join(File.dirname(__FILE__), 'helpers/*'))].each {|file| require_relative file }
+Dir[File.expand_path(File.join(File.dirname(__FILE__), 'helpers/*'))].each { |file| require_relative file }
 
 RSpec.configure do |config|
   config.before do
@@ -120,4 +117,3 @@ RSpec.configure do |config|
 
   config.include SpecHelperMethods
 end
-

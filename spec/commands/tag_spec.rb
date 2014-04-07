@@ -14,9 +14,11 @@ describe Cli::Tag do
     }
   end
   let(:config) { Configuration.new(logger, config_hash) }
+  let(:git_client) { GitClient.new(logger) }
 
   before do
-    allow(GitClient.get_instance(logger)).to receive(:create_tag!)
+    allow(git_client).to receive(:create_tag!)
+    allow(GitClient).to receive(:new).and_return(git_client)
   end
 
   it 'should tag the book and its sections' do

@@ -8,9 +8,12 @@ describe Section do
 
   describe '.get_instance' do
     let(:local_repo_dir) { '/dev/null' }
+    let(:git_client) { GitClient.new(logger) }
+
     before do
-      stub_github_for 'foo/book'
-      stub_github_for 'foo/dogs-repo'
+      stub_github_for git_client, 'foo/book'
+      stub_github_for git_client, 'foo/dogs-repo'
+      allow(GitClient).to receive(:new).and_return(git_client)
     end
 
     context 'when called more than once' do
@@ -72,18 +75,23 @@ describe Section do
       let(:destination_dir) { tmp_subdir('output') }
       let(:repo_name) { 'great_org/dogs-repo' }
       let(:download_url) { "https://github.com/great_org/dogs-repo/archive/#{ref}.tar.gz" }
+      let(:github_client) { GitClient.new(logger) }
+
+      before do
+        allow(GitClient).to receive(:new).and_return github_client
+      end
 
       context 'when no REF is provided' do
         let(:ref) { 'master' }
-        let(:section_hash) { {'repository' => {'name' => repo_name} } }
+        let(:section_hash) { {'repository' => {'name' => repo_name}} }
 
         it 'uses "master" to make requests for the archive link' do
-          expect(GitClient.get_instance(logger)).to receive(:archive_link).with(repo_name, ref: ref).and_return(download_url)
+          expect(github_client).to receive(:archive_link).with(repo_name, ref: ref).and_return(download_url)
           Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
         end
 
         it 'copies the repo from github' do
-          allow(GitClient.get_instance(logger)).to receive(:archive_link).and_return download_url
+          allow(github_client).to receive(:archive_link).and_return download_url
           Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
           expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
         end
@@ -96,7 +104,7 @@ describe Section do
           end
 
           it 'uses the tag to make requests for the archive link' do
-            expect(GitClient.get_instance(logger)).to receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
+            expect(github_client).to receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
             Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
           end
         end
@@ -104,15 +112,15 @@ describe Section do
 
       context 'when a REF is provided' do
         let(:ref) { 'this-is-the-commit-i-want' }
-        let(:section_hash) { {'repository' => {'name' => repo_name, 'ref' => ref} } }
+        let(:section_hash) { {'repository' => {'name' => repo_name, 'ref' => ref}} }
 
         it 'uses the provided REF to make requests for the archive link' do
-          expect(GitClient.get_instance(logger)).to receive(:archive_link).with(repo_name, ref: ref).and_return download_url
+          expect(github_client).to receive(:archive_link).with(repo_name, ref: ref).and_return download_url
           Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
         end
 
         it 'copies the repo from github' do
-          allow(GitClient.get_instance(logger)).to receive(:archive_link).and_return download_url
+          allow(github_client).to receive(:archive_link).and_return download_url
           Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
           expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
         end
@@ -125,7 +133,7 @@ describe Section do
           end
 
           it 'uses the tag to make requests for the archive link' do
-            expect(GitClient.get_instance(logger)).to receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
+            expect(github_client).to receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
             Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
           end
         end

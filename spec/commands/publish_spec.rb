@@ -32,11 +32,14 @@ describe Cli::Publish do
   end
 
   context 'github' do
+    let(:git_client) { GitClient.new(logger) }
+
     before do
-      GitClient.any_instance.stub(:archive_link)
-      stub_github_for 'fantastic/dogs-repo', 'dog-sha'
-      stub_github_for 'fantastic/my-docs-repo', 'my-docs-sha'
-      stub_github_for 'fantastic/my-other-docs-repo', 'my-other-sha'
+      allow(git_client).to receive(:archive_link)
+      stub_github_for git_client, 'fantastic/dogs-repo', 'dog-sha'
+      stub_github_for git_client, 'fantastic/my-docs-repo', 'my-docs-sha'
+      stub_github_for git_client, 'fantastic/my-other-docs-repo', 'my-other-sha'
+      allow(GitClient).to receive(:new).and_return(git_client)
     end
 
     it 'creates some static HTML' do
@@ -52,9 +55,9 @@ describe Cli::Publish do
       let(:fixture_repo_name) { 'fantastic/fixture-book-title' }
 
       it 'gets the book at that tag' do
-        stub_github_for 'fantastic/dogs-repo', desired_tag
-        stub_github_for 'fantastic/my-docs-repo', desired_tag
-        stub_github_for 'fantastic/my-other-docs-repo', desired_tag
+        stub_github_for git_client, 'fantastic/dogs-repo', desired_tag
+        stub_github_for git_client, 'fantastic/my-docs-repo', desired_tag
+        stub_github_for git_client, 'fantastic/my-other-docs-repo', desired_tag
 
         zipped_repo_url = "https://github.com/#{fixture_repo_name}/archive/#{desired_tag}.tar.gz"
 
@@ -65,7 +68,7 @@ describe Cli::Publish do
 
         stub_refs_for_repo(fixture_repo_name, [desired_tag])
 
-        expect(GitClient.get_instance(logger)).to receive(:archive_link).with(fixture_repo_name, ref: desired_tag).once.and_return zipped_repo_url
+        expect(git_client).to receive(:archive_link).with(fixture_repo_name, ref: desired_tag).once.and_return zipped_repo_url
 
         publish_command.run cli_args
       end

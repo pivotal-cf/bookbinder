@@ -2,10 +2,6 @@ class GitClient < Octokit::Client
   class GitClient::TokenException < StandardError;
   end
 
-  def self.get_instance(*args)
-    @@shared_instance ||= new(*args)
-  end
-
   def initialize(logger, *args)
     @logger = logger
     super(*args)

@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe DocRepoChangeMonitor do
-
   include_context 'tmp_dirs'
 
   describe '#build_necessary?' do
@@ -12,17 +11,19 @@ describe DocRepoChangeMonitor do
     let(:logger) { NilLogger.new }
     let(:monitor) { DocRepoChangeMonitor.new logger, book, cached_sha_dir }
     let(:book) { Book.new(full_name: 'wow-org/such-book', sections: repos) }
+    let(:git_client) { GitClient.new(logger, access_token: ENV['GITHUB_API_TOKEN']) }
     let(:repos) { [
         {"repository" => {"name" => "my-docs-org/my-docs-repo"}},
         {"repository" => {"name" => "some-other-org/some-other-repo"}},
     ] }
 
     before do
-      allow(GitClient.get_instance(logger)).to receive(:commits).with('my-docs-org/my-docs-repo')
+      allow(GitClient).to receive(:new).and_return(git_client)
+      allow(git_client).to receive(:commits).with('my-docs-org/my-docs-repo')
         .and_return [OpenStruct.new(sha: 'shaA')]
-      allow(GitClient.get_instance(logger)).to receive(:commits).with('some-other-org/some-other-repo')
+      allow(git_client).to receive(:commits).with('some-other-org/some-other-repo')
         .and_return [OpenStruct.new(sha: 'shaB')]
-      allow(GitClient.get_instance(logger)).to receive(:commits).with('wow-org/such-book')
+      allow(git_client).to receive(:commits).with('wow-org/such-book')
         .and_return [OpenStruct.new(sha: 'old-book-sha')]
     end
 
@@ -60,7 +61,7 @@ describe DocRepoChangeMonitor do
 
     context 'when cached SHAs are available but the Book is out of date' do
       before do
-        allow(GitClient.get_instance(logger)).to receive(:commits).with('wow-org/such-book')
+        allow(git_client).to receive(:commits).with('wow-org/such-book')
           .and_return [OpenStruct.new(sha: 'new-book-sha')]
         write_cached_SHAs 'my-docs-org/my-docs-repo' => 'shaA',
                           'some-other-org/some-other-repo' => 'shaB',

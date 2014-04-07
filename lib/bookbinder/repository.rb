@@ -31,7 +31,7 @@ class Repository
     #TODO better error message
     raise 'No full_name provided ' unless full_name
     @full_name = full_name
-    @github = GitClient.get_instance(logger, access_token: github_token || ENV['GITHUB_API_TOKEN'])
+    @github = GitClient.new(logger, access_token: github_token || ENV['GITHUB_API_TOKEN'])
     @target_ref = target_ref
     @directory = directory
     @local_repo_dir = local_repo_dir

@@ -38,8 +38,12 @@ describe Book do
     let(:temp_workspace) { tmp_subdir('workspace') }
     let(:ref) { 'this-is-a-tag' }
     let(:full_name) { 'foo/book' }
+    let(:git_client) { GitClient.new(logger) }
 
-    before { stub_github_for full_name, ref }
+    before do
+      stub_github_for git_client, full_name, ref
+      allow(GitClient).to receive(:new).and_return git_client
+    end
 
     it 'unzips an archive at the given path' do
       Book.from_remote(logger: logger, full_name: 'foo/book', destination_dir: temp_workspace, ref: ref)

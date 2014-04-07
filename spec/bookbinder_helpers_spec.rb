@@ -6,9 +6,10 @@ require 'redcarpet'
 describe Navigation::HelperMethods do
   include_context 'tmp_dirs'
 
+  let(:logger) { NilLogger.new }
+
   before do
-    nil_logger = NilLogger.new
-    allow(BookbinderLogger).to receive(:new).and_return(nil_logger)
+    allow(BookbinderLogger).to receive(:new).and_return(logger)
   end
 
   def run_middleman(template_variables = {})
@@ -64,9 +65,14 @@ p fib.take_while { |n| n <= 4E6 }
 
     context 'when not local' do
       let(:config) { {local_repo_dir: nil} }
+      let(:git_client) { GitClient.new(logger) }
+
+      before do
+        mock_github_for git_client, repo
+        allow(GitClient).to receive(:new).and_return(git_client)
+      end
 
       it 'returns markdown from github' do
-        mock_github_for repo
         expect(yielded_snippet).to eq(markdown_snippet.chomp)
       end
     end
