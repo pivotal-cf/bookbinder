@@ -81,11 +81,19 @@ HTML
     end
 
     context 'when the anchor is mal-formed' do
-      let(:html) {"<a href='%'></a>"}
-      let(:fudged_uri) {Spider::Stabilimentum::FudgedUri.new('', '%', '%')}
+      let(:html) {
+        <<HTML
+          <a href='remote%#place'></a>
+          <a href='#local%place'></a>
+          <a href='%'></a>
+HTML
+}
+      let(:remote_fudged_uri) {Spider::Stabilimentum::FudgedUri.new('remote%', '#place', 'remote%#place')}
+      let(:local_fudged_uri) {Spider::Stabilimentum::FudgedUri.new('', '#local%place', '#local%place')}
 
       it 'returns a fudged URI' do
-        expect(subject.fragment_identifiers(targeting_locally: false)).to eq([fudged_uri])
+        expect(subject.fragment_identifiers(targeting_locally: false)).to eq([remote_fudged_uri])
+        expect(subject.fragment_identifiers(targeting_locally: true)).to eq([local_fudged_uri])
       end
     end
   end

@@ -28,16 +28,19 @@ class Spider
     end
 
     def fragment_identifiers(targeting_locally: false)
-      anchors.map { |anchor| appropriately_scoped_fragment_uri(anchor, targeting_locally) }.compact
+      anchor_uris.select { |u| good_uri?(u, targeting_locally) }
     end
 
     private
 
-    def appropriately_scoped_fragment_uri(anchor, targeting_locally)
-      uri = URI anchor['href'].to_s
-      uri if destination_scoped_appropriately?(uri, targeting_locally) && has_fragment(uri)
-    rescue URI::InvalidURIError => e
-      FudgedUri.new('', anchor['href'], anchor['href'])
+    def convert_to_uri(anchor)
+      URI anchor['href'].to_s
+    rescue URI::InvalidURIError
+      create_fudged_uri(anchor['href'])
+    end
+
+    def good_uri?(uri, targeting_locally)
+      destination_scoped_appropriately?(uri, targeting_locally) && has_fragment(uri)
     end
 
     def has_fragment(uri)
@@ -48,8 +51,15 @@ class Spider
       local_anchors_sought ? uri.path.to_s.empty? : !uri.path.to_s.empty?
     end
 
-    def anchors
-      @page.doc ? @page.doc.css('a') : []
+    def anchor_uris
+      anchors = @page.doc ? @page.doc.css('a') : []
+      anchors.map { |a| convert_to_uri(a) }
+    end
+
+    def create_fudged_uri(target)
+      path = target.split('#')[0]
+      fragment = target.include?('#') ? '#' + target.split('#')[1] : nil
+      FudgedUri.new(path, fragment, target)
     end
   end
 end
