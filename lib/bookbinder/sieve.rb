@@ -25,7 +25,7 @@ class Sieve
 
   def local_fragments_missing_from(page)
     local_fragments = page.fragment_identifiers targeting_locally: true
-    local_fragments.map { |uri| Spider.prepend_location(page.url, uri) unless page.has_target_for?(uri) }.compact
+    local_fragments.reject { |uri| page.has_target_for?(uri) }.map { |uri| Spider.prepend_location(page.url, uri) }
   end
 
   def remote_fragments_missing_from(page)
