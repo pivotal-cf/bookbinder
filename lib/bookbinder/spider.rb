@@ -72,7 +72,7 @@ class Spider
       end
     end
 
-    broken_links.concat Dir.chdir(@app_dir) { sieve.broken_links_in_all_stylesheets }
+    broken_links.concat Dir.chdir(@app_dir) { CssLinkChecker.new.broken_links_in_all_stylesheets }
     [broken_links.compact.uniq, sitemap.compact.uniq]
   end
 
