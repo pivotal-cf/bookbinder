@@ -59,14 +59,18 @@ class Publisher
   end
 
   def import_repo_to(destination, options, section_hash)
-    Section.get_instance(@logger, section_hash: section_hash, destination_dir: destination, local_repo_dir: options[:local_repo_dir], target_tag: options[:target_tag])
+    Section.get_instance(@logger,
+                         section_hash: section_hash,
+                         destination_dir: destination,
+                         local_repo_dir: options[:local_repo_dir],
+                         target_tag: options[:target_tag])
   end
 
   def generate_pdf(final_app_dir, options, port)
     source_page = URI::HTTP.build({:host=>"localhost", :port=>port, :protocol=>"http://", :path=>'/'+options.fetch(:page)})
     generated_pdf_file = File.join(final_app_dir, 'public', options.fetch(:filename))
     header_file = URI::HTTP.build({:host=>"localhost", :port=>port, :protocol=>"http://", :path=>'/'+options.fetch(:header)})
-    PdfGenerator.new(@logger).generate source_page, generated_pdf_file, header_file
+    PdfGenerator.new(@logger).generate [source_page], generated_pdf_file, header_file
   end
 
   def prepare_directories(final_app, output, middleman_source)

@@ -16,8 +16,8 @@ describe PdfGenerator do
   end
   let(:generated_pdf) { File.join(target_dir, 'generated.pdf')}
 
-  it 'generates a PDF from the specified page and header' do
-    PdfGenerator.new(logger).generate source_page, generated_pdf, header_file
+  it 'generates a PDF from the specified pages and header' do
+    PdfGenerator.new(logger).generate [source_page], generated_pdf, header_file
     expect(File.exist? generated_pdf).to be_true
   end
 

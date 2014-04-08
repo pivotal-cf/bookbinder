@@ -13,10 +13,13 @@ class PdfGenerator
     @logger = logger
   end
 
-  def generate(source, target, header)
-    check_destination_exists source
+  def generate(sources, target, header)
+    sources.each do |s|
+      check_destination_exists s
+    end
     check_destination_exists header
 
+    sources_string = sources.join(", ")
     command = <<CMD
 wkhtmltopdf \
     --margin-top 26mm \
@@ -30,7 +33,7 @@ wkhtmltopdf \
     --footer-center '[page] of [toPage]' \
     --print-media-type \
     --header-html #{header} \
-    #{source} \
+    #{sources_string} \
     #{target}
 CMD
 
