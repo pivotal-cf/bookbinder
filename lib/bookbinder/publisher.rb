@@ -29,6 +29,7 @@ class Publisher
     server_director.use_server do |port|
       links_for_pdf = spider.generate_sitemap options.fetch(:host_for_sitemap), port
       generate_pdf(final_app_dir, options.fetch(:pdf), port) if pdf_requested && repo_with_pdf_page_present?(options, repos)
+      generate_docset_pdf(final_app_dir, options.fetch(:pdf), port, links_for_pdf)
     end
 
     @logger.log "Bookbinder bound your book into #{final_app_dir.green}"
@@ -71,6 +72,13 @@ class Publisher
     generated_pdf_file = File.join(final_app_dir, 'public', options.fetch(:filename))
     header_file = URI::HTTP.build({:host=>"localhost", :port=>port, :protocol=>"http://", :path=>'/'+options.fetch(:header)})
     PdfGenerator.new(@logger).generate [source_page], generated_pdf_file, header_file
+  end
+
+  def generate_docset_pdf(final_app_dir, options, port, raw_sources)
+    sources = raw_sources.map { |s| URI(s) }
+    generated_pdf_file = File.join(final_app_dir, 'public', 'FullDocSet.pdf')
+    header_file = URI::HTTP.build({:host=>"localhost", :port=>port, :protocol=>"http://", :path=>'/'+options.fetch(:header)})
+    PdfGenerator.new(@logger).generate sources, generated_pdf_file, header_file
   end
 
   def prepare_directories(final_app, output, middleman_source)

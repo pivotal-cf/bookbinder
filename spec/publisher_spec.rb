@@ -55,6 +55,7 @@ describe Publisher do
         expect(other_index_html).to include 'This is another Markdown Page'
 
         expect(File.exist? File.join(final_app_dir, 'public', 'DocGuide.pdf')).to be_true
+        expect(File.exist? File.join(final_app_dir, 'public', 'FullDocSet.pdf')).to be_true
       end
 
       context 'when in local mode' do

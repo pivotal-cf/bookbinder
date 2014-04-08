@@ -14,9 +14,7 @@ class PdfGenerator
   end
 
   def generate(sources, target, header)
-    sources.each do |s|
-      check_destination_exists s
-    end
+    sources.each { |s| check_destination_exists s }
     check_destination_exists header
 
     sources_string = sources.join(", ")
