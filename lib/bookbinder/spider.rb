@@ -19,6 +19,7 @@ class Spider
     announce_broken_links @broken_links
 
     write_sitemap_txt(target_host, temp_host, working_links)
+    working_links
   end
 
   def has_broken_links?

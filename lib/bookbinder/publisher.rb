@@ -27,7 +27,7 @@ class Publisher
 
     server_director = ServerDirector.new(@logger, directory: final_app_dir)
     server_director.use_server do |port|
-      spider.generate_sitemap options.fetch(:host_for_sitemap), port
+      links_for_pdf = spider.generate_sitemap options.fetch(:host_for_sitemap), port
       generate_pdf(final_app_dir, options.fetch(:pdf), port) if pdf_requested && repo_with_pdf_page_present?(options, repos)
     end
 

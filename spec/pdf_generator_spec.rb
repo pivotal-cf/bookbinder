@@ -42,4 +42,5 @@ describe PdfGenerator do
       pdf_generator.generate source_page, 'wont_get_created.pdf', header_file
     end.to raise_error(/'wkhtmltopdf' appears to have failed/)
   end
+
 end
