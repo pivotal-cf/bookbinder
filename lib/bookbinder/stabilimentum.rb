@@ -19,7 +19,7 @@ class Spider
     end
 
     def has_target_for?(uri)
-      id_selector   = uri.fragment
+      id_selector = uri.fragment
       name_selector = "[name=#{uri.fragment}]"
 
       @page.doc.css("##{id_selector}").any? || @page.doc.css(name_selector).any?
@@ -28,32 +28,24 @@ class Spider
     end
 
     def fragment_identifiers(targeting_locally: false)
-      anchor_uris.select { |u| good_uri?(u, targeting_locally) }
+      if targeting_locally
+        fragment_anchor_uris.select { |uri| uri.path.empty? }
+      else
+        fragment_anchor_uris.reject { |uri| uri.path.empty? }
+      end
     end
 
     private
+
+    def fragment_anchor_uris
+      anchors = @page.doc ? @page.doc.css('a') : []
+      anchors.map { |a| convert_to_uri(a) }.select { |u| u.fragment }
+    end
 
     def convert_to_uri(anchor)
       URI anchor['href'].to_s
     rescue URI::InvalidURIError
       create_fudged_uri(anchor['href'])
-    end
-
-    def good_uri?(uri, targeting_locally)
-      destination_scoped_appropriately?(uri, targeting_locally) && has_fragment(uri)
-    end
-
-    def has_fragment(uri)
-      !uri.fragment.to_s.empty?
-    end
-
-    def destination_scoped_appropriately?(uri, local_anchors_sought)
-      local_anchors_sought ? uri.path.to_s.empty? : !uri.path.to_s.empty?
-    end
-
-    def anchor_uris
-      anchors = @page.doc ? @page.doc.css('a') : []
-      anchors.map { |a| convert_to_uri(a) }
     end
 
     def create_fudged_uri(target)
