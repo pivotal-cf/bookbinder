@@ -5,19 +5,23 @@ class Sieve
   end
 
   def links_from(page, is_first_pass)
-    if page.not_found? && is_first_pass
-      working_links = []
-      broken_links = [Spider.prepend_location(page.referer, page.url)]
+    if page.not_found?
+      working = []
+      broken  = [Spider.prepend_location(page.referer, page.url)]
     else
-      working_links = [page.url.to_s]
-      broken_links = broken_fragments_targeting(page, is_first_pass)
-      @unverified_fragments_by_url.merge! fragments_targeting_other_pages_from page
+      working = [page.url.to_s]
+      broken  = broken_fragments_targeting(page, is_first_pass)
+      store_unverified_fragments_from(page) if is_first_pass
     end
 
-    return broken_links, working_links
+    return broken, working
   end
 
   private
+
+  def store_unverified_fragments_from(page)
+    @unverified_fragments_by_url.merge! fragments_targeting_other_pages_from page
+  end
 
   def broken_fragments_targeting(page, first_pass)
     first_pass ? local_fragments_missing_from(page) : remote_fragments_missing_from(page)

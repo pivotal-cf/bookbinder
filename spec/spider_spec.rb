@@ -129,6 +129,15 @@ describe Spider do
 
         spider.generate_sitemap host, port
       end
+
+      it 'excludes them from the site map' do
+        spider.generate_sitemap host, port
+
+        sitemap = File.readlines File.join(final_app_dir, 'public', 'sitemap.txt')
+        broken_link_targets = broken_links.map {|link| link.split(" => ").last.gsub("localhost:#{port}", host) }
+
+        expect(sitemap).not_to include(*broken_link_targets)
+      end
     end
   end
 end
