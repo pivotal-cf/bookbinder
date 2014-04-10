@@ -260,13 +260,14 @@ DOGS
       let(:pdf_config) { nil }
       let(:local_repo_dir) { nil }
       let(:sections) { [] }
-      let(:spider) { double }
+      let(:working_links) { [] }
+      let(:spider) { double(:eight_legger) }
 
       before do
         MiddlemanRunner.any_instance.stub(:run) do |middleman_dir|
           Dir.mkdir File.join(middleman_dir, 'build')
         end
-        allow(spider).to receive(:generate_sitemap)
+        allow(spider).to receive(:generate_sitemap).and_return(working_links)
         allow(spider).to receive(:has_broken_links?)
       end
 
@@ -321,13 +322,45 @@ DOGS
       context 'when asked to find repos locally' do
         let(:local_repo_dir) { RepoFixture.repos_dir }
 
+        around do |example|
+          WebMock.disable_net_connect!(:allow_localhost => true)
+          example.run
+          WebMock.disable_net_connect!
+        end
+
         context 'when the repository used to generate the pdf was skipped' do
           let(:sections) { [{'repository' => {'name' => 'org/repo'}, 'directory' => 'pretty_dir'}] }
           let(:pdf_config) do
-            {page: 'pretty_dir/index.html', filename: 'irrelevant.pdf', header: 'pretty_dir/header.html'}
+            {page: 'pretty_dir/index.html', filename: 'irrelevant.pdf', header: 'header.html'}
           end
-          it 'runs successfully' do
-            expect { publish }.to_not raise_error
+
+          context 'but the header is available' do
+            before do
+              stub_request(:get, "http://localhost:41722/header.html").
+                  to_return(:status => 200, :body => 'eggplant', :headers => {})
+            end
+
+            context 'but there are no links' do
+              let(:working_links) { [] }
+
+              it 'runs successfully' do
+                expect { publish }.to_not raise_error
+              end
+            end
+
+            context 'when there are some working links' do
+              let(:working_links) { %w(http://example.com/working.htm http://example.com/hard.htm) }
+
+              before do
+                working_links.each do |link|
+                  stub_request(:get, link).to_return(:status => 200, :body => rand(10_000), :headers => {})
+                end
+              end
+
+              it 'runs successfully' do
+                expect { publish }.to_not raise_error
+              end
+            end
           end
         end
 
@@ -344,12 +377,6 @@ DOGS
           let(:sections) { [{'repository' => {'name' => 'org/my-docs-repo'}, 'directory' => 'pretty_dir'}] }
           let(:pdf_config) do
             {page: 'pretty_dir/unknown_file.html', filename: 'irrelevant.pdf', header: 'pretty_dir/unknown_header.html'}
-          end
-
-          around do |example|
-            WebMock.disable_net_connect!(:allow_localhost => true)
-            example.run
-            WebMock.disable_net_connect!
           end
 
           it 'fails' do

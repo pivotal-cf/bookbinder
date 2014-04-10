@@ -21,26 +21,37 @@ describe PdfGenerator do
     expect(File.exist? generated_pdf).to be_true
   end
 
+  context 'when generating pages from a live web-server' do
+    before do
+      stub_request(:get, "http://example.com/").to_return(:status => 200, :body => `fortune`, :headers => {})
+    end
+
+    it 'generates a PDF from a live web-page and header' do
+      many_pages = 110.times.map { 'http://example.com' }
+      PdfGenerator.new(logger).generate many_pages, generated_pdf, header_file
+      expect(File.exist? generated_pdf).to be_true
+    end
+  end
+
   it 'raises an exception if the specified source URL does not exist' do
     bad_website = 'http://website.invalid/pdf.html'
     stub_request(:get, bad_website).to_return(:status => 404)
     expect do
-      PdfGenerator.new(logger).generate bad_website, 'irrelevant.pdf', header_file
+      PdfGenerator.new(logger).generate [bad_website], 'irrelevant.pdf', header_file
     end.to raise_error(/Could not find file #{Regexp.escape(bad_website)}/)
   end
 
   it 'raises an exception if the specified header file does not exist' do
     expect do
-      PdfGenerator.new(logger).generate source_page, 'irrelevant.pdf', 'not_there.html'
+      PdfGenerator.new(logger).generate [source_page], 'irrelevant.pdf', 'not_there.html'
     end.to raise_error(/Could not find file not_there.html/)
   end
 
   it 'raises an exception if the tool does not produce a PDF' do
-    pdf_generator = PdfGenerator.new(logger)
-    pdf_generator.stub(:shell_out) {}
+    pdf_destination = '/dev/null/doomed.pdf'
+
     expect do
-      pdf_generator.generate source_page, 'wont_get_created.pdf', header_file
+      PdfGenerator.new(logger).generate [source_page], pdf_destination, header_file
     end.to raise_error(/'wkhtmltopdf' appears to have failed/)
   end
-
 end

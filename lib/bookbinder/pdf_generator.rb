@@ -17,9 +17,9 @@ class PdfGenerator
     sources.each { |s| check_destination_exists s }
     check_destination_exists header
 
-    sources_string = sources.join(", ")
     command = <<CMD
 wkhtmltopdf \
+    --ignore-load-errors \
     --margin-top 26mm \
     --margin-left 0mm \
     --margin-right 0mm \
@@ -31,12 +31,11 @@ wkhtmltopdf \
     --footer-center '[page] of [toPage]' \
     --print-media-type \
     --header-html #{header} \
-    #{sources_string} \
+    #{sources.join(' ')} \
     #{target}
 CMD
 
-    # want to see the output of this command
-    shell_out command
+    `#{command}`
 
     raise "'wkhtmltopdf' appears to have failed" unless File.exist?(target)
 

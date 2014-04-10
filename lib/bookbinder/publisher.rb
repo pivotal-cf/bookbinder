@@ -28,8 +28,10 @@ class Publisher
     server_director = ServerDirector.new(@logger, directory: final_app_dir)
     server_director.use_server do |port|
       links_for_pdf = spider.generate_sitemap options.fetch(:host_for_sitemap), port
-      generate_pdf(final_app_dir, options.fetch(:pdf), port) if pdf_requested && repo_with_pdf_page_present?(options, repos)
-      generate_docset_pdf(final_app_dir, options.fetch(:pdf), port, links_for_pdf)
+      if pdf_requested # TODO: Stop piggybacking on arbitrarily targeted single page PDF generation settings
+        generate_pdf(final_app_dir, options.fetch(:pdf), port) if repo_with_pdf_page_present?(options, repos)
+        generate_docset_pdf(final_app_dir, options.fetch(:pdf), port, links_for_pdf) unless links_for_pdf.empty?
+      end
     end
 
     @logger.log "Bookbinder bound your book into #{final_app_dir.green}"
@@ -39,8 +41,8 @@ class Publisher
 
   private
 
-  def generate_site(options, output_master_middleman_dir, repos)
-    MiddlemanRunner.new(@logger).run(output_master_middleman_dir,
+  def generate_site(options, middleman_dir, repos)
+    MiddlemanRunner.new(@logger).run(middleman_dir,
                             options.fetch(:template_variables, {}),
                             options[:local_repo_dir],
                             options[:verbose], repos, options[:host_for_sitemap]
