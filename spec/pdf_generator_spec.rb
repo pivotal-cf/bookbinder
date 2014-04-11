@@ -16,8 +16,11 @@ describe PdfGenerator do
   end
   let(:generated_pdf) { File.join(target_dir, 'generated.pdf')}
 
+
   it 'generates a PDF from the specified pages and header' do
-    PdfGenerator.new(logger).generate [source_page], generated_pdf, header_file
+    silence_io_streams do
+      PdfGenerator.new(logger).generate [source_page], generated_pdf, header_file
+    end
     expect(File.exist? generated_pdf).to be_true
   end
 
@@ -28,7 +31,9 @@ describe PdfGenerator do
 
     it 'generates a PDF from a live web-page and header' do
       many_pages = 110.times.map { 'http://example.com' }
-      PdfGenerator.new(logger).generate many_pages, generated_pdf, header_file
+      silence_io_streams do
+        PdfGenerator.new(logger).generate many_pages, generated_pdf, header_file
+      end
       expect(File.exist? generated_pdf).to be_true
     end
   end
@@ -37,13 +42,17 @@ describe PdfGenerator do
     bad_website = 'http://website.invalid/pdf.html'
     stub_request(:get, bad_website).to_return(:status => 404)
     expect do
-      PdfGenerator.new(logger).generate [bad_website], 'irrelevant.pdf', header_file
+      silence_io_streams do
+        PdfGenerator.new(logger).generate [bad_website], 'irrelevant.pdf', header_file
+      end
     end.to raise_error(/Could not find file #{Regexp.escape(bad_website)}/)
   end
 
   it 'raises an exception if the specified header file does not exist' do
     expect do
-      PdfGenerator.new(logger).generate [source_page], 'irrelevant.pdf', 'not_there.html'
+      silence_io_streams do
+        PdfGenerator.new(logger).generate [source_page], 'irrelevant.pdf', 'not_there.html'
+      end
     end.to raise_error(/Could not find file not_there.html/)
   end
 
@@ -51,7 +60,9 @@ describe PdfGenerator do
     pdf_destination = '/dev/null/doomed.pdf'
 
     expect do
-      PdfGenerator.new(logger).generate [source_page], pdf_destination, header_file
+      silence_io_streams do
+        PdfGenerator.new(logger).generate [source_page], pdf_destination, header_file
+      end
     end.to raise_error(/'wkhtmltopdf' appears to have failed/)
   end
 end
