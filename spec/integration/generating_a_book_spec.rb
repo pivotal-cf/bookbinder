@@ -14,7 +14,9 @@ describe 'generating a book' do
   end
 
   it 'provides the production host to the ERB templates' do
-    `#{GEM_ROOT}/bin/bookbinder publish local`
+    silence_io_streams do
+      `#{GEM_ROOT}/bin/bookbinder publish local`
+    end
 
     index = File.read File.join('final_app', 'public', 'index.html')
     expect(index).to include('My production host is: docs.example.com')

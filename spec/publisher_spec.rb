@@ -38,15 +38,17 @@ describe Publisher do
             {'repository' => {'name' => some_other_repo, 'ref' => some_other_sha}}
         ]
 
-        publisher.publish sections: sections, output_dir: output_dir,
-                          master_middleman_dir: non_broken_master_middleman_dir,
-                          final_app_dir: final_app_dir,
-                          host_for_sitemap: 'example.com',
-                          pdf: {
-                              page: 'pretty_path/index.html',
-                              filename: 'DocGuide.pdf',
-                              header: 'pretty_path/header.html'
-                          }
+        silence_io_streams do
+          publisher.publish sections: sections, output_dir: output_dir,
+                            master_middleman_dir: non_broken_master_middleman_dir,
+                            final_app_dir: final_app_dir,
+                            host_for_sitemap: 'example.com',
+                            pdf: {
+                                page: 'pretty_path/index.html',
+                                filename: 'DocGuide.pdf',
+                                header: 'pretty_path/header.html'
+                            }
+        end
 
         index_html = File.read File.join(final_app_dir, 'public', 'pretty_path', 'index.html')
         expect(index_html).to include 'This is a Markdown Page'
@@ -358,7 +360,9 @@ describe Publisher do
               end
 
               it 'runs successfully' do
-                expect { publish }.to_not raise_error
+                silence_io_streams do
+                  expect { publish }.to_not raise_error
+                end
               end
             end
           end

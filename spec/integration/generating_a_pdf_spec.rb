@@ -14,7 +14,9 @@ describe 'calling bookbinder with pdf configuration' do
   end
 
   it 'generates a pdf based on the filename option' do
-    `#{GEM_ROOT}/bin/bookbinder publish local`
+    silence_io_streams do
+      `#{GEM_ROOT}/bin/bookbinder publish local`
+    end
     expect(File.exists?(File.join('final_app', 'public', 'TestPdf.pdf'))).to eq(true)
   end
 end
