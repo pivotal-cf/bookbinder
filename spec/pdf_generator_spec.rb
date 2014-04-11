@@ -26,7 +26,7 @@ describe PdfGenerator do
 
   context 'when generating pages from a live web-server' do
     before do
-      stub_request(:get, "http://example.com/").to_return(:status => 200, :body => `fortune`, :headers => {})
+      stub_request(:get, "http://example.com/").to_return(:status => 200, :body => 'fortune', :headers => {})
     end
 
     it 'generates a PDF from a live web-page and header' do
