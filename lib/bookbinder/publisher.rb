@@ -1,6 +1,4 @@
 class Publisher
-  include ShellOut
-
   def initialize(logger)
     @logger = logger
   end

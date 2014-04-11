@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe Section do
-  include ShellOut
   include_context 'tmp_dirs'
 
   let(:logger) { NilLogger.new }

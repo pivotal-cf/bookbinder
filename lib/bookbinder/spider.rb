@@ -1,8 +1,6 @@
 require 'pty'
 
 class Spider
-  include ShellOut
-
   def initialize(logger, app_dir: nil)
     @logger = logger
     @app_dir = app_dir || raise('Spiders must be initialized with an app directory.')

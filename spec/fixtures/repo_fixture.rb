@@ -1,5 +1,4 @@
 class RepoFixture
-
   extend ShellOut
 
   def self.tarball(name, sha)

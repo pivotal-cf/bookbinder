@@ -22,8 +22,6 @@ class Middleman::Cli::BuildAction
 end
 
 class MiddlemanRunner
-  include ShellOut
-
   def initialize(logger)
     @logger = logger
   end

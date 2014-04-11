@@ -1,8 +1,6 @@
 require 'net/http'
 
 class PdfGenerator
-  include ShellOut
-
   class MissingSource < StandardError
     def initialize(required_file)
       super "Could not find file #{required_file}"

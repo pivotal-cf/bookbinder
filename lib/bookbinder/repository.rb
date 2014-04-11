@@ -1,5 +1,5 @@
 class Repository
-  include ShellOut
+  include ShellOut #keep me
 
   attr_reader :full_name, :copied_to
 
