@@ -191,13 +191,13 @@ describe Publisher do
                           final_app_dir: final_app_dir,
                           host_for_sitemap: "docs.dogs.com"
 
-        sitemap = File.read File.join(final_app_dir, 'public', 'sitemap.txt')
-        sitemap.split("\n").should =~ (<<DOGS).split("\n")
-http://docs.dogs.com/index.html
-http://docs.dogs.com/dogs-repo/index.html
-http://docs.dogs.com/dogs-repo/big_dogs/index.html
-http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
-DOGS
+        doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
+        expect(doc.css('loc').map &:text).to match_array(%w(
+          http://docs.dogs.com/index.html
+          http://docs.dogs.com/dogs-repo/index.html
+          http://docs.dogs.com/dogs-repo/big_dogs/index.html
+          http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
+        ))
       end
     end
 

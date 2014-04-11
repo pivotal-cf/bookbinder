@@ -272,7 +272,7 @@ If the build_number argument is left out, the latest green build will be deploye
 
 ## Generating a Sitemap for Google Search Indexing
 
-The sitemap file `/sitemap.txt` is automatically regenerated when publishing. When setting up a new docs website, make sure to add this sitemap's url in Google Webmaster Tools (for better reindexing?).
+The sitemap file `/sitemap.xml` is automatically regenerated when publishing. When setting up a new docs website, make sure to add this sitemap's url in Google Webmaster Tools (for better reindexing?).
 
 ## Contributing to Bookbinder
 

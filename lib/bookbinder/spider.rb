@@ -18,7 +18,7 @@ class Spider
 
     announce_broken_links @broken_links
 
-    write_sitemap_txt(target_host, temp_host, working_links)
+    write_sitemap(target_host, temp_host, working_links)
     working_links
   end
 
@@ -32,11 +32,10 @@ class Spider
 
   private
 
-  def write_sitemap_txt(host, port, working_links)
-    sitemap_file = File.join(@app_dir, 'public', 'sitemap.txt')
-    File.open(sitemap_file, 'w') do |file|
-      file.write substitute_hostname(host, port, working_links.join("\n"))
-    end
+  def write_sitemap(host, port, working_links)
+    sitemap_file = File.join(@app_dir, 'public', 'sitemap.xml')
+    sitemap_links = substitute_hostname(host, port, working_links)
+    SitemapGenerator.new.generate(sitemap_links, sitemap_file)
   end
 
   def announce_broken_links(broken_links)
@@ -81,7 +80,7 @@ class Spider
     anemone.focus_crawl { |page| page.links.reject { |link| link.to_s.match(/%23/) } }
   end
 
-  def substitute_hostname(target_host, temp_host, links_string)
-    links_string.gsub(/#{Regexp.escape(temp_host)}/, target_host)
+  def substitute_hostname(target_host, temp_host, links)
+    links.map { |l| l.gsub(/#{Regexp.escape(temp_host)}/, target_host) }
   end
 end

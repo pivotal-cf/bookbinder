@@ -78,13 +78,18 @@ describe Spider do
     let(:spider) { Spider.new logger, app_dir: final_app_dir }
     let(:host) { 'example.com' }
     let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
+    let(:sitemap_links) { ["http://#{host}/index.html", "http://#{host}/other_page.html", "http://#{host}/yaml_page.yml"]}
 
-    it 'generates a sitemap' do
+    it 'requests sitemap generation' do
+      sitemap_generator = SitemapGenerator.new
+      sitemap_path = File.join(final_app_dir, 'public', 'sitemap.xml')
+
+      allow(SitemapGenerator).to receive(:new).and_return(sitemap_generator)
+      expect(sitemap_generator).to receive(:generate) do |incoming_links, incoming_file|
+        expect(incoming_links).to match_array(sitemap_links)
+        expect(incoming_file).to eq(sitemap_path)
+      end.and_call_original
       spider.generate_sitemap host, port
-
-      sitemap = File.read File.join(final_app_dir, 'public', 'sitemap.txt')
-      sites = sitemap.split("\n")
-      expect(sites).to match_array(["http://#{host}/index.html", "http://#{host}/other_page.html", "http://#{host}/yaml_page.yml"])
     end
 
     it 'returns the working links' do
@@ -139,7 +144,7 @@ describe Spider do
       it 'excludes them from the site map' do
         spider.generate_sitemap host, port
 
-        sitemap = File.readlines File.join(final_app_dir, 'public', 'sitemap.txt')
+        sitemap = File.readlines File.join(final_app_dir, 'public', 'sitemap.xml')
         broken_link_targets = broken_links.map {|link| link.split(" => ").last.gsub("localhost:#{port}", host) }
 
         expect(sitemap).not_to include(*broken_link_targets)
