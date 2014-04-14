@@ -25,7 +25,6 @@ class Spider
   end
 
   def self.prepend_location(location, url)
-    puts location
     "#{URI(location).path} => #{url}"
   end
 

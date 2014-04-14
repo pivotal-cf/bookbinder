@@ -10,31 +10,15 @@ class Publisher
     pdf_requested = options.has_key?(:pdf) && options[:pdf]
     master_middleman_dir = options.fetch(:master_middleman_dir)
     spider = options.fetch(:spider) { Spider.new(@logger, app_dir: final_app_dir) }
-    middleman_dir = File.join intermediate_directory, 'master_middleman'
-    middleman_source_directory = File.join middleman_dir, 'source'
-    build_directory = File.join middleman_dir, 'build/.'
+    master_dir = File.join intermediate_directory, 'master_middleman'
+    workspace_dir = File.join master_dir, 'source'
+    build_directory = File.join master_dir, 'build/.'
     public_directory = File.join final_app_dir, 'public'
 
-    prepare_directories final_app_dir, intermediate_directory, middleman_source_directory
-    copy_directory_from_gem 'template_app', final_app_dir
-    copy_directory_from_gem 'master_middleman', middleman_dir
-    FileUtils.cp_r File.join(master_middleman_dir, '.'), middleman_dir
-
-    repos = import_repos(middleman_source_directory, options)
-
-    generate_site(options, middleman_dir, repos)
-    FileUtils.cp_r build_directory, public_directory
-
-    server_director = ServerDirector.new(@logger, directory: final_app_dir)
-    server_director.use_server do |port|
-      sitemap = spider.generate_sitemap options.fetch(:host_for_sitemap), port
-      links_for_pdf = options.fetch(:pdf_index, sitemap)
-
-      if pdf_requested # TODO: Stop piggybacking on arbitrarily targeted single page PDF generation settings
-        generate_pdf(final_app_dir, options.fetch(:pdf), port) if repo_with_pdf_page_present?(options, repos)
-        generate_docset_pdf(final_app_dir, options.fetch(:pdf), port, links_for_pdf) unless links_for_pdf.empty?
-      end
-    end
+    prepare_directories final_app_dir, intermediate_directory, workspace_dir, master_middleman_dir, master_dir
+    sections = gather_sections(workspace_dir, options)
+    generate_site(options, master_dir, sections, build_directory, public_directory)
+    generate_peripherals(final_app_dir, options, pdf_requested, sections, spider, @logger)
 
     @logger.log "Bookbinder bound your book into #{final_app_dir.green}"
 
@@ -43,12 +27,27 @@ class Publisher
 
   private
 
-  def generate_site(options, middleman_dir, repos)
+  def generate_peripherals(final_app_dir, options, pdf_requested, repos, spider, logger)
+    server_director = ServerDirector.new(logger, directory: final_app_dir)
+    server_director.use_server do |port|
+      sitemap = spider.generate_sitemap options.fetch(:host_for_sitemap), port
+
+      links_for_pdf = options.fetch(:pdf_index, sitemap)
+
+      if pdf_requested
+        generate_pdf(final_app_dir, options.fetch(:pdf), port) if repo_with_pdf_page_present?(options, repos)
+        generate_docset_pdf(final_app_dir, options.fetch(:pdf), port, links_for_pdf) unless links_for_pdf.empty?
+      end
+    end
+  end
+
+  def generate_site(options, middleman_dir, repos, build_dir, public_dir)
     MiddlemanRunner.new(@logger).run(middleman_dir,
                                      options.fetch(:template_variables, {}),
                                      options[:local_repo_dir],
                                      options[:verbose], repos, options[:host_for_sitemap]
     )
+    FileUtils.cp_r build_dir, public_dir
   end
 
   def repo_with_pdf_page_present?(options, repos)
@@ -57,13 +56,12 @@ class Publisher
     pdf_repo.copied?
   end
 
-  def import_repos(middleman_source_directory, options)
-    options.fetch(:sections).map do |section_hash|
-      Section.get_instance(@logger,
-                           section_hash: section_hash,
-                           destination_dir: middleman_source_directory,
+  def gather_sections(workspace, options)
+    options.fetch(:sections).map do |section|
+      Section.get_instance(@logger, section_hash: section, destination_dir: workspace,
                            local_repo_dir: options[:local_repo_dir],
-                           target_tag: options[:target_tag])
+                           target_tag: options[:target_tag]
+      )
     end
   end
 
@@ -81,12 +79,16 @@ class Publisher
     @pdf_generator.generate sources, generated_pdf_file, header_file
   end
 
-  def prepare_directories(final_app, output, middleman_source)
+  def prepare_directories(final_app, output, middleman_source, master_middleman_dir, middleman_dir)
     FileUtils.rm_rf File.join output, '.'
     FileUtils.rm_rf File.join final_app, '.'
     FileUtils.mkdir_p output
     FileUtils.mkdir_p File.join final_app, 'public'
     FileUtils.mkdir_p middleman_source
+
+    copy_directory_from_gem 'template_app', final_app
+    copy_directory_from_gem 'master_middleman', middleman_dir
+    FileUtils.cp_r File.join(master_middleman_dir, '.'), middleman_dir
   end
 
   def copy_directory_from_gem(dir, output_dir)
