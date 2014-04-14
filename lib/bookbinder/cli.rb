@@ -66,7 +66,8 @@ class Cli
   end
 
   def fetch_config
-    config_hash = YAML.load(File.read('./config.yml'))
+    config_hash             = YAML.load(File.read('./config.yml'))
+    config_hash[:pdf_index] = YAML.load(File.read('./pdf_index.yml')) if File.exists?('./pdf_index.yml')
     raise 'config.yml is empty' unless config_hash
     Configuration.new(logger, config_hash)
   end

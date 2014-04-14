@@ -23,7 +23,7 @@ describe Publisher do
 
       let(:local_repo_dir) { RepoFixture.repos_dir }
 
-      it 'it creates a directory per repo with the generated html from middleman' do
+      it 'creates a directory per repo with the generated html from middleman' do
         some_repo = 'my-docs-org/my-docs-repo'
         some_other_repo = 'my-other-docs-org/my-other-docs-repo'
         some_sha = 'some-sha'
@@ -58,6 +58,96 @@ describe Publisher do
 
         expect(File.exist? File.join(final_app_dir, 'public', 'DocGuide.pdf')).to be_true
         expect(File.exist? File.join(final_app_dir, 'public', 'FullDocSet.pdf')).to be_true
+      end
+
+      describe 'generating a docset' do
+        let(:non_broken_master_middleman_dir) { generate_middleman_with 'dogs_index.html' }
+
+        context 'when there is no pdf-index' do
+          it 'generates a PDF of every page' do
+
+            some_repo = 'dogs-org/dogs-repo'
+            repo_with_header = 'my-docs-org/my-docs-repo'
+
+            stub_github_for(git_client, some_repo)
+            stub_github_for(git_client, repo_with_header)
+            allow(GitClient).to receive(:new).and_return(git_client)
+
+            sections = [
+                {'repository' => {'name' => some_repo}},
+                {'repository' => {'name' => repo_with_header}, 'directory' => 'pretty-path'}
+            ]
+
+            working_links = %w(
+              http://localhost:41722/index.html
+              http://localhost:41722/dogs-repo/index.html
+              http://localhost:41722/dogs-repo/big_dogs/great_danes/index.html
+              http://localhost:41722/dogs-repo/big_dogs/index.html
+            ).map { |l| URI(l) }
+
+            pdf_generator = PdfGenerator.new(logger)
+            expect(PdfGenerator).to receive(:new).and_return pdf_generator
+            pdf_destination = File.join final_app_dir, 'public', 'FullDocSet.pdf'
+            header_source = URI 'http://localhost:41722/pretty-path/header.html'
+
+            expect(pdf_generator).to receive(:generate) do |links, pdf, header|
+              links.should =~ working_links
+              expect(pdf).to eq pdf_destination
+              expect(header).to eq header_source
+            end
+
+            silence_io_streams do
+              publisher.publish sections: sections, output_dir: output_dir,
+                                master_middleman_dir: non_broken_master_middleman_dir,
+                                final_app_dir: final_app_dir,
+                                host_for_sitemap: 'example.com',
+                                pdf: {header: 'pretty-path/header.html'}
+            end
+          end
+        end
+
+        context 'when there is a pdf-index' do
+          let(:pdf_index) { %w(
+            dogs-repo/big_dogs/index.html
+            dogs-repo/index.html
+            dogs-repo/big_dogs/great_danes/index.html
+          )}
+
+          it 'generates a docset PDF for only the requested files, in the requested order' do
+            some_repo = 'dogs-org/dogs-repo'
+            some_other_repo = 'my-other-docs-org/my-other-docs-repo'
+
+            stub_github_for(git_client, some_repo)
+            stub_github_for(git_client, some_other_repo)
+            allow(GitClient).to receive(:new).and_return(git_client)
+
+            sections = [
+                {'repository' => {'name' => some_repo}},
+                {'repository' => {'name' => some_other_repo}}
+            ]
+
+            pdf_generator = PdfGenerator.new(logger)
+            expect(PdfGenerator).to receive(:new).and_return pdf_generator
+
+            working_links = pdf_index.map { |l| URI("http://localhost:41722/#{l}") }
+
+            pdf_destination = File.join final_app_dir, 'public', 'FullDocSet.pdf'
+            header = URI('http://localhost:41722/pretty_path/header.html')
+
+            expect(pdf_generator).to receive(:generate) do |links, pdf, header|
+              links.should =~ working_links
+            end
+
+            silence_io_streams do
+            publisher.publish sections: sections, output_dir: output_dir,
+                              master_middleman_dir: non_broken_master_middleman_dir,
+                              final_app_dir: final_app_dir,
+                              host_for_sitemap: 'example.com',
+                              pdf: {header: 'pretty_path/header.html'},
+                              pdf_index: pdf_index
+            end
+          end
+        end
       end
 
       context 'when in local mode' do
@@ -351,7 +441,7 @@ describe Publisher do
             end
 
             context 'when there are some working links' do
-              let(:working_links) { %w(http://example.com/working.htm http://example.com/hard.htm) }
+              let(:working_links) { %w(http://localhost:41722/working.htm http://localhost:41722/hard.htm) }
 
               before do
                 working_links.each do |link|

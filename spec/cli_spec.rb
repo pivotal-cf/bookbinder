@@ -154,9 +154,16 @@ describe Cli do
       end
 
       let(:config_hash) { {cool: 'config', 'sections' => [section1]} }
-      let(:configuration) { Configuration.new(logger, config_hash) }
+      let(:pdf_index) { '/pivotalcf/index.html'.to_yaml }
 
-      before { File.write('./config.yml', config_hash.to_yaml) }
+      before do
+        File.write('./pdf_index.yml', pdf_index.to_yaml)
+        File.write('./config.yml', config_hash.to_yaml)
+      end
+
+      let(:configuration) do
+        Configuration.new(logger, config_hash.merge(pdf_index: pdf_index))
+      end
 
       it 'passes configuration to the given command' do
         expect(Cli::Publish).to receive(:new).with(logger, configuration)
