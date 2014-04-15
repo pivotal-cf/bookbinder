@@ -14,7 +14,8 @@ describe Cli::Publish do
           {'repository' => {'name' => 'fantastic/my-docs-repo', 'ref' => 'my-docs-sha'}, 'directory' => 'foods/sweet', 'subnav_template' => 'fruits'},
           {'repository' => {'name' => 'fantastic/my-other-docs-repo', 'ref' => 'my-other-sha'}, 'directory' => 'foods/savory', 'subnav_template' => 'vegetables'}
       ],
-      'public_host' => 'host.example.com'
+      'public_host' => 'host.example.com',
+      'pdf_index' => nil
   } }
   let(:config) { Configuration.new(logger, config_hash) }
   let(:logger) { NilLogger.new }

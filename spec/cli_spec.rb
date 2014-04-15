@@ -147,27 +147,85 @@ describe Cli do
       let(:section1) do
         {
             'repository' => {
-                'name' => 'cloudfoundry/docs-cloudfoundry-concepts'
+                'name' => 'foo/dogs-repo'
             },
-            'directory' => 'concepts'
+            'directory' => section_path
         }
       end
 
-      let(:config_hash) { {cool: 'config', 'sections' => [section1]} }
-      let(:pdf_index) { '/pivotalcf/index.html'.to_yaml }
+      let(:config_hash) do
+        {
+            cool: 'config',
+            'sections' => [section1],
+            'public_host' => 'http://example.com',
+            'pdf' => {'header' => 'pdf_header.html'}
+        }
+      end
+
+      let(:pdf_index_uris) { pdf_index.map {|path| URI "http://localhost:41722/#{path}"} }
+      let(:target_file) { File.join(File.absolute_path('final_app'), 'public', 'FullDocSet.pdf') }
+      let(:single_page_target_file) { File.join(File.absolute_path('final_app'), 'public', single_page_pdf_filename) }
+      let(:header_url) { URI("http://localhost:41722/#{config_hash['pdf']['header']}") }
+      let(:section_path) { 'concepts' }
+      let(:pdf_index) { ["#{section_path}/index.html", "#{section_path}/budgies.hmtl"] }
 
       before do
         File.write('./pdf_index.yml', pdf_index.to_yaml)
         File.write('./config.yml', config_hash.to_yaml)
       end
 
-      let(:configuration) do
-        Configuration.new(logger, config_hash.merge(pdf_index: pdf_index))
+      it 'generates a multi-page PDF based on the pdf_index.yml' do
+        pdf_generator_spy = double(:pdf_spy)
+        expect(PdfGenerator).to receive(:new).and_return pdf_generator_spy
+        expect(pdf_generator_spy).to receive(:generate).with pdf_index_uris, target_file, header_url
+        cli.run ['publish', 'local']
       end
 
-      it 'passes configuration to the given command' do
-        expect(Cli::Publish).to receive(:new).with(logger, configuration)
-        cli.run ['publish', 'local']
+      context 'when configured to also generate a single-page PDF' do
+        let(:single_page_source) { "#{section_path}/gettingstarted.html" }
+        let(:single_page_source_uri) { URI "http://localhost:41722/#{single_page_source}" }
+        let(:config_hash) do
+          {
+              cool: 'config',
+              'sections' => [section1],
+              'public_host' => 'http://example.com',
+              'pdf' => {'header' => 'pdf_header.html', 'page' => single_page_source, 'filename' => single_page_pdf_filename}
+          }
+        end
+        let(:single_page_pdf_filename) { 'GettingStarted.pdf' }
+
+        it 'generates a multi-page PDF based on the pdf_index.yml' do
+          pdf_generator_spy = double(:pdf_spy)
+          expect(PdfGenerator).to receive(:new).and_return pdf_generator_spy
+          allow(pdf_generator_spy).to receive(:generate)
+
+          expect(pdf_generator_spy).to receive(:generate).with pdf_index_uris, target_file, header_url
+          cli.run ['publish', 'local']
+        end
+
+        it 'generates a one-page PDF based on the pdf.page key in config.yml' do
+          pdf_generator_spy = double(:pdf_spy)
+          expect(PdfGenerator).to receive(:new).and_return pdf_generator_spy
+          allow(pdf_generator_spy).to receive(:generate)
+
+          expect(pdf_generator_spy).to receive(:generate).with [single_page_source_uri], single_page_target_file, header_url
+          cli.run ['publish', 'local']
+        end
+
+        context 'and no pdf_index.yml' do
+          before do
+            FileUtils.rm('./pdf_index.yml')
+          end
+
+          it 'generates a one-page PDF based on the pdf.page key in config.yml' do
+            pdf_generator_spy = double(:pdf_spy)
+            expect(PdfGenerator).to receive(:new).and_return pdf_generator_spy
+            allow(pdf_generator_spy).to receive(:generate)
+
+            expect(pdf_generator_spy).to receive(:generate).with [single_page_source_uri], single_page_target_file, header_url
+            cli.run ['publish', 'local']
+          end
+        end
       end
 
       context 'when the configuration is invalid' do

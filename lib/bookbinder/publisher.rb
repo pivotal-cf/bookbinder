@@ -32,7 +32,7 @@ class Publisher
     server_director.use_server do |port|
       sitemap = spider.generate_sitemap options.fetch(:host_for_sitemap), port
 
-      links_for_pdf = options.fetch(:pdf_index, sitemap)
+      links_for_pdf = options[:pdf_index] || sitemap
 
       if pdf_requested
         generate_pdf(final_app_dir, options.fetch(:pdf), port) if repo_with_pdf_page_present?(options, repos)
@@ -51,7 +51,8 @@ class Publisher
   end
 
   def repo_with_pdf_page_present?(options, repos)
-    pdf_page = options.fetch(:pdf).fetch(:page) { return false }
+    pdf_page = options.fetch(:pdf)[:page]
+    return false unless pdf_page
     pdf_repo = repos.find { |repo| pdf_page.start_with?(repo.directory) }
     pdf_repo.copied?
   end

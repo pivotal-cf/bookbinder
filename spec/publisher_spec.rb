@@ -363,15 +363,19 @@ describe Publisher do
         allow(spider).to receive(:has_broken_links?)
       end
 
+      let(:publish_args) { {
+          output_dir: output_dir,
+          sections: sections,
+          master_middleman_dir: master_middleman_dir,
+          host_for_sitemap: 'example.com',
+          final_app_dir: final_app_dir,
+          pdf: pdf_config,
+          local_repo_dir: local_repo_dir,
+          spider: spider
+      } }
+
       def publish
-        publisher.publish output_dir: output_dir,
-                          sections: sections,
-                          master_middleman_dir: master_middleman_dir,
-                          host_for_sitemap: 'example.com',
-                          final_app_dir: final_app_dir,
-                          pdf: pdf_config,
-                          local_repo_dir: local_repo_dir,
-                          spider: spider
+        publisher.publish(publish_args)
       end
 
       context 'when the output directory does not yet exist' do
@@ -414,10 +418,65 @@ describe Publisher do
       context 'when asked to find repos locally' do
         let(:local_repo_dir) { RepoFixture.repos_dir }
 
-        around do |example|
-          WebMock.disable_net_connect!(:allow_localhost => true)
-          example.run
-          WebMock.disable_net_connect!
+        describe 'pdf Generation' do
+          let(:pretty_path) { 'arbitrary' }
+          let(:sections) {[
+              {
+                  'repository' => {
+                      'name' => 'foo/dogs-repo'
+                  },
+                  'directory' => pretty_path
+              }
+          ]}
+          let(:pdf_index) { ["#{pretty_path}/index.html", "#{pretty_path}/budgies.hmtl"] }
+          let(:pdf_index_uris) { pdf_index.map {|path| URI "http://localhost:41722/#{path}"} }
+          let(:target_file) { File.join(final_app_dir, 'public', 'FullDocSet.pdf') }
+          let(:single_page_target_file) { File.join(final_app_dir, 'public', pdf_config[:filename]) }
+          let(:pdf_config) { {header: 'header.html'} }
+          let(:header_url) { URI("http://localhost:41722/#{pdf_config[:header]}") }
+          let(:single_page_source_uri) { URI("http://localhost:41722/#{pdf_config[:page]}") }
+
+          before { publish_args.merge!(pdf_index: pdf_index) }
+
+          it 'generates a multi-page PDF based on the pdf_index.yml' do
+            pdf_generator_spy = double(:pdf_spy)
+            expect(PdfGenerator).to receive(:new).and_return pdf_generator_spy
+            expect(pdf_generator_spy).to receive(:generate).with pdf_index_uris, target_file, header_url
+            publish
+          end
+
+          context 'when configured to also generate a single-page PDF' do
+            let(:pdf_config) { {header: 'header.html', page: "#{pretty_path}/something", filename: 'readAboutSomething.pdf'} }
+
+            it 'generates a multi-page PDF based on the pdf_index.yml' do
+              pdf_generator_spy = double(:pdf_spy)
+              expect(PdfGenerator).to receive(:new).and_return pdf_generator_spy
+              allow(pdf_generator_spy).to receive(:generate)
+
+              expect(pdf_generator_spy).to receive(:generate).with pdf_index_uris, target_file, header_url
+              publish
+            end
+
+            it 'generates a one-page PDF based on the pdf.page key in config.yml' do
+              pdf_generator_spy = double(:pdf_spy)
+              expect(PdfGenerator).to receive(:new).and_return pdf_generator_spy
+              allow(pdf_generator_spy).to receive(:generate)
+
+              expect(pdf_generator_spy).to receive(:generate).with [single_page_source_uri], single_page_target_file, header_url
+              publish
+            end
+
+            context 'and no pdf_index.yml' do
+              it 'generates a one-page PDF based on the pdf.page key in config.yml' do
+                pdf_generator_spy = double(:pdf_spy)
+                expect(PdfGenerator).to receive(:new).and_return pdf_generator_spy
+                allow(pdf_generator_spy).to receive(:generate)
+
+                expect(pdf_generator_spy).to receive(:generate).with [single_page_source_uri], single_page_target_file, header_url
+                publish
+              end
+            end
+          end
         end
 
         context 'when the repository used to generate the pdf was skipped' do
@@ -471,6 +530,12 @@ describe Publisher do
           let(:sections) { [{'repository' => {'name' => 'org/my-docs-repo'}, 'directory' => 'pretty_dir'}] }
           let(:pdf_config) do
             {page: 'pretty_dir/unknown_file.html', filename: 'irrelevant.pdf', header: 'pretty_dir/unknown_header.html'}
+          end
+
+          around do |example|
+            WebMock.disable_net_connect!(:allow_localhost => true)
+            example.run
+            WebMock.disable_net_connect!
           end
 
           it 'fails' do

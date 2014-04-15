@@ -25,17 +25,20 @@ class Cli
 
     def generate_site_and_pdf_for(cli_args: {}, target_tag: nil, final_app_dir: nil)
       # TODO: general solution to turn all string keys to symbols
-      pdf_hash = config.has_option?('pdf') ? {page: config.pdf.fetch('page'),
-                                             filename: config.pdf.fetch('filename'),
-                                             header: config.pdf.fetch('header')}
-
-      : nil
-
       verbosity = cli_args.include?('--verbose')
       location = cli_args[0]
 
-      success = Publisher.new(@logger).publish publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir)
+      success = Publisher.new(@logger).publish publication_arguments(verbosity, location, pdf_options, target_tag, final_app_dir)
       success ? 0 : 1
+    end
+
+    def pdf_options
+      return unless config.has_option?('pdf')
+      {
+        page: config.pdf['page'],
+        filename: config.pdf['filename'],
+        header: config.pdf.fetch('header')
+      }
     end
 
     def checkout_book_at(target_tag, &doc_generation)
@@ -55,7 +58,8 @@ class Cli
           master_middleman_dir: File.absolute_path('master_middleman'),
           final_app_dir: final_app_dir,
           pdf: pdf_hash,
-          verbose: verbosity
+          verbose: verbosity,
+          pdf_index: config.pdf_index
       }
 
       arguments.merge!(local_repo_dir: File.absolute_path('..')) if location == 'local'
