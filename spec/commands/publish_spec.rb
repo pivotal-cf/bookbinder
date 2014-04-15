@@ -7,17 +7,24 @@ describe Cli::Publish do
     spec.run
   end
 
-  let(:config_hash) { {
-      'book_repo' => 'fantastic/fixture-book-title',
-      'sections' => [
-          {'repository' => {'name' => 'fantastic/dogs-repo', 'ref' => 'dog-sha'}, 'directory' => 'dogs', 'subnav_template' => 'dogs'},
-          {'repository' => {'name' => 'fantastic/my-docs-repo', 'ref' => 'my-docs-sha'}, 'directory' => 'foods/sweet', 'subnav_template' => 'fruits'},
-          {'repository' => {'name' => 'fantastic/my-other-docs-repo', 'ref' => 'my-other-sha'}, 'directory' => 'foods/savory', 'subnav_template' => 'vegetables'}
-      ],
-      'public_host' => 'host.example.com',
-      'pdf_index' => nil
-  } }
-  let(:config) { Configuration.new(logger, config_hash) }
+  let(:sections) do
+    [
+        {'repository' => {'name' => 'fantastic/dogs-repo', 'ref' => 'dog-sha'}, 'directory' => 'dogs', 'subnav_template' => 'dogs'},
+        {'repository' => {'name' => 'fantastic/my-docs-repo', 'ref' => 'my-docs-sha'}, 'directory' => 'foods/sweet', 'subnav_template' => 'fruits'},
+        {'repository' => {'name' => 'fantastic/my-other-docs-repo', 'ref' => 'my-other-sha'}, 'directory' => 'foods/savory', 'subnav_template' => 'vegetables'}
+    ]
+  end
+
+  let(:config) do
+    double('Configuration').tap do |d|
+      allow(d).to receive(:has_option?).with('pdf')
+      allow(d).to receive(:sections) { sections }
+      allow(d).to receive(:pdf_index)
+      allow(d).to receive(:public_host)
+      allow(d).to receive(:book_repo) { 'fantastic/fixture-book-title' }
+    end
+  end
+
   let(:logger) { NilLogger.new }
   let(:publish_command) { Cli::Publish.new(logger, config) }
 

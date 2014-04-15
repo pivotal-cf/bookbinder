@@ -54,6 +54,10 @@ class Publisher
     pdf_page = options.fetch(:pdf)[:page]
     return false unless pdf_page
     pdf_repo = repos.find { |repo| pdf_page.start_with?(repo.directory) }
+    unless pdf_repo
+      @logger.warn "No repository directories match the path to specified PDF page: #{pdf_page}"
+      return false
+    end
     pdf_repo.copied?
   end
 

@@ -293,7 +293,7 @@ describe Publisher do
       end
     end
 
-    context 'verbose testing' do
+    describe 'the verbose flag' do
       let(:local_repo_dir) { nil }
 
       it 'suppresses detailed output when the verbose flag is not set' do
@@ -521,8 +521,10 @@ describe Publisher do
           let(:pdf_config) do
             {page: 'pretty_dir/index.html', filename: 'irrelevant.pdf', header: 'pretty_dir/header.html'}
           end
-          it 'fails' do
-            expect { publish }.to raise_error
+
+          it 'complains' do
+            expect(logger).to receive(:warn).with 'No repository directories match the path to specified PDF page: pretty_dir/index.html'
+            publish
           end
         end
 
