@@ -38,6 +38,7 @@ A book project needs a few things to allow bookbinder to run. Here's the minimal
 ├── Gemfile.lock
 ├── .gitignore
 ├── .ruby-version
+├── <pdf_index.yml>
 ├── config.yml
 └── master_middleman
     ├── config.rb
@@ -172,6 +173,20 @@ The publish command creates 2 output directories, one named `output/` and one na
 `final_app/` contains bookbinder's ultimate output: a Rackup web-app that can be pushed to cloud foundry or run locally.
 
 `output/` contains intermediary state, including the final prepared directory that the `publish` script ran middleman against, in `output/master_middleman`.
+
+#### Generating PDFs
+
+`$ bookbinder publish` generates a PDF of the entire book, by default.  If you include a `pdf_index.yml`, `publish` will use only the subset of pages listed there.
+
+`pdf_index.yml` must be formatted as a single YAML vector, eg:
+
+```
+- my-book/intro.html
+- my-book/dramatic-peak.html
+- my-book/denoument.html
+```
+
+The prefixes must match a repository `directory` in `config.yml`.
 
 ### `update_local_doc_repos` command
 
