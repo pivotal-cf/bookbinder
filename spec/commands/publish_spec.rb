@@ -48,12 +48,9 @@ describe Cli::Publish do
     end
 
     def response_for(page)
-      Thread.current[:run_number] ||= 0
-      Thread.current[:run_number] += 1
-
       publish_command.run ['local']
 
-      response = Class
+      response = nil
       ServerDirector.new(logger, directory: 'final_app').use_server do |port|
         uri = URI "http://localhost:#{port}/#{page}"
         req = Net::HTTP::Get.new(uri.path)
@@ -72,7 +69,7 @@ describe Cli::Publish do
     it 'respects a redirects file' do
       redirect_rules = "r301 '/index.html', '/dogs/index.html'"
 
-      expect { File.write('redirects', redirect_rules) }.to change {
+      expect { File.write('redirects.rb', redirect_rules) }.to change {
         response_for('index.html')
       }.from(Net::HTTPSuccess).to(Net::HTTPMovedPermanently)
     end

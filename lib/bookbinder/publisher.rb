@@ -16,7 +16,7 @@ class Publisher
     public_directory = File.join final_app_dir, 'public'
 
     prepare_directories final_app_dir, intermediate_directory, workspace_dir, master_middleman_dir, master_dir
-    FileUtils.cp 'redirects', final_app_dir if File.exists?('redirects')
+    FileUtils.cp 'redirects.rb', final_app_dir if File.exists?('redirects.rb')
     sections = gather_sections(workspace_dir, options)
     generate_site(options, master_dir, sections, build_directory, public_directory)
     generate_peripherals(final_app_dir, options, pdf_requested, sections, spider, @logger)

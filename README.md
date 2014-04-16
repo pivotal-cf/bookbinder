@@ -39,6 +39,7 @@ A book project needs a few things to allow bookbinder to run. Here's the minimal
 ├── .gitignore
 ├── .ruby-version
 ├── <pdf_index.yml>
+├── <redirects.rb>
 ├── config.yml
 └── master_middleman
     ├── config.rb
@@ -170,7 +171,17 @@ will find doc repos by downloading the latest version from github.
 
 The publish command creates 2 output directories, one named `output/` and one named `final_app/`. These are placed in the current directory and are cleared each time you run bookbinder.
 
-`final_app/` contains bookbinder's ultimate output: a Rackup web-app that can be pushed to cloud foundry or run locally.
+`final_app/` contains bookbinder's ultimate output: a Rack web-app that can be pushed to cloud foundry or run locally.
+
+The Rack web-app will respect redirect rules specified in `redirects.rb`, so long as they conform to the `rack/rewrite` [syntax](https://github.com/jtrupiano/rack-rewrite), eg:
+
+```ruby
+rewrite   '/wiki/John_Trupiano',  '/john'
+r301      '/wiki/Yair_Flicker',   '/yair'
+r302      '/wiki/Greg_Jastrab',   '/greg'
+r301      %r{/wiki/(\w+)_\w+},    '/$1'
+```
+
 
 `output/` contains intermediary state, including the final prepared directory that the `publish` script ran middleman against, in `output/master_middleman`.
 
