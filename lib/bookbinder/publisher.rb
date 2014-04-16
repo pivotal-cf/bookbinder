@@ -16,6 +16,7 @@ class Publisher
     public_directory = File.join final_app_dir, 'public'
 
     prepare_directories final_app_dir, intermediate_directory, workspace_dir, master_middleman_dir, master_dir
+    FileUtils.cp 'redirects', final_app_dir if File.exists?('redirects')
     sections = gather_sections(workspace_dir, options)
     generate_site(options, master_dir, sections, build_directory, public_directory)
     generate_peripherals(final_app_dir, options, pdf_requested, sections, spider, @logger)
@@ -84,16 +85,21 @@ class Publisher
     @pdf_generator.generate sources, generated_pdf_file, header_file
   end
 
-  def prepare_directories(final_app, output, middleman_source, master_middleman_dir, middleman_dir)
-    FileUtils.rm_rf File.join output, '.'
+  def prepare_directories(final_app, middleman_scratch_space, middleman_source, master_middleman_dir, middleman_dir)
+    forget_sections(middleman_scratch_space)
     FileUtils.rm_rf File.join final_app, '.'
-    FileUtils.mkdir_p output
+    FileUtils.mkdir_p middleman_scratch_space
     FileUtils.mkdir_p File.join final_app, 'public'
     FileUtils.mkdir_p middleman_source
 
     copy_directory_from_gem 'template_app', final_app
     copy_directory_from_gem 'master_middleman', middleman_dir
     FileUtils.cp_r File.join(master_middleman_dir, '.'), middleman_dir
+  end
+
+  def forget_sections(middleman_scratch)
+    Section.store.clear
+    FileUtils.rm_rf File.join middleman_scratch, '.'
   end
 
   def copy_directory_from_gem(dir, output_dir)

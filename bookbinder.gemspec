@@ -28,4 +28,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'css_parser'
   s.add_runtime_dependency 'puma'
   s.add_runtime_dependency 'popen4'
+  s.add_runtime_dependency 'rack-rewrite'
 end

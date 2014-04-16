@@ -31,11 +31,50 @@ describe Cli::Publish do
   before { Spider.any_instance.stub(:generate_sitemap) }
 
   context 'local' do
+    around do |spec|
+      WebMock.disable_net_connect!(:allow_localhost => true)
+      spec.run
+      WebMock.disable_net_connect!
+    end
+
+    let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
+
+    it 'runs idempotently' do
+      publish_command.run ['local'] # Run Once
+
+      expect do
+        publish_command.run ['local'] # Run twice
+      end.not_to change { File.exist? dogs_index }.from(true).to(false)
+    end
+
+    def response_for(page)
+      Thread.current[:run_number] ||= 0
+      Thread.current[:run_number] += 1
+
+      publish_command.run ['local']
+
+      response = Class
+      ServerDirector.new(logger, directory: 'final_app').use_server do |port|
+        uri = URI "http://localhost:#{port}/#{page}"
+        req = Net::HTTP::Get.new(uri.path)
+        response = Net::HTTP.start(uri.host, uri.port) { |http| http.request(req) }
+      end
+      response
+    end
+
     it 'creates some static HTML' do
       publish_command.run ['local']
 
-      index_html = File.read File.join('final_app', 'public', 'dogs', 'index.html')
+      index_html = File.read dogs_index
       index_html.should include 'Woof'
+    end
+
+    it 'respects a redirects file' do
+      redirect_rules = "r301 '/index.html', '/dogs/index.html'"
+
+      expect { File.write('redirects', redirect_rules) }.to change {
+        response_for('index.html')
+      }.from(Net::HTTPSuccess).to(Net::HTTPMovedPermanently)
     end
   end
 
