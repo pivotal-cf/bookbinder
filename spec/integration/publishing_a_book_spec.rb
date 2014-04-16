@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'publishing a book' do
+describe 'generating a book' do
   include_context 'tmp_dirs'
 
   around_with_fixture_repo do |spec|
@@ -23,9 +23,7 @@ describe 'publishing a book' do
   end
 
   it 'generates a pdf based on the filename option' do
-    silence_io_streams do
-      `#{GEM_ROOT}/bin/bookbinder publish local`
-    end
+    silence_io_streams { `#{GEM_ROOT}/bin/bookbinder publish local` }
     expect(File.exists?(File.join('final_app', 'public', 'TestPdf.pdf'))).to eq(true)
   end
 end
