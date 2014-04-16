@@ -6,15 +6,7 @@ class Cli
       target_tag    = (cli_arguments[1..-1] - ['--verbose']).pop
       final_app_dir = File.absolute_path('final_app')
 
-      if target_tag
-        checkout_book_at(target_tag) do
-          generate_site_and_pdf_for(cli_args:       cli_arguments,
-                                    target_tag:     target_tag,
-                                    final_app_dir:  final_app_dir)
-        end
-      else
-        generate_site_and_pdf_for(cli_args: cli_arguments, final_app_dir: final_app_dir)
-      end
+      bind_book(cli_arguments, final_app_dir, target_tag)
     end
 
     def self.usage
@@ -23,7 +15,15 @@ class Cli
 
     private
 
-    def generate_site_and_pdf_for(cli_args: {}, target_tag: nil, final_app_dir: nil)
+    def bind_book(cli_arguments, final_app_dir, target_tag)
+      if target_tag then
+        checkout_book_at(target_tag) { generate_site_etc(cli_arguments, final_app_dir, target_tag) }
+      else
+        generate_site_etc(cli_arguments, final_app_dir)
+      end
+    end
+
+    def generate_site_etc(cli_args, final_app_dir, target_tag=nil)
       # TODO: general solution to turn all string keys to symbols
       verbosity = cli_args.include?('--verbose')
       location = cli_args[0]
