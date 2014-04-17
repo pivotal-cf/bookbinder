@@ -48,6 +48,7 @@ require_relative 'bookbinder/commands/push_to_prod'
 require_relative 'bookbinder/commands/run_publish_ci'
 require_relative 'bookbinder/commands/update_local_doc_repos'
 require_relative 'bookbinder/commands/tag'
+require_relative 'bookbinder/commands/generate_pdf'
 
 require_relative 'bookbinder/usage_message'
 

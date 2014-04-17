@@ -3,9 +3,7 @@ require 'spec_helper'
 describe 'generating a book' do
   include_context 'tmp_dirs'
 
-  around_with_fixture_repo do |spec|
-    spec.run
-  end
+  around_with_fixture_repo &:run
 
   before do
     config = YAML.load(File.read('./config.yml'))
@@ -20,10 +18,5 @@ describe 'generating a book' do
 
     index = File.read File.join('final_app', 'public', 'index.html')
     expect(index).to include('My production host is: docs.example.com')
-  end
-
-  it 'generates a pdf based on the filename option' do
-    silence_io_streams { `#{GEM_ROOT}/bin/bookbinder publish local` }
-    expect(File.exists?(File.join('final_app', 'public', 'TestPdf.pdf'))).to eq(true)
   end
 end

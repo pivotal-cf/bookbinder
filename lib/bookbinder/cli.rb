@@ -14,7 +14,8 @@ class Cli
     'push_to_prod' => PushToProd,
     'run_publish_ci' => RunPublishCI,
     'update_local_doc_repos' => UpdateLocalDocRepos,
-    'tag' => Tag
+    'tag' => Tag,
+    'generate_pdf' => GeneratePDF
   }.freeze
 
   def run(args)

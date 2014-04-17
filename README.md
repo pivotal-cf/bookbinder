@@ -199,6 +199,10 @@ r301      %r{/wiki/(\w+)_\w+},    '/$1'
 
 The prefixes must match a repository `directory` in `config.yml`.
 
+`$ bookbinder generate_pdf` is another command that will generate a PDF against the currently available `final_app` directory. You must run `publish [local | github]` before running `generate_pdf`.
+
+You can specify which pages to include in a PDF using `$ bookbinder generate_pdf someFile.yml`. Format `someFile.yml` like `pdf_index.yml` above. The output file will have the same name as the YML file used to generate it, with a `.pdf` extension (`someFile.pdf`, in our example).
+
 ### `update_local_doc_repos` command
 
 As a convenience, Bookbinder provides a command to update all your local doc repos, performing a git pull on each one:
