@@ -38,8 +38,8 @@ A book project needs a few things to allow bookbinder to run. Here's the minimal
 ├── Gemfile.lock
 ├── .gitignore
 ├── .ruby-version
-├── <pdf_index.yml>
-├── <redirects.rb>
+├── (optional) <PDF index>.yml
+├── (optional) redirects.rb
 ├── config.yml
 └── master_middleman
     ├── config.rb
@@ -74,8 +74,6 @@ sections:
 
 public_host: animals.example.com
 pdf:
-  page: path/to/source-document.html
-  filename: path/to/output-filename.pdf
   header: path/to/header-file.html
 template_variables:
   var_name: special-value
@@ -185,11 +183,13 @@ r301      %r{/wiki/(\w+)_\w+},    '/$1'
 
 `output/` contains intermediary state, including the final prepared directory that the `publish` script ran middleman against, in `output/master_middleman`.
 
-#### Generating PDFs
+As of version 0.2.0, the `publish` command no longer generates PDFs.
 
-`$ bookbinder publish` generates a PDF of the entire book, by default.  If you include a `pdf_index.yml`, `publish` will use only the subset of pages listed there.
+### `generate_pdf` command
 
-`pdf_index.yml` must be formatted as a single YAML vector, eg:
+`$ bookbinder generate_pdf` will generate a PDF against the currently available `final_app` directory. You must run `publish [local | github]` before running `generate_pdf`.
+
+You can specify which pages to include in a PDF using `$ bookbinder generate_pdf someFile.yml`. `someFile.yml` must be formatted as a single YAML vector, eg:
 
 ```
 - my-book/intro.html
@@ -199,9 +199,8 @@ r301      %r{/wiki/(\w+)_\w+},    '/$1'
 
 The prefixes must match a repository `directory` in `config.yml`.
 
-`$ bookbinder generate_pdf` is another command that will generate a PDF against the currently available `final_app` directory. You must run `publish [local | github]` before running `generate_pdf`.
 
-You can specify which pages to include in a PDF using `$ bookbinder generate_pdf someFile.yml`. Format `someFile.yml` like `pdf_index.yml` above. The output file will have the same name as the YML file used to generate it, with a `.pdf` extension (`someFile.pdf`, in our example).
+ The output file will have the same name as the YAML file used to generate it, with a `.pdf` extension (`someFile.pdf`, in our example).
 
 ### `update_local_doc_repos` command
 
