@@ -17,7 +17,7 @@ describe 'generating a book' do
         `#{GEM_ROOT}/bin/bookbinder publish local`
         `#{GEM_ROOT}/bin/bookbinder generate_pdf`
       end
-      expect(File.exists?(File.join('final_app', 'public', 'GeneratedPdf.pdf'))).to eq(true)
+      expect(File.exists?(File.join('final_app', 'GeneratedPdf.pdf'))).to eq(true)
     end
   end
 

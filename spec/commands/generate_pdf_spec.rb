@@ -33,7 +33,7 @@ describe Cli::GeneratePDF do
     end
 
     context 'without a pdf_index' do
-      let(:target_file) { 'public/GeneratedPdf.pdf' }
+      let(:target_file) { 'GeneratedPdf.pdf' }
       let(:header_url) { 'header.html' }
       let(:header_full_url) { "http://localhost:41722/#{header_url}" }
 
