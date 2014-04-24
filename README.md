@@ -60,6 +60,7 @@ A book project needs a few things to allow bookbinder to run. Here's the minimal
 ```YAML
 book_repo: org-name/repo-name
 cred_repo: org-name/private-repo
+layout_repo: org-name/master-middleman-repo
 
 sections:
   - repository:
@@ -87,9 +88,13 @@ template_variables:
     output
     final_app
 
-`master_middleman` is a directory which forms the basis of your site. [Middleman](http://middlemanapp.com/) configuration and top-level assets, javascripts, and stylesheets should all be placed in here. You can also have ERB layout files. Each time a publish operation is run, this directory is copied to `output/master_middleman`. Then each doc-repo is copied (as a directory) into `output/master_middleman/source/`, before middleman is run to generate the final app.
+`master_middleman` is a directory which forms the basis of your site. [Middleman](http://middlemanapp.com/) configuration and top-level assets, javascripts, and stylesheets should all be placed in here. You can also have ERB layout files. Each time a publish operation is run, this directory is copied to `output/master_middleman`. Then each doc-repo is copied (as a directory) into `output/master_middleman/source/`, before middleman is run to generate the final app.  If you specify a `layout_repo:` in `config.yml`, that will be used instead.
 
 `.ruby-version` is used by [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/) to find the right ruby.  WARNING: If you install rbenv, you MUST uninstall RVM first: [see details here](http://robots.thoughtbot.com/post/47273164981/using-rbenv-to-manage-rubies-and-gems).
+
+### Layout Repository
+
+If layout repository is set to the full name of a Github repository (eg `cloudfoundry/bosh`), it will be downloaded for use as your book's `master_middleman` directory.
 
 ### Credentials Repository
 
