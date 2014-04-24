@@ -52,26 +52,29 @@ class Cli
     end
 
     def publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir)
+      local_repo_dir = location == 'local' ? File.absolute_path('..') : nil
+
       arguments = {
           sections: config.sections,
           output_dir: File.absolute_path('output'),
-          master_middleman_dir: obtain_master_middleman,
+          master_middleman_dir: obtain_master_middleman(local_repo_dir),
           final_app_dir: final_app_dir,
           pdf: pdf_hash,
           verbose: verbosity,
-          pdf_index: config.pdf_index
+          pdf_index: config.pdf_index,
+          local_repo_dir: local_repo_dir
       }
 
-      arguments.merge!(local_repo_dir: File.absolute_path('..')) if location == 'local'
       arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
       arguments.merge!(host_for_sitemap: config.public_host)
       arguments.merge!(target_tag: target_tag) if target_tag
       arguments
     end
 
-    def obtain_master_middleman
+    def obtain_master_middleman(local_repo_dir)
       if config.has_option?('layout_repo')
-        Section.get_instance(config.layout_repo).directory
+        section = {'repository' => {'name' => config.layout_repo}}
+        File.join(local_repo_dir, Section.get_instance(@logger, section_hash: section, local_repo_dir: local_repo_dir).directory)
       else
         File.absolute_path('master_middleman')
       end

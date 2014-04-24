@@ -71,7 +71,7 @@ class Configuration
     @config = config_hash
   end
 
-  %w(book_repo cred_repo sections public_host pdf pdf_index).each do |method_name|
+  %w(book_repo layout_repo cred_repo sections public_host pdf pdf_index).each do |method_name|
     define_method(method_name) do
       config.fetch(method_name)
     end

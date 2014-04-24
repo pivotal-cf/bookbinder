@@ -5,9 +5,10 @@ describe Configuration do
     {
       'book_repo' => 'some-org/some-repo',
       'cred_repo' => 'some-org/cred-repo',
+      'layout_repo' => 'some-org/some-repo',
       'sections' => ['section1', 'section2'],
       'public_host' => 'http://www.example.com',
-      'template_variables' => {'some-var' => 'some-value'}
+      'template_variables' => {'some-var' => 'some-value'},
     }
   end
   let(:logger) { NilLogger.new }
@@ -15,24 +16,10 @@ describe Configuration do
   subject(:config) { Configuration.new(logger, config_hash) }
 
   describe 'accessing configuration values' do
-    it 'exposes #book_repo' do
-      expect(config.book_repo).to eq('some-org/some-repo')
-    end
-
-    it 'exposes #cred_repo' do
-      expect(config.cred_repo).to eq('some-org/cred-repo')
-    end
-
-    it 'exposes #sections' do
-      expect(config.sections).to eq(['section1', 'section2'])
-    end
-
-    it 'exposes #public_host' do
-      expect(config.public_host).to eq('http://www.example.com')
-    end
-
-    it 'exposes #template_variables' do
-      expect(config.template_variables).to eq({'some-var' => 'some-value'})
+    it 'exposes these keys' do
+      config_hash.each do |key, value|
+        expect(config.send(key)).to eq value
+      end
     end
 
     it 'returns an empty hash when template_variables is not provided' do

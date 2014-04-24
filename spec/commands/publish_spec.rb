@@ -137,4 +137,52 @@ describe Cli::Publish do
       }.to raise_error(Cli::InvalidArguments)
     end
   end
+
+  describe 'publication arguments' do
+    let(:all_these_arguments_and_such) do
+      {sections: [{"repository" => {"name" => "fantastic/dogs-repo", "ref" => "dog-sha"},
+                   "directory" => "dogs",
+                   "subnav_template" => "dogs"},
+                  {"repository" => {"name" => "fantastic/my-docs-repo", "ref" => "my-docs-sha"},
+                   "directory" => "foods/sweet",
+                   "subnav_template" => "fruits"},
+                  {"repository" =>
+                       {"name" => "fantastic/my-other-docs-repo", "ref" => "my-other-sha"},
+                   "directory" => "foods/savory",
+                   "subnav_template" => "vegetables"}],
+       output_dir: anything,
+       master_middleman_dir: anything,
+       final_app_dir: anything,
+       pdf: nil,
+       verbose: false,
+       pdf_index: nil,
+       local_repo_dir: anything,
+       host_for_sitemap: nil}
+    end
+
+    it 'are appropriate' do
+      fake_publisher = double(:publisher)
+      expect(Publisher).to receive(:new).and_return fake_publisher
+      expect(fake_publisher).to receive(:publish).with all_these_arguments_and_such
+      publish_command.run ['local']
+    end
+
+    context 'when provided a layout repo' do
+      before do
+        allow(config).to receive(:has_option?).with('layout_repo').and_return true
+        allow(config).to receive(:layout_repo).and_return 'such-org/wow-repo'
+      end
+
+      it 'passes the provided repo as master_middleman_dir' do
+        fake_publisher = double(:publisher)
+        expect(Publisher).to receive(:new).and_return fake_publisher
+
+        expect(fake_publisher).to receive(:publish) do |args|
+          expect(args[:master_middleman_dir]).to match('wow-repo')
+        end
+
+        publish_command.run ['local']
+      end
+    end
+  end
 end
