@@ -17,7 +17,7 @@ describe Cli::Publish do
 
   let(:config) do
     double('Configuration').tap do |d|
-      allow(d).to receive(:has_option?).with('pdf')
+      allow(d).to receive(:has_option?)
       allow(d).to receive(:sections) { sections }
       allow(d).to receive(:pdf_index)
       allow(d).to receive(:public_host)

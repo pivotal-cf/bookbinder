@@ -55,7 +55,7 @@ class Cli
       arguments = {
           sections: config.sections,
           output_dir: File.absolute_path('output'),
-          master_middleman_dir: File.absolute_path('master_middleman'),
+          master_middleman_dir: obtain_master_middleman,
           final_app_dir: final_app_dir,
           pdf: pdf_hash,
           verbose: verbosity,
@@ -67,6 +67,14 @@ class Cli
       arguments.merge!(host_for_sitemap: config.public_host)
       arguments.merge!(target_tag: target_tag) if target_tag
       arguments
+    end
+
+    def obtain_master_middleman
+      if config.has_option?('layout_repo')
+        Section.get_instance(config.layout_repo).directory
+      else
+        File.absolute_path('master_middleman')
+      end
     end
 
     def arguments_are_valid?(arguments)
