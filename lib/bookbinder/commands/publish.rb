@@ -73,8 +73,7 @@ class Cli
 
     def obtain_master_middleman(local_repo_dir)
       if config.has_option?('layout_repo')
-        section = {'repository' => {'name' => config.layout_repo}}
-        File.join(local_repo_dir, Section.get_instance(@logger, section_hash: section, local_repo_dir: local_repo_dir).directory)
+        MasterMiddleman.path(@logger, local_repo_dir, config.layout_repo)
       else
         File.absolute_path('master_middleman')
       end

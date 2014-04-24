@@ -38,6 +38,7 @@ require_relative 'bookbinder/cf_command_runner'
 require_relative 'bookbinder/pusher'
 require_relative 'bookbinder/artifact_namer'
 require_relative 'bookbinder/distributor'
+require_relative 'bookbinder/master_middleman'
 
 require_relative 'bookbinder/bookbinder_command'
 require_relative 'bookbinder/commands/build_and_push_tarball'
