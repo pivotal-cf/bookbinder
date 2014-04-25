@@ -52,7 +52,7 @@ class Cli
     logger.error "#{e.message}, in credentials.yml"
     1
   rescue KeyError => e
-    logger.error "#{e.message}, in config.yml"
+    logger.error "#{e.message} from your configuration."
     1
   rescue Cli::InvalidArguments
     logger.log usage_message.command(command)

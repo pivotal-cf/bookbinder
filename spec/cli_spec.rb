@@ -68,7 +68,7 @@ describe Cli do
         let(:arguments) { ['publish', 'local'] }
 
         it 'logs the error with the config file name' do
-          expect(logger).to receive(:error).with(/I broke.*in config\.yml/)
+          expect(logger).to receive(:error).with(/I broke.*your configuration/)
           run
         end
 

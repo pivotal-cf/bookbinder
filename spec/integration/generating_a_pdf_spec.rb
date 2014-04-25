@@ -11,20 +11,20 @@ describe 'generating a book' do
     File.write('./config.yml', config.to_yaml)
   end
 
-  context 'when no pdf index file is specified' do
+  context 'when no PDF config file is specified' do
     it 'generates a pdf based on the filename option' do
       silence_io_streams do
         `#{GEM_ROOT}/bin/bookbinder publish local`
         `#{GEM_ROOT}/bin/bookbinder generate_pdf`
       end
-      expect(File.exists?(File.join('final_app', 'GeneratedPdf.pdf'))).to eq(true)
+      expect(File.exists?(File.join('final_app', 'TestPdf.pdf'))).to eq(true)
     end
   end
 
-  context 'when a pdf index file is specified' do
+  context 'when a PDF config file is specified' do
 
     before do
-      File.write("#{filename}.yml", { 'pages' => %w(index.html dogs/index.html foods/savory/index.html foods/sweet/index.html) }.to_yaml)
+      File.write("#{filename}.yml", { 'header' => 'foods/sweet/index.html', 'pages' => %w(index.html dogs/index.html foods/savory/index.html foods/sweet/index.html) }.to_yaml)
     end
 
     let(:filename) { 'PDFsAreCool' }
