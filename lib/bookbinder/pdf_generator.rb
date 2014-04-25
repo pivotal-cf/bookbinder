@@ -27,7 +27,7 @@ wkhtmltopdf \
     --header-spacing 10 \
     --footer-spacing 5 \
     --footer-font-size 10 \
-    --footer-left #{left_footer} \
+    --footer-left '#{left_footer}' \
     --footer-center '[page] of [toPage]' \
     --print-media-type \
     --header-html #{header} \
