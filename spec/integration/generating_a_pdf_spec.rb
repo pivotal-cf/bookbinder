@@ -24,7 +24,7 @@ describe 'generating a book' do
   context 'when a pdf index file is specified' do
 
     before do
-      File.write("#{filename}.yml", %w(index.html dogs/index.html foods/savory/index.html foods/sweet/index.html).to_yaml)
+      File.write("#{filename}.yml", { 'pages' => %w(index.html dogs/index.html foods/savory/index.html foods/sweet/index.html) }.to_yaml)
     end
 
     let(:filename) { 'PDFsAreCool' }

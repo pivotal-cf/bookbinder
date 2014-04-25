@@ -51,7 +51,7 @@ describe Cli::GeneratePDF do
       let(:target_file) { 'pdf_index.pdf' }
 
       before do
-        File.write('pdf_index.yml', pdf_index_links.to_yaml)
+        File.write('pdf_index.yml', { 'pages' => pdf_index_links}.to_yaml)
       end
 
       it 'sends all pages in the pdf_index to the PdfGenerator' do

@@ -33,7 +33,7 @@ class Cli
 
     def pages_in_pdf(port, pdf_index_filename)
       local_host = "http://localhost:#{port}/"
-      pdf_index = YAML.load(File.read(File.expand_path(File.join('..', pdf_index_filename))))
+      pdf_index = YAML.load(File.read(File.expand_path(File.join('..', pdf_index_filename))))['pages']
       pdf_index.map { |l| l.prepend(local_host) }
     end
 
