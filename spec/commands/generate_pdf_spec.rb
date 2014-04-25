@@ -42,12 +42,12 @@ describe Cli::GeneratePDF do
       end
 
       it 'sends all pages in the sitemap to the PdfGenerator' do
-        expect(fake_generator).to receive(:generate).with urls, anything, anything
+        expect(fake_generator).to receive(:generate).with urls, anything, anything, anything
         generate
       end
 
       it 'sends the default pdf_header in config.yml to the PdfGenerator' do
-        expect(fake_generator).to receive(:generate).with anything, anything, header_url
+        expect(fake_generator).to receive(:generate).with anything, anything, header_url, anything
         generate
       end
 
@@ -72,7 +72,7 @@ describe Cli::GeneratePDF do
       let(:pdf_config_name) { 'Crocodiles.yml' }
       let(:header_file) { 'header.html' }
       let(:header_url) { "http://localhost:41722/#{header_file}" }
-
+      let(:notice) { 'This is a cool bit of text' }
       context "but it doesn't exist" do
         it 'raises an error' do
           expect{ generate }.to raise_error(/#{pdf_config_name}.*does not exist/)
@@ -80,10 +80,34 @@ describe Cli::GeneratePDF do
       end
 
       context 'and the PDF config exists' do
-        let(:pdf_options) {{'header' => header_file, 'pages' => links}}
+        let(:pdf_options) {{'header' => header_file, 'pages' => links, 'copyright_notice' => notice}}
 
-        before do
-          File.write(pdf_config_name, pdf_options.to_yaml)
+        before { File.write(pdf_config_name, pdf_options.to_yaml) }
+
+        it 'sends the pages from the specified PDF config to the generator' do
+          expect(fake_generator).to receive(:generate).with urls, anything, anything, anything
+          generate
+        end
+
+        it 'sends the header in the specified PDF config to the generator' do
+          expect(fake_generator).to receive(:generate).with anything, anything, header_url, anything
+          generate
+        end
+
+        it 'sends the copyright notice in the specified PDF config to the generator' do
+          expect(fake_generator).to receive(:generate).with anything, anything, anything, notice
+          generate
+        end
+
+        it 'names the target file after the PDF config file' do
+          expected_name = pdf_config_name.gsub(/yml/, 'pdf')
+          expect(fake_generator).to receive(:generate).with anything, expected_name, anything, anything
+          generate
+        end
+
+        it 'does not print a deprecation warning' do
+          expect(logger).to_not receive(:log).with(/config\.yml.*deprecated/)
+          generate
         end
 
         context 'but it is missing required options' do
@@ -92,27 +116,6 @@ describe Cli::GeneratePDF do
           it 'raises an error' do
             expect{ generate }.to raise_error(/#{pdf_config_name}.*is missing required key 'header'/)
           end
-        end
-
-        it 'sends the pages from the specified PDF config to the generator' do
-          expect(fake_generator).to receive(:generate).with urls, anything, anything
-          generate
-        end
-
-        it 'sends the header in the specified PDF config to the generator' do
-          expect(fake_generator).to receive(:generate).with anything, anything, header_url
-          generate
-        end
-
-        it 'names the target file after the PDF config file' do
-          expected_name = pdf_config_name.gsub(/yml/, 'pdf')
-          expect(fake_generator).to receive(:generate).with anything, expected_name, anything
-          generate
-        end
-
-        it 'does not print a deprecation warning' do
-          expect(logger).to_not receive(:log).with(/config\.yml.*deprecated/)
-          generate
         end
       end
     end

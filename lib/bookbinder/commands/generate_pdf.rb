@@ -61,7 +61,7 @@ class Cli
         urls_to_capture = sitemap_links(local_host)
       end
 
-      PdfGenerator.new(@logger).generate(urls_to_capture, output_filename, "http://#{local_host}/#{header}")
+      PdfGenerator.new(@logger).generate(urls_to_capture, output_filename, "http://#{local_host}/#{header}", pdf_options['copyright_notice'])
     end
 
     def pdf_options

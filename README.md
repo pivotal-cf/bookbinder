@@ -194,18 +194,23 @@ As of version 0.2.0, the `publish` command no longer generates PDFs.
 
 `$ bookbinder generate_pdf` will generate a PDF against the currently available `final_app` directory. You must run `publish [local | github]` before running `generate_pdf`.
 
-You can specify which pages to include in a PDF using `$ bookbinder generate_pdf someFile.yml`. `someFile.yml` must be formatted as a single YAML vector, eg:
+You can specify which pages to include in a PDF using `$ bookbinder generate_pdf someFile.yml`. `someFile.yml` must be formatted as YAML:
 
+```yml
+---
+copyright_notice: 'Copyright Pivotal Software Inc, 2042-2043'
+header: some/html/page.html
+pages:
+    - my-book/intro.html
+    - my-book/dramatic-peak.html
+    - my-book/denoument.html
 ```
-- my-book/intro.html
-- my-book/dramatic-peak.html
-- my-book/denoument.html
-```
 
-The prefixes must match a repository `directory` in `config.yml`.
+Each `pages` path must match a repository `directory` in `config.yml`, i.e. it must exist.
 
+An optional copyright notice may be provided as shown in the example.
 
- The output file will have the same name as the YAML file used to generate it, with a `.pdf` extension (`someFile.pdf`, in our example).
+The output file will have the same name as the YAML file used to generate it, with a `.pdf` extension (`someFile.pdf`, in our example).
 
 ### `update_local_doc_repos` command
 

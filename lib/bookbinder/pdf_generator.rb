@@ -11,9 +11,11 @@ class PdfGenerator
     @logger = logger
   end
 
-  def generate(sources, target, header)
+  def generate(sources, target, header, left_footer=nil)
     sources.each { |s| check_destination_exists s }
     check_destination_exists header
+
+    left_footer ||= "   © Copyright 2013-#{Time.now.year}, Pivotal"
 
     command = <<CMD
 wkhtmltopdf \
@@ -25,7 +27,7 @@ wkhtmltopdf \
     --header-spacing 10 \
     --footer-spacing 5 \
     --footer-font-size 10 \
-    --footer-left "   © Copyright 2013-#{Time.now.year}, Pivotal" \
+    --footer-left #{left_footer} \
     --footer-center '[page] of [toPage]' \
     --print-media-type \
     --header-html #{header} \
