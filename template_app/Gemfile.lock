@@ -1,8 +1,13 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    libv8 (3.16.14.3)
     rack (1.5.2)
     rack-rewrite (1.5.0)
+    ref (1.0.5)
+    therubyracer (0.12.1)
+      libv8 (~> 3.16.14.0)
+      ref
     vienna (0.4.0)
       rack (~> 1.5)
 
@@ -11,4 +16,5 @@ PLATFORMS
 
 DEPENDENCIES
   rack-rewrite
+  therubyracer
   vienna
