@@ -17,7 +17,7 @@ class Publisher
     prepare_directories final_app_dir, intermediate_directory, workspace_dir, master_middleman_dir, master_dir
     FileUtils.cp 'redirects.rb', final_app_dir if File.exists?('redirects.rb')
 
-    file_modification_cache = GitModCache.new File.join(master_dir, 'file_modification_dates')
+    file_modification_cache = GitModCache.new File.absolute_path('file_modification_dates')
 
     sections = gather_sections(workspace_dir, options, file_modification_cache)
 

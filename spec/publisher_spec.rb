@@ -4,13 +4,6 @@ describe Publisher do
   describe '#publish' do
     include_context 'tmp_dirs'
 
-    def stub_github_commits(name: full_name, sha: 'master')
-      stub_request(:get, "https://api.github.com/repos/#{name}/git/trees/#{sha}?recursive=true").
-          to_return(:status => 200, :body => "{\"tree\":[{\"path\":\"abc\",\"sha\":\"123\"}]}", headers: {'Content-type' => 'application/json'})
-      stub_request(:get, "https://api.github.com/repos/#{name}/commits?path=abc&sha=#{sha}").
-          to_return(:status => 200, :body => "[{\"commit\":{\"author\":{\"date\":\"12-12-12\"}}}]", headers: {'Content-type' => 'application/json'})
-    end
-
     let(:logger) { NilLogger.new }
     let(:publisher) { Publisher.new(logger) }
     let(:output_dir) { tmp_subdir 'output' }

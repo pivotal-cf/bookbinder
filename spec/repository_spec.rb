@@ -286,7 +286,7 @@ describe Repository do
 
     it 'returns a hash' do
       allow(git_client).to receive(:tree).and_return tree
-      expect(repo.shas_by_file).to eq({'my-docs-repo/fake-path/file.mp3' => 'fake-sha'})
+      expect(repo.shas_by_file).to eq({'fake-path/file.mp3' => 'fake-sha'})
     end
 
     it 'recursively searches the entire tree at teh target ref' do

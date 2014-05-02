@@ -43,4 +43,12 @@ module SpecHelperMethods
 
     stub_refs_for_repo repo_name, [some_ref]
   end
+
+
+  def stub_github_commits(name: nil, sha: 'master')
+    stub_request(:get, "https://api.github.com/repos/#{name}/git/trees/#{sha}?recursive=true").
+        to_return(:status => 200, :body => "{\"tree\":[{\"path\":\"abc\",\"sha\":\"123\"}]}", headers: {'Content-type' => 'application/json'})
+    stub_request(:get, "https://api.github.com/repos/#{name}/commits?path=abc&sha=#{sha}").
+        to_return(:status => 200, :body => "[{\"commit\":{\"author\":{\"date\":\"12-12-12\"}}}]", headers: {'Content-type' => 'application/json'})
+  end
 end

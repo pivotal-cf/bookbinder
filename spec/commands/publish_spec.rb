@@ -3,13 +3,6 @@ require 'spec_helper'
 describe Cli::Publish do
   include_context 'tmp_dirs'
 
-  def stub_github_commits(name: full_name, sha: 'master')
-    stub_request(:get, "https://api.github.com/repos/#{name}/git/trees/#{sha}?recursive=true").
-        to_return(:status => 200, :body => "{\"tree\":[{\"path\":\"abc\",\"sha\":\"123\"}]}", headers: {'Content-type' => 'application/json'})
-    stub_request(:get, "https://api.github.com/repos/#{name}/commits?path=abc&sha=#{sha}").
-        to_return(:status => 200, :body => "[{\"commit\":{\"author\":{\"date\":\"12-12-12\"}}}]", headers: {'Content-type' => 'application/json'})
-  end
-
   around_with_fixture_repo do |spec|
     spec.run
   end
@@ -114,9 +107,8 @@ describe Cli::Publish do
       let(:fixture_repo_name) { 'fantastic/fixture-book-title' }
 
       it 'gets the book at that tag' do
-        sections.each do |s|
-          stub_github_commits(name: s['repository']['name'], sha: desired_tag)
-        end
+        sections.each { |s| stub_github_commits(name: s['repository']['name'], sha: desired_tag) }
+
         stub_github_for git_client, 'fantastic/dogs-repo', desired_tag
         stub_github_for git_client, 'fantastic/my-docs-repo', desired_tag
         stub_github_for git_client, 'fantastic/my-other-docs-repo', desired_tag

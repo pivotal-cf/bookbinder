@@ -119,7 +119,7 @@ class Repository
   def shas_by_file
     tree = @github.tree(full_name, target_ref, recursive: true)
     # TODO: make clearer
-    Hash[tree[:tree].map { |leaf| [File.join(directory, leaf[:path]), leaf[:sha]] }]
+    Hash[tree[:tree].map { |leaf| [leaf[:path], leaf[:sha]] }]
   end
 
   def dates_by_sha(shas_by_file, except: {})
