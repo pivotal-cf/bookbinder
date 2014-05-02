@@ -1,3 +1,4 @@
+require 'date'
 # mostly from https://github.com/multiscan/middleman-navigation but modified slightly
 require_relative 'quicklinks_renderer'
 
@@ -44,9 +45,10 @@ module Navigation
       OpenStruct.new config[:template_variables]
     end
 
-    def modified_date
+    def modified_date(format=nil)
       cache = config[:filecache]
-      cache.fetch(current_path)
+      modified_time = cache.fetch(current_path)
+      (format.nil? ? modified_time : modified_time.strftime(format)) unless modified_time.nil?
     end
 
     def quick_links
