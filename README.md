@@ -23,7 +23,7 @@ Please read this document to understand how to set up a new book project.  You c
 #### Deploying your book
 - Create AWS bucket for green builds and put info into `config.yml`
 - Set up CF spaces for staging and production and put details into `config.yml`
-- Start a Jenkins CI server 
+- Start a Jenkins CI server
 - Set up Jenkins CI with required plugins and two-build setup
 - Verify that Jenkins builds are running and that it deploys to staging after successful builds
 - Deploy to production
@@ -131,6 +131,8 @@ Bookbinder provides several helper functions that can be called from within a .e
 
 `<%= yield_for_subnav %>` inserts the appropriate template in /subnavs, based on each constituent repositories' `subnav_template:` parameter in config.yml. The default template (`\_default.erb`) uses the label `default` and is applied to all sections unless another template is specified with subnav\_template. Template labels are the name of the template file with extensions removed. ("sample" for a template named "sample.erb")
 
+`<%= modified_date [format]%>` will evaluate to the time at which the current page was last modified. The format string is optional: if specified (e.g. "%Y/%m/%d"), the date will be printed accordingly. If not specified, the date will look like '2013-11-13 20:00:18 UTC'.
+
 `<%= yield_for_code_snippet from: 'my-org/code-repo', at: 'myCodeSnippetA' %>` inserts code snippets extracted from code repositories.
 
 To delimit where a code snippet begins and ends, you must use the format of `code_snippet MARKER_OF_YOUR_CHOOSING start OPTIONAL_LANGUAGE`, followed by the code, and then finished with `code_snippet MARKER_OF_YOUR_CHOOSING end`:
@@ -236,7 +238,7 @@ Books can be published from a tag, like so:
 
 This will start a Rackup server to serve your documentation website locally at [http://localhost:4567/](http://localhost:4567/). While making edits in documentation repos, we recommend leaving this running in a dedicated shell window.  It can be terminated by hitting `ctrl-c`.
 
-You should only need to run the `bundle` the first time around. 
+You should only need to run the `bundle` the first time around.
 
 
 ## Continuous Integration
@@ -252,7 +254,7 @@ The goal of this CI setup is to run a full publish operation every time either o
 
 The book CI should have 2 Jenkins builds to accomplish this. Both should link to the same repository (the book repository). Both use scripts from the bookbinder gem.
 
-The **Change Monitor Build** build is simply a cron-like build that runs every minute, and detects if any of the document repositories have changed; if they have, it triggers the Publish Build to run. 
+The **Change Monitor Build** build is simply a cron-like build that runs every minute, and detects if any of the document repositories have changed; if they have, it triggers the Publish Build to run.
 
 The **Publish Build**, when triggered, runs a full publish operation. If the publish build goes green (i.e. there are no broken links), it will deploy to staging and also generate a tarball of the green build, which is stored on S3 with a build number in the filename.  It is then available for [manual deployment](#deploying) to production.
 
