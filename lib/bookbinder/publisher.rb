@@ -16,8 +16,12 @@ class Publisher
 
     prepare_directories final_app_dir, intermediate_directory, workspace_dir, master_middleman_dir, master_dir
     FileUtils.cp 'redirects.rb', final_app_dir if File.exists?('redirects.rb')
-    sections = gather_sections(workspace_dir, options)
-    generate_site(options, master_dir, sections, build_directory, public_directory)
+
+    file_modification_cache = GitModCache.new File.join(master_dir, 'file_modification_dates')
+
+    sections = gather_sections(workspace_dir, options, file_modification_cache)
+
+    generate_site(options, master_dir, sections, build_directory, public_directory, file_modification_cache)
     generate_sitemap(final_app_dir, options, spider)
 
     @logger.log "Bookbinder bound your book into #{final_app_dir.green}"
@@ -32,21 +36,23 @@ class Publisher
     server_director.use_server { |port| spider.generate_sitemap options.fetch(:host_for_sitemap), port }
   end
 
-  def generate_site(options, middleman_dir, repos, build_dir, public_dir)
+  def generate_site(options, middleman_dir, sections, build_dir, public_dir, file_modification_cache)
     MiddlemanRunner.new(@logger).run(middleman_dir,
                                      options.fetch(:template_variables, {}),
-                                     options[:local_repo_dir],
-                                     options[:verbose], repos, options[:host_for_sitemap]
+                                     options[:local_repo_dir], file_modification_cache,
+                                     options[:verbose], sections, options[:host_for_sitemap]
     )
     FileUtils.cp_r build_dir, public_dir
   end
 
-  def gather_sections(workspace, options)
-    options.fetch(:sections).map do |section|
-      Section.get_instance(@logger, section_hash: section, destination_dir: workspace,
+  def gather_sections(workspace, options, file_modification_cache)
+    options.fetch(:sections).map do |attributes|
+      section = Section.get_instance(@logger, section_hash: attributes, destination_dir: workspace,
                            local_repo_dir: options[:local_repo_dir],
                            target_tag: options[:target_tag]
       )
+      section.write_file_modification_dates_to file_modification_cache
+      section
     end
   end
 

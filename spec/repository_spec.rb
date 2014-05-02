@@ -10,6 +10,7 @@ describe Repository do
   before do
     allow(GitClient).to receive(:new).and_call_original
     allow(GitClient).to receive(:new).with(logger, access_token: github_token).and_return(git_client)
+    allow(ProgressBar).to receive(:create).and_return(double(increment: nil))
   end
 
   it 'requires a full_name' do
@@ -197,12 +198,12 @@ describe Repository do
     before do
       allow(git_client).to receive(:validate_authorization)
       allow(git_client).to receive(:commits).with(repo.full_name)
-                                       .and_return([OpenStruct.new(sha: repo_sha)])
+                           .and_return([OpenStruct.new(sha: repo_sha)])
     end
 
     it 'should apply a tag' do
       expect(git_client).to receive(:create_tag!)
-                                        .with(repo.full_name, my_tag, repo_sha)
+                            .with(repo.full_name, my_tag, repo_sha)
 
       repo.tag_with(my_tag)
     end
@@ -266,6 +267,73 @@ describe Repository do
 
       it 'gives an informative error message' do
         expect { repo.download_archive }.to raise_error(/Ref #{target_ref} was not found in #{full_name}/)
+      end
+    end
+  end
+
+  describe '#shas_by_file' do
+    let(:target_ref) { 'arbitrary-reference' }
+    let(:full_name) { 'org/my-docs-repo' }
+    let(:repo) do
+      Repository.new(logger: logger, github_token: github_token, full_name: full_name, target_ref: target_ref)
+    end
+    let(:tree) { {tree: [{path: 'fake-path/file.mp3', sha: 'fake-sha'}]} }
+    let(:git_client) { double(:octokit) }
+
+    before do
+      allow(GitClient).to receive(:new).and_return git_client
+    end
+
+    it 'returns a hash' do
+      allow(git_client).to receive(:tree).and_return tree
+      expect(repo.shas_by_file).to eq({'my-docs-repo/fake-path/file.mp3' => 'fake-sha'})
+    end
+
+    it 'recursively searches the entire tree at teh target ref' do
+      expect(git_client).to receive(:tree).with(full_name, target_ref, recursive: true).and_return tree
+      repo.shas_by_file
+    end
+  end
+
+  describe '#dates_by_sha' do
+    let(:repo) do
+      Repository.new(logger: logger, github_token: github_token, full_name: full_name, target_ref: target_ref)
+    end
+
+    let(:full_name) { 'org/my-docs-repo' }
+    let(:target_ref) { 'arbitrary-reference' }
+    let(:git_client) { double(:octokit) }
+    let(:shas_by_file) { {
+        'file-path1' => 'cached-sha-1',
+        'file-path2' => 'cached-sha-2'
+    }
+    }
+
+    before do
+      allow(GitClient).to receive(:new).and_return git_client
+    end
+
+    context 'when a sha is cached' do
+      let(:modified_date) { rand 1000 }
+      let(:cached_shas) { {'cached-sha-1' => modified_date} }
+
+
+      it 'does not return it in the result' do
+        allow(git_client).to receive(:last_modified_date_of).with("org/my-docs-repo", "arbitrary-reference", "file-path2").and_return(modified_date)
+        expect(repo.dates_by_sha(shas_by_file, except: cached_shas)).to eq('cached-sha-2' => modified_date)
+      end
+    end
+
+    context 'when a sha is not cached' do
+      let(:earlier) { 0 }
+      let(:later) { 1978 }
+      let(:cached_shas) { {} }
+
+      it 'returns all results' do
+        expect(git_client).to receive(:last_modified_date_of).with("org/my-docs-repo", "arbitrary-reference", "file-path1").and_return(earlier)
+        expect(git_client).to receive(:last_modified_date_of).with("org/my-docs-repo", "arbitrary-reference", "file-path2").and_return(later)
+
+        expect(repo.dates_by_sha(shas_by_file, except: cached_shas)).to eq({'cached-sha-1' => earlier,'cached-sha-2' => later})
       end
     end
   end

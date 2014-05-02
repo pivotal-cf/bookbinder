@@ -186,4 +186,15 @@ describe Section do
       end
     end
   end
+
+  describe '#write_file_modification_dates_to' do
+    let(:repo) { double(:repo) }
+    subject(:section) { Section.new(logger, repo, 'my_template') }
+    let(:cache) { double(:file_mod_cache) }
+
+    it 'updates the cache' do
+      expect(cache).to receive(:update_from).with repo
+      section.write_file_modification_dates_to cache
+    end
+  end
 end

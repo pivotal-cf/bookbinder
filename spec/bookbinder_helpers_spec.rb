@@ -7,6 +7,17 @@ describe Navigation::HelperMethods do
   include_context 'tmp_dirs'
 
   let(:logger) { NilLogger.new }
+  let(:klass) do
+    Class.new do
+      include Navigation::HelperMethods
+
+      attr_reader :config
+
+      def initialize(config)
+        @config = config
+      end
+    end
+  end
 
   before do
     allow(BookbinderLogger).to receive(:new).and_return(logger)
@@ -27,22 +38,8 @@ describe Navigation::HelperMethods do
   end
 
   describe '#yield_for_code_snippet' do
-    let(:klass) do
-      Class.new do
-        include Navigation::HelperMethods
-
-        attr_reader :config
-
-        def initialize(config)
-          @config = config
-        end
-      end
-    end
-
     let(:config) { {} }
-    let(:yielded_snippet) do
-      klass.new(config).yield_for_code_snippet(from: repo, at: excerpt_mark)
-    end
+    let(:yielded_snippet) { klass.new(config).yield_for_code_snippet(from: repo, at: excerpt_mark) }
     let(:markdown_snippet) do
       <<-MARKDOWN
 ```ruby
@@ -89,6 +86,19 @@ p fib.take_while { |n| n <= 4E6 }
 
   describe '#yield_for_subnav' do
     pending
+  end
+
+  describe '#modified_date' do
+    let(:first_date){ "19 Jan 3028" }
+    let(:filename) { "Moon Colonization History" }
+    let(:config) { {filecache: double(:cache, fetch: first_date)} }
+
+    it 'returns the date which the cache provides' do
+      expect_any_instance_of(klass).to receive(:current_path).and_return File.join('whatever', filename)
+
+      modified_date = klass.new(config).modified_date
+      expect(modified_date).to eq(first_date)
+    end
   end
 
   describe '#breadcrumbs' do
@@ -201,17 +211,8 @@ p fib.take_while { |n| n <= 4E6 }
 
   describe '#quick_links' do
     let(:quick_links) do
-      class TestClass
-        include Navigation::HelperMethods
-
-        def current_page
-          double(:source_file)
-        end
-      end
-
-      test_class = TestClass.new
-      allow(test_class).to receive(:current_page).and_return(double(:current_page, source_file: nil))
-      test_class.quick_links
+      allow_any_instance_of(klass).to receive(:current_page).and_return(double(:current_page, source_file: nil))
+      klass.new({}).quick_links
     end
 
     let(:sample_markdown) do

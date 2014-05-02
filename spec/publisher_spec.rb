@@ -4,6 +4,13 @@ describe Publisher do
   describe '#publish' do
     include_context 'tmp_dirs'
 
+    def stub_github_commits(name: full_name, sha: 'master')
+      stub_request(:get, "https://api.github.com/repos/#{name}/git/trees/#{sha}?recursive=true").
+          to_return(:status => 200, :body => "{\"tree\":[{\"path\":\"abc\",\"sha\":\"123\"}]}", headers: {'Content-type' => 'application/json'})
+      stub_request(:get, "https://api.github.com/repos/#{name}/commits?path=abc&sha=#{sha}").
+          to_return(:status => 200, :body => "[{\"commit\":{\"author\":{\"date\":\"12-12-12\"}}}]", headers: {'Content-type' => 'application/json'})
+    end
+
     let(:logger) { NilLogger.new }
     let(:publisher) { Publisher.new(logger) }
     let(:output_dir) { tmp_subdir 'output' }
@@ -16,6 +23,7 @@ describe Publisher do
       before do
         squelch_middleman_output
         allow(BookbinderLogger).to receive(:new).and_return(NilLogger.new)
+        allow(ProgressBar).to receive(:create).and_return(double(increment: nil))
         WebMock.disable_net_connect!(:allow_localhost => true)
       end
 
@@ -28,6 +36,9 @@ describe Publisher do
         some_other_repo = 'my-other-docs-org/my-other-docs-repo'
         some_sha = 'some-sha'
         some_other_sha = 'some-other-sha'
+
+        stub_github_commits(name: some_repo, sha: some_sha)
+        stub_github_commits(name: some_other_repo, sha: some_other_sha)
 
         stub_github_for(git_client, some_repo, some_sha)
         stub_github_for(git_client, some_other_repo, some_other_sha)
@@ -68,6 +79,7 @@ describe Publisher do
               final_app_dir: final_app_dir
           }
         end
+        before { stub_github_commits(name: publication_arguments[:sections][0]['repository']['name']) }
 
         it 'it can find repos locally rather than going to github' do
           publisher.publish publication_arguments
@@ -81,6 +93,7 @@ describe Publisher do
 
           context 'and the code repo is present' do
             it 'can find code example repos locally rather than going to github' do
+              pending 'The next feature will be to prevent github access during \'publish local\' for the commit tree, so this test will be valid.'
               publisher.publish publication_arguments
               expect(WebMock).not_to have_requested(:any, /.*git.*/)
             end
@@ -102,6 +115,9 @@ describe Publisher do
       it 'generates non-broken links appropriately' do
         # tests our SubmoduleAwareAssets middleman extension, which is hard to test in isolation :(
         sections = [{'repository' => {'name' => 'org/dogs-repo'}}]
+
+        stub_github_commits(name: sections[0]['repository']['name'])
+
         no_broken_links = publisher.publish sections: sections,
                                             output_dir: output_dir,
                                             master_middleman_dir: dogs_master_middleman_dir,
@@ -145,6 +161,8 @@ describe Publisher do
         it 'applies the syntax highlighting CSS' do
           stub_github_for git_client, section_repo_name
           stub_github_for git_client, code_repo
+          stub_github_commits(name: publication_arguments[:sections][0]['repository']['name'])
+
           allow(GitClient).to receive(:new).and_return(git_client)
 
           publisher.publish(publication_arguments)
@@ -172,6 +190,7 @@ describe Publisher do
         end
 
         it 'makes only one request per code example repository' do
+          stub_github_commits(name: publication_arguments[:sections][0]['repository']['name'])
           stub_github_for git_client, section_repo_name
           mock_github_for git_client, code_repo
           allow(GitClient).to receive(:new).and_return git_client
@@ -182,6 +201,7 @@ describe Publisher do
 
       it 'generates a sitemap' do
         sections = [{'repository' => {'name' => 'org/dogs-repo'}}]
+        stub_github_commits(name: sections[0]['repository']['name'])
 
         publisher.publish sections: sections,
                           output_dir: output_dir,
@@ -198,6 +218,23 @@ describe Publisher do
           http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
         ))
       end
+
+      it 'caches each repo' do
+        number_of_sections = rand(10)+1
+
+        fake_section = double(:section, directory: 'foo', subnav_template: 'bar')
+        allow(Section).to receive(:get_instance).and_return(fake_section)
+        expect(fake_section).to receive(:write_file_modification_dates_to).exactly(number_of_sections).times
+
+        publisher.publish(
+            final_app_dir: final_app_dir,
+            master_middleman_dir: dogs_master_middleman_dir,
+            output_dir: output_dir,
+            sections: Array.new(number_of_sections, {}),
+            host_for_sitemap: 'example.com'
+        )
+      end
+
     end
 
     describe 'the verbose flag' do

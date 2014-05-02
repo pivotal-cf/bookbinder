@@ -13,9 +13,10 @@ describe MiddlemanRunner do
       Section.new(logger, Repository.new(full_name: '', directory: 'fraggles/rock'), nil),
   ] }
   let(:local_repo_dir) { '/dev/null' }
+  let(:filecache) { double(:cache) }
 
   def run_middleman
-    middleman_runner.run(target_dir_path, template_variables, local_repo_dir, verbose, repos, production_host)
+    middleman_runner.run(target_dir_path, template_variables, local_repo_dir, filecache, verbose, repos, production_host)
   end
 
   it 'behaves like a ShellOut'
@@ -62,6 +63,13 @@ describe MiddlemanRunner do
 
     middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
     expect(middleman_instance.config[:subnav_templates]).to eq(templates)
+  end
+
+  it 'tells middleman about the file modification cache' do
+    run_middleman
+
+    middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
+    expect(middleman_instance.config[:filecache]).to eq(filecache)
   end
 
   it 'tells middleman about local_repo_dir' do

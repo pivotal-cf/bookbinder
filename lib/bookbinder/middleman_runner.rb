@@ -26,7 +26,7 @@ class MiddlemanRunner
     @logger = logger
   end
 
-  def run(middleman_dir, template_variables, local_repo_dir, verbose = false, repos = [], production_host=nil)
+  def run(middleman_dir, template_variables, local_repo_dir, file_modification_cache, verbose = false, repos = [], production_host=nil)
     original_mm_root = ENV['MM_ROOT']
     @logger.log "\nRunning middleman...\n\n"
 
@@ -42,7 +42,8 @@ class MiddlemanRunner
           relative_links: false,
           subnav_templates: subnavs_by_dir_name(repos),
           local_repo_dir: local_repo_dir,
-          production_host: production_host
+          production_host: production_host,
+          filecache: file_modification_cache
       }
       config.each { |k, v| builder.config[k] = v }
       build_command.invoke :build, [], {:verbose => verbose}

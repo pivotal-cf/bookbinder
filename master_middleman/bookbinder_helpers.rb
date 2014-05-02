@@ -44,6 +44,11 @@ module Navigation
       OpenStruct.new config[:template_variables]
     end
 
+    def modified_date
+      cache = config[:filecache]
+      cache.fetch(current_path)
+    end
+
     def quick_links
       page_src = File.read(current_page.source_file)
       Redcarpet::Markdown.new(QuicklinksRenderer).render(page_src)

@@ -25,9 +25,13 @@ class GitClient < Octokit::Client
     raise_error_with_context
   end
 
+  def last_modified_date_of(full_name, target_ref, file)
+    commits(full_name, target_ref, path: file).pop[:commit][:author][:date]
+  end
+
   private
 
-  def commits(full_name)
+  def commits(*args)
     super
   rescue Octokit::NotFound
     raise_error_with_context

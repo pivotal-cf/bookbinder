@@ -30,6 +30,10 @@ class Section
     @repository.copied?
   end
 
+  def write_file_modification_dates_to(cache)
+    cache.update_from @repository
+  end
+
   private
 
   def self.acquire(logger, section_hash, local_repo_dir, destination, target_tag)

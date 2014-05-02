@@ -1,3 +1,5 @@
+require 'ruby-progressbar'
+
 class Repository
   include ShellOut #keep me
 
@@ -112,6 +114,27 @@ class Repository
     @logger.log '  downloading '.yellow + archive_link.blue
     response = Faraday.new.get(archive_link)
     response.body
+  end
+
+  def shas_by_file
+    tree = @github.tree(full_name, target_ref, recursive: true)
+    # TODO: make clearer
+    Hash[tree[:tree].map { |leaf| [File.join(directory, leaf[:path]), leaf[:sha]] }]
+  end
+
+  def dates_by_sha(shas_by_file, except: {})
+    result = {}
+
+    bar = ProgressBar.create(total: shas_by_file.size)
+
+    shas_by_file.each do |file, sha|
+      bar.increment
+      next if except.has_key?(sha)
+
+      result[sha] = @github.last_modified_date_of(full_name, target_ref, file.gsub(/#{Regexp.escape(directory)}\//, ''))
+    end
+
+    result
   end
 
   private
