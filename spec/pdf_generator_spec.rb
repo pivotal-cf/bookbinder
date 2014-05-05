@@ -14,7 +14,7 @@ describe PdfGenerator do
     File.open(source_page, 'w') { |f| f.write('Hi!') }
     source_page
   end
-  let(:generated_pdf) { File.join(target_dir, 'generated.pdf')}
+  let(:generated_pdf) { File.join(target_dir, 'generated.pdf') }
 
 
   it 'generates a PDF from the specified pages and header' do
@@ -64,5 +64,13 @@ describe PdfGenerator do
         PdfGenerator.new(logger).generate [source_page], pdf_destination, header_file
       end
     end.to raise_error(/'wkhtmltopdf' appears to have failed/)
+  end
+
+  describe '#generate' do
+    it 'calls wkhtmltopdf with the --disable-external-links flag' do
+      pdf_generator = PdfGenerator.new(logger)
+      expect(pdf_generator).to receive(:`).with(/\s+--disable-external-links\s+/)
+      pdf_generator.generate([source_page], 'test.pdf', header_file)
+    end
   end
 end

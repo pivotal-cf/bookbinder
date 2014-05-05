@@ -19,6 +19,7 @@ class PdfGenerator
 
     command = <<CMD
 wkhtmltopdf \
+    --disable-external-links \
     --ignore-load-errors \
     --margin-top 26mm \
     --margin-left 0mm \
