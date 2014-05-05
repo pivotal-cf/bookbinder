@@ -32,6 +32,7 @@ wkhtmltopdf \
     --footer-center '[page] of [toPage]' \
     --print-media-type \
     --header-html #{header} \
+    --toc \
     #{sources.join(' ')} \
     #{target}
 CMD
