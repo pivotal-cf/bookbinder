@@ -67,16 +67,22 @@ describe PdfGenerator do
   end
 
   describe '#generate' do
+    let(:target) { Tempfile.new('output.pdf').path }
+
     it 'calls wkhtmltopdf with the --disable-external-links flag' do
       pdf_generator = PdfGenerator.new(logger)
-      expect(pdf_generator).to receive(:`).with(/\s+--disable-external-links\s+/)
-      pdf_generator.generate([source_page], 'test.pdf', header_file)
+      expect(pdf_generator).to receive(:`).with(/\s+--disable-external-links\s+/) do
+        FileUtils.touch(target)
+      end
+      pdf_generator.generate([source_page], target, header_file)
     end
 
     it 'calls wkhtmltopdf with the --toc flag' do
       pdf_generator = PdfGenerator.new(logger)
-      expect(pdf_generator).to receive(:`).with(/\s+--toc\s+/)
-      pdf_generator.generate([source_page], 'test.pdf', header_file)
+      expect(pdf_generator).to receive(:`).with(/\s+--toc\s+/) do
+        FileUtils.touch(target)
+      end
+      pdf_generator.generate([source_page], target, header_file)
     end
   end
 end
