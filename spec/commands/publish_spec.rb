@@ -27,6 +27,7 @@ describe Cli::Publish do
 
   let(:logger) { NilLogger.new }
   let(:publish_command) { Cli::Publish.new(logger, config) }
+  let(:git_client) { GitClient.new(logger) }
 
   before do
     allow(ProgressBar).to receive(:create).and_return(double(increment: nil))
@@ -43,16 +44,6 @@ describe Cli::Publish do
 
     let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
 
-    it 'runs idempotently' do
-      silence_io_streams do
-        publish_command.run ['local'] # Run Once
-
-        expect do
-          publish_command.run ['local'] # Run twice
-        end.not_to change { File.exist? dogs_index }.from(true).to(false)
-      end
-    end
-
     def response_for(page)
       publish_command.run ['local']
 
@@ -63,6 +54,16 @@ describe Cli::Publish do
         response = Net::HTTP.start(uri.host, uri.port) { |http| http.request(req) }
       end
       response
+    end
+
+    it 'runs idempotently' do
+      silence_io_streams do
+        publish_command.run ['local'] # Run Once
+
+        expect do
+          publish_command.run ['local'] # Run twice
+        end.not_to change { File.exist? dogs_index }.from(true).to(false)
+      end
     end
 
     it 'creates some static HTML' do
@@ -79,10 +80,27 @@ describe Cli::Publish do
         response_for('index.html')
       }.from(Net::HTTPSuccess).to(Net::HTTPMovedPermanently)
     end
+
+    context 'when provided a layout repo' do
+      before do
+        allow(config).to receive(:has_option?).with('layout_repo').and_return true
+        allow(config).to receive(:layout_repo).and_return 'such-org/layout-repo'
+      end
+
+      it 'passes the provided repo as master_middleman_dir' do
+        fake_publisher = double(:publisher)
+        expect(Publisher).to receive(:new).and_return fake_publisher
+
+        expect(fake_publisher).to receive(:publish) do |args|
+          expect(args[:master_middleman_dir]).to match('layout-repo')
+        end
+
+        publish_command.run ['local']
+      end
+    end
   end
 
   context 'github' do
-    let(:git_client) { GitClient.new(logger) }
 
     before do
       allow(git_client).to receive(:archive_link)
@@ -130,6 +148,27 @@ describe Cli::Publish do
       pending 'when a constituent repository does not have the tag'
       pending 'when a book does not have the tag'
     end
+
+    context 'when provided a layout repo' do
+      before do
+        allow(config).to receive(:has_option?).with('layout_repo').and_return true
+        allow(config).to receive(:layout_repo).and_return 'such-org/layout-repo'
+
+        mock_github_for(git_client, 'such-org/layout-repo')
+        allow(GitClient).to receive(:new).and_return(git_client)
+      end
+
+      it 'passes the provided repo as master_middleman_dir' do
+        fake_publisher = double(:publisher)
+        expect(Publisher).to receive(:new).and_return fake_publisher
+
+        expect(fake_publisher).to receive(:publish) do |args|
+          expect(args[:master_middleman_dir]).to match('layout-repo')
+        end
+
+        publish_command.run ['github']
+      end
+    end
   end
 
   context 'when a pdf is specified' do
@@ -175,24 +214,6 @@ describe Cli::Publish do
       expect(Publisher).to receive(:new).and_return fake_publisher
       expect(fake_publisher).to receive(:publish).with all_these_arguments_and_such
       publish_command.run ['local']
-    end
-
-    context 'when provided a layout repo' do
-      before do
-        allow(config).to receive(:has_option?).with('layout_repo').and_return true
-        allow(config).to receive(:layout_repo).and_return 'such-org/wow-repo'
-      end
-
-      it 'passes the provided repo as master_middleman_dir' do
-        fake_publisher = double(:publisher)
-        expect(Publisher).to receive(:new).and_return fake_publisher
-
-        expect(fake_publisher).to receive(:publish) do |args|
-          expect(args[:master_middleman_dir]).to match('wow-repo')
-        end
-
-        publish_command.run ['local']
-      end
     end
   end
 end

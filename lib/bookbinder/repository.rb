@@ -68,7 +68,7 @@ class Repository
     from = File.join output_dir, (directory_listing_after - directory_listing_before).first
 
     repo_directory = File.join(destination_dir, directory)
-    FileUtils.mkdir repo_directory unless File.exist? repo_directory
+    FileUtils.mkdir_p repo_directory unless File.exist? repo_directory
 
     Dir.glob(File.join(from, '*')).each do |file|
       FileUtils.mv file, repo_directory

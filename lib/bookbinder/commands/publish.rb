@@ -57,7 +57,7 @@ class Cli
       arguments = {
           sections: config.sections,
           output_dir: File.absolute_path('output'),
-          master_middleman_dir: obtain_master_middleman(local_repo_dir),
+          master_middleman_dir: layout_repo_path(local_repo_dir),
           final_app_dir: final_app_dir,
           pdf: pdf_hash,
           verbose: verbosity,
@@ -71,9 +71,20 @@ class Cli
       arguments
     end
 
-    def obtain_master_middleman(local_repo_dir)
+    def layout_repo_path(local_repo_dir)
       if config.has_option?('layout_repo')
-        MasterMiddleman.path(@logger, local_repo_dir, config.layout_repo)
+        if local_repo_dir
+          File.join(local_repo_dir, config.layout_repo)
+        else
+          section = {'repository' => {'name' => config.layout_repo}}
+          destination_dir = Dir.mktmpdir
+          repository =  Repository.build_from_remote(@logger, section, destination_dir, 'master')
+          if repository
+            File.join(destination_dir, repository.directory)
+          else
+            raise 'failed to fetch repository'
+          end
+        end
       else
         File.absolute_path('master_middleman')
       end
