@@ -196,23 +196,39 @@ As of version 0.2.0, the `publish` command no longer generates PDFs.
 
 `$ bookbinder generate_pdf` will generate a PDF against the currently available `final_app` directory. You must run `publish [local | github]` before running `generate_pdf`.
 
-You can specify which pages to include in a PDF using `$ bookbinder generate_pdf someFile.yml`. `someFile.yml` must be formatted as YAML:
+You can specify which pages to include in a PDF using `$ bookbinder generate_pdf docs.yml`. `docs.yml` contains the configuration for the pdf. It must be formatted as YAML and **requires the keys** `header` and `pages`. 
+
+`docs.yml` example:
 
 ```yml
 ---
 copyright_notice: 'Copyright Pivotal Software Inc, 2042-2043'
-header: some/html/page.html
+header: some-header.html
 pages:
     - my-book/intro.html
     - my-book/dramatic-peak.html
-    - my-book/denoument.html
+    - my-book/denouement.html
 ```
 
-Each `pages` path must match a repository `directory` in `config.yml`, i.e. it must exist.
+Each path provided under `pages` must match the `directory` of its `repository` in `config.yml`. 
+The header is pulled in from the `layout_repo`, so the file `some-header.html` is expected to exist at the top level in the repo `my-username/my-layout`.
+
+So for the above pages to publish to pdf, your `config.yml` must contain  
+
+```yml
+---
+layout_repo: my-username/my-layout
+sections:
+- repository:
+    name: my-username/my-book
+    directory: my-book
+```
+
+and in turn, `my-username/my-layout` must contain `some-header.html`; and `my-username/my-book` must contain the pages `intro.html`, `dramatic-peak.html`, and `denouement.html`.
 
 An optional copyright notice may be provided as shown in the example.
 
-The output file will have the same name as the YAML file used to generate it, with a `.pdf` extension (`someFile.pdf`, in our example).
+The output pdf file will have the same name as the YAML file used to generate it. In this example, it will be `docs.pdf` since its configuration was specfied in `docs.yml`.
 
 ### `update_local_doc_repos` command
 
