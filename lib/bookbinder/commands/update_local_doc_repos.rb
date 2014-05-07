@@ -1,20 +1,22 @@
-class Cli
-  class UpdateLocalDocRepos < BookbinderCommand
-    def run(_)
-      config.sections.map { |conf| repo_for(conf) }.each(&:update_local_copy)
-      0
-    end
+module Bookbinder
+  class Cli
+    class UpdateLocalDocRepos < BookbinderCommand
+      def run(_)
+        config.sections.map { |conf| repo_for(conf) }.each(&:update_local_copy)
+        0
+      end
 
-    def self.usage
-      ''
-    end
+      def self.usage
+        ''
+      end
 
-    private
+      private
 
-    def repo_for(section_config)
-      local_repo_dir = File.absolute_path('../')
-      Repository.new(logger: @logger, full_name: section_config['repository']['name'],
-                     local_repo_dir: local_repo_dir)
+      def repo_for(section_config)
+        local_repo_dir = File.absolute_path('../')
+        Repository.new(logger: @logger, full_name: section_config['repository']['name'],
+                       local_repo_dir: local_repo_dir)
+      end
     end
   end
 end

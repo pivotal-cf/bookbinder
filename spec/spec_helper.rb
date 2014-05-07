@@ -2,10 +2,11 @@ require 'webmock/rspec'
 require_relative '../lib/bookbinder'
 require_relative '../template_app/app.rb'
 require_relative 'fixtures/repo_fixture'
+
 Dir[File.expand_path(File.join(File.dirname(__FILE__), 'helpers/*'))].each { |file| require_relative file }
 
 RSpec.configure do |config|
-  config.include SpecHelperMethods
+  config.include Bookbinder::SpecHelperMethods
 
   config.before do
     # awful hack to prevent tests that invoke middleman directly from polluting code that shells out to call it
@@ -16,8 +17,8 @@ RSpec.configure do |config|
   end
 
   config.before do
-    Pusher.any_instance.stub(:push) unless self.class.metadata[:enable_pusher]
+    Bookbinder::Pusher.any_instance.stub(:push) unless self.class.metadata[:enable_pusher]
 
-    allow(Section).to receive(:store).and_return({})
+    allow(Bookbinder::Section).to receive(:store).and_return({})
   end
 end

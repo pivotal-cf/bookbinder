@@ -13,10 +13,13 @@ require 'vienna'
 require 'popen4'
 require 'puma'
 
-require_relative 'bookbinder/shell_out'
+module Bookbinder
+
+end
+#require_relative 'bookbinder/shell_out'
 require_relative 'bookbinder/bookbinder_logger'
 require_relative 'bookbinder/git_client'
-require_relative 'bookbinder/repository'
+#require_relative 'bookbinder/repository'
 require_relative 'bookbinder/git_mod_cache'
 require_relative 'bookbinder/section'
 require_relative 'bookbinder/book'
@@ -39,7 +42,6 @@ require_relative 'bookbinder/cf_command_runner'
 require_relative 'bookbinder/pusher'
 require_relative 'bookbinder/artifact_namer'
 require_relative 'bookbinder/distributor'
-require_relative 'bookbinder/master_middleman'
 
 require_relative 'bookbinder/bookbinder_command'
 require_relative 'bookbinder/commands/build_and_push_tarball'

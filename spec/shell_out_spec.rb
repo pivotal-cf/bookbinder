@@ -1,10 +1,11 @@
 require 'spec_helper'
+require 'bookbinder/shell_out'
 
-describe ShellOut do
+describe Bookbinder::ShellOut do
 
   describe 'shell_out' do
 
-    include ShellOut
+    include Bookbinder::ShellOut
 
     it 'returns the stdout' do
       stdout = shell_out("echo 'hi'")
