@@ -43,4 +43,20 @@ describe GitClient do
       expect(client.head_sha(repo_name)).to eq latest_commit.sha
     end
   end
+
+  describe '#last_modified_date_of' do
+    let(:last_modification_date) { Time.new(2014, 5, 7, 0, 34, 38, '+00:00') }
+    let(:first_modification_date) { Time.new(2014, 5, 3, 0, 42, 21, '+00:00') }
+
+    before do
+      allow(client).to receive(:commits).with(repo_name, 'master', path: 'some-file').and_return(
+        [{:sha=>"123", :commit=> { :author=> { :date=> last_modification_date } } },
+         {:sha=>"456", :commit=> { :author=> { :date=> first_modification_date } } }]
+      )
+    end
+
+    it 'returns the date of the most recent commit' do
+      expect(client.last_modified_date_of(repo_name, "master", 'some-file')).to eq last_modification_date
+    end
+  end
 end

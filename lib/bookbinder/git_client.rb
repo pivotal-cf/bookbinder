@@ -26,7 +26,8 @@ class GitClient < Octokit::Client
   end
 
   def last_modified_date_of(full_name, target_ref, file)
-    commits(full_name, target_ref, path: file).pop[:commit][:author][:date]
+    commits = commits(full_name, target_ref, path: file)
+    commits.first[:commit][:author][:date]
   end
 
   private

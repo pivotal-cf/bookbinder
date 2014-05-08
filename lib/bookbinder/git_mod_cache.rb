@@ -1,8 +1,8 @@
 require 'yaml'
 
 class GitModCache
-  def initialize(storage)
-    @storage = storage
+  def initialize(storage_file_path)
+    @storage = storage_file_path
   end
 
   def update_from(repo)

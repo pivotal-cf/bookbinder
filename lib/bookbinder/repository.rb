@@ -119,9 +119,38 @@ module Bookbinder
     end
 
     def shas_by_file
-      tree = @github.tree(full_name, target_ref, recursive: true)
-      # TODO: make clearer
-      Hash[tree[:tree].map { |leaf| [leaf[:path], leaf[:sha]] }]
+      github_tree = @github.tree(full_name, target_ref, recursive: true)
+      # Tree object returned by GH is a little nasty. Has flat file structure, though. Example:
+      #{"sha"=>"master",
+      # "url"=>
+      #     "https://api.github.com/repos/user/repo_name/git/trees/master",
+      # "tree"=>
+      #     [{"mode"=>"100644",
+      #       "type"=>"blob",
+      #       "sha"=>"yet_another_encrypted_sha",
+      #       "path"=>".gitignore",
+      #       "size"=>428,
+      #       "url"=>
+      #           "https://api.github.com/repos/user/repo_name/git/blobs/yet_another_encrypted_sha"},
+      #      {"mode"=>"100644",
+      #       "type"=>"tree",
+      #       "sha"=>"other_encrypted_sha",
+      #       "path"=>"folder",
+      #       "size"=>1439,
+      #       "url"=>
+      #           "https://api.github.com/repos/user/repo_name/git/blobs/other_encrypted_sha"},
+      #      {"mode"=>"100644",
+      #       "type"=>"blob",
+      #       "sha"=>"yet_another_encrypted_sha",
+      #       "path"=>"folder/README.md",
+      #       "size"=>1439,
+      #       "url"=>
+      #           "https://api.github.com/repos/user/repo_name/git/blobs/yet_another_encrypted_sha"}
+      #     ]
+      #}
+      file_tree = github_tree[:tree]
+      stripped_file_tree = file_tree.map { |leaf| [leaf[:path], leaf[:sha]] }
+      Hash[stripped_file_tree]
     end
 
     def dates_by_sha(shas_by_file, except: {})
