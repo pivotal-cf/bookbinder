@@ -77,7 +77,7 @@ describe PdfGenerator do
       pdf_generator.generate([source_page], target, header_file)
     end
 
-    it 'calls wkhtmltopdf with the --toc flag' do
+    xit 'calls wkhtmltopdf with the --toc flag' do
       pdf_generator = PdfGenerator.new(logger)
       expect(pdf_generator).to receive(:`).with(/\s+--toc\s+/) do
         FileUtils.touch(target)
