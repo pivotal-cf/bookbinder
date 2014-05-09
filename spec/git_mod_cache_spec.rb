@@ -62,6 +62,11 @@ describe GitModCache do
   end
 
   describe '#fetch' do
+    let(:now) { Time.now }
+    before do
+      allow(Time).to receive(:now).and_return(now)
+    end
+
     context 'when the cache has data' do
       let(:initial_contents) { {shas_by_file: shas_by_file, dates_by_sha: dates_by_sha} }
 
@@ -74,8 +79,8 @@ describe GitModCache do
     context 'when the cache is empty' do
       let(:initial_contents) { {} }
 
-      it 'returns nil' do
-        expect(cache.fetch(first_path)).to eq nil
+      it 'returns the current time' do
+        expect(cache.fetch(first_path)).to eq now
       end
     end
 
@@ -84,8 +89,8 @@ describe GitModCache do
         {shas_by_file: {'foo' => 'bar'}, dates_by_sha: {'baz' => 'qux'}}
       end
 
-      it 'returns nil' do
-        expect(cache.fetch(rand.to_s)).to eq nil
+      it 'returns the current time' do
+        expect(cache.fetch(rand.to_s)).to eq now
       end
     end
   end

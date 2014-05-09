@@ -108,10 +108,10 @@ MARKDOWN
       end
 
       context 'when the file is not found in the cache' do
-        before { allow(cache).to receive(:fetch).with(filename).and_return(nil) }
+        let(:now) { Time.now }
+        before { allow(cache).to receive(:fetch).with(filename).and_return(now) }
 
         it 'returns todays date as the last-modified-date' do
-          now = Time.now
           allow(Time).to receive(:now).and_return(now)
 
           expect(an_instance.modified_date).to eq(now)
@@ -301,7 +301,7 @@ MARKDOWN
         end
 
         let(:expected_output) do
-<<HTML
+          <<HTML
 <div class=\"quick-links\"><ul>
 <li><a href=\"#prepare-app\">Prepare Your Own Application for Deployment</a></li>
 <li>

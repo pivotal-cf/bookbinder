@@ -12,6 +12,7 @@ module Bookbinder
       let(:non_broken_master_middleman_dir) { generate_middleman_with 'non_broken_index.html' }
       let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html' }
       let(:git_client) { GitClient.new(logger) }
+      let(:cache) { double('GitModCache', update_from: nil) }
 
       context 'integration' do
         before do
@@ -52,7 +53,8 @@ module Bookbinder
                                   page: 'pretty_path/index.html',
                                   filename: 'DocGuide.pdf',
                                   header: 'pretty_path/header.html'
-                              }
+                              },
+                              file_cache: cache
           end
 
           index_html = File.read File.join(final_app_dir, 'public', 'pretty_path', 'index.html')
@@ -70,7 +72,8 @@ module Bookbinder
                 master_middleman_dir: non_broken_master_middleman_dir,
                 host_for_sitemap: 'example.com',
                 local_repo_dir: local_repo_dir,
-                final_app_dir: final_app_dir
+                final_app_dir: final_app_dir,
+                file_cache: cache
             }
           end
           before { stub_github_commits(name: publication_arguments[:sections][0]['repository']['name']) }
@@ -87,7 +90,7 @@ module Bookbinder
 
             context 'and the code repo is present' do
               it 'can find code example repos locally rather than going to github' do
-                pending 'The next feature will be to prevent github access during \'publish local\' for the commit tree, so this test will be valid.'
+                #pending 'The next feature will be to prevent github access during \'publish local\' for the commit tree, so this test will be valid.'
                 publisher.publish publication_arguments
                 expect(WebMock).not_to have_requested(:any, /.*git.*/)
               end
@@ -117,7 +120,8 @@ module Bookbinder
                                               master_middleman_dir: dogs_master_middleman_dir,
                                               host_for_sitemap: 'example.com',
                                               local_repo_dir: local_repo_dir,
-                                              final_app_dir: final_app_dir
+                                              final_app_dir: final_app_dir,
+                                              file_cache: cache
           expect(no_broken_links).to be_true
         end
 
@@ -132,7 +136,8 @@ module Bookbinder
                             local_repo_dir: local_repo_dir,
                             final_app_dir: final_app_dir,
                             template_variables: {'name' => 'Alexander'},
-                            verbose: true
+                            verbose: true,
+                            file_cache: cache
 
           index_html = File.read File.join(final_app_dir, 'public', 'index.html')
           expect(index_html).to include 'My variable name is Alexander.'
@@ -148,7 +153,8 @@ module Bookbinder
                 final_app_dir: final_app_dir,
                 master_middleman_dir: middleman_dir,
                 host_for_sitemap: 'example.com',
-                sections: [{'repository' => {'name' => section_repo_name}}]
+                sections: [{'repository' => {'name' => section_repo_name}}],
+                file_cache: cache
             }
           end
 
@@ -202,7 +208,8 @@ module Bookbinder
                             master_middleman_dir: dogs_master_middleman_dir,
                             local_repo_dir: local_repo_dir,
                             final_app_dir: final_app_dir,
-                            host_for_sitemap: "docs.dogs.com"
+                            host_for_sitemap: "docs.dogs.com",
+                            file_cache: cache
 
           doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
           expect(doc.css('loc').map &:text).to match_array(%w(
@@ -225,7 +232,8 @@ module Bookbinder
               master_middleman_dir: dogs_master_middleman_dir,
               output_dir: output_dir,
               sections: Array.new(number_of_sections, {}),
-              host_for_sitemap: 'example.com'
+              host_for_sitemap: 'example.com',
+              file_cache: cache
           )
         end
 
@@ -245,7 +253,8 @@ module Bookbinder
                                        host_for_sitemap: 'example.com',
                                        local_repo_dir: local_repo_dir,
                                        final_app_dir: final_app_dir,
-                                       verbose: false }.to raise_error
+                                       verbose: false,
+                                       file_cache: cache }.to raise_error
 
             $stdout.rewind
             collected_output = $stdout.read
@@ -270,7 +279,8 @@ module Bookbinder
                                        host_for_sitemap: 'example.com',
                                        local_repo_dir: local_repo_dir,
                                        final_app_dir: final_app_dir,
-                                       verbose: true
+                                       verbose: true,
+                                       file_cache: cache
             }.to raise_error(SystemExit)
 
             $stdout.rewind
@@ -309,7 +319,8 @@ module Bookbinder
             final_app_dir: final_app_dir,
             pdf: pdf_config,
             local_repo_dir: local_repo_dir,
-            spider: spider
+            spider: spider,
+            file_cache: cache
         } }
 
         def publish

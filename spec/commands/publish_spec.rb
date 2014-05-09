@@ -191,6 +191,7 @@ module Bookbinder
     end
 
     describe 'publication arguments' do
+      let(:cache) { double('GitModCache') }
       let(:all_these_arguments_and_such) do
         {sections: [{"repository" => {"name" => "fantastic/dogs-repo", "ref" => "dog-sha"},
                      "directory" => "dogs",
@@ -209,11 +210,13 @@ module Bookbinder
          verbose: false,
          pdf_index: nil,
          local_repo_dir: anything,
-         host_for_sitemap: nil}
+         host_for_sitemap: nil,
+         file_cache: cache }
       end
 
       it 'are appropriate' do
         fake_publisher = double(:publisher)
+        allow(GitModCache).to receive(:new).and_return(cache)
         expect(Publisher).to receive(:new).and_return fake_publisher
         expect(fake_publisher).to receive(:publish).with all_these_arguments_and_such
         publish_command.run ['local']

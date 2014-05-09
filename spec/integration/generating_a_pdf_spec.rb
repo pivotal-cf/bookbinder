@@ -13,7 +13,7 @@ describe 'generating a book' do
 
   context 'when no PDF config file is specified' do
     it 'generates a pdf based on the filename option' do
-      pending 'Revisit when publishing locally no longer accesses GitHub.'
+      #pending 'Revisit when publishing locally no longer accesses GitHub.'
       silence_io_streams do
         `#{GEM_ROOT}/bin/bookbinder publish local`
         `#{GEM_ROOT}/bin/bookbinder generate_pdf`
@@ -31,7 +31,7 @@ describe 'generating a book' do
     let(:filename) { 'PDFsAreCool' }
 
     it 'generates a pdf with the same name as the index file' do
-      pending 'Revisit when publishing locally no longer accesses GitHub.'
+      #pending 'Revisit when publishing locally no longer accesses GitHub.'
       silence_io_streams do
         `#{GEM_ROOT}/bin/bookbinder publish local`
         `#{GEM_ROOT}/bin/bookbinder generate_pdf #{filename}.yml`

@@ -12,7 +12,7 @@ describe 'generating a book' do
   end
 
   it 'provides the production host to the ERB templates' do
-    pending 'Revisit when publishing locally no longer accesses GitHub.'
+    #pending 'Revisit when publishing locally no longer accesses GitHub.'
     silence_io_streams do
       `#{GEM_ROOT}/bin/bookbinder publish local`
     end
@@ -41,7 +41,7 @@ YAML
     end
 
     it 'uses the provided layout' do
-      pending 'Revisit when publishing locally no longer accesses GitHub.'
+      pending 'Misbehaves due to a bug, pending until next commit.'
       silence_io_streams do
         `#{GEM_ROOT}/bin/bookbinder publish local`
       end

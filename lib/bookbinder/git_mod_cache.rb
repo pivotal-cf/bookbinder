@@ -1,11 +1,13 @@
 require 'yaml'
 
 class GitModCache
-  def initialize(storage_file_path)
+  def initialize(storage_file_path, safe_mode=false)
     @storage = storage_file_path
+    @safe_mode = safe_mode
   end
 
   def update_from(repo)
+    return if safe_mode
     current_contents = contents_on_disk
     cached_dates_by_sha = current_contents.fetch(:dates_by_sha, {})
     cached_shas_by_file = current_contents.fetch(:shas_by_file, {})
@@ -28,11 +30,14 @@ class GitModCache
   end
 
   def fetch(path)
+    return Time.now.utc if safe_mode
     sha = contents_on_disk.fetch(:shas_by_file, {})[path]
-    contents_on_disk.fetch(:dates_by_sha, {})[sha]
+    contents_on_disk.fetch(:dates_by_sha, {}).fetch(sha, Time.now.utc)
   end
 
   private
+
+  attr_reader :safe_mode
 
   def write_to_disk(new_contents_yaml)
     f = File.open(@storage, 'w')
