@@ -90,16 +90,34 @@ MARKDOWN
     end
 
     describe '#modified_date' do
-      let(:first_date){ "19 Jan 3028" }
+      subject(:an_instance) { klass.new(config) }
+
+      let(:first_date) { "19 Jan 3028" }
       let(:filename) { "Moon Colonization History" }
-      let(:config) { {filecache: double(:cache, fetch: first_date)} }
+      let(:cache) { double('GitModCache') }
+      let(:config) { {filecache: cache} }
 
-      it 'returns the date which the cache provides' do
-        expect_any_instance_of(klass).to receive(:current_path).and_return File.join('whatever', filename)
+      before { allow(an_instance).to receive(:current_path).and_return filename }
 
-        modified_date = klass.new(config).modified_date
-        expect(modified_date).to eq(first_date)
+      context 'when the file is found in the cache' do
+        before { allow(cache).to receive(:fetch).with(filename).and_return(first_date) }
+
+        it 'returns the date for that file' do
+          expect(an_instance.modified_date).to eq(first_date)
+        end
       end
+
+      context 'when the file is not found in the cache' do
+        before { allow(cache).to receive(:fetch).with(filename).and_return(nil) }
+
+        it 'returns todays date as the last-modified-date' do
+          now = Time.now
+          allow(Time).to receive(:now).and_return(now)
+
+          expect(an_instance.modified_date).to eq(now)
+        end
+      end
+
     end
 
     describe '#breadcrumbs' do

@@ -48,7 +48,7 @@ module Bookbinder
 
       def modified_date(format=nil)
         cache = config[:filecache]
-        modified_time = cache.fetch(current_path)
+        modified_time = cache.fetch(current_path) || Time.now.utc
         (format.nil? ? modified_time : modified_time.strftime(format)) unless modified_time.nil?
       end
 
