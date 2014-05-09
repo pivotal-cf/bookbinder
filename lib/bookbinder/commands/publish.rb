@@ -19,6 +19,8 @@ module Bookbinder
       def bind_book(cli_arguments, final_app_dir, target_tag)
         if target_tag then
           checkout_book_at(target_tag) { generate_site_etc(cli_arguments, final_app_dir, target_tag) }
+        elsif cli_arguments.include? 'github'
+          checkout_book_at('master') { generate_site_etc(cli_arguments, final_app_dir) }
         else
           generate_site_etc(cli_arguments, final_app_dir)
         end

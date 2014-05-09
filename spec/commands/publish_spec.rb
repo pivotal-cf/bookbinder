@@ -26,6 +26,7 @@ module Bookbinder
       end
     end
 
+    let(:fixture_repo_name) { 'fantastic/fixture-book-title' }
     let(:logger) { NilLogger.new }
     let(:publish_command) { Cli::Publish.new(logger, config) }
     let(:git_client) { GitClient.new(logger) }
@@ -103,16 +104,27 @@ module Bookbinder
 
     context 'github' do
 
+      let(:zipped_repo_url) { "https://github.com/#{fixture_repo_name}/archive/master.tar.gz" }
+
       before do
         allow(git_client).to receive(:archive_link)
         stub_github_for git_client, 'fantastic/dogs-repo', 'dog-sha'
         stub_github_for git_client, 'fantastic/my-docs-repo', 'my-docs-sha'
         stub_github_for git_client, 'fantastic/my-other-docs-repo', 'my-other-sha'
         allow(GitClient).to receive(:new).and_return(git_client)
+
+        zipped_repo = RepoFixture.tarball 'book', 'master'
+        stub_request(:get, zipped_repo_url).to_return(
+            :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
+        )
+
+        stub_refs_for_repo(fixture_repo_name, ['master'])
       end
 
       it 'creates some static HTML' do
         sections.each { |s| stub_github_commits(name: s['repository']['name'], sha: s['repository']['ref']) }
+
+        allow(git_client).to receive(:archive_link).with(fixture_repo_name, ref: 'master').and_return zipped_repo_url
 
         publish_command.run ['github']
 
@@ -120,10 +132,17 @@ module Bookbinder
         index_html.should include 'This is a Markdown Page'
       end
 
+      it 'clones the book' do
+        sections.each { |s| stub_github_commits(name: s['repository']['name'], sha: s['repository']['ref']) }
+
+        expect(git_client).to receive(:archive_link).with(fixture_repo_name, ref: 'master').once.and_return zipped_repo_url
+
+        publish_command.run ['github']
+      end
+
       context 'when a tag is provided' do
         let(:desired_tag) { 'foo-1.7.12' }
         let(:cli_args) { ['github', desired_tag] }
-        let(:fixture_repo_name) { 'fantastic/fixture-book-title' }
 
         it 'gets the book at that tag' do
           sections.each { |s| stub_github_commits(name: s['repository']['name'], sha: desired_tag) }
@@ -157,6 +176,7 @@ module Bookbinder
 
           mock_github_for(git_client, 'such-org/layout-repo')
           allow(GitClient).to receive(:new).and_return(git_client)
+          allow(git_client).to receive(:archive_link).with(fixture_repo_name, ref: 'master').and_return zipped_repo_url
         end
 
         it 'passes the provided repo as master_middleman_dir' do

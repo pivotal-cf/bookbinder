@@ -48,7 +48,7 @@ module Bookbinder
 
       zipped_repo = RepoFixture.tarball repo_name.split('/').last, some_ref
       stub_request(:get, zipped_repo_url).to_return(
-      :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
+        :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
       )
 
       stub_refs_for_repo repo_name, [some_ref]
@@ -60,13 +60,13 @@ module Bookbinder
       ref_response = refs.map do |ref|
         sha = SecureRandom.hex(20)
         {
-        "ref" => "refs/heads/#{ref}",
-        "url" => "https://api.github.com/repos/#{name}/git/refs/heads/#{ref}",
-        "object" => {
-        "sha" => sha,
-        "type" => "commit",
-        "url" => "https://api.github.com/repos/#{name}/git/commits/#{sha}"
-        }
+          "ref" => "refs/heads/#{ref}",
+          "url" => "https://api.github.com/repos/#{name}/git/refs/heads/#{ref}",
+          "object" => {
+            "sha" => sha,
+            "type" => "commit",
+            "url" => "https://api.github.com/repos/#{name}/git/commits/#{sha}"
+          }
         }
       end
 
