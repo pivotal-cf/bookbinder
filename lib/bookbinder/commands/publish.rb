@@ -77,7 +77,7 @@ module Bookbinder
       def layout_repo_path(local_repo_dir)
         if config.has_option?('layout_repo')
           if local_repo_dir
-            File.join(local_repo_dir, config.layout_repo)
+            File.join(local_repo_dir, config.layout_repo.split('/').last)
           else
             section = {'repository' => {'name' => config.layout_repo}}
             destination_dir = Dir.mktmpdir

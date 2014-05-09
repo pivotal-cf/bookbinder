@@ -41,7 +41,6 @@ YAML
     end
 
     it 'uses the provided layout' do
-      pending 'Misbehaves due to a bug, pending until next commit.'
       silence_io_streams do
         `#{GEM_ROOT}/bin/bookbinder publish local`
       end
