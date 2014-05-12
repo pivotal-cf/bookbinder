@@ -43,12 +43,11 @@ module Bookbinder
       end
 
       def checkout_book_at(target_tag, &doc_generation)
+        @logger.log "Binding \"#{config.book_repo.cyan}\" at #{target_tag.magenta}"
         temp_workspace     = Dir.mktmpdir
         book               = Book.from_remote(logger: @logger, full_name: config.book_repo,
                                               destination_dir: temp_workspace, ref: target_tag)
         expected_book_path = File.join temp_workspace, book.directory
-
-        @logger.log "Binding \"#{book.full_name.cyan}\" at #{target_tag.magenta}"
         FileUtils.chdir(expected_book_path) { doc_generation.call(config, target_tag) }
       end
 

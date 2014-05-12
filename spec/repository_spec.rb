@@ -338,13 +338,5 @@ module Bookbinder
         end
       end
     end
-
-    describe '.build_from_remote' do
-      pending
-    end
-
-    describe '.build_from_local' do
-      pending
-    end
   end
 end

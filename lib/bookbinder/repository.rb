@@ -184,7 +184,7 @@ module Bookbinder
 
     def has_ref?(ref)
       refs = @github.refs(@full_name).map &:ref
-      refs.any? { |r| "refs/heads/#{ref}" == r }
+      refs.any? { |r| r.match(/refs\/(heads|tags)\/#{Regexp.quote(ref)}/) }
     end
   end
 end
