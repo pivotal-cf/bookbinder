@@ -156,12 +156,8 @@ module Bookbinder
     def dates_by_sha(shas_by_file, except: {})
       result = {}
 
-      bar = ProgressBar.create(total: shas_by_file.size)
-
       shas_by_file.each do |file, sha|
-        bar.increment
         next if except.has_key?(sha)
-
         result[sha] = @github.last_modified_date_of(full_name, target_ref, file.gsub(/#{Regexp.escape(directory)}\//, ''))
       end
 

@@ -25,6 +25,18 @@ class GitClient < Octokit::Client
     raise_error_with_context
   end
 
+  def tags(*args)
+    super
+  rescue Octokit::Unauthorized, Octokit::NotFound
+    raise_error_with_context
+  end
+
+  def refs(*args)
+    super
+  rescue Octokit::Unauthorized, Octokit::NotFound
+    raise_error_with_context
+  end
+
   def last_modified_date_of(full_name, target_ref, file)
     commits = commits(full_name, target_ref, path: file)
     commits.first[:commit][:author][:date]
@@ -34,7 +46,7 @@ class GitClient < Octokit::Client
 
   def commits(*args)
     super
-  rescue Octokit::NotFound
+  rescue Octokit::Unauthorized, Octokit::NotFound
     raise_error_with_context
   end
 
