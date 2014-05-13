@@ -8,14 +8,12 @@ module Bookbinder
     attr_reader :full_name, :copied_to
 
     def self.build_from_remote(logger, section_hash, destination_dir, target_ref)
-      full_name = section_hash.fetch('repository', {}).fetch('name')
-      target_ref = target_ref || section_hash.fetch('repository', {})['ref']
-      directory = section_hash['directory']
+      full_name   = section_hash.fetch('repository', {}).fetch('name')
+      target_ref  = target_ref || section_hash.fetch('repository', {})['ref']
+      directory   = section_hash['directory']
+      repository  = new(logger: logger, full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
 
-      repository = new(logger: logger, full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
-      if destination_dir
-        repository.copy_from_remote(destination_dir)
-      end
+      repository.copy_from_remote(destination_dir) if destination_dir
 
       repository
     end
