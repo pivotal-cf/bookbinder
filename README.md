@@ -1,4 +1,4 @@
-[![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/pivotal-cf/docs-bookbinder) [![Build Status](https://travis-ci.org/pivotal-cf/bookbinder.png)](https://travis-ci.org/pivotal-cf/docs-bookbinder)
+[![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/pivotal-cf/docs-bookbinder) [![Build Status](https://travis-ci.org/cloudfoundry-incubator/bookbinder.png)](https://travis-ci.org/pivotal-cf/docs-bookbinder)
 # Bookbinder
 
 Bookbinder is a gem that binds together a unified documentation web-app from disparate source material, stored as repositories of markdown or plain HTML on GitHub. It runs [middleman](http://middlemanapp.com/) to produce a (CF-pushable) Rackup app.
@@ -196,7 +196,7 @@ As of version 0.2.0, the `publish` command no longer generates PDFs.
 
 `$ bookbinder generate_pdf` will generate a PDF against the currently available `final_app` directory. You must run `publish [local | github]` before running `generate_pdf`.
 
-You can specify which pages to include in a PDF using `$ bookbinder generate_pdf docs.yml`. `docs.yml` contains the configuration for the pdf. It must be formatted as YAML and **requires the keys** `header` and `pages`. 
+You can specify which pages to include in a PDF using `$ bookbinder generate_pdf docs.yml`. `docs.yml` contains the configuration for the pdf. It must be formatted as YAML and **requires the keys** `header` and `pages`.
 
 `docs.yml` example:
 
@@ -210,10 +210,10 @@ pages:
     - my-book/denouement.html
 ```
 
-Each path provided under `pages` must match the `directory` of its `repository` in `config.yml`. 
+Each path provided under `pages` must match the `directory` of its `repository` in `config.yml`.
 The header is pulled in from the `layout_repo`, so the file `some-header.html` is expected to exist at the top level in the repo `my-username/my-layout`.
 
-So for the above pages to publish to pdf, your `config.yml` must contain  
+So for the above pages to publish to pdf, your `config.yml` must contain
 
 ```yml
 ---
