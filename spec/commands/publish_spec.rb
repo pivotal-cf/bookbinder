@@ -16,17 +16,13 @@ module Bookbinder
       ]
     end
 
-    let(:config) do
-      double('Configuration').tap do |d|
-        allow(d).to receive(:has_option?)
-        allow(d).to receive(:sections) { sections }
-        allow(d).to receive(:pdf_index)
-        allow(d).to receive(:public_host)
-        allow(d).to receive(:book_repo) { 'fantastic/fixture-book-title' }
-      end
+    let(:config_hash) do
+      {'sections' => sections, 'book_repo' => book, 'pdf_index' => [], 'public_host' => 'example.com'}
     end
 
-    let(:fixture_repo_name) { 'fantastic/fixture-book-title' }
+    let(:config) { Configuration.new(logger, config_hash) }
+
+    let(:book) { 'fantastic/book' }
     let(:logger) { NilLogger.new }
     let(:publish_command) { Cli::Publish.new(logger, config) }
     let(:git_client) { GitClient.new(logger) }
@@ -84,9 +80,8 @@ module Bookbinder
       end
 
       context 'when provided a layout repo' do
-        before do
-          allow(config).to receive(:has_option?).with('layout_repo').and_return true
-          allow(config).to receive(:layout_repo).and_return 'such-org/layout-repo'
+        let(:config_hash) do
+          {'sections' => sections, 'book_repo' => book, 'pdf_index' => [], 'public_host' => 'example.com', 'layout_repo' => 'such-org/layout-repo'}
         end
 
         it 'passes the provided repo as master_middleman_dir' do
@@ -104,7 +99,7 @@ module Bookbinder
 
     context 'github' do
 
-      let(:zipped_repo_url) { "https://github.com/#{fixture_repo_name}/archive/master.tar.gz" }
+      let(:zipped_repo_url) { "https://github.com/#{book}/archive/master.tar.gz" }
 
       before do
         allow(git_client).to receive(:archive_link)
@@ -123,40 +118,36 @@ module Bookbinder
         index_html.should include 'This is a Markdown Page'
       end
 
+
       context 'when a tag is provided' do
         let(:desired_tag) { 'foo-1.7.12' }
         let(:cli_args) { ['github', desired_tag] }
+        let(:zipped_repo_url) { "https://github.com/#{book}/archive/#{desired_tag}.tar.gz" }
 
-        it 'gets the book at that tag' do
+        before do
           sections.each { |s| stub_github_commits(name: s['repository']['name'], sha: desired_tag) }
 
           stub_github_for git_client, 'fantastic/dogs-repo', desired_tag
           stub_github_for git_client, 'fantastic/my-docs-repo', desired_tag
           stub_github_for git_client, 'fantastic/my-other-docs-repo', desired_tag
 
-          zipped_repo_url = "https://github.com/#{fixture_repo_name}/archive/#{desired_tag}.tar.gz"
-
-          zipped_repo = RepoFixture.tarball 'fantastic/book'.split('/').last, desired_tag
-          stub_request(:get, zipped_repo_url).to_return(
-              :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
-          )
-
-          stub_refs_for_repo(fixture_repo_name, [desired_tag])
-
-          expect(git_client).to receive(:archive_link).with(fixture_repo_name, ref: desired_tag).once.and_return zipped_repo_url
-
-          publish_command.run cli_args
+          zipped_repo = RepoFixture.tarball 'book', desired_tag
+          stub_request(:get, zipped_repo_url).to_return(:body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'})
+          stub_refs_for_repo(book, [desired_tag])
         end
 
-        pending 'when a constituent repository does not have the tag'
-        pending 'when a book does not have the tag'
+        it 'gets the book at that tag' do
+          mock_github_for git_client, book, desired_tag
+          publish_command.run cli_args
+        end
       end
 
       context 'when provided a layout repo' do
-        before do
-          allow(config).to receive(:has_option?).with('layout_repo').and_return true
-          allow(config).to receive(:layout_repo).and_return 'such-org/layout-repo'
+        let(:config_hash) do
+          {'sections' => sections, 'book_repo' => book, 'pdf_index' => [], 'public_host' => 'example.com', 'layout_repo' => 'such-org/layout-repo'}
+        end
 
+        before do
           mock_github_for(git_client, 'such-org/layout-repo')
           allow(GitClient).to receive(:new).and_return(git_client)
         end
@@ -174,10 +165,6 @@ module Bookbinder
       end
     end
 
-    context 'when a pdf is specified' do
-      pending 'creates the pdf'
-    end
-
     describe 'invalid arguments' do
       it 'raises Cli::InvalidArguments' do
         expect {
@@ -192,32 +179,28 @@ module Bookbinder
 
     describe 'publication arguments' do
       let(:cache) { double('GitModCache') }
+      let(:fake_publisher) { double('publisher') }
+
       let(:all_these_arguments_and_such) do
-        {sections: [{"repository" => {"name" => "fantastic/dogs-repo", "ref" => "dog-sha"},
-                     "directory" => "dogs",
-                     "subnav_template" => "dogs"},
-                    {"repository" => {"name" => "fantastic/my-docs-repo", "ref" => "my-docs-sha"},
-                     "directory" => "foods/sweet",
-                     "subnav_template" => "fruits"},
-                    {"repository" =>
-                         {"name" => "fantastic/my-other-docs-repo", "ref" => "my-other-sha"},
-                     "directory" => "foods/savory",
-                     "subnav_template" => "vegetables"}],
+        {sections: sections,
          output_dir: anything,
          master_middleman_dir: anything,
          final_app_dir: anything,
          pdf: nil,
          verbose: false,
-         pdf_index: nil,
+         pdf_index: [],
          local_repo_dir: anything,
-         host_for_sitemap: nil,
+         host_for_sitemap: 'example.com',
+         template_variables: {},
          file_cache: cache }
       end
 
-      it 'are appropriate' do
-        fake_publisher = double(:publisher)
+      before do
         allow(GitModCache).to receive(:new).and_return(cache)
         expect(Publisher).to receive(:new).and_return fake_publisher
+      end
+
+      it 'are appropriate' do
         expect(fake_publisher).to receive(:publish).with all_these_arguments_and_such
         publish_command.run ['local']
       end
