@@ -264,10 +264,13 @@ module Bookbinder
       end
 
       context 'when given a non-existent tag' do
-        let(:target_ref) { 'some-nonexistent-sha' }
+        before do
+          stub_request(:get, "https://codeload.github.com/org/my-docs-repo/legacy.tar.gz/some-sha").
+              to_return(:status => 404)
+        end
 
         it 'gives an informative error message' do
-          expect { repo.download_archive }.to raise_error(/Ref #{target_ref} was not found in #{full_name}/)
+          expect { repo.download_archive }.to raise_error(RuntimeError, /#{target_ref}/)
         end
       end
     end

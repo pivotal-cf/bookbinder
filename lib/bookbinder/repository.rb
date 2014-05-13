@@ -111,44 +111,14 @@ module Bookbinder
     end
 
     def download_archive
-      raise "Ref #{target_ref} was not found in #{full_name}" unless has_ref?(target_ref)
-
       @logger.log '  downloading '.yellow + archive_link.blue
       response = Faraday.new.get(archive_link)
+      raise "Could not target #{full_name} at ref #{target_ref.magenta}" unless response.success?
       response.body
     end
 
     def shas_by_file
-      github_tree = @github.tree(full_name, target_ref, recursive: true)
-      # Tree object returned by GH is a little nasty. Has flat file structure, though. Example:
-      #{"sha"=>"master",
-      # "url"=>
-      #     "https://api.github.com/repos/user/repo_name/git/trees/master",
-      # "tree"=>
-      #     [{"mode"=>"100644",
-      #       "type"=>"blob",
-      #       "sha"=>"yet_another_encrypted_sha",
-      #       "path"=>".gitignore",
-      #       "size"=>428,
-      #       "url"=>
-      #           "https://api.github.com/repos/user/repo_name/git/blobs/yet_another_encrypted_sha"},
-      #      {"mode"=>"100644",
-      #       "type"=>"tree",
-      #       "sha"=>"other_encrypted_sha",
-      #       "path"=>"folder",
-      #       "size"=>1439,
-      #       "url"=>
-      #           "https://api.github.com/repos/user/repo_name/git/blobs/other_encrypted_sha"},
-      #      {"mode"=>"100644",
-      #       "type"=>"blob",
-      #       "sha"=>"yet_another_encrypted_sha",
-      #       "path"=>"folder/README.md",
-      #       "size"=>1439,
-      #       "url"=>
-      #           "https://api.github.com/repos/user/repo_name/git/blobs/yet_another_encrypted_sha"}
-      #     ]
-      #}
-      file_tree = github_tree[:tree]
+      file_tree = @github.tree(full_name, target_ref, recursive: true)[:tree]
       stripped_file_tree = file_tree.map { |leaf| [leaf[:path], leaf[:sha]] }
       Hash[stripped_file_tree]
     end
@@ -180,11 +150,6 @@ module Bookbinder
 
     def tags
       @github.tags @full_name
-    end
-
-    def has_ref?(ref)
-      refs = @github.refs(@full_name).map &:ref
-      refs.any? { |r| r.match(/refs\/(heads|tags)\/#{Regexp.quote(ref)}/) }
     end
   end
 end

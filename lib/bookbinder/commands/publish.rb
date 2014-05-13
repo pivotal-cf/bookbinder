@@ -17,7 +17,7 @@ module Bookbinder
       private
 
       def bind_book(cli_arguments, final_app_dir, target_tag)
-        if target_tag then
+        if target_tag
           checkout_book_at(target_tag) { generate_site_etc(cli_arguments, final_app_dir, target_tag) }
         else
           generate_site_etc(cli_arguments, final_app_dir)
@@ -42,13 +42,20 @@ module Bookbinder
         }
       end
 
-      def checkout_book_at(target_tag, &doc_generation)
-        @logger.log "Binding \"#{config.book_repo.cyan}\" at #{target_tag.magenta}"
+      def checkout_book_at(target_tag)
+        @logger.log "Binding #{config.book_repo.cyan} at #{target_tag.magenta}"
         temp_workspace     = Dir.mktmpdir
         book               = Book.from_remote(logger: @logger, full_name: config.book_repo,
                                               destination_dir: temp_workspace, ref: target_tag)
+
         expected_book_path = File.join temp_workspace, book.directory
-        FileUtils.chdir(expected_book_path) { doc_generation.call(config, target_tag) }
+        FileUtils.chdir(expected_book_path) { refresh_config; yield }
+      end
+
+      def refresh_config
+        hash = YAML.load(File.read('./config.yml'))
+        hash['pdf_index'] = nil
+        @config = Configuration.new(@logger, hash)
       end
 
       def publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir)

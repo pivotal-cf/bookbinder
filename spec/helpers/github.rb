@@ -1,27 +1,27 @@
 module Bookbinder
   module SpecHelperMethods
-    def mock_github_for(git_client, repo_name, some_ref='master')
+    def mock_github_for(git_client, repo_name, some_ref='master', tarball=nil)
       zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
       expect(git_client).to receive(:archive_link).with(repo_name, ref: some_ref)
                             .once
                             .and_return(zipped_repo_url)
 
-      zipped_repo = RepoFixture.tarball repo_name.split('/').last, some_ref
+      tarball ||= RepoFixture.tarball repo_name.split('/').last, some_ref
       stub_request(:get, zipped_repo_url).to_return(
-          :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
+          :body => tarball, :headers => {'Content-Type' => 'application/x-gzip'}
       )
 
       stub_refs_for_repo repo_name, [some_ref]
     end
 
 
-    def stub_github_for(git_client, repo_name, some_ref = 'master')
+    def stub_github_for(git_client, repo_name, some_ref = 'master', tarball=nil)
       zipped_repo_url = "https://github.com/#{repo_name}/archive/#{some_ref}.tar.gz"
       allow(git_client).to receive(:archive_link).with(repo_name, ref: some_ref).and_return(zipped_repo_url)
 
-      zipped_repo = RepoFixture.tarball repo_name.split('/').last, some_ref
+      tarball ||= RepoFixture.tarball repo_name.split('/').last, some_ref
       stub_request(:get, zipped_repo_url).to_return(
-          :body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'}
+          :body => tarball, :headers => {'Content-Type' => 'application/x-gzip'}
       )
 
       stub_refs_for_repo repo_name, [some_ref]

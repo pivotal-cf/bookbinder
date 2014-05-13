@@ -140,6 +140,33 @@ module Bookbinder
           mock_github_for git_client, book, desired_tag
           publish_command.run cli_args
         end
+
+        context 'the old config.yml lists fewer repos than the new config.yml' do
+          let(:early_section) { 'fantastic/dogs-repo' }
+          let(:another_early_section) { 'fantastic/my-docs-repo' }
+          let(:later_section) { 'fantastic/my-other-docs-repo' }
+
+          let(:zipped_book) do
+            RepoFixture.tarball('book', desired_tag) do |dir|
+              config_file = File.join(dir, 'config.yml')
+              config = YAML.load(File.read(config_file))
+              config['sections'].pop
+              File.write(config_file, config.to_yaml)
+            end
+          end
+
+          before do
+            stub_github_for git_client, book, desired_tag, zipped_book
+          end
+
+          it 'calls for the old sections, but not the new sections' do
+            mock_github_for git_client, early_section, desired_tag
+            mock_github_for git_client, another_early_section, desired_tag
+            expect(git_client).not_to receive(:archive_link).with(later_section, anything)
+
+            publish_command.run cli_args
+          end
+        end
       end
 
       context 'when provided a layout repo' do
