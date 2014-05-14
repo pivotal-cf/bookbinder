@@ -229,10 +229,12 @@ MARKDOWN
     end
 
     describe '#quick_links' do
-      let(:quick_links) do
-        allow_any_instance_of(klass).to receive(:current_page).and_return(double(:current_page, source_file: nil))
-        klass.new({}).quick_links
-      end
+      subject(:an_instance) { klass.new({}) }
+
+      let(:quick_links) { an_instance.quick_links }
+      let(:current_page) { double(:current_page, source_file: nil) }
+
+      before { allow(an_instance).to receive(:current_page).and_return(current_page) }
 
       let(:sample_markdown) do
 <<MARKDOWN
