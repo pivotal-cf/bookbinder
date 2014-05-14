@@ -4,9 +4,8 @@ module Bookbinder
       @@store ||= {}
     end
 
-    def self.get_instance(logger, section_hash: {}, local_repo_dir: nil, destination_dir: nil, target_tag: nil)
-      destination_dir ||= Dir.mktmpdir
-      store.fetch([section_hash.fetch('repository', {})['name'], local_repo_dir]) { acquire(logger, section_hash, local_repo_dir, destination_dir, target_tag) }
+    def self.get_instance(logger, section_hash: {}, local_repo_dir: nil, destination_dir: Dir.mktmpdir, target_tag: nil)
+      store.fetch([section_hash, local_repo_dir]) { acquire(logger, section_hash, local_repo_dir, destination_dir, target_tag) }
     end
 
     def initialize(logger, repository, subnav_template)
@@ -38,13 +37,13 @@ module Bookbinder
     private
 
     def self.acquire(logger, section_hash, local_repo_dir, destination, target_tag)
-      logger.log 'Gathering ' + section_hash.fetch('repository', {})['name'].cyan
+      logger.log "Gathering #{section_hash['repository']['name'].cyan}"
+
       repository = build_repository(logger, destination, local_repo_dir, section_hash, target_tag)
       section = new(logger, repository, section_hash['subnav_template'])
 
-      keep(section, local_repo_dir) if section
+      store[[section_hash, local_repo_dir]] = section
     end
-
     private_class_method :acquire
 
     def self.build_repository(logger, destination, local_repo_dir, repo_hash, target_tag)
@@ -54,13 +53,6 @@ module Bookbinder
         Repository.build_from_remote(logger, repo_hash, destination, target_tag)
       end
     end
-
     private_class_method :build_repository
-
-    def self.keep(section, local_repo_dir)
-      store[[section.full_name, local_repo_dir]] = section
-    end
-
-    private_class_method :keep
   end
 end
