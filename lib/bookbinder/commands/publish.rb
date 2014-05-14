@@ -44,12 +44,7 @@ module Bookbinder
 
       def checkout_book_at(target_tag)
         @logger.log "Binding #{config.book_repo.cyan} at #{target_tag.magenta}"
-        temp_workspace     = Dir.mktmpdir
-        book               = Book.from_remote(logger: @logger, full_name: config.book_repo,
-                                              destination_dir: temp_workspace, ref: target_tag)
-
-        expected_book_path = File.join temp_workspace, book.directory
-        FileUtils.chdir(expected_book_path) { refresh_config; yield }
+        FileUtils.chdir(book_checkout(target_tag)) { refresh_config; yield }
       end
 
       def refresh_config
@@ -63,7 +58,7 @@ module Bookbinder
         git_mod_cache = GitModCache.new(File.absolute_path('file_modification_dates'), location=='local')
 
         arguments = {
-            sections: config.sections,
+            sections: sections,
             output_dir: File.absolute_path('output'),
             master_middleman_dir: layout_repo_path(local_repo_dir),
             final_app_dir: final_app_dir,
@@ -78,6 +73,35 @@ module Bookbinder
         arguments.merge!(host_for_sitemap: config.public_host)
         arguments.merge!(target_tag: target_tag) if target_tag
         arguments
+      end
+
+      def sections
+        result = config.sections
+
+        if config.has_option?('versions')
+          config.versions.each { |version| result.concat sections_from version }
+        end
+
+        result
+      end
+
+      def sections_from(version)
+        config_file = File.join book_checkout(version), 'config.yml'
+        attrs       = YAML.load(File.read(config_file))['sections']
+
+        attrs.map do |section_hash|
+          section_hash['repository']['ref'] = version
+          section_hash['directory'] = File.join(version, section_hash['directory'])
+          section_hash
+        end
+      end
+
+      def book_checkout(ref)
+        temp_workspace = Dir.mktmpdir
+        book = Book.from_remote(logger: @logger, full_name: config.book_repo,
+                                destination_dir: temp_workspace, ref: ref)
+
+        File.join temp_workspace, book.directory
       end
 
       def layout_repo_path(local_repo_dir)

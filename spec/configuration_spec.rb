@@ -4,6 +4,7 @@ module Bookbinder
     let(:config_hash) do
       {
           'book_repo' => 'some-org/some-repo',
+          'versions' => %w(v1.7.1.9 redacted v3),
           'cred_repo' => 'some-org/cred-repo',
           'layout_repo' => 'some-org/some-repo',
           'sections' => ['section1', 'section2'],
