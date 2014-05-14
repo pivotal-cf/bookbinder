@@ -363,6 +363,61 @@ module Bookbinder
         it 'returns true when everything is happy' do
           expect(publish).to be_true
         end
+
+        describe '#publish' do
+          context 'when publishing older versions under subdirectories' do
+
+            let(:v1_tar) do
+              RepoFixture.tarball('book', 'v1') do |dir|
+                index = File.join(dir, 'master_middleman', 'source', 'index.html.md')
+                File.write(index, 'this is v1')
+              end
+            end
+
+            let(:v2_tar) do
+              RepoFixture.tarball('book', 'v2') do |dir|
+                index = File.join(dir, 'master_middleman', 'source', 'index.html.md')
+                File.write(index, 'this is v2')
+              end
+            end
+
+            let(:v3_tar) do
+              RepoFixture.tarball('book', 'v3') do |dir|
+                index = File.join(dir, 'master_middleman', 'source', 'index.html.md')
+                File.write(index, 'this is v3')
+              end
+            end
+
+            before do
+              publish_args.merge!(
+                  book_repo: 'org/book',
+                  versions: %w(v1 v2 v3)
+              )
+
+              allow(GitClient).to receive(:new).and_return(git_client)
+
+              stub_github_for(git_client, 'org/book', 'v1', v1_tar)
+              stub_github_for(git_client, 'org/book', 'v2', v2_tar)
+              stub_github_for(git_client, 'org/book', 'v3', v3_tar)
+            end
+
+            it 'copies the previous book version index files to the middleman source dir' do
+              publish
+
+              v1_index = File.read(
+                  File.join(output_dir, 'master_middleman', 'source', 'v1', 'index.html.md'))
+              expect(v1_index).to eq 'this is v1'
+
+              v2_index = File.read(
+                  File.join(output_dir, 'master_middleman', 'source', 'v2', 'index.html.md'))
+              expect(v2_index).to eq 'this is v2'
+
+              v3_index = File.read(
+                  File.join(output_dir, 'master_middleman', 'source', 'v3', 'index.html.md'))
+              expect(v3_index).to eq 'this is v3'
+            end
+          end
+        end
       end
     end
   end

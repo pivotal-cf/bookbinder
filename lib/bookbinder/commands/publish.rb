@@ -66,12 +66,14 @@ module Bookbinder
             verbose: verbosity,
             pdf_index: config.pdf_index,
             local_repo_dir: local_repo_dir,
-            file_cache: git_mod_cache
+            file_cache: git_mod_cache,
+            book_repo: config.book_repo
         }
 
         arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
         arguments.merge!(host_for_sitemap: config.public_host)
         arguments.merge!(target_tag: target_tag) if target_tag
+        arguments[:versions] = config.has_option?('versions') ? config.versions : []
         arguments
       end
 

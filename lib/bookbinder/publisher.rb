@@ -15,6 +15,8 @@ module Bookbinder
       build_directory = File.join master_dir, 'build/.'
       public_directory = File.join final_app_dir, 'public'
 
+      @versions = options.fetch(:versions, [])
+      @book_repo = options[:book_repo]
       prepare_directories final_app_dir, intermediate_directory, workspace_dir, master_middleman_dir, master_dir
       FileUtils.cp 'redirects.rb', final_app_dir if File.exists?('redirects.rb')
 
@@ -67,6 +69,27 @@ module Bookbinder
       copy_directory_from_gem 'template_app', final_app
       copy_directory_from_gem 'master_middleman', middleman_dir
       FileUtils.cp_r File.join(master_middleman_dir, '.'), middleman_dir
+
+      copy_version_master_middleman(middleman_source)
+    end
+
+    # Copy the index file from each version into the version's directory. Because version
+    # subdirectories are sections, this is the only way they get content from their master
+    # middleman directory.
+    def copy_version_master_middleman(dest_dir)
+      @versions.each do |version|
+        Dir.mktmpdir do |tmpdir|
+          book = Book.from_remote(logger: @logger, full_name: @book_repo,
+                                  destination_dir: tmpdir, ref: version)
+          index_source_dir = File.join(tmpdir, book.directory, 'master_middleman', 'source')
+          index_dest_dir = File.join(dest_dir, version)
+          FileUtils.mkdir_p(index_dest_dir)
+
+          Dir.glob(File.join(index_source_dir, 'index.*')) do |f|
+            FileUtils.cp(File.expand_path(f), index_dest_dir)
+          end
+        end
+      end
     end
 
     def forget_sections(middleman_scratch)

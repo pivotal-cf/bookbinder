@@ -298,7 +298,9 @@ module Bookbinder
          local_repo_dir: anything,
          host_for_sitemap: 'example.com',
          template_variables: {},
-         file_cache: cache }
+         file_cache: cache,
+         book_repo: 'fantastic/book',
+         versions: []}
       end
 
       before do
