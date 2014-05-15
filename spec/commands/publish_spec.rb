@@ -299,8 +299,7 @@ module Bookbinder
          host_for_sitemap: 'example.com',
          template_variables: {},
          file_cache: cache,
-         book_repo: 'fantastic/book',
-         versions: []}
+         book_repo: 'fantastic/book'}
       end
 
       before do

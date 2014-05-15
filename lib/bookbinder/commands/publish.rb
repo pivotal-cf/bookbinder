@@ -58,7 +58,7 @@ module Bookbinder
         git_mod_cache = GitModCache.new(File.absolute_path('file_modification_dates'), location=='local')
 
         arguments = {
-            sections: sections,
+            sections: config.sections,
             output_dir: File.absolute_path('output'),
             master_middleman_dir: layout_repo_path(local_repo_dir),
             final_app_dir: final_app_dir,
@@ -70,21 +70,15 @@ module Bookbinder
             book_repo: config.book_repo
         }
 
+        if config.has_option?('versions') && location != 'local'
+          config.versions.each { |version| arguments[:sections].concat sections_from version }
+          arguments.merge!(versions: config.versions)
+        end
+
         arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
         arguments.merge!(host_for_sitemap: config.public_host)
         arguments.merge!(target_tag: target_tag) if target_tag
-        arguments[:versions] = config.has_option?('versions') ? config.versions : []
         arguments
-      end
-
-      def sections
-        result = config.sections
-
-        if config.has_option?('versions')
-          config.versions.each { |version| result.concat sections_from version }
-        end
-
-        result
       end
 
       def sections_from(version)
