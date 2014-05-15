@@ -11,7 +11,7 @@ class QuicklinksRenderer < Redcarpet::Render::Base
     document.css('.quick-links').to_html if any_headers?
   end
 
-  def header(text, header_level, anchor)
+  def header(text, header_level)
     return unless [2, 3].include?(header_level)
     return unless anchor_for(text)
 
