@@ -1,6 +1,12 @@
 module Bookbinder
   class Cli
     class Publish < BookbinderCommand
+      class VersionUnsupportedError < StandardError;
+        def initialize(msg=nil)
+          super
+        end
+      end
+
       def run(cli_arguments)
         raise Cli::InvalidArguments unless arguments_are_valid?(cli_arguments)
 
@@ -84,6 +90,7 @@ module Bookbinder
       def sections_from(version)
         config_file = File.join book_checkout(version), 'config.yml'
         attrs       = YAML.load(File.read(config_file))['sections']
+        raise VersionUnsupportedError.new(version) if attrs.nil?
 
         attrs.map do |section_hash|
           section_hash['repository']['ref'] = version

@@ -48,6 +48,9 @@ module Bookbinder
       configuration = config
       raise 'Non-unique directory names' unless configuration.valid?
       command.new(logger, configuration).run command_arguments
+    rescue Publish::VersionUnsupportedError => e
+      logger.error "config.yml at version '#{e.message}' has an unsupported API."
+      1
     rescue Configuration::CredentialKeyError => e
       logger.error "#{e.message}, in credentials.yml"
       1

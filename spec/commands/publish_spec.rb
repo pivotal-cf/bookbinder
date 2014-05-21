@@ -118,7 +118,6 @@ module Bookbinder
         index_html.should include 'This is a Markdown Page'
       end
 
-
       context 'when a tag is provided' do
         let(:desired_tag) { 'foo-1.7.12' }
         let(:cli_args) { ['github', desired_tag] }
@@ -267,6 +266,29 @@ module Bookbinder
           index_html = File.read File.join(v2_dir, 'foods', 'savory', 'index.html')
           expect(index_html).to include 'This is another Markdown Page'
 
+        end
+
+        context 'when a tag is at an API version that does not have sections' do
+          let(:versions) { %w(v1) }
+
+          let(:book_without_sections) do
+            RepoFixture.tarball('book', 'v1') do |dir|
+              config_file = File.join(dir, 'config.yml')
+              config = YAML.load(File.read(config_file))
+              config.delete('sections')
+              File.write(config_file, config.to_yaml)
+            end
+          end
+
+          before do
+            stub_github_for(git_client, book, 'v1', book_without_sections)
+          end
+
+          it 'raises a VersionUnsupportedError' do
+            expect {
+              publish_command.run ['github']
+            }.to raise_error(Cli::Publish::VersionUnsupportedError)
+          end
         end
       end
     end
