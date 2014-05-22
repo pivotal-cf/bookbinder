@@ -9,6 +9,7 @@ class UsageMessage
     log_usage_header
     log_flag_usage_messages
     log_command_usage_messages
+    0
   end
 
   def command(command_class)
