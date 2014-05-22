@@ -8,25 +8,20 @@ class GitModCache
 
   def update_from(repo)
     return if safe_mode
-    current_contents = contents_on_disk
-    cached_dates_by_sha = current_contents.fetch(:dates_by_sha, {})
-    cached_shas_by_file = current_contents.fetch(:shas_by_file, {})
 
-    latest_shas_by_file = repo.shas_by_file
-    pretty_latest_shas_by_file = prettify(latest_shas_by_file, repo.directory)
-    new_dates_by_sha = repo.dates_by_sha(latest_shas_by_file, except: cached_dates_by_sha)
+    cached_dates_by_sha         = contents_on_disk.fetch(:dates_by_sha, {})
+    cached_shas_by_file         = contents_on_disk.fetch(:shas_by_file, {})
 
-    shas_by_file = cached_shas_by_file.merge(pretty_latest_shas_by_file)
-    dates_by_sha = cached_dates_by_sha.merge(new_dates_by_sha)
+    latest_shas_by_file         = repo.shas_by_file
+    pretty_latest_shas_by_file  = prettify(latest_shas_by_file, repo.directory)
+    new_dates_by_sha            = repo.dates_by_sha(latest_shas_by_file, except: cached_dates_by_sha)
 
     new_contents = {
-        shas_by_file: shas_by_file,
-        dates_by_sha: dates_by_sha
+        dates_by_sha: cached_dates_by_sha.merge(new_dates_by_sha),
+        shas_by_file: cached_shas_by_file.merge(pretty_latest_shas_by_file),
     }
 
-    new_contents_yaml = YAML.dump new_contents
-
-    write_to_disk(new_contents_yaml)
+    write_to_disk(YAML.dump new_contents)
   end
 
   def fetch(path)
@@ -57,11 +52,11 @@ class GitModCache
   end
 
   def contents_on_disk
-    load_storage || {}
+    @contents ||= load_storage
   end
 
   def load_storage
-    YAML.load_file(@storage) if File.exists?(@storage)
+    File.exists?(@storage) ? YAML.load_file(@storage) : {}
   end
 
 end

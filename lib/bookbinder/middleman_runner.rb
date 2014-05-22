@@ -28,32 +28,40 @@ module Bookbinder
     end
 
     def run(middleman_dir, template_variables, local_repo_dir, file_modification_cache, verbose = false, repos = [], production_host=nil)
-      original_mm_root = ENV['MM_ROOT']
       @logger.log "\nRunning middleman...\n\n"
 
-      # awful hacks to eliminate the impact of global state in middleman. when will it end?
-      Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
-      ENV['MM_ROOT'] = middleman_dir
-      Dir.chdir(middleman_dir) do
-        build_command = Middleman::Cli::Build.new [], {:quiet => !verbose}, {}
-        builder = Middleman::Cli::Build.shared_instance(verbose)
-
-        config = {
-            template_variables: template_variables,
-            relative_links: false,
-            subnav_templates: subnavs_by_dir_name(repos),
-            local_repo_dir: local_repo_dir,
-            production_host: production_host,
-            filecache: file_modification_cache
-        }
-        config.each { |k, v| builder.config[k] = v }
-        build_command.invoke :build, [], {:verbose => verbose}
+      within(middleman_dir) do
+        invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, repos, template_variables, verbose)
       end
-
-      ENV['MM_ROOT'] = original_mm_root
     end
 
     private
+
+    def within(temp_root, &block)
+      Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
+      original_mm_root  = ENV['MM_ROOT']
+      ENV['MM_ROOT']    = temp_root
+
+      Dir.chdir(temp_root) { block.call }
+
+      ENV['MM_ROOT']    = original_mm_root
+    end
+
+    def invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, repos, template_variables, verbose)
+      builder = Middleman::Cli::Build.shared_instance(verbose)
+
+      config = {
+          template_variables: template_variables,
+          relative_links: false,
+          subnav_templates: subnavs_by_dir_name(repos),
+          local_repo_dir: local_repo_dir,
+          production_host: production_host,
+          filecache: file_modification_cache
+      }
+
+      config.each { |k, v| builder.config[k] = v }
+      Middleman::Cli::Build.new([], {quiet: !verbose}, {}).invoke :build, [], {verbose: verbose}
+    end
 
     def subnavs_by_dir_name(repos)
       repos.reduce({}) do |final_map, repository|
