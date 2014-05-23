@@ -30,5 +30,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'popen4'
   s.add_runtime_dependency 'rack-rewrite'
   s.add_runtime_dependency 'ruby-progressbar'
+  s.add_runtime_dependency 'therubyracer'
   s.add_development_dependency 'pry'
 end
