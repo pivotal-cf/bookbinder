@@ -49,5 +49,7 @@ class CssLinkChecker
 
   def http_reachable?(link)
     Net::HTTP.get_response(URI(link)).code == '200'
+  rescue SocketError => e
+    return false
   end
 end
