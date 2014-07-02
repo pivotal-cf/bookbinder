@@ -80,7 +80,9 @@ module Bookbinder
     def copy_from_local(destination_dir)
       if File.exist?(path_to_local_repo)
         @logger.log '  copying '.yellow + path_to_local_repo
-        FileUtils.cp_r path_to_local_repo, File.join(destination_dir, directory)
+        destination = File.join(destination_dir, directory)
+        FileUtils.mkdir_p(destination)
+        FileUtils.cp_r(File.join(path_to_local_repo, '.'), destination)
         @copied_to = File.join(destination_dir, directory)
       else
         announce_skip

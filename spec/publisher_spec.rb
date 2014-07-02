@@ -237,6 +237,34 @@ module Bookbinder
           )
         end
 
+        context "when the section's output directory has multiple levels" do
+          it 'creates intermediate directories' do
+            some_repo = 'my-docs-org/my-docs-repo'
+            some_sha = 'some-sha'
+
+            stub_github_commits(name: some_repo, sha: some_sha)
+            stub_github_for(git_client, some_repo, some_sha)
+            allow(GitClient).to receive(:new).and_return(git_client)
+
+            sections = [
+                {'repository' => {'name' => some_repo, 'ref' => some_sha}, 'directory' => 'a/b/c'},
+            ]
+
+            silence_io_streams do
+              publisher.publish(
+                  sections: sections,
+                  output_dir: output_dir,
+                  master_middleman_dir: non_broken_master_middleman_dir,
+                  final_app_dir: final_app_dir,
+                  host_for_sitemap: 'example.com',
+                  file_cache: cache,
+                  local_repo_dir: local_repo_dir)
+            end
+
+            index_html = File.read(File.join(final_app_dir, 'public', 'a', 'b', 'c', 'index.html'))
+            expect(index_html).to include('This is a Markdown Page')
+          end
+        end
       end
 
       describe 'the verbose flag' do
