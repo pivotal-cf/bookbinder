@@ -54,13 +54,8 @@ module Bookbinder
         local_host = "localhost:#{port}"
         header = pdf_options.fetch('header') { raise IncompletePDFConfig, {file: @pdf_config_file, key: :header} }
 
-        if @pdf_config_file
-          output_filename = File.basename(@pdf_config_file).gsub(/yml/, 'pdf')
-          urls_to_capture = pdf_options.fetch('pages').map { |l| "http://#{local_host}/#{l}" }
-        else
-          output_filename = pdf_options.fetch('filename')
-          urls_to_capture = sitemap_links(local_host)
-        end
+        output_filename = get_output_file_name
+        urls_to_capture = get_urls_to_capture(local_host)
 
         PdfGenerator.new(@logger).generate(urls_to_capture, output_filename, "http://#{local_host}/#{header}", pdf_options['copyright_notice'])
       end
@@ -75,6 +70,22 @@ module Bookbinder
             'filename' => config.pdf.fetch('filename'),
             'header' => config.pdf.fetch('header')
         }
+      end
+
+      def get_output_file_name
+        if @pdf_config_file
+          File.basename(@pdf_config_file).gsub(/yml/, 'pdf')
+        else
+          pdf_options.fetch('filename')
+        end
+      end
+
+      def get_urls_to_capture(local_host)
+        if @pdf_config_file
+          pdf_options.fetch('pages').map { |l| "http://#{local_host}/#{l}" }
+        else
+          sitemap_links(local_host)
+        end
       end
 
       def sitemap_links(local_host)
