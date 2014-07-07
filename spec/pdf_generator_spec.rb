@@ -66,6 +66,19 @@ describe PdfGenerator do
     end.to raise_error(/'wkhtmltopdf' appears to have failed/)
   end
 
+  it 'raises an exception when wkhtmltopdf exits non-zero' do
+    tmp_dir = Dir.mktmpdir
+    pdf_destination = File.join(tmp_dir, 'anything.pdf')
+
+    expect_any_instance_of(Process::Status).to receive(:success?).and_return false
+
+    expect do
+      silence_io_streams do
+        PdfGenerator.new(logger).generate [source_page], pdf_destination, header_file
+      end
+    end.to raise_error(/'wkhtmltopdf' appears to have failed/)
+  end
+
   describe '#generate' do
     let(:target) { Tempfile.new('output.pdf').path }
 

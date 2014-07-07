@@ -38,8 +38,8 @@ CMD
 
     `#{command}`
 
-    raise "'wkhtmltopdf' appears to have failed" unless File.exist?(target)
-
+    raise "'wkhtmltopdf' appears to have failed" unless $?.success? && File.exist?(target)
+    
     @logger.log "\nYour PDF file was generated to #{target.green}"
 
   end
