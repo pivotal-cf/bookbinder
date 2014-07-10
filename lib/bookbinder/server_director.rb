@@ -23,6 +23,7 @@ class ServerDirector
   private
 
   def wait_for_server(io)
+    Kernel.sleep(1)
     begin
       line = io.gets
       raise 'Puma could not start' if line.nil?

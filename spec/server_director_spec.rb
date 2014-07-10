@@ -78,6 +78,8 @@ HERE
         blk.call(fake_stdout, nil, nil, nil)
       end
 
+      expect(Kernel).to receive(:sleep).with(1)
+
       expect(fake_stdout).to receive(:gets).and_return('Waiting', 'Waiting', 'Listening on').ordered
       expect(inner_worker).to receive(:do_work).ordered
 
