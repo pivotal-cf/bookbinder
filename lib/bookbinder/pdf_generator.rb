@@ -17,6 +17,8 @@ class PdfGenerator
 
     left_footer ||= "   © Copyright 2013-#{Time.now.year}, Pivotal"
 
+    toc_xslt_path = File.expand_path('../../../toc.xslt', __FILE__)
+
     command = <<CMD
 wkhtmltopdf \
     --disable-external-links \
@@ -32,6 +34,7 @@ wkhtmltopdf \
     --footer-center '[page] of [toPage]' \
     --print-media-type \
     --header-html #{header} \
+    toc --xsl-style-sheet #{toc_xslt_path} \
     #{sources.join(' ')} \
     #{target}
 CMD

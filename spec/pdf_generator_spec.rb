@@ -87,19 +87,18 @@ describe PdfGenerator do
     let(:target) { Tempfile.new('output.pdf').path }
 
     it 'calls wkhtmltopdf with the --disable-external-links flag' do
-      pending if RbConfig::CONFIG['host_os'] =~ /darwin/
-
       pdf_generator = PdfGenerator.new(logger)
       expect(pdf_generator).to receive(:`).with(/\s+--disable-external-links\s+/) do
-        FileUtils.touch(target)
+        `touch #{target}`
       end
       pdf_generator.generate([source_page], target, header_file)
     end
 
-    xit 'calls wkhtmltopdf with the --toc flag' do
+    it 'calls wkhtmltopdf with the table of contents and stylesheet' do
       pdf_generator = PdfGenerator.new(logger)
-      expect(pdf_generator).to receive(:`).with(/\s+--toc\s+/) do
-        FileUtils.touch(target)
+      toc_xslt_path = File.expand_path('../../toc.xslt', __FILE__)
+      expect(pdf_generator).to receive(:`).with(/\s+toc --xsl-style-sheet #{toc_xslt_path}\s+/) do
+        `touch #{target}`
       end
       pdf_generator.generate([source_page], target, header_file)
     end
