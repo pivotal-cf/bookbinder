@@ -9,7 +9,7 @@ RSpec.configure do |config|
   config.include Bookbinder::SpecHelperMethods
 
   config.order = 'random'
-  config.color_enabled = true
+  config.color = true
 
   config.before do
     # awful hack to prevent tests that invoke middleman directly from polluting code that shells out to call it
