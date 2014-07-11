@@ -102,5 +102,14 @@ describe PdfGenerator do
       end
       pdf_generator.generate([source_page], target, header_file)
     end
+
+    it 'calls wkhtmltopdf with the --load-error-handling ignore flag' do
+      pdf_generator = PdfGenerator.new(logger)
+      expect(pdf_generator).to receive(:`).with(/\s+--load-error-handling ignore\s+/) do
+        `touch #{target}`
+      end
+      pdf_generator.generate([source_page], target, header_file)
+    end
+
   end
 end
