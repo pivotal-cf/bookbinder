@@ -18,6 +18,8 @@ describe PdfGenerator do
 
 
   it 'generates a PDF from the specified pages and header' do
+    pending if RbConfig::CONFIG['host_os'] =~ /darwin/
+
     silence_io_streams do
       PdfGenerator.new(logger).generate [source_page], generated_pdf, header_file
     end
@@ -30,6 +32,8 @@ describe PdfGenerator do
     end
 
     it 'generates a PDF from a live web-page and header' do
+      pending if RbConfig::CONFIG['host_os'] =~ /darwin/
+
       many_pages = 110.times.map { 'http://example.com' }
       silence_io_streams do
         PdfGenerator.new(logger).generate many_pages, generated_pdf, header_file
@@ -83,6 +87,8 @@ describe PdfGenerator do
     let(:target) { Tempfile.new('output.pdf').path }
 
     it 'calls wkhtmltopdf with the --disable-external-links flag' do
+      pending if RbConfig::CONFIG['host_os'] =~ /darwin/
+
       pdf_generator = PdfGenerator.new(logger)
       expect(pdf_generator).to receive(:`).with(/\s+--disable-external-links\s+/) do
         FileUtils.touch(target)
