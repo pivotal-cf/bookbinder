@@ -22,6 +22,7 @@ class PdfGenerator
     command = <<CMD
 wkhtmltopdf \
     --disable-external-links \
+    --disable-javascript \
     --load-error-handling ignore \
     --margin-top 26mm \
     --margin-bottom 13mm \
@@ -31,7 +32,6 @@ wkhtmltopdf \
     --footer-left '#{left_footer}' \
     --footer-center '[page] of [toPage]' \
     --print-media-type \
-    --header-html #{header} \
     toc --xsl-style-sheet #{toc_xslt_path} \
     #{sources.join(' ')} \
     #{target}
