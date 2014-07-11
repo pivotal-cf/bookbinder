@@ -24,8 +24,6 @@ wkhtmltopdf \
     --disable-external-links \
     --load-error-handling ignore \
     --margin-top 26mm \
-    --margin-left 0mm \
-    --margin-right 0mm \
     --margin-bottom 13mm \
     --header-spacing 10 \
     --footer-spacing 5 \
