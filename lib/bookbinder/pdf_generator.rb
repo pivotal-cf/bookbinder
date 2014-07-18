@@ -27,6 +27,7 @@ wkhtmltopdf \
     --margin-top 26mm \
     --margin-bottom 13mm \
     --header-spacing 10 \
+    --header-html #{header} \
     --footer-spacing 5 \
     --footer-font-size 10 \
     --footer-left '#{left_footer}' \
