@@ -55,6 +55,28 @@ module Bookbinder
             Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/definitely-not-around'}}, local_repo_dir: local_repo_dir)
           end
         end
+
+        context 'if the repo is not a hash' do
+          let(:local_repo_dir) { 'spec/fixtures/repositories' }
+            it 'raises a not a hash error message' do
+            expect {
+              Section.get_instance(logger, section_hash: {
+                  'repository' => 'foo/definitely-not-around' }, local_repo_dir: local_repo_dir)
+            }.to raise_error(RuntimeError,
+                             "section repository 'foo/definitely-not-around' is not a hash")
+          end
+        end
+
+        context 'if the repo name is missing' do
+          let(:local_repo_dir) { 'spec/fixtures/repositories' }
+          it 'raises a missing name key error message' do
+            expect {
+              Section.get_instance(logger, section_hash: {
+                  'repository' => { some_key: 'test' }}, local_repo_dir: local_repo_dir)
+            }.to raise_error(RuntimeError,
+                             "section repository '{:some_key=>\"test\"}' missing name key")
+          end
+        end
       end
     end
 

@@ -37,7 +37,10 @@ module Bookbinder
     private
 
     def self.acquire(logger, section_hash, local_repo_dir, destination, target_tag)
-      logger.log "Gathering #{section_hash['repository']['name'].cyan}"
+      repository = section_hash['repository']
+      raise "section repository '#{repository}' is not a hash" unless repository.is_a?(Hash)
+      raise "section repository '#{repository}' missing name key" unless repository['name']
+      logger.log "Gathering #{repository['name'].cyan}"
 
       repository = build_repository(logger, destination, local_repo_dir, section_hash, target_tag)
       section = new(logger, repository, section_hash['subnav_template'])
