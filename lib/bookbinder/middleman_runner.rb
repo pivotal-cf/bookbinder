@@ -1,6 +1,8 @@
 class Middleman::Cli::BuildAction
   def handle_error(file_name, response, e=Thor::Error.new(response))
-    our_errors = [GitClient::TokenException, Bookbinder::CodeExample::InvalidSnippet]
+    our_errors = [GitClient::TokenException,
+                  Bookbinder::CodeExample::InvalidSnippet,
+                  QuicklinksRenderer::BadHeadingLevelError]
     raise e if our_errors.include?(e.class)
 
     original_handle_error(e, file_name, response)

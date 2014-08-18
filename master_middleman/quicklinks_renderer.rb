@@ -1,6 +1,8 @@
 require 'redcarpet'
 
 class QuicklinksRenderer < Redcarpet::Render::Base
+  class BadHeadingLevelError < StandardError; end
+
   def doc_header
     @items = []
     @items[1] = document.css('ul').first
@@ -20,6 +22,8 @@ class QuicklinksRenderer < Redcarpet::Render::Base
     last_list_of_level(header_level-1).add_child(li)
     @items[header_level] = li
     nil
+  rescue BadHeadingLevelError => e
+    raise BadHeadingLevelError.new "The header \"#{text}\", which is at level #{e.message} has no higher-level headers occuring before it."
   end
 
   private
@@ -41,6 +45,7 @@ class QuicklinksRenderer < Redcarpet::Render::Base
 
   def last_list_of_level(n)
     item = @items[n]
+    raise BadHeadingLevelError.new("#{n+1}") unless item
     return item if item.name == 'ul'
 
     item.add_child('<ul>') unless item.css('ul').any?
