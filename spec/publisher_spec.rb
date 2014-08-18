@@ -287,8 +287,6 @@ module Bookbinder
             $stdout.rewind
             collected_output = $stdout.read
 
-            expect(collected_output).to_not match(/== Building files/)
-            expect(collected_output).to_not match(/== Request: \/index.html/)
             expect(collected_output).to_not match(/error.*build\/index.html/)
             expect(collected_output).to_not match(/undefined local variable or method `function_that_does_not_exist'/)
           ensure
@@ -313,8 +311,7 @@ module Bookbinder
 
             $stdout.rewind
             collected_output = $stdout.read
-            expect(collected_output).to match(/== Building files/)
-            expect(collected_output).to match(/== Request: \/index.html/)
+
             expect(collected_output).to match(/error.*build\/index.html/)
             expect(collected_output).to match(/undefined local variable or method `function_that_does_not_exist'/)
           ensure
