@@ -7,38 +7,59 @@ describe GitModCache do
   subject(:cache) { GitModCache.new cachefile }
 
   let(:cachefile) { 'cache' }
-  let(:first_path) { 'path/to/file1' }
-  let(:second_path) { 'path/to/file2' }
-  let(:first_sha) { '--------------' }
-  let(:second_sha) { '00000000000' }
-  let(:earliest) { 10 }
-  let(:latest) { 30000 }
-  let(:shas_by_file) { { first_path => first_sha, second_path => second_sha } }
-  let(:pretty_shas_by_file) { { "#{repo.directory}/#{first_path}" => first_sha,
-                                "#{repo.directory}/#{second_path}" => second_sha } }
-  let(:dates_by_sha) { { first_sha => earliest, second_sha => latest } }
+
+  let(:initial_contents) do
+    {
+        shas_by_file: {'initial-path' => 'initial-sha'},
+        dates_by_sha: {'initial-sha' => 'initial-date'}
+    }
+  end
 
   before { File.write(cachefile, initial_contents.to_yaml) }
 
   describe '#update_from' do
-    let(:initial_contents) do
-      {shas_by_file: {'path' => 'sha'}, dates_by_sha: {'sha' => '4582346'}}
+    let(:repo_1) do
+      double(:repository, shas_by_file: {
+          'path/to/file1' => 'file-1-sha',
+          'path/to/file2' => 'file-2-sha'
+      }, directory: 'fake-org/fake-repo-1')
     end
-    let(:repo) do
-      double(:repository, shas_by_file: shas_by_file, directory: 'fake-org/fake-repo')
+
+    let(:repo_2) do
+      double(:repository, shas_by_file: {
+          'path/to/file3' => 'file-3-sha',
+          'path/to/file4' => 'file-4-sha'
+      }, directory: 'fake-org/fake-repo-2')
     end
 
     context 'when the cache file exists' do
       it 'writes new information provided by the repo to the cache file' do
-        expect(repo).to receive(:dates_by_sha).with({first_path => first_sha, second_path => second_sha}, {except: initial_contents[:dates_by_sha]}).and_return(
-                            first_sha => earliest, second_sha => latest)
+        expected_except_1 = initial_contents[:dates_by_sha]
+
+        expect(repo_1).to receive(:dates_by_sha).with(
+                              {
+                                  'path/to/file1' => 'file-1-sha',
+                                  'path/to/file2' => 'file-2-sha'
+                              },
+                              {except: expected_except_1})
+                          .and_return(
+                              {
+                                  'file-1-sha' => 'file-1-date',
+                                  'file-2-sha' => 'file-2-date',
+                              })
 
         final_contents = {
-            shas_by_file: pretty_shas_by_file.merge({'path' => 'sha' }),
-            dates_by_sha: dates_by_sha.merge({ 'sha' => '4582346' }),
+            shas_by_file: initial_contents[:shas_by_file].merge(
+                'fake-org/fake-repo-1/path/to/file1' => 'file-1-sha',
+                'fake-org/fake-repo-1/path/to/file2' => 'file-2-sha',
+            ),
+            dates_by_sha: initial_contents[:dates_by_sha].merge(
+                'file-1-sha' => 'file-1-date',
+                'file-2-sha' => 'file-2-date',
+            )
         }
 
-        cache.update_from repo
+        cache.update_from repo_1
 
         contents_on_disk = YAML.load_file(cachefile)
         expect(contents_on_disk).to eq final_contents
@@ -49,11 +70,27 @@ describe GitModCache do
       before { FileUtils.rm cachefile }
 
       it 'writes new information provided by the repo to the cache file' do
-        expect(repo).to receive(:dates_by_sha).with({first_path => first_sha, second_path => second_sha}, {:except=>{}}).and_return dates_by_sha
+        expect(repo_1).to receive(:dates_by_sha).with({
+                                                          'path/to/file1' => 'file-1-sha',
+                                                          'path/to/file2' => 'file-2-sha'
+                                                      },
+                                                      {except: {}})
+                          .and_return(
+                              'file-1-sha' => 'file-1-date',
+                              'file-2-sha' => 'file-2-date'
+                          )
+        final_contents = {
+            shas_by_file: {
+                "#{repo_1.directory}/path/to/file1" => 'file-1-sha',
+                "#{repo_1.directory}/path/to/file2" => 'file-2-sha'
+            },
+            dates_by_sha: {
+                'file-1-sha' => 'file-1-date',
+                'file-2-sha' => 'file-2-date'
+            }
+        }
 
-        final_contents = {shas_by_file: pretty_shas_by_file, dates_by_sha: dates_by_sha}
-
-        cache.update_from repo
+        cache.update_from repo_1
 
         contents_on_disk = YAML.load_file(cachefile)
         expect(contents_on_disk).to eq final_contents
@@ -63,16 +100,26 @@ describe GitModCache do
 
   describe '#fetch' do
     let(:now) { Time.now }
-    before do
-      allow(Time).to receive(:now).and_return(now)
-    end
+
+    before { allow(Time).to receive(:now).and_return(now) }
 
     context 'when the cache has data' do
-      let(:initial_contents) { {shas_by_file: shas_by_file, dates_by_sha: dates_by_sha} }
+      let(:initial_contents) do
+        {
+            shas_by_file: {
+                'path/to/file1' => 'file-1-sha',
+                'path/to/file2' => 'file-2-sha'
+            },
+            dates_by_sha: {
+                'file-1-sha' => 'file-1-date',
+                'file-2-sha' => 'file-2-date'
+            }
+        }
+      end
 
       it 'returns the date mapped to the filepaths SHA' do
-        expect(cache.fetch(first_path)).to eq earliest
-        expect(cache.fetch(second_path)).to eq latest
+        expect(cache.fetch('path/to/file1')).to eq 'file-1-date'
+        expect(cache.fetch('path/to/file2')).to eq 'file-2-date'
       end
     end
 
@@ -80,13 +127,16 @@ describe GitModCache do
       let(:initial_contents) { {} }
 
       it 'returns the current time' do
-        expect(cache.fetch(first_path)).to eq now
+        expect(cache.fetch('path/to/file1')).to eq now
       end
     end
 
-    context 'when the file path is absent' do
+    context 'when the file path is not found in the cache' do
       let(:initial_contents) do
-        {shas_by_file: {'foo' => 'bar'}, dates_by_sha: {'baz' => 'qux'}}
+        {
+            shas_by_file: {'foo/bar' => 'bang'},
+            dates_by_sha: {'baz/qux' => 'boo'}
+        }
       end
 
       it 'returns the current time' do
