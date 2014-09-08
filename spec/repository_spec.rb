@@ -266,11 +266,13 @@ module Bookbinder
       context 'when given a non-existent tag' do
         before do
           stub_request(:get, "https://codeload.github.com/org/my-docs-repo/legacy.tar.gz/some-sha").
-              to_return(:status => 404)
+              to_return(:status => 404, :body => 'I do not exist')
         end
 
         it 'gives an informative error message' do
-          expect { repo.download_archive }.to raise_error(RuntimeError, /#{target_ref}/)
+          expect { repo.download_archive }.to raise_error(RuntimeError,
+                                                          "Could not target #{full_name} at ref #{target_ref.magenta}.\nStatus: 404, I do not exist"
+                                              )
         end
       end
     end

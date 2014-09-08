@@ -113,7 +113,7 @@ module Bookbinder
     def download_archive
       @logger.log '  downloading '.yellow + archive_link.blue
       response = Faraday.new.get(archive_link)
-      raise "Could not target #{full_name} at ref #{target_ref.magenta}" unless response.success?
+      raise "Could not target #{full_name} at ref #{target_ref.magenta}.\nStatus: #{response.status}, #{response.body}" unless response.success?
       response.body
     end
 
