@@ -16,12 +16,12 @@ class GitModCache
     pretty_latest_shas_by_file  = prettify(latest_shas_by_file, repo.directory)
     new_dates_by_sha            = repo.dates_by_sha(latest_shas_by_file, except: cached_dates_by_sha)
 
-    new_contents = {
+    @contents = {
         dates_by_sha: cached_dates_by_sha.merge(new_dates_by_sha),
         shas_by_file: cached_shas_by_file.merge(pretty_latest_shas_by_file),
     }
 
-    write_to_disk(YAML.dump new_contents)
+    write_to_disk(YAML.dump @contents)
   end
 
   def fetch(path)

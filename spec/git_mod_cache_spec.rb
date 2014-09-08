@@ -48,18 +48,40 @@ describe GitModCache do
                                   'file-2-sha' => 'file-2-date',
                               })
 
+        expected_except_2 = expected_except_1.merge(
+            'file-1-sha' => 'file-1-date',
+            'file-2-sha' => 'file-2-date'
+        )
+
+        expect(repo_2).to receive(:dates_by_sha).with(
+                              {
+                                  'path/to/file3' => 'file-3-sha',
+                                  'path/to/file4' => 'file-4-sha'
+                              },
+                              {except: expected_except_2})
+                          .and_return(
+                              'file-3-sha' => 'file-3-date',
+                              'file-4-sha' => 'file-4-date'
+                          )
+
         final_contents = {
             shas_by_file: initial_contents[:shas_by_file].merge(
                 'fake-org/fake-repo-1/path/to/file1' => 'file-1-sha',
                 'fake-org/fake-repo-1/path/to/file2' => 'file-2-sha',
+
+                'fake-org/fake-repo-2/path/to/file3' => 'file-3-sha',
+                'fake-org/fake-repo-2/path/to/file4' => 'file-4-sha'
             ),
             dates_by_sha: initial_contents[:dates_by_sha].merge(
                 'file-1-sha' => 'file-1-date',
                 'file-2-sha' => 'file-2-date',
+                'file-3-sha' => 'file-3-date',
+                'file-4-sha' => 'file-4-date',
             )
         }
 
         cache.update_from repo_1
+        cache.update_from repo_2
 
         contents_on_disk = YAML.load_file(cachefile)
         expect(contents_on_disk).to eq final_contents
