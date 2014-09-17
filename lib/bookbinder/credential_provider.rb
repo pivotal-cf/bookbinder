@@ -1,38 +1,19 @@
-require 'rubygems/package'
-require 'zlib'
+require 'yaml'
+require 'tempfile'
 
 class CredentialProvider
-  def initialize(logger, repository)
+  def initialize(logger, repository, git_accessor = Git)
     @logger = logger
     @repository = repository
+    @git_accessor = git_accessor
   end
 
   def credentials
-    @logger.log 'Processing ' + @repository.full_name.cyan
-    untar tarball
-  end
-
-  private
-
-  def tarball
-    @tarball ||= @repository.download_archive
-  end
-
-  def untar(tarball)
-    z = Zlib::GzipReader.new(StringIO.new(tarball))
-    unzipped = StringIO.new(z.read)
-
-    our_yaml = ''
-    Gem::Package::TarReader.new unzipped do |tar|
-      tar.each do |file|
-        if file.full_name.match('credentials.yml')
-          our_yaml = YAML.load file.read
-        end
-      end
+    @logger.log "Processing #{@repository.full_name.cyan}"
+    Dir.mktmpdir do |destination_dir|
+      @repository.copy_from_remote(destination_dir, @git_accessor)
+      cred_file_yaml = File.join(destination_dir, @repository.short_name, 'credentials.yml')
+      YAML.load_file(cred_file_yaml)
     end
-
-    z.close
-
-    our_yaml
   end
 end

@@ -5,7 +5,7 @@ module Bookbinder
   describe GitFileWalker do
     it 'returns the most recent commit for every file' do
       tempdir = Dir.mktmpdir('git-walker-integration')
-      git_object = Git.clone('git@github.com:Duckburg/scrooge.git', tempdir)
+      git_object = Git.clone('https://github.com/Duckburg/scrooge.git', tempdir)
       git_object.checkout('54ef8f581b3542cbbca4219d7c69bf3d9831cdbe')
       file_walker = GitFileWalker.new(git_object)
       file_shas = file_walker.shas_by_file

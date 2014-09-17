@@ -6,12 +6,7 @@ module Bookbinder
       let(:repo_name) { 'my-docs-org/code-example-repo' }
       let(:logger) { NilLogger.new }
       let(:git_client) { GitClient.new(logger) }
-      let(:code_example) { CodeExample.get_instance(logger, section_hash: {'repository' => {'name' => repo_name}}) }
-
-      before do
-        stub_github_for git_client, repo_name
-        allow(GitClient).to receive(:new).and_return(git_client)
-      end
+      let(:code_example) { CodeExample.get_instance(logger, section_hash: {'repository' => {'name' => repo_name}}, git_accessor: SpecGitAccessor) }
 
       it 'produces a string for the given excerpt_marker' do
         code_snippet = <<-RUBY

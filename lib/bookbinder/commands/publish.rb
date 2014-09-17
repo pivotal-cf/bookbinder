@@ -7,12 +7,12 @@ module Bookbinder
         end
       end
 
-      def run(cli_arguments)
+      def run(cli_arguments, git_accessor=Git)
         raise Cli::InvalidArguments unless arguments_are_valid?(cli_arguments)
+        @git_accessor = git_accessor
 
         target_tag    = (cli_arguments[1..-1] - ['--verbose']).pop
         final_app_dir = File.absolute_path('final_app')
-
         bind_book(cli_arguments, final_app_dir, target_tag)
       end
 
@@ -34,8 +34,8 @@ module Bookbinder
         # TODO: general solution to turn all string keys to symbols
         verbosity = cli_args.include?('--verbose')
         location = cli_args[0]
-
-        success = Publisher.new(@logger).publish publication_arguments(verbosity, location, pdf_options, target_tag, final_app_dir)
+        pub_args = publication_arguments(verbosity, location, pdf_options, target_tag, final_app_dir, @git_accessor)
+        success = Publisher.new(@logger).publish(pub_args)
         success ? 0 : 1
       end
 
@@ -59,25 +59,26 @@ module Bookbinder
         @config = Configuration.new(@logger, hash)
       end
 
-      def publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir)
+      def publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir, git_accessor)
         local_repo_dir = location == 'local' ? File.absolute_path('..') : nil
         git_mod_cache = GitModCache.new(File.absolute_path('file_modification_dates'), location=='local')
 
         arguments = {
             sections: config.sections,
             output_dir: File.absolute_path('output'),
-            master_middleman_dir: layout_repo_path(local_repo_dir),
+            master_middleman_dir: layout_repo_path(local_repo_dir, git_accessor),
             final_app_dir: final_app_dir,
             pdf: pdf_hash,
             verbose: verbosity,
             pdf_index: config.pdf_index,
             local_repo_dir: local_repo_dir,
             file_cache: git_mod_cache,
-            book_repo: config.book_repo
+            book_repo: config.book_repo,
+            git_accessor: git_accessor
         }
 
         if config.has_option?('versions') && location != 'local'
-          config.versions.each { |version| arguments[:sections].concat sections_from version }
+          config.versions.each { |version| arguments[:sections].concat sections_from version, git_accessor }
           arguments.merge!(versions: config.versions)
         end
 
@@ -87,8 +88,8 @@ module Bookbinder
         arguments
       end
 
-      def sections_from(version)
-        config_file = File.join book_checkout(version), 'config.yml'
+      def sections_from(version, git_accessor)
+        config_file = File.join book_checkout(version, git_accessor), 'config.yml'
         attrs       = YAML.load(File.read(config_file))['sections']
         raise VersionUnsupportedError.new(version) if attrs.nil?
 
@@ -99,22 +100,26 @@ module Bookbinder
         end
       end
 
-      def book_checkout(ref)
-        temp_workspace = Dir.mktmpdir
-        book = Book.from_remote(logger: @logger, full_name: config.book_repo,
-                                destination_dir: temp_workspace, ref: ref)
+      def book_checkout(ref, git_accessor=Git)
+        temp_workspace = Dir.mktmpdir('book_checkout')
+        book = Book.from_remote(logger: @logger,
+                                full_name: config.book_repo,
+                                destination_dir: temp_workspace,
+                                ref: ref,
+                                git_accessor: git_accessor,
+                               )
 
         File.join temp_workspace, book.directory
       end
 
-      def layout_repo_path(local_repo_dir)
+      def layout_repo_path(local_repo_dir, git_accessor)
         if config.has_option?('layout_repo')
           if local_repo_dir
             File.join(local_repo_dir, config.layout_repo.split('/').last)
           else
             section = {'repository' => {'name' => config.layout_repo}}
             destination_dir = Dir.mktmpdir
-            repository =  Repository.build_from_remote(@logger, section, destination_dir, 'master')
+            repository =  Repository.build_from_remote(@logger, section, destination_dir, 'master', git_accessor)
             if repository
               File.join(destination_dir, repository.directory)
             else
@@ -128,7 +133,6 @@ module Bookbinder
 
       def arguments_are_valid?(arguments)
         return false unless arguments.any?
-
         verbose           = arguments[1] && arguments[1..-1].include?('--verbose')
         tag_provided      = arguments[1] && (arguments[1..-1] - ['--verbose']).any?
         nothing_special   = arguments[1..-1].empty?

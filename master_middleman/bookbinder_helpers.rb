@@ -16,7 +16,7 @@ module Bookbinder
 
     module HelperMethods
       def yield_for_code_snippet(from: nil, at: nil)
-        example = CodeExample.get_instance(bookbinder_logger, section_hash: {'repository' => {'name' => from}}, local_repo_dir: config[:local_repo_dir])
+        example = CodeExample.get_instance(bookbinder_logger, section_hash: {'repository' => {'name' => from}}, local_repo_dir: config[:local_repo_dir], git_accessor: config[:git_accessor])
         snippet, language = example.get_snippet_and_language_at(at)
         delimiter = '```'
 

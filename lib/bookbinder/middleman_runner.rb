@@ -29,11 +29,11 @@ module Bookbinder
       @logger = logger
     end
 
-    def run(middleman_dir, template_variables, local_repo_dir, file_modification_cache, verbose = false, repos = [], production_host=nil)
+    def run(middleman_dir, template_variables, local_repo_dir, file_modification_cache, verbose = false, repos = [], production_host=nil, git_accessor=Git)
       @logger.log "\nRunning middleman...\n\n"
 
       within(middleman_dir) do
-        invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, repos, template_variables, verbose)
+        invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, repos, template_variables, verbose, git_accessor)
       end
     end
 
@@ -49,7 +49,7 @@ module Bookbinder
       ENV['MM_ROOT']    = original_mm_root
     end
 
-    def invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, repos, template_variables, verbose)
+    def invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, repos, template_variables, verbose, git_accessor)
       builder = Middleman::Cli::Build.shared_instance(verbose)
 
       config = {
@@ -58,7 +58,8 @@ module Bookbinder
           subnav_templates: subnavs_by_dir_name(repos),
           local_repo_dir: local_repo_dir,
           production_host: production_host,
-          filecache: file_modification_cache
+          filecache: file_modification_cache,
+          git_accessor: git_accessor,
       }
 
       config.each { |k, v| builder.config[k] = v }

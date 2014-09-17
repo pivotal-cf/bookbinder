@@ -40,7 +40,9 @@ module Bookbinder
 
     describe '#yield_for_code_snippet' do
       let(:config) { {} }
-      let(:yielded_snippet) { klass.new(config).yield_for_code_snippet(from: repo, at: excerpt_mark) }
+      let(:yielded_snippet) do
+        klass.new(config).yield_for_code_snippet(from: repo, at: excerpt_mark)
+      end
       let(:markdown_snippet) do
 <<-MARKDOWN
 ```ruby
@@ -62,13 +64,7 @@ MARKDOWN
       let(:excerpt_mark) { 'complicated_function' }
 
       context 'when not local' do
-        let(:config) { {local_repo_dir: nil} }
-        let(:git_client) { GitClient.new(logger) }
-
-        before do
-          mock_github_for git_client, repo
-          allow(GitClient).to receive(:new).and_return(git_client)
-        end
+        let(:config) { {local_repo_dir: nil, git_accessor: SpecGitAccessor} }
 
         it 'returns markdown from github' do
           expect(yielded_snippet).to eq(markdown_snippet.chomp)

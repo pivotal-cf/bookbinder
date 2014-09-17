@@ -14,7 +14,7 @@ class GitModCache
 
     latest_shas_by_file         = repo.shas_by_file
     pretty_latest_shas_by_file  = prettify(latest_shas_by_file, repo.directory)
-    new_dates_by_sha            = repo.dates_by_sha(latest_shas_by_file, except: cached_dates_by_sha)
+    new_dates_by_sha            = repo.dates_by_sha(latest_shas_by_file, cached_shas: cached_dates_by_sha)
 
     @contents = {
         dates_by_sha: cached_dates_by_sha.merge(new_dates_by_sha),

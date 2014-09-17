@@ -7,7 +7,6 @@ describe GitModCache do
   subject(:cache) { GitModCache.new cachefile }
 
   let(:cachefile) { 'cache' }
-
   let(:initial_contents) do
     {
         shas_by_file: {'initial-path' => 'initial-sha'},
@@ -41,7 +40,7 @@ describe GitModCache do
                                   'path/to/file1' => 'file-1-sha',
                                   'path/to/file2' => 'file-2-sha'
                               },
-                              {except: expected_except_1})
+                              {cached_shas: expected_except_1})
                           .and_return(
                               {
                                   'file-1-sha' => 'file-1-date',
@@ -58,7 +57,7 @@ describe GitModCache do
                                   'path/to/file3' => 'file-3-sha',
                                   'path/to/file4' => 'file-4-sha'
                               },
-                              {except: expected_except_2})
+                              {cached_shas: expected_except_2})
                           .and_return(
                               'file-3-sha' => 'file-3-date',
                               'file-4-sha' => 'file-4-date'
@@ -96,7 +95,7 @@ describe GitModCache do
                                                           'path/to/file1' => 'file-1-sha',
                                                           'path/to/file2' => 'file-2-sha'
                                                       },
-                                                      {except: {}})
+                                                      {cached_shas: {}})
                           .and_return(
                               'file-1-sha' => 'file-1-date',
                               'file-2-sha' => 'file-2-date'

@@ -1,5 +1,7 @@
 require 'spec_helper'
 
+require 'bookbinder/git_file_walker'
+
 module Bookbinder
   describe Repository do
     include_context 'tmp_dirs'
@@ -11,7 +13,6 @@ module Bookbinder
     before do
       allow(GitClient).to receive(:new).and_call_original
       allow(GitClient).to receive(:new).with(logger, access_token: github_token).and_return(git_client)
-      allow(ProgressBar).to receive(:create).and_return(double(increment: nil))
     end
 
     it 'requires a full_name' do
@@ -68,42 +69,56 @@ module Bookbinder
       end
     end
 
-    describe 'copy_from_remote' do
+    describe '#copy_from_remote' do
       let(:repo_name) { 'org/my-docs-repo' }
-      let(:some_sha) { 'some-sha' }
-      let(:repo) { Repository.new(logger: logger, full_name: repo_name, target_ref: some_sha, github_token: 'foo') }
+      let(:target_ref) { 'some-sha' }
+      let(:repo) { Repository.new(logger: logger, full_name: repo_name, target_ref: target_ref, github_token: 'foo') }
       let(:destination_dir) { tmp_subdir('destination') }
-      let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
-      let(:git_client) { GitClient.new(logger) }
-
-      before do
-        stub_github_for git_client, repo_name, some_sha
-        allow(GitClient).to receive(:new).and_return git_client
-      end
+      let(:git_base_object) { double Git::Base }
 
       it 'retrieves the repo from github' do
+        expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
+                                            File.basename(repo_name),
+                                            path: destination_dir).and_return(git_base_object)
+        expect(git_base_object).to receive(:checkout).with(target_ref)
         repo.copy_from_remote(destination_dir)
-        expect(File.exist? File.join(destination_dir, 'my-docs-repo', 'index.html.md')).to be_true
       end
 
-      it 'returns true' do
-        expect(repo.copy_from_remote(destination_dir)).to be_true
+      context 'when the target ref is master' do
+        let(:target_ref) { 'master' }
+        it 'does not check out a ref' do
+          expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
+                                             File.basename(repo_name),
+                                             path: destination_dir).and_return(git_base_object)
+          expect(git_base_object).to_not receive(:checkout)
+          repo.copy_from_remote(destination_dir)
+        end
+      end
+
+      context 'when the target ref is not master' do
+        it 'checks out a ref' do
+          expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
+                                             File.basename(repo_name),
+                                             path: destination_dir).and_return(git_base_object)
+          expect(git_base_object).to receive(:checkout).with(target_ref)
+          repo.copy_from_remote(destination_dir)
+        end
+      end
+
+      it 'returns the location of the copied directory' do
+        expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
+                                           File.basename(repo_name),
+                                           path: destination_dir).and_return(git_base_object)
+        expect(git_base_object).to receive(:checkout).with(target_ref)
+        expect(repo.copy_from_remote(destination_dir)).to eq(destination_dir)
       end
 
       it 'sets copied? to true' do
+        expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
+                                           File.basename(repo_name),
+                                           path: destination_dir).and_return(git_base_object)
+        expect(git_base_object).to receive(:checkout).with(target_ref)
         expect { repo.copy_from_remote(destination_dir) }.to change { repo.copied? }.to(true)
-      end
-
-      context 'when the docs directory already exists in the destination' do
-        before do
-          directory = File.join(destination_dir, 'my-docs-repo')
-          FileUtils.mkdir directory
-        end
-
-        it 'moves the contents of the source directory to the top level of the destination' do
-          repo.copy_from_remote(destination_dir)
-          expect(File.exist? File.join(destination_dir, 'my-docs-repo', 'index.html.md')).to be_true
-        end
       end
     end
 
@@ -112,10 +127,8 @@ module Bookbinder
       let(:target_ref) { 'some-sha' }
       let(:local_repo_dir) { tmp_subdir 'local_repo_dir' }
       let(:repo) { Repository.new(logger: logger, full_name: full_name, target_ref: target_ref, local_repo_dir: local_repo_dir) }
-
       let(:destination_dir) { tmp_subdir('destination') }
       let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
-
       let(:copy_to) { repo.copy_from_local destination_dir }
 
       context 'and the local repo is there' do
@@ -235,69 +248,67 @@ module Bookbinder
       end
     end
 
-    describe '#download_archive' do
+    describe '#copy_from_remote' do
       let(:full_name) { 'org/my-docs-repo' }
-      let(:existing_ref) { 'some-sha' }
-      let(:target_ref) { existing_ref }
-      let(:archive_head_url) { "https://api.github.com/repos/#{full_name}/tarball/#{target_ref}" }
-      let(:tar_url) { "https://codeload.github.com/#{full_name}/legacy.tar.gz/#{target_ref}" }
-
-      let(:repo) { Repository.new(logger: logger, github_token: github_token, full_name: full_name, target_ref: target_ref) }
-
-      before do
-        stub_refs_for_repo(full_name, [existing_ref])
-        stub_request(:head, archive_head_url).to_return(status: 302, body: "", headers: {'Location' => tar_url})
+      let(:target_ref) { 'arbitrary-reference' }
+      let(:made_up_dir) { 'this/doesnt/exist' }
+      let(:git_base_object) { double Git::Base }
+      let(:repo) do
+        Repository.new(logger: logger, github_token: github_token, full_name: full_name, target_ref: target_ref)
       end
 
-      context 'when the repo and ref is visible' do
-        let(:github_archive) { "my_archive".bytes }
-
-        before do
-          stub_request(:get, tar_url).to_return(
-              body: github_archive, headers: {'Content-Type' => 'application/x-gzip'}
-          )
-        end
-
-        it 'gives us the archive from github for the repository' do
-          expect(repo.download_archive).to eq(github_archive)
+      context 'when no special Git accessor is specified' do
+        it 'clones the repo into a specified folder' do
+          expect(Git).to receive(:clone).with("git@github.com:#{full_name}",
+                                              File.basename(full_name),
+                                              path: made_up_dir).and_return(git_base_object)
+          expect(git_base_object).to receive(:checkout).with(target_ref)
+          repo.copy_from_remote(made_up_dir)
         end
       end
 
-      context 'when given a non-existent tag' do
+      context 'when using a special Git accessor' do
         before do
-          stub_request(:get, "https://codeload.github.com/org/my-docs-repo/legacy.tar.gz/some-sha").
-              to_return(:status => 404, :body => 'I do not exist')
+          class MyGitClass
+            def self.clone(arg1, arg2, path: nil)
+              #do nothing
+            end
+          end
         end
 
-        it 'gives an informative error message' do
-          expect { repo.download_archive }.to raise_error(RuntimeError,
-                                                          "Could not target #{full_name} at ref #{target_ref.magenta}.\nStatus: 404, I do not exist"
-                                              )
+        it 'clones using the specified accessor' do
+          expect(MyGitClass).to receive(:clone).with("git@github.com:#{full_name}",
+                                                     File.basename(full_name),
+                                                     path: made_up_dir).and_return(git_base_object)
+          expect(git_base_object).to receive(:checkout).with(target_ref)
+          repo.copy_from_remote(made_up_dir, MyGitClass)
         end
       end
     end
 
     describe '#shas_by_file' do
-      let(:target_ref) { 'arbitrary-reference' }
+      subject(:repo) do
+        Repository.new(logger: logger, github_token: github_token, full_name: full_name)
+      end
+
       let(:full_name) { 'org/my-docs-repo' }
-      let(:repo) do
-        Repository.new(logger: logger, github_token: github_token, full_name: full_name, target_ref: target_ref)
-      end
-      let(:tree) { {tree: [{path: 'fake-path/file.mp3', sha: 'fake-sha'}]} }
-      let(:git_client) { double(:octokit) }
+      let(:git_accessor) { double(Git) }
+      let(:destination_dir) { tmpdir }
+      let(:git_object) { double(Git::Base) }
+      let(:git_file_walker) { double(GitFileWalker) }
+      let(:files_by_sha) { {'file1' => 'sha1'} }
 
-      before do
-        allow(GitClient).to receive(:new).and_return git_client
-      end
+      it 'uses GitFileWalker to retrieve the hash' do
+        allow(git_accessor).to receive(:clone).with(
+                                   "git@github.com:#{full_name}",
+                                   'my-docs-repo',
+                                   path: destination_dir
+                               ).and_return git_object
 
-      it 'returns a hash' do
-        allow(git_client).to receive(:tree).and_return tree
-        expect(repo.shas_by_file).to eq({'fake-path/file.mp3' => 'fake-sha'})
-      end
-
-      it 'recursively searches the entire tree at teh target ref' do
-        expect(git_client).to receive(:tree).with(full_name, target_ref, recursive: true).and_return tree
-        repo.shas_by_file
+        expect(GitFileWalker).to receive(:new).with(git_object).and_return(git_file_walker)
+        expect(git_file_walker).to receive(:shas_by_file).and_return(files_by_sha)
+        repo.copy_from_remote(destination_dir, git_accessor)
+        expect(repo.shas_by_file).to eq(files_by_sha)
       end
     end
 
@@ -308,25 +319,38 @@ module Bookbinder
 
       let(:full_name) { 'org/my-docs-repo' }
       let(:target_ref) { 'arbitrary-reference' }
-      let(:git_client) { double(:octokit) }
+      let(:made_up_dir) { 'this/doesnt/exist' }
+
+      let(:shas) { ['cached-sha-1', 'cached-sha-2'] }
       let(:shas_by_file) { {
           'file-path1' => 'cached-sha-1',
           'file-path2' => 'cached-sha-2'
-      }
-      }
+      } }
+
+      let(:git_object) { double(Git::Base) }
+      let(:log1) { double(Git::Log) }
+      let(:log2) { double(Git::Log) }
+      let(:logs) { [log1, log2] }
 
       before do
-        allow(GitClient).to receive(:new).and_return git_client
+        allow(Git).to receive(:clone).with("git@github.com:#{full_name}",
+                                           File.basename(full_name),
+                                           anything)
+                      .and_return(git_object)
+        allow(git_object).to receive(:log).and_return(logs)
+        allow(logs).to receive(:map).and_return(shas)
+        allow(shas).to receive(:include?).and_return(true)
+        allow(git_object).to receive(:checkout).with(target_ref)
+        repo.copy_from_remote(made_up_dir)
       end
 
       context 'when a sha is cached' do
         let(:modified_date) { rand 1000 }
         let(:cached_shas) { {'cached-sha-1' => modified_date} }
 
-
         it 'does not return it in the result' do
-          allow(git_client).to receive(:last_modified_date_of).with("org/my-docs-repo", "arbitrary-reference", "file-path2").and_return(modified_date)
-          expect(repo.dates_by_sha(shas_by_file, except: cached_shas)).to eq('cached-sha-2' => modified_date)
+          allow(log2).to receive(:date).and_return(modified_date)
+          expect(repo.dates_by_sha(shas_by_file, cached_shas: cached_shas)).to eq('cached-sha-2' => modified_date)
         end
       end
 
@@ -336,10 +360,9 @@ module Bookbinder
         let(:cached_shas) { {} }
 
         it 'returns all results' do
-          expect(git_client).to receive(:last_modified_date_of).with("org/my-docs-repo", "arbitrary-reference", "file-path1").and_return(earlier)
-          expect(git_client).to receive(:last_modified_date_of).with("org/my-docs-repo", "arbitrary-reference", "file-path2").and_return(later)
-
-          expect(repo.dates_by_sha(shas_by_file, except: cached_shas)).to eq({'cached-sha-1' => earlier,'cached-sha-2' => later})
+          allow(log1).to receive(:date).and_return(earlier)
+          allow(log2).to receive(:date).and_return(later)
+          expect(repo.dates_by_sha(shas_by_file, cached_shas: cached_shas)).to eq({'cached-sha-1' => earlier, 'cached-sha-2' => later})
         end
       end
     end

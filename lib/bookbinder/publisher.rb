@@ -14,17 +14,16 @@ module Bookbinder
       workspace_dir = File.join master_dir, 'source'
       build_directory = File.join master_dir, 'build/.'
       public_directory = File.join final_app_dir, 'public'
+      git_accessor = options.fetch(:git_accessor, Git)
 
       @versions = options.fetch(:versions, [])
       @book_repo = options[:book_repo]
-      prepare_directories final_app_dir, intermediate_directory, workspace_dir, master_middleman_dir, master_dir
+      prepare_directories final_app_dir, intermediate_directory, workspace_dir, master_middleman_dir, master_dir, git_accessor
       FileUtils.cp 'redirects.rb', final_app_dir if File.exists?('redirects.rb')
 
       file_modification_cache = options[:file_cache]
-
       sections = gather_sections(workspace_dir, options, file_modification_cache)
-
-      generate_site(options, master_dir, sections, build_directory, public_directory, file_modification_cache)
+      generate_site(options, master_dir, sections, build_directory, public_directory, file_modification_cache, git_accessor)
       generate_sitemap(final_app_dir, options, spider)
 
       @logger.log "Bookbinder bound your book into #{final_app_dir.green}"
@@ -39,27 +38,31 @@ module Bookbinder
       server_director.use_server { |port| spider.generate_sitemap options.fetch(:host_for_sitemap), port }
     end
 
-    def generate_site(options, middleman_dir, sections, build_dir, public_dir, file_modification_cache)
+    def generate_site(options, middleman_dir, sections, build_dir, public_dir, file_modification_cache, git_accessor)
       MiddlemanRunner.new(@logger).run(middleman_dir,
                                        options.fetch(:template_variables, {}),
                                        options[:local_repo_dir], file_modification_cache,
-                                       options[:verbose], sections, options[:host_for_sitemap]
+                                       options[:verbose], sections, options[:host_for_sitemap],
+                                       git_accessor,
       )
       FileUtils.cp_r build_dir, public_dir
     end
 
     def gather_sections(workspace, options, file_modification_cache)
-      options.fetch(:sections).map do |attributes|
+
+      section_data = options.fetch(:sections)
+      section_data.map do |attributes|
         section = Section.get_instance(@logger, section_hash: attributes, destination_dir: workspace,
                                        local_repo_dir: options[:local_repo_dir],
-                                       target_tag: options[:target_tag]
+                                       target_tag: options[:target_tag],
+                                       git_accessor: options.fetch(:git_accessor, Git)
         )
         section.write_file_modification_dates_to file_modification_cache
         section
       end
     end
 
-    def prepare_directories(final_app, middleman_scratch_space, middleman_source, master_middleman_dir, middleman_dir)
+    def prepare_directories(final_app, middleman_scratch_space, middleman_source, master_middleman_dir, middleman_dir, git_accessor)
       forget_sections(middleman_scratch_space)
       FileUtils.rm_rf File.join final_app, '.'
       FileUtils.mkdir_p middleman_scratch_space
@@ -70,17 +73,17 @@ module Bookbinder
       copy_directory_from_gem 'master_middleman', middleman_dir
       FileUtils.cp_r File.join(master_middleman_dir, '.'), middleman_dir
 
-      copy_version_master_middleman(middleman_source)
+      copy_version_master_middleman(middleman_source, git_accessor)
     end
 
     # Copy the index file from each version into the version's directory. Because version
     # subdirectories are sections, this is the only way they get content from their master
     # middleman directory.
-    def copy_version_master_middleman(dest_dir)
+    def copy_version_master_middleman(dest_dir, git_accessor)
       @versions.each do |version|
-        Dir.mktmpdir do |tmpdir|
+        Dir.mktmpdir(version) do |tmpdir|
           book = Book.from_remote(logger: @logger, full_name: @book_repo,
-                                  destination_dir: tmpdir, ref: version)
+                                  destination_dir: tmpdir, ref: version, git_accessor: git_accessor)
           index_source_dir = File.join(tmpdir, book.directory, 'master_middleman', 'source')
           index_dest_dir = File.join(dest_dir, version)
           FileUtils.mkdir_p(index_dest_dir)

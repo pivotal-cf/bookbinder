@@ -32,20 +32,21 @@ module Bookbinder
           some_sha = 'some-sha'
           some_other_sha = 'some-other-sha'
 
-          stub_github_commits(name: some_repo, sha: some_sha)
-          stub_github_commits(name: some_other_repo, sha: some_other_sha)
+          expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{some_repo}",
+                                              "pretty_path",
+                                              anything).and_call_original
 
-          stub_github_for(git_client, some_repo, some_sha)
-          stub_github_for(git_client, some_other_repo, some_other_sha)
-          allow(GitClient).to receive(:new).and_return(git_client)
-
+          expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{some_other_repo}",
+                                             File.basename(some_other_repo),
+                                             anything).and_call_original
           sections = [
               {'repository' => {'name' => some_repo, 'ref' => some_sha}, 'directory' => 'pretty_path'},
               {'repository' => {'name' => some_other_repo, 'ref' => some_other_sha}}
           ]
 
           silence_io_streams do
-            publisher.publish sections: sections, output_dir: output_dir,
+            publisher.publish sections: sections,
+                              output_dir: output_dir,
                               master_middleman_dir: non_broken_master_middleman_dir,
                               final_app_dir: final_app_dir,
                               host_for_sitemap: 'example.com',
@@ -54,7 +55,8 @@ module Bookbinder
                                   filename: 'DocGuide.pdf',
                                   header: 'pretty_path/header.html'
                               },
-                              file_cache: cache
+                              file_cache: cache,
+                              git_accessor: SpecGitAccessor
           end
 
           index_html = File.read File.join(final_app_dir, 'public', 'pretty_path', 'index.html')
@@ -76,7 +78,6 @@ module Bookbinder
                 file_cache: cache
             }
           end
-          before { stub_github_commits(name: publication_arguments[:sections][0]['repository']['name']) }
 
           it 'it can find repos locally rather than going to github' do
             publisher.publish publication_arguments
@@ -113,7 +114,7 @@ module Bookbinder
           # tests our SubmoduleAwareAssets middleman extension, which is hard to test in isolation :(
           sections = [{'repository' => {'name' => 'org/dogs-repo'}}]
 
-          stub_github_commits(name: sections[0]['repository']['name'])
+          #stub_github_commits(name: sections[0]['repository']['name'])
 
           no_broken_links = publisher.publish sections: sections,
                                               output_dir: output_dir,
@@ -154,16 +155,18 @@ module Bookbinder
                 master_middleman_dir: middleman_dir,
                 host_for_sitemap: 'example.com',
                 sections: [{'repository' => {'name' => section_repo_name}}],
-                file_cache: cache
+                file_cache: cache,
+                git_accessor: SpecGitAccessor
             }
           end
 
           it 'applies the syntax highlighting CSS' do
-            stub_github_for git_client, section_repo_name
-            stub_github_for git_client, code_repo
-            stub_github_commits(name: publication_arguments[:sections][0]['repository']['name'])
-
-            allow(GitClient).to receive(:new).and_return(git_client)
+            expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{section_repo_name}",
+                                                            File.basename(section_repo_name),
+                                                            anything).and_call_original
+            expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{code_repo}",
+                                                            File.basename(code_repo),
+                                                            anything).and_call_original
 
             publisher.publish(publication_arguments)
             index_html = File.read(File.join(final_app_dir, 'public', 'index.html'))
@@ -190,18 +193,21 @@ module Bookbinder
           end
 
           it 'makes only one request per code example repository' do
-            stub_github_commits(name: publication_arguments[:sections][0]['repository']['name'])
-            stub_github_for git_client, section_repo_name
-            mock_github_for git_client, code_repo
-            allow(GitClient).to receive(:new).and_return git_client
+            expect(SpecGitAccessor).to receive(:clone).with("git@github.com:org/dogs-repo",
+                                                            "dogs-repo",
+                                                            anything).and_call_original
+            expect(SpecGitAccessor).to receive(:clone).with("git@github.com:cloudfoundry/code-example-repo",
+                                                            "code-example-repo",
+                                                            anything).and_call_original
 
+            publication_arguments[:verbose] = true
             publisher.publish publication_arguments
           end
         end
 
         it 'generates a sitemap' do
           sections = [{'repository' => {'name' => 'org/dogs-repo'}}]
-          stub_github_commits(name: sections[0]['repository']['name'])
+          #stub_github_commits(name: sections[0]['repository']['name'])
 
           publisher.publish sections: sections,
                             output_dir: output_dir,
@@ -242,8 +248,8 @@ module Bookbinder
             some_repo = 'my-docs-org/my-docs-repo'
             some_sha = 'some-sha'
 
-            stub_github_commits(name: some_repo, sha: some_sha)
-            stub_github_for(git_client, some_repo, some_sha)
+            # stub_github_commits(name: some_repo, sha: some_sha)
+            # stub_github_for(git_client, some_repo, some_sha)
             allow(GitClient).to receive(:new).and_return(git_client)
 
             sections = [
@@ -345,7 +351,8 @@ module Bookbinder
             pdf: pdf_config,
             local_repo_dir: local_repo_dir,
             spider: spider,
-            file_cache: cache
+            file_cache: cache,
+            git_accessor: SpecGitAccessor
         } }
 
         def publish
@@ -391,55 +398,65 @@ module Bookbinder
 
         describe '#publish' do
           context 'when publishing older versions under subdirectories' do
-
-            let(:v1_tar) do
-              RepoFixture.tarball('book', 'v1') do |dir|
-                index = File.join(dir, 'master_middleman', 'source', 'index.html.md')
-                File.write(index, 'this is v1')
-              end
-            end
-
-            let(:v2_tar) do
-              RepoFixture.tarball('book', 'v2') do |dir|
-                index = File.join(dir, 'master_middleman', 'source', 'index.html.md')
-                File.write(index, 'this is v2')
-              end
-            end
-
-            let(:v3_tar) do
-              RepoFixture.tarball('book', 'v3') do |dir|
-                index = File.join(dir, 'master_middleman', 'source', 'index.html.md')
-                File.write(index, 'this is v3')
-              end
-            end
-
             before do
               publish_args.merge!(
                   book_repo: 'org/book',
                   versions: %w(v1 v2 v3)
               )
-
-              allow(GitClient).to receive(:new).and_return(git_client)
-
-              stub_github_for(git_client, 'org/book', 'v1', v1_tar)
-              stub_github_for(git_client, 'org/book', 'v2', v2_tar)
-              stub_github_for(git_client, 'org/book', 'v3', v3_tar)
             end
 
             it 'copies the previous book version index files to the middleman source dir' do
+              tmp_dir_v1 = Dir.mktmpdir
+              tmp_dir_v2 = Dir.mktmpdir
+              tmp_dir_v3 = Dir.mktmpdir
+
+              expect(Dir).to receive(:mktmpdir).with('v1').and_yield(tmp_dir_v1)
+              expect(Dir).to receive(:mktmpdir).with('v2').and_yield(tmp_dir_v2)
+              expect(Dir).to receive(:mktmpdir).with('v3').and_yield(tmp_dir_v3)
+
+              book_v1 = double('Book', directory: 'book')
+              expect(Book).to receive(:from_remote).with(
+                                  logger: logger,
+                                  full_name: 'org/book',
+                                  destination_dir: tmp_dir_v1,
+                                  ref: 'v1',
+                                  git_accessor: SpecGitAccessor) do
+                SpecGitAccessor.clone('org/book', 'book', path: tmp_dir_v1).checkout('v1')
+              end.and_return(book_v1)
+
+              book_v2 = double('Book', directory: 'book')
+              expect(Book).to receive(:from_remote).with(
+                                  logger: logger,
+                                  full_name: 'org/book',
+                                  destination_dir: tmp_dir_v2,
+                                  ref: 'v2',
+                                  git_accessor: SpecGitAccessor) do
+                SpecGitAccessor.clone('org/book', 'book', path: tmp_dir_v2).checkout('v2')
+              end.and_return(book_v2)
+
+              book_v3 = double('Book', directory: 'book')
+              expect(Book).to receive(:from_remote).with(
+                                  logger: logger,
+                                  full_name: 'org/book',
+                                  destination_dir: tmp_dir_v3,
+                                  ref: 'v3',
+                                  git_accessor: SpecGitAccessor) do
+                SpecGitAccessor.clone('org/book', 'book', path: tmp_dir_v3).checkout('v3')
+              end.and_return(book_v3)
+
               publish
 
               v1_index = File.read(
                   File.join(output_dir, 'master_middleman', 'source', 'v1', 'index.html.md'))
-              expect(v1_index).to eq 'this is v1'
+              expect(v1_index).to eq "this is v1\n"
 
               v2_index = File.read(
                   File.join(output_dir, 'master_middleman', 'source', 'v2', 'index.html.md'))
-              expect(v2_index).to eq 'this is v2'
+              expect(v2_index).to eq "this is v2\n"
 
               v3_index = File.read(
                   File.join(output_dir, 'master_middleman', 'source', 'v3', 'index.html.md'))
-              expect(v3_index).to eq 'this is v3'
+              expect(v3_index).to eq "this is v3\n"
             end
           end
         end

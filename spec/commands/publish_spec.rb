@@ -10,28 +10,36 @@ module Bookbinder
 
     let(:sections) do
       [
-          {'repository' => {'name' => 'fantastic/dogs-repo', 'ref' => 'dog-sha'}, 'directory' => 'dogs', 'subnav_template' => 'dogs'},
-          {'repository' => {'name' => 'fantastic/my-docs-repo', 'ref' => 'my-docs-sha'}, 'directory' => 'foods/sweet', 'subnav_template' => 'fruits'},
-          {'repository' => {'name' => 'fantastic/my-other-docs-repo', 'ref' => 'my-other-sha'}, 'directory' => 'foods/savory', 'subnav_template' => 'vegetables'}
+          {'repository' => {
+              'name' => 'fantastic/dogs-repo',
+              'ref' => 'dog-sha'},
+           'directory' => 'dogs',
+           'subnav_template' => 'dogs'},
+          {'repository' => {
+              'name' => 'fantastic/my-docs-repo',
+              'ref' => 'some-sha'},
+           'directory' => 'foods/sweet',
+           'subnav_template' => 'fruits'},
+          {'repository' => {
+              'name' => 'fantastic/my-other-docs-repo',
+              'ref' => 'some-other-sha'},
+           'directory' => 'foods/savory',
+           'subnav_template' => 'vegetables'}
       ]
     end
 
     let(:config_hash) do
-      {'sections' => sections, 'book_repo' => book, 'pdf_index' => [], 'public_host' => 'example.com'}
+      {'sections' => sections,
+       'book_repo' => book,
+       'pdf_index' => [],
+       'public_host' => 'example.com'}
     end
 
     let(:config) { Configuration.new(logger, config_hash) }
-
     let(:book) { 'fantastic/book' }
     let(:logger) { NilLogger.new }
     let(:publish_command) { Cli::Publish.new(logger, config) }
     let(:git_client) { GitClient.new(logger) }
-
-    before do
-      allow(ProgressBar).to receive(:create).and_return(double(increment: nil))
-      sections.each { |s| stub_github_commits(name: s['repository']['name']) }
-      Spider.any_instance.stub(:generate_sitemap)
-    end
 
     context 'local' do
       around do |spec|
@@ -43,7 +51,7 @@ module Bookbinder
       let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
 
       def response_for(page)
-        publish_command.run ['local']
+        publish_command.run(['local'], SpecGitAccessor)
 
         response = nil
         ServerDirector.new(logger, directory: 'final_app').use_server do |port|
@@ -56,16 +64,16 @@ module Bookbinder
 
       it 'runs idempotently' do
         silence_io_streams do
-          publish_command.run ['local'] # Run Once
+          publish_command.run(['local'], SpecGitAccessor) # Run Once
 
           expect do
-            publish_command.run ['local'] # Run twice
+            publish_command.run(['local'], SpecGitAccessor) # Run twice
           end.not_to change { File.exist? dogs_index }.from(true).to(false)
         end
       end
 
       it 'creates some static HTML' do
-        publish_command.run ['local']
+        publish_command.run(['local'], SpecGitAccessor)
 
         index_html = File.read dogs_index
         index_html.should include 'Woof'
@@ -86,58 +94,45 @@ module Bookbinder
 
         it 'passes the provided repo as master_middleman_dir' do
           fake_publisher = double(:publisher)
-          expect(Publisher).to receive(:new).and_return fake_publisher
 
+          expect(Publisher).to receive(:new).and_return fake_publisher
           expect(fake_publisher).to receive(:publish) do |args|
             expect(args[:master_middleman_dir]).to match('layout-repo')
           end
-
-          publish_command.run ['local']
+          publish_command.run(['local'], SpecGitAccessor)
         end
       end
     end
 
     context 'github' do
-
       let(:zipped_repo_url) { "https://github.com/#{book}/archive/master.tar.gz" }
 
-      before do
-        allow(git_client).to receive(:archive_link) { |repo, ref| raise "Stub #{repo} for #{ref}!" }
-        stub_github_for git_client, 'fantastic/dogs-repo', 'dog-sha'
-        stub_github_for git_client, 'fantastic/my-docs-repo', 'my-docs-sha'
-        stub_github_for git_client, 'fantastic/my-other-docs-repo', 'my-other-sha'
-        allow(GitClient).to receive(:new).and_return(git_client)
-      end
-
       it 'creates some static HTML' do
-        sections.each { |s| stub_github_commits(name: s['repository']['name'], sha: s['repository']['ref']) }
-
-        publish_command.run ['github']
+        git_mod_cache = double(GitModCache, update_from: nil)
+        allow(GitModCache).to receive(:new).and_return(git_mod_cache)
+        publish_command.run(['github'], SpecGitAccessor)
 
         index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
-        index_html.should include 'This is a Markdown Page'
+        expect(index_html).to include 'This is a Markdown Page'
       end
 
       context 'when a tag is provided' do
         let(:desired_tag) { 'foo-1.7.12' }
         let(:cli_args) { ['github', desired_tag] }
-        let(:zipped_repo_url) { "https://github.com/#{book}/archive/#{desired_tag}.tar.gz" }
-
-        before do
-          sections.each { |s| stub_github_commits(name: s['repository']['name'], sha: desired_tag) }
-
-          stub_github_for git_client, 'fantastic/dogs-repo', desired_tag
-          stub_github_for git_client, 'fantastic/my-docs-repo', desired_tag
-          stub_github_for git_client, 'fantastic/my-other-docs-repo', desired_tag
-
-          zipped_repo = RepoFixture.tarball 'book', desired_tag
-          stub_request(:get, zipped_repo_url).to_return(:body => zipped_repo, :headers => {'Content-Type' => 'application/x-gzip'})
-          stub_refs_for_repo(book, [desired_tag])
-        end
 
         it 'gets the book at that tag' do
-          mock_github_for git_client, book, desired_tag
-          publish_command.run cli_args
+          book = double('Book', directory: 'test')
+          allow(FileUtils).to receive(:chdir).with(/test$/)
+
+          expect(Book).to receive(:from_remote).with(
+                              logger: logger,
+                              full_name: 'fantastic/book',
+                              destination_dir: anything,
+                              ref: desired_tag,
+                              git_accessor: Git
+                          ).and_return(book)
+
+          publish_command.run(cli_args)
         end
 
         context 'the old config.yml lists fewer repos than the new config.yml' do
@@ -145,48 +140,44 @@ module Bookbinder
           let(:another_early_section) { 'fantastic/my-docs-repo' }
           let(:later_section) { 'fantastic/my-other-docs-repo' }
 
-          let(:zipped_book) do
-            RepoFixture.tarball('book', desired_tag) do |dir|
-              config_file = File.join(dir, 'config.yml')
-              config = YAML.load(File.read(config_file))
-              config['sections'].pop
-              File.write(config_file, config.to_yaml)
-            end
-          end
-
-          before do
-            stub_github_for git_client, book, desired_tag, zipped_book
-          end
-
           it 'calls for the old sections, but not the new sections' do
-            mock_github_for git_client, early_section, desired_tag
-            mock_github_for git_client, another_early_section, desired_tag
-            expect(git_client).not_to receive(:archive_link).with(later_section, anything)
+            book = double('Book')
 
-            publish_command.run cli_args
+            allow(Book).to receive(:from_remote).with(
+                               logger: logger,
+                               full_name: 'fantastic/book',
+                               destination_dir: anything,
+                               ref: 'foo-1.7.12',
+                               git_accessor: Git
+                           ).and_return(book)
+            allow(book).to receive(:directory).and_return('test-directory')
+            allow(FileUtils).to receive(:chdir).with(%r{/test-directory$})
+
+            publish_command.run(cli_args, SpecGitAccessor)
+
+            expect(File.read('./config.yml')).to include('dogs-repo')
+            expect(File.read('./config.yml')).to include('my-docs-repo')
+            expect(File.read('./config.yml')).to include('my-other-docs-repo')
           end
         end
       end
 
       context 'when provided a layout repo' do
         let(:config_hash) do
-          {'sections' => sections, 'book_repo' => book, 'pdf_index' => [], 'public_host' => 'example.com', 'layout_repo' => 'such-org/layout-repo'}
-        end
-
-        before do
-          mock_github_for(git_client, 'such-org/layout-repo')
-          allow(GitClient).to receive(:new).and_return(git_client)
+          {'sections' => sections,
+           'book_repo' => book,
+           'pdf_index' => [],
+           'public_host' => 'example.com',
+           'layout_repo' => 'such-org/layout-repo'}
         end
 
         it 'passes the provided repo as master_middleman_dir' do
           fake_publisher = double(:publisher)
           expect(Publisher).to receive(:new).and_return fake_publisher
-
           expect(fake_publisher).to receive(:publish) do |args|
             expect(args[:master_middleman_dir]).to match('layout-repo')
           end
-
-          publish_command.run ['github']
+          publish_command.run(['github'], SpecGitAccessor)
         end
       end
 
@@ -200,28 +191,8 @@ module Bookbinder
           end
         end
 
-        before do
-          sections.each do |s|
-            stub_github_commits(name: s['repository']['name'], sha: s['repository']['ref'])
-          end
-
-          stub_github_for(git_client, book, 'v1', book_without_third_section)
-          stub_github_for(git_client, 'fantastic/dogs-repo', 'v1')
-          stub_github_commits(name: 'fantastic/dogs-repo', sha: 'v1')
-          stub_github_for(git_client, 'fantastic/my-docs-repo', 'v1')
-          stub_github_commits(name: 'fantastic/my-docs-repo', sha: 'v1')
-
-          stub_github_for(git_client, book, 'v2')
-          stub_github_for(git_client, 'fantastic/dogs-repo', 'v2')
-          stub_github_commits(name: 'fantastic/dogs-repo', sha: 'v2')
-          stub_github_for(git_client, 'fantastic/my-docs-repo', 'v2')
-          stub_github_commits(name: 'fantastic/my-docs-repo', sha: 'v2')
-          stub_github_for(git_client, 'fantastic/my-other-docs-repo', 'v2')
-          stub_github_commits(name: 'fantastic/my-other-docs-repo', sha: 'v2')
-        end
-
         let(:versions) { %w(v1 v2) }
-
+        let(:cli_args) { ['github'] }
         let(:config_hash) do
           {
               'versions' => versions,
@@ -231,10 +202,16 @@ module Bookbinder
               'public_host' => 'example.com'
           }
         end
+        let(:config) { Configuration.new(logger, config_hash) }
+        let(:book) { 'fantastic/book' }
+        let(:logger) { NilLogger.new }
+        let(:publish_commander) { Cli::Publish.new(logger, config) }
+        let(:temp_dir) { Dir.mktmpdir }
+        let(:git_accessor_1) { SpecGitAccessor.new('dogs-repo', temp_dir) }
+        let(:git_accessor_2) { SpecGitAccessor.new('dogs-repo', temp_dir) }
 
         it 'publishes previous versions of the book down paths named for the version tag' do
-          publish_command.run ['github']
-
+          publish_commander.run(cli_args, SpecGitAccessor)
 
           index_html = File.read File.join('final_app', 'public', 'dogs', 'index.html')
           expect(index_html).to include 'images/breeds.png'
@@ -245,16 +222,13 @@ module Bookbinder
           index_html = File.read File.join('final_app', 'public', 'foods', 'savory', 'index.html')
           expect(index_html).to include 'This is another Markdown Page'
 
-
           v1_dir = File.join('final_app', 'public', 'v1')
           index_html = File.read File.join(v1_dir, 'dogs', 'index.html')
           expect(index_html).to include 'images/breeds.png'
 
           index_html = File.read File.join(v1_dir, 'foods', 'sweet', 'index.html')
           expect(index_html).to include 'This is a Markdown Page'
-
           expect(File.exist? File.join(v1_dir, 'foods', 'savory', 'index.html')).to be_false
-
 
           v2_dir = File.join('final_app', 'public', 'v2')
           index_html = File.read File.join(v2_dir, 'dogs', 'index.html')
@@ -265,28 +239,27 @@ module Bookbinder
 
           index_html = File.read File.join(v2_dir, 'foods', 'savory', 'index.html')
           expect(index_html).to include 'This is another Markdown Page'
-
         end
 
         context 'when a tag is at an API version that does not have sections' do
           let(:versions) { %w(v1) }
 
-          let(:book_without_sections) do
-            RepoFixture.tarball('book', 'v1') do |dir|
-              config_file = File.join(dir, 'config.yml')
-              config = YAML.load(File.read(config_file))
-              config.delete('sections')
-              File.write(config_file, config.to_yaml)
-            end
-          end
-
-          before do
-            stub_github_for(git_client, book, 'v1', book_without_sections)
-          end
-
           it 'raises a VersionUnsupportedError' do
+            book = double('Book')
+
+            allow(Book).to receive(:from_remote).with(
+                               logger: logger,
+                               full_name: 'fantastic/book',
+                               destination_dir: anything,
+                               ref: 'v1',
+                               git_accessor: SpecGitAccessor
+                           ).and_return(book)
+            allow(book).to receive(:directory).and_return('test-directory')
+            allow(File).to receive(:read).with(%r{/test-directory/config.yml$}).and_return(
+                               "---\nsections: ")
+
             expect {
-              publish_command.run ['github']
+              publish_command.run ['github'], SpecGitAccessor
             }.to raise_error(Cli::Publish::VersionUnsupportedError)
           end
         end
@@ -296,11 +269,11 @@ module Bookbinder
     describe 'invalid arguments' do
       it 'raises Cli::InvalidArguments' do
         expect {
-          publish_command.run ['blah', 'blah', 'whatever']
+          publish_command.run(['blah', 'blah', 'whatever'], SpecGitAccessor)
         }.to raise_error(Cli::InvalidArguments)
 
         expect {
-          publish_command.run []
+          publish_command.run([], SpecGitAccessor)
         }.to raise_error(Cli::InvalidArguments)
       end
     end
@@ -308,7 +281,6 @@ module Bookbinder
     describe 'publication arguments' do
       let(:cache) { double('GitModCache') }
       let(:fake_publisher) { double('publisher') }
-
       let(:all_these_arguments_and_such) do
         {sections: sections,
          output_dir: anything,
@@ -321,7 +293,8 @@ module Bookbinder
          host_for_sitemap: 'example.com',
          template_variables: {},
          file_cache: cache,
-         book_repo: 'fantastic/book'}
+         book_repo: 'fantastic/book',
+         git_accessor: SpecGitAccessor}
       end
 
       before do
@@ -331,7 +304,7 @@ module Bookbinder
 
       it 'are appropriate' do
         expect(fake_publisher).to receive(:publish).with all_these_arguments_and_such
-        publish_command.run ['local']
+        publish_command.run(['local'], SpecGitAccessor)
       end
     end
   end

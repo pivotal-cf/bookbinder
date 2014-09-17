@@ -1,5 +1,7 @@
 require 'ruby-progressbar'
+require 'bookbinder/git_file_walker'
 require 'bookbinder/shell_out'
+require 'git'
 
 module Bookbinder
   class Repository
@@ -7,14 +9,13 @@ module Bookbinder
 
     attr_reader :full_name, :copied_to
 
-    def self.build_from_remote(logger, section_hash, destination_dir, target_ref)
-      full_name   = section_hash.fetch('repository', {}).fetch('name')
-      target_ref  = target_ref || section_hash.fetch('repository', {})['ref']
-      directory   = section_hash['directory']
-      repository  = new(logger: logger, full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
+    def self.build_from_remote(logger, section_hash, destination_dir, target_ref, git_accessor)
+      full_name = section_hash.fetch('repository', {}).fetch('name')
+      target_ref = target_ref || section_hash.fetch('repository', {})['ref']
+      directory = section_hash['directory']
+      repository = new(logger: logger, full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
 
-      repository.copy_from_remote(destination_dir) if destination_dir
-
+      repository.copy_from_remote(destination_dir, git_accessor) if destination_dir
       repository
     end
 
@@ -55,26 +56,10 @@ module Bookbinder
       @directory || short_name
     end
 
-    def copy_from_remote(destination_dir)
-      output_dir = Dir.mktmpdir
-      archive = download_archive
-      tarball_path = File.join(output_dir, "#{short_name}.tar.gz")
-      File.open(tarball_path, 'wb') { |f| f.write(archive) }
-
-      directory_listing_before = Dir.entries output_dir
-      shell_out "tar xzf #{tarball_path} -C #{output_dir}"
-      directory_listing_after = Dir.entries output_dir
-
-      from = File.join output_dir, (directory_listing_after - directory_listing_before).first
-
-      repo_directory = File.join(destination_dir, directory)
-      FileUtils.mkdir_p repo_directory unless File.exist? repo_directory
-
-      Dir.glob(File.join(from, '*')).each do |file|
-        FileUtils.mv file, repo_directory
-      end
-
-      @copied_to = repo_directory
+    def copy_from_remote(destination_dir, git_accessor = Git)
+      @git = git_accessor.clone("git@github.com:#{full_name}", directory, path: destination_dir)
+      @git.checkout(target_ref) unless target_ref == 'master'
+      @copied_to = destination_dir
     end
 
     def copy_from_local(destination_dir)
@@ -110,25 +95,21 @@ module Bookbinder
       @logger.log '  skipping (not found) '.magenta + path_to_local_repo
     end
 
-    def download_archive
-      @logger.log '  downloading '.yellow + archive_link.blue
-      response = Faraday.new.get(archive_link)
-      raise "Could not target #{full_name} at ref #{target_ref.magenta}.\nStatus: #{response.status}, #{response.body}" unless response.success?
-      response.body
-    end
-
     def shas_by_file
-      file_tree = @github.tree(full_name, target_ref, recursive: true)[:tree]
-      stripped_file_tree = file_tree.map { |leaf| [leaf[:path], leaf[:sha]] }
-      Hash[stripped_file_tree]
+      GitFileWalker.new(@git).shas_by_file
     end
 
-    def dates_by_sha(shas_by_file, except: {})
+    def dates_by_sha(shas_by_file, cached_shas: {})
       result = {}
+      logs = @git.log
+      shas = logs.map(&:sha)
 
-      shas_by_file.each do |file, sha|
-        next if except.has_key?(sha)
-        result[sha] = @github.last_modified_date_of(full_name, target_ref, file.gsub(/#{Regexp.escape(directory)}\//, ''))
+      shas_by_file.each_value do |sha|
+        next if cached_shas.has_key?(sha)
+        sha_index = shas.index(sha)
+        if sha_index
+          result[sha] = logs[sha_index].date
+        end
       end
 
       result
@@ -142,10 +123,6 @@ module Bookbinder
 
     def path_to_local_repo
       File.join(@local_repo_dir, short_name)
-    end
-
-    def archive_link
-      @archive_link ||= @github.archive_link full_name, ref: target_ref
     end
 
     def tags
