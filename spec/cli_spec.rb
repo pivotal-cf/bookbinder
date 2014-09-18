@@ -144,6 +144,27 @@ module Bookbinder
         end
       end
 
+      context 'when config.yml has a syntax error' do
+        let(:arguments) { ['publish', 'local'] }
+        let(:config) { double File }
+        let(:file_path) { double String }
+
+        before do
+          allow(config).to receive(:read).with(file_path).and_return(config)
+          YAML.stub(:load).and_raise Psych::SyntaxError.new('context',
+                                                            1,
+                                                            2,'
+                                                            error',
+                                                            'another error',
+                                                            'some other error')
+        end
+
+        it 'should print a helpful message' do
+          expect(logger).to receive(:error).with(/There is a syntax error in your config.yml/)
+          run
+        end
+      end
+
       describe 'the configuration' do
         let(:section1) do
           {

@@ -70,7 +70,11 @@ module Bookbinder
     end
 
     def fetch_config
-      config_hash              = YAML.load(File.read('./config.yml'))
+      begin
+        config_hash              = YAML.load(File.read('./config.yml'))
+      rescue Psych::SyntaxError => e
+        raise "There is a syntax error in your config.yml: \n #{e}"
+      end
       if config_hash
         if File.exists?('./pdf_index.yml')
           config_hash['pdf_index'] = YAML.load(File.read('./pdf_index.yml'))
