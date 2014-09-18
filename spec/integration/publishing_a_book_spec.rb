@@ -11,7 +11,7 @@ describe 'generating a book' do
     File.write('./config.yml', config.to_yaml)
   end
 
-  it 'provides the production host to the ERB templates' do
+  it 'provides the production host to the ERB templates', integration: true do
     #pending 'Revisit when publishing locally no longer accesses GitHub.'
     silence_io_streams do
       `#{GEM_ROOT}/bin/bookbinder publish local`
@@ -40,7 +40,7 @@ YAML
       File.write('./config.yml', config.to_yaml)
     end
 
-    it 'uses the provided layout' do
+    it 'uses the provided layout', integration: true do
       silence_io_streams do
         `#{GEM_ROOT}/bin/bookbinder publish local`
       end
