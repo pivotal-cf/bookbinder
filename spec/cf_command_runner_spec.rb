@@ -77,7 +77,6 @@ module Bookbinder
           expect { cf.login }.to_not raise_error
         end
       end
-
     end
 
     describe '#apps' do
