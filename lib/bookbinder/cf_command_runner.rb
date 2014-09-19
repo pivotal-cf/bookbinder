@@ -81,6 +81,9 @@ class CfCommandRunner
   end
 
   def cf_binary_path
-    @cf_binary_path ||= File.join(GEM_ROOT, 'bin', `uname`.downcase.strip, 'cf')
+    # Assuming cf cli is installed correctly
+    @cf_binary_path ||= '/usr/local/bin/cf'
+    raise  "CF CLI could not be found in /usr/local/bin. Please make sure your cf cli is installed correctly." unless File.exists? @cf_binary_path
+    @cf_binary_path
   end
 end

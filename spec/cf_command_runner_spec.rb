@@ -47,6 +47,17 @@ module Bookbinder
           }.to raise_error(/Could not log in/)
         end
       end
+
+      context 'when the cf cli cannot be found' do
+        let (:cf_binary) { '/usr/local/bin/cf' }
+
+        it 'raises' do
+          File.stub(:exists?).with(cf_binary).and_return(false)
+          expect {
+            cf.login
+          }.to raise_error(/CF CLI could not be found/)
+        end
+      end
     end
 
     describe '#apps' do
