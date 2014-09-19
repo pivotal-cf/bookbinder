@@ -48,16 +48,29 @@ module Bookbinder
         end
       end
 
-      context 'when the cf cli cannot be found' do
-        let (:cf_binary) { '/usr/local/bin/cf' }
+      context 'when the cf cli is not in the path' do
+        let (:binary_path ) { '' }
 
         it 'raises' do
-          File.stub(:exists?).with(cf_binary).and_return(false)
+          CfCommandRunner.any_instance.stub(:`).and_return(binary_path)
           expect {
             cf.login
           }.to raise_error(/CF CLI could not be found/)
         end
       end
+
+      context 'when the cf cli is in the path' do
+        let (:binary_path_syscall ) { '/usr/local/bin/cf\n' }
+        let (:binary_path) { '/usr/local/bin/cf'}
+
+        it 'does not raise' do
+          CfCommandRunner.any_instance.stub(:`).and_return(binary_path_syscall)
+          allow(binary_path_syscall).to receive(:chomp!).and_return(binary_path)
+          expect(Kernel).to receive(:system).with("#{binary_path} login -u 'username' -p 'password' -a 'api.example.com' -o 'my-org' -s 'my-space'").and_return(true)
+          expect { cf.login }.to_not raise_error
+        end
+      end
+
     end
 
     describe '#apps' do

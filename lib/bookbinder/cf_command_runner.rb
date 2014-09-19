@@ -81,9 +81,8 @@ class CfCommandRunner
   end
 
   def cf_binary_path
-    # Assuming cf cli is installed correctly
-    @cf_binary_path ||= '/usr/local/bin/cf'
-    raise  "CF CLI could not be found in /usr/local/bin. Please make sure your cf cli is installed correctly." unless File.exists? @cf_binary_path
+    @cf_binary_path ||= `which cf`.chomp!
+    raise  "CF CLI could not be found in your PATH. Please make sure cf cli is in your PATH." if @cf_binary_path.nil?
     @cf_binary_path
   end
 end
