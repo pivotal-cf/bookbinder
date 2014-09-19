@@ -131,7 +131,6 @@ module Bookbinder
                               ref: desired_tag,
                               git_accessor: Git
                           ).and_return(book)
-
           publish_command.run(cli_args)
         end
 
@@ -243,7 +242,6 @@ module Bookbinder
 
         context 'when a tag is at an API version that does not have sections' do
           let(:versions) { %w(v1) }
-
           it 'raises a VersionUnsupportedError' do
             book = double('Book')
 

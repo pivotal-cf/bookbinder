@@ -15,16 +15,6 @@ module Bookbinder
                                             anything)
       end
 
-      context 'when git accessor is specified' do
-        before do
-          module AGitAccessor
-            def self.clone(something, something_else, path: nil)
-              # do nothing
-            end
-          end
-        end
-      end
-
       context 'when called more than once' do
         it 'always returns the same instance for the same arguments' do
           first_instance = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
@@ -92,10 +82,6 @@ module Bookbinder
 
 
     describe '.from_remote' do
-      # This section is testing whether the tags are available after cloning the git repo.
-      # Without cloning the repo itself, it is difficult to test whether the tags are available without stubbing each step of the way.
-      # It seems this section may not be needed, as long as we can assume cloning the repo gets the tags.
-
       context 'and github returns a 200 status code' do
         before do
           stub_request(:get, download_url).
@@ -104,7 +90,6 @@ module Bookbinder
               :body => zipped_markdown_repo,
               :headers => {'Content-Type' => 'application/x-gzip'}
           )
-          # stub_refs_for_repo repo_name, [ref]
         end
 
         let(:zipped_markdown_repo) { RepoFixture.tarball 'dogs-repo', ref }
@@ -122,26 +107,19 @@ module Bookbinder
           let(:section_hash) { {'repository' => {'name' => repo_name}} }
 
           it 'passes nil to the Repository as the ref' do
-            #expect(github_client).to receive(:archive_link).with(repo_name, ref: ref).and_return(download_url)
             expect(Repository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, Git)
             Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
           end
 
-          #it 'copies the repo from github' do
-          #  allow(github_client).to receive(:archive_link).and_return download_url
-          #  Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
-          #  expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
-          #end
+          it 'copies the repo from github' do
+            Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, git_accessor: SpecGitAccessor)
+            expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_truthy
+          end
 
           context 'and a target_tag is provided' do
             let(:target_tag) { 'oh-dot-three-dot-oh' }
 
-            before do
-              # stub_refs_for_repo repo_name, [ref, target_tag]
-            end
-
             it 'uses the tag to make requests for the archive link' do
-              #expect(github_client).to receive(:archive_link).with(repo_name, ref: target_tag).and_return(download_url)
               expect(Repository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, Git)
               Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
@@ -149,32 +127,25 @@ module Bookbinder
         end
 
         context 'when a REF is provided' do
-          let(:ref) { 'this-is-the-commit-i-want' }
+          let(:ref) { 'foo-1.7.12' }
           let(:section_hash) { {'repository' => {'name' => repo_name, 'ref' => ref}} }
 
           it 'uses the provided REF to make requests for the archive link' do
-            #expect(github_client).to receive(:archive_link).with(repo_name, ref: ref).and_return download_url
             expect(Repository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, Git)
             Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
           end
 
-          #it 'copies the repo from github' do
-            #allow(github_client).to receive(:archive_link).and_return download_url
-            #Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
-            #expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
-          #end
+          it 'copies the repo from github' do
+            Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, git_accessor: SpecGitAccessor)
+            expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_truthy
+          end
 
           context 'and a target_tag is provided' do
             let(:target_tag) { 'oh-dot-three-dot-oh' }
 
-            before do
-              # stub_refs_for_repo repo_name, [ref, target_tag]
-            end
-
             it 'uses the tag to make requests for the archive link' do
-              git_accessor = double('Git')
-              expect(Repository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, git_accessor)
-              Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag, git_accessor: git_accessor)
+              expect(Repository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, Git)
+              Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
           end
         end
@@ -196,7 +167,7 @@ module Bookbinder
         Section.get_instance(logger, section_hash: {'repository' => {'name' => 'crazy_family_of_mine/' + repo_name}},
                              local_repo_dir: local_repo_dir,
                              destination_dir: destination_dir)
-        expect(File.exist? File.join(destination_dir, repo_name, 'my_aunties_goat.txt')).to be_true
+        expect(File.exist? File.join(destination_dir, repo_name, 'my_aunties_goat.txt')).to be_truthy
       end
     end
 

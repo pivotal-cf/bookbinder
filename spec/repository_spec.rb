@@ -138,12 +138,12 @@ module Bookbinder
         end
 
         it 'returns true' do
-          expect(copy_to).to be_true
+          expect(copy_to).to be_truthy
         end
 
         it 'copies the repo' do
           copy_to
-          expect(File.exist? File.join(destination_dir, 'my-docs-repo', 'my_aunties_goat.txt')).to be_true
+          expect(File.exist? File.join(destination_dir, 'my-docs-repo', 'my_aunties_goat.txt')).to be_truthy
         end
 
         it 'sets copied? to true' do
@@ -153,10 +153,10 @@ module Bookbinder
 
       context 'and the local repo is not there' do
         before do
-          expect(File.exist? repo_dir).to be_false
+          expect(File.exist? repo_dir).to be_falsey
         end
         it 'returns false' do
-          expect(copy_to).to be_false
+          expect(copy_to).to be_falsey
         end
 
         it 'does not change copied?' do
@@ -299,7 +299,7 @@ module Bookbinder
       let(:files_by_sha) { {'file1' => 'sha1'} }
 
       it 'uses GitFileWalker to retrieve the hash' do
-        allow(git_accessor).to receive(:clone).with(
+        expect(git_accessor).to receive(:clone).with(
                                    "git@github.com:#{full_name}",
                                    'my-docs-repo',
                                    path: destination_dir

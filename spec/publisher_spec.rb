@@ -91,7 +91,6 @@ module Bookbinder
 
             context 'and the code repo is present' do
               it 'can find code example repos locally rather than going to github' do
-                #pending 'The next feature will be to prevent github access during \'publish local\' for the commit tree, so this test will be valid.'
                 publisher.publish publication_arguments
                 expect(WebMock).not_to have_requested(:any, /.*git.*/)
               end
@@ -111,11 +110,7 @@ module Bookbinder
         end
 
         it 'generates non-broken links appropriately' do
-          # tests our SubmoduleAwareAssets middleman extension, which is hard to test in isolation :(
           sections = [{'repository' => {'name' => 'org/dogs-repo'}}]
-
-          #stub_github_commits(name: sections[0]['repository']['name'])
-
           no_broken_links = publisher.publish sections: sections,
                                               output_dir: output_dir,
                                               master_middleman_dir: dogs_master_middleman_dir,
@@ -207,7 +202,6 @@ module Bookbinder
 
         it 'generates a sitemap' do
           sections = [{'repository' => {'name' => 'org/dogs-repo'}}]
-          #stub_github_commits(name: sections[0]['repository']['name'])
 
           publisher.publish sections: sections,
                             output_dir: output_dir,
@@ -247,14 +241,13 @@ module Bookbinder
           it 'creates intermediate directories' do
             some_repo = 'my-docs-org/my-docs-repo'
             some_sha = 'some-sha'
-
-            # stub_github_commits(name: some_repo, sha: some_sha)
-            # stub_github_for(git_client, some_repo, some_sha)
             allow(GitClient).to receive(:new).and_return(git_client)
 
             sections = [
-                {'repository' => {'name' => some_repo, 'ref' => some_sha}, 'directory' => 'a/b/c'},
+              {'repository' => {'name' => some_repo, 'ref' => some_sha}, 'directory' => 'a/b/c'},
             ]
+
+            allow(GitClient).to receive(:new).and_return(git_client)
 
             silence_io_streams do
               publisher.publish(
