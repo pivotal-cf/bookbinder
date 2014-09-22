@@ -6,6 +6,13 @@ module Bookbinder
     let(:credentials) { Configuration::CfCredentials.new(config_hash, false) }
     let(:cf) { CfCommandRunner.new(logger, credentials, trace_file) }
     let(:trace_file) { 'path/to/log' }
+    let (:binary_path_syscall ) { '/usr/local/bin/cf\n' }
+    let (:binary_path) { '/usr/local/bin/cf'}
+
+    before do
+      CfCommandRunner.any_instance.stub(:`).and_return(binary_path_syscall)
+      allow(binary_path_syscall).to receive(:chomp!).and_return(binary_path)
+    end
 
     describe '#login' do
       let(:config_hash) do
