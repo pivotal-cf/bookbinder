@@ -195,7 +195,7 @@ OUTPUT
       end
     end
 
-    describe '#map_route' do
+    describe '#map_routes' do
 
       context 'when multiple host names are in provided' do
         let(:config_hash) { {'staging_host' => ['some-staging-host', 'some-other-staging-host']} }
@@ -207,7 +207,7 @@ OUTPUT
         context 'when the first command fails' do
           let(:command_success) { false }
           it 'raises' do
-            expect { cf.map_route('my-app-name') }.to raise_error(/Deployed app to my-app-name but failed to map hostname some-staging-host.cfapps.io to it./)
+            expect { cf.map_routes('my-app-name') }.to raise_error(/Deployed app to my-app-name but failed to map hostname some-staging-host.cfapps.io to it./)
           end
         end
 
@@ -215,7 +215,7 @@ OUTPUT
           let(:command_success) { true }
           it 'does not raise' do
             expect(Kernel).to receive(:system).with(/cf map-route my-app-name cfapps.io -n some-other-staging-host/).and_return(command_success)
-            expect { cf.map_route('my-app-name') }.not_to raise_error
+            expect { cf.map_routes('my-app-name') }.not_to raise_error
           end
         end
 
@@ -223,7 +223,7 @@ OUTPUT
           let(:command_success) { true }
           it 'raises an error' do
             expect(Kernel).to receive(:system).with(/cf map-route my-app-name cfapps.io -n some-other-staging-host/).and_return(false)
-            expect { cf.map_route('my-app-name') }.to raise_error(/Deployed app to my-app-name but failed to map hostname some-other-staging-host.cfapps.io to it./)
+            expect { cf.map_routes('my-app-name') }.to raise_error(/Deployed app to my-app-name but failed to map hostname some-other-staging-host.cfapps.io to it./)
           end
         end
       end
@@ -238,14 +238,14 @@ OUTPUT
         context 'when the command fails' do
           let(:command_success) { false }
           it 'raises' do
-            expect { cf.map_route('my-app-name') }.to raise_error(/Deployed app to my-app-name but failed to map hostname some-staging-host.cfapps.io to it./)
+            expect { cf.map_routes('my-app-name') }.to raise_error(/Deployed app to my-app-name but failed to map hostname some-staging-host.cfapps.io to it./)
           end
         end
 
         context 'when the command passes' do
           let(:command_success) { true }
           it 'does not raise' do
-            expect { cf.map_route('my-app-name') }.not_to raise_error
+            expect { cf.map_routes('my-app-name') }.not_to raise_error
           end
         end
       end

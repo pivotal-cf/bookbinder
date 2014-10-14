@@ -50,13 +50,10 @@ class CfCommandRunner
     {'CF_TRACE' => @trace_file}
   end
 
-  def map_route(deploy_target_app)
-    # map hostname to newly deployed app
-    host_names = Array(creds.host)
-
-    host_names.map do |host|
-      success = Kernel.system("#{cf_binary_path} map-route #{deploy_target_app} cfapps.io -n #{host}")
-      raise "Deployed app to #{deploy_target_app} but failed to map hostname #{host}.cfapps.io to it." unless success
+  def map_routes(deploy_target_app)
+    # map hostnames to newly deployed app
+    hosts.map do |host|
+      map_route(deploy_target_app, host)
     end
   end
 
@@ -69,14 +66,27 @@ class CfCommandRunner
       Kernel.sleep 1
     end
     stop(app)
-    unmap_route(app, creds.host)
+    unmap_routes(app, hosts)
   end
 
   private
 
+  def hosts
+    Array(creds.host)
+  end
+
   def stop(app)
     success = Kernel.system("#{cf_binary_path} stop #{app}")
     raise "Failed to stop application #{app}" unless success
+  end
+
+  def map_route(deploy_target_app, host)
+    success = Kernel.system("#{cf_binary_path} map-route #{deploy_target_app} cfapps.io -n #{host}")
+    raise "Deployed app to #{deploy_target_app} but failed to map hostname #{host}.cfapps.io to it." unless success
+  end
+
+  def unmap_routes(app, hosts)
+    hosts.map { |host| unmap_route(app, host) }
   end
 
   def unmap_route(app, host)
