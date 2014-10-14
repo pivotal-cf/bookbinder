@@ -52,8 +52,12 @@ class CfCommandRunner
 
   def map_route(deploy_target_app)
     # map hostname to newly deployed app
-    success = Kernel.system("#{cf_binary_path} map-route #{deploy_target_app} cfapps.io -n #{creds.host}")
-    raise "Deployed app to #{deploy_target_app} but failed to map hostname #{creds.host}.cfapps.io to it." unless success
+    host_names = Array(creds.host)
+
+    host_names.map do |host|
+      success = Kernel.system("#{cf_binary_path} map-route #{deploy_target_app} cfapps.io -n #{host}")
+      raise "Deployed app to #{deploy_target_app} but failed to map hostname #{host}.cfapps.io to it." unless success
+    end
   end
 
   def takedown_old_target_app(app)
