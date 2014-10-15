@@ -305,7 +305,6 @@ OUTPUT
     describe '#unmap_routes' do
       let(:config_hash) { {'staging_host' => 'some-staging-host'} }
       before do
-        p cf
         expect(Kernel).to receive(:system).with(/cf unmap-route my-app-name cfapps.io -n some-staging-host/).and_return(command_success)
       end
 

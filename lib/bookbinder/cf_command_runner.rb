@@ -31,6 +31,9 @@ class CfCommandRunner
     # created this from what used to be #apps to deal with adding multiple hostnames in creds.host
     output, status = Open3.capture2("CF_COLOR=false #{cf_binary_path} routes")
     raise 'failure executing cf routes' unless status.success?
+
+
+    # this fails if there is a new route in the creds that has not been mapped before. need to see if this is ok
     route = output.lines.grep(/^#{Regexp.escape(host)}\s+cfapps\.io\s+/)[0]
     raise 'no routes found' if route.nil?
     match = /cfapps\.io\s+(.+)$/.match(route.rstrip)
@@ -64,6 +67,10 @@ class CfCommandRunner
 
   def unmap_routes(app)
     hosts.map { |host| unmap_route(app, host) }
+  end
+
+  def map_routes(app)
+    hosts.map { |host| map_route(app, host) }
   end
 
   def takedown_old_target_app(app)
