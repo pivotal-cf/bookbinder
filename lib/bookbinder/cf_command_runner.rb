@@ -22,9 +22,16 @@ class CfCommandRunner
   end
 
   def apps
+    # NB -- this function may not function as intended (the CLI's `cf apps`): it is intended to tell us whether Blue or Green is running,
+    # but if it queries both apps and has route overlaps (e.g., docs.pivotal.io is on Blue and Green), it may not serve the purpose intended (see Pusher.rb line 12)
+    hosts.map { |host| apps_for_host(host) }
+  end
+
+  def apps_for_host(host)
+    # created this from what used to be #apps to deal with adding multiple hostnames in creds.host
     output, status = Open3.capture2("CF_COLOR=false #{cf_binary_path} routes")
     raise 'failure executing cf routes' unless status.success?
-    route = output.lines.grep(/^#{Regexp.escape(creds.host)}\s+cfapps\.io\s+/)[0]
+    route = output.lines.grep(/^#{Regexp.escape(host)}\s+cfapps\.io\s+/)[0]
     raise 'no routes found' if route.nil?
     match = /cfapps\.io\s+(.+)$/.match(route.rstrip)
     raise 'no apps found' if match.nil?
