@@ -251,6 +251,32 @@ OUTPUT
       end
     end
 
+    describe '#unmap_routes' do
+      let(:config_hash) { {'staging_host' => 'some-staging-host'} }
+      before do
+        p cf
+        expect(Kernel).to receive(:system).with(/cf unmap-route my-app-name cfapps.io -n some-staging-host/).and_return(command_success)
+      end
+
+      context 'when one route exists' do
+        context 'when unmap fails' do
+          let(:command_success) { false }
+          it 'raises an error' do
+            expect { cf.unmap_routes('my-app-name') }.to raise_error(/Failed to unmap route my-app-name on some-staging-host./)
+          end
+        end
+
+        context 'when unmap succeeds' do
+          let(:command_success) { true }
+          it 'does not raise' do
+            expect { cf.unmap_routes('my-app-name') }.not_to raise_error
+          end
+        end
+      end
+
+      context 'when multiple routes exist'
+    end
+
     describe '#takedown_old_target_app' do
       let(:config_hash) { {'staging_host' => 'some-staging-host'} }
 
