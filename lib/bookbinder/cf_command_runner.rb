@@ -60,11 +60,6 @@ class CfCommandRunner
     {'CF_TRACE' => @trace_file}
   end
 
-  def map_routes(deploy_target_app)
-    # map hostnames to newly deployed app
-    hosts.map { |host| map_route(deploy_target_app, host) }
-  end
-
   def unmap_routes(app)
     hosts.map { |host| unmap_route(app, host) }
   end
