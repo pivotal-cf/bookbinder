@@ -138,12 +138,12 @@ module Bookbinder
         end
 
         it 'returns true' do
-          expect(copy_to).to be_truthy
+          expect(copy_to).to eq(File.join(destination_dir, 'my-docs-repo'))
         end
 
         it 'copies the repo' do
           copy_to
-          expect(File.exist? File.join(destination_dir, 'my-docs-repo', 'my_aunties_goat.txt')).to be_truthy
+          expect(File.exist? File.join(destination_dir, 'my-docs-repo', 'my_aunties_goat.txt')).to eq(true)
         end
 
         it 'sets copied? to true' do
@@ -152,11 +152,12 @@ module Bookbinder
       end
 
       context 'and the local repo is not there' do
-        before do
-          expect(File.exist? repo_dir).to be_falsey
+        it 'should not find the directory' do
+          expect(File.exist? repo_dir).to eq(false)
         end
+
         it 'returns false' do
-          expect(copy_to).to be_falsey
+          expect(copy_to).to be_nil
         end
 
         it 'does not change copied?' do
