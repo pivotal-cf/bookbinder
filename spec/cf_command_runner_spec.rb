@@ -252,28 +252,30 @@ OUTPUT
         let(:config_hash) { {'staging_host' => ['some-staging-host', 'some-other-staging-host']} }
 
         before do
-          expect(Kernel).to receive(:system).with(/cf map-route my-app-name cfapps.io -n some-staging-host/).and_return(command_success)
+          allow(Kernel).to receive(:system).with(/cf map-route my-app-name cfapps.io -n some-staging-host/).and_return(first_command_success)
+          allow(Kernel).to receive(:system).with(/cf map-route my-app-name cfapps.io -n some-other-staging-host/).and_return(second_command_success)
         end
 
         context 'when the first command fails' do
-          let(:command_success) { false }
+          let(:first_command_success) { false }
+          let(:second_command_success) { false }
           it 'raises' do
             expect { cf.map_routes('my-app-name') }.to raise_error(/Deployed app to my-app-name but failed to map hostname some-staging-host.cfapps.io to it./)
           end
         end
 
         context 'when the first and second command passes' do
-          let(:command_success) { true }
+          let(:first_command_success) { true }
+          let(:second_command_success) { true }
           it 'does not raise' do
-            expect(Kernel).to receive(:system).with(/cf map-route my-app-name cfapps.io -n some-other-staging-host/).and_return(command_success)
             expect { cf.map_routes('my-app-name') }.not_to raise_error
           end
         end
 
         context 'when the command passes the first time and fails the second time' do
-          let(:command_success) { true }
+          let(:first_command_success) { true }
+          let(:second_command_success) { false }
           it 'raises an error' do
-            expect(Kernel).to receive(:system).with(/cf map-route my-app-name cfapps.io -n some-other-staging-host/).and_return(false)
             expect { cf.map_routes('my-app-name') }.to raise_error(/Deployed app to my-app-name but failed to map hostname some-other-staging-host.cfapps.io to it./)
           end
         end
@@ -304,11 +306,12 @@ OUTPUT
 
     describe '#unmap_routes' do
       let(:config_hash) { {'staging_host' => 'some-staging-host'} }
-      before do
-        expect(Kernel).to receive(:system).with(/cf unmap-route my-app-name cfapps.io -n some-staging-host/).and_return(command_success)
-      end
 
       context 'when one route exists' do
+        before do
+          expect(Kernel).to receive(:system).with(/cf unmap-route my-app-name cfapps.io -n some-staging-host/).and_return(command_success)
+        end
+
         context 'when unmap fails' do
           let(:command_success) { false }
           it 'raises an error' do
@@ -324,7 +327,37 @@ OUTPUT
         end
       end
 
-      context 'when multiple routes exist'
+      context 'when multiple routes exist' do
+        let(:config_hash) { {'staging_host' => ['some-staging-host', 'some-other-staging-host']} }
+        before do
+          allow(Kernel).to receive(:system).with(/cf unmap-route my-app-name cfapps.io -n some-staging-host/).and_return(first_command_success)
+          allow(Kernel).to receive(:system).with(/cf unmap-route my-app-name cfapps.io -n some-other-staging-host/).and_return(second_command_success)
+        end
+
+        context 'when the first command fails' do
+          let(:first_command_success) { false }
+          let(:second_command_success) { false }
+          it 'raises' do
+            expect { cf.unmap_routes('my-app-name') }.to raise_error(/Failed to unmap route my-app-name on some-staging-host./)
+          end
+        end
+
+        context 'when the first and second command passes' do
+          let(:first_command_success) { true }
+          let(:second_command_success) { true }
+          it 'does not raise' do
+            expect { cf.unmap_routes('my-app-name') }.not_to raise_error
+          end
+        end
+
+        context 'when the command passes the first time and fails the second time' do
+          let(:first_command_success) { true }
+          let(:second_command_success) { false }
+          it 'raises an error' do
+            expect { cf.unmap_routes('my-app-name') }.to raise_error(/Failed to unmap route my-app-name on some-other-staging-host./)
+          end
+        end
+      end
     end
 
     describe '#takedown_old_target_app' do
