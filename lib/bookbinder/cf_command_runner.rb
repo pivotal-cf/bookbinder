@@ -42,9 +42,8 @@ class CfCommandRunner
   end
 
   def push(deploy_target_app)
-    # --no-route is a hack that may need to be removed soon. Sheel can help.
-    # it's a workaround for a bug in cf that fails deployment for apps that have been deployed previously,
-    # claiming that their hostname is already taken (instead of just re-deploying)
+    # Currently --no-routes is used to blow away all existing routes from a newly deployed app.
+    # The routes will then be recreated from the creds repo.
     success = Kernel.system(environment_variables, "#{cf_binary_path} push #{deploy_target_app} --no-route -m 256M -i 2")
     raise "Could not deploy app to #{deploy_target_app}" unless success
   end
@@ -70,8 +69,6 @@ class CfCommandRunner
       Kernel.sleep 1
     end
     stop(app)
-    # will fail if route does not exist or is not in creds repo
-    # potentially we can now just leave all the routes and count on --no-routes to clear them on push
     unmap_routes(app)
   end
 
