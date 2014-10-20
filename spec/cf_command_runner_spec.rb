@@ -104,9 +104,7 @@ OUTPUT
       end
 
       let(:config_hash) do
-        {
-            'staging_host' => hosts
-        }
+        { 'staging_host' => hosts }
       end
       let(:command_success) { true }
 
