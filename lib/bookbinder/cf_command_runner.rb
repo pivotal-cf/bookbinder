@@ -107,8 +107,6 @@ class CfCommandRunner
 
   def new_route?(host)
     route = all_routes.lines.grep(/^#{Regexp.escape(host)}\s+cfapps\.io\s+/)[0]
-    raise "Route #{host} does not exist. Please create it first." if route.nil?
-    apps_with_route = /cfapps\.io\s+(.+)$/.match(route.rstrip)
-    apps_with_route.nil?
+    route.nil?
   end
 end
