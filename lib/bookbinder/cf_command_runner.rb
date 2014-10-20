@@ -77,6 +77,8 @@ class CfCommandRunner
       Kernel.sleep 1
     end
     stop(app)
+    # will fail if route does not exist or is not in creds repo
+    # potentially we can now just leave all the routes and count on --no-routes to clear them on push
     unmap_routes(app)
   end
 
