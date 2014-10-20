@@ -22,23 +22,16 @@ class CfCommandRunner
   end
 
   def apps
-    # NB -- this function may not function as intended (the CLI's `cf apps`): it is intended to tell us whether Blue or Green is running,
-    # but if it queries both apps and has route overlaps (e.g., docs.pivotal.io is on Blue and Green), it may not serve the purpose intended (see Pusher.rb line 12)
-    hosts.map { |host| apps_for_host(host) }
+    existing_hosts = hosts.dup.select { |host| !new_route? host }
+    existing_hosts.map { |host| apps_for_host(host) }
   end
 
   def apps_for_host(host)
-    # created this from what used to be #apps to deal with adding multiple hostnames in creds.host
-    output, status = Open3.capture2("CF_COLOR=false #{cf_binary_path} routes")
-    raise 'failure executing cf routes' unless status.success?
-
-
-    # this fails if there is a new route in the creds that has not been mapped before. need to see if this is ok
-    route = output.lines.grep(/^#{Regexp.escape(host)}\s+cfapps\.io\s+/)[0]
-    raise 'no routes found' if route.nil?
-    match = /cfapps\.io\s+(.+)$/.match(route.rstrip)
-    raise 'no apps found' if match.nil?
-    match[1].split(', ')
+    route = all_routes.lines.grep(/^#{Regexp.escape(host)}\s+cfapps\.io\s+/)[0]
+    raise "no routes found for route #{route}" if route.nil?
+    apps_with_route = /cfapps\.io\s+(.+)$/.match(route.rstrip)
+    raise "no apps found for host #{host}" if apps_with_route.nil?
+    apps_with_route[1].split(', ')
   end
 
   def start(deploy_target_app)
@@ -107,5 +100,18 @@ class CfCommandRunner
     @cf_binary_path ||= `which cf`.chomp!
     raise  "CF CLI could not be found in your PATH. Please make sure cf cli is in your PATH." if @cf_binary_path.nil?
     @cf_binary_path
+  end
+
+  def all_routes
+    output, status = Open3.capture2("CF_COLOR=false #{cf_binary_path} routes")
+    raise 'failure executing cf routes' unless status.success?
+    output
+  end
+
+  def new_route?(host)
+    route = all_routes.lines.grep(/^#{Regexp.escape(host)}\s+cfapps\.io\s+/)[0]
+    raise "Route #{host} does not exist. Please create it first." if route.nil?
+    apps_with_route = /cfapps\.io\s+(.+)$/.match(route.rstrip)
+    apps_with_route.nil?
   end
 end
