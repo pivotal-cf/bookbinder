@@ -82,7 +82,9 @@ module Bookbinder
     describe '#apps' do
       let(:host1) { 'docs' }
       let(:host2) { 'docs-test' }
+      let(:host3) { 'docs-new-route' }
       let(:hosts) { [host1, host2] }
+      let(:too_many_hosts) { [host1, host2, host3] }
       let(:apps) { ['docs-green'] }
       let(:routes_output) do
         space = ' ' # for the editors that trim off trailing whitespace...
@@ -120,6 +122,16 @@ OUTPUT
 
         it 'does not error out' do
           expect { cf.apps }.not_to raise_error
+        end
+      end
+
+      context 'when a route in the creds is not yet mapped in the app' do
+        let(:config_hash) do
+          { 'staging_host' => too_many_hosts }
+        end
+        it 'it does not try to find the app for that route name' do
+          expect(cf).to receive(:apps_for_host).exactly(hosts.count).times
+          cf.apps
         end
       end
     end
