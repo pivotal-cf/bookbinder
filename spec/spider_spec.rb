@@ -88,7 +88,7 @@ describe Spider do
       expect(sitemap_generator).to receive(:generate) do |incoming_links, incoming_file|
         expect(incoming_links).to match_array(sitemap_links)
         expect(incoming_file).to eq(sitemap_path)
-      end.and_call_original
+      end
       spider.generate_sitemap host, port
     end
 
