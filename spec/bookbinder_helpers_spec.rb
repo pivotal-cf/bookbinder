@@ -82,7 +82,7 @@ MARKDOWN
     end
 
     describe '#yield_for_subnav' do
-      pending
+      skip
     end
 
     describe '#modified_date' do

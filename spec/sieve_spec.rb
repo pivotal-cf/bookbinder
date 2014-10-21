@@ -29,7 +29,7 @@ describe Sieve do
       end
 
       context 'and it does not have a valid html body' do
-        pending
+        skip
       end
     end
 
