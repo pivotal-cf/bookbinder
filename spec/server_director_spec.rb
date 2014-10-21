@@ -25,6 +25,8 @@ HERE
   end
 
   describe 'starting the server' do
+    let(:stdout_stream) { double }
+    let(:fake_pid) { 10 }
 
     it 'starts it in the given directory' do
       expect(POpen4).to receive(:popen4) do
@@ -51,10 +53,8 @@ HERE
       it 'raises an error' do
         allow(Process).to receive(:kill)
         allow(POpen4).to receive(:popen4) do |&blk|
-          fake_pid = 10
-          fake_stdout = double
-          allow(fake_stdout).to receive(:gets).and_return(nil)
-          blk.call(fake_stdout, nil, nil, fake_pid)
+          allow(stdout_stream).to receive(:gets).and_return(nil)
+          blk.call(stdout_stream, nil, nil, fake_pid)
         end
 
         expect { server_director.use_server {} }.to raise_error('Puma could not start')
@@ -63,6 +63,9 @@ HERE
   end
 
   describe 'passing in a block' do
+    let(:inner_worker) { double }
+    let(:stdout_stream) { double }
+
     it 'executes it and passes the port' do
       expect { |b|
         server_director.use_server &b
@@ -70,33 +73,34 @@ HERE
     end
 
     it 'does not execute it until the server has started' do
-      inner_worker = double
-      fake_stdout = double
-
       allow(Process).to receive(:kill)
       allow(POpen4).to receive(:popen4) do |&blk|
-        blk.call(fake_stdout, nil, nil, nil)
+        blk.call(stdout_stream, nil, nil, nil)
       end
 
       expect(Kernel).to receive(:sleep).with(1)
 
-      expect(fake_stdout).to receive(:gets).and_return('Waiting', 'Waiting', 'Listening on').ordered
+      expect(stdout_stream).to receive(:gets).and_return('Waiting', 'Waiting', 'Listening on').ordered
       expect(inner_worker).to receive(:do_work).ordered
 
       server_director.use_server { inner_worker.do_work }
     end
   end
 
-  it 'stops the server' do
-    fake_stdout = double(gets: 'Listening on')
-    server_pid = 5252
 
-    allow(POpen4).to receive(:popen4) do |&blk|
-      blk.call(fake_stdout, nil, nil, server_pid)
+  describe 'stopping the server' do
+    let(:stdout_stream) { double(gets: 'Listening on') }
+    let(:server_pid) { 5252 }
+
+    it 'stops' do
+
+      allow(POpen4).to receive(:popen4) do |&blk|
+        blk.call(stdout_stream, nil, nil, server_pid)
+      end
+
+      expect(Process).to receive(:kill).with('KILL', server_pid)
+      server_director.use_server {}
     end
-
-    expect(Process).to receive(:kill).with('KILL', server_pid)
-    server_director.use_server {}
   end
 
   describe 'when the passed-in block raises an exception' do

@@ -10,7 +10,7 @@ class Rack::Static
   private
 
   def path_has_trailing_slash?(path)
-    path =~ /\/$/
+    !((path =~ /\/$/).nil?)
   end
 
   def we_can_serve_index_at_path?(path)

@@ -23,6 +23,7 @@ class CfCommandRunner
 
   def apps
     existing_hosts = hosts.dup.select { |host| !new_route? host }
+    raise "cannot find currently deployed app." if existing_hosts.empty?
     existing_hosts.map { |host| apps_for_host(host) }
   end
 
@@ -61,7 +62,6 @@ class CfCommandRunner
   end
 
   def takedown_old_target_app(app)
-    # unmap hostname from old deployed app.
     # Routers flush every 10 seconds (but not guaranteed), so wait a bit longer than that.
     @logger.log "waiting 15 seconds for routes to remap...\n\n"
     (1..15).to_a.reverse.each do |seconds|
