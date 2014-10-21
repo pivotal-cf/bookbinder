@@ -15,8 +15,8 @@ module Bookbinder
     end
 
     def squelch_middleman_output
-      Thor::Shell::Basic.any_instance.stub(:say_status) {}
-      Middleman::Logger.any_instance.stub(:add) {}
+      allow_any_instance_of(Thor::Shell::Basic).to receive(:say_status) {}
+      allow_any_instance_of(Middleman::Logger).to receive(:add) {}
     end
 
     def write_markdown_source_file(path_under_source_dir, title, content = nil, breadcrumb_title = nil)

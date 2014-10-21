@@ -23,7 +23,7 @@ describe PdfGenerator do
     silence_io_streams do
       PdfGenerator.new(logger).generate [source_page], generated_pdf, header_file
     end
-    expect(File.exist? generated_pdf).to be_true
+    expect(File.exist? generated_pdf).to eq true
   end
 
   context 'when generating pages from a live web-server' do
@@ -38,7 +38,7 @@ describe PdfGenerator do
       silence_io_streams do
         PdfGenerator.new(logger).generate many_pages, generated_pdf, header_file
       end
-      expect(File.exist? generated_pdf).to be_true
+      expect(File.exist? generated_pdf).to eq true
     end
   end
 

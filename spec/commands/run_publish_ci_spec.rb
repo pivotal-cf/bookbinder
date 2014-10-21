@@ -18,8 +18,8 @@ module Bookbinder
 
     context 'when ENV["BUILD_NUMBER"] is set' do
       before do
-        ENV.stub(:[])
-        ENV.stub(:[]).with('BUILD_NUMBER').and_return('42424242')
+        allow(ENV).to receive(:[])
+        allow(ENV).to receive(:[]).with('BUILD_NUMBER').and_return('42424242')
       end
 
       it 'runs three commands and returns 0 if all three do so' do

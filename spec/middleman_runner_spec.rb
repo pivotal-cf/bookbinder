@@ -51,7 +51,7 @@ module Bookbinder
       run_middleman
 
       middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
-      expect(middleman_instance.config[:relative_links]).to be_false
+      expect(middleman_instance.config[:relative_links]).to eq false
     end
 
     it 'tells middleman about subnav_templates' do

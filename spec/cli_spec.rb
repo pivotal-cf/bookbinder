@@ -63,7 +63,7 @@ module Bookbinder
       context 'when run raises' do
         context 'a KeyError' do
           before do
-            Cli::Publish.any_instance.stub(:run).and_raise KeyError.new 'I broke'
+            allow_any_instance_of(Cli::Publish).to receive(:run).and_raise KeyError.new 'I broke'
           end
 
           let(:arguments) { ['publish', 'local'] }
@@ -80,7 +80,7 @@ module Bookbinder
 
         context 'a Configuration::CredentialKeyError' do
           before do
-            Cli::Publish.any_instance.stub(:run).and_raise Configuration::CredentialKeyError.new 'I broke'
+            allow_any_instance_of(Cli::Publish).to receive(:run).and_raise Configuration::CredentialKeyError.new 'I broke'
           end
 
           let(:arguments) { ['publish', 'local'] }
@@ -97,7 +97,7 @@ module Bookbinder
 
         context 'for InvalidArguments' do
           before do
-            Cli::Publish.any_instance.stub(:run).and_raise Cli::InvalidArguments.new
+            allow_any_instance_of(Cli::Publish).to receive(:run).and_raise Cli::InvalidArguments.new
           end
 
           let(:arguments) { ['publish', 'local'] }
@@ -114,7 +114,7 @@ module Bookbinder
 
         context 'any other error' do
           before do
-            Cli::Publish.any_instance.stub(:run).and_raise 'I broke'
+            allow_any_instance_of(Cli::Publish).to receive(:run).and_raise 'I broke'
           end
 
           let(:arguments) { ['publish', 'local'] }
@@ -151,12 +151,14 @@ module Bookbinder
 
         before do
           allow(config).to receive(:read).with(file_path).and_return(config)
-          YAML.stub(:load).and_raise Psych::SyntaxError.new('context',
-                                                            1,
-                                                            2,'
-                                                            error',
-                                                            'another error',
-                                                            'some other error')
+          allow(YAML).to receive(:load).and_raise Psych::SyntaxError.new(
+                                                      'context',
+                                                      1,
+                                                      2,'
+                                                      error',
+                                                      'another error',
+                                                      'some other error'
+                                                  )
         end
 
         it 'should print a helpful message' do

@@ -10,7 +10,7 @@ describe Rack::Static do
       let(:path) { 'valid-and-present' }
 
       it 'returns true' do
-        app.route_file(path).should be_true
+        expect(app.route_file(path)).to eq true
       end
     end
 
@@ -18,7 +18,7 @@ describe Rack::Static do
       let(:path) { 'absent' }
 
       it 'returns false' do
-        app.route_file(path).should be_false
+        expect(app.route_file(path)).to eq false
       end
     end
 
@@ -26,7 +26,7 @@ describe Rack::Static do
       let(:path) { 'valid-and-present/absent' }
 
       it 'returns false' do
-        app.route_file(path).should be_false
+        expect(app.route_file(path)).to eq false
       end
     end
   end
@@ -45,13 +45,13 @@ describe Rack::Static do
       let(:path) { 'foo/' }
 
       it 'returns true' do
-        app.overwrite_file_path(path).should be_true
+        expect(app.overwrite_file_path(path)).to eq true
       end
 
       context 'and the index file is absent' do
         let(:path) { 'wrong' }
         it 'returns false' do
-          app.overwrite_file_path(path).should be_false
+          expect(app.overwrite_file_path(path)).to eq false
         end
       end
     end

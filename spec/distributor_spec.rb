@@ -86,7 +86,7 @@ module Bookbinder
 
         context 'fails' do
           before do
-            fake_archive.stub(:upload_file).and_raise(Errno::ENOENT.new)
+            allow(fake_archive).to receive(:upload_file).and_raise(Errno::ENOENT.new)
           end
 
           it 'logs a message' do

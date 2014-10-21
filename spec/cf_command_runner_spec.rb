@@ -10,7 +10,7 @@ module Bookbinder
     let (:binary_path) { '/usr/local/bin/cf'}
 
     before do
-      CfCommandRunner.any_instance.stub(:`).and_return(binary_path_syscall)
+      allow_any_instance_of(CfCommandRunner).to receive(:`).and_return(binary_path_syscall)
       allow(binary_path_syscall).to receive(:chomp!).and_return(binary_path)
     end
 
@@ -59,10 +59,8 @@ module Bookbinder
         let (:binary_path ) { '' }
 
         it 'raises' do
-          CfCommandRunner.any_instance.stub(:`).and_return(binary_path)
-          expect {
-            cf.login
-          }.to raise_error(/CF CLI could not be found/)
+          allow_any_instance_of(CfCommandRunner).to receive(:`).and_return(binary_path)
+          expect { cf.login }.to raise_error(/CF CLI could not be found/)
         end
       end
 
@@ -71,7 +69,7 @@ module Bookbinder
         let (:binary_path) { '/usr/local/bin/cf'}
 
         it 'does not raise' do
-          CfCommandRunner.any_instance.stub(:`).and_return(binary_path_syscall)
+          allow_any_instance_of(CfCommandRunner).to receive(:`).and_return(binary_path_syscall)
           allow(binary_path_syscall).to receive(:chomp!).and_return(binary_path)
           expect(Kernel).to receive(:system).with("#{binary_path} login -u 'username' -p 'password' -a 'api.example.com' -o 'my-org' -s 'my-space'").and_return(true)
           expect { cf.login }.to_not raise_error

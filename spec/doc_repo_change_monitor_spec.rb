@@ -29,14 +29,14 @@ describe DocRepoChangeMonitor do
 
     context 'when no cached sha file is available' do
       before do
-        expect(File.exist?(cached_sha_file)).to be_false
+        expect(File.exist?(cached_sha_file)).to eq(false)
       end
 
-      it { should be_true }
+      it { is_expected.to eq(true) }
 
       it 'builds a new cached SHA file with the latest head SHAs' do
         subject
-        expect(File.exist?(cached_sha_file)).to be_true
+        expect(File.exist?(cached_sha_file)).to eq(true)
         expect(YAML.load(File.read(cached_sha_file))['my-docs-org/my-docs-repo']).to eq('shaA')
       end
     end
@@ -46,7 +46,7 @@ describe DocRepoChangeMonitor do
         write_cached_SHAs 'my-docs-org/my-docs-repo' => 'shaA'
       end
 
-      it { should be_true }
+      it { is_expected.to eq(true) }
     end
 
     context 'when cached SHAS are available and all SHAs are up to date' do
@@ -56,7 +56,7 @@ describe DocRepoChangeMonitor do
                           'wow-org/such-book' => 'old-book-sha'
       end
 
-      it { should be_false }
+      it { is_expected.to eq(false) }
     end
 
     context 'when cached SHAs are available but the Book is out of date' do
@@ -68,7 +68,7 @@ describe DocRepoChangeMonitor do
                           'wow-org/such-book' => 'old-book-sha'
       end
 
-      it { should be_true }
+      it { is_expected.to eq(true) }
     end
 
     context 'when cached SHAs are available but one is out of date' do
@@ -76,7 +76,7 @@ describe DocRepoChangeMonitor do
         write_cached_SHAs 'my-docs-org/my-docs-repo' => 'shaA', 'some-other-org/some-other-repo' => 'shaC'
       end
 
-      it { should be_true }
+      it { is_expected.to eq(true) }
     end
   end
 

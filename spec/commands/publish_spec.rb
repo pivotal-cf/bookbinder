@@ -66,9 +66,9 @@ module Bookbinder
         silence_io_streams do
           publish_command.run(['local'], SpecGitAccessor) # Run Once
 
-          expect do
-            publish_command.run(['local'], SpecGitAccessor) # Run twice
-          end.not_to change { File.exist? dogs_index }.from(true).to(false)
+          expect(File.exist? dogs_index).to eq true
+          publish_command.run(['local'], SpecGitAccessor) # Run twice
+          expect(File.exist? dogs_index).to eq true
         end
       end
 
@@ -76,7 +76,7 @@ module Bookbinder
         publish_command.run(['local'], SpecGitAccessor)
 
         index_html = File.read dogs_index
-        index_html.should include 'Woof'
+        expect(index_html).to include 'Woof'
       end
 
       it 'respects a redirects file' do
@@ -227,7 +227,7 @@ module Bookbinder
 
           index_html = File.read File.join(v1_dir, 'foods', 'sweet', 'index.html')
           expect(index_html).to include 'This is a Markdown Page'
-          expect(File.exist? File.join(v1_dir, 'foods', 'savory', 'index.html')).to be_false
+          expect(File.exist? File.join(v1_dir, 'foods', 'savory', 'index.html')).to eq false
 
           v2_dir = File.join('final_app', 'public', 'v2')
           index_html = File.read File.join(v2_dir, 'dogs', 'index.html')

@@ -9,7 +9,7 @@ describe Bookbinder::ShellOut do
 
     it 'returns the stdout' do
       stdout = shell_out("echo 'hi'")
-      stdout.should include('hi')
+      expect(stdout).to include('hi')
     end
 
     it 'raises an error with stderr in the message if a non-zero exit status was returned' do

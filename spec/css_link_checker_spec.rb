@@ -21,7 +21,9 @@ a.pivotal-logo span {
   end
 
   describe 'when the remote URI does not respond' do
-    before { Net::HTTP.stub(:get_response).with(URI(non_responsive_uri)).and_raise(SocketError) }
+    before do
+      allow(Net::HTTP).to receive(:get_response).with(URI(non_responsive_uri)).and_raise(SocketError)
+    end
     it 'gets added to the list of broken links' do
       broken_links = []
       expect {

@@ -28,11 +28,11 @@ module Bookbinder
     let(:config) { Configuration.new(logger, config_hash) }
 
     before do
-      ENV.stub(:[])
-      ENV.stub(:[]).with('BUILD_NUMBER').and_return(build_number)
+      allow(ENV).to receive(:[])
+      allow(ENV).to receive(:[]).with('BUILD_NUMBER').and_return(build_number)
       fake_creds = double
-      fake_creds.stub(:credentials).and_return(aws_hash)
-      CredentialProvider.stub(:new).and_return(fake_creds)
+      allow(fake_creds).to receive(:credentials).and_return(aws_hash)
+      allow(CredentialProvider).to receive(:new).and_return(fake_creds)
     end
 
     let(:access_key) { 'access-key' }
@@ -40,15 +40,15 @@ module Bookbinder
     let(:bucket) { 'bucket-name-in-fixture-config' }
 
     it 'should call GreenBuildRepository#create with correct parameters' do
-      Archive.should_receive(:new).with(logger: logger, key: access_key, secret: secret_key).and_call_original
-      Archive.any_instance.should_receive(:create_and_upload_tarball) do |args|
-        args.should have_key(:build_number)
-        args.should have_key(:bucket)
-        args.should have_key(:namespace)
+      expect(Archive).to receive(:new).with(logger: logger, key: access_key, secret: secret_key).and_call_original
+      expect_any_instance_of(Archive).to receive(:create_and_upload_tarball) do |archive, args|
+        expect(args).to have_key(:build_number)
+        expect(args).to have_key(:bucket)
+        expect(args).to have_key(:namespace)
 
-        args.fetch(:bucket).should == bucket
-        args.fetch(:build_number).should == build_number
-        args.fetch(:namespace).should == 'fixture-book-title'
+        expect(args.fetch(:bucket)).to eq bucket
+        expect(args.fetch(:build_number)).to eq build_number
+        expect(args.fetch(:namespace)).to eq 'fixture-book-title'
       end
 
       build_and_push_tarball_command.run []

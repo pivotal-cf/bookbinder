@@ -22,7 +22,7 @@ describe '$ bookbinder' do
         end
 
         index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
-        index_html.should include 'This is a Markdown Page'
+        expect(index_html).to include 'This is a Markdown Page'
       end
 
       it 'respects subnav includes', integration: true do
@@ -32,22 +32,22 @@ describe '$ bookbinder' do
         end
 
         dogs_index = File.read File.join('final_app', 'public', 'dogs', 'index.html')
-        dogs_index.should include 'Woof'
-        dogs_index.should_not include 'Cabbage'
-        dogs_index.should_not include 'Sputnik'
-        dogs_index.should_not include 'Cherry'
+        expect(dogs_index).to include 'Woof'
+        expect(dogs_index).not_to include 'Cabbage'
+        expect(dogs_index).not_to include 'Sputnik'
+        expect(dogs_index).not_to include 'Cherry'
 
         papers_index = File.read File.join('final_app', 'public', 'foods', 'savory', 'index.html')
-        papers_index.should include 'Cabbage'
-        papers_index.should_not include 'Sputnik'
-        papers_index.should_not include 'Woof'
-        papers_index.should_not include 'Strawberry'
+        expect(papers_index).to include 'Cabbage'
+        expect(papers_index).not_to include 'Sputnik'
+        expect(papers_index).not_to include 'Woof'
+        expect(papers_index).not_to include 'Strawberry'
 
         papers_index = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
-        papers_index.should include 'Strawberry'
-        papers_index.should_not include 'Sputnik'
-        papers_index.should_not include 'Woof'
-        papers_index.should_not include 'Spinach'
+        expect(papers_index).to include 'Strawberry'
+        expect(papers_index).not_to include 'Sputnik'
+        expect(papers_index).not_to include 'Woof'
+        expect(papers_index).not_to include 'Spinach'
       end
     end
   end

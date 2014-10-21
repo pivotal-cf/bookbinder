@@ -113,7 +113,7 @@ module Bookbinder
 
           it 'copies the repo from github' do
             Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, git_accessor: SpecGitAccessor)
-            expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
+            expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to eq true
           end
 
           context 'and a target_tag is provided' do
@@ -137,7 +137,7 @@ module Bookbinder
 
           it 'copies the repo from github' do
             Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, git_accessor: SpecGitAccessor)
-            expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to be_true
+            expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to eq true
           end
 
           context 'and a target_tag is provided' do
@@ -167,7 +167,7 @@ module Bookbinder
         Section.get_instance(logger, section_hash: {'repository' => {'name' => 'crazy_family_of_mine/' + repo_name}},
                              local_repo_dir: local_repo_dir,
                              destination_dir: destination_dir)
-        expect(File.exist? File.join(destination_dir, repo_name, 'my_aunties_goat.txt')).to be_true
+        expect(File.exist? File.join(destination_dir, repo_name, 'my_aunties_goat.txt')).to eq true
       end
     end
 

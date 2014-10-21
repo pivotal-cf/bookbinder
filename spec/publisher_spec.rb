@@ -118,7 +118,7 @@ module Bookbinder
                                               local_repo_dir: local_repo_dir,
                                               final_app_dir: final_app_dir,
                                               file_cache: cache
-          expect(no_broken_links).to be_true
+          expect(no_broken_links).to eq true
         end
 
         it 'includes template variables into middleman' do
@@ -328,8 +328,8 @@ module Bookbinder
         let(:spider) { double(:eight_legger) }
 
         before do
-          MiddlemanRunner.any_instance.stub(:run) do |middleman_dir|
-            Dir.mkdir File.join(middleman_dir, 'build')
+          allow_any_instance_of(MiddlemanRunner).to receive(:run) do |middleman_dir|
+            Dir.mkdir File.join(output_dir, 'master_middleman', 'build')
           end
           allow(spider).to receive(:generate_sitemap).and_return(working_links)
           allow(spider).to receive(:has_broken_links?)
@@ -356,7 +356,7 @@ module Bookbinder
           let(:output_dir) { File.join(Dir.mktmpdir, 'uncreated_output') }
           it 'creates the output directory' do
             publish
-            expect(File.exists?(output_dir)).to be_true
+            expect(File.exists?(output_dir)).to eq true
           end
         end
 
@@ -364,29 +364,31 @@ module Bookbinder
           pre_existing_file = File.join(output_dir, 'kill_me')
           FileUtils.touch pre_existing_file
           publish
-          expect(File.exists?(pre_existing_file)).to be_false
+          expect(File.exists?(pre_existing_file)).to eq false
         end
 
         it 'clears and then copies the template_app skeleton inside final_app' do
           pre_existing_file = File.join(final_app_dir, 'kill_me')
           FileUtils.touch pre_existing_file
           publish
-          expect(File.exists?(pre_existing_file)).to be_false
+          expect(File.exists?(pre_existing_file)).to eq false
           copied_manifest = File.read(File.join(final_app_dir, 'app.rb'))
           template_manifest = File.read(File.join('template_app', 'app.rb'))
           expect(copied_manifest).to eq(template_manifest)
         end
 
         context 'when the spider reports broken links' do
-          before { spider.stub(:has_broken_links?).and_return true }
+          before do
+            allow(spider).to receive(:has_broken_links?).and_return true
+          end
 
           it 'returns false' do
-            expect(publish).to be_false
+            expect(publish).to eq false
           end
         end
 
         it 'returns true when everything is happy' do
-          expect(publish).to be_true
+          expect(publish).to eq true
         end
 
         describe '#publish' do

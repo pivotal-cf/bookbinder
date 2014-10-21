@@ -27,7 +27,7 @@ module Bookbinder
 
       context 'when ChangeMonitor reports a build is necessary' do
         before do
-          fake_change_monitor.stub(:build_necessary?).and_return(true)
+          allow(fake_change_monitor).to receive(:build_necessary?).and_return(true)
         end
 
         it 'returns 0' do
