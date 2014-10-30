@@ -19,11 +19,12 @@ describe Spider do
     stub_request(:get, "http://something-surely-existenz.com/present-remote.png").to_return(:status => 200, :body => "", :headers => {})
 
     FileUtils.mkdir_p public_directory
+    FileUtils.mkdir_p File.join(public_directory, 'stylesheets')
     FileUtils.cp_r 'template_app/.', final_app_dir
     FileUtils.mkdir(File.join public_directory, 'images')
     FileUtils.cp present_image, File.join(public_directory, 'images', 'present-relative.png')
     FileUtils.cp present_image, File.join(public_directory, 'present-absolute.png')
-    FileUtils.cp stylesheet, File.join(public_directory, 'stylesheet.css')
+    FileUtils.cp stylesheet, File.join(public_directory, 'stylesheets', 'stylesheet.css')
     FileUtils.cp portal_page, File.join(public_directory, 'index.html')
     FileUtils.cp other_page, File.join(public_directory, 'other_page.html')
     write_arbitrary_yaml_to(public_directory)
@@ -53,7 +54,7 @@ describe Spider do
       let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
 
       before do
-        FileUtils.rm File.join(public_directory, 'stylesheet.css')
+        FileUtils.rm File.join(public_directory, 'stylesheets', 'stylesheet.css')
       end
 
       it 'returns false' do
@@ -106,9 +107,9 @@ describe Spider do
             "/index.html => http://localhost:#{port}/non_existent.yml",
             "/index.html => http://localhost:#{port}/non_existent/index.html",
             "/index.html => http://localhost:#{port}/also_non_existent/index.html",
-            'public/stylesheet.css => absent-relative.gif',
-            'public/stylesheet.css => /absent-absolute.gif',
-            'public/stylesheet.css => http://something-nonexistent.com/absent-remote.gif',
+            'public/stylesheets/stylesheet.css => absent-relative.gif',
+            'public/stylesheets/stylesheet.css => /absent-absolute.gif',
+            'public/stylesheets/stylesheet.css => http://something-nonexistent.com/absent-remote.gif',
         ]
       end
       let(:broken_anchor_links) do
