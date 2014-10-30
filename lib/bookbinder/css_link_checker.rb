@@ -7,7 +7,6 @@ class CssLinkChecker
 
   def localized_links_in_stylesheets
     links_in_stylesheets = []
-
     Dir.glob('**/*.css').each { |stylesheet| links_in_stylesheets.concat localized_links_from(stylesheet) }
 
     links_in_stylesheets
@@ -28,7 +27,8 @@ class CssLinkChecker
   end
 
   def target_exists?(localized_identifier)
-    link = strip_location(localized_identifier)
+    dirs, link = strip_location(localized_identifier)
+    link.gsub!(/'|"/, '')
 
     data_uri      = /^['"]?data:image\//
     remote_uri    = /^['"]?https?:\/\//
@@ -39,12 +39,16 @@ class CssLinkChecker
       when data_uri then true
       when remote_uri then http_reachable?(link)
       when absolute_uri then File.exists?(File.join('.', 'public', link))
-      when relative_uri then File.exists?(File.expand_path(File.join 'public', 'stylesheets', link))
+      when relative_uri then
+        dirs = dirs.split('/')[0...-1]
+        computed_uri = File.expand_path(File.join dirs, link)
+        File.exists?(computed_uri)
     end
   end
 
   def strip_location(id)
-    id.split('=> ').last
+    dirs, filepath = id.split('=> ')
+    [dirs, filepath]
   end
 
   def http_reachable?(link)
