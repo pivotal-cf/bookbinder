@@ -34,9 +34,9 @@ module Bookbinder
       let(:cf_hash) do
         {
             'api_endpoint' => 'http://some-api-endpoint.example.com',
-            'production_host' => 'some-prod-host',
+            'production_host' => { 'some-prod-domain.io' => ['some-prod-host'] },
             'production_space' => 'some-prod-space',
-            'staging_host' => 'some-staging-host',
+            'staging_host' => { 'some-staging-domain.io' => ['some-staging-host'] },
             'staging_space' => 'some-staging-space',
             'app_name' => 'some-app',
             'username' => 'some-user',
@@ -90,7 +90,7 @@ module Bookbinder
 
         it 'raises CredentialKeyError when a required key is missing' do
           cf_hash.clear
-          methods = Configuration::CfCredentials::REQUIRED_KEYS + [:host, :space]
+          methods = Configuration::CfCredentials::REQUIRED_KEYS + [:routes, :space]
           methods.each do |key|
             expect { cf_credentials.send(key) }.to raise_error(Configuration::CredentialKeyError)
           end
@@ -117,7 +117,7 @@ module Bookbinder
             let(:is_production) { true }
 
             it 'uses production values for host and space' do
-              expect(cf_credentials.host).to eq('some-prod-host')
+              expect(cf_credentials.routes).to eq('some-prod-domain.io'=>['some-prod-host'])
               expect(cf_credentials.space).to eq('some-prod-space')
             end
           end
@@ -126,7 +126,7 @@ module Bookbinder
             let(:is_production) { false }
 
             it 'uses staging values for host and space' do
-              expect(cf_credentials.host).to eq('some-staging-host')
+              expect(cf_credentials.routes).to eq('some-staging-domain.io'=>['some-staging-host'])
               expect(cf_credentials.space).to eq('some-staging-space')
             end
           end
@@ -136,7 +136,7 @@ module Bookbinder
       describe '#cf_production_credentials' do
         describe '#host' do
           it 'is the production host' do
-            expect(config.cf_production_credentials.host).to eq('some-prod-host')
+            expect(config.cf_production_credentials.routes).to eq('some-prod-domain.io'=>['some-prod-host'])
           end
         end
 
@@ -150,7 +150,7 @@ module Bookbinder
       describe '#cf_staging_credentials' do
         describe '#host' do
           it 'is the staging host' do
-            expect(config.cf_staging_credentials.host).to eq('some-staging-host')
+            expect(config.cf_staging_credentials.routes).to eq('some-staging-domain.io'=>['some-staging-host'])
           end
         end
 

@@ -46,7 +46,7 @@ module Bookbinder
         end
       end
 
-      def host
+      def routes
         key = is_production ? 'production_host' : 'staging_host'
         fetch(key)
       end

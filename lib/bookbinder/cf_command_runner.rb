@@ -84,7 +84,7 @@ class CfCommandRunner
 
   def routes
     all_routes = []
-    creds.host.each do |domain, apps|
+    creds.routes.each do |domain, apps|
       apps.each do |app|
         all_routes << [domain, app]
       end
