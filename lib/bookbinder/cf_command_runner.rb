@@ -22,15 +22,15 @@ class CfCommandRunner
   end
 
   def apps
-    existing_hosts = hosts.dup.select { |host| !new_route? host }
+    existing_hosts = routes.dup.select { |domain, host| !new_route? domain, host }
     raise "cannot find currently deployed app." if existing_hosts.empty?
-    existing_hosts.map { |host| apps_for_host(host) }
+    existing_hosts.map { |domain, host| apps_for_host(domain, host) }
   end
 
-  def apps_for_host(host)
-    route = all_routes.lines.grep(/^#{Regexp.escape(host)}\s+cfapps\.io\s+/)[0]
-    raise "no routes found for route #{route}" if route.nil?
-    apps_with_route = /cfapps\.io\s+(.+)$/.match(route.rstrip)
+  def apps_for_host(domain, host)
+    route = all_routes.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)[0]
+    raise "no routes found for route #{host}.#{domain}" if route.nil?
+    apps_with_route = /#{Regexp.escape(domain)}\s+(.+)$/.match(route.rstrip)
     raise "no apps found for host #{host}" if apps_with_route.nil?
     apps_with_route[1].split(', ')
   end
@@ -54,11 +54,19 @@ class CfCommandRunner
   end
 
   def unmap_routes(app)
-    hosts.map { |host| unmap_route(app, host) }
+    routes.each do |domain, name|
+      unmap_route(app, name, domain)
+    end
+
+    #hosts.map { |host| unmap_route(app, host) }
   end
 
   def map_routes(app)
-    hosts.map { |host| map_route(app, host) }
+    routes.each do |domain, name|
+      map_route(app, domain, name)
+    end
+
+    #hosts.map { |host| map_route(app, host) }
   end
 
   def takedown_old_target_app(app)
@@ -74,8 +82,14 @@ class CfCommandRunner
 
   private
 
-  def hosts
-    Array(creds.host)
+  def routes
+    all_routes = []
+    creds.host.each do |domain, apps|
+      apps.each do |app|
+        all_routes << [domain, app]
+      end
+    end
+    all_routes
   end
 
   def stop(app)
@@ -83,14 +97,14 @@ class CfCommandRunner
     raise "Failed to stop application #{app}" unless success
   end
 
-  def map_route(deploy_target_app, host)
-    success = Kernel.system("#{cf_binary_path} map-route #{deploy_target_app} cfapps.io -n #{host}")
-    raise "Deployed app to #{deploy_target_app} but failed to map hostname #{host}.cfapps.io to it." unless success
+  def map_route(deploy_target_app, domain, host)
+    success = Kernel.system("#{cf_binary_path} map-route #{deploy_target_app} #{domain} -n #{host}")
+    raise "Deployed app to #{deploy_target_app} but failed to map hostname #{host}.#{domain} to it." unless success
   end
 
-  def unmap_route(app, host)
-    success = Kernel.system("#{cf_binary_path} unmap-route #{app} cfapps.io -n #{host}")
-    raise "Failed to unmap route #{app} on #{host}." unless success
+  def unmap_route(app, host, domain)
+    success = Kernel.system("#{cf_binary_path} unmap-route #{app} #{domain} -n #{host}")
+    raise "Failed to unmap route #{host} on #{app}." unless success
   end
 
   def cf_binary_path
@@ -105,8 +119,8 @@ class CfCommandRunner
     output
   end
 
-  def new_route?(host)
-    route = all_routes.lines.grep(/^#{Regexp.escape(host)}\s+cfapps\.io\s+/)[0]
+  def new_route?(domain, host)
+    route = all_routes.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)[0]
     route.nil?
   end
 end
