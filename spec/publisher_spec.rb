@@ -200,24 +200,43 @@ module Bookbinder
           end
         end
 
-        it 'generates a sitemap' do
-          sections = [{'repository' => {'name' => 'org/dogs-repo'}}]
+        describe '#generate_sitemap' do
+          let(:host_for_sitemap) { "docs.dogs.com" }
+          let(:sections) {  [{ 'repository' => {'name' => 'org/dogs-repo'} }]  }
 
-          publisher.publish sections: sections,
-                            output_dir: output_dir,
-                            master_middleman_dir: dogs_master_middleman_dir,
-                            local_repo_dir: local_repo_dir,
-                            final_app_dir: final_app_dir,
-                            host_for_sitemap: "docs.dogs.com",
-                            file_cache: cache
+          context 'when the hostname is not a single string' do
+            let(:too_many_sitemap_hosts) { ['host1.runpivotal.com', 'host2.pivotal.io'] }
+            it 'raises' do
+              expect do
+                publisher.publish sections: sections,
+                                  output_dir: output_dir,
+                                  master_middleman_dir: dogs_master_middleman_dir,
+                                  local_repo_dir: local_repo_dir,
+                                  final_app_dir: final_app_dir,
+                                  host_for_sitemap: too_many_sitemap_hosts,
+                                  file_cache: cache
 
-          doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
-          expect(doc.css('loc').map &:text).to match_array(%w(
-          http://docs.dogs.com/index.html
-          http://docs.dogs.com/dogs-repo/index.html
-          http://docs.dogs.com/dogs-repo/big_dogs/index.html
-          http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
-        ))
+              end.to raise_error "Your public host must be a single String."
+            end
+          end
+
+          it 'contains the given pages in an XML sitemap' do
+            publisher.publish sections: sections,
+                              output_dir: output_dir,
+                              master_middleman_dir: dogs_master_middleman_dir,
+                              local_repo_dir: local_repo_dir,
+                              final_app_dir: final_app_dir,
+                              host_for_sitemap: host_for_sitemap,
+                              file_cache: cache
+
+            doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
+            expect(doc.css('loc').map &:text).to match_array(%w(
+              http://docs.dogs.com/index.html
+              http://docs.dogs.com/dogs-repo/index.html
+              http://docs.dogs.com/dogs-repo/big_dogs/index.html
+              http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
+            ))
+          end
         end
 
         it 'caches each repo' do
