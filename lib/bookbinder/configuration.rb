@@ -48,7 +48,7 @@ module Bookbinder
 
       def routes
         key = is_production ? 'production_host' : 'staging_host'
-        fetch(key)
+        fetch(key) if correctly_formatted_domain_and_routes?(key)
       end
 
       def space
@@ -64,6 +64,18 @@ module Bookbinder
         creds.fetch(key)
       rescue KeyError => e
         raise CredentialKeyError, e
+      end
+
+      def correctly_formatted_domain_and_routes?(hostkey)
+        host = fetch(hostkey)
+        domains = host.keys
+        domains.each { |domain| correctly_formatted_domain?(domain, host) }
+      end
+
+      def correctly_formatted_domain?(domain, host_hash)
+        raise 'Each domain in credentials must be a single string.' unless domain.is_a? String
+        raise "Domain #{domain} in credentials must contain a web extension, e.g. '.com'." unless domain.include?('.')
+        raise 'Routes in credentials must be nested as an array under the desired domain.' unless host_hash[domain].is_a? Array
       end
     end
 

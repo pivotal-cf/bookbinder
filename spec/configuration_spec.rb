@@ -31,12 +31,14 @@ module Bookbinder
 
     describe 'credentials' do
       let(:aws_hash) { {'access_key' => 'some-secret', 'secret_key' => 'wow-agent', 'green_builds_bucket' => 'its_a_pail'} }
+      let(:cf_staging_routes) {{ 'some-staging-domain.io' => ['some-staging-host'] }}
+      let(:cf_prod_routes) {{ 'some-prod-domain.io' => ['some-prod-host'] }}
       let(:cf_hash) do
         {
             'api_endpoint' => 'http://some-api-endpoint.example.com',
-            'production_host' => { 'some-prod-domain.io' => ['some-prod-host'] },
+            'staging_host' => cf_staging_routes,
             'production_space' => 'some-prod-space',
-            'staging_host' => { 'some-staging-domain.io' => ['some-staging-host'] },
+            'production_host' => cf_prod_routes,
             'staging_space' => 'some-staging-space',
             'app_name' => 'some-app',
             'username' => 'some-user',
@@ -131,11 +133,67 @@ module Bookbinder
             end
           end
         end
+
+        describe '#routes' do
+          let(:is_production) { true }
+
+          context 'with a correctly formatted domain' do
+            let(:cf_prod_routes) {{ 'some-prod-domain.io' => ['some-prod-host'] }}
+            it 'succeeds' do
+              expect(cf_credentials.routes).to eq('some-prod-domain.io' => ['some-prod-host'])
+            end
+          end
+
+          context 'with multiple correctly formatted domains' do
+            let(:cf_prod_routes) do
+              {
+                  'some-prod-domain.io' => ['some-prod-host'],
+                  'another-prod-domain.io' => ['another-prod-host, yet-a-third-prod-host']
+              }
+            end
+            it 'succeeds' do
+              expect(cf_credentials.routes).to eq('some-prod-domain.io' => ['some-prod-host'],
+                                                  'another-prod-domain.io' => ['another-prod-host, yet-a-third-prod-host'])
+            end
+          end
+
+          context 'when domains are incorrectly formatted' do
+            context 'and domains are given as an array' do
+              let(:cf_prod_routes) {{ ['some-prod-domain.io', 'another-prod-domain.io'] => ['some-prod-host'] }}
+              it 'raises' do
+                expect { cf_credentials.routes }.to raise_error(/Each domain in credentials must be a single string./)
+              end
+            end
+
+            context 'and a domain is given without an extension' do
+              let(:cf_prod_routes) {{ 'some-prod-domain' => ['some-prod-host'] }}
+              it 'raises' do
+                expect { cf_credentials.routes }.to raise_error(/must contain a web extension/)
+              end
+            end
+          end
+
+          context 'with correctly formatted routes' do
+            let(:cf_prod_routes) {{ 'some-prod-domain.io' => ['some-prod-host', 'another-prod-host'] }}
+
+            it 'succeeds' do
+              expect(cf_credentials.routes).to eq('some-prod-domain.io' => ['some-prod-host', 'another-prod-host'])
+            end
+          end
+
+          context 'with incorrectly formatted routes' do
+            let(:cf_prod_routes) {{ 'some-prod-domain.io' => 'some-prod-host' }}
+
+            it 'raises' do
+              expect { cf_credentials.routes }.to raise_error(/Routes in credentials must be nested as an array/)
+            end
+          end
+        end
       end
 
       describe '#cf_production_credentials' do
-        describe '#host' do
-          it 'is the production host' do
+        describe '#routes' do
+          it 'are the production routes' do
             expect(config.cf_production_credentials.routes).to eq('some-prod-domain.io'=>['some-prod-host'])
           end
         end
@@ -148,8 +206,8 @@ module Bookbinder
       end
 
       describe '#cf_staging_credentials' do
-        describe '#host' do
-          it 'is the staging host' do
+        describe '#routes' do
+          it 'are the staging routes' do
             expect(config.cf_staging_credentials.routes).to eq('some-staging-domain.io'=>['some-staging-host'])
           end
         end
