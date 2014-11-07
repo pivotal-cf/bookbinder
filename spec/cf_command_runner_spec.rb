@@ -269,18 +269,35 @@ OUTPUT
     end
 
     describe '#map_routes' do
+      context 'when a single domain and route exist' do
+        let(:config_hash) { { 'staging_host' => { 'domain-one.io' => ['docs'] } } }
 
-      context 'when a single domain and route exist'
+        before do
+          allow(Kernel).to receive(:system).with(/cf map-route my-app-name domain-one.io -n docs/).and_return(command_success)
+        end
 
-      context 'when multiple domains with multiple routes exist'
+        context 'when mapping fails' do
+          let(:command_success) { false }
+          it 'raises an error' do
+            expect { cf.map_routes('my-app-name') }.to raise_error(/Deployed app to my-app-name but failed to map hostname docs.domain-one.io to it./)
+          end
+        end
 
-      context 'when multiple domains exist' do
-        let(:config_hash) {
+        context 'when mapping succeeds' do
+          let(:command_success) { true }
+          it 'does not raise' do
+            expect { cf.map_routes('my-app-name') }.not_to raise_error
+          end
+        end
+      end
+
+      context 'when multiple domains with multiple routes exist' do
+        let(:config_hash) do
           { 'staging_host'=>
               { 'domain-one.io' => ['docs-blue', 'docs-green'],
                 'domain-two.io'=> ['docs'] }
           }
-        }
+        end
 
         before do
           allow(Kernel).to receive(:system).with(/cf map-route my-app-name domain-one.io -n docs-blue/).and_return(first_command_success)
