@@ -24,12 +24,14 @@ module Bookbinder
       end
 
       def yield_for_subnav
-        namespaces = decreasingly_specific_namespaces
-
-        template = namespaces.map do |namespace|
-          config[:subnav_templates][namespace]
-        end.compact.pop || 'default'
-
+        if index_subnav
+          template = current_page.data.index_subnav
+        else
+          namespaces = decreasingly_specific_namespaces
+          template = namespaces.map do |namespace|
+            config[:subnav_templates][namespace]
+          end.compact.pop || 'default'
+        end
         partial "subnavs/#{template}"
       end
 
@@ -58,6 +60,10 @@ module Bookbinder
       end
 
       private
+
+      def index_subnav
+        return true if current_page.data.index_subnav
+      end
 
       def decreasingly_specific_namespaces
         page_classes.split(' ')[0...-1].reverse

@@ -19,13 +19,22 @@ module Bookbinder
       allow_any_instance_of(Middleman::Logger).to receive(:add) {}
     end
 
-    def write_markdown_source_file(path_under_source_dir, title, content = nil, breadcrumb_title = nil)
+    def write_markdown_source_file(path_under_source_dir, title, content = nil, breadcrumb_title = nil, subnav = nil)
       full_path = File.join(source_dir, path_under_source_dir)
       full_pathname = Pathname.new(full_path)
       FileUtils.mkdir_p full_pathname.dirname
       breadcrumb_code = breadcrumb_title ? "breadcrumb: #{breadcrumb_title}\n" : ''
-      final_content = "---\ntitle: #{title}\n#{breadcrumb_code}---\n#{content}"
+      subnav_code = subnav ? "index_subnav: #{subnav}" : ''
+      final_content = "---\ntitle: #{title}\n#{breadcrumb_code}\n#{subnav_code}\n---\n#{content}"
       File.open(full_path, 'w') { |f| f.write(final_content) }
+    end
+
+    def write_subnav_content(path_under_source_dir, subnav_content = nil)
+      full_path = File.join(source_dir, path_under_source_dir)
+      full_pathname = Pathname.new(full_path)
+      FileUtils.mkdir_p full_pathname.dirname
+      subnav_code = subnav_content ? subnav_content : ''
+      File.open(full_path, 'w') { |f| f.write(subnav_code) }
     end
 
     def silence_io_streams
