@@ -432,6 +432,34 @@ MARKDOWN
           expect(quick_links).to eq(expected_output.strip)
         end
       end
+
+      context 'when the headers contain erb' do
+        let(:vars) { OpenStruct.new(erb_text: 'ERB Anchor') }
+        let(:sample_markdown) do
+          <<MARKDOWN
+## <a id='my-id-one'></a> Normal Anchor
+## <a id='my-id-two'></a><%= vars.erb_text %>
+MARKDOWN
+        end
+
+        let(:expected_output) do
+          <<HTML
+<div class=\"quick-links\"><ul>\n<li><a href=\"#my-id-one\">Normal Anchor</a></li>
+<li><a href=\"#my-id-two\">ERB Anchor</a></li>\n</ul></div>
+HTML
+        end
+
+        it 'interprets the erb' do
+          vars = OpenStruct.new( erb_text: 'ERB Anchor')
+          renderer = QuicklinksRenderer.new(vars)
+          rendered_material = Redcarpet::Markdown.new(renderer).render(sample_markdown)
+
+          allow(QuicklinksRenderer).to receive(:new).and_return(renderer)
+          Redcarpet::Markdown.any_instance.stub(:render).and_return(rendered_material)
+
+          expect(quick_links).to eq(expected_output.strip)
+        end
+      end
     end
   end
 end

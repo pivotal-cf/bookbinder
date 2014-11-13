@@ -56,7 +56,8 @@ module Bookbinder
 
       def quick_links
         page_src = File.read(current_page.source_file)
-        Redcarpet::Markdown.new(QuicklinksRenderer).render(page_src)
+        quicklinks_renderer = QuicklinksRenderer.new(vars)
+        Redcarpet::Markdown.new(quicklinks_renderer).render(page_src)
       end
 
       private

@@ -1,7 +1,15 @@
 require 'redcarpet'
+require_relative '../master_middleman/bookbinder_helpers'
 
 class QuicklinksRenderer < Redcarpet::Render::Base
   class BadHeadingLevelError < StandardError; end
+
+  attr_reader :vars
+
+  def initialize(template_variables)
+    super()
+    @vars = template_variables
+  end
 
   def doc_header
     @items = []
@@ -33,6 +41,7 @@ class QuicklinksRenderer < Redcarpet::Render::Base
   end
 
   def anchor_for(text)
+    text = ERB.new(text).result(binding)
     doc = Nokogiri::HTML(text)
     target_anchor = doc.css('a').first
     return unless target_anchor && target_anchor['id']
