@@ -57,16 +57,12 @@ class CfCommandRunner
     routes.each do |domain, name|
       unmap_route(app, name, domain)
     end
-
-    #hosts.map { |host| unmap_route(app, host) }
   end
 
   def map_routes(app)
     routes.each do |domain, name|
       map_route(app, domain, name)
     end
-
-    #hosts.map { |host| map_route(app, host) }
   end
 
   def takedown_old_target_app(app)
