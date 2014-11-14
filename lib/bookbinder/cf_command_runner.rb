@@ -60,8 +60,16 @@ class CfCommandRunner
   end
 
   def map_routes(app)
+    succeeded = []
+
     routes.each do |domain, name|
-      map_route(app, domain, name)
+      begin
+        map_route(app, domain, name)
+        succeeded << [app, domain, name]
+      rescue
+        succeeded.each { |app, domain, name| unmap_route(app, name, domain) }
+        raise
+      end
     end
   end
 

@@ -327,8 +327,24 @@ OUTPUT
           let(:first_command_success) { true }
           let(:second_command_success) { false }
           let(:third_command_success) { false }
-          it 'raises an error' do
+
+          it 'unmaps the first route and raises an error' do
+            expect(Kernel).to receive(:system).with(/cf unmap-route my-app-name domain-one.io -n docs-blue/).and_return(true)
+
             expect { cf.map_routes('my-app-name') }.to raise_error(/Deployed app to my-app-name but failed to map hostname docs-green.domain-one.io to it./)
+          end
+        end
+
+        context 'when the command passes the first and second times and fails the third time' do
+          let(:first_command_success) { true }
+          let(:second_command_success) { true }
+          let(:third_command_success) { false }
+
+          it 'unmaps the first and second routes and raises an error' do
+            expect(Kernel).to receive(:system).with(/cf unmap-route my-app-name domain-one.io -n docs-blue/).and_return(true)
+            expect(Kernel).to receive(:system).with(/cf unmap-route my-app-name domain-one.io -n docs-green/).and_return(true)
+
+            expect { cf.map_routes('my-app-name') }.to raise_error(/Deployed app to my-app-name but failed to map hostname docs.domain-two.io to it./)
           end
         end
       end
