@@ -1,5 +1,4 @@
 require 'redcarpet'
-require_relative '../master_middleman/bookbinder_helpers'
 
 class QuicklinksRenderer < Redcarpet::Render::Base
   class BadHeadingLevelError < StandardError; end
