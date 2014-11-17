@@ -29,11 +29,11 @@ module Bookbinder
       @logger = logger
     end
 
-    def run(middleman_dir, template_variables, local_repo_dir, file_modification_cache, verbose = false, repos = [], production_host=nil, git_accessor=Git)
+    def run(middleman_dir, template_variables, local_repo_dir, file_modification_cache, verbose = false, sections = [], production_host=nil, git_accessor=Git)
       @logger.log "\nRunning middleman...\n\n"
 
       within(middleman_dir) do
-        invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, repos, template_variables, verbose, git_accessor)
+        invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, sections, template_variables, verbose, git_accessor)
       end
     end
 
@@ -49,13 +49,13 @@ module Bookbinder
       ENV['MM_ROOT']    = original_mm_root
     end
 
-    def invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, repos, template_variables, verbose, git_accessor)
+    def invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, sections, template_variables, verbose, git_accessor)
       builder = Middleman::Cli::Build.shared_instance(verbose)
 
       config = {
           template_variables: template_variables,
           relative_links: false,
-          subnav_templates: subnavs_by_dir_name(repos),
+          subnav_templates: subnavs_by_dir_name(sections),
           local_repo_dir: local_repo_dir,
           production_host: production_host,
           filecache: file_modification_cache,
@@ -66,10 +66,10 @@ module Bookbinder
       Middleman::Cli::Build.new([], {quiet: !verbose}, {}).invoke :build, [], {verbose: verbose}
     end
 
-    def subnavs_by_dir_name(repos)
-      repos.reduce({}) do |final_map, repository|
-        namespace = repository.directory.gsub('/', '_')
-        template = repository.subnav_template || 'default'
+    def subnavs_by_dir_name(sections)
+      sections.reduce({}) do |final_map, section|
+        namespace = section.directory.gsub('/', '_')
+        template = section.subnav_template || 'default'
 
         final_map.merge(namespace => template)
       end
