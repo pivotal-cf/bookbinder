@@ -9,7 +9,7 @@ module Bookbinder
     let(:template_variables) { {'anybody' => 'nobody'} }
     let(:production_host) { double }
     let(:verbose) { false }
-    let(:repos) { [
+    let(:sections) { [
         Section.new(logger, Repository.new(full_name: '', directory: 'my/place/rocks'), 'my_subnav_template'),
         Section.new(logger, Repository.new(full_name: '', directory: 'fraggles/rock'), nil),
     ] }
@@ -17,7 +17,7 @@ module Bookbinder
     let(:filecache) { double(:cache) }
 
     def run_middleman
-      middleman_runner.run(target_dir_path, template_variables, local_repo_dir, filecache, verbose, repos, production_host)
+      middleman_runner.run(target_dir_path, template_variables, local_repo_dir, filecache, verbose, sections, production_host)
     end
 
     it 'behaves like a ShellOut'
