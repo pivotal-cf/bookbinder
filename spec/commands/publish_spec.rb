@@ -108,8 +108,6 @@ module Bookbinder
       let(:zipped_repo_url) { "https://github.com/#{book}/archive/master.tar.gz" }
 
       it 'creates some static HTML' do
-        git_mod_cache = double(GitModCache, update_from: nil)
-        allow(GitModCache).to receive(:new).and_return(git_mod_cache)
         publish_command.run(['github'], SpecGitAccessor)
 
         index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
@@ -277,7 +275,6 @@ module Bookbinder
     end
 
     describe 'publication arguments' do
-      let(:cache) { double('GitModCache') }
       let(:fake_publisher) { double('publisher') }
       let(:all_these_arguments_and_such) do
         {sections: sections,
@@ -290,13 +287,11 @@ module Bookbinder
          local_repo_dir: anything,
          host_for_sitemap: 'example.com',
          template_variables: {},
-         file_cache: cache,
          book_repo: 'fantastic/book',
          git_accessor: SpecGitAccessor}
       end
 
       before do
-        allow(GitModCache).to receive(:new).and_return(cache)
         expect(Publisher).to receive(:new).and_return fake_publisher
       end
 

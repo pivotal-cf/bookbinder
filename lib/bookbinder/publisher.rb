@@ -23,14 +23,12 @@ module Bookbinder
       prepare_directories final_app_dir, intermediate_directory, workspace_dir, master_middleman_dir, master_dir, git_accessor
       FileUtils.cp 'redirects.rb', final_app_dir if File.exists?('redirects.rb')
 
-      file_modification_cache = options[:file_cache]
-      sections = gather_sections(workspace_dir, options, file_modification_cache)
-
+      sections = gather_sections(workspace_dir, options)
       book = Book.new(logger: @logger,
                       full_name: @book_repo,
                       sections: options.fetch(:sections))
 
-      generate_site(options, master_dir, book, sections, build_directory, public_directory, file_modification_cache, git_accessor)
+      generate_site(options, master_dir, book, sections, build_directory, public_directory, git_accessor)
       generate_sitemap(final_app_dir, options, spider)
 
       @logger.log "Bookbinder bound your book into #{final_app_dir.green}"
@@ -48,17 +46,17 @@ module Bookbinder
       server_director.use_server { |port| spider.generate_sitemap sitemap_hostname, port }
     end
 
-    def generate_site(options, middleman_dir, book, sections, build_dir, public_dir, file_modification_cache, git_accessor)
+    def generate_site(options, middleman_dir, book, sections, build_dir, public_dir, git_accessor)
       MiddlemanRunner.new(@logger).run(middleman_dir,
                                        options.fetch(:template_variables, {}),
-                                       options[:local_repo_dir], file_modification_cache,
-                                       options[:verbose], book, sections, options[:host_for_sitemap],
+                                       options[:local_repo_dir], options[:verbose],
+                                       book, sections, options[:host_for_sitemap],
                                        git_accessor,
       )
       FileUtils.cp_r build_dir, public_dir
     end
 
-    def gather_sections(workspace, options, file_modification_cache)
+    def gather_sections(workspace, options)
 
       section_data = options.fetch(:sections)
       section_data.map do |attributes|
@@ -67,7 +65,6 @@ module Bookbinder
                                        target_tag: options[:target_tag],
                                        git_accessor: options.fetch(:git_accessor, Git)
         )
-        section.write_file_modification_dates_to file_modification_cache
         section
       end
     end

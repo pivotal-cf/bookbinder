@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-require 'bookbinder/git_file_walker'
-
 module Bookbinder
   describe Repository do
     include_context 'tmp_dirs'
@@ -283,87 +281,6 @@ module Bookbinder
                                                      path: made_up_dir).and_return(git_base_object)
           expect(git_base_object).to receive(:checkout).with(target_ref)
           repo.copy_from_remote(made_up_dir, MyGitClass)
-        end
-      end
-    end
-
-    describe '#shas_by_file' do
-      subject(:repo) do
-        Repository.new(logger: logger, github_token: github_token, full_name: full_name)
-      end
-
-      let(:full_name) { 'org/my-docs-repo' }
-      let(:git_accessor) { double(Git) }
-      let(:destination_dir) { tmpdir }
-      let(:git_object) { double(Git::Base) }
-      let(:git_file_walker) { double(GitFileWalker) }
-      let(:files_by_sha) { {'file1' => 'sha1'} }
-
-      it 'uses GitFileWalker to retrieve the hash' do
-        expect(git_accessor).to receive(:clone).with(
-                                   "git@github.com:#{full_name}",
-                                   'my-docs-repo',
-                                   path: destination_dir
-                               ).and_return git_object
-
-        expect(GitFileWalker).to receive(:new).with(git_object).and_return(git_file_walker)
-        expect(git_file_walker).to receive(:shas_by_file).and_return(files_by_sha)
-        repo.copy_from_remote(destination_dir, git_accessor)
-        expect(repo.shas_by_file).to eq(files_by_sha)
-      end
-    end
-
-    describe '#dates_by_sha' do
-      let(:repo) do
-        Repository.new(logger: logger, github_token: github_token, full_name: full_name, target_ref: target_ref)
-      end
-
-      let(:full_name) { 'org/my-docs-repo' }
-      let(:target_ref) { 'arbitrary-reference' }
-      let(:made_up_dir) { 'this/doesnt/exist' }
-
-      let(:shas) { ['cached-sha-1', 'cached-sha-2'] }
-      let(:shas_by_file) { {
-          'file-path1' => 'cached-sha-1',
-          'file-path2' => 'cached-sha-2'
-      } }
-
-      let(:git_object) { double(Git::Base) }
-      let(:log1) { double(Git::Log) }
-      let(:log2) { double(Git::Log) }
-      let(:logs) { [log1, log2] }
-
-      before do
-        allow(Git).to receive(:clone).with("git@github.com:#{full_name}",
-                                           File.basename(full_name),
-                                           anything)
-                      .and_return(git_object)
-        allow(git_object).to receive(:log).and_return(logs)
-        allow(logs).to receive(:map).and_return(shas)
-        allow(shas).to receive(:include?).and_return(true)
-        allow(git_object).to receive(:checkout).with(target_ref)
-        repo.copy_from_remote(made_up_dir)
-      end
-
-      context 'when a sha is cached' do
-        let(:modified_date) { rand 1000 }
-        let(:cached_shas) { {'cached-sha-1' => modified_date} }
-
-        it 'does not return it in the result' do
-          allow(log2).to receive(:date).and_return(modified_date)
-          expect(repo.dates_by_sha(shas_by_file, cached_shas: cached_shas)).to eq('cached-sha-2' => modified_date)
-        end
-      end
-
-      context 'when a sha is not cached' do
-        let(:earlier) { 0 }
-        let(:later) { 1978 }
-        let(:cached_shas) { {} }
-
-        it 'returns all results' do
-          allow(log1).to receive(:date).and_return(earlier)
-          allow(log2).to receive(:date).and_return(later)
-          expect(repo.dates_by_sha(shas_by_file, cached_shas: cached_shas)).to eq({'cached-sha-1' => earlier, 'cached-sha-2' => later})
         end
       end
     end

@@ -1,5 +1,4 @@
 require 'ruby-progressbar'
-require 'bookbinder/git_file_walker'
 require 'bookbinder/shell_out'
 require 'git'
 
@@ -92,26 +91,6 @@ module Bookbinder
 
     def announce_skip
       @logger.log '  skipping (not found) '.magenta + path_to_local_repo
-    end
-
-    def shas_by_file
-      GitFileWalker.new(@git).shas_by_file
-    end
-
-    def dates_by_sha(shas_by_file, cached_shas: {})
-      result = {}
-      logs = @git.log
-      shas = logs.map(&:sha)
-
-      shas_by_file.each_value do |sha|
-        next if cached_shas.has_key?(sha)
-        sha_index = shas.index(sha)
-        if sha_index
-          result[sha] = logs[sha_index].date
-        end
-      end
-
-      result
     end
 
     def get_modification_date_for(file: nil, git: nil)

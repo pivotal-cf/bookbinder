@@ -21,7 +21,6 @@ end
 require_relative 'bookbinder/bookbinder_logger'
 require_relative 'bookbinder/git_client'
 #require_relative 'bookbinder/repository'
-require_relative 'bookbinder/git_mod_cache'
 require_relative 'bookbinder/section'
 require_relative 'bookbinder/book'
 require_relative 'bookbinder/code_example'

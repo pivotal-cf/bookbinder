@@ -12,7 +12,6 @@ module Bookbinder
       let(:non_broken_master_middleman_dir) { generate_middleman_with 'non_broken_index.html' }
       let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html' }
       let(:git_client) { GitClient.new(logger) }
-      let(:cache) { double('GitModCache', update_from: nil) }
 
       context 'integration' do
         before do
@@ -56,7 +55,6 @@ module Bookbinder
                                   filename: 'DocGuide.pdf',
                                   header: 'pretty_path/header.html'
                               },
-                              file_cache: cache,
                               book_repo: book,
                               git_accessor: SpecGitAccessor
           end
@@ -77,8 +75,7 @@ module Bookbinder
                 host_for_sitemap: 'example.com',
                 local_repo_dir: local_repo_dir,
                 final_app_dir: final_app_dir,
-                book_repo: book,
-                file_cache: cache
+                book_repo: book
             }
           end
 
@@ -120,8 +117,7 @@ module Bookbinder
                                               host_for_sitemap: 'example.com',
                                               local_repo_dir: local_repo_dir,
                                               final_app_dir: final_app_dir,
-                                              book_repo: book,
-                                              file_cache: cache
+                                              book_repo: book
           expect(no_broken_links).to eq true
         end
 
@@ -137,8 +133,7 @@ module Bookbinder
                             final_app_dir: final_app_dir,
                             template_variables: {'name' => 'Alexander'},
                             verbose: true,
-                            book_repo: book,
-                            file_cache: cache
+                            book_repo: book
 
           index_html = File.read File.join(final_app_dir, 'public', 'index.html')
           expect(index_html).to include 'My variable name is Alexander.'
@@ -155,7 +150,6 @@ module Bookbinder
                 master_middleman_dir: middleman_dir,
                 host_for_sitemap: 'example.com',
                 sections: [{'repository' => {'name' => section_repo_name}}],
-                file_cache: cache,
                 book_repo: book,
                 git_accessor: SpecGitAccessor
             }
@@ -220,8 +214,7 @@ module Bookbinder
                                   local_repo_dir: local_repo_dir,
                                   final_app_dir: final_app_dir,
                                   host_for_sitemap: too_many_sitemap_hosts,
-                                  book_repo: book,
-                                  file_cache: cache
+                                  book_repo: book
 
               end.to raise_error "Your public host must be a single String."
             end
@@ -234,8 +227,7 @@ module Bookbinder
                               local_repo_dir: local_repo_dir,
                               final_app_dir: final_app_dir,
                               host_for_sitemap: host_for_sitemap,
-                              book_repo: book,
-                              file_cache: cache
+                              book_repo: book
 
             doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
             expect(doc.css('loc').map &:text).to match_array(%w(
@@ -266,7 +258,6 @@ module Bookbinder
                   master_middleman_dir: non_broken_master_middleman_dir,
                   final_app_dir: final_app_dir,
                   host_for_sitemap: 'example.com',
-                  file_cache: cache,
                   book_repo: book,
                   local_repo_dir: local_repo_dir)
             end
@@ -291,8 +282,7 @@ module Bookbinder
                                        host_for_sitemap: 'example.com',
                                        local_repo_dir: local_repo_dir,
                                        final_app_dir: final_app_dir,
-                                       verbose: false,
-                                       file_cache: cache }.to raise_error
+                                       verbose: false }.to raise_error
 
             $stdout.rewind
             collected_output = $stdout.read
@@ -316,8 +306,7 @@ module Bookbinder
                                        local_repo_dir: local_repo_dir,
                                        final_app_dir: final_app_dir,
                                        verbose: true,
-                                       book_repo: 'some-repo/some-book',
-                                       file_cache: cache
+                                       book_repo: 'some-repo/some-book'
             }.to raise_error(SystemExit)
 
             $stdout.rewind
@@ -357,7 +346,6 @@ module Bookbinder
             pdf: pdf_config,
             local_repo_dir: local_repo_dir,
             spider: spider,
-            file_cache: cache,
             book_repo: book,
             git_accessor: SpecGitAccessor
         } }

@@ -64,7 +64,6 @@ module Bookbinder
 
       def publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir, git_accessor)
         local_repo_dir = location == 'local' ? File.absolute_path('..') : nil
-        git_mod_cache = GitModCache.new(File.absolute_path('file_modification_dates'), location=='local')
 
         arguments = {
             sections: config.sections,
@@ -75,7 +74,6 @@ module Bookbinder
             verbose: verbosity,
             pdf_index: config.pdf_index,
             local_repo_dir: local_repo_dir,
-            file_cache: git_mod_cache,
             book_repo: config.book_repo,
             git_accessor: git_accessor
         }

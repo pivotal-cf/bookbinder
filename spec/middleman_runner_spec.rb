@@ -15,10 +15,9 @@ module Bookbinder
     ] }
     let(:book) { Book.new(full_name: 'some-repo/some-book') }
     let(:local_repo_dir) { '/dev/null' }
-    let(:filecache) { double(:cache) }
 
     def run_middleman
-      middleman_runner.run(target_dir_path, template_variables, local_repo_dir, filecache, verbose, book, sections, production_host)
+      middleman_runner.run(target_dir_path, template_variables, local_repo_dir, verbose, book, sections, production_host)
     end
 
     it 'behaves like a ShellOut'
