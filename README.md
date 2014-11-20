@@ -286,16 +286,6 @@ The following Jenkins plugins are necessary:
 
 You will also want to select the Discard Old Builds checkbox in the configuration for each Jenkins build so that your disk does not fill up.
 
-#### *Change Monitor Build*
-This Jenkins build executes the following shell command
-
-    bundle install
-    bundle exec bookbinder doc_repos_updated
-
-and builds the **Publish Build** project on success as a post-build action.
-
-This build determines whether a full publish build should be triggered, by checking whether any of the documentation repos have changed since the last build. To do this, it maintains the `cached_shas.yml` file, kept in the job folder of the change monitor build (i.e. one level above the actual workspace), so that it persists between builds.
-
 #### *Publish Build*
 This build executes this shell command:
 
