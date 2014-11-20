@@ -51,10 +51,6 @@ module Bookbinder
       @repository.get_modification_date_for(file: file, git: git_base_object)
     end
 
-    def write_file_modification_dates_to(cache)
-      cache.update_from @repository
-    end
-
     private
 
     def self.acquire(logger, section_hash, local_repo_dir, destination, target_tag, git_accessor)
