@@ -367,5 +367,62 @@ module Bookbinder
         end
       end
     end
+
+    describe '#get_modification_date_for' do
+      let(:repo_name) { 'org/my-docs-repo' }
+      let(:target_ref) { 'some-sha' }
+      let(:repo) { Repository.new(logger: logger, full_name: repo_name, target_ref: target_ref, github_token: 'foo') }
+      let(:destination_dir) { tmp_subdir('destination') }
+      let(:git_base_object) { double Git::Base }
+      let(:git_history) { double Git::Log }
+      let(:git_history_most_recent_entry) { double Git::Log }
+      let(:most_recent_commit) { double Git::Object::Commit }
+
+      before do
+        allow(Git).to receive(:clone).and_return(git_base_object)
+      end
+
+      context 'if the git accessor is nil' do
+        let(:git_base_object) { nil }
+        it 'raises' do
+          expect{ repo.get_modification_date_for(file: 'path/file.html', git: nil) }.
+              to raise_error(/Unexpected Error: Git accessor unavailable/)
+        end
+      end
+
+
+      context 'if the git accessor exists' do
+        before do
+          allow(git_base_object).to receive(:checkout).with(target_ref)
+          allow(git_base_object).to receive(:log).with(1).and_return(git_history)
+        end
+
+        context 'and when the file exists' do
+          it 'returns the most recent modification date' do
+            some_time = Time.now
+
+            allow(git_history).to receive(:object).with('path/file.html').and_return(git_history_most_recent_entry)
+            allow(git_history_most_recent_entry).to receive(:first).and_return most_recent_commit
+            allow(most_recent_commit).to receive(:date).and_return some_time
+
+            repo.copy_from_remote(destination_dir)
+
+            expect(repo.get_modification_date_for(file: 'path/file.html')).to eq(some_time)
+          end
+        end
+
+        context 'when the file does not exist or is not tracked by git' do
+          it 'raises an error to the user' do
+            allow(git_history).to receive(:object).with('does/not/exist.html').and_return(git_history_most_recent_entry)
+            allow(git_history_most_recent_entry).to receive(:first).and_return most_recent_commit
+            allow(most_recent_commit).to receive(:date).and_raise(Git::GitExecuteError)
+
+            repo.copy_from_remote(destination_dir)
+            expect{repo.get_modification_date_for(file: 'does/not/exist.html')}.
+                to raise_error(/This file does not exist or is not tracked by git!/)
+          end
+        end
+      end
+    end
   end
 end

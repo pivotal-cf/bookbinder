@@ -7,7 +7,6 @@ module Bookbinder
 
     describe '.get_instance' do
       let(:local_repo_dir) { '/dev/null' }
-      let(:git_client) { GitClient.new(logger) }
 
       before do
         allow(Git).to receive(:clone).with("git@github.com:foo/book",
@@ -78,29 +77,10 @@ module Bookbinder
           end
         end
       end
-    end
 
-
-    describe '.from_remote' do
-      context 'and github returns a 200 status code' do
-        before do
-          stub_request(:get, download_url).
-              to_return(
-              :status => 200,
-              :body => zipped_markdown_repo,
-              :headers => {'Content-Type' => 'application/x-gzip'}
-          )
-        end
-
-        let(:zipped_markdown_repo) { RepoFixture.tarball 'dogs-repo', ref }
+      context 'in remote mode' do
         let(:destination_dir) { tmp_subdir('output') }
         let(:repo_name) { 'great_org/dogs-repo' }
-        let(:download_url) { "https://github.com/great_org/dogs-repo/archive/#{ref}.tar.gz" }
-        let(:github_client) { GitClient.new(logger) }
-
-        before do
-          allow(GitClient).to receive(:new).and_return github_client
-        end
 
         context 'when no REF is provided' do
           let(:ref) { 'master' }
@@ -152,25 +132,6 @@ module Bookbinder
       end
     end
 
-    describe '.from_local' do
-      let(:repo_name) { 'aunties-repo' }
-      let(:local_repo_dir) { tmp_subdir 'local_repo_dir' }
-      let(:destination_dir) { tmp_subdir('output') }
-      let(:repo_dir) { File.join(local_repo_dir, repo_name) }
-
-      before do
-        Dir.mkdir repo_dir
-        FileUtils.touch File.join(repo_dir, 'my_aunties_goat.txt')
-      end
-
-      it 'copies the repo from nearby' do
-        Section.get_instance(logger, section_hash: {'repository' => {'name' => 'crazy_family_of_mine/' + repo_name}},
-                             local_repo_dir: local_repo_dir,
-                             destination_dir: destination_dir)
-        expect(File.exist? File.join(destination_dir, repo_name, 'my_aunties_goat.txt')).to eq true
-      end
-    end
-
     describe '#subnav_template' do
       let(:repo) { Section.new(logger, double(:repo), subnav_template_name) }
 
@@ -207,6 +168,44 @@ module Bookbinder
       it 'updates the cache' do
         expect(cache).to receive(:update_from).with repo
         section.write_file_modification_dates_to cache
+      end
+    end
+
+    describe '#get_modification_date_for' do
+      let(:local_repo_dir) { '/some/dir' }
+      let(:repo_name) { 'farm/my_cow_repo' }
+      let(:repo) { Repository.new(full_name: repo_name, local_repo_dir: local_repo_dir) }
+      subject(:section) { Section.new(logger, repo, 'my_template') }
+      let(:file) { 'some-file' }
+      let(:git_base_object) { double Git::Base }
+      let(:time) { Time.new(2011, 1, 28) }
+
+      context 'when publishing from local' do
+        it 'creates the git object locally' do
+          allow(repo).to receive(:has_git_object?).and_return(false)
+          allow(repo).to receive(:get_modification_date_for).with(file: file, git: git_base_object).and_return(time)
+
+          expect(Git).to receive(:open).with(local_repo_dir+'/my_cow_repo').and_return(git_base_object)
+          expect(section.get_modification_date_for(file: file)).to eq time
+        end
+
+        it 'raises if the local repo does not exist or is not a git repo' do
+          allow(repo).to receive(:has_git_object?).and_return(false)
+          allow(Git).to receive(:open).with(local_repo_dir+'/my_cow_repo').and_raise
+          expect { section.get_modification_date_for(file: file) }.
+              to raise_error('Invalid git repository! Cannot get modification date for section: /some/dir/my_cow_repo.')
+        end
+      end
+
+      context 'when publishing from remote' do
+        let(:time) { Time.new(2011, 1, 28) }
+
+        it 'gets the last modified date of the repository' do
+          allow(repo).to receive(:has_git_object?).and_return(true)
+          allow(repo).to receive(:get_modification_date_for).with(file: file, git: nil).and_return(time)
+
+          expect(section.get_modification_date_for(file: file)).to eq time
+        end
       end
     end
   end

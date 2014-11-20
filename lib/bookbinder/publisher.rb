@@ -1,3 +1,5 @@
+require 'bookbinder/directory_helpers'
+
 module Bookbinder
   class Publisher
     def initialize(logger)
@@ -23,7 +25,12 @@ module Bookbinder
 
       file_modification_cache = options[:file_cache]
       sections = gather_sections(workspace_dir, options, file_modification_cache)
-      generate_site(options, master_dir, sections, build_directory, public_directory, file_modification_cache, git_accessor)
+
+      book = Book.new(logger: @logger,
+                      full_name: @book_repo,
+                      sections: options.fetch(:sections))
+
+      generate_site(options, master_dir, book, sections, build_directory, public_directory, file_modification_cache, git_accessor)
       generate_sitemap(final_app_dir, options, spider)
 
       @logger.log "Bookbinder bound your book into #{final_app_dir.green}"
@@ -41,11 +48,11 @@ module Bookbinder
       server_director.use_server { |port| spider.generate_sitemap sitemap_hostname, port }
     end
 
-    def generate_site(options, middleman_dir, sections, build_dir, public_dir, file_modification_cache, git_accessor)
+    def generate_site(options, middleman_dir, book, sections, build_dir, public_dir, file_modification_cache, git_accessor)
       MiddlemanRunner.new(@logger).run(middleman_dir,
                                        options.fetch(:template_variables, {}),
                                        options[:local_repo_dir], file_modification_cache,
-                                       options[:verbose], sections, options[:host_for_sitemap],
+                                       options[:verbose], book, sections, options[:host_for_sitemap],
                                        git_accessor,
       )
       FileUtils.cp_r build_dir, public_dir
@@ -87,7 +94,7 @@ module Bookbinder
         Dir.mktmpdir(version) do |tmpdir|
           book = Book.from_remote(logger: @logger, full_name: @book_repo,
                                   destination_dir: tmpdir, ref: version, git_accessor: git_accessor)
-          index_source_dir = File.join(tmpdir, book.directory, 'master_middleman', 'source')
+          index_source_dir = File.join(tmpdir, book.directory, 'master_middleman', source_dir_name)
           index_dest_dir = File.join(dest_dir, version)
           FileUtils.mkdir_p(index_dest_dir)
 

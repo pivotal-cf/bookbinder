@@ -25,6 +25,7 @@ module Bookbinder
         after { WebMock.disable_net_connect! }
 
         let(:local_repo_dir) { RepoFixture.repos_dir }
+        let(:book) { 'some-repo/some-book' }
 
         it 'creates a directory per repo with the generated html from middleman' do
           some_repo = 'my-docs-org/my-docs-repo'
@@ -56,6 +57,7 @@ module Bookbinder
                                   header: 'pretty_path/header.html'
                               },
                               file_cache: cache,
+                              book_repo: book,
                               git_accessor: SpecGitAccessor
           end
 
@@ -75,6 +77,7 @@ module Bookbinder
                 host_for_sitemap: 'example.com',
                 local_repo_dir: local_repo_dir,
                 final_app_dir: final_app_dir,
+                book_repo: book,
                 file_cache: cache
             }
           end
@@ -117,6 +120,7 @@ module Bookbinder
                                               host_for_sitemap: 'example.com',
                                               local_repo_dir: local_repo_dir,
                                               final_app_dir: final_app_dir,
+                                              book_repo: book,
                                               file_cache: cache
           expect(no_broken_links).to eq true
         end
@@ -133,6 +137,7 @@ module Bookbinder
                             final_app_dir: final_app_dir,
                             template_variables: {'name' => 'Alexander'},
                             verbose: true,
+                            book_repo: book,
                             file_cache: cache
 
           index_html = File.read File.join(final_app_dir, 'public', 'index.html')
@@ -151,6 +156,7 @@ module Bookbinder
                 host_for_sitemap: 'example.com',
                 sections: [{'repository' => {'name' => section_repo_name}}],
                 file_cache: cache,
+                book_repo: book,
                 git_accessor: SpecGitAccessor
             }
           end
@@ -214,6 +220,7 @@ module Bookbinder
                                   local_repo_dir: local_repo_dir,
                                   final_app_dir: final_app_dir,
                                   host_for_sitemap: too_many_sitemap_hosts,
+                                  book_repo: book,
                                   file_cache: cache
 
               end.to raise_error "Your public host must be a single String."
@@ -227,6 +234,7 @@ module Bookbinder
                               local_repo_dir: local_repo_dir,
                               final_app_dir: final_app_dir,
                               host_for_sitemap: host_for_sitemap,
+                              book_repo: book,
                               file_cache: cache
 
             doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
@@ -237,23 +245,6 @@ module Bookbinder
               http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
             ))
           end
-        end
-
-        it 'caches each repo' do
-          number_of_sections = rand(10)+1
-
-          fake_section = double(:section, directory: 'foo', subnav_template: 'bar')
-          allow(Section).to receive(:get_instance).and_return(fake_section)
-          expect(fake_section).to receive(:write_file_modification_dates_to).exactly(number_of_sections).times
-
-          publisher.publish(
-              final_app_dir: final_app_dir,
-              master_middleman_dir: dogs_master_middleman_dir,
-              output_dir: output_dir,
-              sections: Array.new(number_of_sections, {}),
-              host_for_sitemap: 'example.com',
-              file_cache: cache
-          )
         end
 
         context "when the section's output directory has multiple levels" do
@@ -276,6 +267,7 @@ module Bookbinder
                   final_app_dir: final_app_dir,
                   host_for_sitemap: 'example.com',
                   file_cache: cache,
+                  book_repo: book,
                   local_repo_dir: local_repo_dir)
             end
 
@@ -324,6 +316,7 @@ module Bookbinder
                                        local_repo_dir: local_repo_dir,
                                        final_app_dir: final_app_dir,
                                        verbose: true,
+                                       book_repo: 'some-repo/some-book',
                                        file_cache: cache
             }.to raise_error(SystemExit)
 
@@ -342,6 +335,7 @@ module Bookbinder
         let(:master_middleman_dir) { tmp_subdir 'irrelevant' }
         let(:pdf_config) { nil }
         let(:local_repo_dir) { nil }
+        let(:book) { 'some-repo/some-book' }
         let(:sections) { [] }
         let(:working_links) { [] }
         let(:spider) { double(:eight_legger) }
@@ -364,6 +358,7 @@ module Bookbinder
             local_repo_dir: local_repo_dir,
             spider: spider,
             file_cache: cache,
+            book_repo: book,
             git_accessor: SpecGitAccessor
         } }
 

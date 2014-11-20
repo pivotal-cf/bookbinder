@@ -1,6 +1,9 @@
+require 'bookbinder/directory_helpers'
+
 module Bookbinder
   class Cli
     class Publish < BookbinderCommand
+      include Bookbinder::DirectoryHelperMethods
       class VersionUnsupportedError < StandardError;
         def initialize(msg=nil)
           super
@@ -65,7 +68,7 @@ module Bookbinder
 
         arguments = {
             sections: config.sections,
-            output_dir: File.absolute_path('output'),
+            output_dir: File.absolute_path(output_dir_name),
             master_middleman_dir: layout_repo_path(local_repo_dir, git_accessor),
             final_app_dir: final_app_dir,
             pdf: pdf_hash,

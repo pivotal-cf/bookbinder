@@ -1,5 +1,8 @@
+require 'bookbinder/directory_helpers'
+
 module Bookbinder
   class Section
+
     def self.store
       @@store ||= {}
     end
@@ -18,6 +21,7 @@ module Bookbinder
       @logger = logger
       @subnav_template = subnav_template
       @repository = repository
+      @git_accessor = Git
     end
 
     def subnav_template
@@ -34,6 +38,17 @@ module Bookbinder
 
     def copied?
       @repository.copied?
+    end
+
+    def get_modification_date_for(file: nil, full_path: nil)
+      unless @repository.has_git_object?
+        begin
+          git_base_object = @git_accessor.open(@repository.path_to_local_repo)
+        rescue => e
+          raise "Invalid git repository! Cannot get modification date for section: #{@repository.path_to_local_repo}."
+        end
+      end
+      @repository.get_modification_date_for(file: file, git: git_base_object)
     end
 
     def write_file_modification_dates_to(cache)

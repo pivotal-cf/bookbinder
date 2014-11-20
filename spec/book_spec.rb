@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 module Bookbinder
+  include Bookbinder::DirectoryHelperMethods
   describe Book do
     include_context 'tmp_dirs'
 
@@ -71,6 +72,29 @@ module Bookbinder
       end
     end
 
+    describe '#get_modification_date_for' do
+      let(:full_file_path) { '/some/dir/galaxy-book/output/master_middleman/source/404.html.md'}
+      let(:git_log_time_for_file) { Time.new(3028, 1, 19) }
+      let(:git_base_object) { double Git::Base }
+
+      it 'returns the last modified date for the specified file' do
+        allow(Repository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
+        allow(Git).to receive(:open).with('/some/dir/galaxy-book/').and_return(git_base_object)
+
+        expect(repo).to receive(:get_modification_date_for).
+                            with(file: 'master_middleman/source/404.html.md',git: git_base_object).
+                            and_return(git_log_time_for_file)
+        expect(book.get_modification_date_for(full_path: full_file_path)).to eq(git_log_time_for_file)
+      end
+
+      it 'raises if the git directory is invalid' do
+        allow(Repository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
+        allow(Git).to receive(:open).with('/some/dir/galaxy-book/').and_raise(ArgumentError)
+
+        expect{ book.get_modification_date_for(full_path: full_file_path) }.to raise_error(/Invalid git repository/)
+      end
+    end
+
     describe '.from_remote' do
       let(:temp_workspace) { tmp_subdir('workspace') }
       let(:ref) { 'this-is-a-tag' }
@@ -112,5 +136,7 @@ module Bookbinder
         expect(Book.from_remote(logger: logger, full_name: full_name, destination_dir: destination_dir, ref: ref)).to eq(new_book)
       end
     end
+
+
   end
 end

@@ -1,5 +1,4 @@
 require 'spec_helper'
-
 require './master_middleman/bookbinder_helpers'
 require 'redcarpet'
 
@@ -168,32 +167,98 @@ MARKDOWN
     describe '#modified_date' do
       subject(:an_instance) { klass.new(config) }
 
-      let(:first_date) { "19 Jan 3028" }
-      let(:filename) { "Moon Colonization History" }
-      let(:cache) { double('GitModCache') }
-      let(:config) { {filecache: cache} }
+      let(:moon_section) { Section.new(logger, repo, 'my_subnav_template') }
+      let(:fraggle_section) { Section.new(logger, Repository.new(full_name: '', directory: 'fraggles/rock'), nil) }
+      let(:sections) { [moon_section, fraggle_section] }
+      let(:book){ Book.new(full_name: 'full/path') }
+      let(:config) { {sections: sections, book: book} }
+      let(:file_path) { "moon/history.html" }
+      let(:source_file_path) { "/my/full/path/moon/history.html.md" }
+      let(:file_modification_date) { '19 Jan 3028' }
 
-      before { allow(an_instance).to receive(:current_path).and_return filename }
+      let(:repo_name) { '' }
+      let(:repo) { Repository.new(logger: logger, full_name: repo_name, directory: 'moon') }
+      let(:destination_dir) { tmp_subdir('destination') }
+      let(:git_base_object) { double Git::Base }
+      let(:git_history) { double Git::Log }
+      let(:git_history_most_recent_entry) { double Git::Log }
+      let(:most_recent_commit) { double Git::Object::Commit }
 
-      context 'when the file is found in the cache' do
-        before { allow(cache).to receive(:fetch).with(filename).and_return(first_date) }
+      let(:current_page_object) { double Middleman::Sitemap::Resource }
 
-        it 'returns the date for that file' do
-          expect(an_instance.modified_date).to eq(first_date)
+      let(:some_time) { Time.new(3028, 1, 19) }
+
+      before do
+        allow(Git).to receive(:clone).and_return(git_base_object)
+        allow(git_base_object).to receive(:checkout)
+        repo.copy_from_remote(destination_dir)
+
+        allow(git_base_object).to receive(:log).with(1).and_return(git_history)
+
+        allow(git_history).to receive(:object).with('history.html.md').and_return(git_history_most_recent_entry)
+        allow(git_history_most_recent_entry).to receive(:first).and_return most_recent_commit
+        allow(most_recent_commit).to receive(:date).and_return some_time
+
+        allow(an_instance).to receive(:current_path).and_return file_path
+        allow(an_instance).to receive(:current_page).and_return current_page_object
+        allow(current_page_object).to receive(:source_file).and_return source_file_path
+      end
+
+      it 'gets the date for each file from the section' do
+        expect(an_instance.modified_date('%e %b %Y')).to eq file_modification_date
+      end
+
+      it 'gets the date even if the file path is more specific than the directory of the section' do
+        file_path = "moon/colonization/history.html"
+        allow(an_instance).to receive(:current_path).and_return file_path
+        allow(git_history).to receive(:object).with('colonization/history.html.md').and_return(git_history_most_recent_entry)
+        expect(an_instance.modified_date('%e %b %Y')).to eq file_modification_date
+      end
+
+      context 'the sections are incorrectly passed to middleman' do
+        let(:config) { { sections: nil, book: nil } }
+        it 'raises an informative error' do
+          allow(an_instance).to receive(:current_path).and_return('some-path')
+          expect{ an_instance.modified_date }.to raise_error(/Book or Selections are incorrectly specified/)
         end
       end
 
-      context 'when the file is not found in the cache' do
-        let(:now) { Time.now }
-        before { allow(cache).to receive(:fetch).with(filename).and_return(now) }
+      context 'when the current path belongs to the book' do
+        let(:destination_dir) { tmp_subdir('destination') }
+        let(:git_base_object) { double Git::Base }
+        let(:git_history) { double Git::Log }
+        let(:git_history_most_recent_entry) { double Git::Log }
+        let(:most_recent_commit) { double Git::Object::Commit }
 
-        it 'returns todays date as the last-modified-date' do
-          allow(Time).to receive(:now).and_return(now)
+        let(:book) { Book.new(full_name: 'stars/my-galaxy-book') }
+        let(:config) { { book: book, sections: [] } }
+        let(:file_path) { 'index.html' }
+        let(:current_page_object) { double Middleman::Sitemap::Resource }
+        let(:source_file_path) { '/my/long/path/my-galaxy-book/output/master_middleman/source/index.html.md' }
 
-          expect(an_instance.modified_date).to eq(now)
+        let(:file_modification_date) { '19 Jan 3028' }
+        let(:some_time) { Time.new(3028, 1, 19) }
+
+        before do
+          allow(Git).to receive(:open).with('/my/long/path/my-galaxy-book/').and_return(git_base_object)
+          allow(git_base_object).to receive(:log).with(1).and_return(git_history)
+          allow(git_history).to receive(:object).with('master_middleman/source/index.html.md').and_return(git_history_most_recent_entry)
+          allow(git_history_most_recent_entry).to receive(:first).and_return most_recent_commit
+          allow(most_recent_commit).to receive(:date).and_return some_time
+
+          allow(an_instance).to receive(:current_path).and_return file_path
+          allow(an_instance).to receive(:current_page).and_return current_page_object
+          allow(current_page_object).to receive(:source_file).and_return source_file_path
+        end
+
+        it 'gets the date for each file in the book' do
+          expect(an_instance.modified_date).to eq some_time
+        end
+
+        it 'gets the formatted date for each file in the book' do
+          expect(an_instance.modified_date('%e %b %Y')).to eq file_modification_date
         end
       end
-
     end
 
     describe '#breadcrumbs' do
@@ -455,7 +520,7 @@ HTML
           rendered_material = Redcarpet::Markdown.new(renderer).render(sample_markdown)
 
           allow(QuicklinksRenderer).to receive(:new).and_return(renderer)
-          Redcarpet::Markdown.any_instance.stub(:render).and_return(rendered_material)
+          allow_any_instance_of(Redcarpet::Markdown).to receive(:render).and_return(rendered_material)
 
           expect(quick_links).to eq(expected_output.strip)
         end

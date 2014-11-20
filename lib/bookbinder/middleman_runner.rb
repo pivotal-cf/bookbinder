@@ -2,7 +2,8 @@ class Middleman::Cli::BuildAction
   def handle_error(file_name, response, e=Thor::Error.new(response))
     our_errors = [GitClient::TokenException,
                   Bookbinder::CodeExample::InvalidSnippet,
-                  QuicklinksRenderer::BadHeadingLevelError]
+                  QuicklinksRenderer::BadHeadingLevelError,
+                  Git::GitExecuteError]
     raise e if our_errors.include?(e.class)
 
     original_handle_error(e, file_name, response)
@@ -29,11 +30,11 @@ module Bookbinder
       @logger = logger
     end
 
-    def run(middleman_dir, template_variables, local_repo_dir, file_modification_cache, verbose = false, sections = [], production_host=nil, git_accessor=Git)
+    def run(middleman_dir, template_variables, local_repo_dir, file_modification_cache, verbose = false, book = nil, sections = [], production_host=nil, git_accessor=Git)
       @logger.log "\nRunning middleman...\n\n"
 
       within(middleman_dir) do
-        invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, sections, template_variables, verbose, git_accessor)
+        invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, book, sections, template_variables, verbose, git_accessor)
       end
     end
 
@@ -49,7 +50,7 @@ module Bookbinder
       ENV['MM_ROOT']    = original_mm_root
     end
 
-    def invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, sections, template_variables, verbose, git_accessor)
+    def invoke_against_current_dir(file_modification_cache, local_repo_dir, production_host, book, sections, template_variables, verbose, git_accessor)
       builder = Middleman::Cli::Build.shared_instance(verbose)
 
       config = {
@@ -60,6 +61,8 @@ module Bookbinder
           production_host: production_host,
           filecache: file_modification_cache,
           git_accessor: git_accessor,
+          sections: sections,
+          book: book
       }
 
       config.each { |k, v| builder.config[k] = v }

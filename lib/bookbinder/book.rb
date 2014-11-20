@@ -1,6 +1,8 @@
 require 'bookbinder/repository'
+require 'bookbinder/directory_helpers'
 
 class Book
+  include Bookbinder::DirectoryHelperMethods
   #include Bookbinder::Repository
   attr_reader :sections
 
@@ -29,6 +31,16 @@ class Book
 
   def directory
     @repository.directory
+  end
+
+  def get_modification_date_for(file: nil, full_path: nil)
+    git_directory, file_relative_path = full_path.split(output_dir_name+'/')
+    begin
+      git_base_object = Git.open(git_directory)
+    rescue => e
+      raise "Invalid git repository! #{git_directory} is not a .git directory"
+    end
+    @repository.get_modification_date_for(file: file_relative_path, git: git_base_object)
   end
 
   def copy_from_remote(destination_dir)

@@ -14,7 +14,6 @@ module Bookbinder
       target_ref = target_ref || section_hash.fetch('repository', {})['ref']
       directory = section_hash['directory']
       repository = new(logger: logger, full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
-
       repository.copy_from_remote(destination_dir, git_accessor) if destination_dir
       repository
     end
@@ -115,14 +114,32 @@ module Bookbinder
       result
     end
 
-    private
+    def get_modification_date_for(file: nil, git: nil)
+      @git ||= git
+      raise "Unexpected Error: Git accessor unavailable." if @git.nil?
 
-    def target_ref
-      @target_ref ||= 'master'
+      irrelevant_path_component = directory+'/'
+      repo_path = file.gsub(irrelevant_path_component, '')
+
+      begin
+        @git.log(1).object(repo_path).first.date
+      rescue Git::GitExecuteError => e
+        raise "This file does not exist or is not tracked by git! Cannot get last modified date for #{repo_path}."
+      end
     end
 
     def path_to_local_repo
       File.join(@local_repo_dir, short_name)
+    end
+
+    def has_git_object?
+      !!@git
+    end
+
+    private
+
+    def target_ref
+      @target_ref ||= 'master'
     end
 
     def tags

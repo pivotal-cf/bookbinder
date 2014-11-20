@@ -13,11 +13,12 @@ module Bookbinder
         Section.new(logger, Repository.new(full_name: '', directory: 'my/place/rocks'), 'my_subnav_template'),
         Section.new(logger, Repository.new(full_name: '', directory: 'fraggles/rock'), nil),
     ] }
+    let(:book) { Book.new(full_name: 'some-repo/some-book') }
     let(:local_repo_dir) { '/dev/null' }
     let(:filecache) { double(:cache) }
 
     def run_middleman
-      middleman_runner.run(target_dir_path, template_variables, local_repo_dir, filecache, verbose, sections, production_host)
+      middleman_runner.run(target_dir_path, template_variables, local_repo_dir, filecache, verbose, book, sections, production_host)
     end
 
     it 'behaves like a ShellOut'
@@ -66,18 +67,25 @@ module Bookbinder
       expect(middleman_instance.config[:subnav_templates]).to eq(templates)
     end
 
-    it 'tells middleman about the file modification cache' do
-      run_middleman
-
-      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
-      expect(middleman_instance.config[:filecache]).to eq(filecache)
-    end
-
     it 'tells middleman about local_repo_dir' do
       run_middleman
 
       middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
       expect(middleman_instance.config[:local_repo_dir]).to eq local_repo_dir
+    end
+
+    it 'tells middleman about sections' do
+      run_middleman
+
+      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
+      expect(middleman_instance.config[:sections]).to eq sections
+    end
+
+    it 'tells middleman about the book' do
+      run_middleman
+
+      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
+      expect(middleman_instance.config[:book]).to eq book
     end
 
     it 'builds with middleman and passes the verbose parameter' do

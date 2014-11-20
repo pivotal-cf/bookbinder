@@ -15,6 +15,7 @@ module Bookbinder
     end
 
     module HelperMethods
+
       def yield_for_code_snippet(from: nil, at: nil)
         example = CodeExample.get_instance(bookbinder_logger, section_hash: {'repository' => {'name' => from}}, local_repo_dir: config[:local_repo_dir], git_accessor: config[:git_accessor])
         snippet, language = example.get_snippet_and_language_at(at)
@@ -49,8 +50,9 @@ module Bookbinder
       end
 
       def modified_date(format=nil)
-        cache = config[:filecache]
-        modified_time = cache.fetch(current_path)
+        current_file_in_repo = current_path.dup.gsub(File.basename(current_path), File.basename(current_page.source_file))
+        current_section = get_section_or_book_for(current_file_in_repo)
+        modified_time = current_section.get_modification_date_for(file: current_file_in_repo, full_path: current_page.source_file)
         (format.nil? ? modified_time : modified_time.strftime(format))
       end
 
@@ -61,6 +63,19 @@ module Bookbinder
       end
 
       private
+
+      def get_section_or_book_for(path)
+        sections = config[:sections]
+        book = config[:book]
+
+        raise "Book or Selections are incorrectly specified for Middleman." if book.nil? || sections.nil?
+
+        current_section = nil
+        sections.each { |section| current_section = section if File.dirname(current_path).match(/^#{section.directory}/) }
+
+        return book if current_section.nil?
+        return current_section
+      end
 
       def index_subnav
         return true if current_page.data.index_subnav
