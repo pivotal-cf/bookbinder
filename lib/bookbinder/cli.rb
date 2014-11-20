@@ -9,7 +9,6 @@ module Bookbinder
     COMMAND_TO_CLASS_MAPPING = {
         'publish' => Publish,
         'build_and_push_tarball' => BuildAndPushTarball,
-        'doc_repos_updated' => DocReposUpdated,
         'push_local_to_staging' => PushLocalToStaging,
         'push_to_prod' => PushToProd,
         'run_publish_ci' => RunPublishCI,
