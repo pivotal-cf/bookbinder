@@ -7,10 +7,12 @@ module Bookbinder
     let(:logger) { NilLogger.new }
     let(:github_token) { 'blahblah' }
     let(:git_client) { GitClient.new(logger, access_token: github_token) }
+    let(:github) {"https://#{ENV['GITHUB_API_TOKEN']}:x-oauth-basic@github.com"}
 
     before do
       allow(GitClient).to receive(:new).and_call_original
       allow(GitClient).to receive(:new).with(logger, access_token: github_token).and_return(git_client)
+      allow_any_instance_of(Repository).to receive(:get_repo_url) { |o, name | "#{github}/#{name}"}
     end
 
     it 'requires a full_name' do
@@ -73,11 +75,13 @@ module Bookbinder
       let(:repo) { Repository.new(logger: logger, full_name: repo_name, target_ref: target_ref, github_token: 'foo') }
       let(:destination_dir) { tmp_subdir('destination') }
       let(:git_base_object) { double Git::Base }
+      let(:clone) {
+        expect(Git).to receive(:clone).with("#{github}/#{repo_name}", File.basename(repo_name),
+                                            path: destination_dir).and_return(git_base_object)
+      }
 
       it 'retrieves the repo from github' do
-        expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
-                                            File.basename(repo_name),
-                                            path: destination_dir).and_return(git_base_object)
+        clone
         expect(git_base_object).to receive(:checkout).with(target_ref)
         repo.copy_from_remote(destination_dir)
       end
@@ -85,9 +89,7 @@ module Bookbinder
       context 'when the target ref is master' do
         let(:target_ref) { 'master' }
         it 'does not check out a ref' do
-          expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
-                                             File.basename(repo_name),
-                                             path: destination_dir).and_return(git_base_object)
+          clone
           expect(git_base_object).to_not receive(:checkout)
           repo.copy_from_remote(destination_dir)
         end
@@ -95,26 +97,20 @@ module Bookbinder
 
       context 'when the target ref is not master' do
         it 'checks out a ref' do
-          expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
-                                             File.basename(repo_name),
-                                             path: destination_dir).and_return(git_base_object)
+          clone
           expect(git_base_object).to receive(:checkout).with(target_ref)
           repo.copy_from_remote(destination_dir)
         end
       end
 
       it 'returns the location of the copied directory' do
-        expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
-                                           File.basename(repo_name),
-                                           path: destination_dir).and_return(git_base_object)
+        clone
         expect(git_base_object).to receive(:checkout).with(target_ref)
         expect(repo.copy_from_remote(destination_dir)).to eq(destination_dir)
       end
 
       it 'sets copied? to true' do
-        expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
-                                           File.basename(repo_name),
-                                           path: destination_dir).and_return(git_base_object)
+        clone
         expect(git_base_object).to receive(:checkout).with(target_ref)
         expect { repo.copy_from_remote(destination_dir) }.to change { repo.copied? }.to(true)
       end
@@ -258,7 +254,7 @@ module Bookbinder
 
       context 'when no special Git accessor is specified' do
         it 'clones the repo into a specified folder' do
-          expect(Git).to receive(:clone).with("git@github.com:#{full_name}",
+          expect(Git).to receive(:clone).with("#{github}/#{full_name}",
                                               File.basename(full_name),
                                               path: made_up_dir).and_return(git_base_object)
           expect(git_base_object).to receive(:checkout).with(target_ref)
@@ -276,7 +272,7 @@ module Bookbinder
         end
 
         it 'clones using the specified accessor' do
-          expect(MyGitClass).to receive(:clone).with("git@github.com:#{full_name}",
+          expect(MyGitClass).to receive(:clone).with("#{github}/#{full_name}",
                                                      File.basename(full_name),
                                                      path: made_up_dir).and_return(git_base_object)
           expect(git_base_object).to receive(:checkout).with(target_ref)
