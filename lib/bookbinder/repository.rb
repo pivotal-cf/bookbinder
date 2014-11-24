@@ -55,9 +55,16 @@ module Bookbinder
     end
 
     def copy_from_remote(destination_dir, git_accessor = Git)
-      @git = git_accessor.clone("git@github.com:#{full_name}", directory, path: destination_dir)
+      url = get_repo_url(@full_name)
+      @git = git_accessor.clone(url, directory, path: destination_dir)
       @git.checkout(target_ref) unless target_ref == 'master'
       @copied_to = destination_dir
+    end
+    
+    def get_repo_url(name)
+      repo = @github.repository(name)
+      url = repo.rels[:clone].href
+      url.sub('://', "://#{@github.access_token}:x-oauth-basic@") unless @github.access_token.nil? or @github.access_token.empty?
     end
 
     def copy_from_local(destination_dir)

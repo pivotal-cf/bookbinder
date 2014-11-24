@@ -12,6 +12,7 @@ module Bookbinder
       let(:non_broken_master_middleman_dir) { generate_middleman_with 'non_broken_index.html' }
       let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html' }
       let(:git_client) { GitClient.new(logger) }
+      let(:github) {"https://#{ENV['GITHUB_API_TOKEN']}:x-oauth-basic@github.com"}
 
       context 'integration' do
         before do
@@ -19,6 +20,7 @@ module Bookbinder
           allow(BookbinderLogger).to receive(:new).and_return(NilLogger.new)
           allow(ProgressBar).to receive(:create).and_return(double(increment: nil))
           WebMock.disable_net_connect!(:allow_localhost => true)
+          allow_any_instance_of(Repository).to receive(:get_repo_url) { |o, name | "#{github}/#{name}"}
         end
 
         after { WebMock.disable_net_connect! }
@@ -32,11 +34,11 @@ module Bookbinder
           some_sha = 'some-sha'
           some_other_sha = 'some-other-sha'
 
-          expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{some_repo}",
+          expect(SpecGitAccessor).to receive(:clone).with("#{github}/#{some_repo}",
                                               "pretty_path",
                                               anything).and_call_original
 
-          expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{some_other_repo}",
+          expect(SpecGitAccessor).to receive(:clone).with("#{github}/#{some_other_repo}",
                                              File.basename(some_other_repo),
                                              anything).and_call_original
           sections = [
@@ -156,10 +158,10 @@ module Bookbinder
           end
 
           it 'applies the syntax highlighting CSS' do
-            expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{section_repo_name}",
+            expect(SpecGitAccessor).to receive(:clone).with("#{github}/#{section_repo_name}",
                                                             File.basename(section_repo_name),
                                                             anything).and_call_original
-            expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{code_repo}",
+            expect(SpecGitAccessor).to receive(:clone).with("#{github}/#{code_repo}",
                                                             File.basename(code_repo),
                                                             anything).and_call_original
 
@@ -188,10 +190,10 @@ module Bookbinder
           end
 
           it 'makes only one request per code example repository' do
-            expect(SpecGitAccessor).to receive(:clone).with("git@github.com:org/dogs-repo",
+            expect(SpecGitAccessor).to receive(:clone).with("#{github}/org/dogs-repo",
                                                             "dogs-repo",
                                                             anything).and_call_original
-            expect(SpecGitAccessor).to receive(:clone).with("git@github.com:cloudfoundry/code-example-repo",
+            expect(SpecGitAccessor).to receive(:clone).with("#{github}/cloudfoundry/code-example-repo",
                                                             "code-example-repo",
                                                             anything).and_call_original
 

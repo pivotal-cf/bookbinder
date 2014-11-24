@@ -106,6 +106,11 @@ module Bookbinder
 
     context 'github' do
       let(:zipped_repo_url) { "https://github.com/#{book}/archive/master.tar.gz" }
+      let(:github) {"https://#{ENV['GITHUB_API_TOKEN']}:x-oauth-basic@github.com"}
+
+      before do
+        allow_any_instance_of(Repository).to receive(:get_repo_url) { |o, name | "#{github}/#{name}"}
+      end
 
       it 'creates some static HTML' do
         publish_command.run(['github'], SpecGitAccessor)
