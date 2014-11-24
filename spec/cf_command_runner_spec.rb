@@ -159,6 +159,7 @@ cat-pictures            cfapps.io             cats #{space}
 #{host}misleading       cfapps.io
 #{host}                 cfapps.io             #{apps.join(',')} #{space}
 more-cat-pictures       cfapps.io             many-cats,too-many-cats #{space}
+cute-cat-pictures       cfapps.io             cute-cats ,   cuter-cats #{space}
 OUTPUT
       end
 
@@ -194,6 +195,12 @@ OUTPUT
 
           it 'does not concatenate the app names' do
             expect(cf.apps_for_host('cfapps.io', 'more-cat-pictures')).not_to eq(['many-cats,too-many-cats'])
+          end
+        end
+
+        context 'and there is spacing between the app names in the route output' do
+          it 'returns the app names without white spacing' do
+            expect(cf.apps_for_host('cfapps.io', 'cute-cat-pictures')).to eq(['cute-cats', 'cuter-cats'])
           end
         end
       end
