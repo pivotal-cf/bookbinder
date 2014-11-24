@@ -157,8 +157,8 @@ no-cat-pictures         cfapps.io
 less-cat-pictures       cfapps.io             cats #{space}
 cat-pictures            cfapps.io             cats #{space}
 #{host}misleading       cfapps.io
-#{host}                 cfapps.io             #{apps.join(', ')} #{space}
-more-cat-pictures       cfapps.io             many-cats, too-many-cats #{space}
+#{host}                 cfapps.io             #{apps.join(',')} #{space}
+more-cat-pictures       cfapps.io             many-cats,too-many-cats #{space}
 OUTPUT
       end
 
@@ -182,9 +182,19 @@ OUTPUT
       end
 
       context 'when the host has multiple apps' do
-        let(:apps) { ['docs-green', 'docs-blue'] }
+        let(:apps) { ['docs-green','docs-blue'] }
         it 'is the first app' do
           expect(cf.apps_for_host('cfapps.io', 'docs')).to eq(apps)
+        end
+
+        context 'and there is no spacing between the app names in the route output' do
+          it 'returns the app names' do
+            expect(cf.apps_for_host('cfapps.io', 'more-cat-pictures')).to eq(['many-cats', 'too-many-cats'])
+          end
+
+          it 'does not concatenate the app names' do
+            expect(cf.apps_for_host('cfapps.io', 'more-cat-pictures')).not_to eq(['many-cats,too-many-cats'])
+          end
         end
       end
 

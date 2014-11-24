@@ -32,7 +32,7 @@ class CfCommandRunner
     raise "no routes found for route #{host}.#{domain}" if route.nil?
     apps_with_route = /#{Regexp.escape(domain)}\s+(.+)$/.match(route.rstrip)
     raise "no apps found for host #{host}" if apps_with_route.nil?
-    apps_with_route[1].split(', ')
+    apps_with_route[1].split(',')
   end
 
   def start(deploy_target_app)
