@@ -82,10 +82,38 @@ module Bookbinder
 
       def get_urls_to_capture(local_host)
         if @pdf_config_file
-          pdf_options.fetch('pages').map { |l| "http://#{local_host}/#{l}" }
+          pages = pdf_options.fetch('pages')
+          return expand_urls(pages, local_host) if any_include_wildcard?(pages)
+          pages.map { |l| "http://#{local_host}/#{l}" }
         else
           sitemap_links(local_host)
         end
+      end
+
+      def any_include_wildcard?(pages)
+        pages.each do |page|
+          return true if page.include?('*')
+        end
+        false
+      end
+
+      def expand_urls(pages, local_host)
+        final_pages = []
+        pages.each do |page|
+          if page.include?('*')
+            matching_pages = find_matching_files_in_directory(page, local_host)
+            final_pages += matching_pages
+          else
+            final_pages << page
+          end
+        end
+        final_pages
+      end
+
+      def find_matching_files_in_directory(wildcard_page, local_host)
+        wildcard_path = wildcard_page.gsub('*','')
+        possible_links = sitemap_links(local_host)
+        possible_links.select { |link| URI(link).path.match(/^\/#{Regexp.escape(wildcard_path)}/)}
       end
 
       def sitemap_links(local_host)

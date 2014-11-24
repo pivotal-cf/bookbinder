@@ -7,7 +7,8 @@ module Bookbinder
     let(:fake_generator) { double(generate: double) }
     let(:links) { %w(such-uri.html wow-uri.html amaze-uri.html) }
     let(:urls) { links.map { |l| l.prepend('http://localhost:41722/') } }
-    let(:generate) { Cli::GeneratePDF.new(logger, config).run(cli_arguments) }
+    let(:generate_pdf_object) { Cli::GeneratePDF.new(logger, config) }
+    let(:generate) { generate_pdf_object.run(cli_arguments) }
     let(:logger) { NilLogger.new }
     let(:config) { double(:configurator) }
 
@@ -88,6 +89,24 @@ module Bookbinder
           it 'sends the pages from the specified PDF config to the generator' do
             expect(fake_generator).to receive(:generate).with urls, anything, anything, anything
             generate
+          end
+
+          context 'when a wildcard is present' do
+            let(:wildcard_pages) { %w(doge/*) }
+            let(:links) { %w(doge/such-uri.html doge/some-dir/wow-uri.html doge/amaze-uri.html not-doge/stuff.html) }
+            let(:correct_links) { %w(doge/such-uri.html doge/some-dir/wow-uri.html doge/amaze-uri.html) }
+            let(:correct_urls) { correct_links.map { |l| l.prepend('http://localhost:41722/') } }
+            let(:pdf_options) {{'header' => header_file, 'pages' => wildcard_pages, 'copyright_notice' => notice}}
+            
+            it 'detects and attempts to expand the wildcard' do
+              expect(generate_pdf_object).to receive(:expand_urls).with wildcard_pages, 'localhost:41722'
+              generate
+            end
+
+            it 'matches the wildcard to the sitemap' do
+              expect(fake_generator).to receive(:generate).with correct_urls, anything, anything, anything
+              generate
+            end
           end
 
           it 'sends the header in the specified PDF config to the generator' do
