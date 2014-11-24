@@ -2,3 +2,4 @@ bookbinder*.gem
 Gemfile.lock
 .bundle
 file_modification_dates
+.idea/

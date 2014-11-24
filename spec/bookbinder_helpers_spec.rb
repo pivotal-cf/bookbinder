@@ -19,8 +19,11 @@ module Bookbinder
       end
     end
 
+    let(:github) {"https://#{ENV['GITHUB_API_TOKEN']}:x-oauth-basic@github.com"}
+
     before do
       allow(BookbinderLogger).to receive(:new).and_return(logger)
+      allow_any_instance_of(Repository).to receive(:get_repo_url) { |o, name | "#{github}/#{name}"}
     end
 
     def run_middleman(template_variables = {}, subnav_templates = {})

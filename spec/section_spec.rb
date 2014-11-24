@@ -7,11 +7,13 @@ module Bookbinder
 
     describe '.get_instance' do
       let(:local_repo_dir) { '/dev/null' }
+      let(:github) {"https://#{ENV['GITHUB_API_TOKEN']}:x-oauth-basic@github.com"}
 
       before do
-        allow(Git).to receive(:clone).with("git@github.com:foo/book",
+        allow(Git).to receive(:clone).with("#{github}/foo/book",
                                             'book',
                                             anything)
+        allow_any_instance_of(Repository).to receive(:get_repo_url) { |o, name | "#{github}/#{name}"}
       end
 
       context 'when called more than once' do

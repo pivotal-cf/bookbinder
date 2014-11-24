@@ -3,6 +3,8 @@ require 'spec_helper'
 module Bookbinder
   describe CredentialProvider do
     describe '#credentials' do
+
+
       subject(:credentials) do
         CredentialProvider.new logger, credentials_repository, SpecGitAccessor
       end
@@ -14,6 +16,11 @@ module Bookbinder
       let(:full_name) { 'org-name/creds-repo' }
       let(:credentials_repository) do
         Repository.new(logger: logger, full_name: 'org-name/creds-repo')
+      end
+      let(:github) {"https://#{ENV['GITHUB_API_TOKEN']}:x-oauth-basic@github.com"}
+
+      before do
+        allow_any_instance_of(Repository).to receive(:get_repo_url) { |o, name | "#{github}/#{name}"}
       end
 
       it 'returns a hash of the credentials in credentials.yml' do
