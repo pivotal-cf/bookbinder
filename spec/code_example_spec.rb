@@ -7,6 +7,11 @@ module Bookbinder
       let(:logger) { NilLogger.new }
       let(:git_client) { GitClient.new(logger) }
       let(:code_example) { CodeExample.get_instance(logger, section_hash: {'repository' => {'name' => repo_name}}, git_accessor: SpecGitAccessor) }
+      let(:github) {"https://#{ENV['GITHUB_API_TOKEN']}:x-oauth-basic@github.com"}
+
+      before do
+        allow_any_instance_of(Repository).to receive(:get_repo_url) { |o, name | "#{github}/#{name}"}
+      end
 
       it 'produces a string for the given excerpt_marker' do
         code_snippet = <<-RUBY
