@@ -30,7 +30,7 @@ module Bookbinder
 
     def scrape_for(marker)
       locale = 'LC_CTYPE=C LANG=C' # Quiets 'sed: RE error: illegal byte sequence'
-      result = `#{locale} find . -exec sed -ne '/code_snippet #{marker} start/,/code_snippet #{marker} end/ p' {} \\;`
+      result = `#{locale} find . -exec sed -ne '/code_snippet #{marker} start/,/code_snippet #{marker} end/ p' {} \\; 2> /dev/null`
       result = "" unless result.lines.last && result.lines.last.match(/code_snippet #{marker} end/)
       result
     end
