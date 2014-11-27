@@ -99,7 +99,7 @@ module Bookbinder
           context 'and a target_tag is provided' do
             let(:target_tag) { 'oh-dot-three-dot-oh' }
 
-            it 'uses the tag to make requests for the archive link' do
+            it 'passes the target tag to the repository' do
               expect(Repository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, Git)
               Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
@@ -110,7 +110,7 @@ module Bookbinder
           let(:ref) { 'foo-1.7.12' }
           let(:section_hash) { {'repository' => {'name' => repo_name, 'ref' => ref}} }
 
-          it 'uses the provided REF to make requests for the archive link' do
+          it 'passes to the ref in the section hash to the repository' do
             expect(Repository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, Git)
             Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
           end
@@ -123,7 +123,7 @@ module Bookbinder
           context 'and a target_tag is provided' do
             let(:target_tag) { 'oh-dot-three-dot-oh' }
 
-            it 'uses the tag to make requests for the archive link' do
+            it 'passes the target tag to the repository' do
               expect(Repository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, Git)
               Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
@@ -170,30 +170,44 @@ module Bookbinder
       let(:time) { Time.new(2011, 1, 28) }
 
       context 'when publishing from local' do
-        it 'creates the git object locally' do
+        before do
           allow(repo).to receive(:has_git_object?).and_return(false)
-          allow(repo).to receive(:get_modification_date_for).with(file: file, git: git_base_object).and_return(time)
+        end
 
+        it 'creates the git object locally' do
+          allow(repo).to receive(:get_modification_date_for).with(file: file, git: git_base_object).and_return(time)
           expect(Git).to receive(:open).with(local_repo_dir+'/my_cow_repo').and_return(git_base_object)
           expect(section.get_modification_date_for(file: file)).to eq time
         end
 
         it 'raises if the local repo does not exist or is not a git repo' do
-          allow(repo).to receive(:has_git_object?).and_return(false)
           allow(Git).to receive(:open).with(local_repo_dir+'/my_cow_repo').and_raise
           expect { section.get_modification_date_for(file: file) }.
               to raise_error('Invalid git repository! Cannot get modification date for section: /some/dir/my_cow_repo.')
+        end
+
+        it 'passes the git base object to the repository' do
+          allow(Git).to receive(:open).with(local_repo_dir+'/my_cow_repo').and_return(git_base_object)
+          expect(repo).to receive(:get_modification_date_for).with(file: file, git: git_base_object)
+          section.get_modification_date_for(file: file)
         end
       end
 
       context 'when publishing from remote' do
         let(:time) { Time.new(2011, 1, 28) }
 
-        it 'gets the last modified date of the repository' do
+        before do
           allow(repo).to receive(:has_git_object?).and_return(true)
-          allow(repo).to receive(:get_modification_date_for).with(file: file, git: nil).and_return(time)
+        end
 
+        it 'gets the last modified date of the repository' do
+          allow(repo).to receive(:get_modification_date_for).with(file: file, git: nil).and_return(time)
           expect(section.get_modification_date_for(file: file)).to eq time
+        end
+
+        it 'passes nil as the git object to the repository' do
+          expect(repo).to receive(:get_modification_date_for).with(file: file, git: nil)
+          section.get_modification_date_for(file: file)
         end
       end
     end
