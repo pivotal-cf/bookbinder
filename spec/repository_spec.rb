@@ -7,6 +7,11 @@ module Bookbinder
     let(:logger) { NilLogger.new }
     let(:github_token) { 'blahblah' }
     let(:git_client) { GitClient.new(logger, access_token: github_token) }
+    let(:repo_name) { 'great_org/dogs-repo' }
+    let(:section_hash) { {'repository' => {'name' => repo_name}} }
+    let(:destination_dir) { tmp_subdir('output') }
+    let(:local_repo_dir) { 'spec/fixtures/repositories' }
+    let(:repository) { double Repository }
 
     before do
       allow(GitClient).to receive(:new).and_call_original
@@ -21,6 +26,34 @@ module Bookbinder
       expect {
         Repository.new(logger: logger, github_token: github_token)
       }.to raise_error(/full_name/)
+    end
+
+    describe '.build_from_remote' do
+
+      it 'calls copy_from_remote if destination dir is specified' do
+        allow(Repository).to receive(:new).and_return repository
+        expect(repository).to receive(:copy_from_remote).with(destination_dir, Git)
+        Repository.build_from_remote(logger, section_hash, destination_dir, nil, Git)
+      end
+
+      it 'does not copy_from_remote if destination dir is not specified' do
+        allow(Repository).to receive(:new).and_return repository
+        expect(Repository.build_from_remote(logger, section_hash, nil, nil, Git)).to eq repository
+      end
+    end
+
+    describe '.build_from_local' do
+
+      it 'calls copy_from_local if destination dir is specified' do
+        allow(Repository).to receive(:new).and_return repository
+        expect(repository).to receive(:copy_from_local).with(destination_dir)
+        Repository.build_from_local(logger, section_hash, local_repo_dir, destination_dir)
+      end
+
+      it 'does not copy_from_remote if destination dir is not specified' do
+        allow(Repository).to receive(:new).and_return repository
+        expect(Repository.build_from_local(logger, section_hash, local_repo_dir, nil)).to eq repository
+      end
     end
 
     describe '#tag_with' do
@@ -306,7 +339,6 @@ module Bookbinder
               to raise_error(/Unexpected Error: Git accessor unavailable/)
         end
       end
-
 
       context 'if the git accessor exists' do
         before do
