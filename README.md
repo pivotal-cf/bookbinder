@@ -98,9 +98,7 @@ If layout repository is set to the full name of a Github repository (eg `cloudfo
 
 ### Credentials Repository
 
-The credentials repository should be a private repository, referenced in your config.yml as `cred_repo`. It contains two files, `git_ssh_key`, which contains a Github private key with access to your repositories, and `credentials.yml`, which must include your deployment credentials:
-
-Please follow the directions found here if you need help generating a ssh-key: https://help.github.com/articles/generating-ssh-keys/.
+The credentials repository should be a private repository, referenced in your config.yml as `cred_repo`. It contains `credentials.yml`, which must include your deployment credentials:
 
 ```YAML
 aws:
