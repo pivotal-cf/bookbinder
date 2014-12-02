@@ -4,6 +4,12 @@ require 'git'
 
 module Bookbinder
   class Repository
+    class RepositoryCloneError < StandardError
+      def initialize(msg=nil)
+        super
+      end
+    end
+
     include Bookbinder::ShellOut #keep me
 
     attr_reader :full_name, :copied_to
@@ -55,7 +61,18 @@ module Bookbinder
     end
 
     def copy_from_remote(destination_dir, git_accessor = Git)
-      @git = git_accessor.clone("git@github.com:#{full_name}", directory, path: destination_dir)
+      begin
+        @git = git_accessor.clone("git@github.com:#{full_name}", directory, path: destination_dir)
+      rescue => e
+        if e.message.include? "Permission denied (publickey)"
+          raise RepositoryCloneError.new "Unable to access repository #{full_name}. You do not have the correct access rights. Please either add the key to your SSH agent, or set the GIT_SSH environment variable to override default SSH key usage. For more information run: `man git`."
+        elsif
+          e.message.include? "Repository not found."
+          raise RepositoryCloneError.new "Could not read from repository. Please make sure you have the correct access rights and the repository #{full_name} exists."
+        else
+          raise e
+        end
+      end
       @git.checkout(target_ref) unless target_ref == 'master'
       @copied_to = destination_dir
     end

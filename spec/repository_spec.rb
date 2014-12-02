@@ -136,6 +136,36 @@ module Bookbinder
         end
       end
 
+      context 'when there are no credentials for accessing the repository' do
+        let(:credential_error_message) {
+          "Unable to access repository #{repo_name}. You do not have the correct access rights. Please either add the key to your SSH agent, or set the GIT_SSH environment variable to override default SSH key usage. For more information run: `man git`."
+        }
+
+        it 'provides an informative message' do
+          allow(git_base_object).to receive(:clone).and_raise(StandardError.new("Permission denied (publickey)"))
+
+          expect { repo.copy_from_remote(destination_dir, git_base_object) }.to raise_error(credential_error_message)
+        end
+      end
+
+      context 'when the repository does not exist' do
+        let(:repo_dne_error_message) { "Could not read from repository. Please make sure you have the correct access rights and the repository #{repo_name} exists." }
+
+        it 'provides an informative error message' do
+          allow(git_base_object).to receive(:clone).and_raise(StandardError.new("Repository not found."))
+
+          expect { repo.copy_from_remote(destination_dir, git_base_object) }.to raise_error(repo_dne_error_message)
+        end
+      end
+
+      context 'when it throws a general error' do
+        it 'should forward error' do
+          allow(git_base_object).to receive(:clone).and_raise(StandardError.new("Error"))
+
+          expect { repo.copy_from_remote(destination_dir, git_base_object) }.to raise_error("Error")
+        end
+      end
+
       it 'returns the location of the copied directory' do
         expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
                                            File.basename(repo_name),
