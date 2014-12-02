@@ -5,7 +5,9 @@ module Bookbinder
     include_context 'tmp_dirs'
 
     around_with_fixture_repo do |spec|
-      spec.run
+      Kernel.silence_warnings do
+        spec.run
+      end
     end
 
     let(:sections) do
@@ -117,6 +119,22 @@ module Bookbinder
       context 'when a tag is provided' do
         let(:desired_tag) { 'foo-1.7.12' }
         let(:cli_args) { ['github', desired_tag] }
+
+        it 'displays tag deprecation message' do
+          book = double('Book', directory: 'test')
+          allow(FileUtils).to receive(:chdir).with(/test$/)
+
+          allow(Book).to receive(:from_remote).with(
+                              logger: logger,
+                              full_name: 'fantastic/book',
+                              destination_dir: anything,
+                              ref: desired_tag,
+                              git_accessor: Git
+                          ).and_return(book)
+
+          expect(Kernel).to receive(:warn).with("[DEPRECATION] `tag` is deprecated.")
+          publish_command.run(cli_args)
+        end
 
         it 'gets the book at that tag' do
           book = double('Book', directory: 'test')
