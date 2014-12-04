@@ -94,18 +94,43 @@ describe Archive do
       let(:build_number) { nil }
       let(:namespace) { 'a-name' }
 
-      context 'and there are files in the bucket that follow the naming pattern' do
-
+      context 'and there are more than one file in the bucket that follow the naming pattern' do
         before do
           create_s3_file namespace, '17'
           create_s3_file namespace, '3'
+
+          allow(Time).to receive(:now).and_return(Time.now + 30)
+
+          create_s3_file namespace, '1'
         end
 
-        it 'downloads the build with the highest build number' do
+        it 'downloads the green build that is the latest modified build' do
           download
           untarred_file = File.join(app_dir, 'stuff.txt')
           contents = File.read(untarred_file)
-          expect(contents).to eq("contents of #{namespace}-17")
+          expect(contents).to eq("contents of #{namespace}-1")
+        end
+      end
+
+      context 'and there is only one file in the bucket that conforms to the naming pattern' do
+        before do
+          create_s3_file namespace, '1'
+        end
+
+        it 'downloads the green build that is the latest modified build' do
+          download
+          untarred_file = File.join(app_dir, 'stuff.txt')
+          contents = File.read(untarred_file)
+          expect(contents).to eq("contents of #{namespace}-1")
+        end
+
+      end
+
+      context 'and when there are no files that conform to the naming pattern' do
+        let!(:bucket) { fog_connection.directories.create key: bucket_key }
+
+        it 'is blows up rather than trying to download it' do
+          expect {download}.to raise_error(Archive::FileDoesNotExist)
         end
       end
 

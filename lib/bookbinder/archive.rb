@@ -29,7 +29,7 @@ class Archive
     raise NoNamespaceGiven, 'One must specify a namespace to find files in this bucket' unless namespace
 
     directory = connection.directories.get bucket
-    build_number ||= highest_build_number_for_namespace(directory, namespace)
+    build_number ||= latest_build_number_for_namespace(directory, namespace)
     filename = ArtifactNamer.new(namespace, build_number, 'tgz').filename
 
     s3_file = directory.files.get(filename)
@@ -52,12 +52,20 @@ class Archive
     return tarball_filename, tarball_path
   end
 
-  def highest_build_number_for_namespace(directory, namespace)
+  def latest_build_number_for_namespace(directory, namespace)
     all_files = all_files_workaround_for_fog_map_limitation(directory.files)
-    all_files.map(&:key).map do |key|
-      matches = /^#{namespace}-([\d]+)\.tgz/.match(key)
-      matches[1] if matches
-    end.map(&:to_i).max
+
+    all_files_with_namespace = all_files.map do |file|
+      filename = file.key
+      matches = /^#{namespace}-([\d]+)\.tgz/.match(filename)
+      file if matches
+    end.compact
+
+    return nil if all_files_with_namespace.empty?
+    most_recent_file = all_files_with_namespace.sort_by { |file| file.last_modified }.last
+
+    most_recent_filename = most_recent_file.key
+    most_recent_build_number = /^#{namespace}-([\d]+)\.tgz/.match(most_recent_filename)[1]
   end
 
   def connection
