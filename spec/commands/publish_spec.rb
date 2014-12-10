@@ -132,7 +132,7 @@ module Bookbinder
                               git_accessor: Git
                           ).and_return(book)
 
-          expect(Kernel).to receive(:warn).with("[DEPRECATION] `tag` is deprecated.")
+          expect(Kernel).to receive(:warn).with("[WARNING] You are publishing from a tag. The `tag` parameter is deprecated and will be removed in a future release.")
           publish_command.run(cli_args)
         end
 
