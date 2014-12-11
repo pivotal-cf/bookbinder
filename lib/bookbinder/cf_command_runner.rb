@@ -102,7 +102,10 @@ class CfCommandRunner
   end
 
   def map_route(deploy_target_app, domain, host)
-    success = Kernel.system("#{cf_binary_path} map-route #{deploy_target_app} #{domain} -n #{host}")
+    map_route_command = "#{cf_binary_path} map-route #{deploy_target_app} #{domain}"
+    map_route_command += " -n #{host}" unless host.empty?
+
+    success = Kernel.system(map_route_command)
     raise "Deployed app to #{deploy_target_app} but failed to map hostname #{host}.#{domain} to it." unless success
   end
 

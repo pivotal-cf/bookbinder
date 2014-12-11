@@ -185,7 +185,23 @@ module Bookbinder
             let(:cf_prod_routes) {{ 'some-prod-domain.io' => 'some-prod-host' }}
 
             it 'raises' do
-              expect { cf_credentials.routes }.to raise_error(/Routes in credentials must be nested as an array/)
+              expect { cf_credentials.routes }.to raise_error(/Hosts in credentials must be nested as an array/)
+            end
+          end
+
+          context 'when all hosts for a domain are nil' do
+            let(:cf_prod_routes) {{ 'some-prod-domain.io' => nil }}
+
+            it 'raises' do
+              expect { cf_credentials.routes }.to raise_error(/Did you mean to add a list of hosts for domain some-prod-domain.io/)
+            end
+          end
+
+          context 'when a host is nil' do
+            let(:cf_prod_routes) {{ 'some-prod-domain.io' => [nil] }}
+
+            it 'raises' do
+              expect { cf_credentials.routes }.to raise_error(/Did you mean to provide a hostname for the domain some-prod-domain.io/)
             end
           end
         end

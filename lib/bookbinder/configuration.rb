@@ -66,16 +66,18 @@ module Bookbinder
         raise CredentialKeyError, e
       end
 
-      def correctly_formatted_domain_and_routes?(hostkey)
-        host = fetch(hostkey)
-        domains = host.keys
-        domains.each { |domain| correctly_formatted_domain?(domain, host) }
+      def correctly_formatted_domain_and_routes?(deploy_environment)
+        routes_hash = fetch(deploy_environment)
+        domains = routes_hash.keys
+        domains.each { |domain| correctly_formatted_domain?(domain, routes_hash) }
       end
 
-      def correctly_formatted_domain?(domain, host_hash)
+      def correctly_formatted_domain?(domain, routes_hash)
         raise 'Each domain in credentials must be a single string.' unless domain.is_a? String
         raise "Domain #{domain} in credentials must contain a web extension, e.g. '.com'." unless domain.include?('.')
-        raise 'Routes in credentials must be nested as an array under the desired domain.' unless host_hash[domain].is_a? Array
+        raise "Did you mean to add a list of hosts for domain #{domain}? Check your credentials.yml." unless routes_hash[domain]
+        raise "Hosts in credentials must be nested as an array under the desired domain #{domain}." unless routes_hash[domain].is_a? Array
+        raise "Did you mean to provide a hostname for the domain #{domain}? Check your credentials.yml." if routes_hash[domain].any?(&:nil?)
       end
     end
 

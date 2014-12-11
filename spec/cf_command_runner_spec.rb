@@ -308,6 +308,21 @@ OUTPUT
         end
       end
 
+      context 'when the host is an empty string' do
+        let(:config_hash) { { 'staging_host' => { 'domain-one.io' => [""] } } }
+        let(:cf_map_route_command_result) { true }
+
+        before do
+          allow(Kernel).to receive(:system).with(/cf map-route my-app-name domain-one.io/).and_return(cf_map_route_command_result)
+        end
+
+        it 'should run the cf map-routes without -n feature' do
+          expect(Kernel).to receive(:system).with(/cf map-route my-app-name domain-one.io/)
+
+          cf.map_routes('my-app-name')
+        end
+      end
+
       context 'when multiple domains with multiple routes exist' do
         let(:config_hash) do
           { 'staging_host'=>
