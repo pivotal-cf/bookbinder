@@ -54,8 +54,8 @@ class CfCommandRunner
   end
 
   def unmap_routes(app)
-    routes.each do |domain, name|
-      unmap_route(app, name, domain)
+    routes.each do |domain, host|
+      unmap_route(app, domain, host)
     end
   end
 
@@ -67,7 +67,7 @@ class CfCommandRunner
         map_route(app, domain, name)
         succeeded << [app, domain, name]
       rescue
-        succeeded.each { |app, domain, name| unmap_route(app, name, domain) }
+        succeeded.each { |app, domain, host| unmap_route(app, domain, host) }
         raise
       end
     end
@@ -109,9 +109,12 @@ class CfCommandRunner
     raise "Deployed app to #{deploy_target_app} but failed to map hostname #{host}.#{domain} to it." unless success
   end
 
-  def unmap_route(app, host, domain)
-    success = Kernel.system("#{cf_binary_path} unmap-route #{app} #{domain} -n #{host}")
-    raise "Failed to unmap route #{host} on #{app}." unless success
+  def unmap_route(deploy_target_app, domain, host)
+    unmap_route_command = "#{cf_binary_path} unmap-route #{deploy_target_app} #{domain}"
+    unmap_route_command += " -n #{host}" unless host.empty?
+
+    success = Kernel.system(unmap_route_command)
+    raise "Failed to unmap route #{host} on #{deploy_target_app}." unless success
   end
 
   def cf_binary_path

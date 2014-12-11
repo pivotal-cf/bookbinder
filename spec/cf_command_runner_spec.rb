@@ -308,21 +308,6 @@ OUTPUT
         end
       end
 
-      context 'when the host is an empty string' do
-        let(:config_hash) { { 'staging_host' => { 'domain-one.io' => [""] } } }
-        let(:cf_map_route_command_result) { true }
-
-        before do
-          allow(Kernel).to receive(:system).with(/cf map-route my-app-name domain-one.io/).and_return(cf_map_route_command_result)
-        end
-
-        it 'should run the cf map-routes without -n feature' do
-          expect(Kernel).to receive(:system).with(/cf map-route my-app-name domain-one.io/)
-
-          cf.map_routes('my-app-name')
-        end
-      end
-
       context 'when multiple domains with multiple routes exist' do
         let(:config_hash) do
           { 'staging_host'=>
@@ -399,6 +384,21 @@ OUTPUT
           it 'does not raise' do
             expect { cf.map_routes('my-app-name') }.not_to raise_error
           end
+        end
+      end
+
+      context 'when the host is an empty string' do
+        let(:config_hash) { { 'staging_host' => { 'domain-one.io' => [""] } } }
+        let(:cf_map_route_command_result) { true }
+
+        before do
+          allow(Kernel).to receive(:system).with(/cf map-route my-app-name domain-one.io/).and_return(cf_map_route_command_result)
+        end
+
+        it 'should run the cf map-routes without -n feature' do
+          expect(Kernel).to receive(:system).with(/cf map-route my-app-name domain-one.io/)
+
+          cf.map_routes('my-app-name')
         end
       end
     end
@@ -553,6 +553,21 @@ OUTPUT
           it 'raises an error' do
             expect { cf.unmap_routes('my-app-name') }.to raise_error(/Failed to unmap route some-madeup-host on my-app-name./)
           end
+        end
+      end
+
+      context 'when the host is an empty string' do
+        let(:config_hash) { { 'staging_host' => { 'domain-one.io' => [""] } } }
+        let(:some_staging_host_unmap_route_command_result) { true }
+
+        before do
+          allow(Kernel).to receive(:system).with(/cf unmap-route my-app-name domain-one.io/).and_return(some_staging_host_unmap_route_command_result)
+        end
+
+        it 'should run the cf map-routes without -n feature' do
+          expect(Kernel).to receive(:system).with(/cf unmap-route my-app-name domain-one.io/)
+
+          cf.unmap_routes('my-app-name')
         end
       end
     end
