@@ -27,7 +27,7 @@ module Bookbinder
 
     class CfCredentials
       REQUIRED_KEYS = %w(api_endpoint organization app_name).freeze
-      OPTIONAL_KEYS = %w(username password).freeze
+      OPTIONAL_KEYS = %w(username password production_space production_host staging_space staging_host).freeze
 
       def initialize(cred_hash, is_production)
         @creds = cred_hash

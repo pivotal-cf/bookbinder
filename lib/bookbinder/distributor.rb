@@ -22,11 +22,18 @@ module Bookbinder
     end
 
     def distribute
-      download if options[:production]
-      push_app
-      nil
-    ensure
-      upload_trace
+      begin
+        download if options[:production]
+        push_app
+        nil
+      rescue => e
+        cf_credentials = options[:cf_credentials]
+        cf_space = options[:production] ? cf_credentials.production_space : cf_credentials.staging_space
+        cf_routes = options[:production] ? cf_credentials.production_host : cf_credentials.staging_host
+        @logger.error "[ERROR] Error pushing doc site for CF organization: #{cf_credentials.organization}, CF space: #{cf_space}, CF account: #{cf_credentials.username}, routes: #{cf_routes}.\nError message: '#{e.message}'"
+      ensure
+        upload_trace
+      end
     end
 
     private

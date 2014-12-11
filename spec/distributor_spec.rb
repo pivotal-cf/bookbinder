@@ -16,6 +16,17 @@ module Bookbinder
                                         })
     end
 
+    let(:cf_credentials) do
+      Configuration::CfCredentials.new({
+                                           'api_endpoint' => 'http://get.your.apis.here.io',
+                                           'production_host' => 'http://get.your.apis.here.io',
+                                           'organization' => 'foooo',
+                                           'production_space' => 'foooo',
+                                           'app_name' => 'foooo',
+                                           'username' => 'username'
+                                       }, true)
+    end
+
     let(:book_repo_short_name) { 'fixture-book-title' }
     let(:book_repo_name) { "owner/#{book_repo_short_name}" }
     let(:namer_filename) { "#{book_repo_short_name}-#{build_number}.log" }
@@ -32,6 +43,7 @@ module Bookbinder
           fake_namer,
           app_dir: fake_dir,
           aws_credentials: aws_credentials,
+          cf_credentials: cf_credentials,
           production: production,
           build_number: build_number
       )
@@ -62,7 +74,7 @@ module Bookbinder
           distributor.distribute
         end
 
-        it "logs the tracefile's URL" do
+        it 'logs the tracefile URL' do
           expect(fake_archive).to receive(:upload_file).and_return(fake_uploaded_file)
           allow(logger).to receive(:log)
           expect(logger).to receive(:log).with(/#{Regexp.escape(fake_url)}/)
@@ -72,7 +84,7 @@ module Bookbinder
         it 'uploads despite push raising' do
           allow(fake_pusher).to receive(:push).and_raise('Hi there')
           expect(fake_archive).to receive(:upload_file)
-          expect { distributor.distribute }.to raise_error('Hi there')
+          distributor.distribute
         end
 
         context 'when download raises' do
@@ -80,7 +92,7 @@ module Bookbinder
           it 'uploads despite download raising' do
             allow(fake_archive).to receive(:download).and_raise('Hi there')
             expect(fake_archive).to receive(:upload_file)
-            expect { distributor.distribute }.to raise_error('Hi there')
+            distributor.distribute
           end
         end
 
@@ -118,10 +130,38 @@ module Bookbinder
           expect(logger).to receive(:warn).with(/Warning.*production/)
           distributor.distribute
         end
+
+        context 'when an error is thrown from downloading' do
+          it 'logs an informative message' do
+            allow(fake_archive).to receive(:download).and_raise("failed to download because of reason")
+            expect(logger).to receive(:error).with("[ERROR] Error pushing doc site for CF organization: foooo, CF space: foooo, CF account: username, routes: http://get.your.apis.here.io.\nError message: 'failed to download because of reason'")
+
+            distributor.distribute
+          end
+        end
+
+        context 'when an error is thrown from pushing' do
+          it 'logs an informative message' do
+            allow(fake_pusher).to receive(:push).and_raise("failed to push because of reason")
+            expect(logger).to receive(:error).with("[ERROR] Error pushing doc site for CF organization: foooo, CF space: foooo, CF account: username, routes: http://get.your.apis.here.io.\nError message: 'failed to push because of reason'")
+
+            distributor.distribute
+          end
+        end
       end
 
       context 'when not in production' do
         let(:production) { false }
+        let(:cf_credentials) do
+          Configuration::CfCredentials.new({
+                                               'api_endpoint' => 'http://get.your.apis.here.io',
+                                               'staging_host' => 'http://get.your.apis.for.staging.here.io',
+                                               'organization' => 'foooo',
+                                               'staging_space' => 'foo_stage',
+                                               'app_name' => 'foooo',
+                                               'username' => 'username'
+                                           }, false)
+        end
 
         it 'does not download the repo' do
           expect(fake_archive).to_not receive(:download)
@@ -131,6 +171,15 @@ module Bookbinder
         it 'does not warn' do
           expect(logger).not_to receive(:log).with(/Warning.*production/)
           distributor.distribute
+        end
+
+        context 'when an error is thrown from pushing an app' do
+          it 'logs an informative message' do
+            allow(fake_pusher).to receive(:push).and_raise("failed to push because of reason")
+            expect(logger).to receive(:error).with("[ERROR] Error pushing doc site for CF organization: foooo, CF space: foo_stage, CF account: username, routes: http://get.your.apis.for.staging.here.io.\nError message: 'failed to push because of reason'")
+
+            distributor.distribute
+          end
         end
       end
 
@@ -142,16 +191,6 @@ module Bookbinder
     end
 
     describe '.build' do
-      let(:cf_credentials) do
-        Configuration::CfCredentials.new({
-                                             'api_endpoint' => 'http://get.your.apis.here.io',
-                                             'production_host' => 'http://get.your.apis.here.io',
-                                             'organization' => 'foooo',
-                                             'production_space' => 'foooo',
-                                             'app_name' => 'foooo',
-                                         }, true)
-      end
-
       let(:options) do
         {
             book_repo: book_repo_name,
