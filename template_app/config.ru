@@ -1,7 +1,7 @@
 require 'vienna'
 
 use Rack::Auth::Basic, 'PCFP Docs' do |username, password|
-    username = 'pcf', password = 'docs'
+    username == 'pcf' && password == 'docs'
 end
 
 if File.exists?('redirects.rb')
