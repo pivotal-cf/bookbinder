@@ -30,7 +30,7 @@ module Bookbinder
         cf_credentials = options[:cf_credentials]
         cf_space = options[:production] ? cf_credentials.production_space : cf_credentials.staging_space
         cf_routes = options[:production] ? cf_credentials.production_host : cf_credentials.staging_host
-        @logger.error "[ERROR] Error pushing doc site for CF organization: #{cf_credentials.organization}, CF space: #{cf_space}, CF account: #{cf_credentials.username}, routes: #{cf_routes}.\nError message: '#{e.message}'"
+        @logger.error "[ERROR] #{e.message}\n[DEBUG INFO]\nCF organization: #{cf_credentials.organization}\nCF space: #{cf_space}\nCF account: #{cf_credentials.username}\nroutes: #{cf_routes}"
       ensure
         upload_trace
       end
