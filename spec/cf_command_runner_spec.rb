@@ -395,7 +395,7 @@ OUTPUT
           allow(Kernel).to receive(:system).with(/cf map-route my-app-name domain-one.io/).and_return(cf_map_route_command_result)
         end
 
-        it 'should run the cf map-routes without -n feature' do
+        it 'should run cf map-routes without the -n feature' do
           expect(Kernel).to receive(:system).with(/cf map-route my-app-name domain-one.io/)
 
           cf.map_routes('my-app-name')
@@ -564,7 +564,7 @@ OUTPUT
           allow(Kernel).to receive(:system).with(/cf unmap-route my-app-name domain-one.io/).and_return(some_staging_host_unmap_route_command_result)
         end
 
-        it 'should run the cf map-routes without -n feature' do
+        it 'should run cf unmap-routes without the -n feature' do
           expect(Kernel).to receive(:system).with(/cf unmap-route my-app-name domain-one.io/)
 
           cf.unmap_routes('my-app-name')
