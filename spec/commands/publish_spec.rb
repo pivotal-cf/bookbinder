@@ -43,7 +43,7 @@ module Bookbinder
     let(:publish_command) { Cli::Publish.new(logger, config) }
     let(:git_client) { GitClient.new(logger) }
 
-    context 'local' do
+    describe 'local' do
       around do |spec|
         WebMock.disable_net_connect!(:allow_localhost => true)
         spec.run
@@ -106,7 +106,7 @@ module Bookbinder
       end
     end
 
-    context 'github' do
+    describe 'github' do
       let(:zipped_repo_url) { "https://github.com/#{book}/archive/master.tar.gz" }
 
       it 'creates some static HTML' do
