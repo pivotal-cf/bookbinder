@@ -11,10 +11,15 @@ module Bookbinder
       Class.new do
         include Navigation::HelperMethods
 
-        attr_reader :config
+        attr_reader :config, :template, :partial_options
 
         def initialize(config)
           @config = config
+        end
+
+        def partial(template, options={}, &block)
+          @template = template
+          @partial_options = options
         end
       end
     end
@@ -36,6 +41,75 @@ module Bookbinder
       end
 
       ENV['MM_ROOT'] = original_mm_root
+    end
+
+    describe 'injecting customized drop down menu based on archive_menu key inside config' do
+      let(:first_version) { 'v2.0.0.0' }
+      let(:past_versions) { { 'v2.0.0.0' => 'archives/pcf-docs-1.2.pdf' } }
+      let(:config) do
+        {
+            archive_menu:
+                [
+                    first_version,
+                    past_versions
+                ]
+        }
+      end
+
+      context 'when the archive menu tag contains versions' do
+        it 'renders a default archive_menu template with the archive versions' do
+          class_wrapper = klass.new(config)
+          class_wrapper.yield_for_archive_drop_down_menu
+          expect(class_wrapper.template).to eq('archive_menus/default')
+          expect(class_wrapper.partial_options).to eq(locals: { menu_title: first_version, dropdown_links: [past_versions] })
+        end
+      end
+
+      context 'when the archive menu key is not present' do
+        let(:config) { {} }
+
+        it 'should fail gracefully' do
+          expect { klass.new(config).yield_for_archive_drop_down_menu }.to_not raise_error
+        end
+      end
+
+      context 'when the archive menu key is present but contains no versions' do
+        let(:config) do
+          {
+              archive_menu: nil
+          }
+        end
+
+        it 'should fail gracefully' do
+          expect { klass.new(config).yield_for_archive_drop_down_menu }.to raise_error ArchiveConfigFormatError, "Please provide a version for the archive_menu in config.yml."
+        end
+      end
+
+      context 'when only one version is specified' do
+        let(:config) do
+          {
+              archive_menu:
+                  [
+                      first_version
+                  ]
+          }
+        end
+
+        it 'renders a default archive_menu template with the archive version' do
+          class_wrapper = klass.new(config)
+          class_wrapper.yield_for_archive_drop_down_menu
+          expect(class_wrapper.template).to eq('archive_menus/default')
+          expect(class_wrapper.partial_options).to eq(locals: { menu_title: first_version, dropdown_links: [] })
+        end
+      end
+
+      context 'when the archive template does not exist' do
+        it 'catch the exception and raise a ArchiveMenuTemplateNotFound error' do
+          class_wrapper = klass.new(config)
+          allow(class_wrapper).to receive(:partial).and_raise
+          expect { class_wrapper.yield_for_archive_drop_down_menu }.to raise_error ArchiveMenuTemplateNotFound, "Could not find template 'archive_menus/default'. Please provide a template."
+        end
+      end
     end
 
     describe '#yield_for_code_snippet' do
