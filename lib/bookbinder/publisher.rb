@@ -2,69 +2,72 @@ require 'bookbinder/directory_helpers'
 
 module Bookbinder
   class Publisher
-    def initialize(logger)
+    def initialize(logger, spider)
       @logger = logger
       @pdf_generator = PdfGenerator.new(@logger)
+      @spider = spider
     end
 
-    def publish(options)
-      intermediate_directory = options.fetch(:output_dir)
-      final_app_dir = options.fetch(:final_app_dir)
-      master_middleman_dir = options.fetch(:master_middleman_dir)
-      spider = options.fetch(:spider) { Spider.new(@logger, app_dir: final_app_dir) }
+    def publish(cli_options, output_paths, publish_config, git_accessor)
+      intermediate_directory = output_paths.fetch(:output_dir)
+      final_app_dir = output_paths.fetch(:final_app_dir)
+      master_middleman_dir = output_paths.fetch(:master_middleman_dir)
       master_dir = File.join intermediate_directory, 'master_middleman'
       workspace_dir = File.join master_dir, 'source'
       build_directory = File.join master_dir, 'build/.'
       public_directory = File.join final_app_dir, 'public'
-      git_accessor = options.fetch(:git_accessor, Git)
 
-      @versions = options.fetch(:versions, [])
-      @book_repo = options[:book_repo]
+      @versions = publish_config.fetch(:versions, [])
+      @book_repo = publish_config[:book_repo]
       prepare_directories final_app_dir, intermediate_directory, workspace_dir, master_middleman_dir, master_dir, git_accessor
       FileUtils.cp 'redirects.rb', final_app_dir if File.exists?('redirects.rb')
 
-      sections = gather_sections(workspace_dir, options)
+      target_tag = cli_options[:target_tag]
+      sections = gather_sections(workspace_dir, publish_config, output_paths, target_tag, git_accessor)
       book = Book.new(logger: @logger,
                       full_name: @book_repo,
-                      sections: options.fetch(:sections))
+                      sections: publish_config.fetch(:sections))
+      host_for_sitemap = publish_config.fetch(:host_for_sitemap)
 
-      generate_site(options, master_dir, book, sections, build_directory, public_directory, git_accessor)
-      generate_sitemap(final_app_dir, options, spider)
+      generate_site(cli_options, output_paths, publish_config, master_dir, book, sections, build_directory, public_directory, git_accessor)
+      generate_sitemap(final_app_dir, host_for_sitemap, @spider)
 
       @logger.log "Bookbinder bound your book into #{final_app_dir.green}"
 
-      !spider.has_broken_links?
+      !@spider.has_broken_links?
     end
 
     private
 
-    def generate_sitemap(final_app_dir, options, spider)
+    def generate_sitemap(final_app_dir, host_for_sitemap, spider)
       server_director = ServerDirector.new(@logger, directory: final_app_dir)
-      sitemap_hostname = options.fetch(:host_for_sitemap)
-      raise "Your public host must be a single String." unless sitemap_hostname.is_a?(String)
+      raise "Your public host must be a single String." unless host_for_sitemap.is_a?(String)
 
-      server_director.use_server { |port| spider.generate_sitemap sitemap_hostname, port }
+      server_director.use_server { |port| spider.generate_sitemap host_for_sitemap, port }
     end
 
-    def generate_site(options, middleman_dir, book, sections, build_dir, public_dir, git_accessor)
+    def generate_site(cli_options, output_paths, publish_config, middleman_dir, book, sections, build_dir, public_dir, git_accessor)
       MiddlemanRunner.new(@logger).run(middleman_dir,
-                                       options.fetch(:template_variables, {}),
-                                       options[:local_repo_dir], options[:verbose],
-                                       book, sections, options[:host_for_sitemap],
-                                       git_accessor,
+                                       publish_config.fetch(:template_variables, {}),
+                                       output_paths[:local_repo_dir],
+                                       cli_options[:verbose],
+                                       book,
+                                       sections,
+                                       publish_config[:host_for_sitemap],
+                                       git_accessor
       )
       FileUtils.cp_r build_dir, public_dir
     end
 
-    def gather_sections(workspace, options)
-
-      section_data = options.fetch(:sections)
+    def gather_sections(workspace, publish_config, output_paths, target_tag, git_accessor)
+      section_data = publish_config.fetch(:sections)
       section_data.map do |attributes|
-        section = Section.get_instance(@logger, section_hash: attributes, destination_dir: workspace,
-                                       local_repo_dir: options[:local_repo_dir],
-                                       target_tag: options[:target_tag],
-                                       git_accessor: options.fetch(:git_accessor, Git)
-        )
+        section = Section.get_instance(@logger,
+                                       section_hash: attributes,
+                                       destination_dir: workspace,
+                                       local_repo_dir: output_paths[:local_repo_dir],
+                                       target_tag: target_tag,
+                                       git_accessor: git_accessor)
         section
       end
     end

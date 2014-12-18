@@ -98,8 +98,8 @@ module Bookbinder
           fake_publisher = double(:publisher)
 
           expect(Publisher).to receive(:new).and_return fake_publisher
-          expect(fake_publisher).to receive(:publish) do |args|
-            expect(args[:master_middleman_dir]).to match('layout-repo')
+          expect(fake_publisher).to receive(:publish) do |cli_options, output_paths, publish_config, git_accessor, optional_args|
+            expect(output_paths[:master_middleman_dir]).to match('layout-repo')
           end
           publish_command.run(['local'], SpecGitAccessor)
         end
@@ -189,8 +189,8 @@ module Bookbinder
         it 'passes the provided repo as master_middleman_dir' do
           fake_publisher = double(:publisher)
           expect(Publisher).to receive(:new).and_return fake_publisher
-          expect(fake_publisher).to receive(:publish) do |args|
-            expect(args[:master_middleman_dir]).to match('layout-repo')
+          expect(fake_publisher).to receive(:publish) do |cli_options, output_paths, publish_config, git_accessor, optional_args|
+            expect(output_paths[:master_middleman_dir]).to match('layout-repo')
           end
           publish_command.run(['github'], SpecGitAccessor)
         end
@@ -294,19 +294,30 @@ module Bookbinder
 
     describe 'publication arguments' do
       let(:fake_publisher) { double('publisher') }
-      let(:all_these_arguments_and_such) do
-        {sections: sections,
+      let(:git_accessor) { SpecGitAccessor }
+      let(:cli_options) do
+        {
+         verbose: false,
+         target_tag: nil
+        }
+      end
+      let(:publish_config) do
+        {
+         sections: sections,
+         pdf: nil,
+         pdf_index: [],
+         host_for_sitemap: 'example.com',
+         template_variables: {},
+         book_repo: 'fantastic/book'
+        }
+      end
+      let(:output_paths) do
+        {
          output_dir: anything,
          master_middleman_dir: anything,
          final_app_dir: anything,
-         pdf: nil,
-         verbose: false,
-         pdf_index: [],
-         local_repo_dir: anything,
-         host_for_sitemap: 'example.com',
-         template_variables: {},
-         book_repo: 'fantastic/book',
-         git_accessor: SpecGitAccessor}
+         local_repo_dir: anything
+        }
       end
 
       before do
@@ -314,7 +325,7 @@ module Bookbinder
       end
 
       it 'are appropriate' do
-        expect(fake_publisher).to receive(:publish).with all_these_arguments_and_such
+        expect(fake_publisher).to receive(:publish).with cli_options, output_paths, publish_config, git_accessor
         publish_command.run(['local'], SpecGitAccessor)
       end
     end

@@ -39,8 +39,13 @@ module Bookbinder
         # TODO: general solution to turn all string keys to symbols
         verbosity = cli_args.include?('--verbose')
         location = cli_args[0]
-        pub_args = publication_arguments(verbosity, location, pdf_options, target_tag, final_app_dir, @git_accessor)
-        success = Publisher.new(@logger).publish(pub_args)
+
+        cli_options = { verbose: verbosity, target_tag: target_tag }
+        output_paths = output_directory_paths(location, final_app_dir)
+        publish_config = publish_config(location)
+        spider = Spider.new(@logger, app_dir: final_app_dir)
+
+        success = Publisher.new(@logger, spider).publish(cli_options, output_paths, publish_config, @git_accessor)
         success ? 0 : 1
       end
 
@@ -64,31 +69,34 @@ module Bookbinder
         @config = Configuration.new(@logger, hash)
       end
 
-      def publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir, git_accessor)
-        local_repo_dir = location == 'local' ? File.absolute_path('..') : nil
+      def output_directory_paths(location, final_app_dir)
+        local_repo_dir = (location == 'local') ? File.absolute_path('..') : nil
 
+        {
+          final_app_dir: final_app_dir,
+          local_repo_dir: local_repo_dir,
+          output_dir: File.absolute_path(output_dir_name),
+          master_middleman_dir: layout_repo_path(local_repo_dir)
+        }
+      end
+
+      def publish_config(location)
         arguments = {
             sections: config.sections,
-            output_dir: File.absolute_path(output_dir_name),
-            master_middleman_dir: layout_repo_path(local_repo_dir, git_accessor),
-            final_app_dir: final_app_dir,
-            pdf: pdf_hash,
-            verbose: verbosity,
+            pdf: pdf_options,
             pdf_index: config.pdf_index,
-            local_repo_dir: local_repo_dir,
             book_repo: config.book_repo,
-            git_accessor: git_accessor
+            host_for_sitemap: config.public_host
         }
 
-        if config.has_option?('versions') && location != 'local'
-          config.versions.each { |version| arguments[:sections].concat sections_from version, git_accessor }
-          arguments.merge!(versions: config.versions)
+        optional_arguments = {}
+        optional_arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
+        if publishing_to_github? location
+          config.versions.each { |version| arguments[:sections].concat sections_from version, @git_accessor }
+          optional_arguments.merge!(versions: config.versions)
         end
 
-        arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
-        arguments.merge!(host_for_sitemap: config.public_host)
-        arguments.merge!(target_tag: target_tag) if target_tag
-        arguments
+        arguments.merge! optional_arguments
       end
 
       def sections_from(version, git_accessor)
@@ -115,14 +123,14 @@ module Bookbinder
         File.join temp_workspace, book.directory
       end
 
-      def layout_repo_path(local_repo_dir, git_accessor)
+      def layout_repo_path(local_repo_dir)
         if config.has_option?('layout_repo')
           if local_repo_dir
             File.join(local_repo_dir, config.layout_repo.split('/').last)
           else
             section = {'repository' => {'name' => config.layout_repo}}
             destination_dir = Dir.mktmpdir
-            repository =  Repository.build_from_remote(@logger, section, destination_dir, 'master', git_accessor)
+            repository =  Repository.build_from_remote(@logger, section, destination_dir, 'master', @git_accessor)
             if repository
               File.join(destination_dir, repository.directory)
             else
@@ -141,6 +149,10 @@ module Bookbinder
         nothing_special   = arguments[1..-1].empty?
 
         %w(local github).include?(arguments[0]) && (tag_provided || verbose || nothing_special)
+      end
+
+      def publishing_to_github?(publish_location)
+        config.has_option?('versions') && publish_location != 'local'
       end
     end
   end

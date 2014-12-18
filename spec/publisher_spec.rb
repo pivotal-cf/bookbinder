@@ -6,12 +6,14 @@ module Bookbinder
       include_context 'tmp_dirs'
 
       let(:logger) { NilLogger.new }
-      let(:publisher) { Publisher.new(logger) }
+      let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
+      let(:publisher) { Publisher.new(logger, spider) }
       let(:output_dir) { tmp_subdir 'output' }
       let(:final_app_dir) { tmp_subdir 'final_app' }
       let(:non_broken_master_middleman_dir) { generate_middleman_with 'non_broken_index.html' }
       let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html' }
       let(:git_client) { GitClient.new(logger) }
+      let(:working_links) { [] }
 
       context 'integration' do
         before do
@@ -44,19 +46,28 @@ module Bookbinder
               {'repository' => {'name' => some_other_repo, 'ref' => some_other_sha}}
           ]
 
+          output_paths = {
+              output_dir: output_dir,
+              master_middleman_dir: non_broken_master_middleman_dir,
+              final_app_dir: final_app_dir
+          }
+
+          publish_config = {
+              sections: sections,
+              host_for_sitemap: 'example.com',
+              pdf: {
+                  page: 'pretty_path/index.html',
+                  filename: 'DocGuide.pdf',
+                  header: 'pretty_path/header.html'
+              },
+              book_repo: book
+          }
+
           silence_io_streams do
-            publisher.publish sections: sections,
-                              output_dir: output_dir,
-                              master_middleman_dir: non_broken_master_middleman_dir,
-                              final_app_dir: final_app_dir,
-                              host_for_sitemap: 'example.com',
-                              pdf: {
-                                  page: 'pretty_path/index.html',
-                                  filename: 'DocGuide.pdf',
-                                  header: 'pretty_path/header.html'
-                              },
-                              book_repo: book,
-                              git_accessor: SpecGitAccessor
+            publisher.publish({},
+                              output_paths,
+                              publish_config,
+                              SpecGitAccessor)
           end
 
           index_html = File.read File.join(final_app_dir, 'public', 'pretty_path', 'index.html')
@@ -67,20 +78,30 @@ module Bookbinder
         end
 
         context 'when in local mode' do
-          let(:publication_arguments) do
+          let(:output_paths) do
             {
-                sections: [{'repository' => {'name' => 'my-docs-org/my-docs-repo'}}],
-                output_dir: output_dir,
-                master_middleman_dir: non_broken_master_middleman_dir,
-                host_for_sitemap: 'example.com',
-                local_repo_dir: local_repo_dir,
-                final_app_dir: final_app_dir,
-                book_repo: book
+              output_dir: output_dir,
+              master_middleman_dir: non_broken_master_middleman_dir,
+              final_app_dir: final_app_dir,
+              local_repo_dir: local_repo_dir
+            }
+          end
+
+          let(:publish_config) do
+            {
+              sections: [{'repository' => {'name' => 'my-docs-org/my-docs-repo'}}],
+              host_for_sitemap: 'example.com',
+              pdf: {
+                  page: 'pretty_path/index.html',
+                  filename: 'DocGuide.pdf',
+                  header: 'pretty_path/header.html'
+              },
+              book_repo: book
             }
           end
 
           it 'it can find repos locally rather than going to github' do
-            publisher.publish publication_arguments
+            publisher.publish({}, output_paths, publish_config, SpecGitAccessor)
 
             index_html = File.read File.join(final_app_dir, 'public', 'my-docs-repo', 'index.html')
             expect(index_html).to include 'This is a Markdown Page'
@@ -91,7 +112,10 @@ module Bookbinder
 
             context 'and the code repo is present' do
               it 'can find code example repos locally rather than going to github' do
-                publisher.publish publication_arguments
+                publisher.publish({},
+                                  output_paths,
+                                  publish_config,
+                                  SpecGitAccessor)
                 expect(WebMock).not_to have_requested(:any, /.*git.*/)
               end
             end
@@ -102,7 +126,10 @@ module Bookbinder
               it 'fails out' do
                 allow(logger).to receive(:log)
                 expect(logger).to receive(:log).with /skipping \(not found\)/
-                publisher.publish publication_arguments
+                publisher.publish({},
+                                  output_paths,
+                                  publish_config,
+                                  SpecGitAccessor)
                 expect(WebMock).not_to have_requested(:get, 'https://api.github.com/repos/fantastic/code-example-repo/tarball/master')
               end
             end
@@ -110,30 +137,62 @@ module Bookbinder
         end
 
         it 'generates non-broken links appropriately' do
-          sections = [{'repository' => {'name' => 'org/dogs-repo'}}]
-          no_broken_links = publisher.publish sections: sections,
-                                              output_dir: output_dir,
-                                              master_middleman_dir: dogs_master_middleman_dir,
-                                              host_for_sitemap: 'example.com',
-                                              local_repo_dir: local_repo_dir,
-                                              final_app_dir: final_app_dir,
-                                              book_repo: book
+          output_paths = {
+              output_dir: output_dir,
+              master_middleman_dir: dogs_master_middleman_dir,
+              local_repo_dir: local_repo_dir,
+              final_app_dir: final_app_dir
+          }
+
+          publish_config = {
+              sections: [{'repository' => {'name' => 'org/dogs-repo'}}],
+              host_for_sitemap: 'example.com',
+              pdf: {
+                  page: 'pretty_path/index.html',
+                  filename: 'DocGuide.pdf',
+                  header: 'pretty_path/header.html'
+              },
+              book_repo: book
+          }
+
+          no_broken_links = publisher.publish({},
+                            output_paths,
+                            publish_config,
+                            SpecGitAccessor)
+
           expect(no_broken_links).to eq true
         end
 
         it 'includes template variables into middleman' do
           variable_master_middleman_dir = generate_middleman_with 'variable_index.html.md.erb'
-          sections = []
 
-          publisher.publish sections: sections,
-                            output_dir: output_dir,
-                            master_middleman_dir: variable_master_middleman_dir,
-                            host_for_sitemap: 'example.com',
-                            local_repo_dir: local_repo_dir,
-                            final_app_dir: final_app_dir,
-                            template_variables: {'name' => 'Alexander'},
-                            verbose: true,
-                            book_repo: book
+          cli_options = {
+              verbose: true
+          }
+
+          output_paths = {
+              output_dir: output_dir,
+              master_middleman_dir: variable_master_middleman_dir,
+              local_repo_dir: local_repo_dir,
+              final_app_dir: final_app_dir
+          }
+
+          publish_config = {
+              sections: [],
+              host_for_sitemap: 'example.com',
+              pdf: {
+                  page: 'pretty_path/index.html',
+                  filename: 'DocGuide.pdf',
+                  header: 'pretty_path/header.html'
+              },
+              book_repo: book,
+              template_variables: {'name' => 'Alexander'}
+          }
+
+          publisher.publish(cli_options,
+                            output_paths,
+                            publish_config,
+                            SpecGitAccessor)
 
           index_html = File.read File.join(final_app_dir, 'public', 'index.html')
           expect(index_html).to include 'My variable name is Alexander.'
@@ -143,15 +202,28 @@ module Bookbinder
           let(:section_repo_name) { 'org/dogs-repo' }
           let(:code_repo) { 'cloudfoundry/code-example-repo' }
           let(:middleman_dir) { generate_middleman_with('code_snippet_index.html.md.erb') }
-          let(:publication_arguments) do
+          let(:cli_options) do
+            {
+                verbose: nil
+            }
+          end
+          let(:output_paths) do
             {
                 output_dir: output_dir,
-                final_app_dir: final_app_dir,
                 master_middleman_dir: middleman_dir,
-                host_for_sitemap: 'example.com',
+                final_app_dir: final_app_dir
+            }
+          end
+          let(:publish_config) do
+            {
                 sections: [{'repository' => {'name' => section_repo_name}}],
-                book_repo: book,
-                git_accessor: SpecGitAccessor
+                host_for_sitemap: 'example.com',
+                pdf: {
+                    page: 'pretty_path/index.html',
+                    filename: 'DocGuide.pdf',
+                    header: 'pretty_path/header.html'
+                },
+                book_repo: book
             }
           end
 
@@ -163,7 +235,8 @@ module Bookbinder
                                                             File.basename(code_repo),
                                                             anything).and_call_original
 
-            publisher.publish(publication_arguments)
+            publisher.publish({}, output_paths, publish_config, SpecGitAccessor)
+
             index_html = File.read(File.join(final_app_dir, 'public', 'index.html'))
             doc = Nokogiri::HTML(index_html)
 
@@ -195,71 +268,97 @@ module Bookbinder
                                                             "code-example-repo",
                                                             anything).and_call_original
 
-            publication_arguments[:verbose] = true
-            publisher.publish publication_arguments
+            cli_options[:verbose] = true
+            publisher.publish cli_options, output_paths, publish_config, SpecGitAccessor
           end
         end
 
         describe '#generate_sitemap' do
-          let(:host_for_sitemap) { "docs.dogs.com" }
+          let(:master_middleman_dir)   { dogs_master_middleman_dir }
           let(:sections) {  [{ 'repository' => {'name' => 'org/dogs-repo'} }]  }
+          let(:output_paths) do
+            {
+                output_dir: output_dir,
+                master_middleman_dir: master_middleman_dir,
+                final_app_dir: final_app_dir,
+                local_repo_dir: local_repo_dir
+            }
+          end
+          let(:publish_config) do
+            {
+                sections: sections,
+                host_for_sitemap: host_for_sitemap,
+                pdf: {
+                    page: 'pretty_path/index.html',
+                    filename: 'DocGuide.pdf',
+                    header: 'pretty_path/header.html'
+                },
+                book_repo: book
+            }
+          end
 
           context 'when the hostname is not a single string' do
-            let(:too_many_sitemap_hosts) { ['host1.runpivotal.com', 'host2.pivotal.io'] }
+            let(:host_for_sitemap) { ['host1.runpivotal.com', 'host2.pivotal.io'] }
+
             it 'raises' do
               expect do
-                publisher.publish sections: sections,
-                                  output_dir: output_dir,
-                                  master_middleman_dir: dogs_master_middleman_dir,
-                                  local_repo_dir: local_repo_dir,
-                                  final_app_dir: final_app_dir,
-                                  host_for_sitemap: too_many_sitemap_hosts,
-                                  book_repo: book
-
+                publisher.publish({}, output_paths, publish_config, SpecGitAccessor)
               end.to raise_error "Your public host must be a single String."
             end
           end
 
-          it 'contains the given pages in an XML sitemap' do
-            publisher.publish sections: sections,
-                              output_dir: output_dir,
-                              master_middleman_dir: dogs_master_middleman_dir,
-                              local_repo_dir: local_repo_dir,
-                              final_app_dir: final_app_dir,
-                              host_for_sitemap: host_for_sitemap,
-                              book_repo: book
+          context 'when the hostname is a single string' do
+            let(:host_for_sitemap) { "docs.dogs.com" }
 
-            doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
-            expect(doc.css('loc').map &:text).to match_array(%w(
-              http://docs.dogs.com/index.html
-              http://docs.dogs.com/dogs-repo/index.html
-              http://docs.dogs.com/dogs-repo/big_dogs/index.html
-              http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
-            ))
+            it 'contains the given pages in an XML sitemap' do
+              publisher.publish({}, output_paths, publish_config, SpecGitAccessor)
+
+              doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
+              expect(doc.css('loc').map &:text).to match_array(%w(
+                http://docs.dogs.com/index.html
+                http://docs.dogs.com/dogs-repo/index.html
+                http://docs.dogs.com/dogs-repo/big_dogs/index.html
+                http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
+              ))
+            end
           end
         end
 
         context "when the section's output directory has multiple levels" do
+          let(:some_repo) { 'my-docs-org/my-docs-repo' }
+          let(:some_sha)  { 'some-sha' }
+          let(:sections) do
+            {
+                'repository' => {'name' => some_repo, 'ref' => some_sha}, 'directory' => 'a/b/c'
+            }
+          end
+          let(:output_paths) do
+            {
+                output_dir: output_dir,
+                master_middleman_dir: non_broken_master_middleman_dir,
+                final_app_dir: final_app_dir,
+                local_repo_dir: local_repo_dir
+            }
+          end
+          let(:publish_config) do
+            {
+                sections: [sections],
+                host_for_sitemap: 'example.com',
+                pdf: {
+                    page: 'pretty_path/index.html',
+                    filename: 'DocGuide.pdf',
+                    header: 'pretty_path/header.html'
+                },
+                book_repo: book
+            }
+          end
+
           it 'creates intermediate directories' do
-            some_repo = 'my-docs-org/my-docs-repo'
-            some_sha = 'some-sha'
             allow(GitClient).to receive(:new).and_return(git_client)
-
-            sections = [
-              {'repository' => {'name' => some_repo, 'ref' => some_sha}, 'directory' => 'a/b/c'},
-            ]
-
             allow(GitClient).to receive(:new).and_return(git_client)
 
             silence_io_streams do
-              publisher.publish(
-                  sections: sections,
-                  output_dir: output_dir,
-                  master_middleman_dir: non_broken_master_middleman_dir,
-                  final_app_dir: final_app_dir,
-                  host_for_sitemap: 'example.com',
-                  book_repo: book,
-                  local_repo_dir: local_repo_dir)
+              publisher.publish({}, output_paths, publish_config, SpecGitAccessor)
             end
 
             index_html = File.read(File.join(final_app_dir, 'public', 'a', 'b', 'c', 'index.html'))
@@ -269,28 +368,59 @@ module Bookbinder
       end
 
       describe 'the verbose flag' do
+        before do
+          allow(spider).to receive(:generate_sitemap).and_return(working_links)
+          allow(spider).to receive(:has_broken_links?)
+        end
+
         let(:local_repo_dir) { nil }
+        let(:verbosity) { true }
+        let(:cli_options) do
+          {
+              verbose: verbosity
+          }
+        end
+        let(:output_paths) do
+          {
+              output_dir: output_dir,
+              master_middleman_dir: generate_middleman_with('erroneous_middleman.html.md.erb'),
+              final_app_dir: final_app_dir,
+              local_repo_dir: local_repo_dir
+          }
+        end
+        let(:publish_config) do
+          {
+              sections: [],
+              host_for_sitemap: 'example.com',
+              pdf: {
+                  page: 'pretty_path/index.html',
+                  filename: 'DocGuide.pdf',
+                  header: 'pretty_path/header.html'
+              },
+              book_repo: 'some-repo/some-book'
+          }
+        end
 
-        it 'suppresses detailed output when the verbose flag is not set' do
-          begin
-            real_stdout = $stdout
-            $stdout = StringIO.new
+        context 'when the verbose flag is not set' do
+          let(:verbosity) { false }
 
-            expect { publisher.publish repos: [],
-                                       output_dir: output_dir,
-                                       master_middleman_dir: generate_middleman_with('erroneous_middleman.html.md.erb'),
-                                       host_for_sitemap: 'example.com',
-                                       local_repo_dir: local_repo_dir,
-                                       final_app_dir: final_app_dir,
-                                       verbose: false }.to raise_error
+          it 'suppresses detailed output' do
+            begin
+              real_stdout = $stdout
+              $stdout = StringIO.new
 
-            $stdout.rewind
-            collected_output = $stdout.read
+              expect do
+                publisher.publish(cli_options, output_paths, publish_config, SpecGitAccessor)
+              end.to raise_error
 
-            expect(collected_output).to_not match(/error.*build\/index.html/)
-            expect(collected_output).to_not match(/undefined local variable or method `function_that_does_not_exist'/)
-          ensure
-            $stdout = real_stdout
+              $stdout.rewind
+              collected_output = $stdout.read
+
+              expect(collected_output).to_not match(/error.*build\/index.html/)
+              expect(collected_output).to_not match(/undefined local variable or method `function_that_does_not_exist'/)
+            ensure
+              $stdout = real_stdout
+            end
           end
         end
 
@@ -299,14 +429,7 @@ module Bookbinder
             real_stdout = $stdout
             $stdout = StringIO.new
             expect {
-              publisher.publish sections: [],
-                                       output_dir: output_dir,
-                                       master_middleman_dir: generate_middleman_with('erroneous_middleman.html.md.erb'),
-                                       host_for_sitemap: 'example.com',
-                                       local_repo_dir: local_repo_dir,
-                                       final_app_dir: final_app_dir,
-                                       verbose: true,
-                                       book_repo: 'some-repo/some-book'
+              publisher.publish cli_options, output_paths, publish_config, SpecGitAccessor
             }.to raise_error(SystemExit)
 
             $stdout.rewind
@@ -321,37 +444,42 @@ module Bookbinder
       end
 
       context 'unit' do
+        before do
+          allow(spider).to receive(:generate_sitemap).and_return(working_links)
+          allow(spider).to receive(:has_broken_links?)
+        end
+
         let(:master_middleman_dir) { tmp_subdir 'irrelevant' }
         let(:pdf_config) { nil }
         let(:local_repo_dir) { nil }
         let(:book) { 'some-repo/some-book' }
         let(:sections) { [] }
-        let(:working_links) { [] }
-        let(:spider) { double(:eight_legger) }
+        let(:cli_options) { {} }
+        let(:output_paths) do
+          {
+              output_dir: output_dir,
+              master_middleman_dir: master_middleman_dir,
+              final_app_dir: final_app_dir,
+              local_repo_dir: local_repo_dir
+          }
+        end
+        let(:publish_config) do
+          {
+              sections: sections,
+              host_for_sitemap: 'example.com',
+              pdf: pdf_config,
+              book_repo: book
+          }
+        end
 
         before do
           allow_any_instance_of(MiddlemanRunner).to receive(:run) do |middleman_dir|
             Dir.mkdir File.join(output_dir, 'master_middleman', 'build')
           end
-          allow(spider).to receive(:generate_sitemap).and_return(working_links)
-          allow(spider).to receive(:has_broken_links?)
         end
 
-        let(:publish_args) { {
-            output_dir: output_dir,
-            sections: sections,
-            master_middleman_dir: master_middleman_dir,
-            host_for_sitemap: 'example.com',
-            final_app_dir: final_app_dir,
-            pdf: pdf_config,
-            local_repo_dir: local_repo_dir,
-            spider: spider,
-            book_repo: book,
-            git_accessor: SpecGitAccessor
-        } }
-
         def publish
-          publisher.publish(publish_args)
+          publisher.publish(cli_options, output_paths, publish_config, SpecGitAccessor)
         end
 
         context 'when the output directory does not yet exist' do
@@ -392,69 +520,98 @@ module Bookbinder
         it 'returns true when everything is happy' do
           expect(publish).to eq true
         end
+      end
 
-        describe '#publish' do
-          context 'when publishing older versions under subdirectories' do
-            before do
-              publish_args.merge!(
-                  book_repo: 'org/book',
-                  versions: %w(v1 v2 v3)
-              )
-            end
+      describe '#publish' do
+        before do
+          allow(spider).to receive(:generate_sitemap).and_return(working_links)
+          allow(spider).to receive(:has_broken_links?)
+        end
 
-            it 'copies the previous book version index files to the middleman source dir' do
-              tmp_dir_v1 = Dir.mktmpdir
-              tmp_dir_v2 = Dir.mktmpdir
-              tmp_dir_v3 = Dir.mktmpdir
+        let(:master_middleman_dir) { tmp_subdir 'irrelevant' }
+        let(:pdf_config) { nil }
+        let(:local_repo_dir) { nil }
+        let(:book) { 'some-repo/some-book' }
+        let(:sections) { [] }
+        let(:cli_options) { {} }
+        let(:output_paths) do
+            {
+                output_dir: output_dir,
+                master_middleman_dir: master_middleman_dir,
+                final_app_dir: final_app_dir,
+                local_repo_dir: local_repo_dir
+            }
+        end
+        let(:publish_config) do
+          {
+              sections: sections,
+              host_for_sitemap: 'example.com',
+              pdf: pdf_config,
+              book_repo: book
+          }
+        end
 
-              expect(Dir).to receive(:mktmpdir).with('v1').and_yield(tmp_dir_v1)
-              expect(Dir).to receive(:mktmpdir).with('v2').and_yield(tmp_dir_v2)
-              expect(Dir).to receive(:mktmpdir).with('v3').and_yield(tmp_dir_v3)
+        context 'when publishing older versions under subdirectories' do
+          before do
+            publish_config.merge!(
+                book_repo: 'org/book',
+                versions: %w(v1 v2 v3)
+            )
+          end
 
-              book_v1 = double('Book', directory: 'book')
-              expect(Book).to receive(:from_remote).with(
-                                  logger: logger,
-                                  full_name: 'org/book',
-                                  destination_dir: tmp_dir_v1,
-                                  ref: 'v1',
-                                  git_accessor: SpecGitAccessor) do
-                SpecGitAccessor.clone('org/book', 'book', path: tmp_dir_v1).checkout('v1')
-              end.and_return(book_v1)
+          it 'copies the previous book version index files to the middleman source dir' do
+            tmp_dir_v1 = Dir.mktmpdir
+            tmp_dir_v2 = Dir.mktmpdir
+            tmp_dir_v3 = Dir.mktmpdir
 
-              book_v2 = double('Book', directory: 'book')
-              expect(Book).to receive(:from_remote).with(
-                                  logger: logger,
-                                  full_name: 'org/book',
-                                  destination_dir: tmp_dir_v2,
-                                  ref: 'v2',
-                                  git_accessor: SpecGitAccessor) do
-                SpecGitAccessor.clone('org/book', 'book', path: tmp_dir_v2).checkout('v2')
-              end.and_return(book_v2)
+            allow(Dir).to receive(:mktmpdir).and_call_original
+            expect(Dir).to receive(:mktmpdir).with('v1').and_yield(tmp_dir_v1)
+            expect(Dir).to receive(:mktmpdir).with('v2').and_yield(tmp_dir_v2)
+            expect(Dir).to receive(:mktmpdir).with('v3').and_yield(tmp_dir_v3)
 
-              book_v3 = double('Book', directory: 'book')
-              expect(Book).to receive(:from_remote).with(
-                                  logger: logger,
-                                  full_name: 'org/book',
-                                  destination_dir: tmp_dir_v3,
-                                  ref: 'v3',
-                                  git_accessor: SpecGitAccessor) do
-                SpecGitAccessor.clone('org/book', 'book', path: tmp_dir_v3).checkout('v3')
-              end.and_return(book_v3)
+            book_v1 = double('Book', directory: 'book')
+            expect(Book).to receive(:from_remote).with(
+                                logger: logger,
+                                full_name: 'org/book',
+                                destination_dir: tmp_dir_v1,
+                                ref: 'v1',
+                                git_accessor: SpecGitAccessor) do
+              SpecGitAccessor.clone('org/book', 'book', path: tmp_dir_v1).checkout('v1')
+            end.and_return(book_v1)
 
-              publish
+            book_v2 = double('Book', directory: 'book')
+            expect(Book).to receive(:from_remote).with(
+                                logger: logger,
+                                full_name: 'org/book',
+                                destination_dir: tmp_dir_v2,
+                                ref: 'v2',
+                                git_accessor: SpecGitAccessor) do
+              SpecGitAccessor.clone('org/book', 'book', path: tmp_dir_v2).checkout('v2')
+            end.and_return(book_v2)
 
-              v1_index = File.read(
-                  File.join(output_dir, 'master_middleman', 'source', 'v1', 'index.html.md'))
-              expect(v1_index).to eq "this is v1\n"
+            book_v3 = double('Book', directory: 'book')
+            expect(Book).to receive(:from_remote).with(
+                                logger: logger,
+                                full_name: 'org/book',
+                                destination_dir: tmp_dir_v3,
+                                ref: 'v3',
+                                git_accessor: SpecGitAccessor) do
+              SpecGitAccessor.clone('org/book', 'book', path: tmp_dir_v3).checkout('v3')
+            end.and_return(book_v3)
 
-              v2_index = File.read(
-                  File.join(output_dir, 'master_middleman', 'source', 'v2', 'index.html.md'))
-              expect(v2_index).to eq "this is v2\n"
+            publisher.publish(cli_options, output_paths, publish_config, SpecGitAccessor)
 
-              v3_index = File.read(
-                  File.join(output_dir, 'master_middleman', 'source', 'v3', 'index.html.md'))
-              expect(v3_index).to eq "this is v3\n"
-            end
+            v1_index = File.read(
+                File.join(output_dir, 'master_middleman', 'source', 'v1', 'index.html.md'))
+            expect(v1_index).to eq "this is v1\n"
+
+            v2_index = File.read(
+                File.join(output_dir, 'master_middleman', 'source', 'v2', 'index.html.md'))
+            expect(v2_index).to eq "this is v2\n"
+
+            v3_index = File.read(
+                File.join(output_dir, 'master_middleman', 'source', 'v3', 'index.html.md'))
+            expect(v3_index).to eq "this is v3\n"
           end
         end
       end
