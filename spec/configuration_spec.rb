@@ -4,6 +4,7 @@ module Bookbinder
     let(:bookbinder_schema_version) { '1.0.0' }
     let(:logger) { NilLogger.new }
     let(:user_schema_version) { '1.0.0' }
+    let(:archive_menu) { [] }
     let(:config_hash) do
       {
           'book_repo' => 'some-org/some-repo',
@@ -13,9 +14,11 @@ module Bookbinder
           'sections' => ['section1', 'section2'],
           'public_host' => 'http://www.example.com',
           'template_variables' => {'some-var' => 'some-value'},
-          'schema_version' => user_schema_version
+          'schema_version' => user_schema_version,
+          'archive_menu' => archive_menu
       }
     end
+
     let(:config) { Configuration.new(logger, config_hash) }
 
     describe 'valid configuration construction' do
@@ -115,6 +118,13 @@ module Bookbinder
       it 'exposes these keys' do
         config_hash.each do |key, value|
           expect(config.send(key)).to eq value
+        end
+      end
+
+      context 'when optional keys do not exist' do
+        it 'returns nil' do
+          config_hash.delete('archive_menu')
+          expect(config.send('archive_menu')).to be_nil
         end
       end
 

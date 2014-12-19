@@ -2,10 +2,11 @@ require 'bookbinder/directory_helpers'
 
 module Bookbinder
   class Publisher
-    def initialize(logger, spider)
+    def initialize(logger, spider, static_site_generator)
       @logger = logger
       @pdf_generator = PdfGenerator.new(@logger)
       @spider = spider
+      @static_site_generator = static_site_generator
     end
 
     def publish(cli_options, output_paths, publish_config, git_accessor)
@@ -47,14 +48,15 @@ module Bookbinder
     end
 
     def generate_site(cli_options, output_paths, publish_config, middleman_dir, book, sections, build_dir, public_dir, git_accessor)
-      MiddlemanRunner.new(@logger).run(middleman_dir,
-                                       publish_config.fetch(:template_variables, {}),
-                                       output_paths[:local_repo_dir],
-                                       cli_options[:verbose],
-                                       book,
-                                       sections,
-                                       publish_config[:host_for_sitemap],
-                                       git_accessor
+      @static_site_generator.run(middleman_dir,
+                                 publish_config.fetch(:template_variables, {}),
+                                 output_paths[:local_repo_dir],
+                                 cli_options[:verbose],
+                                 book,
+                                 sections,
+                                 publish_config[:host_for_sitemap],
+                                 publish_config[:archive_menu],
+                                 git_accessor
       )
       FileUtils.cp_r build_dir, public_dir
     end

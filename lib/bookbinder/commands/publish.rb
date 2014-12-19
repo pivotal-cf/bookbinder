@@ -44,8 +44,9 @@ module Bookbinder
         output_paths = output_directory_paths(location, final_app_dir)
         publish_config = publish_config(location)
         spider = Spider.new(@logger, app_dir: final_app_dir)
+        static_site_generator = MiddlemanRunner.new(@logger)
 
-        success = Publisher.new(@logger, spider).publish(cli_options, output_paths, publish_config, @git_accessor)
+        success = Publisher.new(@logger, spider, static_site_generator).publish(cli_options, output_paths, publish_config, @git_accessor)
         success ? 0 : 1
       end
 
@@ -86,7 +87,8 @@ module Bookbinder
             pdf: pdf_options,
             pdf_index: config.pdf_index,
             book_repo: config.book_repo,
-            host_for_sitemap: config.public_host
+            host_for_sitemap: config.public_host,
+            archive_menu: config.archive_menu
         }
 
         optional_arguments = {}

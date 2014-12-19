@@ -114,9 +114,18 @@ module Bookbinder
 
     end
 
-    %w(book_repo layout_repo cred_repo sections public_host pdf pdf_index versions).each do |method_name|
+    CONFIG_REQUIRED_KEYS = %w(book_repo layout_repo cred_repo sections public_host pdf pdf_index versions)
+    CONFIG_OPTIONAL_KEYS = %w(archive_menu)
+
+    CONFIG_REQUIRED_KEYS.each do |method_name|
       define_method(method_name) do
         config.fetch(method_name)
+      end
+    end
+
+    CONFIG_OPTIONAL_KEYS.each do |method_name|
+      define_method(method_name) do
+        config[method_name]
       end
     end
 

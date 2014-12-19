@@ -7,11 +7,13 @@ module Bookbinder
 
       let(:logger) { NilLogger.new }
       let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
-      let(:publisher) { Publisher.new(logger, spider) }
+      let(:static_site_generator) { MiddlemanRunner.new logger }
+      let(:publisher) { Publisher.new(logger, spider, static_site_generator) }
       let(:output_dir) { tmp_subdir 'output' }
       let(:final_app_dir) { tmp_subdir 'final_app' }
       let(:non_broken_master_middleman_dir) { generate_middleman_with 'non_broken_index.html' }
       let(:dogs_master_middleman_dir) { generate_middleman_with 'dogs_index.html' }
+      let(:archive_menu) { {} }
       let(:git_client) { GitClient.new(logger) }
       let(:working_links) { [] }
 
@@ -397,7 +399,8 @@ module Bookbinder
                   filename: 'DocGuide.pdf',
                   header: 'pretty_path/header.html'
               },
-              book_repo: 'some-repo/some-book'
+              book_repo: 'some-repo/some-book',
+              archive_menu: {}
           }
         end
 
@@ -454,7 +457,14 @@ module Bookbinder
         let(:local_repo_dir) { nil }
         let(:book) { 'some-repo/some-book' }
         let(:sections) { [] }
-        let(:cli_options) { {} }
+        let(:host_for_sitemap) { 'example.com' }
+        let(:archive_menu) { {} }
+        let(:template_variables) { {} }
+        let(:cli_options) do
+          {
+              verbose: false
+          }
+        end
         let(:output_paths) do
           {
               output_dir: output_dir,
@@ -466,14 +476,15 @@ module Bookbinder
         let(:publish_config) do
           {
               sections: sections,
-              host_for_sitemap: 'example.com',
+              host_for_sitemap: host_for_sitemap,
               pdf: pdf_config,
-              book_repo: book
+              book_repo: book,
+              archive_menu: archive_menu
           }
         end
 
         before do
-          allow_any_instance_of(MiddlemanRunner).to receive(:run) do |middleman_dir|
+          allow(static_site_generator).to receive(:run) do |middleman_dir|
             Dir.mkdir File.join(output_dir, 'master_middleman', 'build')
           end
         end
@@ -488,6 +499,19 @@ module Bookbinder
             publish
             expect(File.exists?(output_dir)).to eq true
           end
+        end
+
+        it 'sends middlemanRunner the correct arguments to run' do
+          expect(static_site_generator).to receive(:run).with(anything,
+                                                             template_variables,
+                                                             local_repo_dir,
+                                                             false,
+                                                             anything,
+                                                             sections,
+                                                             host_for_sitemap,
+                                                             archive_menu,
+                                                             SpecGitAccessor)
+          publish
         end
 
         it 'clears the output directory before running' do
@@ -522,7 +546,7 @@ module Bookbinder
         end
       end
 
-      describe '#publish' do
+      describe 'publishing with the version tag' do
         before do
           allow(spider).to receive(:generate_sitemap).and_return(working_links)
           allow(spider).to receive(:has_broken_links?)

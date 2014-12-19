@@ -28,15 +28,16 @@ module Bookbinder
       allow(BookbinderLogger).to receive(:new).and_return(logger)
     end
 
-    def run_middleman(template_variables = {}, subnav_templates = {})
+    def run_middleman(template_variables: {}, subnav_templates: {}, archive_menu: {})
       original_mm_root = ENV['MM_ROOT']
 
       Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
       ENV['MM_ROOT'] = tmpdir
       Dir.chdir(tmpdir) do
-        build_command = Middleman::Cli::Build.new [], {:quiet => true}, {}
+        build_command = Middleman::Cli::Build.new [], {:quiet => false}, {}
         Middleman::Cli::Build.shared_instance(false).config[:template_variables] = template_variables
         Middleman::Cli::Build.shared_instance(false).config[:subnav_templates] = subnav_templates
+        Middleman::Cli::Build.shared_instance(false).config[:archive_menu] = archive_menu
         build_command.invoke :build, [], {:verbose => false}
       end
 
@@ -44,70 +45,77 @@ module Bookbinder
     end
 
     describe 'injecting customized drop down menu based on archive_menu key inside config' do
-      let(:first_version) { 'v2.0.0.0' }
+      let(:source_dir) { tmp_subdir 'source' }
+      let(:source_file_content) { '<%= yield_for_archive_drop_down_menu %>' }
+      let(:source_file_under_test) { 'index.md.erb' }
+      let(:source_file_title) { 'Dogs' }
+      let(:output) { File.read File.join(tmpdir, 'build', 'index.html') }
+      let(:partial_content) do
+        '<div class="header-dropdown"><a class="header-dropdown-link"><%= menu_title %></a></div><div class="header-dropdown-content"><ul><% for link in dropdown_links %><li><a href="<%= link.values.first %>"><%= link.keys.first %></a></li><% end %></ul></div>'
+      end
+      let(:first_version) { 'v3.0.0.0' }
       let(:past_versions) { { 'v2.0.0.0' => 'archives/pcf-docs-1.2.pdf' } }
-      let(:config) do
-        {
-            archive_menu:
-                [
-                    first_version,
-                    past_versions
-                ]
-        }
+      let(:archive_menu) do
+        [
+            first_version,
+            past_versions
+        ]
       end
 
-      context 'when the archive menu tag contains versions' do
-        it 'renders a default archive_menu template with the archive versions' do
-          class_wrapper = klass.new(config)
-          class_wrapper.yield_for_archive_drop_down_menu
-          expect(class_wrapper.template).to eq('archive_menus/default')
-          expect(class_wrapper.partial_options).to eq(locals: { menu_title: first_version, dropdown_links: [past_versions] })
-        end
+      before do
+        FileUtils.cp_r 'master_middleman/.', tmpdir
+        FileUtils.mkdir_p source_dir
+        squelch_middleman_output
+        write_markdown_source_file source_file_under_test, source_file_title, source_file_content
       end
 
-      context 'when the archive menu key is not present' do
-        let(:config) { {} }
-
-        it 'should fail gracefully' do
-          expect { klass.new(config).yield_for_archive_drop_down_menu }.to_not raise_error
-        end
-      end
-
-      context 'when the archive menu key is present but contains no versions' do
-        let(:config) do
-          {
-              archive_menu: nil
-          }
+      context 'when the archive template does exist' do
+        before do
+          write_archive_menu_content "archive_menus/_default.erb", partial_content
         end
 
-        it 'should fail gracefully' do
-          expect { klass.new(config).yield_for_archive_drop_down_menu }.to raise_error ArchiveConfigFormatError, "Please provide a version for the archive_menu in config.yml."
-        end
-      end
+        context 'when the archive menu tag contains versions' do
+          let(:expected_past_versions) { { 'v2.0.0.0' => '/archives/pcf-docs-1.2.pdf' } }
 
-      context 'when only one version is specified' do
-        let(:config) do
-          {
-              archive_menu:
-                  [
-                      first_version
-                  ]
-          }
+          it 'renders a default archive_menu template with the archive versions' do
+            run_middleman(archive_menu: archive_menu)
+            doc = Nokogiri::HTML(output)
+            expect(doc.css('div .header-dropdown-link').text).to eq(first_version)
+            expect(doc.css('.header-dropdown-content').text).to eq(past_versions.keys.first)
+            expect(doc.css('.header-dropdown-content ul li a').first['href']).to eq("#{expected_past_versions.values.first}")
+          end
         end
 
-        it 'renders a default archive_menu template with the archive version' do
-          class_wrapper = klass.new(config)
-          class_wrapper.yield_for_archive_drop_down_menu
-          expect(class_wrapper.template).to eq('archive_menus/default')
-          expect(class_wrapper.partial_options).to eq(locals: { menu_title: first_version, dropdown_links: [] })
-        end
-      end
+        context 'when the optional archive menu key is not present' do
+          it 'should run middleman without including the key' do
+            expect do
+              original_mm_root = ENV['MM_ROOT']
 
-      context 'when the archive template does not exist' do
-        it 'catch the exception and raise a ArchiveMenuTemplateNotFound error' do
-          class_wrapper = klass.new(config)
-          allow(class_wrapper).to receive(:partial).and_raise
-          expect { class_wrapper.yield_for_archive_drop_down_menu }.to raise_error ArchiveMenuTemplateNotFound, "Could not find template 'archive_menus/default'. Please provide a template."
+              Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
+              ENV['MM_ROOT'] = tmpdir
+              Dir.chdir(tmpdir) do
+                build_command = Middleman::Cli::Build.new [], {:quiet => false}, {}
+                build_command.invoke :build, [], {:verbose => false}
+              end
+
+              ENV['MM_ROOT'] = original_mm_root
+
+            end.to_not raise_error
+          end
+        end
+
+        context 'when only one version is specified' do
+          let(:archive_menu) do
+            [
+                first_version
+            ]
+          end
+
+          it 'renders an archive_menu template with the archive version' do
+            run_middleman(archive_menu: archive_menu)
+            doc = Nokogiri::HTML(output)
+            expect(doc.css('div .header-dropdown-link').text).to eq(first_version)
+          end
         end
       end
     end
@@ -220,7 +228,7 @@ MARKDOWN
         context 'and a subnav is specified' do
           it 'inserts the subnav specified in the config' do
             write_subnav_content "subnavs/#{subnav}.erb", subnav_code
-            run_middleman({}, { section_directory => subnav })
+            run_middleman(subnav_templates: { section_directory => subnav })
             doc = Nokogiri::HTML(output)
 
             expect(doc.css('div')[0].first[1]).to eq('sub-nav')
@@ -231,7 +239,7 @@ MARKDOWN
         context 'and a subnav is not specified' do
           let(:subnav){ nil }
           it 'inserts the default subnav' do
-            run_middleman({}, { section_directory => subnav })
+            run_middleman(subnav_templates: { section_directory => subnav })
             expect(output).to be_empty
           end
         end
@@ -437,7 +445,7 @@ MARKDOWN
         let(:output) { File.read File.join(tmpdir, 'build', 'index.html') }
 
         it 'displays nothing' do
-          run_middleman 'var_name' => 'A Variable Value'
+          run_middleman(template_variables: { 'var_name' => 'A Variable Value' } )
           expect(output).to include('A Variable Value')
         end
       end

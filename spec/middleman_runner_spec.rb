@@ -8,6 +8,7 @@ module Bookbinder
     let(:target_dir_path) { Dir.mktmpdir }
     let(:template_variables) { {'anybody' => 'nobody'} }
     let(:production_host) { double }
+    let(:archive_menu) { {} }
     let(:verbose) { false }
     let(:sections) { [
         Section.new(logger, Repository.new(full_name: '', directory: 'my/place/rocks'), 'my_subnav_template'),
@@ -17,7 +18,7 @@ module Bookbinder
     let(:local_repo_dir) { '/dev/null' }
 
     def run_middleman
-      middleman_runner.run(target_dir_path, template_variables, local_repo_dir, verbose, book, sections, production_host)
+      middleman_runner.run(target_dir_path, template_variables, local_repo_dir, verbose, book, sections, production_host, archive_menu)
     end
 
     it 'behaves like a ShellOut'
@@ -42,9 +43,16 @@ module Bookbinder
 
     it 'tells middleman the production host' do
       run_middleman
-      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
 
+      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
       expect(middleman_instance.config[:production_host]).to eq(production_host)
+    end
+
+    it 'tells middleman the archive menu' do
+      run_middleman
+
+      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
+      expect(middleman_instance.config[:archive_menu]).to eq(archive_menu)
     end
 
     it 'tells middleman not to use relative links' do

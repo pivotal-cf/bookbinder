@@ -29,12 +29,15 @@ module Bookbinder
            'subnav_template' => 'vegetables'}
       ]
     end
+    let(:archive_menu) { [] }
 
     let(:config_hash) do
       {'sections' => sections,
        'book_repo' => book,
        'pdf_index' => [],
-       'public_host' => 'example.com'}
+       'public_host' => 'example.com',
+       'archive_menu' => archive_menu
+      }
     end
 
     let(:config) { Configuration.new(logger, config_hash) }
@@ -67,7 +70,6 @@ module Bookbinder
       it 'runs idempotently' do
         silence_io_streams do
           publish_command.run(['local'], SpecGitAccessor) # Run Once
-
           expect(File.exist? dogs_index).to eq true
           publish_command.run(['local'], SpecGitAccessor) # Run twice
           expect(File.exist? dogs_index).to eq true
@@ -98,7 +100,7 @@ module Bookbinder
           fake_publisher = double(:publisher)
 
           expect(Publisher).to receive(:new).and_return fake_publisher
-          expect(fake_publisher).to receive(:publish) do |cli_options, output_paths, publish_config, git_accessor, optional_args|
+          expect(fake_publisher).to receive(:publish) do |cli_options, output_paths, publish_config, git_accessor|
             expect(output_paths[:master_middleman_dir]).to match('layout-repo')
           end
           publish_command.run(['local'], SpecGitAccessor)
@@ -189,7 +191,7 @@ module Bookbinder
         it 'passes the provided repo as master_middleman_dir' do
           fake_publisher = double(:publisher)
           expect(Publisher).to receive(:new).and_return fake_publisher
-          expect(fake_publisher).to receive(:publish) do |cli_options, output_paths, publish_config, git_accessor, optional_args|
+          expect(fake_publisher).to receive(:publish) do |cli_options, output_paths, publish_config, git_accessor|
             expect(output_paths[:master_middleman_dir]).to match('layout-repo')
           end
           publish_command.run(['github'], SpecGitAccessor)
@@ -295,23 +297,24 @@ module Bookbinder
     describe 'publication arguments' do
       let(:fake_publisher) { double('publisher') }
       let(:git_accessor) { SpecGitAccessor }
-      let(:cli_options) do
+      let(:expected_cli_options) do
         {
          verbose: false,
          target_tag: nil
         }
       end
-      let(:publish_config) do
+      let(:expected_publish_config) do
         {
          sections: sections,
          pdf: nil,
          pdf_index: [],
          host_for_sitemap: 'example.com',
          template_variables: {},
-         book_repo: 'fantastic/book'
+         book_repo: 'fantastic/book',
+         archive_menu: archive_menu
         }
       end
-      let(:output_paths) do
+      let(:expected_output_paths) do
         {
          output_dir: anything,
          master_middleman_dir: anything,
@@ -324,8 +327,8 @@ module Bookbinder
         expect(Publisher).to receive(:new).and_return fake_publisher
       end
 
-      it 'are appropriate' do
-        expect(fake_publisher).to receive(:publish).with cli_options, output_paths, publish_config, git_accessor
+      it 'pass the appropriate arguments to publish from the config' do
+        expect(fake_publisher).to receive(:publish).with expected_cli_options, expected_output_paths, expected_publish_config, git_accessor
         publish_command.run(['local'], SpecGitAccessor)
       end
     end
