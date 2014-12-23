@@ -49,7 +49,7 @@ module Bookbinder
     end
 
     def validate(config_hash)
-      Configuration.new(logger, config_hash) if configuration_validator.valid?(config_hash)
+      Configuration.new(logger, config_hash) if configuration_validator.valid?(config_hash, Configuration::CURRENT_SCHEMA_VERSION, Configuration::STARTING_SCHEMA_VERSION)
     end
   end
 end

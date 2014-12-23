@@ -6,14 +6,11 @@ module Bookbinder
       @logger = logger
     end
 
-    attr_reader :bookbinder_schema_version
-
-    def valid?(config_hash)
+    def valid?(config_hash, bookbinder_schema_version, starting_schema_version)
       @config_hash = config_hash
       raise 'Your config.yml appears to be empty. Please check and try again.' unless config_hash
 
-      @bookbinder_schema_version = Configuration::CURRENT_SCHEMA_VERSION
-      starting_schema_version = Configuration::STARTING_SCHEMA_VERSION
+      @bookbinder_schema_version = bookbinder_schema_version
       schema_major_version, schema_minor_version, schema_patch_version = bookbinder_schema_version.split('.')
 
       if user_schema_version.nil?
@@ -67,11 +64,11 @@ module Bookbinder
     end
 
     def incompatible_schema_message
-      "[ERROR] Your config.yml format, schema version #{user_schema_version}, is older than this version of Bookbinder can support. Please update your config.yml keys and format to version #{bookbinder_schema_version} and try again."
+      "[ERROR] Your config.yml format, schema version #{user_schema_version}, is older than this version of Bookbinder can support. Please update your config.yml keys and format to version #{@bookbinder_schema_version} and try again."
     end
 
     def unrecognized_schema_version_message
-      "[ERROR] The config schema version #{user_schema_version} is unrecognized by this version of Bookbinder. The latest schema version is #{bookbinder_schema_version}."
+      "[ERROR] The config schema version #{user_schema_version} is unrecognized by this version of Bookbinder. The latest schema version is #{@bookbinder_schema_version}."
     end
 
     def nonbreaking_schema_message_for(version_level)
