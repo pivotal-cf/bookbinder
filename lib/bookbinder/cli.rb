@@ -44,9 +44,10 @@ module Bookbinder
     end
 
     def run_command(command, command_arguments)
-      configuration = config
-      raise 'Non-unique directory names' unless configuration.valid?
-      command.new(logger, configuration).run command_arguments
+      configuration_validator = ConfigurationValidator.new(logger)
+      @configuration_fetcher = ConfigurationFetcher.new(logger, configuration_validator)
+      @configuration_fetcher.set_config_file_path './config.yml'
+      command.new(logger, @configuration_fetcher).run command_arguments
     rescue Publish::VersionUnsupportedError => e
       logger.error "config.yml at version '#{e.message}' has an unsupported API."
       1
@@ -62,27 +63,6 @@ module Bookbinder
     rescue => e
       logger.error e.message
       1
-    end
-
-    def config
-      @config ||= fetch_config
-    end
-
-    def fetch_config
-      begin
-        config_hash              = YAML.load(File.read('./config.yml'))
-      rescue Psych::SyntaxError => e
-        raise "There is a syntax error in your config.yml: \n #{e}"
-      end
-      if config_hash
-        if File.exists?('./pdf_index.yml')
-          config_hash['pdf_index'] = YAML.load(File.read('./pdf_index.yml'))
-        else
-          config_hash['pdf_index'] = nil
-        end
-      end
-      raise 'config.yml is empty' unless config_hash
-      Configuration.new(logger, config_hash)
     end
 
     def unrecognized_flag(name)

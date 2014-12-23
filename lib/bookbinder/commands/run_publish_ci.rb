@@ -19,15 +19,15 @@ module Bookbinder
       end
 
       def publish(cli_args)
-        Publish.new(@logger, config).run(['github'] + cli_args)
+        Publish.new(@logger, @configuration_fetcher).run(['github'] + cli_args)
       end
 
       def push_to_staging
-        PushLocalToStaging.new(@logger, config).run []
+        PushLocalToStaging.new(@logger, @configuration_fetcher).run []
       end
 
       def push_tarball
-        BuildAndPushTarball.new(@logger, config).run []
+        BuildAndPushTarball.new(@logger, @configuration_fetcher).run []
       end
     end
   end

@@ -21,14 +21,16 @@ module Bookbinder
     end
 
     let(:logger) { NilLogger.new }
+    let(:configuration_fetcher) { double('configuration_fetcher') }
     let(:config) { Configuration.new(logger, config_hash) }
-    let(:command) { described_class.new(logger, config) }
+    let(:command) { described_class.new(logger, configuration_fetcher) }
 
     before do
       fake_cred_repo = double(CredentialProvider, credentials: {'aws' => {}, 'cloud_foundry' => {}})
       allow(CredentialProvider).to receive(:new).and_return(fake_cred_repo)
 
       allow(Distributor).to receive(:build).and_return(fake_distributor)
+      allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
     end
 
     it 'returns 0' do

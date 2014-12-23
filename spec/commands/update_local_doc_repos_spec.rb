@@ -10,9 +10,14 @@ module Bookbinder
       let(:config_hash) { { 'sections' => sections } }
       let(:logger) { NilLogger.new }
       let(:config) { Configuration.new(logger, config_hash) }
+      let(:configuration_fetcher) { double('configuration_fetcher') }
+
+      before do
+        allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
+      end
 
       it 'returns 0' do
-        expect(Cli::UpdateLocalDocRepos.new(logger, config).run(nil)).to eq(0)
+        expect(Cli::UpdateLocalDocRepos.new(logger, configuration_fetcher).run(nil)).to eq(0)
       end
 
       it 'calls #update_local_copy on an instance of each Repository' do
@@ -24,7 +29,7 @@ module Bookbinder
           expect(repository).to receive(:update_local_copy)
         end
 
-        Cli::UpdateLocalDocRepos.new(logger, config).run(nil)
+        Cli::UpdateLocalDocRepos.new(logger, configuration_fetcher).run(nil)
       end
     end
   end

@@ -16,23 +16,23 @@ module Bookbinder
     end
     let(:config) { Configuration.new(logger, config_hash) }
     let(:git_client) { GitClient.new(logger) }
+    let(:configuration_fetcher) { double('configuration_fetcher') }
 
     before do
       allow(git_client).to receive(:create_tag!)
       allow(GitClient).to receive(:new).and_return(git_client)
+      allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
     end
 
     it 'should tag the book and its sections' do
       @book = expect_to_receive_and_return_real_now(Book, :new, {logger: logger, full_name: book_title, sections: []})
       expect(@book).to receive(:tag_self_and_sections_with).with(desired_tag)
-      Cli::Tag.new(logger, config).run [desired_tag]
+      Cli::Tag.new(logger, configuration_fetcher).run [desired_tag]
     end
 
     context 'when no tag is supplied' do
       it 'raises a Cli::InvalidArguments error' do
-        expect {
-          Cli::Tag.new(logger, config).run []
-        }.to raise_error(Cli::InvalidArguments)
+        expect { Cli::Tag.new(logger, configuration_fetcher).run [] }.to raise_error(Cli::InvalidArguments)
       end
     end
   end

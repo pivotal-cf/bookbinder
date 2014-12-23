@@ -21,110 +21,18 @@ module Bookbinder
 
     let(:config) { Configuration.new(logger, config_hash) }
 
-    describe 'valid configuration construction' do
-      context 'when the user has specified a config schema version' do
-
-        context 'when config schema version is supported' do
-          context 'and matches the latest version' do
-            let(:user_schema_version) { '1.0.0' }
-            let(:bookbinder_schema_version) { '1.0.0' }
-
-            it 'should create the valid configuration object' do
-              expect { Configuration.new(logger, config_hash, bookbinder_schema_version) }.to_not raise_error
-            end
-          end
-
-          context 'but there exists a new minor version' do
-            let(:user_schema_version) { '1.0.0' }
-            let(:bookbinder_schema_version)   { '1.2.0' }
-
-            it 'logs an informative error message' do
-              expect(logger).to receive(:warn).with "[WARNING] Your schema is valid, but there exists a new minor version. Consider updating your config.yml."
-              expect(Configuration.new(logger, config_hash, bookbinder_schema_version)).to_not be_nil
-            end
-          end
-
-          context 'but there exists a new patch version' do
-            let(:user_schema_version) { '1.0.0' }
-            let(:bookbinder_schema_version)   { '1.0.2' }
-
-            it 'logs an informative error message' do
-              expect(logger).to receive(:warn).with "[WARNING] Your schema is valid, but there exists a new patch version. Consider updating your config.yml."
-              expect(Configuration.new(logger, config_hash, bookbinder_schema_version)).to_not be_nil
-            end
-          end
-        end
-
-        context 'when config schema version is not recognized by bookbinder' do
-          let(:bookbinder_schema_version) { '2.0.0' }
-
-          context 'and the major version is unknown' do
-            let(:user_schema_version) { '3.0.0' }
-            it 'raises a ConfigSchemaUnrecognizedError' do
-              expect { Configuration.new(logger, config_hash, bookbinder_schema_version) }.to raise_error Configuration::ConfigSchemaUnsupportedError, "[ERROR] The config schema version #{user_schema_version} is unrecognized by this version of Bookbinder. The latest schema version is #{bookbinder_schema_version}."
-            end
-          end
-
-          context 'and the minor version is unknown' do
-            let(:user_schema_version) { '2.1.0' }
-            it 'raises a ConfigSchemaUnrecognizedError' do
-              expect { Configuration.new(logger, config_hash, bookbinder_schema_version) }.to raise_error Configuration::ConfigSchemaUnsupportedError, "[ERROR] The config schema version #{user_schema_version} is unrecognized by this version of Bookbinder. The latest schema version is #{bookbinder_schema_version}."
-            end
-          end
-
-          context 'and the patch version is unknown' do
-            let(:user_schema_version) { '2.0.1' }
-            it 'raises a ConfigSchemaUnrecogizedError' do
-              expect { Configuration.new(logger, config_hash, bookbinder_schema_version) }.to raise_error Configuration::ConfigSchemaUnsupportedError, "[ERROR] The config schema version #{user_schema_version} is unrecognized by this version of Bookbinder. The latest schema version is #{bookbinder_schema_version}."
-            end
-          end
-
-        end
-
-        context 'when config schema version is unsupported due to a new major version' do
-          let(:user_schema_version) { '1.0.0' }
-          let(:bookbinder_schema_version)   { '2.0.0' }
-
-          it 'raises a ConfigSchemaUnsupportedError' do
-            expect { Configuration.new(logger, config_hash, bookbinder_schema_version) }.to raise_error Configuration::ConfigSchemaUnsupportedError, "[ERROR] Your config.yml format, schema version #{user_schema_version}, is older than this version of Bookbinder can support. Please update your config.yml keys and format to version #{bookbinder_schema_version} and try again."
-          end
-        end
-      end
-
-      context 'when the user has not specified a config schema version' do
-        before { config_hash.delete("schema_version") }
-
-        context 'when bookbinder is 1.0.0' do
-          it 'should not raise an error' do
-            expect { Configuration.new(logger, config_hash) }.to_not raise_error
-          end
-
-          it 'should create the valid configuration object' do
-            expect(Configuration.new(logger, config_hash)).to_not be_nil
-          end
-        end
-
-        context 'when bookbinder is not 1.0.0' do
-          let(:bookbinder_schema_version) { '1.0.2' }
-
-          it 'raises a ConfigSchemaUnrecognizedError' do
-            expect { Configuration.new(logger, config_hash, bookbinder_schema_version) }.to raise_error Configuration::ConfigSchemaUnsupportedError, "[ERROR] Bookbinder now requires a certain schema. Please see README and provide a schema version."
-          end
-        end
-      end
-    end
-
     describe 'accessing configuration values' do
-      it 'exposes these keys' do
+      it 'exposes some of these keys' do
+        config_hash.delete('schema_version')
         config_hash.each do |key, value|
-          expect(config.send(key)).to eq value
+          expect(config.public_send(key)).to eq value
         end
       end
 
       context 'when optional keys do not exist' do
         it 'returns nil' do
           config_hash.delete('archive_menu')
-          expect(config.send('archive_menu')).to be_nil
+          expect(config.public_send('archive_menu')).to be_nil
         end
       end
 
@@ -156,7 +64,7 @@ module Bookbinder
 
       before do
         repository = double
-        allow(Repository).to receive(:new).with(logger:logger, full_name: 'some-org/cred-repo').and_return(repository)
+        allow(Repository).to receive(:new).with(logger: logger, full_name: 'some-org/cred-repo').and_return(repository)
         allow(CredentialProvider).to receive(:new).with(logger, repository).and_return(cred_repo)
       end
 
@@ -371,42 +279,6 @@ module Bookbinder
 
       it 'is false for different configurations' do
         expect(Configuration.new(logger, config_hash_1)).not_to eq(Configuration.new(logger, config_hash_2))
-      end
-    end
-
-    describe 'validity' do
-      it 'should be valid when directory names are unique' do
-        section1 = {
-            'repository' => {
-                'name' => 'cloudfoundry/docs-cloudfoundry-concepts'
-            },
-            'directory' => 'concepts'
-        }
-
-        section2 = {
-            'repository' => {
-                'name' => 'cloudfoundry/docs-cloudfoundry-foo'
-            },
-            'directory' => 'foo'
-        }
-
-        valid_config_hash = {'sections' => [section1, section2]}
-
-        configuration = Configuration.new(logger, valid_config_hash)
-        expect(configuration.valid?).to eq(true)
-      end
-
-      it 'should be invalid when directory names are not unique' do
-        section1 = {
-            'repository' => {
-                'name' => 'cloudfoundry/docs-cloudfoundry-concepts'
-            },
-            'directory' => 'concepts'
-        }
-        invalid_config_hash = {'sections' => [section1, section1]}
-
-        configuration = Configuration.new(logger, invalid_config_hash)
-        expect(configuration.valid?).to eq(false)
       end
     end
 

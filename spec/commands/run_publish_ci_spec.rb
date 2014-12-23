@@ -2,18 +2,20 @@ require 'spec_helper'
 
 module Bookbinder
   describe Cli::RunPublishCI do
-    let(:fake_publish) { double }
-    let(:fake_push_local_to_staging) { double }
-    let(:fake_build_and_push_tarball) { double }
+    let(:fake_publish) { double 'fake_publish' }
+    let(:fake_push_local_to_staging) { double 'fake_push_to_staging' }
+    let(:fake_build_and_push_tarball) { double 'fake_build_and_push_tarball' }
     let(:config_hash) { {'book_repo' => 'foo/bar'} }
     let(:config) { Configuration.new(logger, config_hash) }
     let(:logger) { NilLogger.new }
-    let(:command) { Cli::RunPublishCI.new(logger, config) }
+    let(:configuration_fetcher) { double 'configuration_fetcher' }
+    let(:command) { Cli::RunPublishCI.new(logger, configuration_fetcher) }
 
     before do
-      allow(Cli::Publish).to receive(:new).with(logger, config) { fake_publish }
-      allow(Cli::PushLocalToStaging).to receive(:new).with(logger, config) { fake_push_local_to_staging }
-      allow(Cli::BuildAndPushTarball).to receive(:new).with(logger, config) { fake_build_and_push_tarball }
+      allow(configuration_fetcher).to receive(:fetch_config) { config }
+      allow(Cli::Publish).to receive(:new).with(logger, configuration_fetcher) { fake_publish }
+      allow(Cli::PushLocalToStaging).to receive(:new).with(logger, configuration_fetcher) { fake_push_local_to_staging }
+      allow(Cli::BuildAndPushTarball).to receive(:new).with(logger, configuration_fetcher) { fake_build_and_push_tarball }
     end
 
     context 'when ENV["BUILD_NUMBER"] is set' do
@@ -47,7 +49,7 @@ module Bookbinder
       end
 
       it 'respects the --verbose flag' do
-        publish_command = expect_to_receive_and_return_real_now(Cli::Publish, :new, logger, config)
+        publish_command = expect_to_receive_and_return_real_now(Cli::Publish, :new, logger, configuration_fetcher)
         expect(publish_command).to receive(:run).with ['github', '--verbose']
         command.run ['--verbose']
       end

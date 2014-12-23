@@ -7,10 +7,15 @@ module Bookbinder
     let(:fake_generator) { double(generate: double) }
     let(:links) { %w(such-uri.html wow-uri.html amaze-uri.html) }
     let(:urls) { links.map { |l| l.prepend('http://localhost:41722/') } }
-    let(:generate_pdf_object) { Cli::GeneratePDF.new(logger, config) }
+    let(:configuration_fetcher) { double('configuration_fetcher') }
+    let(:generate_pdf_object) { Cli::GeneratePDF.new(logger, configuration_fetcher) }
     let(:generate) { generate_pdf_object.run(cli_arguments) }
     let(:logger) { NilLogger.new }
     let(:config) { double(:configurator) }
+
+    before do
+      allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
+    end
 
     around_with_fixture_repo &:run
 
