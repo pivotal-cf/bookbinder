@@ -27,10 +27,6 @@ describe Sieve do
           expect(working_links).to eq([root_page_url])
         end
       end
-
-      context 'and it does not have a valid html body' do
-        skip
-      end
     end
 
     context 'when the page is not found' do

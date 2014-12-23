@@ -18,7 +18,7 @@ describe PdfGenerator do
 
 
   it 'generates a PDF from the specified pages and header' do
-    skip if RbConfig::CONFIG['host_os'] =~ /darwin/
+    skip 'This test can only run in a linux environment.' if RbConfig::CONFIG['host_os'] =~ /darwin/
 
     silence_io_streams do
       PdfGenerator.new(logger).generate [source_page], generated_pdf, header_file
@@ -32,7 +32,7 @@ describe PdfGenerator do
     end
 
     it 'generates a PDF from a live web-page and header' do
-      skip if RbConfig::CONFIG['host_os'] =~ /darwin/
+      skip 'This test can only run in a linux environment.' if RbConfig::CONFIG['host_os'] =~ /darwin/
 
       many_pages = 110.times.map { 'http://example.com' }
       silence_io_streams do

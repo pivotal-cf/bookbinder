@@ -21,8 +21,6 @@ module Bookbinder
       middleman_runner.run(target_dir_path, template_variables, local_repo_dir, verbose, book, sections, production_host, archive_menu)
     end
 
-    it 'behaves like a ShellOut'
-
     it 'invokes Middleman in the requested directory' do
       build_command = expect_to_receive_and_return_real_now(Middleman::Cli::Build, :new, [], {:quiet => !verbose}, {})
 
