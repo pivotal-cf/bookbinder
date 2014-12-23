@@ -27,7 +27,7 @@ module Bookbinder
 
       def bind_book(cli_arguments, final_app_dir, target_tag)
         if target_tag
-          Kernel.warn "[WARNING] You are publishing from a tag. The `tag` parameter is deprecated and will be removed in a future release."
+          @logger.warn "[WARNING] You are publishing from a tag. The `tag` parameter is deprecated and will be removed in a future release."
 
           checkout_book_at(target_tag) { generate_site_etc(cli_arguments, final_app_dir, target_tag) }
         else
