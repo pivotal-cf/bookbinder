@@ -5,7 +5,8 @@ module Bookbinder
     let(:logger) { NilLogger.new }
     let(:bookbinder_schema_version) { '1.0.0' }
     let(:user_schema_version) { '1.0.0' }
-    let(:subject) { ConfigurationValidator.new(logger) }
+    let(:file_system_accessor) { double 'fileSystemAccessor', file_exist?: true }
+    let(:subject) { ConfigurationValidator.new(logger, file_system_accessor) }
 
     describe 'validating the configuration hash' do
       context 'when the config hash is empty' do
@@ -162,6 +163,111 @@ module Bookbinder
         invalid_config_hash = {'sections' => [section1, section1]}
 
         expect{subject.valid? invalid_config_hash, bookbinder_schema_version, user_schema_version}.to raise_error ConfigurationValidator::DuplicateSectionNameError
+      end
+    end
+
+    describe 'validating the archive_menu' do
+      context "when there's an archive_menu key and the partial is present" do
+        it "returns true" do
+          config = {
+            'archive_menu' => [
+              'v1.3.0.0'
+            ],
+            'sections' => [
+              {
+                'repository' => {
+                  'name' => 'cloudfoundry/docs-cloudfoundry-concepts'
+                }
+              }
+            ]
+          }
+          expect(subject.valid?(config, bookbinder_schema_version, user_schema_version)).to be_truthy
+        end
+      end
+
+      context 'when there is an archive_menu key but the corresponding partial does not exist' do
+        let(:archive_menu_path) {}
+
+        before do
+          allow(file_system_accessor).to receive(:file_exist?).and_return false
+        end
+
+        it 'raises an exception' do
+          section1 = {
+              'repository' => {
+                  'name' => 'cloudfoundry/docs-cloudfoundry-concepts'
+              },
+              'directory' => 'concepts'
+          }
+
+          section2 = {
+              'repository' => {
+                  'name' => 'cloudfoundry/docs-cloudfoundry-foo'
+              },
+              'directory' => 'foo'
+          }
+
+          valid_config_hash = {
+              'archive_menu' => [
+                  'v1.3.0.0'
+              ],
+              'sections' => [section1, section2]
+          }
+
+          expect { subject.valid? valid_config_hash, bookbinder_schema_version, user_schema_version }.to raise_error ConfigurationValidator::MissingArchiveMenuPartialError
+        end
+      end
+
+      context "when there is no archive_menu and no partial" do
+        it "returns true" do
+          allow(file_system_accessor).to receive(:file_exist?).and_return false
+
+          config = {
+            'sections' => [
+              {
+                'repository' => {
+                  'name' => 'cloudfoundry/docs-cloudfoundry-foo'
+                },
+              }
+            ]
+          }
+
+          expect(subject.valid? config, bookbinder_schema_version, user_schema_version).to be_truthy
+        end
+      end
+
+      context 'when there is an archive_menu but an item is empty' do
+        it 'raises an exception' do
+          config = {
+            'archive_menu' => [ nil ],
+            'sections' => [
+              {
+                'repository' => {
+                  'name' => 'cloudfoundry/docs-cloudfoundry-foo'
+                },
+              }
+            ]
+          }
+          expect { subject.valid? config, bookbinder_schema_version, user_schema_version }.
+            to raise_error ConfigurationValidator::EmptyArchiveItemsError
+        end
+      end
+
+      context 'when there is an empty archive_menu key' do
+        it "raises an exception" do
+          config = {
+            'archive_menu' => nil,
+            'sections' => [
+              {
+                'repository' => {
+                  'name' => 'cloudfoundry/docs-cloudfoundry-foo'
+                }
+              }
+            ]
+          }
+          expect { subject.valid? config, bookbinder_schema_version, user_schema_version }.
+            to raise_error ConfigurationValidator::ArchiveMenuNotDefinedError
+        end
       end
     end
   end

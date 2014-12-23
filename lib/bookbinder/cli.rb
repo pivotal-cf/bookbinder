@@ -1,3 +1,5 @@
+require_relative 'local_file_system_accessor'
+
 module Bookbinder
   class Cli
     class InvalidArguments < StandardError;
@@ -45,7 +47,8 @@ module Bookbinder
 
     def run_command(command, command_arguments)
       yaml_loader = YAMLLoader.new
-      configuration_validator = ConfigurationValidator.new(logger)
+      local_file_system_accessor = LocalFileSystemAccessor.new
+      configuration_validator = ConfigurationValidator.new(logger, local_file_system_accessor)
       @configuration_fetcher = ConfigurationFetcher.new(logger, configuration_validator, yaml_loader)
       @configuration_fetcher.set_config_file_path './config.yml'
       command.new(logger, @configuration_fetcher).run command_arguments
