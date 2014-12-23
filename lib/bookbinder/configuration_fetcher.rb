@@ -8,7 +8,7 @@ module Bookbinder
                   :config,
                   :config_file_path
 
-    def initialize(logger, configuration_validator, loader = YAMLLoader.new)
+    def initialize(logger, configuration_validator, loader)
       @loader = loader
       @logger = logger
       @configuration_validator = configuration_validator

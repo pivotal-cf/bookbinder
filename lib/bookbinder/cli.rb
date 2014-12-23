@@ -44,8 +44,9 @@ module Bookbinder
     end
 
     def run_command(command, command_arguments)
+      yaml_loader = YAMLLoader.new
       configuration_validator = ConfigurationValidator.new(logger)
-      @configuration_fetcher = ConfigurationFetcher.new(logger, configuration_validator)
+      @configuration_fetcher = ConfigurationFetcher.new(logger, configuration_validator, yaml_loader)
       @configuration_fetcher.set_config_file_path './config.yml'
       command.new(logger, @configuration_fetcher).run command_arguments
     rescue Publish::VersionUnsupportedError => e
