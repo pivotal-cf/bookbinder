@@ -97,9 +97,9 @@ module Bookbinder
           end
 
           context 'when a wildcard is present' do
-            let(:wildcard_pages) { %w(doge/*) }
-            let(:links) { %w(doge/such-uri.html doge/some-dir/wow-uri.html doge/amaze-uri.html not-doge/stuff.html) }
-            let(:correct_links) { %w(doge/such-uri.html doge/some-dir/wow-uri.html doge/amaze-uri.html) }
+            let(:wildcard_pages) { %w(top.html doge/* cate/*) }
+            let(:links) { %w(top.html doge/such-uri.html doge/some-dir/wow-uri.html doge/amaze-uri.html not-doge/stuff.html cate/meow.html cate/food.html) }
+            let(:correct_links) { %w(top.html doge/such-uri.html doge/some-dir/wow-uri.html doge/amaze-uri.html cate/meow.html cate/food.html) }
             let(:correct_urls) { correct_links.map { |l| l.prepend('http://localhost:41722/') } }
             let(:pdf_options) {{'header' => header_file, 'pages' => wildcard_pages, 'copyright_notice' => notice}}
             

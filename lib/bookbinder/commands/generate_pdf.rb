@@ -104,7 +104,7 @@ module Bookbinder
             matching_pages = find_matching_files_in_directory(page, local_host)
             final_pages += matching_pages
           else
-            final_pages << page
+            final_pages << "http://#{local_host}/#{page}"
           end
         end
         final_pages
