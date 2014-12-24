@@ -262,7 +262,7 @@ OUTPUT
 
       it 'send the right args' do
         expect(Kernel).to receive(:system) do |variables, command|
-          expect(command).to match(/cf push my-app-name --no-route -m 256M -i 2/)
+          expect(command).to match(/cf push my-app-name --no-route -m 256M -i 3/)
         end
 
         cf.push('my-app-name')

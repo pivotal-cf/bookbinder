@@ -45,7 +45,7 @@ class CfCommandRunner
   def push(deploy_target_app)
     # Currently --no-routes is used to blow away all existing routes from a newly deployed app.
     # The routes will then be recreated from the creds repo.
-    success = Kernel.system(environment_variables, "#{cf_binary_path} push #{deploy_target_app} --no-route -m 256M -i 2")
+    success = Kernel.system(environment_variables, "#{cf_binary_path} push #{deploy_target_app} --no-route -m 256M -i 3")
     raise "Could not deploy app to #{deploy_target_app}" unless success
   end
 
