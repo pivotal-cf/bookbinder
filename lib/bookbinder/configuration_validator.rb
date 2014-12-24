@@ -22,7 +22,7 @@ module Bookbinder
     end
 
     def check(config)
-      partial_location = './master_middleman/archive_menus/_default.erb'
+      partial_location = './master_middleman/source/archive_menus/_default.erb'
       if config.has_key?("archive_menu") && config["archive_menu"].nil?
         ConfigurationValidator::ArchiveMenuNotDefinedError.new 'Did you mean to provide an archive menu value to display? If you use the archive_menu key, you must provide at least one value.'
       elsif archive_items(config).include?(nil)
