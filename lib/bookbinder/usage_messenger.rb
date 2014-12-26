@@ -1,4 +1,4 @@
-class UsageMessage
+class UsageMessenger
   def initialize(logger, commands, flags)
     @logger = logger
     @commands = commands

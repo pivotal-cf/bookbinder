@@ -199,23 +199,15 @@ module Bookbinder
     end
 
     describe 'flags' do
-      Cli::FLAGS.each do |flag|
-        let(:arguments) { ["--#{flag}"] }
-
-        context "calling the #{flag} flag" do
-          it "calls the #{flag} method on cli" do
-            expect(cli).to receive(flag.to_sym)
-            run
-          end
-
-          it 'returns 0' do
-            expect(run).to eq(0)
-          end
+      context 'when the input flag is --version' do
+        it 'should log the gemspec version' do
+          expect(logger).to receive(:log).with("bookbinder #{Gem::Specification::load(File.join GEM_ROOT, "bookbinder.gemspec").version}")
+          expect(cli.run ['--version']).to eq(0)
         end
 
-        it "the #{flag} is added to the usage list" do
-          expect(logger).to receive(:log).with(/--#{Regexp.escape(flag)}/)
-          cli.run ['--foo']
+        it 'the flag is added to the usage list' do
+          expect(logger).to receive(:log).with(/--#{Regexp.escape('version')}/)
+          cli.run []
         end
       end
 
