@@ -15,7 +15,11 @@ require 'popen4'
 require 'puma'
 
 module Bookbinder
-
+  class VersionUnsupportedError < StandardError;
+    def initialize(msg=nil)
+      super
+    end
+  end
 end
 #require_relative 'bookbinder/shell_out'
 require_relative 'bookbinder/bookbinder_logger'

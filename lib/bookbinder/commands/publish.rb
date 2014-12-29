@@ -7,12 +7,6 @@ module Bookbinder
       include Bookbinder::DirectoryHelperMethods
       extend Commands::Naming
 
-      class VersionUnsupportedError < StandardError;
-        def initialize(msg=nil)
-          super
-        end
-      end
-
       def self.usage
         "publish <local|github> [tag] [--verbose]"
       end

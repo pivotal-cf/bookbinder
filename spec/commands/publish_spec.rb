@@ -279,7 +279,7 @@ module Bookbinder
 
             expect {
               publish_command.run ['github'], SpecGitAccessor
-            }.to raise_error(Cli::Publish::VersionUnsupportedError)
+            }.to raise_error(Bookbinder::VersionUnsupportedError)
           end
         end
       end
