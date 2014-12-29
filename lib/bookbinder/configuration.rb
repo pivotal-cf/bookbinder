@@ -143,7 +143,7 @@ module Bookbinder
     private
 
     def credentials
-      @credentials ||= CredentialProvider.new(@logger, credentials_repository).credentials
+      @credentials ||= RemoteYamlCredentialProvider.new(@logger, credentials_repository).credentials
     end
 
     def credentials_repository

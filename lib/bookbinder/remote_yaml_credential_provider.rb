@@ -1,7 +1,7 @@
 require 'yaml'
 require 'tempfile'
 
-class CredentialProvider
+class RemoteYamlCredentialProvider
   def initialize(logger, repository, git_accessor = Git)
     @logger = logger
     @repository = repository

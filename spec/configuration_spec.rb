@@ -65,7 +65,7 @@ module Bookbinder
       before do
         repository = double
         allow(Repository).to receive(:new).with(logger: logger, full_name: 'some-org/cred-repo').and_return(repository)
-        allow(CredentialProvider).to receive(:new).with(logger, repository).and_return(cred_repo)
+        allow(RemoteYamlCredentialProvider).to receive(:new).with(logger, repository).and_return(cred_repo)
       end
 
       describe '#aws_credentials' do
@@ -250,13 +250,13 @@ module Bookbinder
 
       it 'fetches the credentials repository only when the credentials are asked for' do
         config.book_repo
-        expect(CredentialProvider).to_not have_received(:new)
+        expect(RemoteYamlCredentialProvider).to_not have_received(:new)
         config.aws_credentials
-        expect(CredentialProvider).to have_received(:new)
+        expect(RemoteYamlCredentialProvider).to have_received(:new)
       end
 
       it 'only fetches the credentials repository once' do
-        expect(CredentialProvider).to receive(:new).once
+        expect(RemoteYamlCredentialProvider).to receive(:new).once
         config.aws_credentials
         config.cf_staging_credentials
         config.cf_production_credentials
