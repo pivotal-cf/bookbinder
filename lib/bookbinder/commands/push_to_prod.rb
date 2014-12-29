@@ -1,6 +1,10 @@
+require_relative 'naming'
+
 module Bookbinder
   class Cli
     class PushToProd < BookbinderCommand
+      extend Commands::Naming
+
       def self.usage
         'push_to_prod [build_#]'
       end
@@ -14,14 +18,14 @@ module Bookbinder
 
       def options(arguments)
         {
-            app_dir: Dir.mktmpdir,
-            build_number: arguments[0],
+          app_dir: Dir.mktmpdir,
+          build_number: arguments[0],
 
-            aws_credentials: config.aws_credentials,
-            cf_credentials: config.cf_production_credentials,
+          aws_credentials: config.aws_credentials,
+          cf_credentials: config.cf_production_credentials,
 
-            book_repo: config.book_repo,
-            production: true
+          book_repo: config.book_repo,
+          production: true
         }
       end
     end

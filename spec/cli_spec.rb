@@ -21,23 +21,23 @@ module Bookbinder
     end
 
     describe '#run' do
-      Cli::COMMAND_TO_CLASS_MAPPING.each do |command, klass|
+      Cli::COMMANDS.each do |klass|
         let(:extra_args) { ['arg1', 'arg2'] }
         let(:fake_command) { double }
 
-        context "running the #{command} command" do
-          let(:arguments) { [command] + extra_args }
+        context "running the #{klass.command_name} command" do
+          let(:arguments) { [klass.command_name] + extra_args }
 
           before do
             allow(klass).to receive(:new).and_return(fake_command)
           end
 
-          it "calls run #{klass} for the #{command} command" do
+          it "calls run #{klass} for the #{klass.command_name} command" do
             expect(fake_command).to receive(:run).with(['arg1', 'arg2'])
             cli.run arguments
           end
 
-          it "returns the return value of #{klass} for the #{command} command" do
+          it "returns the return value of #{klass} for the #{klass.command_name} command" do
             expect(fake_command).to receive(:run).and_return(42)
             expect(cli.run arguments).to eq(42)
           end

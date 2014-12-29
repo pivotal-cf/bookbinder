@@ -1,6 +1,10 @@
+require_relative 'naming'
+
 module Bookbinder
   class Cli
     class UpdateLocalDocRepos < BookbinderCommand
+      extend Commands::Naming
+
       def self.usage
         'update_local_doc_repos'
       end
@@ -15,7 +19,7 @@ module Bookbinder
       def repo_for(section_config)
         local_repo_dir = File.absolute_path('../')
         GitHubRepository.new(logger: @logger, full_name: section_config['repository']['name'],
-                       local_repo_dir: local_repo_dir)
+                             local_repo_dir: local_repo_dir)
       end
     end
   end

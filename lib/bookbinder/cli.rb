@@ -69,21 +69,20 @@ module Bookbinder
 
     FLAGS = %w(version)
 
-    # breaking this command => class naming convention will break usage_messages!
-    COMMAND_TO_CLASS_MAPPING = {
-        'publish' => Publish,
-        'build_and_push_tarball' => BuildAndPushTarball,
-        'push_local_to_staging' => PushLocalToStaging,
-        'push_to_prod' => PushToProd,
-        'run_publish_ci' => RunPublishCI,
-        'update_local_doc_repos' => UpdateLocalDocRepos,
-        'tag' => Tag,
-        'generate_pdf' => GeneratePDF
-    }.freeze
+    COMMANDS = [
+        BuildAndPushTarball,
+        GeneratePDF,
+        Publish,
+        PushLocalToStaging,
+        PushToProd,
+        RunPublishCI,
+        Tag,
+        UpdateLocalDocRepos,
+    ].freeze
 
     def run(args)
       command_name = args[0]
-      command = COMMAND_TO_CLASS_MAPPING[command_name]
+      command = COMMANDS.detect { |known_command| known_command.command_name == command_name }
       command_arguments = args[1..-1]
 
       logger = BookbinderLogger.new
@@ -93,7 +92,7 @@ module Bookbinder
       configuration_fetcher = ConfigurationFetcher.new(logger, configuration_validator, yaml_loader)
       configuration_fetcher.set_config_file_path './config.yml'
 
-      usage_messenger = UsageMessenger.new(logger, COMMAND_TO_CLASS_MAPPING, FLAGS)
+      usage_messenger = UsageMessenger.new(logger, COMMANDS, FLAGS)
 
       command_router = CommandRouter.new(configuration_fetcher, usage_messenger, logger)
       command_router.route command_name, command, command_arguments

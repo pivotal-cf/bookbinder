@@ -19,7 +19,7 @@ class UsageMessenger
   end
 
   def log_command_usage_messages
-    @commands.values.sort_by(&:usage).each do |command_class|
+    @commands.each do |command_class|
       @logger.log "  bookbinder #{command_class.usage}"
     end
   end

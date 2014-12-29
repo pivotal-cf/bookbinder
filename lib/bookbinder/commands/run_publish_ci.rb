@@ -1,6 +1,10 @@
+require_relative 'naming'
+
 module Bookbinder
   class Cli
     class RunPublishCI < BookbinderCommand
+      extend Commands::Naming
+
       def self.usage
         'run_publish_ci'
       end

@@ -1,6 +1,10 @@
+require_relative 'naming'
+
 module Bookbinder
   class Cli
     class Tag < BookbinderCommand
+      extend Commands::Naming
+
       def self.usage
         'tag <git tag>'
       end

@@ -1,6 +1,10 @@
+require_relative 'naming'
+
 module Bookbinder
   class Cli
     class BuildAndPushTarball < BookbinderCommand
+      extend Commands::Naming
+
       class MissingBuildNumber < StandardError
         def initialize
           super 'You must set $BUILD_NUMBER to push an identifiable build.'

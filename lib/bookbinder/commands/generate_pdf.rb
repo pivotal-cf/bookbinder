@@ -1,6 +1,10 @@
+require_relative 'naming'
+
 module Bookbinder
   class Cli
     class GeneratePDF < BookbinderCommand
+      extend Commands::Naming
+
       class AppNotPublished < StandardError
         def initialize(msg='You must publish locally before you generate a PDF.')
           super(msg)

@@ -1,6 +1,10 @@
+require_relative 'naming'
+
 module Bookbinder
   class Cli
     class PushLocalToStaging < BookbinderCommand
+      extend Commands::Naming
+
       def self.usage
         'push_local_to_staging'
       end

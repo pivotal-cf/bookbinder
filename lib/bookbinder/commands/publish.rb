@@ -1,9 +1,12 @@
 require 'bookbinder/directory_helpers'
+require_relative 'naming'
 
 module Bookbinder
   class Cli
     class Publish < BookbinderCommand
       include Bookbinder::DirectoryHelperMethods
+      extend Commands::Naming
+
       class VersionUnsupportedError < StandardError;
         def initialize(msg=nil)
           super
