@@ -3,7 +3,6 @@ require 'bookbinder/directory_helpers'
 
 class Book
   include Bookbinder::DirectoryHelperMethods
-  #include Bookbinder::GitHubRepository
   attr_reader :sections
 
   def self.from_remote(logger: nil, full_name: nil, destination_dir: nil, ref: nil, git_accessor: Git)
