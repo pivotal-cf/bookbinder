@@ -10,7 +10,7 @@ module Bookbinder
       end
     end
 
-    include Bookbinder::ShellOut #keep me
+    include Bookbinder::ShellOut
 
     attr_reader :full_name, :copied_to
 
