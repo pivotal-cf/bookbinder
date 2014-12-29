@@ -1,13 +1,13 @@
 module Bookbinder
   class Cli
     class UpdateLocalDocRepos < BookbinderCommand
+      def self.usage
+        'update_local_doc_repos'
+      end
+
       def run(_)
         config.sections.map { |conf| repo_for(conf) }.each(&:update_local_copy)
         0
-      end
-
-      def self.usage
-        ''
       end
 
       private

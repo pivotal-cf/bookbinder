@@ -1,6 +1,10 @@
 module Bookbinder
   class Cli
     class Tag < BookbinderCommand
+      def self.usage
+        'tag <git tag>'
+      end
+
       def run(params)
         tag = params.first
         raise Cli::InvalidArguments unless tag
@@ -12,10 +16,6 @@ module Bookbinder
         @logger.log 'Success!'.green
         @logger.log " #{book.full_name.yellow} and its sections were tagged with #{tag.blue}"
         0
-      end
-
-      def self.usage
-        '<git tag>'
       end
     end
   end

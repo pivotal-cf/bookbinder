@@ -1,13 +1,13 @@
 module Bookbinder
   class Cli
     class PushToProd < BookbinderCommand
+      def self.usage
+        'push_to_prod [build_#]'
+      end
+
       def run(arguments)
         Distributor.build(@logger, options(arguments)).distribute
         0
-      end
-
-      def self.usage
-        '[build_#]'
       end
 
       private

@@ -12,10 +12,6 @@ class UsageMessenger
     0
   end
 
-  def command(command_class)
-    "bookbinder #{command_class.name.split('::').last.underscore} #{command_class.usage}"
-  end
-
   private
 
   def log_flag_usage_messages
@@ -23,8 +19,8 @@ class UsageMessenger
   end
 
   def log_command_usage_messages
-    @commands.values.sort_by { |k| k.name }.each do |command_class|
-      @logger.log "  #{command(command_class)}"
+    @commands.values.sort_by(&:usage).each do |command_class|
+      @logger.log "  bookbinder #{command_class.usage}"
     end
   end
 

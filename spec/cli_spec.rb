@@ -103,7 +103,7 @@ module Bookbinder
           let(:arguments) { ['publish', 'local'] }
 
           it 'shows the command usage' do
-            expect(logger).to receive(:log).with(/publish #{Regexp.escape(Cli::Publish.usage)}/)
+            expect(logger).to receive(:log).with(Cli::Publish.usage)
             run
           end
 

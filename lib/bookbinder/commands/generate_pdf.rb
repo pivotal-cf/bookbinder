@@ -25,6 +25,10 @@ module Bookbinder
         end
       end
 
+      def self.usage
+        'generate_pdf [PDF config.yml]'
+      end
+
       def run(params)
         raise AppNotPublished unless Dir.exists?('final_app')
 
@@ -42,10 +46,6 @@ module Bookbinder
         else
           @logger.warn "Declaring PDF options in config.yml is deprecated.\nDeclare them in a PDF config file, instead, and target that file when you re-invoke bookbinder.\ne.g. bookbinder generate_pdf theGoodParts.yml"
         end
-      end
-
-      def self.usage
-        '[PDF config.yml]'
       end
 
       private

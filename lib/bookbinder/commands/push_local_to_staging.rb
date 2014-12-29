@@ -1,13 +1,13 @@
 module Bookbinder
   class Cli
     class PushLocalToStaging < BookbinderCommand
+      def self.usage
+        'push_local_to_staging'
+      end
+
       def run(_)
         Distributor.build(@logger, options).distribute
         0
-      end
-
-      def self.usage
-        ''
       end
 
       private

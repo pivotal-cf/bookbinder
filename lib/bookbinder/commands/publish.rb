@@ -10,6 +10,10 @@ module Bookbinder
         end
       end
 
+      def self.usage
+        "publish <local|github> [tag] [--verbose]"
+      end
+
       def run(cli_arguments, git_accessor=Git)
         raise Cli::InvalidArguments unless arguments_are_valid?(cli_arguments)
         @git_accessor = git_accessor
@@ -17,10 +21,6 @@ module Bookbinder
         target_tag    = (cli_arguments[1..-1] - ['--verbose']).pop
         final_app_dir = File.absolute_path('final_app')
         bind_book(cli_arguments, final_app_dir, target_tag)
-      end
-
-      def self.usage
-        "<local|github> [tag] [--verbose]"
       end
 
       private
