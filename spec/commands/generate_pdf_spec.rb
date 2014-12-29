@@ -1,14 +1,14 @@
 require 'spec_helper'
 
 module Bookbinder
-  describe Cli::GeneratePDF do
+  describe Commands::GeneratePDF do
     include_context 'tmp_dirs'
 
     let(:fake_generator) { double(generate: double) }
     let(:links) { %w(such-uri.html wow-uri.html amaze-uri.html) }
     let(:urls) { links.map { |l| l.prepend('http://localhost:41722/') } }
     let(:configuration_fetcher) { double('configuration_fetcher') }
-    let(:generate_pdf_object) { Cli::GeneratePDF.new(logger, configuration_fetcher) }
+    let(:generate_pdf_object) { Commands::GeneratePDF.new(logger, configuration_fetcher) }
     let(:generate) { generate_pdf_object.run(cli_arguments) }
     let(:logger) { NilLogger.new }
     let(:config) { double(:configurator) }
@@ -23,7 +23,7 @@ module Bookbinder
       let(:cli_arguments) {[]}
 
       it 'raises' do
-        expect { generate }.to raise_error Cli::GeneratePDF::AppNotPublished
+        expect { generate }.to raise_error Commands::GeneratePDF::AppNotPublished
       end
     end
 

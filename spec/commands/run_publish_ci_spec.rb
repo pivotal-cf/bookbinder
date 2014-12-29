@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Bookbinder
-  describe Cli::RunPublishCI do
+  describe Commands::RunPublishCI do
     let(:fake_publish) { double 'fake_publish' }
     let(:fake_push_local_to_staging) { double 'fake_push_to_staging' }
     let(:fake_build_and_push_tarball) { double 'fake_build_and_push_tarball' }
@@ -9,13 +9,13 @@ module Bookbinder
     let(:config) { Configuration.new(logger, config_hash) }
     let(:logger) { NilLogger.new }
     let(:configuration_fetcher) { double 'configuration_fetcher' }
-    let(:command) { Cli::RunPublishCI.new(logger, configuration_fetcher) }
+    let(:command) { Commands::RunPublishCI.new(logger, configuration_fetcher) }
 
     before do
       allow(configuration_fetcher).to receive(:fetch_config) { config }
-      allow(Cli::Publish).to receive(:new).with(logger, configuration_fetcher) { fake_publish }
-      allow(Cli::PushLocalToStaging).to receive(:new).with(logger, configuration_fetcher) { fake_push_local_to_staging }
-      allow(Cli::BuildAndPushTarball).to receive(:new).with(logger, configuration_fetcher) { fake_build_and_push_tarball }
+      allow(Commands::Publish).to receive(:new).with(logger, configuration_fetcher) { fake_publish }
+      allow(Commands::PushLocalToStaging).to receive(:new).with(logger, configuration_fetcher) { fake_push_local_to_staging }
+      allow(Commands::BuildAndPushTarball).to receive(:new).with(logger, configuration_fetcher) { fake_build_and_push_tarball }
     end
 
     context 'when ENV["BUILD_NUMBER"] is set' do
@@ -49,7 +49,7 @@ module Bookbinder
       end
 
       it 'respects the --verbose flag' do
-        publish_command = expect_to_receive_and_return_real_now(Cli::Publish, :new, logger, configuration_fetcher)
+        publish_command = expect_to_receive_and_return_real_now(Commands::Publish, :new, logger, configuration_fetcher)
         expect(publish_command).to receive(:run).with ['github', '--verbose']
         command.run ['--verbose']
       end
@@ -58,7 +58,7 @@ module Bookbinder
     it 'raises MissingBuildNumber if ENV["BUILD_NUMBER"] is not set' do
       expect {
         command.run([])
-      }.to raise_error(Cli::BuildAndPushTarball::MissingBuildNumber)
+      }.to raise_error(Commands::BuildAndPushTarball::MissingBuildNumber)
     end
   end
 end

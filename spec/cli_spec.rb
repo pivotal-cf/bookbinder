@@ -63,7 +63,7 @@ module Bookbinder
       context 'when run raises' do
         context 'a KeyError' do
           before do
-            allow_any_instance_of(Cli::Publish).to receive(:run).and_raise KeyError.new 'I broke'
+            allow_any_instance_of(Commands::Publish).to receive(:run).and_raise KeyError.new 'I broke'
           end
 
           let(:arguments) { ['publish', 'local'] }
@@ -80,7 +80,7 @@ module Bookbinder
 
         context 'a Configuration::CredentialKeyError' do
           before do
-            allow_any_instance_of(Cli::Publish).to receive(:run).and_raise Configuration::CredentialKeyError.new 'I broke'
+            allow_any_instance_of(Commands::Publish).to receive(:run).and_raise Configuration::CredentialKeyError.new 'I broke'
           end
 
           let(:arguments) { ['publish', 'local'] }
@@ -97,13 +97,13 @@ module Bookbinder
 
         context 'for InvalidArguments' do
           before do
-            allow_any_instance_of(Cli::Publish).to receive(:run).and_raise Cli::InvalidArguments.new
+            allow_any_instance_of(Commands::Publish).to receive(:run).and_raise Cli::InvalidArguments.new
           end
 
           let(:arguments) { ['publish', 'local'] }
 
           it 'shows the command usage' do
-            expect(logger).to receive(:log).with(Cli::Publish.usage)
+            expect(logger).to receive(:log).with(Commands::Publish.usage)
             run
           end
 
@@ -114,7 +114,7 @@ module Bookbinder
 
         context 'any other error' do
           before do
-            allow_any_instance_of(Cli::Publish).to receive(:run).and_raise 'I broke'
+            allow_any_instance_of(Commands::Publish).to receive(:run).and_raise 'I broke'
           end
 
           let(:arguments) { ['publish', 'local'] }

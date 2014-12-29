@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Bookbinder
-  describe Cli::PushLocalToStaging do
+  describe Commands::PushLocalToStaging do
     let(:book_repo) { 'my-user/fixture-book-title' }
     let(:config_hash) { {'book_repo' => book_repo, 'cred_repo' => 'whatever'} }
 

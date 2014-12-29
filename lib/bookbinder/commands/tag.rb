@@ -1,7 +1,7 @@
 require_relative 'naming'
 
 module Bookbinder
-  class Cli
+  module Commands
     class Tag < BookbinderCommand
       extend Commands::Naming
 

@@ -1,5 +1,5 @@
 module Bookbinder
-  class Cli
+  module Commands
     class BookbinderCommand
       def initialize(logger, configuration_fetcher)
         @logger = logger

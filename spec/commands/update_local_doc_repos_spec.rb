@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Bookbinder
-  describe Cli::UpdateLocalDocRepos do
+  describe Commands::UpdateLocalDocRepos do
     describe '#run' do
       let(:sections) { [
           {'repository' => {'name' => 'org/repo-name'}},
@@ -17,7 +17,7 @@ module Bookbinder
       end
 
       it 'returns 0' do
-        expect(Cli::UpdateLocalDocRepos.new(logger, configuration_fetcher).run(nil)).to eq(0)
+        expect(Commands::UpdateLocalDocRepos.new(logger, configuration_fetcher).run(nil)).to eq(0)
       end
 
       it 'calls #update_local_copy on an instance of each GitHubRepository' do
@@ -29,7 +29,7 @@ module Bookbinder
           expect(repository).to receive(:update_local_copy)
         end
 
-        Cli::UpdateLocalDocRepos.new(logger, configuration_fetcher).run(nil)
+        Commands::UpdateLocalDocRepos.new(logger, configuration_fetcher).run(nil)
       end
     end
   end

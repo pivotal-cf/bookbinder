@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Bookbinder
-  describe Cli::PushToProd do
+  describe Commands::PushToProd do
     let(:book_repo) { 'my-user/fixture-book-title' }
     let(:build_number) { '17' }
     let(:config_hash) { {'book_repo' => book_repo, 'cred_repo' => 'whatever'} }

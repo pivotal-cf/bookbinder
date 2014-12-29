@@ -9,14 +9,14 @@ module Bookbinder
     FLAGS = %w(version)
 
     COMMANDS = [
-        BuildAndPushTarball,
-        GeneratePDF,
-        Publish,
-        PushLocalToStaging,
-        PushToProd,
-        RunPublishCI,
-        Tag,
-        UpdateLocalDocRepos,
+        Commands::BuildAndPushTarball,
+        Commands::GeneratePDF,
+        Commands::Publish,
+        Commands::PushLocalToStaging,
+        Commands::PushToProd,
+        Commands::RunPublishCI,
+        Commands::Tag,
+        Commands::UpdateLocalDocRepos,
     ].freeze
 
     def run(args)

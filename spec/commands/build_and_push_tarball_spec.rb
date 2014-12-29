@@ -1,13 +1,13 @@
 require 'spec_helper'
 
 module Bookbinder
-  describe Cli::BuildAndPushTarball do
+  describe Commands::BuildAndPushTarball do
     include_context 'tmp_dirs'
 
     let(:logger) { NilLogger.new }
     let(:configuration_fetcher) { double('configuration_fetcher') }
     let(:config) { Configuration.new(logger, config_hash) }
-    let(:build_and_push_tarball_command) { Cli::BuildAndPushTarball.new(logger, configuration_fetcher) }
+    let(:build_and_push_tarball_command) { Commands::BuildAndPushTarball.new(logger, configuration_fetcher) }
     let(:build_number) { '17' }
     let(:book_repo) { 'org/fixture-book-title' }
 

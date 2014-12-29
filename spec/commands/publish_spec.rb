@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Bookbinder
-  describe Cli::Publish do
+  describe Commands::Publish do
     include_context 'tmp_dirs'
 
     around_with_fixture_repo do |spec|
@@ -42,7 +42,7 @@ module Bookbinder
     let(:book) { 'fantastic/book' }
     let(:logger) { NilLogger.new }
     let(:configuration_fetcher) { double('configuration_fetcher') }
-    let(:publish_command) { Cli::Publish.new(logger, configuration_fetcher) }
+    let(:publish_command) { Commands::Publish.new(logger, configuration_fetcher) }
     let(:git_client) { GitClient.new(logger) }
 
     before do
@@ -225,7 +225,7 @@ module Bookbinder
         let(:config) { Configuration.new(logger, config_hash) }
         let(:book) { 'fantastic/book' }
         let(:logger) { NilLogger.new }
-        let(:publish_commander) { Cli::Publish.new(logger, configuration_fetcher) }
+        let(:publish_commander) { Commands::Publish.new(logger, configuration_fetcher) }
         let(:temp_dir) { Dir.mktmpdir }
         let(:git_accessor_1) { SpecGitAccessor.new('dogs-repo', temp_dir) }
         let(:git_accessor_2) { SpecGitAccessor.new('dogs-repo', temp_dir) }
