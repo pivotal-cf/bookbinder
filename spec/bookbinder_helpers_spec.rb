@@ -250,7 +250,7 @@ MARKDOWN
       subject(:an_instance) { klass.new(config) }
 
       let(:moon_section) { Section.new(logger, repo, 'my_subnav_template') }
-      let(:fraggle_section) { Section.new(logger, Repository.new(full_name: '', directory: 'fraggles/rock'), nil) }
+      let(:fraggle_section) { Section.new(logger, GitHubRepository.new(full_name: '', directory: 'fraggles/rock'), nil) }
       let(:sections) { [moon_section, fraggle_section] }
       let(:book){ Book.new(full_name: 'full/path') }
       let(:config) { {sections: sections, book: book} }
@@ -259,7 +259,7 @@ MARKDOWN
       let(:file_modification_date) { '19 Jan 3028' }
 
       let(:repo_name) { '' }
-      let(:repo) { Repository.new(logger: logger, full_name: repo_name, directory: 'moon') }
+      let(:repo) { GitHubRepository.new(logger: logger, full_name: repo_name, directory: 'moon') }
       let(:destination_dir) { tmp_subdir('destination') }
       let(:git_base_object) { double Git::Base }
       let(:git_history) { double Git::Log }

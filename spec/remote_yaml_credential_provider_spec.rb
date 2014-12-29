@@ -14,7 +14,7 @@ module Bookbinder
       end
       let(:full_name) { 'org-name/creds-repo' }
       let(:credentials_repository) do
-        Repository.new(logger: logger, full_name: 'org-name/creds-repo')
+        GitHubRepository.new(logger: logger, full_name: 'org-name/creds-repo')
       end
 
       it 'returns a hash of the credentials in credentials.yml' do

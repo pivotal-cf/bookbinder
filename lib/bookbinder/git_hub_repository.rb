@@ -3,7 +3,7 @@ require 'bookbinder/shell_out'
 require 'git'
 
 module Bookbinder
-  class Repository
+  class GitHubRepository
     class RepositoryCloneError < StandardError
       def initialize(msg=nil)
         super

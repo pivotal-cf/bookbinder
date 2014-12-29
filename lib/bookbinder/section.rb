@@ -68,9 +68,9 @@ module Bookbinder
 
     def self.build_repository(logger, destination, local_repo_dir, repo_hash, target_tag, git_accessor)
       if local_repo_dir
-        Repository.build_from_local(logger, repo_hash, local_repo_dir, destination)
+        GitHubRepository.build_from_local(logger, repo_hash, local_repo_dir, destination)
       else
-        Repository.build_from_remote(logger, repo_hash, destination, target_tag, git_accessor)
+        GitHubRepository.build_from_remote(logger, repo_hash, destination, target_tag, git_accessor)
       end
     end
     private_class_method :build_repository

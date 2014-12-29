@@ -17,7 +17,7 @@ module Bookbinder
 
     let(:book_name) { 'wow-org/such-book' }
     let(:book) { Book.new(full_name: 'test') }
-    let(:repo) { double(Repository) }
+    let(:repo) { double(GitHubRepository) }
 
     describe '#tag_self_and_sections_with' do
       let(:desired_tag) { 12.times.map { (65 + rand(26)).chr }.join }
@@ -25,12 +25,12 @@ module Bookbinder
       it 'should tag itself and the repos for each section' do
         sections.each do |s|
           doc_repo = double
-          expect(Repository).to receive(:new).with(logger: logger, full_name: s['repository']['name']).and_return(doc_repo)
+          expect(GitHubRepository).to receive(:new).with(logger: logger, full_name: s['repository']['name']).and_return(doc_repo)
           expect(doc_repo).to receive(:tag_with).with(desired_tag)
         end
 
         self_repo = double
-        expect(Repository).to receive(:new).with(logger: logger, full_name: book_name, target_ref: nil, github_token: nil).and_return(self_repo)
+        expect(GitHubRepository).to receive(:new).with(logger: logger, full_name: book_name, target_ref: nil, github_token: nil).and_return(self_repo)
         expect(self_repo).to receive(:tag_with).with(desired_tag)
 
         book = Book.new(logger: logger, full_name: book_name, sections: sections)
@@ -40,7 +40,7 @@ module Bookbinder
 
     describe '#full_name' do
       it 'returns the name of the repository' do
-        allow(Repository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
+        allow(GitHubRepository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
         expect(repo).to receive(:full_name).and_return('test')
         expect(book.full_name).to eq('test')
       end
@@ -48,7 +48,7 @@ module Bookbinder
 
     describe '#head_sha' do
       it 'returns the sha of the latest commit' do
-        allow(Repository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
+        allow(GitHubRepository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
         expect(repo).to receive(:head_sha).and_return('latest-sha')
         expect(book.head_sha).to eq('latest-sha')
       end
@@ -56,7 +56,7 @@ module Bookbinder
 
     describe '#directory' do
       it 'returns the directory of the repository' do
-        allow(Repository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
+        allow(GitHubRepository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
         expect(repo).to receive(:directory).and_return('test-dir')
         expect(book.directory).to eq('test-dir')
       end
@@ -66,7 +66,7 @@ module Bookbinder
       let(:destination_dir) { 'some-path' }
       let(:git_accessor) { double(Git) }
       it 'copies the repository from the remote directory' do
-        allow(Repository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
+        allow(GitHubRepository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
         expect(repo).to receive(:copy_from_remote).with(destination_dir, Git).and_return(destination_dir)
         expect(book.copy_from_remote(destination_dir)).to eq(destination_dir)
       end
@@ -78,7 +78,7 @@ module Bookbinder
       let(:git_base_object) { double Git::Base }
 
       it 'returns the last modified date for the specified file' do
-        allow(Repository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
+        allow(GitHubRepository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
         allow(Git).to receive(:open).with('/some/dir/galaxy-book/').and_return(git_base_object)
 
         expect(repo).to receive(:get_modification_date_for).
@@ -88,7 +88,7 @@ module Bookbinder
       end
 
       it 'raises if the git directory is invalid' do
-        allow(Repository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
+        allow(GitHubRepository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil).and_return(repo)
         allow(Git).to receive(:open).with('/some/dir/galaxy-book/').and_raise(ArgumentError)
 
         expect{ book.get_modification_date_for(full_path: full_file_path) }.to raise_error(/Invalid git repository/)

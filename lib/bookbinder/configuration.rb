@@ -147,7 +147,7 @@ module Bookbinder
     end
 
     def credentials_repository
-      @credentials_repository ||= Repository.new(logger: @logger, full_name: cred_repo)
+      @credentials_repository ||= GitHubRepository.new(logger: @logger, full_name: cred_repo)
     end
   end
 end
