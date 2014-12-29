@@ -32,7 +32,7 @@ module Bookbinder
       allow(ENV).to receive(:[]).with('BUILD_NUMBER').and_return(build_number)
       fake_creds = double
       allow(fake_creds).to receive(:credentials).and_return(aws_hash)
-      allow(CredentialProvider).to receive(:new).and_return(fake_creds)
+      allow(RemoteYamlCredentialProvider).to receive(:new).and_return(fake_creds)
       allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
     end
 

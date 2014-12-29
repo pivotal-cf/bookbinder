@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Bookbinder
-  describe Repository do
+  describe GitHubRepository do
     include_context 'tmp_dirs'
 
     let(:logger) { NilLogger.new }
@@ -11,7 +11,7 @@ module Bookbinder
     let(:section_hash) { {'repository' => {'name' => repo_name}} }
     let(:destination_dir) { tmp_subdir('output') }
     let(:local_repo_dir) { 'spec/fixtures/repositories' }
-    let(:repository) { double Repository }
+    let(:repository) { double GitHubRepository }
 
     before do
       allow(GitClient).to receive(:new).and_call_original
@@ -20,39 +20,39 @@ module Bookbinder
 
     it 'requires a full_name' do
       expect {
-        Repository.new(logger: logger, github_token: github_token, full_name: '')
+        GitHubRepository.new(logger: logger, github_token: github_token, full_name: '')
       }.not_to raise_error
 
       expect {
-        Repository.new(logger: logger, github_token: github_token)
+        GitHubRepository.new(logger: logger, github_token: github_token)
       }.to raise_error(/full_name/)
     end
 
     describe '.build_from_remote' do
 
       it 'calls copy_from_remote if destination dir is specified' do
-        allow(Repository).to receive(:new).and_return repository
+        allow(GitHubRepository).to receive(:new).and_return repository
         expect(repository).to receive(:copy_from_remote).with(destination_dir, Git)
-        Repository.build_from_remote(logger, section_hash, destination_dir, nil, Git)
+        GitHubRepository.build_from_remote(logger, section_hash, destination_dir, nil, Git)
       end
 
       it 'does not copy_from_remote if destination dir is not specified' do
-        allow(Repository).to receive(:new).and_return repository
-        expect(Repository.build_from_remote(logger, section_hash, nil, nil, Git)).to eq repository
+        allow(GitHubRepository).to receive(:new).and_return repository
+        expect(GitHubRepository.build_from_remote(logger, section_hash, nil, nil, Git)).to eq repository
       end
     end
 
     describe '.build_from_local' do
 
       it 'calls copy_from_local if destination dir is specified' do
-        allow(Repository).to receive(:new).and_return repository
+        allow(GitHubRepository).to receive(:new).and_return repository
         expect(repository).to receive(:copy_from_local).with(destination_dir)
-        Repository.build_from_local(logger, section_hash, local_repo_dir, destination_dir)
+        GitHubRepository.build_from_local(logger, section_hash, local_repo_dir, destination_dir)
       end
 
       it 'does not copy_from_remote if destination dir is not specified' do
-        allow(Repository).to receive(:new).and_return repository
-        expect(Repository.build_from_local(logger, section_hash, local_repo_dir, nil)).to eq repository
+        allow(GitHubRepository).to receive(:new).and_return repository
+        expect(GitHubRepository.build_from_local(logger, section_hash, local_repo_dir, nil)).to eq repository
       end
     end
 
@@ -63,13 +63,13 @@ module Bookbinder
         expect(git_client).to receive(:head_sha).with('org/repo').and_return head_sha
         expect(git_client).to receive(:create_tag!).with('org/repo', 'the_tag_name', head_sha)
 
-        Repository.new(logger: logger, github_token: github_token, full_name: 'org/repo').tag_with('the_tag_name')
+        GitHubRepository.new(logger: logger, github_token: github_token, full_name: 'org/repo').tag_with('the_tag_name')
       end
     end
 
     describe '#short_name' do
       it 'returns the repo name when org and repo name are provided' do
-        expect(Repository.new(full_name: 'some-org/some-name').short_name).to eq('some-name')
+        expect(GitHubRepository.new(full_name: 'some-org/some-name').short_name).to eq('some-name')
       end
     end
 
@@ -85,25 +85,25 @@ module Bookbinder
 
         expect(fake_github).to receive(:head_sha).with('org/repo').and_return('dcba')
 
-        repository = Repository.new(logger: logger, full_name: 'org/repo', github_token: github_token)
+        repository = GitHubRepository.new(logger: logger, full_name: 'org/repo', github_token: github_token)
         expect(repository.head_sha).to eq('dcba')
       end
     end
 
     describe '#directory' do
       it 'returns @directory if set' do
-        expect(Repository.new(full_name: '', directory: 'the_directory').directory).to eq('the_directory')
+        expect(GitHubRepository.new(full_name: '', directory: 'the_directory').directory).to eq('the_directory')
       end
 
       it 'returns #short_name if @directory is unset' do
-        expect(Repository.new(full_name: 'org/repo').directory).to eq('repo')
+        expect(GitHubRepository.new(full_name: 'org/repo').directory).to eq('repo')
       end
     end
 
     describe '#copy_from_remote' do
       let(:repo_name) { 'org/my-docs-repo' }
       let(:target_ref) { 'some-sha' }
-      let(:repo) { Repository.new(logger: logger, full_name: repo_name, target_ref: target_ref, github_token: 'foo') }
+      let(:repo) { GitHubRepository.new(logger: logger, full_name: repo_name, target_ref: target_ref, github_token: 'foo') }
       let(:destination_dir) { tmp_subdir('destination') }
       let(:git_base_object) { double Git::Base }
 
@@ -187,7 +187,7 @@ module Bookbinder
       let(:full_name) { 'org/my-docs-repo' }
       let(:target_ref) { 'some-sha' }
       let(:local_repo_dir) { tmp_subdir 'local_repo_dir' }
-      let(:repo) { Repository.new(logger: logger, full_name: full_name, target_ref: target_ref, local_repo_dir: local_repo_dir) }
+      let(:repo) { GitHubRepository.new(logger: logger, full_name: full_name, target_ref: target_ref, local_repo_dir: local_repo_dir) }
       let(:destination_dir) { tmp_subdir('destination') }
       let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
       let(:copy_to) { repo.copy_from_local destination_dir }
@@ -228,7 +228,7 @@ module Bookbinder
     end
 
     describe '#has_tag?' do
-      let(:repo) { Repository.new(full_name: 'my-docs-org/my-docs-repo',
+      let(:repo) { GitHubRepository.new(full_name: 'my-docs-org/my-docs-repo',
                                   target_ref: 'some_sha',
                                   directory: 'pretty_url_path',
                                   local_repo_dir: '') }
@@ -263,7 +263,7 @@ module Bookbinder
 
     describe '#tag_with' do
       let(:repo_sha) { 'some-sha' }
-      let(:repo) { Repository.new(logger: logger,
+      let(:repo) { GitHubRepository.new(logger: logger,
                                   github_token: github_token,
                                   full_name: 'my-docs-org/my-docs-repo',
                                   target_ref: repo_sha,
@@ -289,7 +289,7 @@ module Bookbinder
       let(:local_repo_dir) { tmpdir }
       let(:full_name) { 'org/repo-name' }
       let(:repo_dir) { File.join(local_repo_dir, 'repo-name') }
-      let(:repository) { Repository.new(logger: logger, github_token: github_token, full_name: full_name, local_repo_dir: local_repo_dir) }
+      let(:repository) { GitHubRepository.new(logger: logger, github_token: github_token, full_name: full_name, local_repo_dir: local_repo_dir) }
 
       context 'when the repo dirs are there' do
         before do
@@ -316,7 +316,7 @@ module Bookbinder
       let(:made_up_dir) { 'this/doesnt/exist' }
       let(:git_base_object) { double Git::Base }
       let(:repo) do
-        Repository.new(logger: logger, github_token: github_token, full_name: full_name, target_ref: target_ref)
+        GitHubRepository.new(logger: logger, github_token: github_token, full_name: full_name, target_ref: target_ref)
       end
 
       context 'when no special Git accessor is specified' do
@@ -351,7 +351,7 @@ module Bookbinder
     describe '#get_modification_date_for' do
       let(:repo_name) { 'org/my-docs-repo' }
       let(:target_ref) { 'some-sha' }
-      let(:repo) { Repository.new(logger: logger, full_name: repo_name, target_ref: target_ref, github_token: 'foo') }
+      let(:repo) { GitHubRepository.new(logger: logger, full_name: repo_name, target_ref: target_ref, github_token: 'foo') }
       let(:destination_dir) { tmp_subdir('destination') }
       let(:git_base_object) { double Git::Base }
       let(:git_history) { double Git::Log }

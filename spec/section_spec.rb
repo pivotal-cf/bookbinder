@@ -86,8 +86,8 @@ module Bookbinder
           let(:ref) { 'master' }
           let(:section_hash) { {'repository' => {'name' => repo_name}} }
 
-          it 'passes nil to the Repository as the ref' do
-            expect(Repository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, Git)
+          it 'passes nil to the GitHubRepository as the ref' do
+            expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, Git)
             Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
           end
 
@@ -100,7 +100,7 @@ module Bookbinder
             let(:target_tag) { 'oh-dot-three-dot-oh' }
 
             it 'passes the target tag to the repository' do
-              expect(Repository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, Git)
+              expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, Git)
               Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
           end
@@ -111,7 +111,7 @@ module Bookbinder
           let(:section_hash) { {'repository' => {'name' => repo_name, 'ref' => ref}} }
 
           it 'passes to the ref in the section hash to the repository' do
-            expect(Repository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, Git)
+            expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, Git)
             Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
           end
 
@@ -124,7 +124,7 @@ module Bookbinder
             let(:target_tag) { 'oh-dot-three-dot-oh' }
 
             it 'passes the target tag to the repository' do
-              expect(Repository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, Git)
+              expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, Git)
               Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
           end
@@ -163,7 +163,7 @@ module Bookbinder
     describe '#get_modification_date_for' do
       let(:local_repo_dir) { '/some/dir' }
       let(:repo_name) { 'farm/my_cow_repo' }
-      let(:repo) { Repository.new(full_name: repo_name, local_repo_dir: local_repo_dir) }
+      let(:repo) { GitHubRepository.new(full_name: repo_name, local_repo_dir: local_repo_dir) }
       subject(:section) { Section.new(logger, repo, 'my_template') }
       let(:file) { 'some-file' }
       let(:git_base_object) { double Git::Base }

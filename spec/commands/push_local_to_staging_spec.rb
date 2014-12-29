@@ -26,8 +26,8 @@ module Bookbinder
     let(:command) { described_class.new(logger, configuration_fetcher) }
 
     before do
-      fake_cred_repo = double(CredentialProvider, credentials: {'aws' => {}, 'cloud_foundry' => {}})
-      allow(CredentialProvider).to receive(:new).and_return(fake_cred_repo)
+      fake_cred_repo = double(RemoteYamlCredentialProvider, credentials: {'aws' => {}, 'cloud_foundry' => {}})
+      allow(RemoteYamlCredentialProvider).to receive(:new).and_return(fake_cred_repo)
 
       allow(Distributor).to receive(:build).and_return(fake_distributor)
       allow(configuration_fetcher).to receive(:fetch_config).and_return(config)

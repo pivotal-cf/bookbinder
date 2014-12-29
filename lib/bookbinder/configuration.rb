@@ -143,11 +143,11 @@ module Bookbinder
     private
 
     def credentials
-      @credentials ||= CredentialProvider.new(@logger, credentials_repository).credentials
+      @credentials ||= RemoteYamlCredentialProvider.new(@logger, credentials_repository).credentials
     end
 
     def credentials_repository
-      @credentials_repository ||= Repository.new(logger: @logger, full_name: cred_repo)
+      @credentials_repository ||= GitHubRepository.new(logger: @logger, full_name: cred_repo)
     end
   end
 end
