@@ -28,7 +28,7 @@ class CfCommandRunner
   end
 
   def apps_for_host(domain, host)
-    route = all_routes.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)[0]
+    route = routes_for(domain, host).first
     raise "no routes found for route #{host}.#{domain}" if route.nil?
     apps_with_route = /#{Regexp.escape(domain)}\s+(.+)$/.match(route.rstrip)
     raise "no apps found for host #{host}" if apps_with_route.nil?
@@ -123,14 +123,17 @@ class CfCommandRunner
     @cf_binary_path
   end
 
-  def all_routes
+  def cf_routes_output
     output, status = Open3.capture2("CF_COLOR=false #{cf_binary_path} routes")
     raise 'failure executing cf routes' unless status.success?
     output
   end
 
+  def routes_for(domain, host)
+    cf_routes_output.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)
+  end
+
   def new_route?(domain, host)
-    route = all_routes.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)[0]
-    route.nil?
+    routes_for(domain, host).empty?
   end
 end
