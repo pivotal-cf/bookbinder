@@ -54,7 +54,7 @@ module Bookbinder
       rescue Cli::UnknownCommand => e
         logger.log e.message
         1
-      rescue => e
+      rescue RuntimeError => e
         logger.error e.message
         1
       end
