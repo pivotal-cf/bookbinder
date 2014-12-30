@@ -21,7 +21,7 @@ module Bookbinder
     end
 
     describe '#run' do
-      CommandRunner::COMMANDS.each do |klass|
+      Cli::COMMANDS.each do |klass|
         let(:extra_args) { ['arg1', 'arg2'] }
         let(:fake_command) { double }
 

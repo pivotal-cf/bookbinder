@@ -7,6 +7,19 @@ module Bookbinder
     UnknownCommand = Class.new(StandardError)
     UnknownFlag = Class.new(StandardError)
 
+    FLAGS = %w(version)
+
+    COMMANDS = [
+      Commands::BuildAndPushTarball,
+      Commands::GeneratePDF,
+      Commands::Publish,
+      Commands::PushLocalToStaging,
+      Commands::PushToProd,
+      Commands::RunPublishCI,
+      Commands::Tag,
+      Commands::UpdateLocalDocRepos,
+    ].freeze
+
     def run(args)
       command_name = args[0]
       command_arguments = args[1..-1]
@@ -19,10 +32,27 @@ module Bookbinder
       configuration_fetcher.set_config_file_path './config.yml'
       usage_messenger = UsageMessenger.new
 
-      command_runner = CommandRunner.new(configuration_fetcher, usage_messenger, logger)
+      command_runner = CommandRunner.new(configuration_fetcher, usage_messenger, logger, COMMANDS, FLAGS)
 
       begin
-        command_runner.run command_name, command_arguments
+        known_command_names = COMMANDS.map(&:command_name)
+        if command_name && command_name.match(/^--/)
+          flag = command_name[2..-1]
+          if FLAGS.include?(flag)
+            "Bookbinder::CommandRunner::#{flag.classify}Flag".constantize.new(logger).run
+          else
+            logger.log "Unrecognized flag '#{command_name}'\n" +
+            usage_messenger.construct_for(COMMANDS, FLAGS)
+            1
+          end
+        elsif known_command_names.include?(command_name)
+          command_runner.run command_name, command_arguments
+        else
+          logger.log "Unrecognized command '#{command_name}'\n" +
+            usage_messenger.construct_for(COMMANDS, FLAGS)
+          1
+        end
+
       rescue VersionUnsupportedError => e
         logger.error "config.yml at version '#{e.message}' has an unsupported API."
         1
