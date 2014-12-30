@@ -1,5 +1,6 @@
 require_relative 'command_runner'
 require_relative 'local_file_system_accessor'
+require_relative 'commands/version'
 
 module Bookbinder
   class Cli
@@ -7,7 +8,9 @@ module Bookbinder
     UnknownCommand = Class.new(StandardError)
     UnknownFlag = Class.new(StandardError)
 
-    FLAGS = %w(version)
+    FLAGS = [
+      Commands::Version
+    ]
 
     COMMANDS = [
       Commands::BuildAndPushTarball,
@@ -32,23 +35,16 @@ module Bookbinder
       configuration_fetcher.set_config_file_path './config.yml'
       usage_messenger = UsageMessenger.new
 
-      command_runner = CommandRunner.new(configuration_fetcher, usage_messenger, logger, COMMANDS, FLAGS)
+      command_runner = CommandRunner.new(configuration_fetcher, usage_messenger, logger, COMMANDS + FLAGS)
 
       begin
-        known_command_names = COMMANDS.map(&:command_name)
-        if command_name && command_name.match(/^--/)
-          flag = command_name[2..-1]
-          if FLAGS.include?(flag)
-            "Bookbinder::CommandRunner::#{flag.classify}Flag".constantize.new(logger).run
-          else
-            logger.log "Unrecognized flag '#{command_name}'\n" +
-            usage_messenger.construct_for(COMMANDS, FLAGS)
-            1
-          end
-        elsif known_command_names.include?(command_name)
+        known_command_names = (COMMANDS + FLAGS).map(&:command_name)
+
+        command_type = "#{command_name}".match(/^--/) ? 'flag' : 'command'
+        if known_command_names.include?(command_name)
           command_runner.run command_name, command_arguments
         else
-          logger.log "Unrecognized command '#{command_name}'\n" +
+          logger.log "Unrecognized #{command_type} '#{command_name}'\n" +
             usage_messenger.construct_for(COMMANDS, FLAGS)
           1
         end

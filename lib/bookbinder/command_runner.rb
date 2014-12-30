@@ -1,31 +1,10 @@
 module Bookbinder
   class CommandRunner
-    class VersionFlag
-
-      def self.command_name
-        '--version'
-      end
-
-      def initialize(logger)
-        @logger = logger
-      end
-
-      def run(*)
-        logger.log "bookbinder #{Gem::Specification::load(File.join GEM_ROOT, "bookbinder.gemspec").version}"
-        0
-      end
-
-      private
-
-      attr_reader :logger
-    end
-
-    def initialize(configuration_fetcher, usage_messenger, logger, commands, flags)
+    def initialize(configuration_fetcher, usage_messenger, logger, commands)
       @configuration_fetcher = configuration_fetcher
       @usage_messenger = usage_messenger
       @logger = logger
       @commands = commands
-      @flags = flags
     end
 
     def run(command_name, command_arguments)
@@ -40,7 +19,7 @@ module Bookbinder
 
     private
 
-    attr_reader :logger, :usage_messenger, :flags, :commands
+    attr_reader :logger, :usage_messenger, :commands
 
   end
 end
