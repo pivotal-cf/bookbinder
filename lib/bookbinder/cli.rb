@@ -1,12 +1,12 @@
 require_relative 'command_runner'
 require_relative 'local_file_system_accessor'
 require_relative 'commands/version'
+require_relative 'command_validator'
 
 module Bookbinder
   class Cli
     InvalidArguments = Class.new(StandardError)
     UnknownCommand = Class.new(StandardError)
-    UnknownFlag = Class.new(StandardError)
 
     FLAGS = [
       Commands::Version
@@ -34,20 +34,13 @@ module Bookbinder
       configuration_fetcher = ConfigurationFetcher.new(logger, configuration_validator, yaml_loader)
       configuration_fetcher.set_config_file_path './config.yml'
       usage_messenger = UsageMessenger.new
+      command_validator = CommandValidator.new usage_messenger, COMMANDS + FLAGS, usage_messenger.construct_for(COMMANDS, FLAGS)
 
       command_runner = CommandRunner.new(configuration_fetcher, usage_messenger, logger, COMMANDS + FLAGS)
 
       begin
-        known_command_names = (COMMANDS + FLAGS).map(&:command_name)
-
-        command_type = "#{command_name}".match(/^--/) ? 'flag' : 'command'
-        if known_command_names.include?(command_name)
-          command_runner.run command_name, command_arguments
-        else
-          logger.log "Unrecognized #{command_type} '#{command_name}'\n" +
-            usage_messenger.construct_for(COMMANDS, FLAGS)
-          1
-        end
+        command_validator.validate! command_name
+        command_runner.run command_name, command_arguments
 
       rescue VersionUnsupportedError => e
         logger.error "config.yml at version '#{e.message}' has an unsupported API."
@@ -59,9 +52,6 @@ module Bookbinder
         logger.error "#{e.message} from your configuration."
         1
       rescue Cli::UnknownCommand => e
-        logger.log e.message
-        1
-      rescue Cli::UnknownFlag => e
         logger.log e.message
         1
       rescue => e
