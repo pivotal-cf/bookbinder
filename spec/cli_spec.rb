@@ -21,7 +21,7 @@ module Bookbinder
     end
 
     describe '#run' do
-      Cli::COMMANDS.each do |klass|
+      CommandRunner::COMMANDS.each do |klass|
         let(:extra_args) { ['arg1', 'arg2'] }
         let(:fake_command) { double }
 
@@ -56,7 +56,7 @@ module Bookbinder
         let(:arguments) { ['foo'] }
         it 'should print a helpful message' do
           expect(logger).to receive(:log).with(/Unrecognized command 'foo'/)
-          run
+          expect(run).to eq(1)
         end
       end
 

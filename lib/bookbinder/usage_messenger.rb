@@ -1,31 +1,27 @@
 class UsageMessenger
-  def initialize(logger, commands, flags)
-    @logger = logger
-    @commands = commands
-    @flags = flags
-  end
 
-  def print
-    log_usage_header
-    log_flag_usage_messages
-    log_command_usage_messages
-    0
+  def construct_for commands, flags
+    log_usage_header + "\n" + flag_usage_messages(flags) + command_usage_messages(commands)
   end
 
   private
 
-  def log_flag_usage_messages
-    @flags.each { |f| @logger.log "  bookbinder --#{f}" }
+  def flag_usage_messages(flags)
+    flag_usage_messages = ""
+    flags.each { |f| flag_usage_messages += "  bookbinder --#{f}\n" }
+    flag_usage_messages
   end
 
-  def log_command_usage_messages
-    @commands.each do |command_class|
-      @logger.log "  bookbinder #{command_class.usage}"
+  def command_usage_messages(commands)
+    flag_command_messages = ""
+    commands.each do |command_class|
+      flag_command_messages += "  bookbinder #{command_class.usage}\n"
     end
+    flag_command_messages
   end
 
   def log_usage_header
-    @logger.log <<TEXT
+    <<TEXT
 
 Bookbinder documentation can be found at https://github.com/pivotal-cf/docs-bookbinder
 

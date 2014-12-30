@@ -4,11 +4,15 @@ module Bookbinder
       def initialize(logger, configuration_fetcher)
         @logger = logger
         @configuration_fetcher = configuration_fetcher
-        @config = configuration_fetcher.fetch_config
       end
 
       private
-      attr_accessor :config, :configuration_fetcher
+
+      def config
+        @config ||= configuration_fetcher.fetch_config
+      end
+
+      attr_reader :configuration_fetcher
     end
   end
 end
