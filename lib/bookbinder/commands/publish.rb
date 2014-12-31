@@ -8,7 +8,7 @@ module Bookbinder
       extend Commands::Naming
 
       def self.usage
-        "publish <local|github> [--verbose]"
+        "publish <local|github> [--verbose] \t Binds the sections specified in config.yml into the final_app directory"
       end
 
       def run(cli_arguments, git_accessor=Git)

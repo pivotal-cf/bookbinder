@@ -6,7 +6,7 @@ module Bookbinder
       extend Commands::Naming
 
       def self.usage
-        'tag <git tag>'
+        "tag <git tag> \t \t \t \t Applies the specified Git tag to your book and all its sections"
       end
 
       def run(params)

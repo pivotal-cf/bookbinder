@@ -12,7 +12,7 @@ module Bookbinder
       end
 
       def self.usage
-        "build_and_push_tarball"
+        "build_and_push_tarball \t  \t  \t Tars up final_app directory and pushes to the S3 bucket specified in your credentials.yml"
       end
 
       def run(_)

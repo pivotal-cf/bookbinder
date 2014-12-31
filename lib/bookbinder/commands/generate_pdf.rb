@@ -30,7 +30,7 @@ module Bookbinder
       end
 
       def self.usage
-        'generate_pdf [PDF config.yml]'
+        "generate_pdf [<file_name>.yml] \t \t Generates PDF specified in YAML file"
       end
 
       def run(params)
