@@ -2,7 +2,7 @@ module Bookbinder
   module Commands
     class Version < BookbinderCommand
       def self.to_s
-        "version"
+        'version'
       end
 
       def self.command_name
@@ -10,13 +10,10 @@ module Bookbinder
       end
 
       def run(*)
-        logger.log "bookbinder #{Gem::Specification::load(File.join GEM_ROOT, "bookbinder.gemspec").version}"
+        @logger.log "bookbinder #{Gem::Specification::load(File.join GEM_ROOT, "bookbinder.gemspec").version}"
         0
       end
 
-      private
-
-      attr_reader :logger
     end
   end
 end

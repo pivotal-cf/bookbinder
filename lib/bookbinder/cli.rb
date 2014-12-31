@@ -2,6 +2,7 @@ require_relative 'command_runner'
 require_relative 'local_file_system_accessor'
 require_relative 'commands/version'
 require_relative 'command_validator'
+require_relative 'commands/help'
 
 module Bookbinder
   class Cli
@@ -9,7 +10,8 @@ module Bookbinder
     UnknownCommand = Class.new(StandardError)
 
     FLAGS = [
-      Commands::Version
+      Commands::Version,
+      Commands::Help
     ]
 
     COMMANDS = [
@@ -34,9 +36,10 @@ module Bookbinder
       configuration_fetcher = ConfigurationFetcher.new(logger, configuration_validator, yaml_loader)
       configuration_fetcher.set_config_file_path './config.yml'
       usage_messenger = UsageMessenger.new
-      command_validator = CommandValidator.new usage_messenger, COMMANDS + FLAGS, usage_messenger.construct_for(COMMANDS, FLAGS)
+      usage_message = usage_messenger.construct_for(COMMANDS, FLAGS)
+      command_validator = CommandValidator.new usage_messenger, COMMANDS + FLAGS, usage_message
 
-      command_runner = CommandRunner.new(configuration_fetcher, usage_messenger, logger, COMMANDS + FLAGS)
+      command_runner = CommandRunner.new(configuration_fetcher, usage_message, logger, COMMANDS + FLAGS)
 
       begin
         command_validator.validate! command_name

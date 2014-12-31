@@ -211,6 +211,13 @@ module Bookbinder
         end
       end
 
+      context 'when the input flag is --help' do
+        it 'logs the command usages including --help' do
+          expect(logger).to receive(:log).with(/--#{Regexp.escape('help')}/)
+          expect(cli.run ['--help']).to eq(0)
+        end
+      end
+
       context 'when a flag that is not recognized is supplied' do
         let(:arguments) { ['--foo'] }
 
