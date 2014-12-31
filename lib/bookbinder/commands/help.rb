@@ -14,6 +14,10 @@ module Bookbinder
         '--help'
       end
 
+      def self.usage
+        "--help \t \t \t \t \t Print this message"
+      end
+
       def run(*)
         logger.log(usage_message)
         0

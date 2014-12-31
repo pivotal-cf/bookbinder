@@ -6,7 +6,7 @@ module Bookbinder
       extend Commands::Naming
 
       def self.usage
-        "run_publish_ci \t \t \t \t Runs publish, push_local_to_staging, and build_and_push_tarball for CI purposes"
+        "run_publish_ci \t \t \t \t Run publish, push_local_to_staging, and build_and_push_tarball for CI purposes"
       end
 
       def run(cli_args)

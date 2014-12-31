@@ -6,7 +6,7 @@ module Bookbinder
       extend Commands::Naming
 
       def self.usage
-        "update_local_doc_repos \t \t \t Runs `git pull` on all the sections that exist at the same directory level as your book directory"
+        "update_local_doc_repos \t \t \t Run `git pull` on all sections that exist at the same directory level as your book directory"
       end
 
       def run(_)

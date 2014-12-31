@@ -8,7 +8,7 @@ class UsageMessenger
 
   def flag_usage_messages(flags)
     flag_usage_messages = ""
-    flags.each { |f| flag_usage_messages += "  bookbinder --#{f}\n" }
+    flags.each { |f| flag_usage_messages += "  bookbinder #{f.usage}\n" }
     flag_usage_messages
   end
 

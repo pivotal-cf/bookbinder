@@ -6,7 +6,7 @@ module Bookbinder
       extend Commands::Naming
 
       def self.usage
-        "push_local_to_staging \t \t  \t Pushes the contents of final_app to the staging host specified in credentials.yml"
+        "push_local_to_staging \t \t  \t Push the contents of final_app to the staging host specified in credentials.yml"
       end
 
       def run(_)

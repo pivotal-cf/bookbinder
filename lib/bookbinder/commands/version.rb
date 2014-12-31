@@ -9,6 +9,10 @@ module Bookbinder
         '--version'
       end
 
+      def self.usage
+        "--version \t \t \t \t \t Print the version of bookbinder"
+      end
+
       def run(*)
         @logger.log "bookbinder #{Gem::Specification::load(File.join GEM_ROOT, "bookbinder.gemspec").version}"
         0
