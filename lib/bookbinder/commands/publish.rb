@@ -8,7 +8,7 @@ module Bookbinder
       extend Commands::Naming
 
       def self.usage
-        "publish <local|github> [tag] [--verbose]"
+        "publish <local|github> [--verbose]"
       end
 
       def run(cli_arguments, git_accessor=Git)
