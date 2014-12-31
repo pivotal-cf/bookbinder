@@ -10,7 +10,7 @@ module Bookbinder
       end
 
       def self.usage
-        "--version \t \t \t \t \t Print the version of bookbinder"
+        "--version \t \t \t \t Print the version of bookbinder"
       end
 
       def run(*)

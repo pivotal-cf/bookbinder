@@ -8,14 +8,14 @@ class UsageMessenger
 
   def flag_usage_messages(flags)
     flag_usage_messages = ""
-    flags.each { |f| flag_usage_messages += "  bookbinder #{f.usage}\n" }
+    flags.each { |f| flag_usage_messages += " \t#{f.usage}\n" }
     flag_usage_messages
   end
 
   def command_usage_messages(commands)
     flag_command_messages = ""
     commands.each do |command_class|
-      flag_command_messages += "  bookbinder #{command_class.usage}\n"
+      flag_command_messages += " \t#{command_class.usage}\n"
     end
     flag_command_messages
   end
@@ -23,9 +23,9 @@ class UsageMessenger
   def log_usage_header
     <<TEXT
 
-Bookbinder documentation can be found at https://github.com/pivotal-cf/docs-bookbinder
+\e[1;39;49mDocumentation\e[0m: https://github.com/pivotal-cf/docs-bookbinder
 
-Usage (preface with 'bundle exec ' when using rbenv):
+\e[1;39;49mUsage\e[0m: bookbinder <command|flag> [args]
 TEXT
   end
 end
