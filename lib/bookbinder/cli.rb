@@ -42,7 +42,8 @@ module Bookbinder
       command_runner = CommandRunner.new(configuration_fetcher, usage_message, logger, COMMANDS + FLAGS)
 
       begin
-        command_validator.validate! command_name
+        command_name ? command_validator.validate!(command_name) : command_name = '--help'
+
         command_runner.run command_name, command_arguments
 
       rescue VersionUnsupportedError => e

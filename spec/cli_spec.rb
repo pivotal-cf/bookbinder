@@ -47,7 +47,7 @@ module Bookbinder
       context 'when no arguments are supplied' do
         let(:arguments) { [] }
         it 'should print a helpful message' do
-          expect(logger).to receive(:log).with(/Unrecognized command ''/)
+          expect(logger).to receive(:log).with(/Usage/)
           run
         end
       end
