@@ -9,9 +9,7 @@ module Bookbinder
         cf_cli.login
 
         old_app = cf_cli.apps.first.first
-        currently_deployed_to_green = old_app.include? "green"
-
-        new_app = "#{cf_cli.creds.app_name}-#{currently_deployed_to_green ? "blue" : "green"}"
+        new_app = old_app.with_flipped_name
 
         cf_cli.start(new_app)
         cf_cli.push(new_app)

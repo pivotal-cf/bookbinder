@@ -114,7 +114,8 @@ OUTPUT
       end
 
       it 'returns the app sets for multiple hosts' do
-        expect(cf.apps).to eq([%w(docs-green), %w(docs-green docs-blue)])
+        expect(cf.apps).to eq([[CfApp.new('docs-green')],
+                               [CfApp.new('docs-green'), CfApp.new('docs-blue')]])
       end
 
       it "only queries the API once" do
@@ -164,7 +165,7 @@ OUTPUT
         end
 
         it "returns app names with stripped spaces" do
-          expect(cf.apps).to eq([%w(many-cats too-many-cats)])
+          expect(cf.apps).to eq([[ CfApp.new('many-cats'), CfApp.new('too-many-cats') ]])
         end
       end
 
@@ -178,7 +179,8 @@ OUTPUT
         end
 
         it "returns the apps for the mapped routes" do
-          expect(cf.apps).to eq([%w(docs-green), %w(docs-green docs-blue)])
+          expect(cf.apps).to eq([[ CfApp.new('docs-green') ],
+                                 [ CfApp.new('docs-green'), CfApp.new('docs-blue') ]])
         end
       end
 
