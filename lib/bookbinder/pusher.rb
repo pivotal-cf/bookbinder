@@ -8,7 +8,7 @@ module Bookbinder
       Dir.chdir(app_dir) do
         cf_cli.login
 
-        old_app = cf_cli.apps.first.first
+        old_app = cf_cli.mapped_app_groups.first.first
         new_app = old_app.with_flipped_name
 
         cf_cli.start(new_app)

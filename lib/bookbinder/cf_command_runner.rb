@@ -48,7 +48,7 @@ module Bookbinder
       raise "Could not log in to #{creds.api_endpoint}" unless success
     end
 
-    def apps
+    def mapped_app_groups
       cli_parser = CliRoutesParser.new(cf_routes_output)
 
       existing_hosts = creds.flat_routes.reject do |domain, host|

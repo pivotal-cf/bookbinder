@@ -80,7 +80,7 @@ module Bookbinder
       end
     end
 
-    describe '#apps' do
+    describe 'retrieving apps' do
       let(:routes_output) do
         eol_space = ' '
         <<OUTPUT
@@ -114,13 +114,13 @@ OUTPUT
       end
 
       it 'returns the app sets for multiple hosts' do
-        expect(cf.apps).to eq([[CfApp.new('docs-green')],
-                               [CfApp.new('docs-green'), CfApp.new('docs-blue')]])
+        expect(cf.mapped_app_groups).to eq([[CfApp.new('docs-green')],
+                                            [CfApp.new('docs-green'), CfApp.new('docs-blue')]])
       end
 
       it "only queries the API once" do
         expect(Open3).to receive(:capture2).once
-        cf.apps
+        cf.mapped_app_groups
       end
 
       context "when there are no apps" do
@@ -135,7 +135,7 @@ OUTPUT
         end
 
         it "raises an exception" do
-          expect { cf.apps }.to raise_error(/no apps found/)
+          expect { cf.mapped_app_groups }.to raise_error(/no apps found/)
         end
       end
 
@@ -151,7 +151,7 @@ OUTPUT
         end
 
         it 'raises' do
-          expect { cf.apps }.to raise_error(/cannot find currently deployed app/)
+          expect { cf.mapped_app_groups }.to raise_error(/cannot find currently deployed app/)
         end
       end
 
@@ -165,7 +165,7 @@ OUTPUT
         end
 
         it "returns app names with stripped spaces" do
-          expect(cf.apps).to eq([[ CfApp.new('many-cats'), CfApp.new('too-many-cats') ]])
+          expect(cf.mapped_app_groups).to eq([[ CfApp.new('many-cats'), CfApp.new('too-many-cats') ]])
         end
       end
 
@@ -179,8 +179,8 @@ OUTPUT
         end
 
         it "returns the apps for the mapped routes" do
-          expect(cf.apps).to eq([[ CfApp.new('docs-green') ],
-                                 [ CfApp.new('docs-green'), CfApp.new('docs-blue') ]])
+          expect(cf.mapped_app_groups).to eq([[ CfApp.new('docs-green') ],
+                                              [ CfApp.new('docs-green'), CfApp.new('docs-blue') ]])
         end
       end
 
@@ -190,7 +190,7 @@ OUTPUT
             with(/routes/).
             and_return(['unparsed output',
                         double(success?: false)])
-          expect { cf.apps }.to raise_error(/failure executing cf routes/)
+          expect { cf.mapped_app_groups }.to raise_error(/failure executing cf routes/)
         end
       end
     end
