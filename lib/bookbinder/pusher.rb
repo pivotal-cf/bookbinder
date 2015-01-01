@@ -9,12 +9,18 @@ module Bookbinder
         cf_cli.login
 
         old_app = cf_cli.mapped_app_groups.first.first
-        new_app = old_app.with_flipped_name
 
-        cf_cli.start(new_app)
-        cf_cli.push(new_app)
-        cf_cli.map_routes(new_app)
-        cf_cli.takedown_old_target_app(old_app)
+        if old_app
+          new_app = old_app.with_flipped_name
+          cf_cli.start(new_app)
+          cf_cli.push(new_app)
+          cf_cli.map_routes(new_app)
+          cf_cli.takedown_old_target_app(old_app)
+        else
+          new_app = cf_cli.new_app
+          cf_cli.push(new_app)
+          cf_cli.map_routes(new_app)
+        end
       end
     end
 

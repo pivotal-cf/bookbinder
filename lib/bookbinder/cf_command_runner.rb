@@ -37,6 +37,10 @@ module Bookbinder
       end
     end
 
+    def new_app
+      BlueGreenApp.new([creds.app_name, 'blue'].join('-'))
+    end
+
     def start(deploy_target_app)
       # Theoretically we shouldn't need this (and corresponding "stop" below), but we've seen CF pull files from both
       # green and blue when a DNS redirect points to HOST.cfapps.io
@@ -98,7 +102,7 @@ module Bookbinder
           app = apps_with_route[1]
           app.split(',').map { |name| BlueGreenApp.new(name) }
         else
-          raise "no apps found for host #{host}"
+          []
         end
       end
 

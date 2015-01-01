@@ -14,6 +14,14 @@ module Bookbinder
       allow(binary_path_syscall).to receive(:chomp!).and_return(binary_path)
     end
 
+    describe "obtaining a new app for a fresh deploy" do
+      let(:config_hash) { { 'app_name' => 'mygreatapp' } }
+
+      it "uses the app name from the credentials, and makes it blue" do
+        expect(cf.new_app).to eq(BlueGreenApp.new('mygreatapp-blue'))
+      end
+    end
+
     describe '#login' do
       let(:config_hash) do
         {
@@ -134,8 +142,8 @@ docs                    cfapps.io             #{eol_space}
 OUTPUT
         end
 
-        it "raises an exception" do
-          expect { cf.mapped_app_groups }.to raise_error(/no apps found/)
+        it "returns an array containing an empty array" do
+          expect(cf.mapped_app_groups).to eq [[]]
         end
       end
 
