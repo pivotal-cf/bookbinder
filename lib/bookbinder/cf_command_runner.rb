@@ -106,11 +106,11 @@ module Bookbinder
 
       private
 
+      attr_reader :raw_routes
+
       def routes_for(domain, host)
         raw_routes.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)
       end
-
-      attr_reader :raw_routes
     end
 
     private
