@@ -8,13 +8,11 @@ module Bookbinder
       Dir.chdir(app_dir) do
         cf_cli.login
 
-        # query which app (green/blue) the hostname currently points to
         old_app = cf_cli.apps.first.first
         currently_deployed_to_green = old_app.include? "green"
 
         new_app = "#{cf_cli.creds.app_name}-#{currently_deployed_to_green ? "blue" : "green"}"
 
-        # deploy to the other instance
         cf_cli.start(new_app)
         cf_cli.push(new_app)
         cf_cli.map_routes(new_app)
