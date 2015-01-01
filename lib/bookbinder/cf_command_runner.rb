@@ -3,8 +3,6 @@ require_relative 'blue_green_app'
 
 module Bookbinder
   class CfCommandRunner
-    attr_reader :creds
-
     def initialize(logger, cf_credentials, trace_file)
       @logger = logger
       @creds = cf_credentials
@@ -53,10 +51,6 @@ module Bookbinder
       # The routes will then be recreated from the creds repo.
       success = Kernel.system(environment_variables, "#{cf_binary_path} push #{deploy_target_app} --no-route -m 256M -i 3")
       raise "Could not deploy app to #{deploy_target_app}" unless success
-    end
-
-    def environment_variables
-      {'CF_TRACE' => @trace_file}
     end
 
     def unmap_routes(app)
@@ -121,6 +115,8 @@ module Bookbinder
 
     private
 
+    attr_reader :creds
+
     def stop(app)
       success = Kernel.system("#{cf_binary_path} stop #{app}")
       raise "Failed to stop application #{app}" unless success
@@ -152,6 +148,10 @@ module Bookbinder
       output, status = Open3.capture2("CF_COLOR=false #{cf_binary_path} routes")
       raise 'failure executing cf routes' unless status.success?
       output
+    end
+
+    def environment_variables
+      {'CF_TRACE' => @trace_file}
     end
   end
 end
