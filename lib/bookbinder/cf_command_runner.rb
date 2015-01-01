@@ -98,7 +98,7 @@ class CfCommandRunner
       begin
         map_route(app, domain, name)
         succeeded << [app, domain, name]
-      rescue
+      rescue RuntimeError
         succeeded.each { |app, domain, host| unmap_route(app, domain, host) }
         raise
       end
