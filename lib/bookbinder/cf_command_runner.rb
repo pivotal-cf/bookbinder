@@ -22,17 +22,26 @@ class CfCommandRunner
   end
 
   def apps
-    existing_hosts = routes.dup.select { |domain, host| !new_route? domain, host }
-    raise "cannot find currently deployed app." if existing_hosts.empty?
-    existing_hosts.map { |domain, host| apps_for_host(domain, host) }
+    existing_hosts = routes.reject { |domain, host| new_route?(domain, host) }
+    if existing_hosts.any?
+      existing_hosts.map { |domain, host| apps_for_host(domain, host) }
+    else
+      raise "cannot find currently deployed app."
+    end
   end
 
   def apps_for_host(domain, host)
     route = routes_for(domain, host).first
-    raise "no routes found for route #{host}.#{domain}" if route.nil?
-    apps_with_route = /#{Regexp.escape(domain)}\s+(.+)$/.match(route.rstrip)
-    raise "no apps found for host #{host}" if apps_with_route.nil?
-    apps_with_route[1].split(',').map { |app| app.strip }
+    if route
+      apps_with_route = route.rstrip.match(/#{Regexp.escape(domain)}\s+(.+)$/)
+      if apps_with_route.nil?
+        raise "no apps found for host #{host}"
+      else
+        apps_with_route[1].split(',').map { |app| app.strip }
+      end
+    else
+      raise "no routes found for route #{host}.#{domain}"
+    end
   end
 
   def start(deploy_target_app)
