@@ -6,8 +6,8 @@ module Bookbinder
     let(:credentials) { Configuration::CfCredentials.new(config_hash, false) }
     let(:cf) { CfCommandRunner.new(logger, credentials, trace_file) }
     let(:trace_file) { 'path/to/log' }
-    let (:binary_path_syscall ) { '/usr/local/bin/cf\n' }
-    let (:binary_path) { '/usr/local/bin/cf'}
+    let(:binary_path_syscall ) { '/usr/local/bin/cf\n' }
+    let(:binary_path) { '/usr/local/bin/cf'}
 
     before do
       allow_any_instance_of(CfCommandRunner).to receive(:`).and_return(binary_path_syscall)
@@ -59,7 +59,7 @@ module Bookbinder
       end
 
       context 'when the cf cli is not in the path' do
-        let (:binary_path ) { '' }
+        let(:binary_path ) { '' }
 
         it 'raises' do
           allow_any_instance_of(CfCommandRunner).to receive(:`).and_return(binary_path)
@@ -68,8 +68,8 @@ module Bookbinder
       end
 
       context 'when the cf cli is in the path' do
-        let (:binary_path_syscall ) { '/usr/local/bin/cf\n' }
-        let (:binary_path) { '/usr/local/bin/cf'}
+        let(:binary_path_syscall ) { '/usr/local/bin/cf\n' }
+        let(:binary_path) { '/usr/local/bin/cf'}
 
         it 'does not raise' do
           allow_any_instance_of(CfCommandRunner).to receive(:`).and_return(binary_path_syscall)
