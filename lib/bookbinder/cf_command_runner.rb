@@ -4,35 +4,6 @@ module Bookbinder
   class CfCommandRunner
     attr_reader :creds
 
-    class CliRoutesParser
-      def initialize(raw_routes)
-        @raw_routes = raw_routes
-      end
-
-      def apps_for_host(domain, host)
-        route = routes_for(domain, host).first
-        apps_with_route = route.rstrip.match(/#{Regexp.escape(domain)}\s+(.+)$/)
-        if apps_with_route
-          app = apps_with_route[1]
-          app.split(',').map(&:strip)
-        else
-          raise "no apps found for host #{host}"
-        end
-      end
-
-      def new_route?(domain, host)
-        routes_for(domain, host).empty?
-      end
-
-      private
-
-      def routes_for(domain, host)
-        raw_routes.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)
-      end
-
-      attr_reader :raw_routes
-    end
-
     def initialize(logger, cf_credentials, trace_file)
       @logger = logger
       @creds = cf_credentials
@@ -112,6 +83,35 @@ module Bookbinder
       end
       stop(app)
       unmap_routes(app)
+    end
+
+    class CliRoutesParser
+      def initialize(raw_routes)
+        @raw_routes = raw_routes
+      end
+
+      def apps_for_host(domain, host)
+        route = routes_for(domain, host).first
+        apps_with_route = route.rstrip.match(/#{Regexp.escape(domain)}\s+(.+)$/)
+        if apps_with_route
+          app = apps_with_route[1]
+          app.split(',').map(&:strip)
+        else
+          raise "no apps found for host #{host}"
+        end
+      end
+
+      def new_route?(domain, host)
+        routes_for(domain, host).empty?
+      end
+
+      private
+
+      def routes_for(domain, host)
+        raw_routes.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)
+      end
+
+      attr_reader :raw_routes
     end
 
     private
