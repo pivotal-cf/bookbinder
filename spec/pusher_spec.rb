@@ -15,11 +15,7 @@ module Bookbinder
     end
 
     let(:cf) do
-      double(
-          creds: creds,
-          find_green_blue: 'app-green',
-          host: 'host.example.com'
-      )
+      double(creds: creds)
     end
 
     subject(:pusher) { Pusher.new(cf) }
