@@ -22,22 +22,23 @@ class CfCommandRunner
   end
 
   def apps
-    existing_hosts = routes.reject { |domain, host| new_route?(domain, host) }
+    raw_routes = cf_routes_output
+    existing_hosts = routes.reject { |domain, host| new_route?(raw_routes, domain, host) }
     if existing_hosts.any?
-      existing_hosts.map { |domain, host| apps_for_host(domain, host) }
+      existing_hosts.map { |domain, host| apps_for_host(raw_routes, domain, host) }
     else
       raise "cannot find currently deployed app."
     end
   end
 
-  def apps_for_host(domain, host)
-    route = routes_for(domain, host).first
+  def apps_for_host(raw_routes, domain, host)
+    route = routes_for(raw_routes, domain, host).first
     if route
       apps_with_route = route.rstrip.match(/#{Regexp.escape(domain)}\s+(.+)$/)
       if apps_with_route.nil?
         raise "no apps found for host #{host}"
       else
-        apps_with_route[1].split(',').map { |app| app.strip }
+        apps_with_route[1].split(',').map(&:strip)
       end
     else
       raise "no routes found for route #{host}.#{domain}"
@@ -135,11 +136,11 @@ class CfCommandRunner
     output
   end
 
-  def routes_for(domain, host)
-    cf_routes_output.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)
+  def routes_for(routes_output, domain, host)
+    routes_output.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)
   end
 
-  def new_route?(domain, host)
-    routes_for(domain, host).empty?
+  def new_route?(cf_routes_output, domain, host)
+    routes_for(cf_routes_output, domain, host).empty?
   end
 end

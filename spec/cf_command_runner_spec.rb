@@ -117,6 +117,11 @@ OUTPUT
         expect(cf.apps).to eq([%w(docs-green), %w(docs-green docs-blue)])
       end
 
+      it "only queries the API once" do
+        expect(Open3).to receive(:capture2).once
+        cf.apps
+      end
+
       context "when there are no apps" do
         let(:routes_output) do
           eol_space = ' '
