@@ -81,12 +81,6 @@ module Bookbinder
     end
 
     describe '#apps' do
-      let(:host1) { 'docs' }
-      let(:host2) { 'docs-test' }
-      let(:host3) { 'docs-new-route' }
-      let(:hosts) { [host1, host2] }
-      let(:too_many_hosts) { [host1, host2, host3] }
-      let(:apps) { ['docs-green', 'docs-blue'] }
       let(:routes_output) do
         eol_space = ' '
         <<OUTPUT
@@ -96,148 +90,100 @@ host                    domain                apps
 no-cat-pictures         cfapps.io
 less-cat-pictures       cfapps.io             cats #{eol_space}
 cat-pictures            cfapps.io             cats #{eol_space}
-#{host1}misleading      cfapps.io
-#{host1}                cfapps.io             #{apps[0]} #{eol_space}
-#{host2}misleading      cfapps.io
-#{host2}                cfapps.io             #{apps.join(', ')} #{eol_space}
+docsmisleading          cfapps.io
+docs                    cfapps.io             docs-green #{eol_space}
+docs-testmisleading     cfapps.io
+docs-test               cfapps.io             docs-green,docs-blue #{eol_space}
 more-cat-pictures       cfapps.io             many-cats, too-many-cats #{eol_space}
 OUTPUT
       end
 
       let(:config_hash) do
-        { 'staging_host' =>
-          {
-            'cfapps.io' => hosts
+        {
+          'staging_host' => {
+            'cfapps.io' => ['docs', 'docs-test']
           }
         }
       end
-
-      let(:cf_routes_command_result) { true }
-
-      before do
-        allow(Open3).to receive(:capture2).with(/routes/).and_return([routes_output, double(success?: cf_routes_command_result)])
-      end
-
-      context 'when there are multiple hosts with the same app' do
-        it 'queries for apps for each host' do
-          expect(cf).to receive(:apps_for_host).at_least(hosts.count).times
-          cf.apps
-        end
-
-        it 'does not error out' do
-          expect { cf.apps }.not_to raise_error
-        end
-      end
-
-      context 'when a route in the creds is not yet mapped in the app' do
-        let(:config_hash) do
-          { 'staging_host' =>
-                {
-                    'cfapps.io' => too_many_hosts
-                }
-          }
-        end
-        it 'it does not try to find the app for that route name' do
-          expect(cf).to receive(:apps_for_host).exactly(hosts.count).times
-          cf.apps
-        end
-      end
-    end
-
-    describe '#apps_for_host' do
-      let(:config_hash) { { 'staging_host' => { 'cfapps.io' => 'docs' } } }
 
       before do
         allow(Open3).to receive(:capture2).
           with(/routes/).
           and_return([routes_output,
-                      double(success?: cf_routes_command_result)])
+                      double(success?: true)])
       end
 
-      context 'when the host has one app' do
+      it 'returns the app sets for multiple hosts' do
+        expect(cf.apps).to eq([%w(docs-green), %w(docs-green docs-blue)])
+      end
+
+      context "when there are no apps" do
         let(:routes_output) do
           eol_space = ' '
           <<OUTPUT
 Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
 
 host                    domain                apps
-cat-pictures            cfapps.io             cats #{eol_space}
-docsmisleading          cfapps.io
-docs                    cfapps.io             docs-green #{eol_space}
-cute-cat-pictures       cfapps.io             cute-cats ,   cuter-cats #{eol_space}
+docs                    cfapps.io             #{eol_space}
 OUTPUT
         end
-        let(:cf_routes_command_result) { true }
 
-        it 'returns the single app' do
-          expect(cf.apps_for_host('cfapps.io', 'docs')).to eq(['docs-green'])
-        end
-      end
-
-      context 'when the host has multiple apps' do
-        let(:routes_output) do
-          eol_space = ' '
-          <<OUTPUT
-Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
-
-host                    domain                apps
-docs                    cfapps.io             docs-green,docs-blue #{eol_space}
-OUTPUT
-      end
-
-        let(:cf_routes_command_result) { true }
-
-        it 'returns all apps for the host' do
-          expect(cf.apps_for_host('cfapps.io', 'docs')).to eq(['docs-green', 'docs-blue'])
-        end
-
-        context 'and there is spacing between the app names in the route output' do
-          let(:routes_output) do
-            eol_space = ' '
-            <<OUTPUT
-Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
-
-host                    domain                apps
-cute-cat-pictures       cfapps.io             cute-cats ,   cuter-cats #{eol_space}
-OUTPUT
-          end
-
-          it 'returns correct app names' do
-            expect(cf.apps_for_host('cfapps.io', 'cute-cat-pictures')).to eq(['cute-cats', 'cuter-cats'])
-          end
-        end
-      end
-
-      context 'when the host has no apps' do
-        let(:routes_output) do
-          eol_space = ' '
-          <<OUTPUT
-Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
-
-host                    domain                apps
-docs                    cfapps.io              #{eol_space}
-OUTPUT
-      end
-        let(:cf_routes_command_result) { true }
-
-        it 'raises' do
-          expect { cf.apps_for_host('cfapps.io', 'docs') }.to raise_error(/no apps found/)
+        it "raises an exception" do
+          expect { cf.apps }.to raise_error(/no apps found/)
         end
       end
 
       context 'when the host is not found' do
-        let(:cf_routes_command_result) { true }
-        let(:routes_output) { '' }
+        let(:routes_output) do
+          eol_space = ' '
+          <<OUTPUT
+Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
+
+host                    domain                apps
+foo                     cfapps.io             fantastic-app #{eol_space}
+OUTPUT
+        end
+
         it 'raises' do
-          expect { cf.apps_for_host('cfapps.io', 'docs') }.to raise_error(/no routes found/)
+          expect { cf.apps }.to raise_error(/cannot find currently deployed app/)
         end
       end
 
-      context 'when the command fails' do
-        let(:routes_output) { 'unparsed output' }
-        let(:cf_routes_command_result) { false }
+      context "when there are spaces in between app names" do
+        let(:config_hash) do
+          {
+            'staging_host' => {
+              'cfapps.io' => ['more-cat-pictures']
+            }
+          }
+        end
+
+        it "returns app names with stripped spaces" do
+          expect(cf.apps).to eq([%w(many-cats too-many-cats)])
+        end
+      end
+
+      context 'when a route in the creds is not yet mapped in the app' do
+        let(:config_hash) do
+          {
+            'staging_host' => {
+              'cfapps.io' => %w(docs docs-test docs-new-route)
+            }
+          }
+        end
+
+        it "returns the apps for the mapped routes" do
+          expect(cf.apps).to eq([%w(docs-green), %w(docs-green docs-blue)])
+        end
+      end
+
+      context 'when the cf command fails' do
         it 'raises' do
-          expect { cf.apps_for_host('cfapps.io', 'docs') }.to raise_error(/failure executing cf routes/)
+          allow(Open3).to receive(:capture2).
+            with(/routes/).
+            and_return(['unparsed output',
+                        double(success?: false)])
+          expect { cf.apps }.to raise_error(/failure executing cf routes/)
         end
       end
     end
