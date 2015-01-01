@@ -9,29 +9,26 @@ module Bookbinder
         @raw_routes = raw_routes
       end
 
-      def routes_for(domain, host)
-        raw_routes.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)
+      def apps_for_host(domain, host)
+        route = routes_for(domain, host).first
+        apps_with_route = route.rstrip.match(/#{Regexp.escape(domain)}\s+(.+)$/)
+        if apps_with_route
+          app = apps_with_route[1]
+          app.split(',').map(&:strip)
+        else
+          raise "no apps found for host #{host}"
+        end
       end
 
       def new_route?(domain, host)
         routes_for(domain, host).empty?
       end
 
-      def apps_for_host(domain, host)
-        route = routes_for(domain, host).first
-        if route
-          apps_with_route = route.rstrip.match(/#{Regexp.escape(domain)}\s+(.+)$/)
-          if apps_with_route.nil?
-            raise "no apps found for host #{host}"
-          else
-            apps_with_route[1].split(',').map(&:strip)
-          end
-        else
-          raise "no routes found for route #{host}.#{domain}"
-        end
-      end
-
       private
+
+      def routes_for(domain, host)
+        raw_routes.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)
+      end
 
       attr_reader :raw_routes
     end
