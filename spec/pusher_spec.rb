@@ -22,11 +22,11 @@ module Bookbinder
     let(:app_dir) { tmp_subdir "pusher_spec" }
 
     def green
-      CfApp.new('app-green')
+      BlueGreenApp.new('app-green')
     end
 
     def blue
-      CfApp.new('app-blue')
+      BlueGreenApp.new('app-blue')
     end
 
     describe 'when the hostname points to green' do

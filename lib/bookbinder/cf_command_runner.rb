@@ -1,32 +1,7 @@
 require 'open3'
+require_relative 'blue_green_app'
 
 module Bookbinder
-  class CfApp
-    def initialize(name)
-      @name = name.strip
-    end
-
-    def ==(other)
-      to_s == other.to_s
-    end
-
-    def to_s
-      name
-    end
-
-    def with_flipped_name
-      if name.include?('green')
-        CfApp.new(name.sub('green', 'blue'))
-      else
-        CfApp.new(name.sub('blue', 'green'))
-      end
-    end
-
-    private
-
-    attr_reader :name
-  end
-
   class CfCommandRunner
     attr_reader :creds
 
@@ -121,7 +96,7 @@ module Bookbinder
         apps_with_route = route.rstrip.match(/#{Regexp.escape(domain)}\s+(.+)$/)
         if apps_with_route
           app = apps_with_route[1]
-          app.split(',').map { |name| CfApp.new(name) }
+          app.split(',').map { |name| BlueGreenApp.new(name) }
         else
           raise "no apps found for host #{host}"
         end
