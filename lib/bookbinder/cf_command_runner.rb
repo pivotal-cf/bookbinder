@@ -3,6 +3,38 @@ require 'open3'
 class CfCommandRunner
   attr_reader :creds
 
+  class CliRoutesParser
+    def initialize(raw_routes)
+      @raw_routes = raw_routes
+    end
+
+    def routes_for(domain, host)
+      raw_routes.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)
+    end
+
+    def new_route?(domain, host)
+      routes_for(domain, host).empty?
+    end
+
+    def apps_for_host(domain, host)
+      route = routes_for(domain, host).first
+      if route
+        apps_with_route = route.rstrip.match(/#{Regexp.escape(domain)}\s+(.+)$/)
+        if apps_with_route.nil?
+          raise "no apps found for host #{host}"
+        else
+          apps_with_route[1].split(',').map(&:strip)
+        end
+      else
+        raise "no routes found for route #{host}.#{domain}"
+      end
+    end
+
+    private
+
+    attr_reader :raw_routes
+  end
+
   def initialize(logger, cf_credentials, trace_file)
     @logger = logger
     @creds = cf_credentials
@@ -22,10 +54,14 @@ class CfCommandRunner
   end
 
   def apps
-    raw_routes = cf_routes_output
-    existing_hosts = routes.reject { |domain, host| new_route?(raw_routes, domain, host) }
+    cli_parser = CliRoutesParser.new(cf_routes_output)
+
+    existing_hosts = creds.flat_routes.reject do |domain, host|
+      cli_parser.new_route?(domain, host)
+    end
+
     if existing_hosts.any?
-      existing_hosts.map { |domain, host| apps_for_host(raw_routes, domain, host) }
+      existing_hosts.map { |domain, host| cli_parser.apps_for_host(domain, host) }
     else
       raise "cannot find currently deployed app."
     end
@@ -50,7 +86,7 @@ class CfCommandRunner
   end
 
   def unmap_routes(app)
-    routes.each do |domain, host|
+    creds.flat_routes.each do |domain, host|
       unmap_route(app, domain, host)
     end
   end
@@ -58,7 +94,7 @@ class CfCommandRunner
   def map_routes(app)
     succeeded = []
 
-    routes.each do |domain, name|
+    creds.flat_routes.each do |domain, name|
       begin
         map_route(app, domain, name)
         succeeded << [app, domain, name]
@@ -81,27 +117,6 @@ class CfCommandRunner
   end
 
   private
-
-  def apps_for_host(raw_routes, domain, host)
-    route = routes_for(raw_routes, domain, host).first
-    if route
-      apps_with_route = route.rstrip.match(/#{Regexp.escape(domain)}\s+(.+)$/)
-      if apps_with_route.nil?
-        raise "no apps found for host #{host}"
-      else
-        apps_with_route[1].split(',').map(&:strip)
-      end
-    else
-      raise "no routes found for route #{host}.#{domain}"
-    end
-  end
-
-  def routes
-    creds.routes.reduce([]) do |all_routes, domain_apps|
-      domain, apps = domain_apps
-      all_routes + apps.map { |app| [domain, app] }
-    end
-  end
 
   def stop(app)
     success = Kernel.system("#{cf_binary_path} stop #{app}")
@@ -134,13 +149,5 @@ class CfCommandRunner
     output, status = Open3.capture2("CF_COLOR=false #{cf_binary_path} routes")
     raise 'failure executing cf routes' unless status.success?
     output
-  end
-
-  def routes_for(routes_output, domain, host)
-    routes_output.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)
-  end
-
-  def new_route?(cf_routes_output, domain, host)
-    routes_for(cf_routes_output, domain, host).empty?
   end
 end
