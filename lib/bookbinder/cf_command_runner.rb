@@ -96,13 +96,10 @@ class CfCommandRunner
   private
 
   def routes
-    all_routes = []
-    creds.routes.each do |domain, apps|
-      apps.each do |app|
-        all_routes << [domain, app]
-      end
+    creds.routes.reduce([]) do |all_routes, domain_apps|
+      domain, apps = domain_apps
+      all_routes + apps.map { |app| [domain, app] }
     end
-    all_routes
   end
 
   def stop(app)
