@@ -31,20 +31,6 @@ class CfCommandRunner
     end
   end
 
-  def apps_for_host(raw_routes, domain, host)
-    route = routes_for(raw_routes, domain, host).first
-    if route
-      apps_with_route = route.rstrip.match(/#{Regexp.escape(domain)}\s+(.+)$/)
-      if apps_with_route.nil?
-        raise "no apps found for host #{host}"
-      else
-        apps_with_route[1].split(',').map(&:strip)
-      end
-    else
-      raise "no routes found for route #{host}.#{domain}"
-    end
-  end
-
   def start(deploy_target_app)
     # Theoretically we shouldn't need this (and corresponding "stop" below), but we've seen CF pull files from both
     # green and blue when a DNS redirect points to HOST.cfapps.io
@@ -95,6 +81,20 @@ class CfCommandRunner
   end
 
   private
+
+  def apps_for_host(raw_routes, domain, host)
+    route = routes_for(raw_routes, domain, host).first
+    if route
+      apps_with_route = route.rstrip.match(/#{Regexp.escape(domain)}\s+(.+)$/)
+      if apps_with_route.nil?
+        raise "no apps found for host #{host}"
+      else
+        apps_with_route[1].split(',').map(&:strip)
+      end
+    else
+      raise "no routes found for route #{host}.#{domain}"
+    end
+  end
 
   def routes
     creds.routes.reduce([]) do |all_routes, domain_apps|
