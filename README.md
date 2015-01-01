@@ -113,8 +113,10 @@ cloud_foundry:
   app_name: docs
   staging_space: docs-staging
   production_space: docs-production
-  staging_host: staging-route-subdomain
-  production_host: production-route-subdomain
+  staging_host:
+    cfapps.io: [ staging-route-subdomain ]
+  production_host:
+    cfapps.io: [ production-route-subdomain ]
 ```
 
 ## Middleman Templating Helpers
