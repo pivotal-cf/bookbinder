@@ -90,26 +90,24 @@ module Bookbinder
       end
 
       def apps_for_host(domain, host)
-        route = routes_for(domain, host).first
-        apps_with_route = route.rstrip.match(/#{Regexp.escape(domain)}\s+(.+)$/)
-        if apps_with_route
-          app = apps_with_route[1]
-          app.split(',').map { |name| BlueGreenApp.new(name) }
-        else
-          []
-        end
+        apps_by_host_and_domain.fetch([host, domain], []).
+          map &BlueGreenApp.method(:new)
       end
 
       def new_route?(domain, host)
-        routes_for(domain, host).empty?
+        !apps_by_host_and_domain.has_key?([host, domain])
       end
 
       private
 
       attr_reader :raw_routes
 
-      def routes_for(domain, host)
-        raw_routes.lines.grep(/^#{Regexp.escape(host)}\s+#{Regexp.escape(domain)}\s+/)
+      def apps_by_host_and_domain
+        @apps_by_host_and_domain ||= Hash[
+          raw_routes.lines[3..-1].
+          map { |line| line.split(/\s+/, 3) }.
+          map { |item| [item[0..1], item[2].split(',').map(&:strip)] }
+        ]
       end
     end
 
