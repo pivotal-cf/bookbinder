@@ -13,10 +13,10 @@ module Bookbinder
     end
 
     def with_flipped_name
-      if name.include?('green')
-        BlueGreenApp.new(name.sub('green', 'blue'))
+      if name.match(/green$/)
+        BlueGreenApp.new(name.sub(/green$/, 'blue'))
       else
-        BlueGreenApp.new(name.sub('blue', 'green'))
+        BlueGreenApp.new(name.sub(/blue$/, 'green'))
       end
     end
 
