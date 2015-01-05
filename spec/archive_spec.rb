@@ -23,13 +23,14 @@ describe Archive do
   describe '#create' do
     let(:build_number) { 42 }
     let(:namespace) { 'pcf' }
-    let(:create) do
+    let(:final_app_dir) { tmp_subdir 'final_app' }
+
+    def create
       archive.create_and_upload_tarball build_number: build_number,
                                         namespace: namespace,
                                         app_dir: final_app_dir,
                                         bucket: bucket_key
     end
-    let(:final_app_dir) { tmp_subdir 'final_app' }
 
     before do
       File.open(File.join(final_app_dir, 'stuff.txt'), 'w') { |f| f.write('this is stuff') }
@@ -79,7 +80,8 @@ describe Archive do
   describe '#download' do
     let(:app_dir) { tmp_subdir 'app_dir' }
     let(:bucket) { fog_connection.directories.create key: bucket_key }
-    let(:download) do
+
+    def download
       archive.download download_dir: app_dir,
                        bucket: bucket_key,
                        build_number: build_number,
