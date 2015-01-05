@@ -58,6 +58,13 @@ module Bookbinder
         fetch(key) if correctly_formatted_domain_and_routes?(key)
       end
 
+      def flat_routes
+        routes.reduce([]) do |all_routes, domain_apps|
+          domain, apps = domain_apps
+          all_routes + apps.map { |app| [domain, app] }
+        end
+      end
+
       def space
         key = is_production ? 'production_space' : 'staging_space'
         fetch(key)
