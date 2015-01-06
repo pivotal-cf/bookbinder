@@ -43,16 +43,32 @@ module Bookbinder
     end
 
     describe '.build_from_local' do
-
-      it 'calls copy_from_local if destination dir is specified' do
-        allow(GitHubRepository).to receive(:new).and_return repository
-        expect(repository).to receive(:copy_from_local).with(destination_dir)
-        GitHubRepository.build_from_local(logger, section_hash, local_repo_dir, destination_dir)
+      it 'performs the copy if destination dir is specified' do
+        expect(Dir.entries(destination_dir)).not_to include('dogs-repo')
+        GitHubRepository.build_from_local(logger,
+                                          section_hash,
+                                          local_repo_dir,
+                                          destination_dir)
+        expect(Dir.entries(destination_dir)).to include('dogs-repo')
       end
 
-      it 'does not copy_from_remote if destination dir is not specified' do
-        allow(GitHubRepository).to receive(:new).and_return repository
-        expect(GitHubRepository.build_from_local(logger, section_hash, local_repo_dir, nil)).to eq repository
+      it "doesn't perform the copy if destination dir is not specified" do
+        expect(GitHubRepository.build_from_local(logger, section_hash, local_repo_dir, nil)).
+          to be_a(GitHubRepository)
+      end
+
+      it "doesn't copy if destination (e.g. book) and source (e.g. section) repos are the same" do
+        destination_dir = Pathname(tmp_subdir('monolithrepo')).join('output')
+        FileUtils.mkdir(destination_dir)
+
+        expect {
+          GitHubRepository.build_from_local(
+            logger,
+            { 'repository' => {'name' => 'camelpunch/monolithrepo'} },
+            tmpdir,
+            destination_dir
+          )
+        }.not_to change { Dir.entries(destination_dir).size }
       end
     end
 
