@@ -1,5 +1,4 @@
-require_relative 'cf_app_fetcher'
-require_relative 'cf_routes'
+require_relative 'app_fetcher'
 
 module Bookbinder
   class Distributor
@@ -11,7 +10,7 @@ module Bookbinder
 
       archive = Archive.new(logger: logger, key: options[:aws_credentials].access_key, secret: options[:aws_credentials].secret_key)
       cf_command_runner = CfCommandRunner.new(logger, options[:cf_credentials], namer.full_path)
-      cf_app_fetcher = CfAppFetcher.new(options[:cf_credentials].flat_routes, cf_command_runner)
+      cf_app_fetcher = AppFetcher.new(options[:cf_credentials].flat_routes, cf_command_runner)
 
       pusher = Pusher.new(cf_command_runner, cf_app_fetcher)
       new(logger, archive, pusher, namespace, namer, options)

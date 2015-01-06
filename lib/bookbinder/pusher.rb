@@ -1,4 +1,4 @@
-require_relative 'cf_app_fetcher'
+require_relative 'app_fetcher'
 
 module Bookbinder
   class Pusher

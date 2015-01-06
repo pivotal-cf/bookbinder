@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Bookbinder
-  describe CfAppFetcher do
+  describe AppFetcher do
     describe 'retrieving apps' do
       let(:routes_output) do
         eol_space = ' '
@@ -22,7 +22,7 @@ OUTPUT
 
       let(:routes_to_search) { [['cfapps.io', 'docs']] }
       let(:cf_command_runner) { double 'cf_command_runner' }
-      let(:subject) { CfAppFetcher.new(routes_to_search, cf_command_runner) }
+      let(:subject) { AppFetcher.new(routes_to_search, cf_command_runner) }
 
       before do
         allow(cf_command_runner).to receive(:cf_routes_output).and_return(routes_output)

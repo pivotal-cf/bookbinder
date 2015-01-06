@@ -1,6 +1,8 @@
+require_relative "cf_routes"
+
 module Bookbinder
 
-  class CfAppFetcher
+  class AppFetcher
     def initialize(routes_to_search, cf_command_runner)
       @routes_to_search = routes_to_search
       @cf_command_runner = cf_command_runner
