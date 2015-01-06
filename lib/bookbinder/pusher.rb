@@ -1,14 +1,17 @@
+require_relative 'cf_app_fetcher'
+
 module Bookbinder
   class Pusher
-    def initialize(cf_cli)
+    def initialize(cf_cli, app_fetcher)
       @cf_cli = cf_cli
+      @app_fetcher = app_fetcher
     end
 
     def push(app_dir)
       Dir.chdir(app_dir) do
         cf_cli.login
 
-        old_app = cf_cli.mapped_app_groups.first.first
+        old_app = app_fetcher.fetch_current_app
 
         if old_app
           new_app = old_app.with_flipped_name
@@ -26,6 +29,6 @@ module Bookbinder
 
     private
 
-    attr_reader :cf_cli
+    attr_reader :cf_cli, :app_fetcher
   end
 end

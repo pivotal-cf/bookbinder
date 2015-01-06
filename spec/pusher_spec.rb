@@ -5,8 +5,9 @@ module Bookbinder
     include_context 'tmp_dirs'
 
     let(:cf) { double('command runner') }
+    let(:app_fetcher) { double('current app fetcher') }
 
-    subject(:pusher) { Pusher.new(cf) }
+    subject(:pusher) { Pusher.new(cf, app_fetcher) }
     let(:app_dir) { tmp_subdir "pusher_spec" }
 
     def green
@@ -20,7 +21,7 @@ module Bookbinder
     describe 'when the hostname points to green' do
       before do
         expect(cf).to receive(:login).with(no_args).ordered
-        allow(cf).to receive(:mapped_app_groups).with(no_args).and_return([[green]]).ordered
+        allow(app_fetcher).to receive(:fetch_current_app).and_return green
       end
 
       it 'starts the blue app, then remaps before taking the green app down' do
@@ -36,7 +37,7 @@ module Bookbinder
     describe 'when the hostname points to blue' do
       before do
         expect(cf).to receive(:login).with(no_args).ordered
-        allow(cf).to receive(:mapped_app_groups).with(no_args).and_return([[blue]]).ordered
+        allow(app_fetcher).to receive(:fetch_current_app).and_return blue
       end
 
       it 'starts the green app, then remaps before taking the blue app down' do
@@ -54,8 +55,8 @@ module Bookbinder
 
       before do
         expect(cf).to receive(:login).with(no_args).ordered
-        allow(cf).to receive(:mapped_app_groups).with(no_args).and_return([[]]).ordered
         allow(cf).to receive(:new_app).and_return(new_app)
+        allow(app_fetcher).to receive(:fetch_current_app).and_return nil
       end
 
       it 'starts the blue app and maps it' do

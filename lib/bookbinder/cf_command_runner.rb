@@ -21,18 +21,10 @@ module Bookbinder
       raise "Could not log in to #{creds.api_endpoint}" unless success
     end
 
-    def mapped_app_groups
-      cli_parser = CliRoutesParser.new(cf_routes_output)
-
-      existing_hosts = creds.flat_routes.reject do |domain, host|
-        cli_parser.new_route?(domain, host)
-      end
-
-      if existing_hosts.any?
-        existing_hosts.map { |domain, host| cli_parser.apps_for_host(domain, host) }
-      else
-        raise "cannot find currently deployed app."
-      end
+    def cf_routes_output
+      output, status = Open3.capture2("CF_COLOR=false #{cf_binary_path} routes")
+      raise 'failure executing cf routes' unless status.success?
+      output
     end
 
     def new_app
@@ -84,33 +76,6 @@ module Bookbinder
       unmap_routes(app)
     end
 
-    class CliRoutesParser
-      def initialize(raw_routes)
-        @raw_routes = raw_routes
-      end
-
-      def apps_for_host(domain, host)
-        apps_by_host_and_domain.fetch([host, domain], []).
-          map &BlueGreenApp.method(:new)
-      end
-
-      def new_route?(domain, host)
-        !apps_by_host_and_domain.has_key?([host, domain])
-      end
-
-      private
-
-      attr_reader :raw_routes
-
-      def apps_by_host_and_domain
-        @apps_by_host_and_domain ||= Hash[
-          raw_routes.lines[3..-1].
-          map { |line| line.split(/\s+/, 3) }.
-          map { |item| [item[0..1], item[2].split(',').map(&:strip)] }
-        ]
-      end
-    end
-
     private
 
     attr_reader :creds
@@ -140,12 +105,6 @@ module Bookbinder
       @cf_binary_path ||= `which cf`.chomp!
       raise "CF CLI could not be found in your PATH. Please make sure cf cli is in your PATH." if @cf_binary_path.nil?
       @cf_binary_path
-    end
-
-    def cf_routes_output
-      output, status = Open3.capture2("CF_COLOR=false #{cf_binary_path} routes")
-      raise 'failure executing cf routes' unless status.success?
-      output
     end
 
     def environment_variables

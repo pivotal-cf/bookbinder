@@ -19,7 +19,9 @@ module Bookbinder
     let(:cf_credentials) do
       Configuration::CfCredentials.new({
                                            'api_endpoint' => 'http://get.your.apis.here.io',
-                                           'production_host' => 'http://get.your.apis.here.io',
+                                           'production_host' => {
+                                               'get.your.apis.here.io' => 'a_production_host'
+                                            },
                                            'organization' => 'foooo',
                                            'production_space' => 'foooo',
                                            'app_name' => 'foooo',
@@ -133,7 +135,7 @@ module Bookbinder
 
         context 'when an error is thrown from downloading' do
           let(:error_message) {
-            "[ERROR] failed to download because of reason.\n[DEBUG INFO]\nCF organization: foooo\nCF space: foooo\nCF account: username\nroutes: http://get.your.apis.here.io"
+            "[ERROR] failed to download because of reason.\n[DEBUG INFO]\nCF organization: foooo\nCF space: foooo\nCF account: username\nroutes: #{cf_credentials.production_host}"
           }
           it 'logs an informative message' do
             allow(fake_archive).to receive(:download).and_raise("failed to download because of reason.")
@@ -145,7 +147,7 @@ module Bookbinder
 
         context 'when an error is thrown from pushing' do
           let(:error_message) {
-            "[ERROR] failed to push because of reason.\n[DEBUG INFO]\nCF organization: foooo\nCF space: foooo\nCF account: username\nroutes: http://get.your.apis.here.io"
+            "[ERROR] failed to push because of reason.\n[DEBUG INFO]\nCF organization: foooo\nCF space: foooo\nCF account: username\nroutes: #{cf_credentials.production_host}"
           }
           it 'logs an informative message' do
             allow(fake_pusher).to receive(:push).and_raise("failed to push because of reason.")
@@ -161,7 +163,9 @@ module Bookbinder
         let(:cf_credentials) do
           Configuration::CfCredentials.new({
           'api_endpoint' => 'http://get.your.apis.here.io',
-          'staging_host' => 'http://get.your.apis.for.staging.here.io',
+          'staging_host' => {
+              'http://get.your.apis.for.staging.here.io' => 'a_staging_host'
+          },
           'organization' => 'foooo',
           'staging_space' => 'foo_stage',
           'app_name' => 'foooo',
@@ -181,7 +185,7 @@ module Bookbinder
 
         context 'when an error is thrown from pushing an app' do
           let(:error_message) {
-            "[ERROR] failed to push because of reason.\n[DEBUG INFO]\nCF organization: foooo\nCF space: foo_stage\nCF account: username\nroutes: http://get.your.apis.for.staging.here.io"
+            "[ERROR] failed to push because of reason.\n[DEBUG INFO]\nCF organization: foooo\nCF space: foo_stage\nCF account: username\nroutes: #{cf_credentials.staging_host}"
           }
           it 'logs an informative message' do
             allow(fake_pusher).to receive(:push).and_raise("failed to push because of reason.")
@@ -196,30 +200,6 @@ module Bookbinder
         expect(fake_pusher).to receive(:push).with(fake_dir)
 
         distributor.distribute
-      end
-    end
-
-    describe '.build' do
-      let(:options) do
-        {
-            book_repo: book_repo_name,
-            app_dir: fake_dir,
-            aws_credentials: aws_credentials,
-            cf_credentials: cf_credentials,
-            production: production,
-            build_number: build_number,
-        }
-      end
-
-      it 'creates the right objects' do
-        real_namer = expect_to_receive_and_return_real_now(ArtifactNamer, :new, book_repo_short_name, build_number, 'log', '/tmp')
-        real_archive = expect_to_receive_and_return_real_now(Archive, :new, logger: logger, key: key, secret: secret)
-        real_runner = expect_to_receive_and_return_real_now(CfCommandRunner, :new, logger, cf_credentials, namer_full_path)
-        real_pusher = expect_to_receive_and_return_real_now(Pusher, :new, real_runner)
-
-        expect(described_class).to receive(:new).with(logger, real_archive, real_pusher, book_repo_short_name, real_namer, options)
-
-        described_class.build(logger, options)
       end
     end
   end
