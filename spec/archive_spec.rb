@@ -83,12 +83,6 @@ describe Archive do
     end
 
     context 'when the bucket does not yet exist' do
-      it 'creates the bucket' do
-        create
-        directory = fog_connection.directories.get(bucket_key)
-        expect(directory).not_to be_nil
-      end
-
       it_behaves_like 'an archive'
     end
 
