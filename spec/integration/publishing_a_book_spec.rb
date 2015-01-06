@@ -1,6 +1,12 @@
-require 'spec_helper'
+require 'yaml'
+
+require_relative '../helpers/tmp_dirs'
+require_relative '../helpers/expectations'
+require_relative '../helpers/middleman'
 
 describe 'generating a book' do
+  include Bookbinder::SpecHelperMethods
+
   include_context 'tmp_dirs'
 
   around_with_fixture_repo &:run
@@ -11,10 +17,12 @@ describe 'generating a book' do
     File.write('./config.yml', config.to_yaml)
   end
 
+  let(:gem_root) { File.expand_path('../../../', __FILE__) }
+
   it 'provides the production host to the ERB templates', integration: true do
     #pending 'Revisit when publishing locally no longer accesses GitHub.'
     silence_io_streams do
-      `#{GEM_ROOT}/bin/bookbinder publish local`
+      `#{gem_root}/bin/bookbinder publish local`
     end
 
     index = File.read File.join('final_app', 'public', 'index.html')
@@ -42,7 +50,7 @@ YAML
 
     it 'uses the provided layout', integration: true do
       silence_io_streams do
-        `#{GEM_ROOT}/bin/bookbinder publish local`
+        `#{gem_root}/bin/bookbinder publish local`
       end
 
       index = File.read File.join('final_app', 'public', 'index.html')

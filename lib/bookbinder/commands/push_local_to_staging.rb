@@ -1,3 +1,7 @@
+require_relative '../distributor'
+require_relative 'bookbinder_command'
+require_relative 'naming'
+
 module Bookbinder
   module Commands
     class PushLocalToStaging < BookbinderCommand

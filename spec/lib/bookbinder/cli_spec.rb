@@ -97,7 +97,7 @@ module Bookbinder
 
         context 'for InvalidArguments' do
           before do
-            allow_any_instance_of(Commands::Publish).to receive(:run).and_raise Cli::InvalidArguments.new
+            allow_any_instance_of(Commands::Publish).to receive(:run).and_raise CliError::InvalidArguments.new
           end
 
           let(:arguments) { ['publish', 'local'] }

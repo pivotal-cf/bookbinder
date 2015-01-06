@@ -1,4 +1,7 @@
-require 'spec_helper'
+require_relative '../../lib/bookbinder/commands/update_local_doc_repos'
+require_relative '../../lib/bookbinder/configuration'
+
+require_relative '../helpers/nil_logger'
 
 module Bookbinder
   describe Commands::UpdateLocalDocRepos do

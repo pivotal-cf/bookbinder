@@ -1,4 +1,14 @@
-require 'spec_helper'
+require 'webmock/rspec'
+
+require_relative '../../helpers/tmp_dirs'
+require_relative '../../helpers/spec_git_accessor'
+require_relative '../../helpers/nil_logger'
+require_relative '../../helpers/middleman'
+require_relative '../../fixtures/repo_fixture'
+require_relative '../../../lib/bookbinder/publisher'
+require_relative '../../../lib/bookbinder/spider'
+require_relative '../../../lib/bookbinder/book'
+require_relative '../../../lib/bookbinder/middleman_runner'
 
 module Bookbinder
   describe Publisher do
@@ -18,6 +28,8 @@ module Bookbinder
       let(:working_links) { [] }
 
       context 'integration' do
+        include SpecHelperMethods
+
         before do
           squelch_middleman_output
           allow(BookbinderLogger).to receive(:new).and_return(NilLogger.new)
@@ -370,6 +382,8 @@ module Bookbinder
       end
 
       describe 'the verbose flag' do
+        include SpecHelperMethods
+
         before do
           allow(spider).to receive(:generate_sitemap).and_return(working_links)
           allow(spider).to receive(:has_broken_links?)

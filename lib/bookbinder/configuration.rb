@@ -1,3 +1,6 @@
+require_relative 'remote_yaml_credential_provider'
+require_relative 'git_hub_repository'
+
 module Bookbinder
   class Configuration
 

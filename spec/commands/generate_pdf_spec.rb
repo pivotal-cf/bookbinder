@@ -1,4 +1,9 @@
-require 'spec_helper'
+require 'yaml'
+require_relative '../../lib/bookbinder/commands/generate_pdf'
+require_relative '../../lib/bookbinder/sitemap_generator'
+require_relative '../helpers/expectations'
+require_relative '../helpers/tmp_dirs'
+require_relative '../helpers/nil_logger'
 
 module Bookbinder
   describe Commands::GeneratePDF do
@@ -102,7 +107,7 @@ module Bookbinder
             let(:correct_links) { %w(top.html doge/such-uri.html doge/some-dir/wow-uri.html doge/amaze-uri.html cate/meow.html cate/food.html) }
             let(:correct_urls) { correct_links.map { |l| l.prepend('http://localhost:41722/') } }
             let(:pdf_options) {{'header' => header_file, 'pages' => wildcard_pages, 'copyright_notice' => notice}}
-            
+
             it 'detects and attempts to expand the wildcard' do
               expect(generate_pdf_object).to receive(:expand_urls).with wildcard_pages, 'localhost:41722'
               generate

@@ -1,3 +1,4 @@
+require_relative "blue_green_app"
 require_relative "cf_routes"
 
 module Bookbinder

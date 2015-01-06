@@ -1,3 +1,6 @@
+require_relative '../pdf_generator'
+require_relative '../server_director'
+require_relative 'bookbinder_command'
 require_relative 'naming'
 
 module Bookbinder

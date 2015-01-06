@@ -1,4 +1,6 @@
 require_relative 'naming'
+require_relative 'bookbinder_command'
+require_relative '../archive'
 
 module Bookbinder
   module Commands

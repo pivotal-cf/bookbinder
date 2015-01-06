@@ -1,3 +1,5 @@
+require_relative 'cli_exceptions'
+
 module Bookbinder
   class CommandRunner
     def initialize(configuration_fetcher, usage_message, logger, commands)
@@ -15,7 +17,7 @@ module Bookbinder
         else
           command.new(logger, @configuration_fetcher).run command_arguments
         end
-      rescue Cli::InvalidArguments
+      rescue CliError::InvalidArguments
         logger.log command.usage
         1
       end

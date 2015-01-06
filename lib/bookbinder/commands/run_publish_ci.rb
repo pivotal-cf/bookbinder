@@ -1,4 +1,8 @@
+require_relative 'bookbinder_command'
 require_relative 'naming'
+require_relative 'publish'
+require_relative 'push_local_to_staging'
+require_relative 'build_and_push_tarball'
 
 module Bookbinder
   module Commands

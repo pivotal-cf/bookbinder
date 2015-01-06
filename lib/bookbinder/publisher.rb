@@ -1,8 +1,17 @@
-require 'bookbinder/directory_helpers'
+require 'middleman-syntax'
+require_relative 'bookbinder_logger'
+require_relative 'directory_helpers'
+require_relative 'pdf_generator'
+require_relative 'section'
+require_relative 'server_director'
 
 module Bookbinder
   class Publisher
+    include DirectoryHelperMethods
+
     def initialize(logger, spider, static_site_generator)
+      @gem_root = File.expand_path('../../../', __FILE__)
+
       @logger = logger
       @pdf_generator = PdfGenerator.new(@logger)
       @spider = spider
@@ -113,7 +122,7 @@ module Bookbinder
     end
 
     def copy_directory_from_gem(dir, output_dir)
-      FileUtils.cp_r File.join(GEM_ROOT, "#{dir}/."), output_dir
+      FileUtils.cp_r File.join(@gem_root, "#{dir}/."), output_dir
     end
   end
 end

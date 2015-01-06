@@ -1,3 +1,5 @@
+require_relative 'bookbinder_command'
+
 module Bookbinder
   module Commands
     class Version < BookbinderCommand

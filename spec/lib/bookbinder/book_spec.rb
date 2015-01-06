@@ -1,4 +1,7 @@
-require 'spec_helper'
+require_relative "../../../lib/bookbinder/directory_helpers"
+require_relative "../../../lib/bookbinder/book"
+require_relative '../../helpers/tmp_dirs'
+require_relative '../../helpers/nil_logger'
 
 module Bookbinder
   include Bookbinder::DirectoryHelperMethods

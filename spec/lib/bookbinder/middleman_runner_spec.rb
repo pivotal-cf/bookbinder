@@ -1,7 +1,13 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/middleman_runner'
+require_relative '../../helpers/middleman'
+require_relative '../../helpers/nil_logger'
+require_relative '../../../lib/bookbinder/book'
+require_relative '../../../lib/bookbinder/section'
 
 module Bookbinder
   describe MiddlemanRunner do
+    include SpecHelperMethods
+
     let(:logger) { NilLogger.new }
     let(:middleman_runner) { MiddlemanRunner.new(logger) }
 

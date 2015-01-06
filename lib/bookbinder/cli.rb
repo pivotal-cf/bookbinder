@@ -1,14 +1,15 @@
 require_relative 'command_runner'
 require_relative 'local_file_system_accessor'
-require_relative 'commands/version'
 require_relative 'command_validator'
+
+require_relative 'commands/build_and_push_tarball'
+require_relative 'commands/generate_pdf'
+require_relative 'commands/publish'
+require_relative 'commands/version'
 require_relative 'commands/help'
 
 module Bookbinder
   class Cli
-    InvalidArguments = Class.new(StandardError)
-    UnknownCommand = Class.new(StandardError)
-
     FLAGS = [
       Commands::Version,
       Commands::Help
@@ -46,7 +47,7 @@ module Bookbinder
 
         command_runner.run command_name, command_arguments
 
-      rescue VersionUnsupportedError => e
+      rescue Commands::Publish::VersionUnsupportedError => e
         logger.error "config.yml at version '#{e.message}' has an unsupported API."
         1
       rescue Configuration::CredentialKeyError => e
@@ -55,7 +56,7 @@ module Bookbinder
       rescue KeyError => e
         logger.error "#{e.message} from your configuration."
         1
-      rescue Cli::UnknownCommand => e
+      rescue CliError::UnknownCommand => e
         logger.log e.message
         1
       rescue RuntimeError => e

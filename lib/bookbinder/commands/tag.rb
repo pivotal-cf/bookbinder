@@ -1,3 +1,8 @@
+require_relative '../book'
+require_relative '../bookbinder_logger'
+require_relative '../cli_exceptions'
+
+require_relative 'bookbinder_command'
 require_relative 'naming'
 
 module Bookbinder
@@ -11,7 +16,7 @@ module Bookbinder
 
       def run(params)
         tag = params.first
-        raise Cli::InvalidArguments unless tag
+        raise CliError::InvalidArguments unless tag
 
         book = Book.new(logger: @logger, full_name: config.book_repo, sections: config.sections)
 

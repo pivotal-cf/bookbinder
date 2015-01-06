@@ -1,3 +1,5 @@
+require_relative 'cli_exceptions'
+
 module Bookbinder
   class CommandValidator
     def initialize(usage_messenger, commands, usage_text)
@@ -10,7 +12,7 @@ module Bookbinder
       known_command_names = commands.map(&:command_name)
       command_type = "#{command_name}".match(/^--/) ? 'flag' : 'command'
       if !known_command_names.include?(command_name)
-        raise Cli::UnknownCommand.new "Unrecognized #{command_type} '#{command_name}'\n" + usage_text
+        raise CliError::UnknownCommand.new "Unrecognized #{command_type} '#{command_name}'\n" + usage_text
       end
     end
 

@@ -1,7 +1,14 @@
-require 'spec_helper'
+require_relative '../../lib/bookbinder/commands/push_to_prod'
+require_relative '../../lib/bookbinder/remote_yaml_credential_provider'
+require_relative '../../lib/bookbinder/configuration'
+
+require_relative '../helpers/middleman'
+require_relative '../helpers/nil_logger'
 
 module Bookbinder
   describe Commands::PushToProd do
+    include SpecHelperMethods
+
     let(:book_repo) { 'my-user/fixture-book-title' }
     let(:build_number) { '17' }
     let(:config_hash) { {'book_repo' => book_repo, 'cred_repo' => 'whatever'} }

@@ -1,4 +1,4 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/app_fetcher'
 
 module Bookbinder
   describe AppFetcher do

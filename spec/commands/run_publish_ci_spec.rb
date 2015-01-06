@@ -1,7 +1,15 @@
-require 'spec_helper'
+require_relative '../../lib/bookbinder/commands/run_publish_ci'
+
+# require_relative '../helpers/expectations'
+require_relative '../helpers/middleman'
+require_relative '../helpers/nil_logger'
+# require_relative '../helpers/spec_git_accessor'
+# require_relative '../helpers/tmp_dirs'
 
 module Bookbinder
   describe Commands::RunPublishCI do
+    include SpecHelperMethods
+
     let(:fake_publish) { double 'fake_publish' }
     let(:fake_push_local_to_staging) { double 'fake_push_to_staging' }
     let(:fake_build_and_push_tarball) { double 'fake_build_and_push_tarball' }

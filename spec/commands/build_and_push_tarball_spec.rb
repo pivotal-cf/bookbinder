@@ -1,4 +1,7 @@
-require 'spec_helper'
+require_relative '../../lib/bookbinder/commands/build_and_push_tarball'
+require_relative '../helpers/tmp_dirs'
+require_relative '../helpers/nil_logger'
+require_relative '../../lib/bookbinder/configuration'
 
 module Bookbinder
   describe Commands::BuildAndPushTarball do

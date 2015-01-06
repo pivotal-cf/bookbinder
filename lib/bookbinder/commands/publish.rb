@@ -1,9 +1,18 @@
-require 'bookbinder/directory_helpers'
+require_relative '../book'
+require_relative '../cli_exceptions'
+require_relative '../configuration'
+require_relative '../directory_helpers'
+require_relative '../middleman_runner'
+require_relative '../publisher'
+require_relative '../spider'
+require_relative 'bookbinder_command'
 require_relative 'naming'
 
 module Bookbinder
   module Commands
     class Publish < BookbinderCommand
+      VersionUnsupportedError = Class.new(StandardError)
+
       include Bookbinder::DirectoryHelperMethods
       extend Commands::Naming
 
@@ -12,7 +21,7 @@ module Bookbinder
       end
 
       def run(cli_arguments, git_accessor=Git)
-        raise Cli::InvalidArguments unless arguments_are_valid?(cli_arguments)
+        raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
         @git_accessor = git_accessor
 
         target_tag    = (cli_arguments[1..-1] - ['--verbose']).pop

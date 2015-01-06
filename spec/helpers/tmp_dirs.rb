@@ -1,4 +1,5 @@
 require 'pathname'
+require 'tmpdir'
 
 shared_context 'tmp_dirs' do
   def tmp_subdir(name)

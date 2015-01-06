@@ -1,7 +1,17 @@
-require 'spec_helper'
+require 'webmock/rspec'
+
+require_relative '../../lib/bookbinder/commands/publish'
+
+require_relative '../helpers/expectations'
+require_relative '../helpers/middleman'
+require_relative '../helpers/nil_logger'
+require_relative '../helpers/spec_git_accessor'
+require_relative '../helpers/tmp_dirs'
 
 module Bookbinder
   describe Commands::Publish do
+    include SpecHelperMethods
+
     include_context 'tmp_dirs'
 
     around_with_fixture_repo do |spec|
@@ -279,7 +289,7 @@ module Bookbinder
 
             expect {
               publish_command.run ['github'], SpecGitAccessor
-            }.to raise_error(Bookbinder::VersionUnsupportedError)
+            }.to raise_error(Commands::Publish::VersionUnsupportedError)
           end
         end
       end
@@ -289,11 +299,11 @@ module Bookbinder
       it 'raises Cli::InvalidArguments' do
         expect {
           publish_command.run(['blah', 'blah', 'whatever'], SpecGitAccessor)
-        }.to raise_error(Cli::InvalidArguments)
+        }.to raise_error(CliError::InvalidArguments)
 
         expect {
           publish_command.run([], SpecGitAccessor)
-        }.to raise_error(Cli::InvalidArguments)
+        }.to raise_error(CliError::InvalidArguments)
       end
     end
 
