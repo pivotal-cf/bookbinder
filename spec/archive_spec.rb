@@ -3,22 +3,46 @@ require 'spec_helper'
 describe Archive do
 
   around do |example|
-    Fog.mock!
-    Fog::Mock.reset
-    example.run
-    Fog.unmock!
+    if ENV['REAL_S3']
+      net_connect_previously_allowed = WebMock.net_connect_allowed?
+      WebMock.allow_net_connect!
+      example.run
+      WebMock.disable_net_connect! unless net_connect_previously_allowed
+    else
+      Fog.mock!
+      Fog::Mock.reset
+      example.run
+      Fog.unmock!
+    end
   end
 
   include_context 'tmp_dirs'
 
+  let(:aws_access_key_id) { ENV.fetch('AWS_ACCESS_KEY_ID', '') }
+  let(:aws_secret_access_key) { ENV.fetch('AWS_SECRET_ACCESS_KEY', '') }
+
   let(:fog_connection) do
     Fog::Storage.new :provider => 'AWS',
-                     :aws_access_key_id => 'aws-key',
-                     :aws_secret_access_key => 'aws-secret-key'
+                     :aws_access_key_id => aws_access_key_id,
+                     :aws_secret_access_key => aws_secret_access_key
   end
-  let(:bucket_key) { 'pivotal-cf-docs-green-builds' }
+  let(:bucket_key) { "pivotal-cf-docs-green-builds-#{SecureRandom.hex}" }
   let(:logger) { NilLogger.new }
-  let(:archive) { Archive.new logger: logger, key: 'aws-key', secret: 'aws-secret-key' }
+  let(:archive) { Archive.new(logger: logger,
+                              key: aws_access_key_id,
+                              secret: aws_secret_access_key) }
+
+  def delete
+    bucket = fog_connection.directories.get(bucket_key)
+    if bucket
+      bucket.files.each(&:destroy)
+      bucket.destroy
+    end
+  end
+
+  after do
+    delete
+  end
 
   describe '#create' do
     let(:build_number) { 42 }
@@ -33,7 +57,7 @@ describe Archive do
     end
 
     before do
-      File.open(File.join(final_app_dir, 'stuff.txt'), 'w') { |f| f.write('this is stuff') }
+      File.write(final_app_dir.join('stuff.txt'), 'this is stuff')
     end
 
     shared_examples_for 'an archive' do
@@ -88,25 +112,25 @@ describe Archive do
                        namespace: namespace
     end
 
-    before do
-      expect(fog_connection.directories).to be_empty
-    end
-
     context 'when not given a specific build number' do
       let(:build_number) { nil }
       let(:namespace) { 'a-name' }
 
-      context 'and there are more than one file in the bucket that follow the naming pattern' do
+      context 'and there is more than one file in the bucket that follows the naming pattern' do
         before do
           create_s3_file namespace, '17'
           create_s3_file namespace, '3'
 
-          allow(Time).to receive(:now).and_return(Time.now + 30)
+          if ENV['REAL_S3']
+            sleep 1
+          else
+            allow(Time).to receive(:now).and_return(Time.now + 30)
+          end
 
           create_s3_file namespace, '1'
         end
 
-        it 'downloads the green build that is the latest modified build' do
+        it 'downloads the last modified green build' do
           download
           untarred_file = File.join(app_dir, 'stuff.txt')
           contents = File.read(untarred_file)
