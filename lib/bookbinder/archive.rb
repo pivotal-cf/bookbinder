@@ -15,7 +15,7 @@ class Archive
     tarball_filename, tarball_path = create_tarball(app_dir, build_number, namespace)
 
     upload_file(bucket, tarball_filename, tarball_path)
-    @logger.log "Green build ##{build_number.to_s.green} has been uploaded to S3 for #{namespace.cyan}"
+    @logger.log "Green build ##{build_number.to_s.green} has been uploaded to S3 for #{namespace.to_s.cyan}"
   end
 
   def upload_file(bucket, name, source_path)
@@ -39,7 +39,7 @@ class Archive
     File.open(downloaded_file, 'wb') { |f| f.write(s3_file.body) }
     Dir.chdir(download_dir) { `tar xzf #{downloaded_file}` }
 
-    @logger.log "Green build ##{build_number.to_s.green} has been downloaded from S3 and untarred into #{download_dir.cyan}"
+    @logger.log "Green build ##{build_number.to_s.green} has been downloaded from S3 and untarred into #{download_dir.to_s.cyan}"
   end
 
   private

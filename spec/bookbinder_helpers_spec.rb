@@ -32,7 +32,7 @@ module Bookbinder
       original_mm_root = ENV['MM_ROOT']
 
       Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
-      ENV['MM_ROOT'] = tmpdir
+      ENV['MM_ROOT'] = tmpdir.to_s
       Dir.chdir(tmpdir) do
         build_command = Middleman::Cli::Build.new [], {:quiet => false}, {}
         Middleman::Cli::Build.shared_instance(false).config[:template_variables] = template_variables
@@ -92,7 +92,7 @@ module Bookbinder
               original_mm_root = ENV['MM_ROOT']
 
               Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
-              ENV['MM_ROOT'] = tmpdir
+              ENV['MM_ROOT'] = tmpdir.to_s
               Dir.chdir(tmpdir) do
                 build_command = Middleman::Cli::Build.new [], {:quiet => false}, {}
                 build_command.invoke :build, [], {:verbose => false}

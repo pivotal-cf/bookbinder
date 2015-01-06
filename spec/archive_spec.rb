@@ -210,17 +210,10 @@ describe Archive do
 
   describe '#upload_file' do
     it 'uploads to AWS bucket' do
-      Fog.mock!
-      Fog::Mock.reset
-
-      allow(File).to receive(:read).with('/my/lovely/filename').and_return("I have a file")
-
-      bucket = 'my-bucket'
-      filename = 'filename'
-      uploaded_file = archive.upload_file(bucket, filename, '/my/lovely/filename')
-
-      expect(uploaded_file).to be_a(Fog::Storage::AWS::File)
-      expect(uploaded_file.url(0)).to match(/^https:\/\/#{bucket}.s3.amazonaws.com\/#{filename}/)
+      File.write(tmpdir.join('filename'), "I have a file")
+      uploaded_file = archive.upload_file(bucket_key, 'filename', tmpdir.join('filename'))
+      expect(uploaded_file.url(0)).
+        to match(%r(^https://#{bucket_key}\.s3\.amazonaws\.com/filename))
     end
   end
 end
