@@ -33,7 +33,7 @@ module Bookbinder
       generate_site(cli_options, output_paths, publish_config, master_dir, book, sections, build_directory, public_directory, git_accessor)
       generate_sitemap(final_app_dir, host_for_sitemap, @spider)
 
-      @logger.log "Bookbinder bound your book into #{final_app_dir.green}"
+      @logger.log "Bookbinder bound your book into #{final_app_dir.to_s.green}"
 
       !@spider.has_broken_links?
     end

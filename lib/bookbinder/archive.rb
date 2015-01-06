@@ -15,14 +15,14 @@ class Archive
     tarball_filename, tarball_path = create_tarball(app_dir, build_number, namespace)
 
     upload_file(bucket, tarball_filename, tarball_path)
-    @logger.log "Green build ##{build_number.to_s.green} has been uploaded to S3 for #{namespace.cyan}"
+    @logger.log "Green build ##{build_number.to_s.green} has been uploaded to S3 for #{namespace.to_s.cyan}"
   end
 
   def upload_file(bucket, name, source_path)
-    directory = connection.directories.create key: bucket
-    directory.files.create :key => name,
-                           :body => File.read(source_path),
-                           :public => true
+    find_or_create_directory(bucket).
+      files.create(key: name,
+                   body: File.read(source_path),
+                   public: true)
   end
 
   def download(download_dir: nil, bucket: nil, build_number: nil, namespace: nil)
@@ -39,10 +39,16 @@ class Archive
     File.open(downloaded_file, 'wb') { |f| f.write(s3_file.body) }
     Dir.chdir(download_dir) { `tar xzf #{downloaded_file}` }
 
-    @logger.log "Green build ##{build_number.to_s.green} has been downloaded from S3 and untarred into #{download_dir.cyan}"
+    @logger.log "Green build ##{build_number.to_s.green} has been downloaded from S3 and untarred into #{download_dir.to_s.cyan}"
   end
 
   private
+
+  def find_or_create_directory(name)
+    connection.directories.create(key: name)
+  rescue Excon::Errors::Conflict
+    connection.directories.get(name)
+  end
 
   def create_tarball(app_dir, build_number, namespace)
     tarball_filename = ArtifactNamer.new(namespace, build_number, 'tgz').filename
