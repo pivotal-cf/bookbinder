@@ -22,9 +22,10 @@ describe Archive do
   let(:aws_secret_access_key) { ENV.fetch('AWS_SECRET_ACCESS_KEY', '') }
 
   let(:fog_connection) do
-    Fog::Storage.new :provider => 'AWS',
-                     :aws_access_key_id => aws_access_key_id,
-                     :aws_secret_access_key => aws_secret_access_key
+    Fog::Storage.new(provider: 'AWS',
+                     aws_access_key_id: aws_access_key_id,
+                     aws_secret_access_key: aws_secret_access_key,
+                     region: 'us-east-1')
   end
   let(:bucket_key) { "pivotal-cf-docs-green-builds-#{SecureRandom.hex}" }
   let(:logger) { NilLogger.new }
@@ -90,7 +91,24 @@ describe Archive do
       before do
         fog_connection.directories.create key: bucket_key
       end
+
       it_behaves_like 'an archive'
+    end
+
+    context 'when the bucket is in a non-default region, and is already there' do
+      before do
+        eu_connection = Fog::Storage.new(provider: :aws,
+                                         aws_access_key_id: aws_access_key_id,
+                                         aws_secret_access_key: aws_secret_access_key,
+                                         region: 'eu-west-1')
+        eu_connection.directories.create(key: bucket_key)
+      end
+
+      it "creates successfully" do
+        create
+        directory = fog_connection.directories.get(bucket_key)
+        expect(directory.files.get("#{namespace}-#{build_number}.tgz")).not_to be_nil
+      end
     end
   end
 
