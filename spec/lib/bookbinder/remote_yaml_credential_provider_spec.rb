@@ -1,5 +1,5 @@
 require 'spec_helper'
-require_relative '../lib/bookbinder/remote_yaml_credential_provider'
+require_relative '../../../lib/bookbinder/remote_yaml_credential_provider'
 
 module Bookbinder
   describe RemoteYamlCredentialProvider do

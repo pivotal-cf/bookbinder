@@ -96,7 +96,7 @@ describe PdfGenerator do
 
     it 'calls wkhtmltopdf with the table of contents and stylesheet' do
       pdf_generator = PdfGenerator.new(logger)
-      toc_xslt_path = File.expand_path('../../toc.xslt', __FILE__)
+      toc_xslt_path = File.expand_path('../../../../toc.xslt', __FILE__)
       expect(pdf_generator).to receive(:`).with(/\s+toc --xsl-style-sheet #{toc_xslt_path}\s+/) do
         `touch #{target}`
       end
