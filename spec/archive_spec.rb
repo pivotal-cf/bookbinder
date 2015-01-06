@@ -69,16 +69,15 @@ describe Archive do
 
       it 'uploads a tarball with the contents of the given app directory' do
         create
-        s3_file = fog_connection.directories.get(bucket_key).files.get("#{namespace}-#{build_number}.tgz")
+        s3_file = fog_connection.directories.get(bucket_key).
+          files.get("#{namespace}-#{build_number}.tgz")
 
-        File.open(File.join(tmpdir, 'uploaded.tgz'), 'wb') do |f|
-          f.write(s3_file.body)
-        end
+        File.write(tmpdir.join('uploaded.tgz'), s3_file.body)
 
         exploded_dir = tmp_subdir('exploded')
         `cd #{exploded_dir} && tar xzf ../uploaded.tgz`
 
-        contents = File.read(File.join(exploded_dir, 'stuff.txt'))
+        contents = File.read(exploded_dir.join('stuff.txt'))
         expect(contents).to eq('this is stuff')
       end
     end
@@ -132,7 +131,7 @@ describe Archive do
 
         it 'downloads the last modified green build' do
           download
-          untarred_file = File.join(app_dir, 'stuff.txt')
+          untarred_file = app_dir.join('stuff.txt')
           contents = File.read(untarred_file)
           expect(contents).to eq("contents of #{namespace}-1")
         end
@@ -145,7 +144,7 @@ describe Archive do
 
         it 'downloads that file' do
           download
-          untarred_file = File.join(app_dir, 'stuff.txt')
+          untarred_file = app_dir.join('stuff.txt')
           contents = File.read(untarred_file)
           expect(contents).to eq("contents of #{namespace}-1")
         end
@@ -177,7 +176,7 @@ describe Archive do
 
       it 'downloads the build with the given build number' do
         download
-        untarred_file = File.join(app_dir, 'stuff.txt')
+        untarred_file = app_dir.join('stuff.txt')
         contents = File.read(untarred_file)
         expect(contents).to eq('contents of spatula-3')
       end
