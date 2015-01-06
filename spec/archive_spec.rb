@@ -143,7 +143,7 @@ describe Archive do
           create_s3_file namespace, '1'
         end
 
-        it 'downloads the green build that is the latest modified build' do
+        it 'downloads that file' do
           download
           untarred_file = File.join(app_dir, 'stuff.txt')
           contents = File.read(untarred_file)
