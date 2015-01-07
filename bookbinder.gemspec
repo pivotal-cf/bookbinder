@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.email       = Base64.decode64('Z21vcmdhbkBnb3Bpdm90YWwuY29t') # Gavin's
 
   s.files       = Dir['lib/**/*'] + Dir['template_app/**/*'] + Dir['master_middleman/**/*'] + Dir['bin/**/*']
-  s.homepage    = 'https://github.com/pivotal-cf/docs-bookbinder'
+  s.homepage    = 'https://github.com/cloudfoundry-incubator/bookbinder'
   s.license     = 'MIT'
   s.executable  = 'bookbinder'
 
