@@ -56,15 +56,6 @@ module Bookbinder
         success ? 0 : 1
       end
 
-      def pdf_options
-        return unless config.has_option?('pdf')
-        {
-            page: config.pdf['page'],
-            filename: config.pdf['filename'],
-            header: config.pdf.fetch('header')
-        }
-      end
-
       def checkout_book_at(target_tag)
         @logger.log "Binding #{config.book_repo.cyan} at #{target_tag.magenta}"
         FileUtils.chdir(book_checkout(target_tag)) { refresh_config; yield }
@@ -90,8 +81,6 @@ module Bookbinder
       def publish_config(location)
         arguments = {
             sections: config.sections,
-            pdf: pdf_options,
-            pdf_index: config.pdf_index,
             book_repo: config.book_repo,
             host_for_sitemap: config.public_host,
             archive_menu: config.archive_menu

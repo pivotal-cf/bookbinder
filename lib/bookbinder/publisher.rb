@@ -1,7 +1,6 @@
 require 'middleman-syntax'
 require_relative 'bookbinder_logger'
 require_relative 'directory_helpers'
-require_relative 'pdf_generator'
 require_relative 'section'
 require_relative 'server_director'
 
@@ -11,9 +10,7 @@ module Bookbinder
 
     def initialize(logger, spider, static_site_generator)
       @gem_root = File.expand_path('../../../', __FILE__)
-
       @logger = logger
-      @pdf_generator = PdfGenerator.new(@logger)
       @spider = spider
       @static_site_generator = static_site_generator
     end

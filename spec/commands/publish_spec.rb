@@ -319,8 +319,6 @@ module Bookbinder
       let(:expected_publish_config) do
         {
          sections: sections,
-         pdf: nil,
-         pdf_index: [],
          host_for_sitemap: 'example.com',
          template_variables: {},
          book_repo: 'fantastic/book',
