@@ -1,3 +1,5 @@
+require_relative 'section'
+
 module Bookbinder
   class CodeExample < Section
     class InvalidSnippet < StandardError

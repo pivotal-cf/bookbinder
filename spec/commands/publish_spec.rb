@@ -1,13 +1,21 @@
-require 'spec_helper'
+require 'webmock/rspec'
+
+require_relative '../../lib/bookbinder/commands/publish'
+
+require_relative '../helpers/expectations'
+require_relative '../helpers/middleman'
+require_relative '../helpers/nil_logger'
+require_relative '../helpers/spec_git_accessor'
+require_relative '../helpers/tmp_dirs'
 
 module Bookbinder
-  describe Cli::Publish do
+  describe Commands::Publish do
+    include SpecHelperMethods
+
     include_context 'tmp_dirs'
 
     around_with_fixture_repo do |spec|
-      Kernel.silence_warnings do
-        spec.run
-      end
+      spec.run
     end
 
     let(:sections) do
@@ -29,21 +37,29 @@ module Bookbinder
            'subnav_template' => 'vegetables'}
       ]
     end
+    let(:archive_menu) { [] }
 
     let(:config_hash) do
       {'sections' => sections,
        'book_repo' => book,
        'pdf_index' => [],
-       'public_host' => 'example.com'}
+       'public_host' => 'example.com',
+       'archive_menu' => archive_menu
+      }
     end
 
     let(:config) { Configuration.new(logger, config_hash) }
     let(:book) { 'fantastic/book' }
     let(:logger) { NilLogger.new }
-    let(:publish_command) { Cli::Publish.new(logger, config) }
+    let(:configuration_fetcher) { double('configuration_fetcher') }
+    let(:publish_command) { Commands::Publish.new(logger, configuration_fetcher) }
     let(:git_client) { GitClient.new(logger) }
 
-    context 'local' do
+    before do
+      allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
+    end
+
+    describe 'local' do
       around do |spec|
         WebMock.disable_net_connect!(:allow_localhost => true)
         spec.run
@@ -67,7 +83,6 @@ module Bookbinder
       it 'runs idempotently' do
         silence_io_streams do
           publish_command.run(['local'], SpecGitAccessor) # Run Once
-
           expect(File.exist? dogs_index).to eq true
           publish_command.run(['local'], SpecGitAccessor) # Run twice
           expect(File.exist? dogs_index).to eq true
@@ -98,15 +113,15 @@ module Bookbinder
           fake_publisher = double(:publisher)
 
           expect(Publisher).to receive(:new).and_return fake_publisher
-          expect(fake_publisher).to receive(:publish) do |args|
-            expect(args[:master_middleman_dir]).to match('layout-repo')
+          expect(fake_publisher).to receive(:publish) do |cli_options, output_paths, publish_config, git_accessor|
+            expect(output_paths[:master_middleman_dir]).to match('layout-repo')
           end
           publish_command.run(['local'], SpecGitAccessor)
         end
       end
     end
 
-    context 'github' do
+    describe 'github' do
       let(:zipped_repo_url) { "https://github.com/#{book}/archive/master.tar.gz" }
 
       it 'creates some static HTML' do
@@ -114,67 +129,6 @@ module Bookbinder
 
         index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
         expect(index_html).to include 'This is a Markdown Page'
-      end
-
-      context 'when a tag is provided' do
-        let(:desired_tag) { 'foo-1.7.12' }
-        let(:cli_args) { ['github', desired_tag] }
-
-        it 'displays tag deprecation message' do
-          book = double('Book', directory: 'test')
-          allow(FileUtils).to receive(:chdir).with(/test$/)
-
-          allow(Book).to receive(:from_remote).with(
-                              logger: logger,
-                              full_name: 'fantastic/book',
-                              destination_dir: anything,
-                              ref: desired_tag,
-                              git_accessor: Git
-                          ).and_return(book)
-
-          expect(Kernel).to receive(:warn).with("[DEPRECATION] `tag` is deprecated.")
-          publish_command.run(cli_args)
-        end
-
-        it 'gets the book at that tag' do
-          book = double('Book', directory: 'test')
-          allow(FileUtils).to receive(:chdir).with(/test$/)
-
-          expect(Book).to receive(:from_remote).with(
-                              logger: logger,
-                              full_name: 'fantastic/book',
-                              destination_dir: anything,
-                              ref: desired_tag,
-                              git_accessor: Git
-                          ).and_return(book)
-          publish_command.run(cli_args)
-        end
-
-        context 'the old config.yml lists fewer repos than the new config.yml' do
-          let(:early_section) { 'fantastic/dogs-repo' }
-          let(:another_early_section) { 'fantastic/my-docs-repo' }
-          let(:later_section) { 'fantastic/my-other-docs-repo' }
-
-          it 'calls for the old sections, but not the new sections' do
-            book = double('Book')
-
-            allow(Book).to receive(:from_remote).with(
-                               logger: logger,
-                               full_name: 'fantastic/book',
-                               destination_dir: anything,
-                               ref: 'foo-1.7.12',
-                               git_accessor: Git
-                           ).and_return(book)
-            allow(book).to receive(:directory).and_return('test-directory')
-            allow(FileUtils).to receive(:chdir).with(%r{/test-directory$})
-
-            publish_command.run(cli_args, SpecGitAccessor)
-
-            expect(File.read('./config.yml')).to include('dogs-repo')
-            expect(File.read('./config.yml')).to include('my-docs-repo')
-            expect(File.read('./config.yml')).to include('my-other-docs-repo')
-          end
-        end
       end
 
       context 'when provided a layout repo' do
@@ -189,8 +143,8 @@ module Bookbinder
         it 'passes the provided repo as master_middleman_dir' do
           fake_publisher = double(:publisher)
           expect(Publisher).to receive(:new).and_return fake_publisher
-          expect(fake_publisher).to receive(:publish) do |args|
-            expect(args[:master_middleman_dir]).to match('layout-repo')
+          expect(fake_publisher).to receive(:publish) do |cli_options, output_paths, publish_config, git_accessor|
+            expect(output_paths[:master_middleman_dir]).to match('layout-repo')
           end
           publish_command.run(['github'], SpecGitAccessor)
         end
@@ -220,7 +174,7 @@ module Bookbinder
         let(:config) { Configuration.new(logger, config_hash) }
         let(:book) { 'fantastic/book' }
         let(:logger) { NilLogger.new }
-        let(:publish_commander) { Cli::Publish.new(logger, config) }
+        let(:publish_commander) { Commands::Publish.new(logger, configuration_fetcher) }
         let(:temp_dir) { Dir.mktmpdir }
         let(:git_accessor_1) { SpecGitAccessor.new('dogs-repo', temp_dir) }
         let(:git_accessor_2) { SpecGitAccessor.new('dogs-repo', temp_dir) }
@@ -274,7 +228,7 @@ module Bookbinder
 
             expect {
               publish_command.run ['github'], SpecGitAccessor
-            }.to raise_error(Cli::Publish::VersionUnsupportedError)
+            }.to raise_error(Commands::Publish::VersionUnsupportedError)
           end
         end
       end
@@ -284,37 +238,47 @@ module Bookbinder
       it 'raises Cli::InvalidArguments' do
         expect {
           publish_command.run(['blah', 'blah', 'whatever'], SpecGitAccessor)
-        }.to raise_error(Cli::InvalidArguments)
+        }.to raise_error(CliError::InvalidArguments)
 
         expect {
           publish_command.run([], SpecGitAccessor)
-        }.to raise_error(Cli::InvalidArguments)
+        }.to raise_error(CliError::InvalidArguments)
       end
     end
 
     describe 'publication arguments' do
       let(:fake_publisher) { double('publisher') }
-      let(:all_these_arguments_and_such) do
-        {sections: sections,
-         output_dir: anything,
-         master_middleman_dir: anything,
-         final_app_dir: anything,
-         pdf: nil,
+      let(:git_accessor) { SpecGitAccessor }
+      let(:expected_cli_options) do
+        {
          verbose: false,
-         pdf_index: [],
-         local_repo_dir: anything,
+         target_tag: nil
+        }
+      end
+      let(:expected_publish_config) do
+        {
+         sections: sections,
          host_for_sitemap: 'example.com',
          template_variables: {},
          book_repo: 'fantastic/book',
-         git_accessor: SpecGitAccessor}
+         archive_menu: archive_menu
+        }
+      end
+      let(:expected_output_paths) do
+        {
+         output_dir: anything,
+         master_middleman_dir: anything,
+         final_app_dir: anything,
+         local_repo_dir: anything
+        }
       end
 
       before do
         expect(Publisher).to receive(:new).and_return fake_publisher
       end
 
-      it 'are appropriate' do
-        expect(fake_publisher).to receive(:publish).with all_these_arguments_and_such
+      it 'pass the appropriate arguments to publish from the config' do
+        expect(fake_publisher).to receive(:publish).with expected_cli_options, expected_output_paths, expected_publish_config, git_accessor
         publish_command.run(['local'], SpecGitAccessor)
       end
     end

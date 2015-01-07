@@ -15,7 +15,7 @@ module Bookbinder
     end
 
     def self.repos_dir
-      File.join(GEM_ROOT, 'spec', 'fixtures', 'repositories')
+      File.expand_path('../repositories', __FILE__)
     end
 
     private

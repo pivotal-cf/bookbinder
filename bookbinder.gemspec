@@ -33,5 +33,10 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'ruby-progressbar'
   s.add_runtime_dependency 'therubyracer'
   s.add_runtime_dependency 'git', '~> 1.2.8'
-  s.add_development_dependency 'pry'
+
+  s.add_development_dependency 'license_finder'
+  s.add_development_dependency 'pry-byebug'
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'webmock'
 end

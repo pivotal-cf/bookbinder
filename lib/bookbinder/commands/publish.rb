@@ -1,94 +1,81 @@
-require 'bookbinder/directory_helpers'
+require_relative '../book'
+require_relative '../cli_exceptions'
+require_relative '../configuration'
+require_relative '../directory_helpers'
+require_relative '../middleman_runner'
+require_relative '../publisher'
+require_relative '../spider'
+require_relative 'bookbinder_command'
+require_relative 'naming'
 
 module Bookbinder
-  class Cli
+  module Commands
     class Publish < BookbinderCommand
+      VersionUnsupportedError = Class.new(StandardError)
+
       include Bookbinder::DirectoryHelperMethods
-      class VersionUnsupportedError < StandardError;
-        def initialize(msg=nil)
-          super
-        end
+      extend Commands::Naming
+
+      def self.usage
+        "publish <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
       end
 
       def run(cli_arguments, git_accessor=Git)
-        raise Cli::InvalidArguments unless arguments_are_valid?(cli_arguments)
+        raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
         @git_accessor = git_accessor
 
-        target_tag    = (cli_arguments[1..-1] - ['--verbose']).pop
         final_app_dir = File.absolute_path('final_app')
-        bind_book(cli_arguments, final_app_dir, target_tag)
-      end
-
-      def self.usage
-        "<local|github> [tag] [--verbose]"
+        bind_book(cli_arguments, final_app_dir)
       end
 
       private
 
-      def bind_book(cli_arguments, final_app_dir, target_tag)
-        if target_tag
-          Kernel.warn "[DEPRECATION] `tag` is deprecated."
-
-          checkout_book_at(target_tag) { generate_site_etc(cli_arguments, final_app_dir, target_tag) }
-        else
-          generate_site_etc(cli_arguments, final_app_dir)
-        end
+      def bind_book(cli_arguments, final_app_dir)
+        generate_site_etc(cli_arguments, final_app_dir)
       end
 
       def generate_site_etc(cli_args, final_app_dir, target_tag=nil)
         # TODO: general solution to turn all string keys to symbols
         verbosity = cli_args.include?('--verbose')
         location = cli_args[0]
-        pub_args = publication_arguments(verbosity, location, pdf_options, target_tag, final_app_dir, @git_accessor)
-        success = Publisher.new(@logger).publish(pub_args)
+
+        cli_options = { verbose: verbosity, target_tag: target_tag }
+        output_paths = output_directory_paths(location, final_app_dir)
+        publish_config = publish_config(location)
+        spider = Spider.new(@logger, app_dir: final_app_dir)
+        static_site_generator = MiddlemanRunner.new(@logger)
+
+        success = Publisher.new(@logger, spider, static_site_generator).publish(cli_options, output_paths, publish_config, @git_accessor)
         success ? 0 : 1
       end
 
-      def pdf_options
-        return unless config.has_option?('pdf')
+      def output_directory_paths(location, final_app_dir)
+        local_repo_dir = (location == 'local') ? File.absolute_path('..') : nil
+
         {
-            page: config.pdf['page'],
-            filename: config.pdf['filename'],
-            header: config.pdf.fetch('header')
+          final_app_dir: final_app_dir,
+          local_repo_dir: local_repo_dir,
+          output_dir: File.absolute_path(output_dir_name),
+          master_middleman_dir: layout_repo_path(local_repo_dir)
         }
       end
 
-      def checkout_book_at(target_tag)
-        @logger.log "Binding #{config.book_repo.cyan} at #{target_tag.magenta}"
-        FileUtils.chdir(book_checkout(target_tag)) { refresh_config; yield }
-      end
-
-      def refresh_config
-        hash = YAML.load(File.read('./config.yml'))
-        hash['pdf_index'] = nil
-        @config = Configuration.new(@logger, hash)
-      end
-
-      def publication_arguments(verbosity, location, pdf_hash, target_tag, final_app_dir, git_accessor)
-        local_repo_dir = location == 'local' ? File.absolute_path('..') : nil
-
+      def publish_config(location)
         arguments = {
             sections: config.sections,
-            output_dir: File.absolute_path(output_dir_name),
-            master_middleman_dir: layout_repo_path(local_repo_dir, git_accessor),
-            final_app_dir: final_app_dir,
-            pdf: pdf_hash,
-            verbose: verbosity,
-            pdf_index: config.pdf_index,
-            local_repo_dir: local_repo_dir,
             book_repo: config.book_repo,
-            git_accessor: git_accessor
+            host_for_sitemap: config.public_host,
+            archive_menu: config.archive_menu
         }
 
-        if config.has_option?('versions') && location != 'local'
-          config.versions.each { |version| arguments[:sections].concat sections_from version, git_accessor }
-          arguments.merge!(versions: config.versions)
+        optional_arguments = {}
+        optional_arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
+        if publishing_to_github? location
+          config.versions.each { |version| arguments[:sections].concat sections_from version, @git_accessor }
+          optional_arguments.merge!(versions: config.versions)
         end
 
-        arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
-        arguments.merge!(host_for_sitemap: config.public_host)
-        arguments.merge!(target_tag: target_tag) if target_tag
-        arguments
+        arguments.merge! optional_arguments
       end
 
       def sections_from(version, git_accessor)
@@ -115,14 +102,14 @@ module Bookbinder
         File.join temp_workspace, book.directory
       end
 
-      def layout_repo_path(local_repo_dir, git_accessor)
+      def layout_repo_path(local_repo_dir)
         if config.has_option?('layout_repo')
           if local_repo_dir
             File.join(local_repo_dir, config.layout_repo.split('/').last)
           else
             section = {'repository' => {'name' => config.layout_repo}}
             destination_dir = Dir.mktmpdir
-            repository =  Repository.build_from_remote(@logger, section, destination_dir, 'master', git_accessor)
+            repository =  GitHubRepository.build_from_remote(@logger, section, destination_dir, 'master', @git_accessor)
             if repository
               File.join(destination_dir, repository.directory)
             else
@@ -141,6 +128,10 @@ module Bookbinder
         nothing_special   = arguments[1..-1].empty?
 
         %w(local github).include?(arguments[0]) && (tag_provided || verbose || nothing_special)
+      end
+
+      def publishing_to_github?(publish_location)
+        config.has_option?('versions') && publish_location != 'local'
       end
     end
   end

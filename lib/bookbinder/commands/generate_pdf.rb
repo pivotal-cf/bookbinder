@@ -1,6 +1,13 @@
+require_relative '../pdf_generator'
+require_relative '../server_director'
+require_relative 'bookbinder_command'
+require_relative 'naming'
+
 module Bookbinder
-  class Cli
+  module Commands
     class GeneratePDF < BookbinderCommand
+      extend Commands::Naming
+
       class AppNotPublished < StandardError
         def initialize(msg='You must publish locally before you generate a PDF.')
           super(msg)
@@ -25,6 +32,10 @@ module Bookbinder
         end
       end
 
+      def self.usage
+        "generate_pdf [<file_name>.yml] \t \t Generate a PDF from the files specified in <file_name.yml>"
+      end
+
       def run(params)
         raise AppNotPublished unless Dir.exists?('final_app')
 
@@ -42,10 +53,6 @@ module Bookbinder
         else
           @logger.warn "Declaring PDF options in config.yml is deprecated.\nDeclare them in a PDF config file, instead, and target that file when you re-invoke bookbinder.\ne.g. bookbinder generate_pdf theGoodParts.yml"
         end
-      end
-
-      def self.usage
-        '[PDF config.yml]'
       end
 
       private
@@ -104,7 +111,7 @@ module Bookbinder
             matching_pages = find_matching_files_in_directory(page, local_host)
             final_pages += matching_pages
           else
-            final_pages << page
+            final_pages << "http://#{local_host}/#{page}"
           end
         end
         final_pages

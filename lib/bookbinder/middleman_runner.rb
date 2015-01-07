@@ -1,6 +1,11 @@
+require 'middleman-core'
+require 'middleman-core/cli'
+require 'middleman-core/profiling'
+require_relative 'code_example'
+
 class Middleman::Cli::BuildAction
   def handle_error(file_name, response, e=Thor::Error.new(response))
-    our_errors = [GitClient::TokenException,
+    our_errors = [Bookbinder::GitClient::TokenException,
                   Bookbinder::CodeExample::InvalidSnippet,
                   QuicklinksRenderer::BadHeadingLevelError,
                   Git::GitExecuteError]
@@ -30,11 +35,11 @@ module Bookbinder
       @logger = logger
     end
 
-    def run(middleman_dir, template_variables, local_repo_dir, verbose = false, book = nil, sections = [], production_host=nil, git_accessor=Git)
+    def run(middleman_dir, template_variables, local_repo_dir, verbose = false, book = nil, sections = [], production_host=nil, archive_menu=nil, git_accessor=Git)
       @logger.log "\nRunning middleman...\n\n"
 
       within(middleman_dir) do
-        invoke_against_current_dir(local_repo_dir, production_host, book, sections, template_variables, verbose, git_accessor)
+        invoke_against_current_dir(local_repo_dir, production_host, book, sections, template_variables, archive_menu, verbose, git_accessor)
       end
     end
 
@@ -50,18 +55,19 @@ module Bookbinder
       ENV['MM_ROOT']    = original_mm_root
     end
 
-    def invoke_against_current_dir(local_repo_dir, production_host, book, sections, template_variables, verbose, git_accessor)
+    def invoke_against_current_dir(local_repo_dir, production_host, book, sections, template_variables, archive_menu, verbose, git_accessor)
       builder = Middleman::Cli::Build.shared_instance(verbose)
 
       config = {
-          template_variables: template_variables,
-          relative_links: false,
-          subnav_templates: subnavs_by_dir_name(sections),
           local_repo_dir: local_repo_dir,
           production_host: production_host,
           git_accessor: git_accessor,
           sections: sections,
-          book: book
+          book: book,
+          template_variables: template_variables,
+          relative_links: false,
+          subnav_templates: subnavs_by_dir_name(sections),
+          archive_menu: archive_menu
       }
 
       config.each { |k, v| builder.config[k] = v }

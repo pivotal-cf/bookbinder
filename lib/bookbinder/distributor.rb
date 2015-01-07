@@ -1,14 +1,18 @@
+require_relative 'app_fetcher'
+
 module Bookbinder
   class Distributor
     EXPIRATION_HOURS = 2
 
     def self.build(logger, options)
-      namespace = Repository.new(logger: logger, full_name: options[:book_repo]).short_name
+      namespace = GitHubRepository.new(logger: logger, full_name: options[:book_repo]).short_name
       namer = ArtifactNamer.new(namespace, options[:build_number], 'log', '/tmp')
 
       archive = Archive.new(logger: logger, key: options[:aws_credentials].access_key, secret: options[:aws_credentials].secret_key)
-      command_runner = CfCommandRunner.new(logger, options[:cf_credentials], namer.full_path)
-      pusher = Pusher.new(command_runner)
+      cf_command_runner = CfCommandRunner.new(logger, options[:cf_credentials], namer.full_path)
+      cf_app_fetcher = AppFetcher.new(options[:cf_credentials].flat_routes, cf_command_runner)
+
+      pusher = Pusher.new(cf_command_runner, cf_app_fetcher)
       new(logger, archive, pusher, namespace, namer, options)
     end
 
@@ -22,11 +26,18 @@ module Bookbinder
     end
 
     def distribute
-      download if options[:production]
-      push_app
-      nil
-    ensure
-      upload_trace
+      begin
+        download if options[:production]
+        push_app
+        nil
+      rescue => e
+        cf_credentials = options[:cf_credentials]
+        cf_space = options[:production] ? cf_credentials.production_space : cf_credentials.staging_space
+        cf_routes = options[:production] ? cf_credentials.production_host : cf_credentials.staging_host
+        @logger.error "[ERROR] #{e.message}\n[DEBUG INFO]\nCF organization: #{cf_credentials.organization}\nCF space: #{cf_space}\nCF account: #{cf_credentials.username}\nroutes: #{cf_routes}"
+      ensure
+        upload_trace
+      end
     end
 
     private

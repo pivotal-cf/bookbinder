@@ -1,11 +1,16 @@
-require 'spec_helper'
+require_relative '../../lib/bookbinder/commands/build_and_push_tarball'
+require_relative '../helpers/tmp_dirs'
+require_relative '../helpers/nil_logger'
+require_relative '../../lib/bookbinder/configuration'
 
 module Bookbinder
-  describe Cli::BuildAndPushTarball do
+  describe Commands::BuildAndPushTarball do
     include_context 'tmp_dirs'
 
     let(:logger) { NilLogger.new }
-    let(:build_and_push_tarball_command) { Cli::BuildAndPushTarball.new(logger, config) }
+    let(:configuration_fetcher) { double('configuration_fetcher') }
+    let(:config) { Configuration.new(logger, config_hash) }
+    let(:build_and_push_tarball_command) { Commands::BuildAndPushTarball.new(logger, configuration_fetcher) }
     let(:build_number) { '17' }
     let(:book_repo) { 'org/fixture-book-title' }
 
@@ -18,21 +23,20 @@ module Bookbinder
           }
       }
     end
-
     let(:config_hash) do
       {
           'book_repo' => book_repo,
           'cred_repo' => 'some/repo'
       }
     end
-    let(:config) { Configuration.new(logger, config_hash) }
 
     before do
       allow(ENV).to receive(:[])
       allow(ENV).to receive(:[]).with('BUILD_NUMBER').and_return(build_number)
       fake_creds = double
       allow(fake_creds).to receive(:credentials).and_return(aws_hash)
-      allow(CredentialProvider).to receive(:new).and_return(fake_creds)
+      allow(RemoteYamlCredentialProvider).to receive(:new).and_return(fake_creds)
+      allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
     end
 
     let(:access_key) { 'access-key' }

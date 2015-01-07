@@ -14,9 +14,6 @@ require 'vienna'
 require 'popen4'
 require 'puma'
 
-module Bookbinder
-
-end
 #require_relative 'bookbinder/shell_out'
 require_relative 'bookbinder/bookbinder_logger'
 require_relative 'bookbinder/git_client'
@@ -24,8 +21,10 @@ require_relative 'bookbinder/git_client'
 require_relative 'bookbinder/section'
 require_relative 'bookbinder/book'
 require_relative 'bookbinder/code_example'
-require_relative 'bookbinder/credential_provider'
+require_relative 'bookbinder/remote_yaml_credential_provider'
 require_relative 'bookbinder/configuration'
+require_relative 'bookbinder/configuration_fetcher'
+require_relative 'bookbinder/configuration_validator'
 require_relative 'bookbinder/css_link_checker'
 require_relative 'bookbinder/sitemap_generator'
 require_relative 'bookbinder/sieve'
@@ -42,7 +41,7 @@ require_relative 'bookbinder/pusher'
 require_relative 'bookbinder/artifact_namer'
 require_relative 'bookbinder/distributor'
 
-require_relative 'bookbinder/bookbinder_command'
+require_relative 'bookbinder/commands/bookbinder_command'
 require_relative 'bookbinder/commands/build_and_push_tarball'
 require_relative 'bookbinder/commands/publish'
 require_relative 'bookbinder/commands/push_local_to_staging'
@@ -52,7 +51,7 @@ require_relative 'bookbinder/commands/update_local_doc_repos'
 require_relative 'bookbinder/commands/tag'
 require_relative 'bookbinder/commands/generate_pdf'
 
-require_relative 'bookbinder/usage_message'
+require_relative 'bookbinder/usage_messenger'
 
 require_relative 'bookbinder/cli'
 
