@@ -37,6 +37,15 @@ module Bookbinder
       File.open(full_path, 'w') { |f| f.write(subnav_code) }
     end
 
+    def write_archive_menu_content(path_under_source_dir, archive_menu_content = "<div>archive</div>")
+      full_path = File.join(source_dir, path_under_source_dir)
+      full_pathname = Pathname.new(full_path)
+      FileUtils.mkdir_p full_pathname.dirname
+
+      partial_code = archive_menu_content
+      File.open(full_path, 'w') { |f| f.write(partial_code) }
+    end
+
     def silence_io_streams
       begin
         orig_stderr = $stderr.clone

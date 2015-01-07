@@ -1,106 +1,68 @@
+require_relative 'command_runner'
+require_relative 'local_file_system_accessor'
+require_relative 'command_validator'
+
+require_relative 'commands/build_and_push_tarball'
+require_relative 'commands/generate_pdf'
+require_relative 'commands/publish'
+require_relative 'commands/version'
+require_relative 'commands/help'
+
 module Bookbinder
   class Cli
-    class InvalidArguments < StandardError;
-    end
+    FLAGS = [
+      Commands::Version,
+      Commands::Help
+    ]
 
-    FLAGS = %w(version)
-
-    # breaking this command => class naming convention will break usage_messages!
-    COMMAND_TO_CLASS_MAPPING = {
-        'publish' => Publish,
-        'build_and_push_tarball' => BuildAndPushTarball,
-        'push_local_to_staging' => PushLocalToStaging,
-        'push_to_prod' => PushToProd,
-        'run_publish_ci' => RunPublishCI,
-        'update_local_doc_repos' => UpdateLocalDocRepos,
-        'tag' => Tag,
-        'generate_pdf' => GeneratePDF
-    }.freeze
+    COMMANDS = [
+      Commands::BuildAndPushTarball,
+      Commands::GeneratePDF,
+      Commands::Publish,
+      Commands::PushLocalToStaging,
+      Commands::PushToProd,
+      Commands::RunPublishCI,
+      Commands::Tag,
+      Commands::UpdateLocalDocRepos,
+    ].freeze
 
     def run(args)
       command_name = args[0]
-      command = COMMAND_TO_CLASS_MAPPING[command_name]
       command_arguments = args[1..-1]
 
-      if command_name && command_name.match(/^--/)
-        flag = command_name[2..-1]
-        if FLAGS.include? flag
-          self.send flag
-        else
-          unrecognized_flag(flag)
-        end
-        0
-      elsif command
-        run_command(command, command_arguments)
-      else
-        unrecognized_command command_name
-      end
-    end
+      logger = BookbinderLogger.new
+      yaml_loader = YAMLLoader.new
+      local_file_system_accessor = LocalFileSystemAccessor.new
+      configuration_validator = ConfigurationValidator.new(logger, local_file_system_accessor)
+      configuration_fetcher = ConfigurationFetcher.new(logger, configuration_validator, yaml_loader)
+      configuration_fetcher.set_config_file_path './config.yml'
+      usage_messenger = UsageMessenger.new
+      usage_message = usage_messenger.construct_for(COMMANDS, FLAGS)
+      command_validator = CommandValidator.new usage_messenger, COMMANDS + FLAGS, usage_message
 
-    private
+      command_runner = CommandRunner.new(configuration_fetcher, usage_message, logger, COMMANDS + FLAGS)
 
-    def version
-      logger.log "bookbinder #{Gem::Specification::load(File.join GEM_ROOT, "bookbinder.gemspec").version}"
-    end
-
-    def run_command(command, command_arguments)
-      configuration = config
-      raise 'Non-unique directory names' unless configuration.valid?
-      command.new(logger, configuration).run command_arguments
-    rescue Publish::VersionUnsupportedError => e
-      logger.error "config.yml at version '#{e.message}' has an unsupported API."
-      1
-    rescue Configuration::CredentialKeyError => e
-      logger.error "#{e.message}, in credentials.yml"
-      1
-    rescue KeyError => e
-      logger.error "#{e.message} from your configuration."
-      1
-    rescue Cli::InvalidArguments
-      logger.log usage_message.command(command)
-      1
-    rescue => e
-      logger.error e.message
-      1
-    end
-
-    def config
-      @config ||= fetch_config
-    end
-
-    def fetch_config
       begin
-        config_hash              = YAML.load(File.read('./config.yml'))
-      rescue Psych::SyntaxError => e
-        raise "There is a syntax error in your config.yml: \n #{e}"
+        command_name ? command_validator.validate!(command_name) : command_name = '--help'
+
+        command_runner.run command_name, command_arguments
+
+      rescue Commands::Publish::VersionUnsupportedError => e
+        logger.error "config.yml at version '#{e.message}' has an unsupported API."
+        1
+      rescue Configuration::CredentialKeyError => e
+        logger.error "#{e.message}, in credentials.yml"
+        1
+      rescue KeyError => e
+        logger.error "#{e.message} from your configuration."
+        1
+      rescue CliError::UnknownCommand => e
+        logger.log e.message
+        1
+      rescue RuntimeError => e
+        logger.error e.message
+        1
       end
-      if config_hash
-        if File.exists?('./pdf_index.yml')
-          config_hash['pdf_index'] = YAML.load(File.read('./pdf_index.yml'))
-        else
-          config_hash['pdf_index'] = nil
-        end
-      end
-      raise 'config.yml is empty' unless config_hash
-      Configuration.new(logger, config_hash)
-    end
-
-    def unrecognized_flag(name)
-      logger.log "Unrecognized flag '--#{name}'"
-      usage_message.print
-    end
-
-    def unrecognized_command(name)
-      logger.log "Unrecognized command '#{name}'"
-      usage_message.print
-    end
-
-    def usage_message
-      UsageMessage.new(logger, COMMAND_TO_CLASS_MAPPING, FLAGS)
-    end
-
-    def logger
-      @logger ||= BookbinderLogger.new
     end
   end
 end

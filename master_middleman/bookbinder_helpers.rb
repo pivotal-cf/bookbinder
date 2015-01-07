@@ -4,6 +4,12 @@ require_relative 'quicklinks_renderer'
 
 I18n.enforce_available_locales = false
 
+class ArchiveMenuTemplateNotFound < StandardError;
+end
+
+class ArchiveConfigFormatError < StandardError;
+end
+
 module Bookbinder
   module Navigation
     class << self
@@ -34,6 +40,23 @@ module Bookbinder
           end.compact.pop || 'default'
         end
         partial "subnavs/#{template}"
+      end
+
+      def yield_for_archive_drop_down_menu
+        if config.respond_to?(:archive_menu)
+          title = config[:archive_menu].first
+          links = config[:archive_menu][1..-1]
+
+          new_links_based_from_root = links.map do |link|
+            link_from_root = link.dup
+            link_from_root.map do |k, v|
+              link_from_root[k] = "/#{v}"
+            end
+            link_from_root
+          end
+
+          partial 'archive_menus/default', locals: { menu_title: title, dropdown_links: new_links_based_from_root }
+        end
       end
 
       def breadcrumbs

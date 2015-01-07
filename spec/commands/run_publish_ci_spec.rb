@@ -1,19 +1,29 @@
-require 'spec_helper'
+require_relative '../../lib/bookbinder/commands/run_publish_ci'
+
+# require_relative '../helpers/expectations'
+require_relative '../helpers/middleman'
+require_relative '../helpers/nil_logger'
+# require_relative '../helpers/spec_git_accessor'
+# require_relative '../helpers/tmp_dirs'
 
 module Bookbinder
-  describe Cli::RunPublishCI do
-    let(:fake_publish) { double }
-    let(:fake_push_local_to_staging) { double }
-    let(:fake_build_and_push_tarball) { double }
+  describe Commands::RunPublishCI do
+    include SpecHelperMethods
+
+    let(:fake_publish) { double 'fake_publish' }
+    let(:fake_push_local_to_staging) { double 'fake_push_to_staging' }
+    let(:fake_build_and_push_tarball) { double 'fake_build_and_push_tarball' }
     let(:config_hash) { {'book_repo' => 'foo/bar'} }
     let(:config) { Configuration.new(logger, config_hash) }
     let(:logger) { NilLogger.new }
-    let(:command) { Cli::RunPublishCI.new(logger, config) }
+    let(:configuration_fetcher) { double 'configuration_fetcher' }
+    let(:command) { Commands::RunPublishCI.new(logger, configuration_fetcher) }
 
     before do
-      allow(Cli::Publish).to receive(:new).with(logger, config) { fake_publish }
-      allow(Cli::PushLocalToStaging).to receive(:new).with(logger, config) { fake_push_local_to_staging }
-      allow(Cli::BuildAndPushTarball).to receive(:new).with(logger, config) { fake_build_and_push_tarball }
+      allow(configuration_fetcher).to receive(:fetch_config) { config }
+      allow(Commands::Publish).to receive(:new).with(logger, configuration_fetcher) { fake_publish }
+      allow(Commands::PushLocalToStaging).to receive(:new).with(logger, configuration_fetcher) { fake_push_local_to_staging }
+      allow(Commands::BuildAndPushTarball).to receive(:new).with(logger, configuration_fetcher) { fake_build_and_push_tarball }
     end
 
     context 'when ENV["BUILD_NUMBER"] is set' do
@@ -47,7 +57,7 @@ module Bookbinder
       end
 
       it 'respects the --verbose flag' do
-        publish_command = expect_to_receive_and_return_real_now(Cli::Publish, :new, logger, config)
+        publish_command = expect_to_receive_and_return_real_now(Commands::Publish, :new, logger, configuration_fetcher)
         expect(publish_command).to receive(:run).with ['github', '--verbose']
         command.run ['--verbose']
       end
@@ -56,7 +66,7 @@ module Bookbinder
     it 'raises MissingBuildNumber if ENV["BUILD_NUMBER"] is not set' do
       expect {
         command.run([])
-      }.to raise_error(Cli::BuildAndPushTarball::MissingBuildNumber)
+      }.to raise_error(Commands::BuildAndPushTarball::MissingBuildNumber)
     end
   end
 end

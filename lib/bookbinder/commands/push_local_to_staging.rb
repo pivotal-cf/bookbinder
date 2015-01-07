@@ -1,13 +1,19 @@
+require_relative '../distributor'
+require_relative 'bookbinder_command'
+require_relative 'naming'
+
 module Bookbinder
-  class Cli
+  module Commands
     class PushLocalToStaging < BookbinderCommand
+      extend Commands::Naming
+
+      def self.usage
+        "push_local_to_staging \t \t  \t Push the contents of final_app to the staging host specified in credentials.yml"
+      end
+
       def run(_)
         Distributor.build(@logger, options).distribute
         0
-      end
-
-      def self.usage
-        ''
       end
 
       private

@@ -1,9 +1,12 @@
+require 'pathname'
+require 'tmpdir'
+
 shared_context 'tmp_dirs' do
   def tmp_subdir(name)
-    directory = File.join(tmpdir, name)
-    FileUtils.mkdir directory
-    directory
+    tmpdir.join(name).tap do |dir|
+      FileUtils.mkdir dir
+    end
   end
 
-  let(:tmpdir) { Dir.mktmpdir }
+  let(:tmpdir) { Pathname(Dir.mktmpdir) }
 end
