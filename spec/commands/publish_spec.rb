@@ -131,67 +131,6 @@ module Bookbinder
         expect(index_html).to include 'This is a Markdown Page'
       end
 
-      context 'when a tag is provided' do
-        let(:desired_tag) { 'foo-1.7.12' }
-        let(:cli_args) { ['github', desired_tag] }
-
-        it 'displays tag deprecation message' do
-          book = double('Book', directory: 'test')
-          allow(FileUtils).to receive(:chdir).with(/test$/)
-
-          allow(Book).to receive(:from_remote).with(
-                              logger: logger,
-                              full_name: 'fantastic/book',
-                              destination_dir: anything,
-                              ref: desired_tag,
-                              git_accessor: Git
-                          ).and_return(book)
-
-          expect(logger).to receive(:warn).with("[WARNING] You are publishing from a tag. The `tag` parameter is deprecated and will be removed in a future release.")
-          publish_command.run(cli_args)
-        end
-
-        it 'gets the book at that tag' do
-          book = double('Book', directory: 'test')
-          allow(FileUtils).to receive(:chdir).with(/test$/)
-
-          expect(Book).to receive(:from_remote).with(
-                              logger: logger,
-                              full_name: 'fantastic/book',
-                              destination_dir: anything,
-                              ref: desired_tag,
-                              git_accessor: Git
-                          ).and_return(book)
-          publish_command.run(cli_args)
-        end
-
-        context 'the old config.yml lists fewer repos than the new config.yml' do
-          let(:early_section) { 'fantastic/dogs-repo' }
-          let(:another_early_section) { 'fantastic/my-docs-repo' }
-          let(:later_section) { 'fantastic/my-other-docs-repo' }
-
-          it 'calls for the old sections, but not the new sections' do
-            book = double('Book')
-
-            allow(Book).to receive(:from_remote).with(
-                               logger: logger,
-                               full_name: 'fantastic/book',
-                               destination_dir: anything,
-                               ref: 'foo-1.7.12',
-                               git_accessor: Git
-                           ).and_return(book)
-            allow(book).to receive(:directory).and_return('test-directory')
-            allow(FileUtils).to receive(:chdir).with(%r{/test-directory$})
-
-            publish_command.run(cli_args, SpecGitAccessor)
-
-            expect(File.read('./config.yml')).to include('dogs-repo')
-            expect(File.read('./config.yml')).to include('my-docs-repo')
-            expect(File.read('./config.yml')).to include('my-other-docs-repo')
-          end
-        end
-      end
-
       context 'when provided a layout repo' do
         let(:config_hash) do
           {'sections' => sections,

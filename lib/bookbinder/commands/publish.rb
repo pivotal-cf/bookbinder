@@ -24,21 +24,14 @@ module Bookbinder
         raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
         @git_accessor = git_accessor
 
-        target_tag    = (cli_arguments[1..-1] - ['--verbose']).pop
         final_app_dir = File.absolute_path('final_app')
-        bind_book(cli_arguments, final_app_dir, target_tag)
+        bind_book(cli_arguments, final_app_dir)
       end
 
       private
 
-      def bind_book(cli_arguments, final_app_dir, target_tag)
-        if target_tag
-          @logger.warn "[WARNING] You are publishing from a tag. The `tag` parameter is deprecated and will be removed in a future release."
-
-          checkout_book_at(target_tag) { generate_site_etc(cli_arguments, final_app_dir, target_tag) }
-        else
-          generate_site_etc(cli_arguments, final_app_dir)
-        end
+      def bind_book(cli_arguments, final_app_dir)
+        generate_site_etc(cli_arguments, final_app_dir)
       end
 
       def generate_site_etc(cli_args, final_app_dir, target_tag=nil)
@@ -54,17 +47,6 @@ module Bookbinder
 
         success = Publisher.new(@logger, spider, static_site_generator).publish(cli_options, output_paths, publish_config, @git_accessor)
         success ? 0 : 1
-      end
-
-      def checkout_book_at(target_tag)
-        @logger.log "Binding #{config.book_repo.cyan} at #{target_tag.magenta}"
-        FileUtils.chdir(book_checkout(target_tag)) { refresh_config; yield }
-      end
-
-      def refresh_config
-        hash = YAML.load(File.read('./config.yml'))
-        hash['pdf_index'] = nil
-        @config = Configuration.new(@logger, hash)
       end
 
       def output_directory_paths(location, final_app_dir)
