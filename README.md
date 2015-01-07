@@ -21,7 +21,7 @@ Please read this document to understand how to set up a new book project.  You c
 - Publish and run the server locally to test your book
 
 #### Deploying your book
-- Create AWS bucket for green builds and put info into `config.yml`
+- Create an AWS bucket for green builds and put info into `config.yml`
 - Set up CF spaces for staging and production and put details into `config.yml`
 - Start a Jenkins CI server
 - Set up Jenkins CI with required plugins and two-build setup
