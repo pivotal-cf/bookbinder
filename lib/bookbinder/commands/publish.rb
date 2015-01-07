@@ -1,5 +1,5 @@
 require_relative '../book'
-require_relative '../cli_exceptions'
+require_relative '../cli_error'
 require_relative '../configuration'
 require_relative '../directory_helpers'
 require_relative '../middleman_runner'
