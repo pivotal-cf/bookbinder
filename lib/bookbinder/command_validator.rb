@@ -1,4 +1,4 @@
-require_relative 'cli_exceptions'
+require_relative 'cli_error'
 
 module Bookbinder
   class CommandValidator
