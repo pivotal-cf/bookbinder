@@ -1,5 +1,7 @@
-activesupport,3.2.17,MIT,A toolkit of support libraries and Ruby core extensions extracted from the Rails framework.,"A toolkit of support libraries and Ruby core extensions extracted from the Rails framework. Rich support for multibyte strings, internationalization, time zones, and testing."
-addressable,2.3.5,Apache License 2.0,URI Implementation,"Addressable is a replacement for the URI implementation that is part of
+CFPropertyList,2.2.8,MIT,"Read, write and manipulate both binary and XML property lists as defined by apple","This is a module to read, write and manipulate both binary and XML property lists as defined by apple."
+Platform,0.4.0,other,Hopefully robust platform sensing,""
+activesupport,4.1.8,MIT,A toolkit of support libraries and Ruby core extensions extracted from the Rails framework.,"A toolkit of support libraries and Ruby core extensions extracted from the Rails framework. Rich support for multibyte strings, internationalization, time zones, and testing."
+addressable,2.3.6,Apache 2.0,URI Implementation,"Addressable is a replacement for the URI implementation that is part of
 Ruby's standard library. It more closely conforms to the relevant RFCs and
 adds support for IRIs and URI templates."
 anemone,0.7.2,MIT,Anemone web-spider framework,""
@@ -7,40 +9,55 @@ ansi,1.4.3,GPLv2,ANSI at your fingertips!,"The ANSI project is a superlative col
 enabling ANSI colorization and stylization of console output. Byte for byte
 ANSI is the best ANSI code library available for the Ruby programming
 language."
-bookbinder,0.1.11,MIT,Markdown to Rackup application documentation generator,A command line utility to be run in Book repositories to stitch together their constituent Markdown repos into a static-HTML-serving application
+bookbinder,1.0.0,MIT,Markdown to Rackup application documentation generator,A command line utility to be run in Book repositories to stitch together their constituent Markdown repos into a static-HTML-serving application
 builder,3.2.2,MIT,Builders for MarkUp.,"Builder provides a number of builder objects that make creating structured data
 simple to do.  Currently the following builder objects are supported:
 
 * XML Markup
 * XML Events"
-bundler,1.3.5,MIT,The best way to manage your application's dependencies,"Bundler manages an application's dependencies through its entire life, across many machines, systematically and repeatably"
-chunky_png,1.3.0,MIT,"Pure ruby library for read/write, chunk-level access to PNG files","This pure Ruby library can read and write PNG images without depending on an external 
+bundler,1.6.2,MIT,The best way to manage your application's dependencies,"Bundler manages an application's dependencies through its entire life, across many machines, systematically and repeatably"
+byebug,3.5.1,BSD,Ruby 2.0 fast debugger - base + CLI,"Byebug is a Ruby 2 debugger. It's implemented using the
+    Ruby 2 TracePoint C API for execution control and the Debug Inspector C API
+    for call stack navigation.  The core component provides support that
+    front-ends can build on. It provides breakpoint handling and bindings for
+    stack frames among other things and it comes with an easy to use command
+    line interface."
+celluloid,0.16.0,MIT,Actor-based concurrent object framework for Ruby,Celluloid enables people to build concurrent programs out of concurrent objects just as easily as they build sequential programs out of sequential objects
+chunky_png,1.3.3,MIT,"Pure ruby library for read/write, chunk-level access to PNG files","This pure Ruby library can read and write PNG images without depending on an external
     image library, like RMagick. It tries to be memory efficient and reasonably fast.
-    
-    It supports reading and writing all PNG variants that are defined in the specification, 
-    with one limitation: only 8-bit color depth is supported. It supports all transparency, 
-    interlacing and filtering options the PNG specifications allows. It can also read and 
+
+    It supports reading and writing all PNG variants that are defined in the specification,
+    with one limitation: only 8-bit color depth is supported. It supports all transparency,
+    interlacing and filtering options the PNG specifications allows. It can also read and
     write textual metadata from PNG files. Low-level read/write access to PNG chunks is
     also possible.
-    
+
     This library supports simple drawing on the image canvas and simple operations like
-    alpha composition and cropping. Finally, it can import from and export to RMagick for 
+    alpha composition and cropping. Finally, it can import from and export to RMagick for
     interoperability.
-    
-    Also, have a look at OilyPNG at http://github.com/wvanbergen/oily_png. OilyPNG is a 
-    drop in mixin module that implements some of the ChunkyPNG algorithms in C, which 
+
+    Also, have a look at OilyPNG at http://github.com/wvanbergen/oily_png. OilyPNG is a
+    drop in mixin module that implements some of the ChunkyPNG algorithms in C, which
     provides a massive speed boost to encoding and decoding."
-coffee-script,2.2.0,MIT,Ruby CoffeeScript Compiler,Ruby CoffeeScript is a bridge to the JS CoffeeScript compiler.
-coffee-script-source,1.7.0,MIT,The CoffeeScript Compiler,"CoffeeScript is a little language that compiles into JavaScript.
+coderay,1.1.0,MIT,Fast syntax highlighting for selected languages.,"Fast and easy syntax highlighting for selected languages, written in Ruby. Comes with RedCloth integration and LOC counter."
+coffee-script,2.3.0,MIT,Ruby CoffeeScript Compiler,Ruby CoffeeScript is a bridge to the JS CoffeeScript compiler.
+coffee-script-source,1.8.0,MIT,The CoffeeScript Compiler,"CoffeeScript is a little language that compiles into JavaScript.
     Underneath all of those embarrassing braces and semicolons,
     JavaScript has always had a gorgeous object model at its heart.
     CoffeeScript is an attempt to expose the good parts of JavaScript
     in a simple way."
-compass,0.12.3,MIT,A Real Stylesheet Framework,Compass is a Sass-based Stylesheet Framework that streamlines the creation and maintainance of CSS.
+columnize,0.9.0,"ruby,GPL2",Module to format an Array as an Array of String aligned in columns,"In showing a long lists, sometimes one would prefer to see the value
+arranged aligned in columns. Some examples include listing methods
+of an object or debugger commands.
+See Examples in the rdoc documentation for examples."
+compass,1.0.1,MIT,A Real Stylesheet Framework,Compass is a Sass-based Stylesheet Framework that streamlines the creation and maintenance of CSS.
+compass-core,1.0.1,MIT,The Compass core stylesheet library,The Compass core stylesheet library and minimum required ruby extensions. This library can be used stand-alone without the compass ruby configuration file or compass command line tools.
+compass-import-once,1.0.5,MIT,Speed up your Sass compilation by making @import only import each file once.,Changes the behavior of Sass's @import directive to only import a file once.
 crack,0.4.2,MIT,"Really simple JSON and XML parsing, ripped from Merb and Rails.","Really simple JSON and XML parsing, ripped from Merb and Rails."
 css_parser,1.3.5,MIT,Ruby CSS parser.,A set of classes for parsing CSS in Ruby.
-daemons,1.1.9,MIT,A toolkit to create and control daemons in different ways,"Daemons provides an easy way to wrap existing ruby scripts (for example a self-written server)  to be run as a daemon and to be controlled by simple start/stop/restart commands.  You can also call blocks as daemons and control them from the parent or just daemonize the current process.  Besides this basic functionality, daemons offers many advanced features like exception  backtracing and logging (in case your ruby script crashes) and monitoring and automatic restarting of your processes if they crash."
-diff-lcs,1.2.5,MIT,Diff::LCS computes the difference between two Enumerable sequences using the McIlroy-Hunt longest common subsequence (LCS) algorithm,"Diff::LCS computes the difference between two Enumerable sequences using the
+debugger-linecache,1.2.0,MIT,Read file with caching,"Linecache is a module for reading and caching lines. This may be useful for
+example in a debugger where the same lines are shown many times."
+diff-lcs,1.2.5,"MIT,Perl Artistic v2,GNU GPL v2",Diff::LCS computes the difference between two Enumerable sequences using the McIlroy-Hunt longest common subsequence (LCS) algorithm,"Diff::LCS computes the difference between two Enumerable sequences using the
 McIlroy-Hunt longest common subsequence (LCS) algorithm. It includes utilities
 to create a simple HTML diff output format and a standard diff-like tool.
 
@@ -52,46 +69,79 @@ Coincident with the release of diff-lcs 1.2.3, we reported an issue with
 Rubinius in 1.9 mode
 ({rubinius/rubinius#2268}[https://github.com/rubinius/rubinius/issues/2268]).
 We are happy to report that this issue has been resolved."
-eventmachine,1.0.3,other,Ruby/EventMachine library,"EventMachine implements a fast, single-threaded engine for arbitrary network
-communications. It's extremely easy to use in Ruby. EventMachine wraps all
-interactions with IP sockets, allowing programs to concentrate on the
-implementation of network protocols. It can be used to create both network
-servers and clients. To create a server or client, a Ruby program only needs
-to specify the IP address and port, and provide a Module that implements the
-communications protocol. Implementations of several standard network protocols
-are provided with the package, primarily to serve as examples. The real goal
-of EventMachine is to enable programs to easily interface with other programs
-using TCP/IP, especially if custom protocols are required."
-excon,0.31.0,MIT,"speed, persistence, http(s)",EXtended http(s) CONnections
-execjs,1.4.0,MIT,Run JavaScript code from Ruby,ExecJS lets you run JavaScript code from Ruby.
+erubis,2.7.0,MIT,a fast and extensible eRuby implementation which supports multi-language,"Erubis is an implementation of eRuby and has the following features:
+
+  * Very fast, almost three times faster than ERB and about 10% faster than eruby.
+  * Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+  * Auto escaping support
+  * Auto trimming spaces around '<% %>'
+  * Embedded pattern changeable (default '<% %>')
+  * Enable to handle Processing Instructions (PI) as embedded pattern (ex. '<?rb ... ?>')
+  * Context object available and easy to combine eRuby template with YAML datafile
+  * Print statement available
+  * Easy to extend and customize in subclass
+  * Ruby on Rails support"
+excon,0.42.1,MIT,"speed, persistence, http(s)",EXtended http(s) CONnections
+execjs,2.2.2,MIT,Run JavaScript code from Ruby,ExecJS lets you run JavaScript code from Ruby.
 faraday,0.8.9,MIT,HTTP/REST API client library.,""
-faraday_middleware,0.9.0,MIT,Various middleware for Faraday,Various middleware for Faraday
-ffi,1.9.3,BSD,Ruby FFI,Ruby FFI library
-fog,1.20.0,MIT,brings clouds to you,"The Ruby cloud services library. Supports all major cloud providers including AWS, Rackspace, Linode, Blue Box, StormOnDemand, and many others. Full support for most AWS services including EC2, S3, CloudWatch, SimpleDB, ELB, and RDS."
-formatador,0.2.4,MIT,Ruby STDOUT text formatting,STDOUT text formatting
-fssm,0.2.10,MIT,File System State Monitor,"The File System State Monitor keeps track of the state of any number of paths and will fire events when said state changes (create/update/delete). FSSM supports using FSEvents on MacOS, Inotify on GNU/Linux, and polling anywhere else."
-haml,4.0.5,MIT,"An elegant, structured (X)HTML/XML templating engine.","Haml (HTML Abstraction Markup Language) is a layer on top of HTML or XML that's
+faraday_middleware,0.9.1,MIT,Various middleware for Faraday,Various middleware for Faraday
+ffi,1.9.6,BSD,Ruby FFI,Ruby FFI library
+fission,0.5.0,MIT,Command line tool to manage VMware Fusion VMs,A simple utility to manage VMware Fusion VMs from the command line
+fog,1.26.0,MIT,brings clouds to you,"The Ruby cloud services library. Supports all major cloud providers including AWS, Rackspace, Linode, Blue Box, StormOnDemand, and many others. Full support for most AWS services including EC2, S3, CloudWatch, SimpleDB, ELB, and RDS."
+fog-atmos,0.1.0,MIT,Module for the 'fog' gem to support Atmos.,"This library can be used as a module for `fog` or as standalone provider
+                        to use the Atmos in applications."
+fog-brightbox,0.7.1,MIT,This library can be used as a module for `fog` or as standalone provider to use the Brightbox Cloud in applications,Module for the 'fog' gem to support Brightbox Cloud
+fog-core,1.27.2,MIT,Shared classes and tests for fog providers and services.,Shared classes and tests for fog providers and services.
+fog-ecloud,0.0.2,MIT,Module for the 'fog' gem to support Terremark EnterpriseCloud.,"This library can be used as a module for `fog` or as standalone provider
+                        to use the Terremark EnterpriseCloud in applications."
+fog-json,1.0.0,MIT,JSON parsing for fog providers,"Extraction of the JSON parsing tools shared between a
+                          number of providers in the 'fog' gem."
+fog-profitbricks,0.0.1,MIT,Module for the 'fog' gem to support ProfitBricks.,Module for the 'fog' gem to support ProfitBricks.
+fog-radosgw,0.0.3,MIT,Fog backend for provisioning Ceph Radosgw.,Fog backend for provisioning users on Ceph Radosgw - the Swift and S3 compatible REST API for Ceph.
+fog-sakuracloud,0.1.1,MIT,Module for the 'fog' gem to support Sakura no Cloud,Module for the 'fog' gem to support Sakura no Cloud
+fog-softlayer,0.3.26,MIT,This library can be used as a module for `fog` or as standalone provider to use the SoftLayer Cloud in applications,Module for the 'fog' gem to support SoftLayer Cloud
+fog-storm_on_demand,0.1.0,MIT,Module for the 'fog' gem to support StormOnDemand.,"This library can be used as a module for `fog` or as standalone provider
+                        to use the StormOnDemand in applications."
+fog-terremark,0.0.3,MIT,Module for the 'fog' gem to support Terremark vCloud.,"This library can be used as a module for `fog` or as standalone provider
+                        to use the Terremark vCloud in applications."
+fog-vmfusion,0.0.1,MIT,Module for the 'fog' gem to support VMWARE FUSION.,"This library can be used as a module for `fog` or as standalone provider
+                        to use the VMWARE FUSION in applications."
+fog-voxel,0.0.2,MIT,Module for the 'fog' gem to support Voxel.,"This library can be used as a module for `fog` or as standalone provider
+                        to use the Voxel in applications."
+fog-xml,0.1.1,MIT,XML parsing for fog providers,"Extraction of the XML parsing tools shared between a
+                          number of providers in the 'fog' gem"
+formatador,0.2.5,MIT,Ruby STDOUT text formatting,STDOUT text formatting
+git,1.2.8,MIT,"Ruby/Git is a Ruby library that can be used to create, read and manipulate Git repositories by wrapping system calls to the git binary.",""
+haml,4.0.6,MIT,"An elegant, structured (X)HTML/XML templating engine.","Haml (HTML Abstraction Markup Language) is a layer on top of HTML or XML that's
 designed to express the structure of documents in a non-repetitive, elegant, and
 easy way by using indentation rather than closing tags and allowing Ruby to be
 embedded with ease. It was originally envisioned as a plugin for Ruby on Rails,
 but it can function as a stand-alone templating engine."
 hike,1.2.3,MIT,Find files in a set of paths,A Ruby library for finding files in a set of paths.
-httparty,0.12.0,MIT,"Makes http fun! Also, makes consuming restful web services dead easy.","Makes http fun! Also, makes consuming restful web services dead easy."
-i18n,0.6.9,MIT,New wave Internationalization support for Ruby,New wave Internationalization support for Ruby.
-json,1.8.1,Ruby,JSON Implementation for Ruby,This is a JSON implementation as a Ruby extension in C.
-kramdown,1.3.2,MIT,"kramdown is a fast, pure-Ruby Markdown-superset converter.","kramdown is yet-another-markdown-parser but fast, pure Ruby,
+hitimes,1.2.2,ISC,"Hitimes is a fast, high resolution timer library for recording performance metrics.  It uses the appropriate low method calls for each system to get the highest granularity time increments possible.","Hitimes is a fast, high resolution timer library for recording performance metrics.  It uses the appropriate low method calls for each system to get the highest granularity time increments possible.   It currently supports any of the following systems: * any system with the POSIX call `clock_gettime()` * Mac OS X * Windows * JRuby Using Hitimes can be faster than using a series of `Time.new` calls, and it will have a much higher granularity. It is definitely faster than using `Process.times`."
+hooks,0.4.0,MIT,Generic hooks with callbacks for Ruby.,"Declaratively define hooks, add callbacks and run them with the options you like."
+httparty,0.13.3,MIT,"Makes http fun! Also, makes consuming restful web services dead easy.","Makes http fun! Also, makes consuming restful web services dead easy."
+i18n,0.6.11,MIT,New wave Internationalization support for Ruby,New wave Internationalization support for Ruby.
+inflecto,0.0.2,MIT,Inflector for strings,Inflector for strings
+ipaddress,0.8.0,MIT,IPv4/IPv6 addresses manipulation library,"IPAddress is a Ruby library designed to make manipulation 
+      of IPv4 and IPv6 addresses both powerful and simple. It mantains
+      a layer of compatibility with Ruby's own IPAddr, while 
+      addressing many of its issues."
+json,1.8.1,other,This json is bundled with Ruby,""
+kramdown,1.5.0,MIT,"kramdown is a fast, pure-Ruby Markdown-superset converter.","kramdown is yet-another-markdown-parser but fast, pure Ruby,
 using a strict syntax definition and supporting several common extensions."
-license_finder,0.9.5.1,MIT,Audit the OSS licenses of your application's dependencies.,"Do you know the licenses of all your application's dependencies? What open source software licenses will your business accept?
-
-  LicenseFinder culls your Gemfile, detects the licenses of the gems in it, and gives you a report that you can act on. If you already know
-  what licenses your business is comfortable with, you can whitelist them, leaving you with an action report of only those dependencies that have
-  licenses that fall outside of the whitelist."
-listen,1.3.1,MIT,Listen to file modifications,The Listen gem listens to file modifications and notifies you about the changes. Works everywhere!
-middleman,3.2.1,MIT,Hand-crafted frontend development,"A static site generator. Provides dozens of templating languages (Haml, Sass, Compass, Slim, CoffeeScript, and more). Makes minification, compression, cache busting, Yaml data (and more) an easy part of your development cycle."
-middleman-core,3.2.1,MIT,Hand-crafted frontend development,"A static site generator. Provides dozens of templating languages (Haml, Sass, Compass, Slim, CoffeeScript, and more). Makes minification, compression, cache busting, Yaml data (and more) an easy part of your development cycle."
-middleman-sprockets,3.3.1,MIT,Sprockets support for Middleman,Sprockets support for Middleman
+libv8,3.16.14.7,MIT,Distribution of the V8 JavaScript engine,Distributes the V8 JavaScript engine in binary and source forms in order to support fast builds of The Ruby Racer
+license_finder,1.2,MIT,Audit the OSS licenses of your application's dependencies.,"LicenseFinder works with your package managers to find
+    dependencies, detect the licenses of the packages in them, compare
+    those licenses against a user-defined whitelist, and give you an
+    actionable exception report."
+listen,2.8.4,MIT,Listen to file modifications,The Listen gem listens to file modifications and notifies you about the changes. Works everywhere!
+method_source,0.8.2,MIT,retrieve the sourcecode for a method,retrieve the sourcecode for a method
+middleman,3.3.7,MIT,Hand-crafted frontend development,"A static site generator. Provides dozens of templating languages (Haml, Sass, Compass, Slim, CoffeeScript, and more). Makes minification, compression, cache busting, Yaml data (and more) an easy part of your development cycle."
+middleman-core,3.3.7,MIT,Hand-crafted frontend development,"A static site generator. Provides dozens of templating languages (Haml, Sass, Compass, Slim, CoffeeScript, and more). Makes minification, compression, cache busting, Yaml data (and more) an easy part of your development cycle."
+middleman-sprockets,3.4.1,MIT,Sprockets support for Middleman,Sprockets support for Middleman
 middleman-syntax,2.0.0,MIT,Code syntax highlighting plugin via rouge for Middleman,Code syntax highlighting plugin via rouge for Middleman
-mime-types,2.1,MIT,The mime-types library provides a library and registry for information about MIME content type definitions,"The mime-types library provides a library and registry for information about
+mime-types,2.4.3,"MIT,Artistic 2.0,GPL-2",The mime-types library provides a library and registry for information about MIME content type definitions,"The mime-types library provides a library and registry for information about
 MIME content type definitions. It can be used to determine defined filename
 extensions for MIME types, or to use filename extensions to look up the likely
 MIME type definitions.
@@ -106,12 +156,28 @@ add additional type definitions (see Contributing.rdoc). The primary sources
 for MIME type definitions found in mime-types is the IANA collection of
 registrations (see below for the link), RFCs, and W3C recommendations.
 
-This is release 2.1, mostly changing how the MIME type registry is updated from
-the IANA registry (the format of which was incompatibly changed shortly before
-this release) and taking advantage of the extra data available from IANA
-registry in the form of MIME::Type#xrefs. In addition, the {LTSW
-list}[http://www.ltsw.se/knbase/internet/mime.htp] has been dropped as a
-supported list.
+This is release 2.4.3, restoring full compatibility with Ruby 1.9.2 (which will
+be dropped in mime-types 3.0). It also includes the performance improvements
+from mime-types 2.4.2 (since yanked because of the broken Ruby 1.9.2 support)
+and the 2.4.1 fix of a bug in observed use of the mime-types library where
+extensions were not previously sorted, such that
+
+    MIME::Types.of('image.jpg').first.extensions.first
+
+returned a value of +jpeg+ in mime-types 1, but +jpe+ in mime-types 2. This was
+introduced because extensions were sorted during assignment
+(MIME::Type#extensions=). This behaviour has been reverted to protect clients
+that work as noted above. The preferred way to express this is the new method:
+
+    MIME::Type.of('image.jpg').first.preferred_extension
+
+Łukasz Śliwa created the
+{friendly_mime}[https://github.com/lukaszsliwa/friendly_mime] gem, which offers
+friendly descriptive names for MIME types. This functionality and
+English-language data has been added to mime-types as MIME::Type#friendly. To
+make it easy for internationalization, MIME::Type#i18n_key has been added,
+which will return a key suitable for use with the
+{I18n}[https://github.com/svenfuchs/i18n] library.
 
 As a reminder, mime-types 2.x is no longer compatible with Ruby 1.8 and
 mime-types 1.x is only being maintained for security issues. No new MIME types
@@ -122,62 +188,156 @@ MIME::Types for Perl by Mark Overmeer, copyright 2001 - 2009. It is built to
 conform to the MIME types of RFCs 2045 and 2231. It tracks the {IANA Media
 Types registry}[https://www.iana.org/assignments/media-types/media-types.xhtml]
 with some types added by the users of mime-types."
-mini_portile,0.5.2,MIT,Simplistic port-like solution for developers,Simplistic port-like solution for developers. It provides a standard and simplified way to compile against dependency libraries without messing up your system.
-multi_json,1.9.0,MIT,A common interface to multiple JSON libraries.,"A common interface to multiple JSON libraries, including Oj, Yajl, the JSON gem (with C-extensions), the pure-Ruby JSON gem, NSJSONSerialization, gson.rb, JrJackson, and OkJson."
+mini_portile,0.6.2,MIT,Simplistic port-like solution for developers,Simplistic port-like solution for developers. It provides a standard and simplified way to compile against dependency libraries without messing up your system.
+minitest,5.5.0,MIT,"minitest provides a complete suite of testing facilities supporting TDD, BDD, mocking, and benchmarking","minitest provides a complete suite of testing facilities supporting
+TDD, BDD, mocking, and benchmarking.
+
+    ""I had a class with Jim Weirich on testing last week and we were
+     allowed to choose our testing frameworks. Kirk Haines and I were
+     paired up and we cracked open the code for a few test
+     frameworks...
+
+     I MUST say that minitest is *very* readable / understandable
+     compared to the 'other two' options we looked at. Nicely done and
+     thank you for helping us keep our mental sanity.""
+
+    -- Wayne E. Seguin
+
+minitest/unit is a small and incredibly fast unit testing framework.
+It provides a rich set of assertions to make your tests clean and
+readable.
+
+minitest/spec is a functionally complete spec engine. It hooks onto
+minitest/unit and seamlessly bridges test assertions over to spec
+expectations.
+
+minitest/benchmark is an awesome way to assert the performance of your
+algorithms in a repeatable manner. Now you can assert that your newb
+co-worker doesn't replace your linear algorithm with an exponential
+one!
+
+minitest/mock by Steven Baker, is a beautifully tiny mock (and stub)
+object framework.
+
+minitest/pride shows pride in testing and adds coloring to your test
+output. I guess it is an example of how to write IO pipes too. :P
+
+minitest/unit is meant to have a clean implementation for language
+implementors that need a minimal set of methods to bootstrap a working
+test suite. For example, there is no magic involved for test-case
+discovery.
+
+    ""Again, I can't praise enough the idea of a testing/specing
+     framework that I can actually read in full in one sitting!""
+
+    -- Piotr Szotkowski
+
+Comparing to rspec:
+
+    rspec is a testing DSL. minitest is ruby.
+
+    -- Adam Hawkins, ""Bow Before MiniTest""
+
+minitest doesn't reinvent anything that ruby already provides, like:
+classes, modules, inheritance, methods. This means you only have to
+learn ruby to use minitest and all of your regular OO practices like
+extract-method refactorings still apply."
+multi_json,1.10.1,MIT,A common interface to multiple JSON libraries.,"A common interface to multiple JSON libraries, including Oj, Yajl, the JSON gem (with C-extensions), the pure-Ruby JSON gem, NSJSONSerialization, gson.rb, JrJackson, and OkJson."
 multi_xml,0.5.5,MIT,A generic swappable back-end for XML parsing,"Provides swappable XML backends utilizing LibXML, Nokogiri, Ox, or REXML."
 multipart-post,1.2.0,MIT,A multipart form post accessory for Net::HTTP.,"Use with Net::HTTP to do multipart form posts.  IO values that have #content_type, #original_filename, and #local_path will be posted as a binary file."
-net-scp,1.1.2,MIT,A pure Ruby implementation of the SCP client protocol,A pure Ruby implementation of the SCP client protocol
-net-ssh,2.8.0,MIT,Net::SSH: a pure-Ruby implementation of the SSH2 client protocol.,"Net::SSH: a pure-Ruby implementation of the SSH2 client protocol. It allows you to write programs that invoke and interact with processes on remote servers, via SSH2."
-nokogiri,1.6.1,MIT,"Nokogiri (é¸) is an HTML, XML, SAX, and Reader parser","Nokogiri (é¸) is an HTML, XML, SAX, and Reader parser.  Among Nokogiri's
+net-scp,1.2.1,MIT,A pure Ruby implementation of the SCP client protocol,A pure Ruby implementation of the SCP client protocol
+net-ssh,2.9.1,MIT,Net::SSH: a pure-Ruby implementation of the SSH2 client protocol.,"Net::SSH: a pure-Ruby implementation of the SSH2 client protocol. It allows you to write programs that invoke and interact with processes on remote servers, via SSH2."
+nokogiri,1.6.5,MIT,"Nokogiri (鋸) is an HTML, XML, SAX, and Reader parser","Nokogiri (鋸) is an HTML, XML, SAX, and Reader parser.  Among Nokogiri's
 many features is the ability to search documents via XPath or CSS3 selectors.
 
-XML is like violence - if it doesnât solve your problems, you are not using
+XML is like violence - if it doesn’t solve your problems, you are not using
 enough of it."
 octokit,2.7.0,MIT,Ruby toolkit for working with the GitHub API,Simple wrapper for the GitHub API
-rack,1.5.2,MIT,a modular Ruby webserver interface,"Rack provides a minimal, modular and adaptable interface for developing
+open4,1.3.4,ruby,open4,"open child process with handles on pid, stdin, stdout, and stderr: manage child processes and their io handles easily."
+padrino-contrib,0.2.0,MIT,Contributed plugins and utilities for Padrino Framework,Contributed plugins and utilities for the Padrino Ruby Web Framework
+padrino-helpers,0.12.4,MIT,Helpers for padrino,"Tag helpers, asset helpers, form helpers, form builders and many more helpers for padrino"
+padrino-support,0.12.4,MIT,Support for padrino,A number of support methods and extensions for Padrino framework
+popen4,0.1.2,ruby,Open4 cross-platform,"POpen4 provides the Rubyist a single API across platforms for executing a command in a child process with handles on stdout, stderr, stdin streams as well as access to the process ID and exit status."
+pry,0.10.1,MIT,An IRB alternative and runtime developer console,An IRB alternative and runtime developer console
+pry-byebug,2.0.0,MIT,Fast debugging with Pry.,"Combine 'pry' with 'byebug'. Adds 'step', 'next',
+   'finish', 'continue' and 'break' commands to control execution."
+puma,2.10.2,New BSD,"Puma is a simple, fast, threaded, and highly concurrent HTTP 1.1 server for Ruby/Rack applications","Puma is a simple, fast, threaded, and highly concurrent HTTP 1.1 server for Ruby/Rack applications. Puma is intended for use in both development and production environments. In order to get the best throughput, it is highly recommended that you use a  Ruby implementation with real threads like Rubinius or JRuby."
+rack,1.6.0,MIT,a modular Ruby webserver interface,"Rack provides a minimal, modular and adaptable interface for developing
 web applications in Ruby.  By wrapping HTTP requests and responses in
 the simplest way possible, it unifies and distills the API for web
 servers, web frameworks, and software in between (the so-called
 middleware) into a single method call.
 
-Also see http://rack.github.com/."
+Also see http://rack.github.io/."
+rack-rewrite,1.5.1,MIT,A rack middleware for enforcing rewrite rules,A rack middleware for enforcing rewrite rules. In many cases you can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
 rack-test,0.6.2,MIT,Simple testing API built on Rack,"Rack::Test is a small, simple testing API for Rack apps. It can be used on its
 own or as a reusable starting point for Web frameworks and testing libraries
 to build on. Most of its initial functionality is an extraction of Merb 1.0's
 request helpers feature."
-rake,10.1.1,MIT,Ruby based make-like utility.,Rake is a Make-like program implemented in Ruby. Tasks and dependencies arespecified in standard Ruby syntax.
+rake,10.4.2,MIT,Rake is a Make-like program implemented in Ruby,"Rake is a Make-like program implemented in Ruby. Tasks and dependencies are
+specified in standard Ruby syntax.
+
+Rake has the following features:
+
+* Rakefiles (rake's version of Makefiles) are completely defined in
+  standard Ruby syntax.  No XML files to edit.  No quirky Makefile
+  syntax to worry about (is that a tab or a space?)
+
+* Users can specify tasks with prerequisites.
+
+* Rake supports rule patterns to synthesize implicit tasks.
+
+* Flexible FileLists that act like arrays but know about manipulating
+  file names and paths.
+
+* A library of prepackaged tasks to make building rakefiles easier. For example,
+  tasks for building tarballs and publishing to FTP or SSH sites.  (Formerly
+  tasks for building RDoc and Gems were included in rake but they're now
+  available in RDoc and RubyGems respectively.)
+
+* Supports parallel execution of tasks."
 rb-fsevent,0.9.4,MIT,Very simple & usable FSEvents API,FSEvents API with Signals catching (without RubyCocoa)
-rb-inotify,0.9.3,MIT,"A Ruby wrapper for Linux's inotify, using FFI","A Ruby wrapper for Linux's inotify, using FFI"
-rb-kqueue,0.2.2,MIT,"A Ruby wrapper for BSD's kqueue, using FFI","A Ruby wrapper for BSD's kqueue, using FFI"
-redcarpet,3.1.1,MIT,Markdown that smells nice,"A fast, safe and extensible Markdown to (X)HTML parser"
+rb-inotify,0.9.5,MIT,"A Ruby wrapper for Linux's inotify, using FFI","A Ruby wrapper for Linux's inotify, using FFI"
+redcarpet,3.2.2,MIT,Markdown that smells nice,"A fast, safe and extensible Markdown to (X)HTML parser"
+ref,1.0.5,MIT,"Library that implements weak, soft, and strong references in Ruby.","Library that implements weak, soft, and strong references in Ruby that work across multiple runtimes (MRI, REE, YARV, Jruby, Rubinius, and IronRuby). Also includes implementation of maps/hashes that use references and a reference queue."
 robotex,1.0.0,MIT,Obey Robots.txt,""
-rouge,1.3.3,MIT (see LICENSE file),A pure-ruby colorizer based on pygments,"Rouge aims to a be a simple, easy-to-extend drop-in replacement for pygments."
-rspec,2.14.1,MIT,rspec-2.14.1,BDD for Ruby
-rspec-core,2.14.8,MIT,rspec-core-2.14.8,BDD for Ruby. RSpec runner and example groups.
-rspec-expectations,2.14.5,MIT,rspec-expectations-2.14.5,rspec expectations (should[_not] and matchers)
-rspec-mocks,2.14.6,MIT,rspec-mocks-2.14.6,"RSpec's 'test double' framework, with support for stubbing and mocking"
-safe_yaml,1.0.1,MIT,SameYAML provides an alternative implementation of YAML.load suitable for accepting user input in Ruby applications.,Parse YAML safely
-sass,3.2.14,MIT,A powerful but elegant CSS compiler that makes CSS fun again.,"Sass makes CSS fun again. Sass is an extension of CSS3, adding
+rouge,1.7.7,MIT (see LICENSE file),A pure-ruby colorizer based on pygments,"Rouge aims to a be a simple, easy-to-extend drop-in replacement for pygments."
+rspec,3.1.0,MIT,rspec-3.1.0,BDD for Ruby
+rspec-core,3.1.7,MIT,rspec-core-3.1.7,BDD for Ruby. RSpec runner and example groups.
+rspec-expectations,3.1.2,MIT,rspec-expectations-3.1.2,"rspec-expectations provides a simple, readable API to express expected outcomes of a code example."
+rspec-mocks,3.1.3,MIT,rspec-mocks-3.1.3,"RSpec's 'test double' framework, with support for stubbing and mocking"
+rspec-support,3.1.2,MIT,rspec-support-3.1.2,Support utilities for RSpec gems
+ruby-progressbar,1.7.1,MIT,Ruby/ProgressBar is a flexible text progress bar library for Ruby.,"Ruby/ProgressBar is an extremely flexible text progress bar library for Ruby.
+The output can be customized with a flexible formatting system including:
+percentage, bars of various formats, elapsed time and estimated time remaining."
+safe_yaml,1.0.4,MIT,SameYAML provides an alternative implementation of YAML.load suitable for accepting user input in Ruby applications.,Parse YAML safely
+sass,3.4.9,MIT,A powerful but elegant CSS compiler that makes CSS fun again.,"Sass makes CSS fun again. Sass is an extension of CSS3, adding
       nested rules, variables, mixins, selector inheritance, and more.
       It's translated to well-formatted, standard CSS using the
       command line tool or a web-framework plugin."
-sawyer,0.5.3,MIT,Secret User Agent of HTTP,""
-sequel,4.7.0,MIT,The Database Toolkit for Ruby,The Database Toolkit for Ruby
-sprockets,2.11.1,MIT,Rack-based asset packaging system,"Sprockets is a Rack-based asset packaging system that concatenates and serves JavaScript, CoffeeScript, CSS, LESS, Sass, and SCSS."
-sprockets-helpers,1.0.1,MIT,Asset path helpers for Sprockets 2.x applications,Asset path helpers for Sprockets 2.x applications
-sprockets-sass,1.0.3,MIT,Better Sass integration with Sprockets 2.0,"When using Sprockets 2.0 with Sass you will eventually run into a pretty big issue. `//= require` directives will not allow Sass mixins, variables, etc. to be shared between files. So you'll try to use `@import`, and that'll also blow up in your face. `sprockets-sass` fixes all of this by creating a Sass::Importer that is Sprockets aware."
-sqlite3,1.3.8,MIT,This module allows Ruby programs to interface with the SQLite3 database engine (http://www.sqlite.org),"This module allows Ruby programs to interface with the SQLite3
+sawyer,0.5.5,MIT,Secret User Agent of HTTP,""
+sequel,4.18.0,MIT,The Database Toolkit for Ruby,The Database Toolkit for Ruby
+slop,3.6.0,MIT,Simple Lightweight Option Parsing,A simple DSL for gathering options and parsing the command line
+sprockets,2.12.3,MIT,Rack-based asset packaging system,"Sprockets is a Rack-based asset packaging system that concatenates and serves JavaScript, CoffeeScript, CSS, LESS, Sass, and SCSS."
+sprockets-helpers,1.1.0,MIT,Asset path helpers for Sprockets 2.x applications,Asset path helpers for Sprockets 2.x applications
+sprockets-sass,1.3.1,MIT,Better Sass integration with Sprockets 2.0,"When using Sprockets 2.0 with Sass you will eventually run into a pretty big issue. `//= require` directives will not allow Sass mixins, variables, etc. to be shared between files. So you'll try to use `@import`, and that'll also blow up in your face. `sprockets-sass` fixes all of this by creating a Sass::Importer that is Sprockets aware."
+sqlite3,1.3.10,New BSD,This module allows Ruby programs to interface with the SQLite3 database engine (http://www.sqlite.org),"This module allows Ruby programs to interface with the SQLite3
 database engine (http://www.sqlite.org).  You must have the
 SQLite engine installed in order to build this module.
 
 Note that this module is only compatible with SQLite 3.6.16 or newer."
-thin,1.6.2,Ruby,A thin and fast web server,A thin and fast web server
-thor,0.18.1,MIT,"A scripting framework that replaces rake, sake and rubigen","A scripting framework that replaces rake, sake and rubigen"
+therubyracer,0.12.1,MIT,Embed the V8 JavaScript interpreter into Ruby,Call JavaScript code and manipulate JavaScript objects from Ruby. Call Ruby code and manipulate Ruby objects from JavaScript.
+thor,0.19.1,MIT,Thor is a toolkit for building powerful command-line interfaces.,Thor is a toolkit for building powerful command-line interfaces.
+thread_safe,0.3.4,Apache 2.0,A collection of data structures and utilities to make thread-safe programming in Ruby easier,Thread-safe collections and utilities for Ruby
 tilt,1.4.1,MIT,Generic interface to multiple Ruby template engines,Generic interface to multiple Ruby template engines
-uglifier,2.1.2,MIT,Ruby wrapper for UglifyJS JavaScript compressor,""
-unf,0.1.3,2-clause BSDL,A wrapper library to bring Unicode Normalization Form support to Ruby/JRuby,"This is a wrapper library to bring Unicode Normalization Form support
+timers,4.0.1,MIT,"Schedule procs to run after a certain time, or at periodic intervals, using any API that accepts a timeout",Pure Ruby one-shot and periodic timers
+tzinfo,1.2.2,MIT,Daylight savings aware timezone library,TZInfo provides daylight savings aware transformations between times in different time zones.
+uber,0.0.12,MIT,"Gem-authoring tools like class method inheritance in modules, dynamic options and more.",A gem-authoring framework.
+uglifier,2.6.1,MIT,Ruby wrapper for UglifyJS JavaScript compressor,Uglifier minifies JavaScript files by wrapping UglifyJS to be accessible in Ruby
+unf,0.1.4,2-clause BSDL,A wrapper library to bring Unicode Normalization Form support to Ruby/JRuby,"This is a wrapper library to bring Unicode Normalization Form support
 to Ruby/JRuby."
 unf_ext,0.0.6,MIT,Unicode Normalization Form support library for CRuby,Unicode Normalization Form support library for CRuby
 vienna,0.4.0,MIT,"Tiny, zero-configuration static file server built on top of rack","Tiny, zero-configuration static file server built on top of rack"
-webmock,1.17.4,MIT,Library for stubbing HTTP requests in Ruby.,WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.
-wkhtmltopdf-binary,0.9.9.1,other,Provides binaries for WKHTMLTOPDF project in an easily accessible package.,""
+webmock,1.20.4,MIT,Library for stubbing HTTP requests in Ruby.,WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.
+wkhtmltopdf-binary-cf,0.12.3,other,Provides binaries for WKHTMLTOPDF project in an easily accessible package.,""
+xml-simple,1.1.4,ruby,A simple API for XML processing.,""
