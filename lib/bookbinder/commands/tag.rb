@@ -1,6 +1,6 @@
 require_relative '../book'
 require_relative '../bookbinder_logger'
-require_relative '../cli_exceptions'
+require_relative '../cli_error'
 
 require_relative 'bookbinder_command'
 require_relative 'naming'
