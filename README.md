@@ -265,7 +265,7 @@ As a convenience, Bookbinder provides a command to update all your local doc rep
 
 The `bookbinder tag` command commits Git tags to checkpoint a book and its constituent document repositories. This allows the tagged version of the documentation to be re-generated at a later time.
 
-    `bundle exec bookbinder tag book-formerly-known-as-v1.0.1`
+    bundle exec bookbinder tag book-formerly-known-as-v1.0.1
 
 ## Running the App Locally
 
