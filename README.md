@@ -5,7 +5,8 @@ Bookbinder is a gem that binds together a unified documentation web-app from dis
 
 ## About
 
-Bookbinder is meant to be used from within a "book" project. The book project provides a configuration of which documentation repositories to pull in; the bookbinder gem provides a set of scripts to aggregate those repositories and publish them to various locations.
+Bookbinder is meant to be used from within a "book" project. 
+The book project provides a configuration of which documentation repositories to pull in; the bookbinder gem provides a set of scripts to aggregate those repositories and publish them to various locations.
 It also provides scripts for running a CI system that can detect when a documentation repository has been updated with new content, and then verify that the composed book is free of any dead links.
 
 ## Setting Up a Book Project
