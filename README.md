@@ -14,7 +14,7 @@ It also provides scripts for running a CI system that can detect when a document
 ### Setup Checklist
 Please read this document to understand how to set up a new book project.  You can refer to this checklist for the steps that must completed manually when setting up your book:
 
-#### Creating and configuring your book
+#### Creating and Configuring your Book
 - Create a git repo for the book and populate it with the required files (or use an existing book repo as a template).
 - Add list of included doc sections to `config.yml`.
 - (For private repositories) Create a Github [SSH key](https://help.github.com/articles/generating-ssh-keys/) for bookbinder from an account that has access to the documentation repositories.
