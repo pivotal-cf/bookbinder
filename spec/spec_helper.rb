@@ -24,6 +24,7 @@ RSpec.configure do |config|
   end
 
   config.before do
+    
     allow_any_instance_of(Bookbinder::Pusher).to receive(:push) unless self.class.metadata[:enable_pusher]
 
     allow(Bookbinder::Section).to receive(:store).and_return({})
