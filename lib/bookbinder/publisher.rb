@@ -70,12 +70,13 @@ module Bookbinder
     def gather_sections(workspace, publish_config, output_paths, target_tag, git_accessor)
       section_data = publish_config.fetch(:sections)
       section_data.map do |attributes|
-        section = Section.get_instance(@logger,
-                                       section_hash: attributes,
-                                       destination_dir: workspace,
-                                       local_repo_dir: output_paths[:local_repo_dir],
-                                       target_tag: target_tag,
-                                       git_accessor: git_accessor)
+        section = SectionRepository.new(@logger,
+                                        store: Section.store,
+                                        section_hash: attributes,
+                                        destination_dir: workspace,
+                                        local_repo_dir: output_paths[:local_repo_dir],
+                                        target_tag: target_tag,
+                                        git_accessor: git_accessor).get_instance
         section
       end
     end
