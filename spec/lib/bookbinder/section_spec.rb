@@ -133,7 +133,7 @@ module Bookbinder
     end
 
     describe '#subnav_template' do
-      let(:repo) { Section.new(logger, double(:repo), subnav_template_name) }
+      let(:repo) { Section.new(logger, double(:repo), subnav_template_name, 'path/to/repository') }
 
       context 'when the incoming template does not look like a partial file' do
         let(:subnav_template_name) { 'my_template' }
@@ -164,7 +164,7 @@ module Bookbinder
       let(:local_repo_dir) { '/some/dir' }
       let(:repo_name) { 'farm/my_cow_repo' }
       let(:repo) { GitHubRepository.new(full_name: repo_name, local_repo_dir: local_repo_dir) }
-      subject(:section) { Section.new(logger, repo, 'my_template') }
+      subject(:section) { Section.new(logger, repo, 'my_template', 'path/to/farm') }
       let(:file) { 'some-file' }
       let(:git_base_object) { double Git::Base }
       let(:time) { Time.new(2011, 1, 28) }

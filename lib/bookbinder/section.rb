@@ -17,10 +17,11 @@ module Bookbinder
       store.fetch([section_hash, local_repo_dir]) { acquire(logger, section_hash, local_repo_dir, destination_dir, target_tag, git_accessor) }
     end
 
-    def initialize(logger, repository, subnav_template)
+    def initialize(logger, repository, subnav_template, destination_dir)
       @logger = logger
       @subnav_template = subnav_template
       @repository = repository
+      @destination_dir = destination_dir
       @git_accessor = Git
     end
 
@@ -40,6 +41,10 @@ module Bookbinder
       @repository.copied?
     end
 
+    def path_to_repository
+      File.join @destination_dir, @repository.directory
+    end
+
     def get_modification_date_for(file: nil, full_path: nil)
       unless @repository.has_git_object?
         begin
@@ -53,24 +58,24 @@ module Bookbinder
 
     private
 
-    def self.acquire(logger, section_hash, local_repo_dir, destination, target_tag, git_accessor)
+    def self.acquire(logger, section_hash, local_repo_dir, destination_dir, target_tag, git_accessor)
       repository = section_hash['repository']
       raise "section repository '#{repository}' is not a hash" unless repository.is_a?(Hash)
       raise "section repository '#{repository}' missing name key" unless repository['name']
       logger.log "Gathering #{repository['name'].cyan}"
 
-      repository = build_repository(logger, destination, local_repo_dir, section_hash, target_tag, git_accessor)
-      section = new(logger, repository, section_hash['subnav_template'])
+      repository = build_repository(logger, destination_dir, local_repo_dir, section_hash, target_tag, git_accessor)
+      section = new(logger, repository, section_hash['subnav_template'], destination_dir)
 
       store[[section_hash, local_repo_dir]] = section
     end
     private_class_method :acquire
 
-    def self.build_repository(logger, destination, local_repo_dir, repo_hash, target_tag, git_accessor)
+    def self.build_repository(logger, destination_dir, local_repo_dir, repo_hash, target_tag, git_accessor)
       if local_repo_dir
-        GitHubRepository.build_from_local(logger, repo_hash, local_repo_dir, destination)
+        GitHubRepository.build_from_local(logger, repo_hash, local_repo_dir, destination_dir)
       else
-        GitHubRepository.build_from_remote(logger, repo_hash, destination, target_tag, git_accessor)
+        GitHubRepository.build_from_remote(logger, repo_hash, destination_dir, target_tag, git_accessor)
       end
     end
     private_class_method :build_repository

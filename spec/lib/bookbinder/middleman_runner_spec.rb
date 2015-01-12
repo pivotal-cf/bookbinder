@@ -17,8 +17,8 @@ module Bookbinder
     let(:archive_menu) { {} }
     let(:verbose) { false }
     let(:sections) { [
-        Section.new(logger, GitHubRepository.new(full_name: '', directory: 'my/place/rocks'), 'my_subnav_template'),
-        Section.new(logger, GitHubRepository.new(full_name: '', directory: 'fraggles/rock'), nil),
+        Section.new(logger, GitHubRepository.new(full_name: '', directory: 'my/place/rocks'), 'my_subnav_template', 'my/place/rocks'),
+        Section.new(logger, GitHubRepository.new(full_name: '', directory: 'fraggles/rock'), nil, 'fraggles/rock'),
     ] }
     let(:book) { Book.new(full_name: 'some-repo/some-book') }
     let(:local_repo_dir) { '/dev/null' }
