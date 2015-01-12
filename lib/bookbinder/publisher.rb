@@ -13,6 +13,8 @@ module Bookbinder
       @logger = logger
       @spider = spider
       @static_site_generator = static_site_generator
+      @section_repository = SectionRepository.new(@logger,
+                                                  store: Section.store)
     end
 
     def publish(cli_options, output_paths, publish_config, git_accessor)
@@ -46,6 +48,8 @@ module Bookbinder
 
     private
 
+    attr_reader :section_repository
+
     def generate_sitemap(final_app_dir, host_for_sitemap, spider)
       server_director = ServerDirector.new(@logger, directory: final_app_dir)
       raise "Your public host must be a single String." unless host_for_sitemap.is_a?(String)
@@ -70,14 +74,9 @@ module Bookbinder
     def gather_sections(workspace, publish_config, output_paths, target_tag, git_accessor)
       section_data = publish_config.fetch(:sections)
       section_data.map do |attributes|
-        section = SectionRepository.new(@logger,
-                                        store: Section.store,
-                                        section_hash: attributes,
-                                        destination_dir: workspace,
+        section_repository.get_instance(attributes, destination_dir: workspace,
                                         local_repo_dir: output_paths[:local_repo_dir],
-                                        target_tag: target_tag,
-                                        git_accessor: git_accessor).get_instance
-        section
+                                        target_tag: target_tag, git_accessor: git_accessor)
       end
     end
 

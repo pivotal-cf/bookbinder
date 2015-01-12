@@ -4,33 +4,32 @@ module Bookbinder
     include_context 'tmp_dirs'
 
     let(:logger) { NilLogger.new }
+    let(:repository) { SectionRepository.new(logger, store: Section.store) }
 
     describe '.get_instance' do
       let(:local_repo_dir) { '/dev/null' }
 
       before do
-        allow(Git).to receive(:clone).with("git@github.com:foo/book",
-                                            'book',
-                                            anything)
+        allow(Git).to receive(:clone).with("git@github.com:foo/book", 'book', anything)
       end
 
       context 'when called more than once' do
         it 'always returns the same instance for the same arguments' do
-          first_instance = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
-          second_instance = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
+          first_instance = repository.get_instance({'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
+          second_instance = repository.get_instance({'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
           expect(first_instance).to be(second_instance)
         end
 
         it 'returns different instances for different repo names' do
-          first_instance = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/dogs-repo'}}, local_repo_dir: local_repo_dir)
-          second_instance = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
+          first_instance = repository.get_instance({'repository' => {'name' => 'foo/dogs-repo'}}, local_repo_dir: local_repo_dir)
+          second_instance = repository.get_instance({'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
 
           expect(first_instance).not_to be(second_instance)
         end
 
         it 'returns different instances for different modes' do
-          local_code_repo = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/book'}}, local_repo_dir: 'spec/fixtures/repositories')
-          remote_code_repo = Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/book'}})
+          local_code_repo = repository.get_instance({'repository' => {'name' => 'foo/book'}}, local_repo_dir: 'spec/fixtures/repositories')
+          remote_code_repo = repository.get_instance({'repository' => {'name' => 'foo/book'}})
 
           expect(local_code_repo).not_to be(remote_code_repo)
         end
@@ -41,7 +40,7 @@ module Bookbinder
           let(:local_repo_dir) { 'spec/fixtures/repositories' }
 
           it 'copies repos from local directory' do
-            expect(Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/code-example-repo'}}, local_repo_dir: local_repo_dir)).to be_copied
+            expect(repository.get_instance({'repository' => {'name' => 'foo/code-example-repo'}}, local_repo_dir: local_repo_dir)).to be_copied
           end
         end
 
@@ -51,7 +50,8 @@ module Bookbinder
           it 'logs a warning' do
             allow(logger).to receive(:log)
             expect(logger).to receive(:log).with /skipping \(not found\)/
-            Section.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/definitely-not-around'}}, local_repo_dir: local_repo_dir)
+            repository.get_instance({'repository' => {'name' => 'foo/definitely-not-around'}},
+                                    local_repo_dir: local_repo_dir)
           end
         end
 
@@ -59,8 +59,7 @@ module Bookbinder
           let(:local_repo_dir) { 'spec/fixtures/repositories' }
             it 'raises a not a hash error message' do
             expect {
-              Section.get_instance(logger, section_hash: {
-                  'repository' => 'foo/definitely-not-around' }, local_repo_dir: local_repo_dir)
+              repository.get_instance({ 'repository' => 'foo/definitely-not-around' }, local_repo_dir: local_repo_dir)
             }.to raise_error(RuntimeError,
                              "section repository 'foo/definitely-not-around' is not a hash")
           end
@@ -70,8 +69,7 @@ module Bookbinder
           let(:local_repo_dir) { 'spec/fixtures/repositories' }
           it 'raises a missing name key error message' do
             expect {
-              Section.get_instance(logger, section_hash: {
-                  'repository' => { some_key: 'test' }}, local_repo_dir: local_repo_dir)
+              repository.get_instance({ 'repository' => { some_key: 'test' }}, local_repo_dir: local_repo_dir)
             }.to raise_error(RuntimeError,
                              "section repository '{:some_key=>\"test\"}' missing name key")
           end
@@ -88,11 +86,11 @@ module Bookbinder
 
           it 'passes nil to the GitHubRepository as the ref' do
             expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, Git)
-            Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
+            repository.get_instance(section_hash, destination_dir: destination_dir)
           end
 
           it 'copies the repo from github' do
-            Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, git_accessor: SpecGitAccessor)
+            repository.get_instance(section_hash, destination_dir: destination_dir, git_accessor: SpecGitAccessor)
             expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to eq true
           end
 
@@ -101,7 +99,7 @@ module Bookbinder
 
             it 'passes the target tag to the repository' do
               expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, Git)
-              Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
+              repository.get_instance(section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
           end
         end
@@ -112,11 +110,11 @@ module Bookbinder
 
           it 'passes to the ref in the section hash to the repository' do
             expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, Git)
-            Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir)
+            repository.get_instance(section_hash, destination_dir: destination_dir)
           end
 
           it 'copies the repo from github' do
-            Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, git_accessor: SpecGitAccessor)
+            repository.get_instance(section_hash, destination_dir: destination_dir, git_accessor: SpecGitAccessor)
             expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to eq true
           end
 
@@ -125,7 +123,7 @@ module Bookbinder
 
             it 'passes the target tag to the repository' do
               expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, Git)
-              Section.get_instance(logger, section_hash: section_hash, destination_dir: destination_dir, target_tag: target_tag)
+              repository.get_instance(section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
           end
         end

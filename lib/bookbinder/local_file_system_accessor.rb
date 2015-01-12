@@ -1,3 +1,5 @@
+require 'find'
+
 module Bookbinder
 
   class LocalFileSystemAccessor
