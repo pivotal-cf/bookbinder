@@ -26,10 +26,10 @@ module Bookbinder
                   :destination_dir, :target_tag, :git_accessor)
 
       def acquire(section_hash, local_repo_dir, destination_dir, target_tag)
-        repository = section_hash['repository']
-        raise "section repository '#{repository}' is not a hash" unless repository.is_a?(Hash)
-        raise "section repository '#{repository}' missing name key" unless repository['name']
-        logger.log "Gathering #{repository['name'].cyan}"
+        repository_config = section_hash['repository']
+        raise "section repository '#{repository_config}' is not a hash" unless repository_config.is_a?(Hash)
+        raise "section repository '#{repository_config}' missing name key" unless repository_config['name']
+        logger.log "Gathering #{repository_config['name'].cyan}"
         repository = build_repository(destination_dir, local_repo_dir, section_hash, target_tag)
         section = Section.new(repository, section_hash['subnav_template'], destination_dir)
         store[[section_hash, local_repo_dir]] = section
