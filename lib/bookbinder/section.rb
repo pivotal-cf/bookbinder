@@ -15,7 +15,7 @@ module Bookbinder
                      local_repo_dir: nil,
                      target_tag: nil)
       store.fetch([attributes, local_repo_dir]) {
-        acquire(logger, attributes, local_repo_dir, destination_dir, target_tag, git_accessor)
+        acquire(attributes, local_repo_dir, destination_dir, target_tag)
       }
     end
 
@@ -24,17 +24,17 @@ module Bookbinder
     attr_reader(:store, :section_hash, :local_repo_dir, :logger,
                 :destination_dir, :target_tag, :git_accessor)
 
-    def acquire(logger, section_hash, local_repo_dir, destination_dir, target_tag, git_accessor)
+    def acquire(section_hash, local_repo_dir, destination_dir, target_tag)
       repository = section_hash['repository']
       raise "section repository '#{repository}' is not a hash" unless repository.is_a?(Hash)
       raise "section repository '#{repository}' missing name key" unless repository['name']
       logger.log "Gathering #{repository['name'].cyan}"
-      repository = build_repository(logger, destination_dir, local_repo_dir, section_hash, target_tag, git_accessor)
+      repository = build_repository(destination_dir, local_repo_dir, section_hash, target_tag)
       section = Section.new(logger, repository, section_hash['subnav_template'], destination_dir)
       store[[section_hash, local_repo_dir]] = section
     end
 
-    def build_repository(logger, destination_dir, local_repo_dir, repo_hash, target_tag, git_accessor)
+    def build_repository(destination_dir, local_repo_dir, repo_hash, target_tag)
       if local_repo_dir
         GitHubRepository.build_from_local(logger, repo_hash, local_repo_dir, destination_dir)
       else
@@ -47,21 +47,6 @@ module Bookbinder
 
     def self.store
       @@store ||= {}
-    end
-
-    def self.get_instance(logger,
-                          section_hash: {},
-                          local_repo_dir: nil,
-                          destination_dir: Dir.mktmpdir,
-                          target_tag: nil,
-                          git_accessor: Git)
-      SectionRepository.new(logger,
-                            store: store,
-                            section_hash: section_hash,
-                            local_repo_dir: local_repo_dir,
-                            destination_dir: destination_dir,
-                            target_tag: target_tag,
-                            git_accessor: git_accessor).get_instance
     end
 
     def initialize(logger, repository, subnav_template, destination_dir)
