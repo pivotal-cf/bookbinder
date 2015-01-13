@@ -15,7 +15,8 @@ module Bookbinder
       @static_site_generator = static_site_generator
       @git_accessor = git_accessor
       @section_repository = SectionRepository.new(@logger,
-                                                  store: Section.store)
+                                                  store: Section.store,
+                                                  git_accessor: git_accessor)
     end
 
     def publish(cli_options, output_paths, publish_config)
@@ -75,9 +76,10 @@ module Bookbinder
     def gather_sections(workspace, publish_config, output_paths, target_tag, git_accessor)
       section_data = publish_config.fetch(:sections)
       section_data.map do |attributes|
-        section_repository.get_instance(attributes, destination_dir: workspace,
+        section_repository.get_instance(attributes,
+                                        destination_dir: workspace,
                                         local_repo_dir: output_paths[:local_repo_dir],
-                                        target_tag: target_tag, git_accessor: git_accessor)
+                                        target_tag: target_tag)
       end
     end
 

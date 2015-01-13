@@ -3,16 +3,17 @@ require 'bookbinder/directory_helpers'
 module Bookbinder
   class SectionRepository
     def initialize(logger,
-                   store: nil)
+                   store: nil,
+                   git_accessor: Git)
       @store = store
       @logger = logger
+      @git_accessor = git_accessor
     end
 
     def get_instance(attributes,
                      destination_dir: Dir.mktmpdir,
                      local_repo_dir: nil,
-                     target_tag: nil,
-                     git_accessor: Git)
+                     target_tag: nil)
       store.fetch([attributes, local_repo_dir]) {
         acquire(logger, attributes, local_repo_dir, destination_dir, target_tag, git_accessor)
       }

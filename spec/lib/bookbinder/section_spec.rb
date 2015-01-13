@@ -4,7 +4,7 @@ module Bookbinder
     include_context 'tmp_dirs'
 
     let(:logger) { NilLogger.new }
-    let(:repository) { SectionRepository.new(logger, store: Section.store) }
+    let(:repository) { SectionRepository.new(logger, store: Section.store, git_accessor: SpecGitAccessor) }
 
     describe '.get_instance' do
       let(:local_repo_dir) { '/dev/null' }
@@ -85,12 +85,12 @@ module Bookbinder
           let(:section_hash) { {'repository' => {'name' => repo_name}} }
 
           it 'passes nil to the GitHubRepository as the ref' do
-            expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, Git)
+            expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, SpecGitAccessor)
             repository.get_instance(section_hash, destination_dir: destination_dir)
           end
 
           it 'copies the repo from github' do
-            repository.get_instance(section_hash, destination_dir: destination_dir, git_accessor: SpecGitAccessor)
+            repository.get_instance(section_hash, destination_dir: destination_dir)
             expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to eq true
           end
 
@@ -98,7 +98,7 @@ module Bookbinder
             let(:target_tag) { 'oh-dot-three-dot-oh' }
 
             it 'passes the target tag to the repository' do
-              expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, Git)
+              expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, SpecGitAccessor)
               repository.get_instance(section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
           end
@@ -109,12 +109,12 @@ module Bookbinder
           let(:section_hash) { {'repository' => {'name' => repo_name, 'ref' => ref}} }
 
           it 'passes to the ref in the section hash to the repository' do
-            expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, Git)
+            expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, SpecGitAccessor)
             repository.get_instance(section_hash, destination_dir: destination_dir)
           end
 
           it 'copies the repo from github' do
-            repository.get_instance(section_hash, destination_dir: destination_dir, git_accessor: SpecGitAccessor)
+            repository.get_instance(section_hash, destination_dir: destination_dir)
             expect(File.exist? File.join(destination_dir, 'dogs-repo', 'index.html.md.erb')).to eq true
           end
 
@@ -122,7 +122,7 @@ module Bookbinder
             let(:target_tag) { 'oh-dot-three-dot-oh' }
 
             it 'passes the target tag to the repository' do
-              expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, Git)
+              expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, SpecGitAccessor)
               repository.get_instance(section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
           end
