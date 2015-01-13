@@ -46,10 +46,6 @@ module Bookbinder
 
   class Section
 
-    def self.store
-      @@store ||= {}
-    end
-
     def initialize(logger, repository, subnav_template, destination_dir)
       @logger = logger
       @subnav_template = subnav_template

@@ -260,6 +260,7 @@ module Bookbinder
           end
 
           it 'makes only one request per code example repository' do
+            CodeExample.store.clear
             expect(SpecGitAccessor).to receive(:clone).with("git@github.com:org/dogs-repo",
                                                             "dogs-repo",
                                                             anything).and_call_original

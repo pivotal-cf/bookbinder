@@ -8,14 +8,20 @@ module Bookbinder
       end
     end
 
-    def self.get_instance(logger,
-                          section_hash: {},
-                          local_repo_dir: nil,
-                          destination_dir: Dir.mktmpdir,
-                          target_tag: nil,
-                          git_accessor: Git)
-      @git_accessor = git_accessor
-      store.fetch([section_hash, local_repo_dir]) { acquire(logger, section_hash, local_repo_dir, destination_dir, target_tag, git_accessor) }
+    class << self
+      def get_instance(logger,
+                       section_hash: {},
+                       local_repo_dir: nil,
+                       destination_dir: Dir.mktmpdir,
+                       target_tag: nil,
+                       git_accessor: Git)
+        @git_accessor = git_accessor
+        store.fetch([section_hash, local_repo_dir]) { acquire(logger, section_hash, local_repo_dir, destination_dir, target_tag, git_accessor) }
+      end
+
+      def store
+        @@store ||= {}
+      end
     end
 
     def get_snippet_and_language_at(marker)

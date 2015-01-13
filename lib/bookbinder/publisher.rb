@@ -24,7 +24,7 @@ module Bookbinder
       @static_site_generator = static_site_generator
       @git_accessor = git_accessor
       @section_repository = SectionRepository.new(@logger,
-                                                  store: Section.store,
+                                                  store: {},
                                                   git_accessor: git_accessor)
     end
 
@@ -133,7 +133,7 @@ module Bookbinder
     end
 
     def forget_sections(middleman_scratch)
-      Section.store.clear
+      CodeExample.store.clear
       FileUtils.rm_rf File.join middleman_scratch, '.'
     end
 
