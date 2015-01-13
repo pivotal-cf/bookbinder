@@ -1,19 +1,29 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/section'
+require_relative '../../helpers/tmp_dirs'
+require_relative '../../helpers/nil_logger'
+require_relative '../../helpers/spec_git_accessor'
+
 module Bookbinder
   describe Section do
     include_context 'tmp_dirs'
 
     let(:logger) { NilLogger.new }
-    let(:repository) { SectionRepository.new(logger, store: Section.store, git_accessor: SpecGitAccessor) }
+    let(:repository) {
+      SectionRepository.new(
+        logger,
+        store: {},
+        git_accessor: SpecGitAccessor
+      )
+    }
 
-    describe '.get_instance' do
+    describe 'getting a section' do
       let(:local_repo_dir) { '/dev/null' }
 
       before do
         allow(Git).to receive(:clone).with("git@github.com:foo/book", 'book', anything)
       end
 
-      context 'when called more than once' do
+      context 'when requested more than once' do
         it 'always returns the same instance for the same arguments' do
           first_instance = repository.get_instance({'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
           second_instance = repository.get_instance({'repository' => {'name' => 'foo/book'}}, local_repo_dir: local_repo_dir)
