@@ -250,9 +250,15 @@ MARKDOWN
       subject(:an_instance) { klass.new(config) }
 
       let(:moon_section) { Section.new(repo, 'my_subnav_template', 'path/to/moon') }
-      let(:fraggle_section) { Section.new(GitHubRepository.new(full_name: '', directory: 'fraggles/rock'), nil, 'path/to/fraggles') }
+      let(:fraggle_section) {
+        Section.new(
+          GitHubRepository.new(full_name: '', directory: 'fraggles/rock'),
+          nil,
+          'path/to/fraggles'
+        )
+      }
       let(:sections) { [moon_section, fraggle_section] }
-      let(:book){ Book.new(full_name: 'full/path') }
+      let(:book) { Book.new(full_name: 'full/path') }
       let(:config) { {sections: sections, book: book} }
       let(:file_path) { "moon/history.html" }
       let(:source_file_path) { "/my/full/path/moon/history.html.md" }
