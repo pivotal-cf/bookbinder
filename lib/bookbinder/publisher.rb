@@ -8,6 +8,15 @@ module Bookbinder
   class Publisher
     include DirectoryHelperMethods
 
+    class << self
+      def build(logger, final_app_dir, git_accessor)
+        Publisher.new(logger,
+                      Spider.new(logger, app_dir: final_app_dir),
+                      MiddlemanRunner.new(logger),
+                      git_accessor)
+      end
+    end
+
     def initialize(logger, spider, static_site_generator, git_accessor)
       @gem_root = File.expand_path('../../../', __FILE__)
       @logger = logger
@@ -30,7 +39,14 @@ module Bookbinder
 
       @versions = publish_config.fetch(:versions, [])
       @book_repo = publish_config[:book_repo]
-      prepare_directories final_app_dir, intermediate_directory, workspace_dir, master_middleman_dir, master_dir, git_accessor
+
+      prepare_directories(final_app_dir,
+                          intermediate_directory,
+                          workspace_dir,
+                          master_middleman_dir,
+                          master_dir,
+                          git_accessor)
+
       FileUtils.cp 'redirects.rb', final_app_dir if File.exists?('redirects.rb')
 
       target_tag = cli_options[:target_tag]
