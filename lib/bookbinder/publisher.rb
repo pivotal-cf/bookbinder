@@ -1,7 +1,7 @@
 require 'middleman-syntax'
 require_relative 'bookbinder_logger'
 require_relative 'directory_helpers'
-require_relative 'section'
+require_relative 'repositories/section_repository'
 require_relative 'server_director'
 
 module Bookbinder
@@ -23,9 +23,9 @@ module Bookbinder
       @spider = spider
       @static_site_generator = static_site_generator
       @git_accessor = git_accessor
-      @section_repository = SectionRepository.new(@logger,
-                                                  store: {},
-                                                  git_accessor: git_accessor)
+      @section_repository = Repositories::SectionRepository.new(@logger,
+                                                                store: {},
+                                                                git_accessor: git_accessor)
     end
 
     def publish(cli_options, output_paths, publish_config)
