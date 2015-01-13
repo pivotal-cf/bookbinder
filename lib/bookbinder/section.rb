@@ -31,7 +31,7 @@ module Bookbinder
       raise "section repository '#{repository}' missing name key" unless repository['name']
       logger.log "Gathering #{repository['name'].cyan}"
       repository = build_repository(destination_dir, local_repo_dir, section_hash, target_tag)
-      section = Section.new(logger, repository, section_hash['subnav_template'], destination_dir)
+      section = Section.new(repository, section_hash['subnav_template'], destination_dir)
       store[[section_hash, local_repo_dir]] = section
     end
 
@@ -46,8 +46,7 @@ module Bookbinder
 
   class Section
 
-    def initialize(logger, repository, subnav_template, destination_dir)
-      @logger = logger
+    def initialize(repository, subnav_template, destination_dir)
       @subnav_template = subnav_template
       @repository = repository
       @destination_dir = destination_dir
