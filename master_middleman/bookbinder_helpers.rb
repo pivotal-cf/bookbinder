@@ -93,14 +93,8 @@ module Bookbinder
       def get_section_or_book_for(path)
         sections = config[:sections]
         book = config[:book]
-
         raise "Book or Selections are incorrectly specified for Middleman." if book.nil? || sections.nil?
-
-        current_section = nil
-        sections.each { |section| current_section = section if File.dirname(current_path).match(/^#{section.directory}/) }
-
-        return book if current_section.nil?
-        return current_section
+        sections.detect(->{ book }) { |section| File.dirname(current_path).match(/^#{section.directory}/) }
       end
 
       def index_subnav
