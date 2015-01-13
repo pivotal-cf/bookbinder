@@ -18,7 +18,7 @@ module Bookbinder
       let(:logger) { NilLogger.new }
       let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
       let(:static_site_generator) { MiddlemanRunner.new logger }
-      let(:publisher) { Publisher.new(logger, spider, static_site_generator) }
+      let(:publisher) { Publisher.new(logger, spider, static_site_generator, SpecGitAccessor) }
       let(:output_dir) { tmp_subdir 'output' }
       let(:final_app_dir) { tmp_subdir 'final_app' }
       let(:non_broken_master_middleman_dir) { generate_middleman_with 'non_broken_index.html' }
@@ -78,10 +78,7 @@ module Bookbinder
           }
 
           silence_io_streams do
-            publisher.publish({},
-                              output_paths,
-                              publish_config,
-                              SpecGitAccessor)
+            publisher.publish({}, output_paths, publish_config)
           end
 
           index_html = File.read File.join(final_app_dir, 'public', 'pretty_path', 'index.html')
@@ -115,7 +112,7 @@ module Bookbinder
           end
 
           it 'it can find repos locally rather than going to github' do
-            publisher.publish({}, output_paths, publish_config, SpecGitAccessor)
+            publisher.publish({}, output_paths, publish_config)
 
             index_html = File.read File.join(final_app_dir, 'public', 'my-docs-repo', 'index.html')
             expect(index_html).to include 'This is a Markdown Page'
@@ -126,10 +123,7 @@ module Bookbinder
 
             context 'and the code repo is present' do
               it 'can find code example repos locally rather than going to github' do
-                publisher.publish({},
-                                  output_paths,
-                                  publish_config,
-                                  SpecGitAccessor)
+                publisher.publish({}, output_paths, publish_config)
                 expect(WebMock).not_to have_requested(:any, /.*git.*/)
               end
             end
@@ -140,10 +134,7 @@ module Bookbinder
               it 'fails out' do
                 allow(logger).to receive(:log)
                 expect(logger).to receive(:log).with /skipping \(not found\)/
-                publisher.publish({},
-                                  output_paths,
-                                  publish_config,
-                                  SpecGitAccessor)
+                publisher.publish({}, output_paths, publish_config)
                 expect(WebMock).not_to have_requested(:get, 'https://api.github.com/repos/fantastic/code-example-repo/tarball/master')
               end
             end
@@ -169,10 +160,7 @@ module Bookbinder
               book_repo: book
           }
 
-          no_broken_links = publisher.publish({},
-                            output_paths,
-                            publish_config,
-                            SpecGitAccessor)
+          no_broken_links = publisher.publish({}, output_paths, publish_config)
 
           expect(no_broken_links).to eq true
         end
@@ -203,10 +191,7 @@ module Bookbinder
               template_variables: {'name' => 'Alexander'}
           }
 
-          publisher.publish(cli_options,
-                            output_paths,
-                            publish_config,
-                            SpecGitAccessor)
+          publisher.publish(cli_options, output_paths, publish_config)
 
           index_html = File.read File.join(final_app_dir, 'public', 'index.html')
           expect(index_html).to include 'My variable name is Alexander.'
@@ -249,7 +234,7 @@ module Bookbinder
                                                             File.basename(code_repo),
                                                             anything).and_call_original
 
-            publisher.publish({}, output_paths, publish_config, SpecGitAccessor)
+            publisher.publish({}, output_paths, publish_config)
 
             index_html = File.read(File.join(final_app_dir, 'public', 'index.html'))
             doc = Nokogiri::HTML(index_html)
@@ -283,7 +268,7 @@ module Bookbinder
                                                             anything).and_call_original
 
             cli_options[:verbose] = true
-            publisher.publish cli_options, output_paths, publish_config, SpecGitAccessor
+            publisher.publish cli_options, output_paths, publish_config
           end
         end
 
@@ -316,7 +301,7 @@ module Bookbinder
 
             it 'raises' do
               expect do
-                publisher.publish({}, output_paths, publish_config, SpecGitAccessor)
+                publisher.publish({}, output_paths, publish_config)
               end.to raise_error "Your public host must be a single String."
             end
           end
@@ -325,7 +310,7 @@ module Bookbinder
             let(:host_for_sitemap) { "docs.dogs.com" }
 
             it 'contains the given pages in an XML sitemap' do
-              publisher.publish({}, output_paths, publish_config, SpecGitAccessor)
+              publisher.publish({}, output_paths, publish_config)
 
               doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
               expect(doc.css('loc').map &:text).to match_array(%w(
@@ -372,7 +357,7 @@ module Bookbinder
             allow(GitClient).to receive(:new).and_return(git_client)
 
             silence_io_streams do
-              publisher.publish({}, output_paths, publish_config, SpecGitAccessor)
+              publisher.publish({}, output_paths, publish_config)
             end
 
             index_html = File.read(File.join(final_app_dir, 'public', 'a', 'b', 'c', 'index.html'))
@@ -427,7 +412,7 @@ module Bookbinder
               $stdout = StringIO.new
 
               expect do
-                publisher.publish(cli_options, output_paths, publish_config, SpecGitAccessor)
+                publisher.publish(cli_options, output_paths, publish_config)
               end.to raise_error
 
               $stdout.rewind
@@ -446,7 +431,7 @@ module Bookbinder
             real_stdout = $stdout
             $stdout = StringIO.new
             expect {
-              publisher.publish cli_options, output_paths, publish_config, SpecGitAccessor
+              publisher.publish cli_options, output_paths, publish_config
             }.to raise_error(SystemExit)
 
             $stdout.rewind
@@ -504,7 +489,7 @@ module Bookbinder
         end
 
         def publish
-          publisher.publish(cli_options, output_paths, publish_config, SpecGitAccessor)
+          publisher.publish(cli_options, output_paths, publish_config)
         end
 
         context 'when the output directory does not yet exist' do

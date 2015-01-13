@@ -278,7 +278,7 @@ module Bookbinder
       end
 
       it 'pass the appropriate arguments to publish from the config' do
-        expect(fake_publisher).to receive(:publish).with expected_cli_options, expected_output_paths, expected_publish_config, git_accessor
+        expect(fake_publisher).to receive(:publish).with expected_cli_options, expected_output_paths, expected_publish_config
         publish_command.run(['local'], SpecGitAccessor)
       end
     end

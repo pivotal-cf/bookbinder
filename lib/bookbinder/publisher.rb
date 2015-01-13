@@ -8,16 +8,17 @@ module Bookbinder
   class Publisher
     include DirectoryHelperMethods
 
-    def initialize(logger, spider, static_site_generator)
+    def initialize(logger, spider, static_site_generator, git_accessor)
       @gem_root = File.expand_path('../../../', __FILE__)
       @logger = logger
       @spider = spider
       @static_site_generator = static_site_generator
+      @git_accessor = git_accessor
       @section_repository = SectionRepository.new(@logger,
                                                   store: Section.store)
     end
 
-    def publish(cli_options, output_paths, publish_config, git_accessor)
+    def publish(cli_options, output_paths, publish_config)
       intermediate_directory = output_paths.fetch(:output_dir)
       final_app_dir = output_paths.fetch(:final_app_dir)
       master_middleman_dir = output_paths.fetch(:master_middleman_dir)
@@ -48,7 +49,7 @@ module Bookbinder
 
     private
 
-    attr_reader :section_repository
+    attr_reader :git_accessor, :section_repository
 
     def generate_sitemap(final_app_dir, host_for_sitemap, spider)
       server_director = ServerDirector.new(@logger, directory: final_app_dir)

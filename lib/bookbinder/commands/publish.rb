@@ -45,7 +45,7 @@ module Bookbinder
         spider = Spider.new(@logger, app_dir: final_app_dir)
         static_site_generator = MiddlemanRunner.new(@logger)
 
-        success = Publisher.new(@logger, spider, static_site_generator).publish(cli_options, output_paths, publish_config, @git_accessor)
+        success = Publisher.new(@logger, spider, static_site_generator, @git_accessor).publish(cli_options, output_paths, publish_config)
         success ? 0 : 1
       end
 
