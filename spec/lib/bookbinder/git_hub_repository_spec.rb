@@ -43,18 +43,18 @@ module Bookbinder
       end
     end
 
-    describe '.build_from_local' do
+    describe '.build_and_copy_from_local' do
       it 'performs the copy if destination dir is specified' do
         expect(Dir.entries(destination_dir)).not_to include('dogs-repo')
-        GitHubRepository.build_from_local(logger,
-                                          section_hash,
-                                          local_repo_dir,
-                                          destination_dir)
+        GitHubRepository.build_and_copy_from_local(logger,
+                                                   section_hash,
+                                                   local_repo_dir,
+                                                   destination_dir)
         expect(Dir.entries(destination_dir)).to include('dogs-repo')
       end
 
       it "doesn't perform the copy if destination dir is not specified" do
-        expect(GitHubRepository.build_from_local(logger, section_hash, local_repo_dir, nil)).
+        expect(GitHubRepository.build_and_copy_from_local(logger, section_hash, local_repo_dir, nil)).
           to be_a(GitHubRepository)
       end
 
@@ -63,7 +63,7 @@ module Bookbinder
         FileUtils.mkdir(destination_dir)
 
         expect {
-          GitHubRepository.build_from_local(
+          GitHubRepository.build_and_copy_from_local(
             logger,
             { 'repository' => {'name' => 'camelpunch/monolithrepo'} },
             tmpdir,

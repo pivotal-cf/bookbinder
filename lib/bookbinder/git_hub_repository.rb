@@ -25,7 +25,7 @@ module Bookbinder
       repository
     end
 
-    def self.build_from_local(logger, section_hash, local_repo_dir, destination_dir)
+    def self.build_and_copy_from_local(logger, section_hash, local_repo_dir, destination_dir)
       full_name = section_hash.fetch('repository').fetch('name')
       directory = section_hash['directory']
 
