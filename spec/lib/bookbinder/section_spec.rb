@@ -101,10 +101,10 @@ module Bookbinder
 
             expect(GitHubRepository).
               to receive(:build_from_remote).
-              with(logger, section_hash, destination_dir, nil, SpecGitAccessor).
+              with(logger, section_hash, nil, SpecGitAccessor).
               and_return(vcs_repo)
 
-            repository.get_instance(section_hash, destination_dir: destination_dir)
+            repository.get_instance(section_hash)
           end
 
           it 'copies the repo from github' do
@@ -120,7 +120,7 @@ module Bookbinder
 
               expect(GitHubRepository).
                 to receive(:build_from_remote).
-                with(logger, section_hash, destination_dir, target_tag, SpecGitAccessor).
+                with(logger, section_hash, target_tag, SpecGitAccessor).
                 and_return(vcs_repo)
 
               repository.get_instance(section_hash, destination_dir: destination_dir, target_tag: target_tag)
@@ -137,7 +137,7 @@ module Bookbinder
 
             expect(GitHubRepository).
               to receive(:build_from_remote).
-              with(logger, section_hash, destination_dir, nil, SpecGitAccessor).
+              with(logger, section_hash, nil, SpecGitAccessor).
               and_return(vcs_repo)
 
             repository.get_instance(section_hash, destination_dir: destination_dir)
@@ -156,7 +156,7 @@ module Bookbinder
 
               expect(GitHubRepository).
                 to receive(:build_from_remote).
-                with(logger, section_hash, destination_dir, target_tag, SpecGitAccessor).
+                with(logger, section_hash, target_tag, SpecGitAccessor).
                 and_return(vcs_repo)
 
               repository.get_instance(section_hash, destination_dir: destination_dir, target_tag: target_tag)

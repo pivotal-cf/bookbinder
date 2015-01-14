@@ -18,7 +18,6 @@ module Bookbinder
 
     def self.build_from_remote(logger,
                                section_hash,
-                               destination_dir,
                                target_ref,
                                git_accessor)
       full_name = section_hash.fetch('repository', {}).fetch('name')
@@ -33,8 +32,7 @@ module Bookbinder
 
     def self.build_from_local(logger,
                               section_hash,
-                              local_repo_dir,
-                              destination_dir)
+                              local_repo_dir)
       full_name = section_hash.fetch('repository').fetch('name')
       directory = section_hash['directory']
 

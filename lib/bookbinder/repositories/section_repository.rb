@@ -40,11 +40,11 @@ module Bookbinder
       def build_repository(destination_dir, local_repo_dir, repo_hash, target_tag)
         if local_repo_dir
           GitHubRepository.
-            build_from_local(logger, repo_hash, local_repo_dir, destination_dir).
+            build_from_local(logger, repo_hash, local_repo_dir).
             tap { |repo| repo.copy_from_local(destination_dir) }
         else
           GitHubRepository.
-            build_from_remote(logger, repo_hash, destination_dir, target_tag, git_accessor).
+            build_from_remote(logger, repo_hash, target_tag, git_accessor).
             tap { |repo| repo.copy_from_remote(destination_dir, git_accessor) }
         end
       end
