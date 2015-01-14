@@ -1,21 +1,34 @@
 require 'middleman-syntax'
 require_relative 'bookbinder_logger'
 require_relative 'directory_helpers'
-require_relative 'section'
+require_relative 'repositories/section_repository'
 require_relative 'server_director'
 
 module Bookbinder
   class Publisher
     include DirectoryHelperMethods
 
-    def initialize(logger, spider, static_site_generator)
+    class << self
+      def build(logger, final_app_dir, git_accessor)
+        Publisher.new(logger,
+                      Spider.new(logger, app_dir: final_app_dir),
+                      MiddlemanRunner.new(logger),
+                      git_accessor)
+      end
+    end
+
+    def initialize(logger, spider, static_site_generator, git_accessor)
       @gem_root = File.expand_path('../../../', __FILE__)
       @logger = logger
       @spider = spider
       @static_site_generator = static_site_generator
+      @git_accessor = git_accessor
+      @section_repository = Repositories::SectionRepository.new(@logger,
+                                                                store: {},
+                                                                git_accessor: git_accessor)
     end
 
-    def publish(cli_options, output_paths, publish_config, git_accessor)
+    def publish(cli_options, output_paths, publish_config)
       intermediate_directory = output_paths.fetch(:output_dir)
       final_app_dir = output_paths.fetch(:final_app_dir)
       master_middleman_dir = output_paths.fetch(:master_middleman_dir)
@@ -26,7 +39,14 @@ module Bookbinder
 
       @versions = publish_config.fetch(:versions, [])
       @book_repo = publish_config[:book_repo]
-      prepare_directories final_app_dir, intermediate_directory, workspace_dir, master_middleman_dir, master_dir, git_accessor
+
+      prepare_directories(final_app_dir,
+                          intermediate_directory,
+                          workspace_dir,
+                          master_middleman_dir,
+                          master_dir,
+                          git_accessor)
+
       FileUtils.cp 'redirects.rb', final_app_dir if File.exists?('redirects.rb')
 
       target_tag = cli_options[:target_tag]
@@ -45,6 +65,8 @@ module Bookbinder
     end
 
     private
+
+    attr_reader :git_accessor, :section_repository
 
     def generate_sitemap(final_app_dir, host_for_sitemap, spider)
       server_director = ServerDirector.new(@logger, directory: final_app_dir)
@@ -70,13 +92,10 @@ module Bookbinder
     def gather_sections(workspace, publish_config, output_paths, target_tag, git_accessor)
       section_data = publish_config.fetch(:sections)
       section_data.map do |attributes|
-        section = Section.get_instance(@logger,
-                                       section_hash: attributes,
-                                       destination_dir: workspace,
-                                       local_repo_dir: output_paths[:local_repo_dir],
-                                       target_tag: target_tag,
-                                       git_accessor: git_accessor)
-        section
+        section_repository.get_instance(attributes,
+                                        destination_dir: workspace,
+                                        local_repo_dir: output_paths[:local_repo_dir],
+                                        target_tag: target_tag)
       end
     end
 
@@ -114,7 +133,7 @@ module Bookbinder
     end
 
     def forget_sections(middleman_scratch)
-      Section.store.clear
+      CodeExample.store.clear
       FileUtils.rm_rf File.join middleman_scratch, '.'
     end
 

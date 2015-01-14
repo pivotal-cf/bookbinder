@@ -75,7 +75,10 @@ module Bookbinder
       def modified_date(format=nil)
         current_file_in_repo = current_path.dup.gsub(File.basename(current_path), File.basename(current_page.source_file))
         current_section = get_section_or_book_for(current_file_in_repo)
-        modified_time = current_section.get_modification_date_for(file: current_file_in_repo, full_path: current_page.source_file)
+        modified_time = current_section.get_modification_date_for(
+          file: current_file_in_repo,
+          full_path: current_page.source_file
+        )
         (format.nil? ? modified_time : modified_time.strftime(format))
       end
 
@@ -90,14 +93,8 @@ module Bookbinder
       def get_section_or_book_for(path)
         sections = config[:sections]
         book = config[:book]
-
         raise "Book or Selections are incorrectly specified for Middleman." if book.nil? || sections.nil?
-
-        current_section = nil
-        sections.each { |section| current_section = section if File.dirname(current_path).match(/^#{section.directory}/) }
-
-        return book if current_section.nil?
-        return current_section
+        sections.detect(->{ book }) { |section| File.dirname(current_path).match(/^#{section.directory}/) }
       end
 
       def index_subnav

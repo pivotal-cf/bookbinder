@@ -42,11 +42,14 @@ module Bookbinder
         cli_options = { verbose: verbosity, target_tag: target_tag }
         output_paths = output_directory_paths(location, final_app_dir)
         publish_config = publish_config(location)
-        spider = Spider.new(@logger, app_dir: final_app_dir)
-        static_site_generator = MiddlemanRunner.new(@logger)
 
-        success = Publisher.new(@logger, spider, static_site_generator).publish(cli_options, output_paths, publish_config, @git_accessor)
+        success = publisher_for_dir(final_app_dir).publish(cli_options, output_paths, publish_config)
+
         success ? 0 : 1
+      end
+
+      def publisher_for_dir(final_app_dir)
+        Publisher.build(@logger, final_app_dir, @git_accessor)
       end
 
       def output_directory_paths(location, final_app_dir)
