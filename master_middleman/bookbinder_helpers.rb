@@ -74,7 +74,7 @@ module Bookbinder
       end
 
       def modified_date(format=nil)
-        current_file_in_repo = current_path.dup.gsub(File.basename(current_path), File.basename(current_page.source_file))
+        current_file_in_repo = current_path.gsub(File.basename(current_path), File.basename(current_page.source_file))
         current_section = get_section_or_book_for(current_file_in_repo)
         modified_time = current_section.get_modification_date_for(
           file: current_file_in_repo,
