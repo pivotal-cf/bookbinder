@@ -8,7 +8,6 @@ module Bookbinder
     describe '#get_snippet_and_language_at' do
       let(:repo_name) { 'my-docs-org/code-example-repo' }
       let(:logger) { NilLogger.new }
-      let(:git_client) { GitClient.new(logger) }
       let(:repository) {
         Repositories::SectionRepository.new(
           logger,

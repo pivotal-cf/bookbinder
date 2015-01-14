@@ -16,23 +16,32 @@ module Bookbinder
 
     attr_reader :full_name, :copied_to
 
-    def self.build_and_copy_from_remote(logger, section_hash, destination_dir, target_ref, git_accessor)
+    def self.build_from_remote(logger,
+                               section_hash,
+                               destination_dir,
+                               target_ref,
+                               git_accessor)
       full_name = section_hash.fetch('repository', {}).fetch('name')
       target_ref = target_ref || section_hash.fetch('repository', {})['ref']
       directory = section_hash['directory']
-      repository = new(logger: logger, full_name: full_name, target_ref: target_ref, github_token: ENV['GITHUB_API_TOKEN'], directory: directory)
-      repository.copy_from_remote(destination_dir, git_accessor) if destination_dir
-      repository
+      new(logger: logger,
+          full_name: full_name,
+          target_ref: target_ref,
+          github_token: ENV['GITHUB_API_TOKEN'],
+          directory: directory)
     end
 
-    def self.build_and_copy_from_local(logger, section_hash, local_repo_dir, destination_dir)
+    def self.build_from_local(logger,
+                              section_hash,
+                              local_repo_dir,
+                              destination_dir)
       full_name = section_hash.fetch('repository').fetch('name')
       directory = section_hash['directory']
 
-      repository = new(logger: logger, full_name: full_name, directory: directory, local_repo_dir: local_repo_dir)
-      repository.copy_from_local(destination_dir) if destination_dir
-
-      repository
+      new(logger: logger,
+          full_name: full_name,
+          directory: directory,
+          local_repo_dir: local_repo_dir)
     end
 
     def initialize(logger: nil, full_name: nil, target_ref: nil, github_token: nil, directory: nil, local_repo_dir: nil)

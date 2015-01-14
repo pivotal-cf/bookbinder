@@ -107,11 +107,12 @@ module Bookbinder
           else
             section = {'repository' => {'name' => config.layout_repo}}
             destination_dir = Dir.mktmpdir
-            repository = GitHubRepository.build_and_copy_from_remote(@logger,
-                                                                     section,
-                                                                     destination_dir,
-                                                                     'master',
-                                                                     @git_accessor)
+            repository = GitHubRepository.build_from_remote(@logger,
+                                                            section,
+                                                            destination_dir,
+                                                            'master',
+                                                            @git_accessor)
+            repository.copy_from_remote(destination_dir, @git_accessor)
             if repository
               File.join(destination_dir, repository.directory)
             else
