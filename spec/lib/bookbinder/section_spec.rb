@@ -1,4 +1,5 @@
 require_relative '../../../lib/bookbinder/repositories/section_repository'
+require_relative '../../../lib/bookbinder/section'
 require_relative '../../helpers/tmp_dirs'
 require_relative '../../helpers/nil_logger'
 require_relative '../../helpers/spec_git_accessor'
@@ -12,6 +13,7 @@ module Bookbinder
       Repositories::SectionRepository.new(
         logger,
         store: {},
+        build: ->(*args) { Section.new(*args) },
         git_accessor: SpecGitAccessor
       )
     }

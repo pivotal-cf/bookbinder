@@ -1,3 +1,4 @@
+require_relative '../../../lib/bookbinder/repositories/section_repository'
 require_relative '../../../lib/bookbinder/code_example'
 require_relative '../../helpers/nil_logger'
 require_relative '../../helpers/spec_git_accessor'
@@ -8,7 +9,15 @@ module Bookbinder
       let(:repo_name) { 'my-docs-org/code-example-repo' }
       let(:logger) { NilLogger.new }
       let(:git_client) { GitClient.new(logger) }
-      let(:code_example) { CodeExample.get_instance(logger, section_hash: {'repository' => {'name' => repo_name}}, git_accessor: SpecGitAccessor) }
+      let(:repository) {
+        Repositories::SectionRepository.new(
+          logger,
+          store: {},
+          build: ->(*args) { CodeExample.new(*args) },
+          git_accessor: SpecGitAccessor
+        )
+      }
+      let(:code_example) { repository.get_instance('repository' => {'name' => repo_name}) }
 
       it 'produces a string for the given excerpt_marker' do
         code_snippet = <<-RUBY
@@ -49,7 +58,10 @@ p fib.take_while { |n| n <= 4E6 }
       end
 
       context 'when the repo was not copied' do
-        let(:missing_repo) { CodeExample.get_instance(logger, section_hash: {'repository' => {'name' => 'foo/missing-book'}}, local_repo_dir: '/dev/null') }
+        let(:missing_repo) {
+          repository.get_instance({'repository' => {'name' => 'foo/missing-book'}},
+                                  local_repo_dir: '/dev/null')
+        }
 
         it 'logs a warning' do
           allow(logger).to receive(:log)
