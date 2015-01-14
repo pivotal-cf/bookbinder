@@ -31,15 +31,10 @@ module Bookbinder
       private
 
       def bind_book(cli_arguments, final_app_dir)
-        generate_site_etc(cli_arguments, final_app_dir)
-      end
+        verbosity = cli_arguments.include?('--verbose')
+        location = cli_arguments[0]
 
-      def generate_site_etc(cli_args, final_app_dir, target_tag=nil)
-        # TODO: general solution to turn all string keys to symbols
-        verbosity = cli_args.include?('--verbose')
-        location = cli_args[0]
-
-        cli_options = { verbose: verbosity, target_tag: target_tag }
+        cli_options = { verbose: verbosity, target_tag: nil }
         output_paths = output_directory_paths(location, final_app_dir)
         publish_config = publish_config(location)
 
