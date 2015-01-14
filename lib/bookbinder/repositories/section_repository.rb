@@ -41,7 +41,7 @@ module Bookbinder
         if local_repo_dir
           GitHubRepository.build_from_local(logger, repo_hash, local_repo_dir, destination_dir)
         else
-          GitHubRepository.build_from_remote(logger, repo_hash, destination_dir, target_tag, git_accessor)
+          GitHubRepository.build_and_copy_from_remote(logger, repo_hash, destination_dir, target_tag, git_accessor)
         end
       end
     end

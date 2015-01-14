@@ -16,7 +16,7 @@ module Bookbinder
 
     attr_reader :full_name, :copied_to
 
-    def self.build_from_remote(logger, section_hash, destination_dir, target_ref, git_accessor)
+    def self.build_and_copy_from_remote(logger, section_hash, destination_dir, target_ref, git_accessor)
       full_name = section_hash.fetch('repository', {}).fetch('name')
       target_ref = target_ref || section_hash.fetch('repository', {})['ref']
       directory = section_hash['directory']

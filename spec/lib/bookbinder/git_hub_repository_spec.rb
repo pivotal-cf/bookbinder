@@ -19,26 +19,27 @@ module Bookbinder
     end
 
     it 'requires a full_name' do
-      expect {
-        GitHubRepository.new(logger: logger, github_token: github_token, full_name: '')
-      }.not_to raise_error
+      expect(
+        GitHubRepository.new(logger: logger, github_token: github_token, full_name: '').
+        full_name
+      ).to eq('')
 
       expect {
         GitHubRepository.new(logger: logger, github_token: github_token)
       }.to raise_error(/full_name/)
     end
 
-    describe '.build_from_remote' do
+    describe '.build_and_copy_from_remote' do
 
       it 'calls copy_from_remote if destination dir is specified' do
         allow(GitHubRepository).to receive(:new).and_return repository
         expect(repository).to receive(:copy_from_remote).with(destination_dir, Git)
-        GitHubRepository.build_from_remote(logger, section_hash, destination_dir, nil, Git)
+        GitHubRepository.build_and_copy_from_remote(logger, section_hash, destination_dir, nil, Git)
       end
 
       it 'does not copy_from_remote if destination dir is not specified' do
         allow(GitHubRepository).to receive(:new).and_return repository
-        expect(GitHubRepository.build_from_remote(logger, section_hash, nil, nil, Git)).to eq repository
+        expect(GitHubRepository.build_and_copy_from_remote(logger, section_hash, nil, nil, Git)).to eq repository
       end
     end
 

@@ -97,7 +97,7 @@ module Bookbinder
           let(:section_hash) { {'repository' => {'name' => repo_name}} }
 
           it 'passes nil to the GitHubRepository as the ref' do
-            expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, SpecGitAccessor)
+            expect(GitHubRepository).to receive(:build_and_copy_from_remote).with(logger, section_hash, destination_dir, nil, SpecGitAccessor)
             repository.get_instance(section_hash, destination_dir: destination_dir)
           end
 
@@ -110,7 +110,7 @@ module Bookbinder
             let(:target_tag) { 'oh-dot-three-dot-oh' }
 
             it 'passes the target tag to the repository' do
-              expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, SpecGitAccessor)
+              expect(GitHubRepository).to receive(:build_and_copy_from_remote).with(logger, section_hash, destination_dir, target_tag, SpecGitAccessor)
               repository.get_instance(section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
           end
@@ -121,7 +121,7 @@ module Bookbinder
           let(:section_hash) { {'repository' => {'name' => repo_name, 'ref' => ref}} }
 
           it 'passes to the ref in the section hash to the repository' do
-            expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, SpecGitAccessor)
+            expect(GitHubRepository).to receive(:build_and_copy_from_remote).with(logger, section_hash, destination_dir, nil, SpecGitAccessor)
             repository.get_instance(section_hash, destination_dir: destination_dir)
           end
 
@@ -134,7 +134,7 @@ module Bookbinder
             let(:target_tag) { 'oh-dot-three-dot-oh' }
 
             it 'passes the target tag to the repository' do
-              expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, SpecGitAccessor)
+              expect(GitHubRepository).to receive(:build_and_copy_from_remote).with(logger, section_hash, destination_dir, target_tag, SpecGitAccessor)
               repository.get_instance(section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
           end
