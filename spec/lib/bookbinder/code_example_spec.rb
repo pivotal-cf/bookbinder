@@ -1,4 +1,6 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/code_example'
+require_relative '../../helpers/nil_logger'
+require_relative '../../helpers/spec_git_accessor'
 
 module Bookbinder
   describe CodeExample do
