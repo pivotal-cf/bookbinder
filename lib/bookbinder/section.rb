@@ -1,4 +1,3 @@
-require_relative 'directory_helpers'
 require_relative 'git_hub_repository'
 
 module Bookbinder

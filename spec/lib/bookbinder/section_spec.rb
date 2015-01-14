@@ -1,4 +1,5 @@
 require_relative '../../../lib/bookbinder/repositories/section_repository'
+require_relative '../../../lib/bookbinder/section'
 require_relative '../../helpers/tmp_dirs'
 require_relative '../../helpers/nil_logger'
 require_relative '../../helpers/spec_git_accessor'
@@ -12,6 +13,7 @@ module Bookbinder
       Repositories::SectionRepository.new(
         logger,
         store: {},
+        build: ->(*args) { Section.new(*args) },
         git_accessor: SpecGitAccessor
       )
     }
@@ -95,7 +97,13 @@ module Bookbinder
           let(:section_hash) { {'repository' => {'name' => repo_name}} }
 
           it 'passes nil to the GitHubRepository as the ref' do
-            expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, SpecGitAccessor)
+            vcs_repo = double("VCS repo", copy_from_remote: nil)
+
+            expect(GitHubRepository).
+              to receive(:build_from_remote).
+              with(logger, section_hash, destination_dir, nil, SpecGitAccessor).
+              and_return(vcs_repo)
+
             repository.get_instance(section_hash, destination_dir: destination_dir)
           end
 
@@ -108,7 +116,13 @@ module Bookbinder
             let(:target_tag) { 'oh-dot-three-dot-oh' }
 
             it 'passes the target tag to the repository' do
-              expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, SpecGitAccessor)
+              vcs_repo = double("VCS repo", copy_from_remote: nil)
+
+              expect(GitHubRepository).
+                to receive(:build_from_remote).
+                with(logger, section_hash, destination_dir, target_tag, SpecGitAccessor).
+                and_return(vcs_repo)
+
               repository.get_instance(section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
           end
@@ -119,7 +133,13 @@ module Bookbinder
           let(:section_hash) { {'repository' => {'name' => repo_name, 'ref' => ref}} }
 
           it 'passes to the ref in the section hash to the repository' do
-            expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, nil, SpecGitAccessor)
+            vcs_repo = double("VCS repo", copy_from_remote: nil)
+
+            expect(GitHubRepository).
+              to receive(:build_from_remote).
+              with(logger, section_hash, destination_dir, nil, SpecGitAccessor).
+              and_return(vcs_repo)
+
             repository.get_instance(section_hash, destination_dir: destination_dir)
           end
 
@@ -132,7 +152,13 @@ module Bookbinder
             let(:target_tag) { 'oh-dot-three-dot-oh' }
 
             it 'passes the target tag to the repository' do
-              expect(GitHubRepository).to receive(:build_from_remote).with(logger, section_hash, destination_dir, target_tag, SpecGitAccessor)
+              vcs_repo = double("VCS repo", copy_from_remote: nil)
+
+              expect(GitHubRepository).
+                to receive(:build_from_remote).
+                with(logger, section_hash, destination_dir, target_tag, SpecGitAccessor).
+                and_return(vcs_repo)
+
               repository.get_instance(section_hash, destination_dir: destination_dir, target_tag: target_tag)
             end
           end

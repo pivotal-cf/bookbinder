@@ -19,57 +19,14 @@ module Bookbinder
     end
 
     it 'requires a full_name' do
-      expect {
-        GitHubRepository.new(logger: logger, github_token: github_token, full_name: '')
-      }.not_to raise_error
+      expect(
+        GitHubRepository.new(logger: logger, github_token: github_token, full_name: '').
+        full_name
+      ).to eq('')
 
       expect {
         GitHubRepository.new(logger: logger, github_token: github_token)
       }.to raise_error(/full_name/)
-    end
-
-    describe '.build_from_remote' do
-
-      it 'calls copy_from_remote if destination dir is specified' do
-        allow(GitHubRepository).to receive(:new).and_return repository
-        expect(repository).to receive(:copy_from_remote).with(destination_dir, Git)
-        GitHubRepository.build_from_remote(logger, section_hash, destination_dir, nil, Git)
-      end
-
-      it 'does not copy_from_remote if destination dir is not specified' do
-        allow(GitHubRepository).to receive(:new).and_return repository
-        expect(GitHubRepository.build_from_remote(logger, section_hash, nil, nil, Git)).to eq repository
-      end
-    end
-
-    describe '.build_from_local' do
-      it 'performs the copy if destination dir is specified' do
-        expect(Dir.entries(destination_dir)).not_to include('dogs-repo')
-        GitHubRepository.build_from_local(logger,
-                                          section_hash,
-                                          local_repo_dir,
-                                          destination_dir)
-        expect(Dir.entries(destination_dir)).to include('dogs-repo')
-      end
-
-      it "doesn't perform the copy if destination dir is not specified" do
-        expect(GitHubRepository.build_from_local(logger, section_hash, local_repo_dir, nil)).
-          to be_a(GitHubRepository)
-      end
-
-      it "doesn't copy if destination (e.g. book) and source (e.g. section) repos are the same" do
-        destination_dir = Pathname(tmp_subdir('monolithrepo')).join('output')
-        FileUtils.mkdir(destination_dir)
-
-        expect {
-          GitHubRepository.build_from_local(
-            logger,
-            { 'repository' => {'name' => 'camelpunch/monolithrepo'} },
-            tmpdir,
-            destination_dir
-          )
-        }.not_to change { Dir.entries(destination_dir).size }
-      end
     end
 
     describe '#tag_with' do

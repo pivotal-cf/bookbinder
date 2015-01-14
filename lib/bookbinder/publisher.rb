@@ -23,9 +23,12 @@ module Bookbinder
       @spider = spider
       @static_site_generator = static_site_generator
       @git_accessor = git_accessor
-      @section_repository = Repositories::SectionRepository.new(@logger,
-                                                                store: {},
-                                                                git_accessor: git_accessor)
+      @section_repository = Repositories::SectionRepository.new(
+        logger,
+        store: Repositories::SectionRepository::SHARED_CACHE,
+        build: ->(*args) { Section.new(*args) },
+        git_accessor: git_accessor
+      )
     end
 
     def publish(cli_options, output_paths, publish_config)
@@ -90,8 +93,7 @@ module Bookbinder
     end
 
     def gather_sections(workspace, publish_config, output_paths, target_tag, git_accessor)
-      section_data = publish_config.fetch(:sections)
-      section_data.map do |attributes|
+      publish_config.fetch(:sections).map do |attributes|
         section_repository.get_instance(attributes,
                                         destination_dir: workspace,
                                         local_repo_dir: output_paths[:local_repo_dir],
@@ -133,7 +135,7 @@ module Bookbinder
     end
 
     def forget_sections(middleman_scratch)
-      CodeExample.store.clear
+      Repositories::SectionRepository::SHARED_CACHE.clear
       FileUtils.rm_rf File.join middleman_scratch, '.'
     end
 

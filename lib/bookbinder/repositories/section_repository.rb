@@ -1,11 +1,13 @@
-require_relative '../section'
-
 module Bookbinder
   module Repositories
     class SectionRepository
+      SHARED_CACHE = {}
+
       def initialize(logger,
                      store: nil,
+                     build: nil,
                      git_accessor: Git)
+        @build = build
         @store = store
         @logger = logger
         @git_accessor = git_accessor
@@ -22,7 +24,7 @@ module Bookbinder
 
       private
 
-      attr_reader(:store, :section_hash, :local_repo_dir, :logger,
+      attr_reader(:build, :store, :section_hash, :local_repo_dir, :logger,
                   :destination_dir, :target_tag, :git_accessor)
 
       def acquire(section_hash, local_repo_dir, destination_dir, target_tag)
@@ -31,15 +33,19 @@ module Bookbinder
         raise "section repository '#{repository_config}' missing name key" unless repository_config['name']
         logger.log "Gathering #{repository_config['name'].cyan}"
         repository = build_repository(destination_dir, local_repo_dir, section_hash, target_tag)
-        section = Section.new(repository, section_hash['subnav_template'], destination_dir)
-        store[[section_hash, local_repo_dir]] = section
+        store[[section_hash, local_repo_dir]] =
+          build[repository, section_hash['subnav_template'], destination_dir]
       end
 
       def build_repository(destination_dir, local_repo_dir, repo_hash, target_tag)
         if local_repo_dir
-          GitHubRepository.build_from_local(logger, repo_hash, local_repo_dir, destination_dir)
+          GitHubRepository.
+            build_from_local(logger, repo_hash, local_repo_dir, destination_dir).
+            tap { |repo| repo.copy_from_local(destination_dir) }
         else
-          GitHubRepository.build_from_remote(logger, repo_hash, destination_dir, target_tag, git_accessor)
+          GitHubRepository.
+            build_from_remote(logger, repo_hash, destination_dir, target_tag, git_accessor).
+            tap { |repo| repo.copy_from_remote(destination_dir, git_accessor) }
         end
       end
     end
