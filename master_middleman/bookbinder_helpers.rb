@@ -74,13 +74,19 @@ module Bookbinder
       end
 
       def modified_date(format=nil)
-        current_file_in_repo = current_path.gsub(File.basename(current_path), File.basename(current_page.source_file))
+        current_file_in_repo = current_path.gsub(
+          File.basename(current_path),
+          File.basename(current_page.source_file)
+        )
         current_section = get_section_or_book_for(current_file_in_repo)
-        modified_time = current_section.get_modification_date_for(
+
+        modified_time = attribute_fetcher.get_modification_date_for(
+          current_section,
           file: current_file_in_repo,
           full_path: current_page.source_file
         )
-        (format.nil? ? modified_time : modified_time.strftime(format))
+
+        format ? modified_time.strftime(format) : modified_time
       end
 
       def quick_links
@@ -90,6 +96,16 @@ module Bookbinder
       end
 
       private
+
+      def attribute_fetcher
+        GitFileAttributeFetcher.new
+      end
+
+      class GitFileAttributeFetcher
+        def get_modification_date_for(section, opts)
+          section.get_modification_date_for(opts)
+        end
+      end
 
       def code_example_repo
         @code_example_repo ||= Repositories::SectionRepository.new(
