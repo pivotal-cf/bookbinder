@@ -503,14 +503,15 @@ module Bookbinder
 
         it 'sends middlemanRunner the correct arguments to run' do
           expect(static_site_generator).to receive(:run).with(anything,
-                                                             template_variables,
-                                                             local_repo_dir,
-                                                             false,
-                                                             anything,
-                                                             sections,
-                                                             host_for_sitemap,
-                                                             archive_menu,
-                                                             SpecGitAccessor)
+                                                              anything,
+                                                              template_variables,
+                                                              local_repo_dir,
+                                                              false,
+                                                              anything,
+                                                              sections,
+                                                              host_for_sitemap,
+                                                              archive_menu,
+                                                              SpecGitAccessor)
           publish
         end
 

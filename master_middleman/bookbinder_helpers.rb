@@ -23,9 +23,29 @@ module Bookbinder
     module HelperMethods
 
       def yield_for_code_snippet(from: nil, at: nil)
-        example = code_example_repo.get_instance({'repository' => {'name' => from}},
-                                                 local_repo_dir: config[:local_repo_dir])
-        snippet, language = example.get_snippet_and_language_at(at)
+        git_accessor = config[:git_accessor]
+        local_repo_dir = config[:local_repo_dir]
+        attributes = {'repository' => {'name' => from}}
+        workspace = config[:workspace]
+        code_example = code_example_repo.fetch_code_example_for(attributes, local_repo_dir)
+
+        if code_example
+          snippet, language = code_example.get_snippet_and_language_at(at)
+        else
+          vcs_repo =
+              if local_repo_dir
+                GitHubRepository.
+                    build_from_local(bookbinder_logger, attributes, local_repo_dir).
+                    tap { |repo| repo.copy_from_local(workspace) }
+              else
+                GitHubRepository.
+                    build_from_remote(bookbinder_logger, attributes, nil, git_accessor).
+                    tap { |repo| repo.copy_from_remote(workspace, git_accessor) }
+              end
+          example = code_example_repo.get_instance(attributes, vcs_repo: vcs_repo)
+          snippet, language = example.get_snippet_and_language_at(at)
+        end
+
         delimiter = '```'
 
         snippet.prepend("#{delimiter}#{language}\n").concat("\n#{delimiter}")

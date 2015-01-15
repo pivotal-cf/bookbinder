@@ -14,39 +14,30 @@ module Bookbinder
       end
 
       def get_instance(attributes,
+                       vcs_repo: nil,
                        destination_dir: Dir.mktmpdir,
-                       local_repo_dir: nil,
                        target_tag: nil)
-        store.fetch([attributes, local_repo_dir]) {
-          acquire(attributes, local_repo_dir, destination_dir, target_tag)
+        store.fetch([attributes, vcs_repo.path_to_local_repo]) {
+          acquire(attributes, destination_dir, target_tag, vcs_repo)
         }
+      end
+
+      def fetch_code_example_for(attributes, local_repo_dir)
+        store[[attributes, local_repo_dir]]
       end
 
       private
 
-      attr_reader(:build, :store, :section_hash, :local_repo_dir, :logger,
+      attr_reader(:build, :store, :section_hash, :logger,
                   :destination_dir, :target_tag, :git_accessor)
 
-      def acquire(section_hash, local_repo_dir, destination_dir, target_tag)
+      def acquire(section_hash, destination_dir, target_tag, vcs_repo)
         repository_config = section_hash['repository']
         raise "section repository '#{repository_config}' is not a hash" unless repository_config.is_a?(Hash)
         raise "section repository '#{repository_config}' missing name key" unless repository_config['name']
         logger.log "Gathering #{repository_config['name'].cyan}"
-        repository = build_repository(destination_dir, local_repo_dir, section_hash, target_tag)
-        store[[section_hash, local_repo_dir]] =
-          build[repository, section_hash['subnav_template'], destination_dir]
-      end
-
-      def build_repository(destination_dir, local_repo_dir, repo_hash, target_tag)
-        if local_repo_dir
-          GitHubRepository.
-            build_from_local(logger, repo_hash, local_repo_dir).
-            tap { |repo| repo.copy_from_local(destination_dir) }
-        else
-          GitHubRepository.
-            build_from_remote(logger, repo_hash, target_tag, git_accessor).
-            tap { |repo| repo.copy_from_remote(destination_dir, git_accessor) }
-        end
+        store[[section_hash, vcs_repo.path_to_local_repo]] =
+          build[vcs_repo, section_hash['subnav_template'], destination_dir]
       end
     end
   end

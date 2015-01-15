@@ -138,7 +138,9 @@ module Bookbinder
     end
 
     def path_to_local_repo
-      File.join(@local_repo_dir, short_name)
+      if @local_repo_dir
+        File.join(@local_repo_dir, short_name)
+      end
     end
 
     def has_git_object?

@@ -36,6 +36,7 @@ module Bookbinder
     end
 
     def run(middleman_dir,
+            workspace_dir,
             template_variables,
             local_repo_dir,
             verbose = false,
@@ -48,6 +49,7 @@ module Bookbinder
 
       within(middleman_dir) do
         invoke_against_current_dir(local_repo_dir,
+                                   workspace_dir,
                                    production_host,
                                    book,
                                    sections,
@@ -71,6 +73,7 @@ module Bookbinder
     end
 
     def invoke_against_current_dir(local_repo_dir,
+                                   workspace_dir,
                                    production_host,
                                    book,
                                    sections,
@@ -82,6 +85,7 @@ module Bookbinder
 
       config = {
           local_repo_dir: local_repo_dir,
+          workspace: workspace_dir,
           production_host: production_host,
           git_accessor: git_accessor,
           sections: sections,

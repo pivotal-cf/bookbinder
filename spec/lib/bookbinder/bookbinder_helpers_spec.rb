@@ -146,7 +146,8 @@ MARKDOWN
       let(:excerpt_mark) { 'complicated_function' }
 
       context 'when not local' do
-        let(:config) { {local_repo_dir: nil, git_accessor: SpecGitAccessor} }
+        let(:config) { {local_repo_dir: nil, workspace: 'code-example-repo', git_accessor: SpecGitAccessor} }
+        around_with_fixture_repo &:run
 
         it 'returns markdown from github' do
           expect(yielded_snippet).to eq(markdown_snippet.chomp)
@@ -154,7 +155,7 @@ MARKDOWN
       end
 
       context 'when local' do
-        let(:config) { {local_repo_dir: '..'} }
+        let(:config) { {local_repo_dir: '..', workspace: 'code-example-repo'} }
         around_with_fixture_repo &:run
 
         it 'returns markdown from the local repo' do

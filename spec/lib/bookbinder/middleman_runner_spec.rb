@@ -24,7 +24,7 @@ module Bookbinder
     let(:local_repo_dir) { '/dev/null' }
 
     def run_middleman
-      middleman_runner.run(target_dir_path, template_variables, local_repo_dir, verbose, book, sections, production_host, archive_menu)
+      middleman_runner.run(target_dir_path, 'master_middleman/source/public', template_variables, local_repo_dir, verbose, book, sections, production_host, archive_menu)
     end
 
     it 'invokes Middleman in the requested directory' do

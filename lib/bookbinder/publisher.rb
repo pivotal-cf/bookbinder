@@ -59,8 +59,9 @@ module Bookbinder
                       sections: publish_config.fetch(:sections))
       host_for_sitemap = publish_config.fetch(:host_for_sitemap)
 
-      generate_site(cli_options, output_paths, publish_config, master_dir, book, sections, build_directory, public_directory, git_accessor)
+      generate_site(cli_options, output_paths, publish_config, master_dir, workspace_dir, book, sections, build_directory, public_directory, git_accessor)
       generate_sitemap(final_app_dir, host_for_sitemap, @spider)
+
 
       @logger.log "Bookbinder bound your book into #{final_app_dir.to_s.green}"
 
@@ -69,7 +70,7 @@ module Bookbinder
 
     private
 
-    attr_reader :git_accessor, :section_repository
+    attr_reader :git_accessor, :section_repository, :logger
 
     def generate_sitemap(final_app_dir, host_for_sitemap, spider)
       server_director = ServerDirector.new(@logger, directory: final_app_dir)
@@ -78,8 +79,9 @@ module Bookbinder
       server_director.use_server { |port| spider.generate_sitemap host_for_sitemap, port }
     end
 
-    def generate_site(cli_options, output_paths, publish_config, middleman_dir, book, sections, build_dir, public_dir, git_accessor)
+    def generate_site(cli_options, output_paths, publish_config, middleman_dir, workspace_dir, book, sections, build_dir, public_dir, git_accessor)
       @static_site_generator.run(middleman_dir,
+                                 workspace_dir,
                                  publish_config.fetch(:template_variables, {}),
                                  output_paths[:local_repo_dir],
                                  cli_options[:verbose],
@@ -94,9 +96,22 @@ module Bookbinder
 
     def gather_sections(workspace, publish_config, output_paths, target_tag, git_accessor)
       publish_config.fetch(:sections).map do |attributes|
+
+        local_repo_dir = output_paths[:local_repo_dir]
+        vcs_repo =
+          if local_repo_dir
+            GitHubRepository.
+              build_from_local(logger, attributes, local_repo_dir).
+              tap { |repo| repo.copy_from_local(workspace) }
+          else
+            GitHubRepository.
+              build_from_remote(logger, attributes, target_tag, git_accessor).
+              tap { |repo| repo.copy_from_remote(workspace, git_accessor) }
+          end
+
         section_repository.get_instance(attributes,
+                                        vcs_repo: vcs_repo,
                                         destination_dir: workspace,
-                                        local_repo_dir: output_paths[:local_repo_dir],
                                         target_tag: target_tag)
       end
     end
@@ -121,8 +136,11 @@ module Bookbinder
     def copy_version_master_middleman(dest_dir, git_accessor)
       @versions.each do |version|
         Dir.mktmpdir(version) do |tmpdir|
-          book = Book.from_remote(logger: @logger, full_name: @book_repo,
-                                  destination_dir: tmpdir, ref: version, git_accessor: git_accessor)
+          book = Book.from_remote(logger: @logger,
+                                  full_name: @book_repo,
+                                  destination_dir: tmpdir,
+                                  ref: version,
+                                  git_accessor: git_accessor)
           index_source_dir = File.join(tmpdir, book.directory, 'master_middleman', source_dir_name)
           index_dest_dir = File.join(dest_dir, version)
           FileUtils.mkdir_p(index_dest_dir)

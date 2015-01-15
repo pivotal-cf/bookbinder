@@ -109,6 +109,26 @@ module Bookbinder
         end
       end
 
+      context 'when no ref is provided' do
+        it 'fetches the target ref from the section config hash' do
+          target_ref = 'my-special-ref'
+          section_hash = {
+              'repository' => {
+                  'name' => repo_name,
+                  'ref'  => target_ref
+              },
+              'directory'  => File.basename(repo_name),
+          }
+
+          repo = GitHubRepository.build_from_remote(logger, section_hash, nil, git_accessor: SpecGitAccessor)
+          expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
+                                              File.basename(repo_name),
+                                              path: destination_dir).and_return(git_base_object)
+          expect(git_base_object).to receive(:checkout).with(target_ref)
+          repo.copy_from_remote(destination_dir)
+        end
+      end
+
       context 'when there are no credentials for accessing the repository' do
         let(:credential_error_message) {
           "Unable to access repository #{repo_name}. You do not have the correct access rights. Please either add the key to your SSH agent, or set the GIT_SSH environment variable to override default SSH key usage. For more information run: `man git`."
