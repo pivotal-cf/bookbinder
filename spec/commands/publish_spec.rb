@@ -585,5 +585,83 @@ module Bookbinder
         publish_command.run(['local'], SpecGitAccessor)
       end
     end
+
+    describe 'verbose mode' do
+      context 'when the verbose flag is not set' do
+        it 'suppresses detailed output' do
+          sections = [
+              {
+                  'repository' => { 'name' => 'my-docs-org/repo-with-nonexistent-helper-method' },
+                  'directory' => nil
+              }
+          ]
+          config_hash = {
+              'sections' => sections,
+              'book_repo' => book,
+              'public_host' => 'docs.dogs.com'
+          }
+
+          config = Configuration.new(logger, config_hash)
+          configuration_fetcher = double('configuration_fetcher')
+          allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
+
+          publish_command = Commands::Publish.new(logger, configuration_fetcher)
+
+          begin
+            real_stdout = $stdout
+            $stdout = StringIO.new
+
+            expect do
+              publish_command.run(['github'], SpecGitAccessor)
+            end.to raise_error
+
+            $stdout.rewind
+            collected_output = $stdout.read
+
+            expect(collected_output).to_not match(/error.*build\/index.html/)
+            expect(collected_output).to_not match(/undefined local variable or method `function_that_does_not_exist'/)
+          ensure
+            $stdout = real_stdout
+          end
+        end
+      end
+
+      it 'shows more detailed output when the verbose flag is set' do
+        sections = [
+            {
+                'repository' => { 'name' => 'my-docs-org/repo-with-nonexistent-helper-method' },
+                'directory' => nil
+            }
+        ]
+        config_hash = {
+            'sections' => sections,
+            'book_repo' => book,
+            'public_host' => 'docs.dogs.com'
+        }
+
+        config = Configuration.new(logger, config_hash)
+        configuration_fetcher = double('configuration_fetcher')
+        allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
+
+        publish_command = Commands::Publish.new(logger, configuration_fetcher)
+
+        begin
+          real_stdout = $stdout
+          $stdout = StringIO.new
+
+          expect do
+            publish_command.run(['github', '--verbose'], SpecGitAccessor)
+          end.to raise_error
+
+          $stdout.rewind
+          collected_output = $stdout.read
+
+          expect(collected_output).to match(/error.*build/)
+          expect(collected_output).to match(/undefined local variable or method `function_that_does_not_exist'/)
+        ensure
+          $stdout = real_stdout
+        end
+      end
+    end
   end
 end
