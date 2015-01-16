@@ -42,8 +42,6 @@ module Bookbinder
       server_director.use_server do
         Dir.chdir(final_app_dir) { spec.run }
       end
-
-      WebMock.disable_net_connect!
     end
 
     describe '#has_broken_links?' do
