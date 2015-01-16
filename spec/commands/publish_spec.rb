@@ -487,13 +487,17 @@ module Bookbinder
       end
 
       context 'when the hostname is a single string' do
-        around do |spec|
+        before do
           WebMock.disable_net_connect!(:allow_localhost => true)
-          spec.run
+        end
+
+        after do
           WebMock.disable_net_connect!
         end
 
         it 'contains the given pages in an XML sitemap' do
+          WebMock.disable_net_connect!(:allow_localhost => true)
+
           book_dir = File.absolute_path('.')
           middleman_source_dir = File.join(book_dir, 'master_middleman', 'source')
           FileUtils.mkdir_p middleman_source_dir
