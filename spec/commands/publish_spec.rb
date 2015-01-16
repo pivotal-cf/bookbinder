@@ -659,5 +659,65 @@ module Bookbinder
         end
       end
     end
+
+    describe 'creating necessary directories' do
+      context 'when the output directory does not yet exist' do
+        def create_publish_command
+          config_hash = {
+              'sections' => [],
+              'book_repo' => book,
+              'public_host' => 'docs.dogs.com'
+          }
+
+          config = Configuration.new(logger, config_hash)
+          configuration_fetcher = double('configuration_fetcher')
+          allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
+
+          Commands::Publish.new(logger, configuration_fetcher)
+        end
+
+        it 'creates the output directory' do
+          publish_command = create_publish_command
+
+          output_dir = File.absolute_path('./output')
+
+          expect(File.exists?(output_dir)).to eq false
+
+          publish_command.run(['github'], SpecGitAccessor)
+
+          expect(File.exists?(output_dir)).to eq true
+        end
+
+        it 'clears the output directory before running' do
+          publish_command = create_publish_command
+
+          output_dir = File.absolute_path('./output')
+          FileUtils.mkdir_p output_dir
+          pre_existing_file = File.join(output_dir, 'happy')
+          FileUtils.touch pre_existing_file
+
+          expect(File.exists?(pre_existing_file)).to eq true
+
+          publish_command.run(['github'], SpecGitAccessor)
+
+          expect(File.exists?(pre_existing_file)).to eq false
+        end
+
+        it 'clears and then copies the template_app skeleton inside final_app' do
+          final_app_dir = File.absolute_path('./final_app')
+          FileUtils.mkdir_p final_app_dir
+          pre_existing_file = File.join(final_app_dir, 'happy')
+          FileUtils.touch pre_existing_file
+
+          publish_command = create_publish_command
+          publish_command.run(['github'], SpecGitAccessor)
+
+          expect(File.exists?(pre_existing_file)).to eq false
+          copied_manifest = File.read File.join(final_app_dir, 'app.rb')
+          template_manifest = File.read(File.expand_path('../../../template_app/app.rb', __FILE__))
+          expect(copied_manifest).to eq(template_manifest)
+        end
+      end
+    end
   end
 end

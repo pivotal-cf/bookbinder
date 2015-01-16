@@ -74,14 +74,6 @@ module Bookbinder
           publisher.publish(cli_options, output_paths, publish_config)
         end
 
-        context 'when the output directory does not yet exist' do
-          let(:output_dir) { File.join(Dir.mktmpdir, 'uncreated_output') }
-          it 'creates the output directory' do
-            publish
-            expect(File.exists?(output_dir)).to eq true
-          end
-        end
-
         it 'sends middlemanRunner the correct arguments to run' do
           expect(static_site_generator).to receive(:run).with(anything,
                                                               anything,
@@ -94,23 +86,6 @@ module Bookbinder
                                                               archive_menu,
                                                               SpecGitAccessor)
           publish
-        end
-
-        it 'clears the output directory before running' do
-          pre_existing_file = File.join(output_dir, 'kill_me')
-          FileUtils.touch pre_existing_file
-          publish
-          expect(File.exists?(pre_existing_file)).to eq false
-        end
-
-        it 'clears and then copies the template_app skeleton inside final_app' do
-          pre_existing_file = File.join(final_app_dir, 'kill_me')
-          FileUtils.touch pre_existing_file
-          publish
-          expect(File.exists?(pre_existing_file)).to eq false
-          copied_manifest = File.read(File.join(final_app_dir, 'app.rb'))
-          template_manifest = File.read(File.join('template_app', 'app.rb'))
-          expect(copied_manifest).to eq(template_manifest)
         end
 
         context 'when the spider reports broken links' do
