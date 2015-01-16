@@ -42,6 +42,8 @@ module Bookbinder
       server_director.use_server do
         Dir.chdir(final_app_dir) { spec.run }
       end
+
+      WebMock.disable_net_connect!
     end
 
     describe '#has_broken_links?' do
@@ -50,8 +52,6 @@ module Bookbinder
       let(:log_file) { File.join(output_dir, 'wget.log') }
       let(:logger) { NilLogger.new }
       let(:spider) { Spider.new logger, app_dir: final_app_dir }
-
-      after { WebMock.disable_net_connect! }
 
       context 'when there are no broken links' do
         let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
