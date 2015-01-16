@@ -8,16 +8,6 @@ module Bookbinder
   class Publisher
     include DirectoryHelperMethods
 
-    class << self
-      def build(logger, final_app_dir, git_accessor)
-        Publisher.new(logger,
-                      Spider.new(logger, app_dir: final_app_dir),
-                      MiddlemanRunner.new(logger),
-                      ServerDirector.new(logger, directory: final_app_dir),
-                      git_accessor)
-      end
-    end
-
     def initialize(logger, spider, static_site_generator, server_director, git_accessor)
       @logger = logger
       @spider = spider

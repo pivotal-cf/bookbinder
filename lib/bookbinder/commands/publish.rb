@@ -134,7 +134,11 @@ module Bookbinder
       end
 
       def publisher_for_dir(final_app_dir)
-        Publisher.build(@logger, final_app_dir, @git_accessor)
+        spider = Spider.new(@logger, app_dir: final_app_dir)
+        middleman_runner = MiddlemanRunner.new(@logger)
+        server_director = ServerDirector.new(@logger, directory: final_app_dir)
+
+        Publisher.new(@logger, spider, middleman_runner, server_director, @git_accessor)
       end
 
       def output_directory_paths(location, final_app_dir)
