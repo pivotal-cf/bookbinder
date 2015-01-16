@@ -57,14 +57,19 @@ module Bookbinder
 
     before do
       allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
+      WebMock.disable_net_connect!(:allow_localhost => true)
+    end
+
+    after do
+      WebMock.disable_net_connect!
     end
 
     describe 'local' do
-      around do |spec|
-        WebMock.disable_net_connect!(:allow_localhost => true)
-        spec.run
-        WebMock.disable_net_connect!
-      end
+      # around do |spec|
+      #   WebMock.disable_net_connect!(:allow_localhost => true)
+      #   spec.run
+      #   WebMock.disable_net_connect!
+      # end
 
       let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
 
@@ -487,17 +492,7 @@ module Bookbinder
       end
 
       context 'when the hostname is a single string' do
-        before do
-          WebMock.disable_net_connect!(:allow_localhost => true)
-        end
-
-        after do
-          WebMock.disable_net_connect!
-        end
-
         it 'contains the given pages in an XML sitemap' do
-          WebMock.disable_net_connect!(:allow_localhost => true)
-
           book_dir = File.absolute_path('.')
           middleman_source_dir = File.join(book_dir, 'master_middleman', 'source')
           FileUtils.mkdir_p middleman_source_dir
