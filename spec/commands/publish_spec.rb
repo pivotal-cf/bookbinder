@@ -114,9 +114,8 @@ module Bookbinder
 
         it 'passes the provided repo as master_middleman_dir' do
           fake_publisher = double(:publisher)
-
           expect(Publisher).to receive(:new).and_return fake_publisher
-          expect(fake_publisher).to receive(:publish) do |cli_options, output_paths, publish_config, git_accessor|
+          expect(fake_publisher).to receive(:publish) do |sections, cli_options, output_paths, publish_config, git_accessor|
             expect(output_paths[:master_middleman_dir]).to match('layout-repo')
           end
           publish_command.run(['local'], SpecGitAccessor)
@@ -219,7 +218,7 @@ module Bookbinder
         it 'passes the provided repo as master_middleman_dir' do
           fake_publisher = double(:publisher)
           expect(Publisher).to receive(:new).and_return fake_publisher
-          expect(fake_publisher).to receive(:publish) do |cli_options, output_paths, publish_config, git_accessor|
+          expect(fake_publisher).to receive(:publish) do |sections, cli_options, output_paths, publish_config, git_accessor|
             expect(output_paths[:master_middleman_dir]).to match('layout-repo')
           end
           publish_command.run(['github'], SpecGitAccessor)
@@ -577,7 +576,7 @@ module Bookbinder
       end
 
       it 'pass the appropriate arguments to publish from the config' do
-        expect(fake_publisher).to receive(:publish).with expected_cli_options, expected_output_paths, expected_publish_config
+        expect(fake_publisher).to receive(:publish).with anything, expected_cli_options, expected_output_paths, expected_publish_config
         publish_command.run(['local'], SpecGitAccessor)
       end
     end

@@ -23,6 +23,13 @@ module Bookbinder
       def run(cli_arguments, git_accessor=Git)
         raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
         @git_accessor = git_accessor
+        @section_repository = Repositories::SectionRepository.new(
+            @logger,
+            store: Repositories::SectionRepository::SHARED_CACHE,
+            build: ->(*args) { Section.new(*args) },
+            git_accessor: git_accessor
+        )
+        @gem_root = File.expand_path('../../../../', __FILE__)
 
         final_app_dir = File.absolute_path('final_app')
         bind_book(cli_arguments, final_app_dir)
@@ -37,10 +44,93 @@ module Bookbinder
         cli_options = { verbose: verbosity, target_tag: nil }
         output_paths = output_directory_paths(location, final_app_dir)
         publish_config = publish_config(location)
+        @versions = publish_config.fetch(:versions, [])
+        @book_repo = publish_config[:book_repo]
 
-        success = publisher_for_dir(final_app_dir).publish(cli_options, output_paths, publish_config)
+        master_middleman_dir = output_paths.fetch(:master_middleman_dir)
+        intermediate_directory = output_paths.fetch(:output_dir)
+        master_dir = File.join intermediate_directory, 'master_middleman'
+        workspace_dir = File.join master_dir, 'source'
+        prepare_directories(final_app_dir,
+                            intermediate_directory,
+                            workspace_dir,
+                            master_middleman_dir,
+                            master_dir,
+                            @git_accessor)
+
+        target_tag = cli_options[:target_tag]
+        sections = gather_sections(workspace_dir, publish_config, output_paths, target_tag, @git_accessor)
+
+        success = publisher_for_dir(final_app_dir).publish(sections, cli_options, output_paths, publish_config)
 
         success ? 0 : 1
+      end
+
+      def gather_sections(workspace, publish_config, output_paths, target_tag, git_accessor)
+        publish_config.fetch(:sections).map do |attributes|
+
+          local_repo_dir = output_paths[:local_repo_dir]
+          vcs_repo =
+              if local_repo_dir
+                GitHubRepository.
+                    build_from_local(@logger, attributes, local_repo_dir).
+                    tap { |repo| repo.copy_from_local(workspace) }
+              else
+                GitHubRepository.
+                    build_from_remote(@logger, attributes, target_tag, git_accessor).
+                    tap { |repo| repo.copy_from_remote(workspace, git_accessor) }
+              end
+
+          @section_repository.get_instance(attributes,
+                                          vcs_repo: vcs_repo,
+                                          destination_dir: workspace,
+                                          target_tag: target_tag)
+        end
+      end
+
+      def prepare_directories(final_app, middleman_scratch_space, middleman_source, master_middleman_dir, middleman_dir, git_accessor)
+        forget_sections(middleman_scratch_space)
+        FileUtils.rm_rf File.join final_app, '.'
+        FileUtils.mkdir_p middleman_scratch_space
+        FileUtils.mkdir_p File.join final_app, 'public'
+        FileUtils.mkdir_p middleman_source
+
+        copy_directory_from_gem 'template_app', final_app
+        copy_directory_from_gem 'master_middleman', middleman_dir
+        FileUtils.cp_r File.join(master_middleman_dir, '.'), middleman_dir
+
+        copy_version_master_middleman(middleman_source, git_accessor)
+      end
+
+      def forget_sections(middleman_scratch)
+        Repositories::SectionRepository::SHARED_CACHE.clear
+        FileUtils.rm_rf File.join middleman_scratch, '.'
+      end
+
+      def copy_directory_from_gem(dir, output_dir)
+        FileUtils.cp_r File.join(@gem_root, "#{dir}/."), output_dir
+      end
+
+      # Copy the index file from each version into the version's directory. Because version
+      # subdirectories are sections, this is the only way they get content from their master
+      # middleman directory.
+      def copy_version_master_middleman(dest_dir, git_accessor)
+        @versions.each do |version|
+          Dir.mktmpdir(version) do |tmpdir|
+            book = Book.from_remote(logger: @logger,
+                                    full_name: @book_repo,
+                                    destination_dir: tmpdir,
+                                    ref: version,
+                                    git_accessor: git_accessor)
+            index_source_dir = File.join(tmpdir, book.directory, 'master_middleman', source_dir_name)
+            index_dest_dir = File.join(dest_dir, version)
+            FileUtils.mkdir_p(index_dest_dir)
+
+            Dir.glob(File.join(index_source_dir, 'index.*')) do |f|
+              FileUtils.cp(File.expand_path(f), index_dest_dir)
+            end
+          end
+        end
       end
 
       def publisher_for_dir(final_app_dir)
