@@ -45,10 +45,6 @@ module Bookbinder
 
       attr_reader :publisher
 
-      def publisher_for_dir
-        Publisher.new(@logger, spider, middleman_runner, server_director, @git_accessor)
-      end
-
       def bind_book(cli_arguments, final_app_dir)
         verbosity = cli_arguments.include?('--verbose')
         location = cli_arguments[0]
