@@ -51,6 +51,8 @@ module Bookbinder
       let(:logger) { NilLogger.new }
       let(:spider) { Spider.new logger, app_dir: final_app_dir }
 
+      after { WebMock.disable_net_connect! }
+
       context 'when there are no broken links' do
         let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
 

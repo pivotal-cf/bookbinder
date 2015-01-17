@@ -60,6 +60,8 @@ module Bookbinder
       WebMock.disable_net_connect!(:allow_localhost => true)
     end
 
+    after { WebMock.disable_net_connect! }
+
     describe 'local' do
       let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
 
