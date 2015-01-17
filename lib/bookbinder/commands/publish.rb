@@ -21,6 +21,8 @@ module Bookbinder
       end
 
       def run(cli_arguments, git_accessor=Git)
+        final_app_dir = File.absolute_path('final_app')
+
         raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
         @git_accessor = git_accessor
         @section_repository = Repositories::SectionRepository.new(
@@ -30,12 +32,22 @@ module Bookbinder
             git_accessor: git_accessor
         )
         @gem_root = File.expand_path('../../../../', __FILE__)
+        spider = Spider.new(@logger, app_dir: final_app_dir)
+        middleman_runner = MiddlemanRunner.new(@logger)
+        server_director = ServerDirector.new(@logger, directory: final_app_dir)
 
-        final_app_dir = File.absolute_path('final_app')
+        @publisher = Publisher.new(@logger, spider, middleman_runner, server_director, @git_accessor)
+
         bind_book(cli_arguments, final_app_dir)
       end
 
       private
+
+      attr_reader :publisher
+
+      def publisher_for_dir
+        Publisher.new(@logger, spider, middleman_runner, server_director, @git_accessor)
+      end
 
       def bind_book(cli_arguments, final_app_dir)
         verbosity = cli_arguments.include?('--verbose')
@@ -61,7 +73,7 @@ module Bookbinder
         target_tag = cli_options[:target_tag]
         sections = gather_sections(workspace_dir, publish_config, output_paths, target_tag, @git_accessor)
 
-        success = publisher_for_dir(final_app_dir).publish(sections, cli_options, output_paths, publish_config)
+        success = publisher.publish(sections, cli_options, output_paths, publish_config)
 
         success ? 0 : 1
       end
@@ -131,14 +143,6 @@ module Bookbinder
             end
           end
         end
-      end
-
-      def publisher_for_dir(final_app_dir)
-        spider = Spider.new(@logger, app_dir: final_app_dir)
-        middleman_runner = MiddlemanRunner.new(@logger)
-        server_director = ServerDirector.new(@logger, directory: final_app_dir)
-
-        Publisher.new(@logger, spider, middleman_runner, server_director, @git_accessor)
       end
 
       def output_directory_paths(location, final_app_dir)
