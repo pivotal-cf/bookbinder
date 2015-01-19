@@ -7,10 +7,12 @@ require_relative '../helpers/middleman'
 require_relative '../helpers/nil_logger'
 require_relative '../helpers/spec_git_accessor'
 require_relative '../helpers/tmp_dirs'
+require_relative '../helpers/web_connection'
 
 module Bookbinder
   describe Commands::Publish do
     include SpecHelperMethods
+    extend WebConnection
 
     include_context 'tmp_dirs'
 
@@ -57,10 +59,9 @@ module Bookbinder
 
     before do
       allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
-      WebMock.disable_net_connect!(:allow_localhost => true)
     end
 
-    after { WebMock.disable_net_connect! }
+    only_local_web_allowed
 
     describe 'local' do
       let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
