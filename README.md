@@ -283,7 +283,7 @@ You should only need to run the `bundle` the first time around.
 
 ### CI for Books
 
-The currently recommended tool for CI with Bookbinder is GoCD. Please see this wiki for information on how to set it up: https://sites.google.com/a/pivotal.io/cf-tools/gocd.
+The currently recommended tool for CI with Bookbinder is GoCD.
 
 #### CI Runner
 You will want a build that executes this shell command:
