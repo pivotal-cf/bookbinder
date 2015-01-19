@@ -1,4 +1,4 @@
-require 'fog'
+require 'fog/aws'
 require 'tmpdir'
 require 'ansi'
 require 'faraday'
