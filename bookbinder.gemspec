@@ -2,7 +2,7 @@ require 'base64'
 
 Gem::Specification.new do |s|
   s.name        = 'bookbindery'
-  s.version     = '1.0.1'
+  s.version     = '1.0.2'
   s.summary     = 'Markdown to Rackup application documentation generator'
   s.description = 'A command line utility to be run in Book repositories to stitch together their constituent Markdown repos into a static-HTML-serving application'
   s.authors     = ['Mike Grafton', 'Lucas Marks', 'Gavin Morgan', 'Nikhil Gajwani', 'Dan Wendorf', 'Brenda Chan', 'Matthew Boedicker', 'Frank Kotsianas']
@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'rack-rewrite'
   s.add_runtime_dependency 'ruby-progressbar'
   s.add_runtime_dependency 'therubyracer'
-  s.add_runtime_dependency 'git', '1.2.8'
+  s.add_runtime_dependency 'git', '~> 1.2.8'
 
   s.add_development_dependency 'license_finder'
   s.add_development_dependency 'pry-byebug'
