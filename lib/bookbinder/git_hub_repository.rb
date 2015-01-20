@@ -69,7 +69,7 @@ module Bookbinder
       @directory || short_name
     end
 
-    def copy_from_remote(destination_dir, git_accessor = Git)
+    def copy_from_remote(destination_dir, git_accessor = CachingGitAccessor.new)
       begin
         @git = git_accessor.clone("git@github.com:#{full_name}", directory, path: destination_dir)
       rescue => e

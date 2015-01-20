@@ -420,42 +420,6 @@ module Bookbinder
         expect(typeless_text).not_to include(yaml_part)
         expect(typeless_text).not_to include(ruby_part)
       end
-
-      it 'makes only one request per code example repository' do
-        Repositories::SectionRepository::SHARED_CACHE.clear
-        section_repo_name = 'org/my-repo-with-code-snippets'
-        code_repo = 'cloudfoundry/code-example-repo'
-
-        expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{section_repo_name}",
-                                                        'my-code-snippet-repo',
-                                                        anything).and_call_original
-        expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{code_repo}",
-                                                        'code-example-repo',
-                                                        anything).and_call_original
-
-        sections = [
-            {'repository' => {
-                'name' => 'org/my-repo-with-code-snippets'},
-             'directory' => 'my-code-snippet-repo'
-            }
-        ]
-
-        config_hash = {
-            'sections' => sections,
-            'book_repo' => book,
-            'pdf_index' => [],
-            'public_host' => 'example.com',
-        }
-
-        config = Configuration.new(logger, config_hash)
-        configuration_fetcher = double('configuration_fetcher')
-        allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
-
-        publish_command = Commands::Publish.new(logger, configuration_fetcher)
-        silence_io_streams do
-          publish_command.run(['github', '--verbose'], SpecGitAccessor)
-        end
-      end
     end
 
     describe 'generates a site-map' do

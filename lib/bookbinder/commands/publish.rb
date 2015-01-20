@@ -1,4 +1,5 @@
 require_relative '../book'
+require_relative '../caching_git_accessor'
 require_relative '../cli_error'
 require_relative '../configuration'
 require_relative '../directory_helpers'
@@ -20,7 +21,7 @@ module Bookbinder
         "publish <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
       end
 
-      def run(cli_arguments, git_accessor=Git)
+      def run(cli_arguments, git_accessor=CachingGitAccessor.new)
         final_app_dir = File.absolute_path('final_app')
 
         raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
