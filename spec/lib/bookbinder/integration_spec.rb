@@ -16,7 +16,6 @@ describe '$ bookbinder' do
   describe 'publish' do
     describe 'local' do
       it 'generates a rack app', integration: true do
-        #pending 'Revisit when publishing locally no longer accesses GitHub.'
         silence_io_streams do
           `#{GEM_ROOT}/bin/bookbinder publish local`
         end
@@ -26,7 +25,6 @@ describe '$ bookbinder' do
       end
 
       it 'respects subnav includes', integration: true do
-        #pending 'Revisit when publishing locally no longer accesses GitHub.'
         silence_io_streams do
           `#{GEM_ROOT}/bin/bookbinder publish local`
         end
