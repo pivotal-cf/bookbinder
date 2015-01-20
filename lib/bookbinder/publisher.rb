@@ -61,9 +61,7 @@ module Bookbinder
                                  book,
                                  sections,
                                  publish_config[:host_for_sitemap],
-                                 publish_config[:archive_menu],
-                                 git_accessor
-      )
+                                 publish_config[:archive_menu])
       FileUtils.cp_r build_dir, public_dir
     end
   end

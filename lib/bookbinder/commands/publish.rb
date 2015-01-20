@@ -34,7 +34,7 @@ module Bookbinder
         )
         @gem_root = File.expand_path('../../../../', __FILE__)
         spider = Spider.new(@logger, app_dir: final_app_dir)
-        middleman_runner = MiddlemanRunner.new(@logger)
+        middleman_runner = MiddlemanRunner.new(@logger, git_accessor)
         server_director = ServerDirector.new(@logger, directory: final_app_dir)
 
         @publisher = Publisher.new(@logger, spider, middleman_runner, server_director, @git_accessor)
