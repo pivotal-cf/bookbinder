@@ -1,11 +1,8 @@
 require 'spec_helper'
 require_relative '../../../lib/bookbinder/stabilimentum'
-require_relative '../../helpers/web_connection'
 
 module Bookbinder
   describe Spider do
-    extend WebConnection
-
     def write_arbitrary_yaml_to(location)
       File.open(File.join(location, 'yaml_page.yml'), 'w').puts({foo: 'bar'}.to_yaml)
     end
@@ -20,9 +17,6 @@ module Bookbinder
     let(:logger) { NilLogger.new }
 
     around do |spec|
-      stub_request(:get, "http://something-nonexistent.com/absent-remote.gif").to_return(:status => 404, :body => "", :headers => {})
-      stub_request(:get, "http://something-surely-existenz.com/present-remote.png").to_return(:status => 200, :body => "", :headers => {})
-
       FileUtils.mkdir_p public_directory
       FileUtils.mkdir_p File.join(public_directory, 'stylesheets')
       FileUtils.cp_r 'template_app/.', final_app_dir

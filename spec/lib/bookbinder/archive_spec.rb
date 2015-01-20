@@ -1,15 +1,10 @@
 require_relative '../../../lib/bookbinder/archive'
 require_relative '../../helpers/tmp_dirs'
 require_relative '../../helpers/nil_logger'
-require_relative '../../helpers/web_connection'
 
 module Bookbinder
   describe Archive do
-    extend WebConnection
-
-    if ENV['REAL_S3']
-      web_allowed
-    else
+    unless ENV['REAL_S3']
       around do |example|
         Fog.mock!
         Fog::Mock.reset

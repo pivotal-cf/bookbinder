@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'webmock/rspec'
 require_relative '../lib/bookbinder'
 require_relative '../template_app/app.rb'
 require_relative 'fixtures/repo_fixture'
