@@ -31,7 +31,7 @@ module Bookbinder
               book_repo: 'some-repo/some-book',
         }
 
-        publisher = Publisher.new(logger, spider, static_site_generator, server_director, SpecGitAccessor)
+        publisher = Publisher.new(logger, spider, static_site_generator, server_director)
         publisher.publish([], cli_options, output_paths, publish_config)
       end
 
@@ -43,7 +43,7 @@ module Bookbinder
 
           logger = NilLogger.new
           spider = Spider.new(logger, app_dir: final_app_dir)
-          static_site_generator = MiddlemanRunner.new logger
+          static_site_generator = MiddlemanRunner.new logger, SpecGitAccessor
           allow(static_site_generator).to receive(:run) do |middleman_dir|
             FileUtils.mkdir_p File.join(output_dir, 'master_middleman', 'build')
           end
@@ -65,7 +65,7 @@ module Bookbinder
 
         logger = NilLogger.new
         spider = Spider.new(logger, app_dir: final_app_dir)
-        static_site_generator = MiddlemanRunner.new logger
+        static_site_generator = MiddlemanRunner.new logger, SpecGitAccessor
         allow(static_site_generator).to receive(:run) do |middleman_dir|
           FileUtils.mkdir_p File.join(master_middleman_dir, 'build')
           FileUtils.mkdir_p File.join(final_app_dir, 'public')

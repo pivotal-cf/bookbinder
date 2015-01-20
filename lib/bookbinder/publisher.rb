@@ -8,11 +8,10 @@ module Bookbinder
   class Publisher
     include DirectoryHelperMethods
 
-    def initialize(logger, spider, static_site_generator, server_director, git_accessor)
+    def initialize(logger, spider, static_site_generator, server_director)
       @logger = logger
       @spider = spider
       @static_site_generator = static_site_generator
-      @git_accessor = git_accessor
       @server_director = server_director
     end
 
@@ -33,7 +32,7 @@ module Bookbinder
                       sections: publish_config.fetch(:sections))
       host_for_sitemap = publish_config.fetch(:host_for_sitemap)
 
-      generate_site(cli_options, output_paths, publish_config, master_dir, workspace_dir, book, sections, build_directory, public_directory, git_accessor)
+      generate_site(cli_options, output_paths, publish_config, master_dir, workspace_dir, book, sections, build_directory, public_directory)
       generate_sitemap(host_for_sitemap, @spider)
 
 
@@ -44,7 +43,7 @@ module Bookbinder
 
     private
 
-    attr_reader :git_accessor, :section_repository, :logger
+    attr_reader :section_repository, :logger
 
     def generate_sitemap(host_for_sitemap, spider)
       raise "Your public host must be a single String." unless host_for_sitemap.is_a?(String)
@@ -52,7 +51,7 @@ module Bookbinder
       @server_director.use_server { |port| spider.generate_sitemap host_for_sitemap, port }
     end
 
-    def generate_site(cli_options, output_paths, publish_config, middleman_dir, workspace_dir, book, sections, build_dir, public_dir, git_accessor)
+    def generate_site(cli_options, output_paths, publish_config, middleman_dir, workspace_dir, book, sections, build_dir, public_dir)
       @static_site_generator.run(middleman_dir,
                                  workspace_dir,
                                  publish_config.fetch(:template_variables, {}),

@@ -37,7 +37,7 @@ module Bookbinder
         middleman_runner = MiddlemanRunner.new(@logger, git_accessor)
         server_director = ServerDirector.new(@logger, directory: final_app_dir)
 
-        @publisher = Publisher.new(@logger, spider, middleman_runner, server_director, @git_accessor)
+        @publisher = Publisher.new(@logger, spider, middleman_runner, server_director)
 
         bind_book(cli_arguments, final_app_dir)
       end

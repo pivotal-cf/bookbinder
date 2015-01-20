@@ -8,8 +8,10 @@ module Bookbinder
   describe MiddlemanRunner do
     include SpecHelperMethods
 
+    UNEXERCISED_GIT_ACCESSOR = nil
+
     let(:logger) { NilLogger.new }
-    let(:middleman_runner) { MiddlemanRunner.new(logger) }
+    let(:middleman_runner) { MiddlemanRunner.new(logger, UNEXERCISED_GIT_ACCESSOR) }
 
     let(:target_dir_path) { Dir.mktmpdir }
     let(:template_variables) { {'anybody' => 'nobody'} }
