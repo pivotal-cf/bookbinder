@@ -1,5 +1,3 @@
-require 'webmock/rspec'
-
 require_relative '../../lib/bookbinder/commands/publish'
 
 require_relative '../helpers/expectations'
@@ -7,13 +5,10 @@ require_relative '../helpers/middleman'
 require_relative '../helpers/nil_logger'
 require_relative '../helpers/spec_git_accessor'
 require_relative '../helpers/tmp_dirs'
-require_relative '../helpers/web_connection'
 
 module Bookbinder
   describe Commands::Publish do
     include SpecHelperMethods
-    extend WebConnection
-
     include_context 'tmp_dirs'
 
     around_with_fixture_repo do |spec|
@@ -60,8 +55,6 @@ module Bookbinder
     before do
       allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
     end
-
-    only_local_web_allowed
 
     describe 'local' do
       let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
@@ -164,7 +157,6 @@ module Bookbinder
             allow(logger).to receive(:log)
             expect(logger).to receive(:log).with /skipping \(not found\)/
             publish_command.run(['local'], SpecGitAccessor)
-            expect(WebMock).not_to have_requested(:get, 'https://api.github.com/repos/fantastic/code-example-repo/tarball/master')
           end
         end
       end

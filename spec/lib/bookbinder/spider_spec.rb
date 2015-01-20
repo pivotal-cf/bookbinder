@@ -19,8 +19,6 @@ module Bookbinder
     let(:public_directory) { File.join(final_app_dir, 'public') }
     let(:logger) { NilLogger.new }
 
-    only_local_web_allowed
-
     around do |spec|
       stub_request(:get, "http://something-nonexistent.com/absent-remote.gif").to_return(:status => 404, :body => "", :headers => {})
       stub_request(:get, "http://something-surely-existenz.com/present-remote.png").to_return(:status => 200, :body => "", :headers => {})
