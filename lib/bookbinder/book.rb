@@ -12,12 +12,23 @@ module Bookbinder
       book
     end
 
-    def initialize(logger: nil, full_name: nil, target_ref: nil, github_token: nil, sections: [], git_accessor: Git)
+    def initialize(logger: nil,
+                   full_name: nil,
+                   target_ref: nil,
+                   github_token: nil,
+                   sections: [],
+                   git_accessor: Git)
       @sections = sections.map do |section|
-        GitHubRepository.new logger: logger, full_name: section['repository']['name']
+        GitHubRepository.new(logger: logger,
+                             full_name: section['repository']['name'],
+                             git_accessor: git_accessor)
       end
 
-      @repository = GitHubRepository.new(logger: logger, full_name: full_name, target_ref: target_ref, github_token: github_token)
+      @repository = GitHubRepository.new(logger: logger,
+                                         full_name: full_name,
+                                         target_ref: target_ref,
+                                         github_token: github_token,
+                                         git_accessor: git_accessor)
       @git_accessor = git_accessor
     end
 
@@ -40,11 +51,11 @@ module Bookbinder
       rescue => e
         raise "Invalid git repository! #{git_directory} is not a .git directory"
       end
-      @repository.get_modification_date_for(file: file_relative_path, git: git_base_object)
+      @repository.get_modification_date_for(file: file_relative_path, git_base_object: git_base_object)
     end
 
     def copy_from_remote(destination_dir)
-      @repository.copy_from_remote(destination_dir, @git_accessor)
+      @repository.copy_from_remote(destination_dir)
     end
 
     def tag_self_and_sections_with(tag)

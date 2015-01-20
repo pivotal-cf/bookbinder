@@ -155,7 +155,8 @@ MARKDOWN
       end
 
       context 'when local' do
-        let(:config) { {local_repo_dir: '..', workspace: 'code-example-repo'} }
+        UNUSED_BUT_TRUTHY_GIT_ACCESSOR = "UNUSED BUT TRUTHY GIT ACCESSOR"
+        let(:config) { {local_repo_dir: '..', workspace: 'code-example-repo', git_accessor: UNUSED_BUT_TRUTHY_GIT_ACCESSOR} }
         around_with_fixture_repo &:run
 
         it 'returns markdown from the local repo' do
@@ -253,7 +254,7 @@ MARKDOWN
       let(:moon_section) { Section.new(repo, 'my_subnav_template', 'path/to/moon') }
       let(:fraggle_section) {
         Section.new(
-          GitHubRepository.new(full_name: '', directory: 'fraggles/rock'),
+          GitHubRepository.new(full_name: '', directory: 'fraggles/rock', git_accessor: Git),
           nil,
           'path/to/fraggles'
         )
@@ -266,7 +267,11 @@ MARKDOWN
       let(:file_modification_date) { '19 Jan 3028' }
 
       let(:repo_name) { '' }
-      let(:repo) { GitHubRepository.new(logger: logger, full_name: repo_name, directory: 'moon') }
+      let(:vcs_accessor) { double('vcs_accessor') }
+      let(:repo) { GitHubRepository.new(logger: logger,
+                                        full_name: repo_name,
+                                        directory: 'moon',
+                                        git_accessor: vcs_accessor) }
       let(:destination_dir) { tmp_subdir('destination') }
       let(:git_base_object) { double Git::Base }
       let(:git_history) { double Git::Log }
@@ -278,7 +283,7 @@ MARKDOWN
       let(:some_time) { Time.new(3028, 1, 19) }
 
       before do
-        allow(Git).to receive(:clone).and_return(git_base_object)
+        allow(vcs_accessor).to receive(:clone).and_return(git_base_object)
         allow(git_base_object).to receive(:checkout)
         repo.copy_from_remote(destination_dir)
 

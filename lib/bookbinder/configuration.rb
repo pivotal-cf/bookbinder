@@ -1,5 +1,6 @@
 require_relative 'remote_yaml_credential_provider'
 require_relative 'git_hub_repository'
+require 'git'
 
 module Bookbinder
   class Configuration
@@ -157,7 +158,7 @@ module Bookbinder
     end
 
     def credentials_repository
-      @credentials_repository ||= GitHubRepository.new(logger: @logger, full_name: cred_repo)
+      @credentials_repository ||= GitHubRepository.new(logger: @logger, full_name: cred_repo, git_accessor: Git)
     end
   end
 end

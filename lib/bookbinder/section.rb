@@ -37,7 +37,7 @@ module Bookbinder
           raise "Invalid git repository! Cannot get modification date for section: #{@repository.path_to_local_repo}."
         end
       end
-      @repository.get_modification_date_for(file: file, git: git_base_object)
+      @repository.get_modification_date_for(file: file, git_base_object: git_base_object)
     end
   end
 end

@@ -28,7 +28,7 @@ module Bookbinder
 
         sections.each do |section_config|
           repository = double
-          allow(GitHubRepository).to receive(:new).with(logger: logger, full_name: section_config['repository']['name'], local_repo_dir: parent_directory).and_return(repository)
+          allow(GitHubRepository).to receive(:new).with(logger: logger, full_name: section_config['repository']['name'], local_repo_dir: parent_directory, git_accessor: Git).and_return(repository)
           expect(repository).to receive(:update_local_copy)
         end
 

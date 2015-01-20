@@ -64,7 +64,7 @@ module Bookbinder
 
       before do
         repository = double
-        allow(GitHubRepository).to receive(:new).with(logger: logger, full_name: 'some-org/cred-repo').and_return(repository)
+        allow(GitHubRepository).to receive(:new).with(logger: logger, full_name: 'some-org/cred-repo', git_accessor: Git).and_return(repository)
         allow(RemoteYamlCredentialProvider).to receive(:new).with(logger, repository).and_return(cred_repo)
       end
 

@@ -5,7 +5,7 @@ module Bookbinder
   describe RemoteYamlCredentialProvider do
     describe '#credentials' do
       subject(:credentials) do
-        RemoteYamlCredentialProvider.new logger, credentials_repository, SpecGitAccessor
+        RemoteYamlCredentialProvider.new logger, credentials_repository
       end
 
       let(:logger) { double(Logger).as_null_object }
@@ -14,7 +14,8 @@ module Bookbinder
       end
       let(:full_name) { 'org-name/creds-repo' }
       let(:credentials_repository) do
-        GitHubRepository.new(logger: logger, full_name: 'org-name/creds-repo')
+        GitHubRepository.new(logger: logger, full_name: 'org-name/creds-repo',
+                             git_accessor: SpecGitAccessor)
       end
 
       it 'returns a hash of the credentials in credentials.yml' do

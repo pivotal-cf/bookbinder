@@ -35,12 +35,15 @@ module Bookbinder
           vcs_repo =
               if local_repo_dir
                 GitHubRepository.
-                    build_from_local(bookbinder_logger, attributes, local_repo_dir).
+                    build_from_local(bookbinder_logger,
+                                     attributes,
+                                     local_repo_dir,
+                                     git_accessor).
                     tap { |repo| repo.copy_from_local(workspace) }
               else
                 GitHubRepository.
                     build_from_remote(bookbinder_logger, attributes, nil, git_accessor).
-                    tap { |repo| repo.copy_from_remote(workspace, git_accessor) }
+                    tap { |repo| repo.copy_from_remote(workspace) }
               end
           example = code_example_repo.get_instance(attributes, vcs_repo: vcs_repo)
           snippet, language = example.get_snippet_and_language_at(at)

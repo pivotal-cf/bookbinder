@@ -82,12 +82,12 @@ module Bookbinder
           vcs_repo =
               if local_repo_dir
                 GitHubRepository.
-                    build_from_local(@logger, attributes, local_repo_dir).
+                    build_from_local(@logger, attributes, local_repo_dir, git_accessor).
                     tap { |repo| repo.copy_from_local(workspace) }
               else
                 GitHubRepository.
                     build_from_remote(@logger, attributes, target_tag, git_accessor).
-                    tap { |repo| repo.copy_from_remote(workspace, git_accessor) }
+                    tap { |repo| repo.copy_from_remote(workspace) }
               end
 
           @section_repository.get_instance(attributes,
@@ -206,7 +206,7 @@ module Bookbinder
                                                             section,
                                                             'master',
                                                             @git_accessor)
-            repository.copy_from_remote(destination_dir, @git_accessor)
+            repository.copy_from_remote(destination_dir)
             if repository
               File.join(destination_dir, repository.directory)
             else

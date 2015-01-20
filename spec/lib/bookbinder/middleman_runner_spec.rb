@@ -8,7 +8,7 @@ module Bookbinder
   describe MiddlemanRunner do
     include SpecHelperMethods
 
-    UNEXERCISED_GIT_ACCESSOR = nil
+    UNEXERCISED_GIT_ACCESSOR = "UNEXERCISED_GIT_ACCESSOR"
 
     let(:logger) { NilLogger.new }
     let(:middleman_runner) { MiddlemanRunner.new(logger, UNEXERCISED_GIT_ACCESSOR) }
@@ -19,8 +19,18 @@ module Bookbinder
     let(:archive_menu) { {} }
     let(:verbose) { false }
     let(:sections) { [
-        Section.new(GitHubRepository.new(full_name: '', directory: 'my/place/rocks'), 'my_subnav_template', 'my/place/rocks'),
-        Section.new(GitHubRepository.new(full_name: '', directory: 'fraggles/rock'), nil, 'fraggles/rock'),
+        Section.new(
+          GitHubRepository.new(full_name: '',
+                               directory: 'my/place/rocks',
+                               git_accessor: UNEXERCISED_GIT_ACCESSOR),
+          'my_subnav_template', 'my/place/rocks'
+        ),
+        Section.new(
+          GitHubRepository.new(full_name: '',
+                               directory: 'fraggles/rock',
+                               git_accessor: UNEXERCISED_GIT_ACCESSOR),
+          nil, 'fraggles/rock'
+        ),
     ] }
     let(:book) { Book.new(full_name: 'some-repo/some-book') }
     let(:local_repo_dir) { '/dev/null' }
