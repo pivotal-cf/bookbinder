@@ -60,7 +60,7 @@ module Bookbinder
       @local_repo_dir = local_repo_dir
 
       @github = GitClient.new(logger, access_token: github_token || ENV['GITHUB_API_TOKEN'])
-      @git_accessor = git_accessor or raise ArgumentError.new("Must provide a git accessor")
+      @git_accessor = git_accessor
     end
 
     def tag_with(tagname)
