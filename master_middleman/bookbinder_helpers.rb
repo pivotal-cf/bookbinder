@@ -134,8 +134,7 @@ module Bookbinder
         @code_example_repo ||= Repositories::SectionRepository.new(
           bookbinder_logger,
           store: Repositories::SectionRepository::SHARED_CACHE,
-          build: ->(*args) { CodeExample.new(*args) },
-          git_accessor: config[:git_accessor]
+          build: ->(*args) { CodeExample.new(*args) }
         )
       end
 

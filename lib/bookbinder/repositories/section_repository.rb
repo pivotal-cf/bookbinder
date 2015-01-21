@@ -5,12 +5,10 @@ module Bookbinder
 
       def initialize(logger,
                      store: nil,
-                     build: nil,
-                     git_accessor: Git)
+                     build: nil)
         @build = build
         @store = store
         @logger = logger
-        @git_accessor = git_accessor
       end
 
       def get_instance(attributes,
@@ -29,7 +27,7 @@ module Bookbinder
       private
 
       attr_reader(:build, :store, :section_hash, :logger,
-                  :destination_dir, :target_tag, :git_accessor)
+                  :destination_dir, :target_tag)
 
       def acquire(section_hash, destination_dir, target_tag, vcs_repo)
         repository_config = section_hash['repository']
