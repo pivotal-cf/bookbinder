@@ -45,55 +45,5 @@ module Bookbinder
         end
       end
     end
-
-    describe '#get_modification_date_for' do
-      let(:local_repo_dir) { '/some/dir' }
-      let(:repo_name) { 'farm/my_cow_repo' }
-      let(:vcs_accessor) { Git }
-      let(:repo) { GitHubRepository.new(full_name: repo_name,
-                                        local_repo_dir: local_repo_dir,
-                                        git_accessor: vcs_accessor) }
-      subject(:section) { Section.new(repo, 'my_template', 'path/to/farm') }
-      let(:file) { 'some-file' }
-      let(:git_base_object) { double Git::Base }
-      let(:time) { Time.new(2011, 1, 28) }
-
-      context 'when publishing from local' do
-        before do
-          allow(repo).to receive(:has_git_object?).and_return(false)
-        end
-
-        it 'creates the git object locally' do
-          allow(repo).to receive(:get_modification_date_for).with(file: file, path_to_local_repo: repo.path_to_local_repo).and_return(time)
-
-          expect(section.get_modification_date_for(file: file)).to eq time
-        end
-
-        it 'passes the git base object to the repository' do
-          allow(vcs_accessor).to receive(:open).with(local_repo_dir+'/my_cow_repo').and_return(git_base_object)
-
-          expect(repo).to receive(:get_modification_date_for).with(file: file, path_to_local_repo: '/some/dir/my_cow_repo')
-          section.get_modification_date_for(file: file)
-        end
-      end
-
-      context 'when publishing from remote' do
-        let(:time) { Time.new(2011, 1, 28) }
-
-        before do
-          allow(repo).to receive(:has_git_object?).and_return(true)
-        end
-
-        it 'gets the last modified date of the repository' do
-          allow(repo).to receive(:get_modification_date_for).with(file: file, path_to_local_repo: repo.path_to_local_repo).and_return(time)
-          expect(section.get_modification_date_for(file: file)).to eq time
-        end
-
-        it 'passes nil as the git object to the repository' do
-          expect(repo).to receive(:get_modification_date_for).with(file: file, path_to_local_repo: '/some/dir/my_cow_repo')
-          section.get_modification_date_for(file: file)
-        end
-      end
-    end
   end
 end

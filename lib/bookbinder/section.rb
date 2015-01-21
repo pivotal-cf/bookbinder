@@ -28,9 +28,5 @@ module Bookbinder
     def path_to_repository
       File.join @destination_dir, @repository.directory
     end
-
-    def get_modification_date_for(file: nil, full_path: nil)
-      @repository.get_modification_date_for(file: file, path_to_local_repo: @repository.path_to_local_repo)
-    end
   end
 end

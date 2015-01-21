@@ -135,27 +135,6 @@ module Bookbinder
       @logger.log '  skipping (not found) '.magenta + path_to_local_repo
     end
 
-    def get_modification_date_for(file: nil, path_to_local_repo: nil)
-      git_base_object = @git_base_object
-
-      unless git_base_object
-        begin
-          git_base_object = git_accessor.open(path_to_local_repo)
-        rescue => e
-          raise "Invalid git repository! Cannot get modification date for section at: #{path_to_local_repo}."
-        end
-      end
-
-      irrelevant_path_component = directory+'/'
-      path_within_repo = file.gsub(irrelevant_path_component, '')
-
-      begin
-        git_base_object.log(1).object(path_within_repo).first.date
-      rescue Git::GitExecuteError => e
-        raise "This file does not exist or is not tracked by git! Cannot get last modified date for #{path_within_repo}."
-      end
-    end
-
     def path_to_local_repo
       if @local_repo_dir
         File.join(@local_repo_dir, short_name)
