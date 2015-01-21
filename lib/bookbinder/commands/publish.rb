@@ -29,8 +29,7 @@ module Bookbinder
         @section_repository = Repositories::SectionRepository.new(
             @logger,
             store: Repositories::SectionRepository::SHARED_CACHE,
-            build: ->(*args) { Section.new(*args) },
-            git_accessor: git_accessor
+            build: ->(*args) { Section.new(*args) }
         )
         @gem_root = File.expand_path('../../../../', __FILE__)
         spider = Spider.new(@logger, app_dir: final_app_dir)

@@ -12,8 +12,7 @@ module Bookbinder
         SectionRepository.new(
             logger,
             store: {},
-            build: ->(*args) { Section.new(*args) },
-            git_accessor: SpecGitAccessor
+            build: ->(*args) { Section.new(*args) }
         )
       end
 
