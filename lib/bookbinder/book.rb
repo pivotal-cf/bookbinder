@@ -45,13 +45,8 @@ module Bookbinder
     end
 
     def get_modification_date_for(file: nil, full_path: nil)
-      git_directory, file_relative_path = full_path.split(output_dir_name+'/')
-      begin
-        git_base_object = Git.open(git_directory)
-      rescue => e
-        raise "Invalid git repository! #{git_directory} is not a .git directory"
-      end
-      @repository.get_modification_date_for(file: file_relative_path, git_base_object: git_base_object)
+      git_directory, file_relative_path = full_path.split('/'+output_dir_name+'/')
+      @repository.get_modification_date_for(file: file_relative_path, path_to_local_repo: git_directory)
     end
 
     def copy_from_remote(destination_dir)

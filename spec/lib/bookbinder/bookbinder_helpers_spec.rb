@@ -334,7 +334,7 @@ MARKDOWN
         let(:some_time) { Time.new(3028, 1, 19) }
 
         before do
-          allow(Git).to receive(:open).with('/my/long/path/my-galaxy-book/').and_return(git_base_object)
+          allow(Git).to receive(:open).with('/my/long/path/my-galaxy-book').and_return(git_base_object)
           allow(git_base_object).to receive(:log).with(1).and_return(git_history)
           allow(git_history).to receive(:object).with('master_middleman/source/index.html.md').and_return(git_history_most_recent_entry)
           allow(git_history_most_recent_entry).to receive(:first).and_return most_recent_commit

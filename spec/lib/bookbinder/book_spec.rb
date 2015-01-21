@@ -80,22 +80,16 @@ module Bookbinder
       let(:full_file_path) { '/some/dir/galaxy-book/output/master_middleman/source/404.html.md'}
       let(:git_log_time_for_file) { Time.new(3028, 1, 19) }
       let(:git_base_object) { double Git::Base }
+      let(:repo) { double(GitHubRepository) }
 
       it 'returns the last modified date for the specified file' do
         allow(GitHubRepository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil, git_accessor: git_accessor).and_return(repo)
         allow(Git).to receive(:open).with('/some/dir/galaxy-book/').and_return(git_base_object)
 
         expect(repo).to receive(:get_modification_date_for).
-                            with(file: 'master_middleman/source/404.html.md', git_base_object: git_base_object).
+                            with(file: 'master_middleman/source/404.html.md', path_to_local_repo: '/some/dir/galaxy-book').
                             and_return(git_log_time_for_file)
         expect(book.get_modification_date_for(full_path: full_file_path)).to eq(git_log_time_for_file)
-      end
-
-      it 'raises if the git directory is invalid' do
-        allow(GitHubRepository).to receive(:new).with(logger: nil, full_name: 'test', target_ref: nil, github_token: nil, git_accessor: git_accessor).and_return(repo)
-        allow(Git).to receive(:open).with('/some/dir/galaxy-book/').and_raise(ArgumentError)
-
-        expect{ book.get_modification_date_for(full_path: full_file_path) }.to raise_error(/Invalid git repository/)
       end
     end
 

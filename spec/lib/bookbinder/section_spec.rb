@@ -64,20 +64,15 @@ module Bookbinder
         end
 
         it 'creates the git object locally' do
-          allow(repo).to receive(:get_modification_date_for).with(file: file, git_base_object: git_base_object).and_return(time)
-          expect(vcs_accessor).to receive(:open).with(local_repo_dir+'/my_cow_repo').and_return(git_base_object)
-          expect(section.get_modification_date_for(file: file)).to eq time
-        end
+          allow(repo).to receive(:get_modification_date_for).with(file: file, path_to_local_repo: repo.path_to_local_repo).and_return(time)
 
-        it 'raises if the local repo does not exist or is not a git repo' do
-          allow(vcs_accessor).to receive(:open).with(local_repo_dir+'/my_cow_repo').and_raise
-          expect { section.get_modification_date_for(file: file) }.
-              to raise_error('Invalid git repository! Cannot get modification date for section: /some/dir/my_cow_repo.')
+          expect(section.get_modification_date_for(file: file)).to eq time
         end
 
         it 'passes the git base object to the repository' do
           allow(vcs_accessor).to receive(:open).with(local_repo_dir+'/my_cow_repo').and_return(git_base_object)
-          expect(repo).to receive(:get_modification_date_for).with(file: file, git_base_object: git_base_object)
+
+          expect(repo).to receive(:get_modification_date_for).with(file: file, path_to_local_repo: '/some/dir/my_cow_repo')
           section.get_modification_date_for(file: file)
         end
       end
@@ -90,12 +85,12 @@ module Bookbinder
         end
 
         it 'gets the last modified date of the repository' do
-          allow(repo).to receive(:get_modification_date_for).with(file: file, git_base_object: nil).and_return(time)
+          allow(repo).to receive(:get_modification_date_for).with(file: file, path_to_local_repo: repo.path_to_local_repo).and_return(time)
           expect(section.get_modification_date_for(file: file)).to eq time
         end
 
         it 'passes nil as the git object to the repository' do
-          expect(repo).to receive(:get_modification_date_for).with(file: file, git_base_object: nil)
+          expect(repo).to receive(:get_modification_date_for).with(file: file, path_to_local_repo: '/some/dir/my_cow_repo')
           section.get_modification_date_for(file: file)
         end
       end

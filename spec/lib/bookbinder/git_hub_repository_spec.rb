@@ -370,22 +370,23 @@ module Bookbinder
       let(:git_history_most_recent_entry) { double Git::Log }
       let(:most_recent_commit) { double Git::Object::Commit }
 
-      before do
-        allow(git_accessor).to receive(:clone).and_return(git_base_object)
-      end
-
-      context 'if the git accessor is nil' do
-        let(:git_base_object) { nil }
-        it 'raises' do
-          expect{ repo.get_modification_date_for(file: 'path/file.html', git_base_object: nil) }.
-              to raise_error(/Unexpected Error: Git base object unavailable/)
+      context 'if the git base object is nil' do
+        context 'and the specified path is not a git repo' do
+          it 'raises an informative error' do
+            allow(git_accessor).to receive(:open).and_raise
+            expect { repo.get_modification_date_for(file: 'my_cow_repo.html', path_to_local_repo: '/not/a/real/file/path') }.
+                to raise_error('Invalid git repository! Cannot get modification date for section at: /not/a/real/file/path.')
+          end
         end
       end
 
-      context 'if the git accessor exists' do
+      context 'if the git base object exists' do
         before do
           allow(git_base_object).to receive(:checkout).with(target_ref)
           allow(git_base_object).to receive(:log).with(1).and_return(git_history)
+
+          allow(git_accessor).to receive(:clone).and_return(git_base_object)
+          repo.copy_from_remote(destination_dir)
         end
 
         context 'and when the file exists' do
@@ -396,19 +397,16 @@ module Bookbinder
             allow(git_history_most_recent_entry).to receive(:first).and_return most_recent_commit
             allow(most_recent_commit).to receive(:date).and_return some_time
 
-            repo.copy_from_remote(destination_dir)
-
             expect(repo.get_modification_date_for(file: 'path/file.html')).to eq(some_time)
           end
         end
 
-        context 'when the file does not exist or is not tracked by git' do
+        context 'when the desired file does not exist in the repository or is not tracked by git' do
           it 'raises an error to the user' do
             allow(git_history).to receive(:object).with('does/not/exist.html').and_return(git_history_most_recent_entry)
             allow(git_history_most_recent_entry).to receive(:first).and_return most_recent_commit
             allow(most_recent_commit).to receive(:date).and_raise(Git::GitExecuteError)
 
-            repo.copy_from_remote(destination_dir)
             expect{repo.get_modification_date_for(file: 'does/not/exist.html')}.
                 to raise_error(/This file does not exist or is not tracked by git!/)
           end

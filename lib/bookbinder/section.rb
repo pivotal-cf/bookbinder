@@ -30,14 +30,7 @@ module Bookbinder
     end
 
     def get_modification_date_for(file: nil, full_path: nil)
-      unless @repository.has_git_object?
-        begin
-          git_base_object = @git_accessor.open(@repository.path_to_local_repo)
-        rescue => e
-          raise "Invalid git repository! Cannot get modification date for section: #{@repository.path_to_local_repo}."
-        end
-      end
-      @repository.get_modification_date_for(file: file, git_base_object: git_base_object)
+      @repository.get_modification_date_for(file: file, path_to_local_repo: @repository.path_to_local_repo)
     end
   end
 end
