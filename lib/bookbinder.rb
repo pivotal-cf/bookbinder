@@ -1,8 +1,6 @@
 require 'fog/aws'
 require 'tmpdir'
 require 'ansi'
-require 'faraday'
-require 'faraday_middleware'
 require 'octokit'
 require 'middleman-syntax'
 require 'middleman-core/cli'
