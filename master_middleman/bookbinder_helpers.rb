@@ -29,34 +29,24 @@ module Bookbinder
         workspace = config[:workspace]
         code_example_reader = CodeExampleReader.new(bookbinder_logger)
 
-        code_example = code_example_repo.fetch_from_cache_for(attributes, local_repo_dir)
-
-        if code_example
-          snippet, language = code_example_reader.get_snippet_and_language_at(at,
-                                                                              code_example.path_to_repository,
-                                                                              code_example.copied,
-                                                                              code_example.full_name)
-        else
-          vcs_repo =
-              if local_repo_dir
-                GitHubRepository.
-                    build_from_local(bookbinder_logger,
-                                     attributes,
-                                     local_repo_dir,
-                                     git_accessor).
-                    tap { |repo| repo.copy_from_local(workspace) }
-              else
-                GitHubRepository.
-                    build_from_remote(bookbinder_logger, attributes, nil, git_accessor).
-                    tap { |repo| repo.copy_from_remote(workspace) }
-              end
-          example = code_example_repo.get_instance(attributes, vcs_repo: vcs_repo)
-          snippet, language = code_example_reader.get_snippet_and_language_at(at,
-                                                                              example.path_to_repository,
-                                                                              example.copied,
-                                                                              example.full_name
-          )
-        end
+        vcs_repo =
+          if local_repo_dir
+            GitHubRepository.
+              build_from_local(bookbinder_logger,
+                               attributes,
+                               local_repo_dir,
+                               git_accessor).
+              tap { |repo| repo.copy_from_local(workspace) }
+          else
+            GitHubRepository.
+              build_from_remote(bookbinder_logger, attributes, nil, git_accessor).
+              tap { |repo| repo.copy_from_remote(workspace) }
+          end
+        example = code_example_repo.get_instance(attributes, vcs_repo: vcs_repo)
+        snippet, language = code_example_reader.get_snippet_and_language_at(at,
+                                                                            example.path_to_repository,
+                                                                            example.copied,
+                                                                            example.full_name)
 
         delimiter = '```'
 
@@ -117,7 +107,18 @@ module Bookbinder
         @code_example_repo ||= Repositories::SectionRepository.new(
           bookbinder_logger,
           store: Repositories::SectionRepository::SHARED_CACHE,
-          build: ->(*args) { CodeExample.new(*args) }
+          build: ->(path_to_repository,
+                    full_name,
+                    copied,
+                    _,
+                    destination_dir,
+                    directory_name) {
+                      CodeExample.new(path_to_repository,
+                                      full_name,
+                                      copied,
+                                      destination_dir,
+                                      directory_name)
+                    }
         )
       end
 

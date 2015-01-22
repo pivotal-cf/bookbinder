@@ -82,8 +82,8 @@ module Bookbinder
     def copy_from_remote(destination_dir)
       begin
         @git_base_object = git_accessor.clone("git@github.com:#{full_name}",
-                                  directory,
-                                  path: destination_dir)
+                                              directory,
+                                              path: destination_dir)
       rescue => e
         if e.message.include? "Permission denied (publickey)"
           raise RepositoryCloneError.new "Unable to access repository #{full_name}. You do not have the correct access rights. Please either add the key to your SSH agent, or set the GIT_SSH environment variable to override default SSH key usage. For more information run: `man git`."
