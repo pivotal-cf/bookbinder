@@ -14,7 +14,7 @@ module Bookbinder
 
     def get_snippet_and_language_at(marker, path_to_repository, copied, repo_name)
       unless copied
-        logger.log '  skipping (not found) '.magenta + path_to_repository
+        logger.log '  skipping (not found) '.magenta + repo_name
         return ''
       end
 

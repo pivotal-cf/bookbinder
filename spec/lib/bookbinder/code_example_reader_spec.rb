@@ -61,7 +61,7 @@ p fib.take_while { |n| n <= 4E6 }
         it 'logs a warning' do
           destination_dir = File.expand_path('../../../fixtures/repositories/code-example-repo', __FILE__)
           expect(logger).to receive(:log).with /skipping \(not found\)/
-          code_example_reader.get_snippet_and_language_at('anything_at_all', destination_dir, false, 'code-example-repo')
+          code_example_reader.get_snippet_and_language_at('can_be_anything', path_to_repo = nil, false, 'code-example-repo')
         end
       end
     end
