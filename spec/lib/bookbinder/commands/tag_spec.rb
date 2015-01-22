@@ -23,7 +23,7 @@ module Bookbinder
       }
     end
     let(:config) { Configuration.new(logger, config_hash) }
-    let(:git_client) { GitClient.new(logger) }
+    let(:git_client) { GitClient.new }
     let(:configuration_fetcher) { double('configuration_fetcher') }
 
     before do

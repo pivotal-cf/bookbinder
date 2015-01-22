@@ -20,7 +20,7 @@ module Bookbinder
 
     let(:logger) { NilLogger.new }
     let(:github_token) { 'blahblah' }
-    let(:git_client) { GitClient.new(logger, access_token: github_token) }
+    let(:git_client) { GitClient.new(access_token: github_token) }
     let(:repo_name) { 'great_org/dogs-repo' }
     let(:section_hash) { {'repository' => {'name' => repo_name}} }
     let(:destination_dir) { tmp_subdir('output') }
@@ -33,7 +33,7 @@ module Bookbinder
 
     before do
       allow(GitClient).to receive(:new).and_call_original
-      allow(GitClient).to receive(:new).with(logger, access_token: github_token).and_return(git_client)
+      allow(GitClient).to receive(:new).with(access_token: github_token).and_return(git_client)
     end
 
     it 'requires a full_name' do
@@ -71,9 +71,10 @@ module Bookbinder
       it "returns the first (most recent) commit's sha if @head_sha is unset" do
         fake_github = double(:github)
 
-        expect(GitClient).to receive(:new).
-                                 with(logger, access_token: github_token).
-                                 and_return(fake_github)
+        expect(GitClient).
+          to receive(:new).
+          with(access_token: github_token).
+          and_return(fake_github)
 
         expect(fake_github).to receive(:head_sha).with('org/repo').and_return('dcba')
 

@@ -48,7 +48,7 @@ module Bookbinder
     let(:logger) { NilLogger.new }
     let(:configuration_fetcher) { double('configuration_fetcher') }
     let(:publish_command) { Commands::Publish.new(logger, configuration_fetcher) }
-    let(:git_client) { GitClient.new(logger) }
+    let(:git_client) { GitClient.new }
 
     before do
       allow(configuration_fetcher).to receive(:fetch_config).and_return(config)

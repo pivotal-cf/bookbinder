@@ -5,17 +5,11 @@ module Bookbinder
     class GitClient::TokenException < StandardError;
     end
 
-    def initialize(logger, *args)
-      @logger = logger
-      super(*args)
-    end
-
     def head_sha(full_name)
       commits(full_name).first.sha
     end
 
     def create_tag!(full_name, tagname, ref)
-      @logger.log 'Tagging ' + full_name.cyan
       tag_result = create_tag(
         full_name,
         "tags/#{tagname}",
