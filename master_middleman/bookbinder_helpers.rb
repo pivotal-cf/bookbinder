@@ -107,7 +107,18 @@ module Bookbinder
         @code_example_repo ||= Repositories::SectionRepository.new(
           bookbinder_logger,
           store: Repositories::SectionRepository::SHARED_CACHE,
-          build: ->(*args) { CodeExample.new(*args) }
+          build: ->(path_to_repository,
+                    full_name,
+                    copied,
+                    _,
+                    destination_dir,
+                    directory_name) {
+                      CodeExample.new(path_to_repository,
+                                      full_name,
+                                      copied,
+                                      destination_dir,
+                                      directory_name)
+                    }
         )
       end
 
