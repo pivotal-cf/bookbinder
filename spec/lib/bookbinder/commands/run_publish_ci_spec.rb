@@ -1,10 +1,6 @@
-require_relative '../../lib/bookbinder/commands/run_publish_ci'
-
-# require_relative '../helpers/expectations'
-require_relative '../helpers/middleman'
-require_relative '../helpers/nil_logger'
-# require_relative '../helpers/spec_git_accessor'
-# require_relative '../helpers/tmp_dirs'
+require_relative '../../../../lib/bookbinder/commands/run_publish_ci'
+require_relative '../../../helpers/middleman'
+require_relative '../../../helpers/nil_logger'
 
 module Bookbinder
   describe Commands::RunPublishCI do

@@ -1,10 +1,10 @@
-require_relative '../../lib/bookbinder/commands/publish'
+require_relative '../../../../lib/bookbinder/commands/publish'
 
-require_relative '../helpers/expectations'
-require_relative '../helpers/middleman'
-require_relative '../helpers/nil_logger'
-require_relative '../helpers/spec_git_accessor'
-require_relative '../helpers/tmp_dirs'
+require_relative '../../../helpers/expectations'
+require_relative '../../../helpers/middleman'
+require_relative '../../../helpers/nil_logger'
+require_relative '../../../helpers/spec_git_accessor'
+require_relative '../../../helpers/tmp_dirs'
 
 module Bookbinder
   describe Commands::Publish do
@@ -442,7 +442,7 @@ module Bookbinder
           book_dir = File.absolute_path('.')
           middleman_source_dir = File.join(book_dir, 'master_middleman', 'source')
           FileUtils.mkdir_p middleman_source_dir
-          FileUtils.cp File.expand_path('../../fixtures/dogs_index.html', __FILE__), File.join(middleman_source_dir, 'index.html.md.erb')
+          FileUtils.cp File.expand_path('../../../../fixtures/dogs_index.html', __FILE__), File.join(middleman_source_dir, 'index.html.md.erb')
 
           sections = [
               { 'repository' => {'name' => 'org/dogs-repo'} }
@@ -670,7 +670,7 @@ module Bookbinder
 
           expect(File.exists?(pre_existing_file)).to eq false
           copied_manifest = File.read File.join(final_app_dir, 'app.rb')
-          template_manifest = File.read(File.expand_path('../../../template_app/app.rb', __FILE__))
+          template_manifest = File.read(File.expand_path('../../../../../template_app/app.rb', __FILE__))
           expect(copied_manifest).to eq(template_manifest)
         end
       end

@@ -1,9 +1,9 @@
 require 'yaml'
-require_relative '../../lib/bookbinder/commands/generate_pdf'
-require_relative '../../lib/bookbinder/sitemap_generator'
-require_relative '../helpers/expectations'
-require_relative '../helpers/tmp_dirs'
-require_relative '../helpers/nil_logger'
+require_relative '../../../../lib/bookbinder/commands/generate_pdf'
+require_relative '../../../../lib/bookbinder/sitemap_generator'
+require_relative '../../../helpers/expectations'
+require_relative '../../../helpers/tmp_dirs'
+require_relative '../../../helpers/nil_logger'
 
 module Bookbinder
   describe Commands::GeneratePDF do
