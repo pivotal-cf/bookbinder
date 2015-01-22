@@ -6,7 +6,7 @@ require_relative 'code_example'
 class Middleman::Cli::BuildAction
   def handle_error(file_name, response, e=Thor::Error.new(response))
     our_errors = [Bookbinder::GitClient::TokenException,
-                  Bookbinder::CodeExample::InvalidSnippet,
+                  Bookbinder::CodeExampleReader::InvalidSnippet,
                   QuicklinksRenderer::BadHeadingLevelError,
                   Git::GitExecuteError]
     raise e if our_errors.include?(e.class)

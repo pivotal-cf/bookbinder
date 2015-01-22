@@ -2,46 +2,16 @@ require_relative 'section'
 
 module Bookbinder
   class CodeExample < Section
-    class InvalidSnippet < StandardError
-      def initialize(repo, marker)
-        super "Error with marker #{marker.cyan} #{'in'.red} #{repo.cyan}#{'.'.red}"
-      end
-    end
 
-    def initialize(repository, subnav_template, destination_dir)
+    attr_reader :subnav_template, :destination_dir, :path_to_repository, :full_name, :copied, :directory_name
+
+    def initialize(path_to_repository, full_name, copied, subnav_template, destination_dir, directory_name)
       @subnav_template = subnav_template
-      @repository = repository
       @destination_dir = destination_dir
-      @git_accessor = Git
-    end
-
-    def get_snippet_and_language_at(marker)
-      unless @repository.copied?
-        @repository.announce_skip
-        return ''
-      end
-
-      prepared_snippet_at(marker)
-    end
-
-    private
-
-    def prepared_snippet_at(marker)
-      snippet = ''
-      FileUtils.cd(@repository.copied_to) { snippet = scrape_for(marker) }
-
-      raise InvalidSnippet.new(full_name, marker) if snippet.empty?
-      lines = snippet.split("\n")
-      language_match = lines[0].match(/code_snippet #{Regexp.escape(marker)} start (\w+)/)
-      language = language_match[1] if language_match
-      [lines[1..-2].join("\n"), language]
-    end
-
-    def scrape_for(marker)
-      locale = 'LC_CTYPE=C LANG=C' # Quiets 'sed: RE error: illegal byte sequence'
-      result = `#{locale} find . -exec sed -ne '/code_snippet #{marker} start/,/code_snippet #{marker} end/ p' {} \\; 2> /dev/null`
-      result = "" unless result.lines.last && result.lines.last.match(/code_snippet #{marker} end/)
-      result
+      @path_to_repository = path_to_repository
+      @full_name = full_name
+      @copied = copied
+      @directory_name = directory_name
     end
   end
 end

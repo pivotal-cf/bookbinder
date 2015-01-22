@@ -20,7 +20,7 @@ module Bookbinder
         }
       end
 
-      def fetch_code_example_for(attributes, local_repo_dir)
+      def fetch_from_cache_for(attributes, local_repo_dir)
         store[[attributes, local_repo_dir]]
       end
 
@@ -35,7 +35,12 @@ module Bookbinder
         raise "section repository '#{repository_config}' missing name key" unless repository_config['name']
         logger.log "Gathering #{repository_config['name'].cyan}"
         store[[section_hash, vcs_repo.path_to_local_repo]] =
-          build[vcs_repo, section_hash['subnav_template'], destination_dir]
+          build[vcs_repo.copied_to,
+                vcs_repo.full_name,
+                vcs_repo.copied?,
+                section_hash['subnav_template'],
+                destination_dir,
+                vcs_repo.directory]
       end
     end
   end
