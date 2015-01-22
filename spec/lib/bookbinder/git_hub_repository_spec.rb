@@ -1,4 +1,6 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/git_hub_repository'
+require_relative '../../helpers/nil_logger'
+require_relative '../../helpers/tmp_dirs'
 
 module Bookbinder
   describe GitHubRepository do
@@ -264,7 +266,7 @@ module Bookbinder
 
       context 'when a tag has been applied' do
         let(:tags) do
-          [OpenStruct.new(name: my_tag)]
+          [double(name: my_tag)]
         end
 
         it 'is true when checking that tag' do
@@ -297,7 +299,7 @@ module Bookbinder
       before do
         allow(git_client).to receive(:validate_authorization)
         allow(git_client).to receive(:commits).with(repo.full_name)
-                             .and_return([OpenStruct.new(sha: repo_sha)])
+                             .and_return([double(sha: repo_sha)])
       end
 
       it 'should apply a tag' do
