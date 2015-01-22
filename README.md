@@ -60,7 +60,7 @@ A book project needs a few things to allow Bookbinder to run. Here's the minimal
 ```YAML
 book_repo: org-name/repo-name
 cred_repo: org-name/private-repo
-layout_repo: org-name/master-middleman-repo		# optional
+layout_repo: org-name/master-middleman-repo		# non-optional for the generate_pdf command
 
 sections:
   - repository:
@@ -237,7 +237,19 @@ pages:
 ```
 
 Each path provided under `pages` must match the `directory` of its `repository` in `config.yml`.
-The header is pulled in from the `layout_repo`, so the file `some-header.html` is expected to exist at the top level in the repo `my-username/my-layout`.
+The header is pulled in from the `layout_repo`, so the file `some-header.html` is expected to exist at the top level in the repo `my-username/my-layout`. The contents of `some-header.html` will be added as a header to each page within the generated pdf.
+
+Here's an example of `some-header.html`:
+```
+<!DOCTYPE html>
+<html>
+  <body>
+    <div class='pdf_header' style="background-color:#ffffff; padding:12px 0px 12px 10px">
+    	<img src='images/logo-big.png' style="height:20px">
+    </div>
+  </body>
+</html>
+```
 
 So for the above pages to publish to pdf, your `config.yml` must contain
 
@@ -283,7 +295,7 @@ You should only need to run the `bundle` the first time around.
 
 ### CI for Books
 
-The currently recommended tool for CI with Bookbinder is GoCD. Please see this wiki for information on how to set it up: https://sites.google.com/a/pivotal.io/cf-tools/gocd.
+The currently recommended tool for CI with Bookbinder is GoCD.
 
 #### CI Runner
 You will want a build that executes this shell command:
