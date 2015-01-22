@@ -7,6 +7,5 @@ module Bookbinder
     def directory
       directory_name
     end
-
   end
 end
