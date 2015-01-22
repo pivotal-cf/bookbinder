@@ -8,7 +8,7 @@ module Bookbinder
     let(:cred_repo) { 'fantastic/creds-repo' }
     let(:logger) { NilLogger.new }
 
-    around_with_fixture_repo &:run
+    use_fixture_repo
 
     def run
       cli.run arguments

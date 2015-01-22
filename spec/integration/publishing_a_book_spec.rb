@@ -9,7 +9,7 @@ describe 'generating a book' do
 
   include_context 'tmp_dirs'
 
-  around_with_fixture_repo &:run
+  use_fixture_repo
 
   before do
     config = YAML.load(File.read('./config.yml'))

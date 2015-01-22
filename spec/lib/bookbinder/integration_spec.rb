@@ -3,9 +3,7 @@ require 'spec_helper'
 describe '$ bookbinder' do
   include_context 'tmp_dirs'
 
-  around_with_fixture_repo do |spec|
-    spec.run
-  end
+  use_fixture_repo
 
   before do
     config = YAML.load(File.read('./config.yml'))

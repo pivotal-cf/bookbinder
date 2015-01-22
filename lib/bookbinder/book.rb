@@ -4,7 +4,6 @@ require_relative 'directory_helpers'
 module Bookbinder
   class Book
     include DirectoryHelperMethods
-    attr_reader :sections
 
     def self.from_remote(logger: nil, full_name: nil, destination_dir: nil, ref: nil, git_accessor: Git)
       book = new(logger: logger, full_name: full_name, target_ref: ref, git_accessor: git_accessor)
@@ -18,7 +17,7 @@ module Bookbinder
                    github_token: nil,
                    sections: [],
                    git_accessor: Git)
-      @sections = sections.map do |section|
+      @section_vcs_repos = sections.map do |section|
         GitHubRepository.new(logger: logger,
                              full_name: section['repository']['name'],
                              git_accessor: git_accessor)
@@ -49,7 +48,7 @@ module Bookbinder
     end
 
     def tag_self_and_sections_with(tag)
-      (@sections + [@repository]).each { |repo| repo.tag_with tag }
+      (@section_vcs_repos + [@repository]).each { |repo| repo.tag_with tag }
     end
   end
 end

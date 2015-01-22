@@ -147,7 +147,7 @@ MARKDOWN
 
       context 'when not local' do
         let(:config) { {local_repo_dir: nil, workspace: 'code-example-repo', git_accessor: SpecGitAccessor} }
-        around_with_fixture_repo &:run
+        use_fixture_repo
 
         it 'returns markdown from github' do
           expect(yielded_snippet).to eq(markdown_snippet.chomp)
@@ -157,7 +157,7 @@ MARKDOWN
       context 'when local' do
         UNUSED_BUT_TRUTHY_GIT_ACCESSOR = "UNUSED BUT TRUTHY GIT ACCESSOR"
         let(:config) { {local_repo_dir: '..', workspace: 'code-example-repo', git_accessor: UNUSED_BUT_TRUTHY_GIT_ACCESSOR} }
-        around_with_fixture_repo &:run
+        use_fixture_repo
 
         it 'returns markdown from the local repo' do
           expect(yielded_snippet).to eq(markdown_snippet.chomp)

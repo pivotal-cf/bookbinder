@@ -3,7 +3,7 @@ require 'spec_helper'
 module Bookbinder
   describe GitClient do
     let(:logger) { NilLogger.new }
-    let(:client) { GitClient.new(logger) }
+    let(:client) { GitClient.new }
     let(:repo_name) { 'foo/bar' }
 
     describe 'create_tag!' do

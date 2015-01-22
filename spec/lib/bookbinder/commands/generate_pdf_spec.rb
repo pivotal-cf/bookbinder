@@ -1,9 +1,9 @@
 require 'yaml'
-require_relative '../../lib/bookbinder/commands/generate_pdf'
-require_relative '../../lib/bookbinder/sitemap_generator'
-require_relative '../helpers/expectations'
-require_relative '../helpers/tmp_dirs'
-require_relative '../helpers/nil_logger'
+require_relative '../../../../lib/bookbinder/commands/generate_pdf'
+require_relative '../../../../lib/bookbinder/sitemap_generator'
+require_relative '../../../helpers/expectations'
+require_relative '../../../helpers/tmp_dirs'
+require_relative '../../../helpers/nil_logger'
 
 module Bookbinder
   describe Commands::GeneratePDF do
@@ -22,7 +22,7 @@ module Bookbinder
       allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
     end
 
-    around_with_fixture_repo &:run
+    use_fixture_repo
 
     context 'when a final app has not been generated' do
       let(:cli_arguments) {[]}

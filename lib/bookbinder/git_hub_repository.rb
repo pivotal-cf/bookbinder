@@ -1,16 +1,11 @@
-require 'ruby-progressbar'
 require 'bookbinder/shell_out'
 require 'git'
-require_relative 'git_client'
 require_relative 'bookbinder_logger'
+require_relative 'git_client'
 
 module Bookbinder
   class GitHubRepository
-    class RepositoryCloneError < StandardError
-      def initialize(msg=nil)
-        super
-      end
-    end
+    RepositoryCloneError = Class.new(StandardError)
 
     include Bookbinder::ShellOut
 
@@ -59,11 +54,12 @@ module Bookbinder
       @directory = directory
       @local_repo_dir = local_repo_dir
 
-      @github = GitClient.new(logger, access_token: github_token || ENV['GITHUB_API_TOKEN'])
+      @github = GitClient.new(access_token: github_token || ENV['GITHUB_API_TOKEN'])
       @git_accessor = git_accessor or raise ArgumentError.new("Must provide a git accessor")
     end
 
     def tag_with(tagname)
+      @logger.log 'Tagging ' + full_name.cyan
       @github.create_tag! full_name, tagname, head_sha
     end
 
