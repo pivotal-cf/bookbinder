@@ -31,7 +31,8 @@ module Bookbinder
         raise "section repository '#{repository_config}' missing name key" unless repository_config['name']
         logger.log "Gathering #{repository_config['name'].cyan}"
         store[[section_hash, vcs_repo.path_to_local_repo]] =
-          build[vcs_repo.copied_to,
+          build[Bookbinder::SupportedFormats::Markdown,
+                vcs_repo.copied_to,
                 vcs_repo.full_name,
                 vcs_repo.copied?,
                 section_hash['subnav_template'],

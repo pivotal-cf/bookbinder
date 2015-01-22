@@ -19,8 +19,8 @@ module Bookbinder
     let(:archive_menu) { {} }
     let(:verbose) { false }
     let(:sections) { [
-        Section.new('path/to/repo', '', true, 'my_subnav_template', 'path/to', 'my/place/rocks'),
-        Section.new('path/to/repo', '', true, nil, 'path/to', 'fraggles/rock')
+        Section.new(SupportedFormats::Markdown, 'path/to/repo', '', true, 'my_subnav_template', 'path/to', 'my/place/rocks'),
+        Section.new(SupportedFormats::Markdown, 'path/to/repo', '', true, nil, 'path/to', 'fraggles/rock')
     ] }
     let(:book) { Book.new(full_name: 'some-repo/some-book') }
     let(:local_repo_dir) { '/dev/null' }
