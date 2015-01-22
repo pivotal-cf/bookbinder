@@ -11,9 +11,7 @@ module Bookbinder
     include SpecHelperMethods
     include_context 'tmp_dirs'
 
-    around_with_fixture_repo do |spec|
-      spec.run
-    end
+    use_fixture_repo
 
     let(:sections) do
       [

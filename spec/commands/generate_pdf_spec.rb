@@ -22,7 +22,7 @@ module Bookbinder
       allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
     end
 
-    around_with_fixture_repo &:run
+    use_fixture_repo
 
     context 'when a final app has not been generated' do
       let(:cli_arguments) {[]}

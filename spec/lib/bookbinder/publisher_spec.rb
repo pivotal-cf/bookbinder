@@ -12,9 +12,7 @@ module Bookbinder
     describe '#publish' do
       include_context 'tmp_dirs'
 
-      around_with_fixture_repo do |spec|
-        spec.run
-      end
+      use_fixture_repo
 
       def publish(logger, spider, static_site_generator, final_app_dir, master_middleman_dir, output_dir, server_director)
         cli_options =   { verbose: false }
