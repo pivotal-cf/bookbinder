@@ -1,16 +1,12 @@
-require 'ruby-progressbar'
 require 'bookbinder/shell_out'
 require 'git'
-require_relative 'git_client'
+require 'ruby-progressbar'
 require_relative 'bookbinder_logger'
+require_relative 'git_client'
 
 module Bookbinder
   class GitHubRepository
-    class RepositoryCloneError < StandardError
-      def initialize(msg=nil)
-        super
-      end
-    end
+    RepositoryCloneError = Class.new(StandardError)
 
     include Bookbinder::ShellOut
 
