@@ -1,6 +1,5 @@
 require 'bookbinder/shell_out'
 require 'git'
-require 'ruby-progressbar'
 require_relative 'bookbinder_logger'
 require_relative 'git_client'
 
