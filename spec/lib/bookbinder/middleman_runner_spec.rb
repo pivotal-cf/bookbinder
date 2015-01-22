@@ -19,18 +19,8 @@ module Bookbinder
     let(:archive_menu) { {} }
     let(:verbose) { false }
     let(:sections) { [
-        Section.new(
-          GitHubRepository.new(full_name: '',
-                               directory: 'my/place/rocks',
-                               git_accessor: UNEXERCISED_GIT_ACCESSOR),
-          'my_subnav_template', 'my/place/rocks'
-        ),
-        Section.new(
-          GitHubRepository.new(full_name: '',
-                               directory: 'fraggles/rock',
-                               git_accessor: UNEXERCISED_GIT_ACCESSOR),
-          nil, 'fraggles/rock'
-        ),
+        Section.new('path/to/repo', '', true, 'my_subnav_template', 'path/to', 'my/place/rocks'),
+        Section.new('path/to/repo', '', true, nil, 'path/to', 'fraggles/rock')
     ] }
     let(:book) { Book.new(full_name: 'some-repo/some-book') }
     let(:local_repo_dir) { '/dev/null' }

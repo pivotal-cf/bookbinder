@@ -27,10 +27,15 @@ module Bookbinder
         local_repo_dir = config[:local_repo_dir]
         attributes = {'repository' => {'name' => from}}
         workspace = config[:workspace]
-        code_example = code_example_repo.fetch_code_example_for(attributes, local_repo_dir)
+        code_example_reader = CodeExampleReader.new(bookbinder_logger)
+
+        code_example = code_example_repo.fetch_from_cache_for(attributes, local_repo_dir)
 
         if code_example
-          snippet, language = code_example.get_snippet_and_language_at(at)
+          snippet, language = code_example_reader.get_snippet_and_language_at(at,
+                                                                              code_example.path_to_repository,
+                                                                              code_example.copied,
+                                                                              code_example.full_name)
         else
           vcs_repo =
               if local_repo_dir
@@ -46,7 +51,11 @@ module Bookbinder
                     tap { |repo| repo.copy_from_remote(workspace) }
               end
           example = code_example_repo.get_instance(attributes, vcs_repo: vcs_repo)
-          snippet, language = example.get_snippet_and_language_at(at)
+          snippet, language = code_example_reader.get_snippet_and_language_at(at,
+                                                                              example.path_to_repository,
+                                                                              example.copied,
+                                                                              example.full_name
+          )
         end
 
         delimiter = '```'
