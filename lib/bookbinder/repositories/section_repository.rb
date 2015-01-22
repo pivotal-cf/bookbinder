@@ -20,10 +20,6 @@ module Bookbinder
         }
       end
 
-      def fetch_from_cache_for(attributes, local_repo_dir)
-        store[[attributes, local_repo_dir]]
-      end
-
       private
 
       attr_reader(:build, :store, :section_hash, :logger,

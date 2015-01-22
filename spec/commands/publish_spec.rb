@@ -359,12 +359,20 @@ module Bookbinder
         section_repo_name = 'org/my-repo-with-code-snippets'
         code_repo = 'cloudfoundry/code-example-repo'
 
-        expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{section_repo_name}",
-                                                        'my-code-snippet-repo',
-                                                        anything).and_call_original
-        expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{code_repo}",
-                                                        'code-example-repo',
-                                                        anything).and_call_original
+        expect(SpecGitAccessor).
+          to receive(:clone).
+          with("git@github.com:#{section_repo_name}",
+               'my-code-snippet-repo',
+               anything).
+          at_least(1).times.
+          and_call_original
+        expect(SpecGitAccessor).
+          to receive(:clone).
+          with("git@github.com:#{code_repo}",
+               'code-example-repo',
+               anything).
+          at_least(1).times.
+          and_call_original
 
         sections = [
             {'repository' => {
