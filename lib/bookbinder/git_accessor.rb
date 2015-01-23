@@ -1,7 +1,7 @@
 require 'git'
 
 module Bookbinder
-  class CachingGitAccessor
+  class GitAccessor
     def initialize
       @cache = {}
     end
