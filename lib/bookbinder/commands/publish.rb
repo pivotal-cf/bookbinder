@@ -29,8 +29,7 @@ module Bookbinder
         @git_accessor = git_accessor
         @section_repository = Repositories::SectionRepository.new(
             @logger,
-            store: Repositories::SectionRepository::SHARED_CACHE,
-            build: ->(*args) { Section.new(*args) }
+            store: Repositories::SectionRepository::SHARED_CACHE
         )
         @gem_root = File.expand_path('../../../../', __FILE__)
         spider = Spider.new(@logger, app_dir: final_app_dir)
@@ -39,18 +38,10 @@ module Bookbinder
 
         @publisher = Publisher.new(@logger, spider, middleman_runner, server_director)
 
-        bind_book(cli_arguments, final_app_dir)
-      end
-
-      private
-
-      attr_reader :publisher
-
-      def bind_book(cli_arguments, final_app_dir)
         verbosity = cli_arguments.include?('--verbose')
         location = cli_arguments[0]
 
-        cli_options = { verbose: verbosity, target_tag: nil }
+        cli_options = {verbose: verbosity, target_tag: nil}
         output_paths = output_directory_paths(location, final_app_dir)
         publish_config = publish_config(location)
         @versions = publish_config.fetch(:versions, [])
@@ -75,6 +66,10 @@ module Bookbinder
         success ? 0 : 1
       end
 
+      private
+
+      attr_reader :publisher
+
       def gather_sections(workspace, publish_config, output_paths, target_tag, git_accessor)
         publish_config.fetch(:sections).map do |attributes|
 
@@ -93,7 +88,8 @@ module Bookbinder
           @section_repository.get_instance(attributes,
                                           vcs_repo: vcs_repo,
                                           destination_dir: workspace,
-                                          target_tag: target_tag)
+                                          target_tag: target_tag,
+                                          build: ->(*args) { Section.new(*args) })
         end
       end
 
