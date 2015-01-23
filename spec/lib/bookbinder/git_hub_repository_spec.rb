@@ -192,7 +192,7 @@ module Bookbinder
                                            File.basename(repo_name),
                                            path: destination_dir).and_return(git_base_object)
         expect(git_base_object).to receive(:checkout).with(target_ref)
-        expect(repo.copy_from_remote(destination_dir)).to eq(destination_dir)
+        expect(repo.copy_from_remote(destination_dir)).to eq(File.join(destination_dir + 'my-docs-repo'))
       end
 
       it 'sets copied? to true' do

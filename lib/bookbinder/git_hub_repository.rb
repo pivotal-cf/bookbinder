@@ -91,7 +91,7 @@ module Bookbinder
         end
       end
       @git_base_object.checkout(target_ref) unless target_ref == 'master'
-      @copied_to = destination_dir
+      @copied_to = File.join(destination_dir, directory)
     end
 
     def copy_from_local(destination_dir)
