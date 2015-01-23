@@ -87,13 +87,6 @@ module Bookbinder
       expect(middleman_instance.config[:local_repo_dir]).to eq local_repo_dir
     end
 
-    it 'tells middleman about sections' do
-      run_middleman
-
-      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
-      expect(middleman_instance.config[:sections]).to eq sections
-    end
-
     it 'tells middleman about the book' do
       run_middleman
 

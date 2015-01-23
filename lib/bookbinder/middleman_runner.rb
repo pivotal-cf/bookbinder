@@ -89,7 +89,6 @@ module Bookbinder
           workspace: workspace_dir,
           production_host: production_host,
           git_accessor: git_accessor,
-          sections: sections,
           book: book,
           template_variables: template_variables,
           relative_links: false,
@@ -102,11 +101,11 @@ module Bookbinder
     end
 
     def subnavs_by_dir_name(sections)
-      sections.reduce({}) do |final_map, section|
+      sections.reduce({}) do |subnavs, section|
         namespace = section.directory.gsub('/', '_')
         template = section.subnav_template || 'default'
 
-        final_map.merge(namespace => template)
+        subnavs.merge(namespace => template)
       end
     end
   end
