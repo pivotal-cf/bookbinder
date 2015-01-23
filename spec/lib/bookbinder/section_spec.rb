@@ -4,8 +4,7 @@ module Bookbinder
   describe Section do
 
     describe '#subnav_template' do
-      let(:repo) { Section.new(SupportedFormats::Markdown,
-                               'directory',
+      let(:repo) { Section.new('directory',
                                'full name',
                                copied = true,
                                subnav_template_name,
