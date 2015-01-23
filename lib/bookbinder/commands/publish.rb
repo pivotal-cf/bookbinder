@@ -88,7 +88,6 @@ module Bookbinder
           @section_repository.get_instance(attributes,
                                           vcs_repo: vcs_repo,
                                           destination_dir: workspace,
-                                          target_tag: target_tag,
                                           build: ->(*args) { Section.new(*args) })
         end
       end
