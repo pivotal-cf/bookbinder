@@ -42,7 +42,7 @@ module Bookbinder
             template_variables,
             local_repo_dir,
             verbose = false,
-            sections = [],
+            subnav_templates_by_directory = {},
             production_host=nil,
             archive_menu=nil)
       @logger.log "\nRunning middleman...\n\n"
@@ -51,7 +51,7 @@ module Bookbinder
         invoke_against_current_dir(local_repo_dir,
                                    workspace_dir,
                                    production_host,
-                                   sections,
+                                   subnav_templates_by_directory,
                                    template_variables,
                                    archive_menu,
                                    verbose)
@@ -75,7 +75,7 @@ module Bookbinder
     def invoke_against_current_dir(local_repo_dir,
                                    workspace_dir,
                                    production_host,
-                                   sections,
+                                   subnav_templates,
                                    template_variables,
                                    archive_menu,
                                    verbose)
@@ -88,21 +88,12 @@ module Bookbinder
           git_accessor: git_accessor,
           template_variables: template_variables,
           relative_links: false,
-          subnav_templates: subnavs_by_dir_name(sections),
+          subnav_templates: subnav_templates,
           archive_menu: archive_menu
       }
 
       config.each { |k, v| builder.config[k] = v }
       Middleman::Cli::Build.new([], {quiet: !verbose}, {}).invoke :build, [], {verbose: verbose}
-    end
-
-    def subnavs_by_dir_name(sections)
-      sections.reduce({}) do |subnavs, section|
-        namespace = section.directory.gsub('/', '_')
-        template = section.subnav_template || 'default'
-
-        subnavs.merge(namespace => template)
-      end
     end
   end
 end

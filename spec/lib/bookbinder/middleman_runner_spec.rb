@@ -25,7 +25,12 @@ module Bookbinder
     let(:local_repo_dir) { '/dev/null' }
 
     def run_middleman
-      middleman_runner.run(target_dir_path, 'master_middleman/source/public', template_variables, local_repo_dir, verbose, sections, production_host, archive_menu)
+      subnav_templates = {
+          'my_place_rocks' => 'my_subnav_template',
+          'fraggles_rock' => 'default'
+      }
+
+      middleman_runner.run(target_dir_path, 'master_middleman/source/public', template_variables, local_repo_dir, verbose, subnav_templates, production_host, archive_menu)
     end
 
     it 'invokes Middleman in the requested directory' do

@@ -61,7 +61,9 @@ module Bookbinder
         target_tag = cli_options[:target_tag]
         sections = gather_sections(workspace_dir, publish_config, output_paths, target_tag, @git_accessor)
 
-        success = publisher.publish(sections, cli_options, output_paths, publish_config)
+        subnavs = subnavs_by_dir_name(sections)
+
+        success = publisher.publish(subnavs, cli_options, output_paths, publish_config)
 
         success ? 0 : 1
       end
@@ -224,6 +226,15 @@ module Bookbinder
 
       def publishing_to_github?(publish_location)
         config.has_option?('versions') && publish_location != 'local'
+      end
+
+      def subnavs_by_dir_name(sections)
+        sections.reduce({}) do |subnavs, section|
+          namespace = section.directory.gsub('/', '_')
+          template = section.subnav_template || 'default'
+
+          subnavs.merge(namespace => template)
+        end
       end
     end
   end
