@@ -22,11 +22,10 @@ module Bookbinder
         Section.new('path/to/repo', '', true, 'my_subnav_template', 'path/to', 'my/place/rocks'),
         Section.new('path/to/repo', '', true, nil, 'path/to', 'fraggles/rock')
     ] }
-    let(:book) { Book.new(full_name: 'some-repo/some-book') }
     let(:local_repo_dir) { '/dev/null' }
 
     def run_middleman
-      middleman_runner.run(target_dir_path, 'master_middleman/source/public', template_variables, local_repo_dir, verbose, book, sections, production_host, archive_menu)
+      middleman_runner.run(target_dir_path, 'master_middleman/source/public', template_variables, local_repo_dir, verbose, sections, production_host, archive_menu)
     end
 
     it 'invokes Middleman in the requested directory' do
@@ -85,13 +84,6 @@ module Bookbinder
 
       middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
       expect(middleman_instance.config[:local_repo_dir]).to eq local_repo_dir
-    end
-
-    it 'tells middleman about the book' do
-      run_middleman
-
-      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
-      expect(middleman_instance.config[:book]).to eq book
     end
 
     it 'builds with middleman and passes the verbose parameter' do

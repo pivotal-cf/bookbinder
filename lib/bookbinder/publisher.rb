@@ -27,12 +27,9 @@ module Bookbinder
 
       FileUtils.cp 'redirects.rb', final_app_dir if File.exists?('redirects.rb')
 
-      book = Book.new(logger: @logger,
-                      full_name: @book_repo,
-                      sections: publish_config.fetch(:sections))
       host_for_sitemap = publish_config.fetch(:host_for_sitemap)
 
-      generate_site(cli_options, output_paths, publish_config, master_dir, workspace_dir, book, sections, build_directory, public_directory)
+      generate_site(cli_options, output_paths, publish_config, master_dir, workspace_dir, sections, build_directory, public_directory)
       generate_sitemap(host_for_sitemap, @spider)
 
 
@@ -51,13 +48,12 @@ module Bookbinder
       @server_director.use_server { |port| spider.generate_sitemap host_for_sitemap, port }
     end
 
-    def generate_site(cli_options, output_paths, publish_config, middleman_dir, workspace_dir, book, sections, build_dir, public_dir)
+    def generate_site(cli_options, output_paths, publish_config, middleman_dir, workspace_dir, sections, build_dir, public_dir)
       @static_site_generator.run(middleman_dir,
                                  workspace_dir,
                                  publish_config.fetch(:template_variables, {}),
                                  output_paths[:local_repo_dir],
                                  cli_options[:verbose],
-                                 book,
                                  sections,
                                  publish_config[:host_for_sitemap],
                                  publish_config[:archive_menu])
