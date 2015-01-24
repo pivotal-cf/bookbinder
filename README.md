@@ -11,7 +11,7 @@ It also provides scripts for running a CI system that can detect when a document
 
 ## Setting Up a Book Project
 
-Note: Bookbinder requires Ruby version 2.0.0-p195 or higher.
+**Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
 
 ### Setup Checklist
 Please read this document to understand how to set up a new book project.  You can refer to this checklist for the steps that must completed manually when setting up your book:
