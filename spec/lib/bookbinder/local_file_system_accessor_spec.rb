@@ -1,21 +1,28 @@
 require_relative '../../../lib/bookbinder/local_file_system_accessor'
 
 module Bookbinder
-
   describe LocalFileSystemAccessor do
-    let(:local_file_system_accessor) { LocalFileSystemAccessor.new }
-
-    it 'can find if a given extension exists in a directory' do
-      expect(local_file_system_accessor.contains_extension?('rb', '.')).to be_truthy
+    def local_file_system_accessor
+      LocalFileSystemAccessor.new
     end
 
-    it 'can recusively find if a given extension exists in a directory' do
-      expect(local_file_system_accessor.contains_extension?('ditamap', './spec/fixtures')).to be_truthy
-    end
+    describe 'writing to a new file' do
+      it 'writes text to the specified place in the filesystem' do
+        Dir.mktmpdir do |tmpdir|
+          filepath = File.join tmpdir, 'filename.txt'
+          local_file_system_accessor.write(to: filepath, text: 'this is some text')
+          expect(File.read(filepath)).to eq 'this is some text'
+        end
+      end
 
-    it 'returns false if the given extension is not found in any subdirectory' do
-      expect(local_file_system_accessor.contains_extension?('dummy_ext', './spec/fixtures')).to eq false
+      it 'returns the location of the written file' do
+        Dir.mktmpdir do |tmpdir|
+          filepath = File.join tmpdir, 'filename.txt'
+          location_of_file = local_file_system_accessor.write(to: filepath,
+                                                              text: 'this is some text')
+          expect(location_of_file).to eq filepath
+        end
+      end
     end
   end
-
 end

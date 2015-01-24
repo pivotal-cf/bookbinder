@@ -9,6 +9,10 @@ require_relative '../section'
 require_relative '../spider'
 require_relative 'bookbinder_command'
 require_relative 'naming'
+require_relative '../dita_section_gatherer'
+require_relative '../shell'
+require_relative '../local_file_system_accessor'
+require_relative '../local_dita_processor'
 
 module Bookbinder
   module Commands
@@ -48,17 +52,50 @@ module Bookbinder
         @book_repo = publish_config[:book_repo]
 
         master_middleman_dir = output_paths.fetch(:master_middleman_dir)
-        intermediate_directory = output_paths.fetch(:output_dir)
-        master_dir = File.join intermediate_directory, 'master_middleman'
+        output_dir = output_paths.fetch(:output_dir)
+
+        tmp_dir = File.join output_dir, 'tmp'
+        processed_dita_dir = File.join tmp_dir, 'processed_dita'
+
+        master_dir = File.join output_dir, 'master_middleman'
         workspace_dir = File.join master_dir, 'source'
         prepare_directories(final_app_dir,
-                            intermediate_directory,
+                            output_dir,
+                            tmp_dir,
+                            processed_dita_dir,
                             workspace_dir,
                             master_middleman_dir,
                             master_dir,
                             @version_control_system)
 
         target_tag = cli_options[:target_tag]
+
+        section_hash = publish_config.fetch(:sections)
+        dita_section_config_hash = section_hash.select { |section_attrs| section_attrs.has_key? 'ditamap_location' }
+        dita_sections = dita_section_config_hash.map do |dita_section_config|
+          relative_path_to_dita_map = dita_section_config['ditamap_location']
+          full_name = section_hash.fetch('repository', {}).fetch('name')
+          target_ref = section_hash.fetch('repository', {})['ref']
+          directory = section_hash['directory']
+
+          DitaSection.new(nil, relative_path_to_dita_map, full_name, target_ref, directory)
+        end
+
+        # this only works for remote; fine for now
+        # -future: possible add a second clone(_from_local) method with a path?
+        dita_section_gatherer = DitaSectionGatherer.new(version_control_system)
+        cloned_dita_sections = dita_section_gatherer.gather(dita_sections, to: tmp_dir)
+
+        file_system_accessor = LocalFileSystemAccessor.new
+        location_of_dita_template_file = file_system_accessor.write(
+            to: File.join(output_dir, 'transform_dita.xml'),
+            text: dita_transform_script(config.path_to_dita_ot_library)
+        )
+
+        shell = Shell.new
+        dita_processor = LocalDitaProcessor.new(shell, location_of_dita_template_file)
+
+        dita_processor.process(cloned_dita_sections, to:processed_dita_dir)
 
         sections = gather_sections(workspace_dir, publish_config, output_paths, target_tag, @version_control_system)
 
@@ -95,10 +132,13 @@ module Bookbinder
         end
       end
 
-      def prepare_directories(final_app, middleman_scratch_space, middleman_source, master_middleman_dir, middleman_dir, version_control_system)
-        forget_sections(middleman_scratch_space)
+      def prepare_directories(final_app, output_dir, tmp_dir, processed_dita_dir, middleman_source, master_middleman_dir, middleman_dir, version_control_system)
+        forget_sections(output_dir)
         FileUtils.rm_rf File.join final_app, '.'
-        FileUtils.mkdir_p middleman_scratch_space
+        FileUtils.rm_rf File.join tmp_dir, '.'
+        FileUtils.mkdir_p output_dir
+        FileUtils.mkdir_p tmp_dir
+        FileUtils.mkdir_p processed_dita_dir
         FileUtils.mkdir_p File.join final_app, 'public'
         FileUtils.mkdir_p middleman_source
 
@@ -156,7 +196,7 @@ module Bookbinder
             sections: config.sections,
             book_repo: config.book_repo,
             host_for_sitemap: config.public_host,
-            archive_menu: config.archive_menu
+            archive_menu: config.archive_menu,
         }
 
         optional_arguments = {}
@@ -236,6 +276,25 @@ module Bookbinder
 
           subnavs.merge(namespace => template)
         end
+      end
+
+      def dita_transform_script(path_to_dita_ot_library)
+        <<SCRIPT
+        <?xml version="1.0" encoding="UTF-8" ?>
+<project name="dita_transform_script" default="somebuild" basedir=".">
+
+    <property name="dita.dir" location="src/main"/>
+
+    <target name="somebuild">
+        <ant antfile="#{path_to_dita_ot_library}/build.xml">
+            <property name="args.input" value="${dita_location}" />
+            <property name="transtype" value="htmlhelp"/>
+            <property name="out" value="${out_dir}" />
+        </ant>
+    </target>
+
+</project>
+SCRIPT
       end
     end
   end

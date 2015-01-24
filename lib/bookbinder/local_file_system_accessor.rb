@@ -7,12 +7,12 @@ module Bookbinder
       File.exist?(path)
     end
 
-    def contains_extension?(file_extension, path)
-      Find.find(path) do |path|
-        return true if path =~ /.*\.#{file_extension}$/
+    def write(to: , text: )
+      File.open(to, 'w') do |f|
+        f.write(text)
       end
 
-      false
+      to
     end
   end
 
