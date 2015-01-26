@@ -10,7 +10,7 @@ require_relative '../spider'
 require_relative 'bookbinder_command'
 require_relative 'naming'
 require_relative '../dita_section_gatherer'
-require_relative '../shell'
+require_relative '../sheller'
 require_relative '../local_file_system_accessor'
 require_relative '../local_dita_processor'
 
@@ -92,8 +92,8 @@ module Bookbinder
             text: dita_transform_script(config.path_to_dita_ot_library)
         )
 
-        shell = Shell.new
-        dita_processor = LocalDitaProcessor.new(shell, location_of_dita_template_file)
+        sheller = Sheller.new
+        dita_processor = LocalDitaProcessor.new(sheller, location_of_dita_template_file)
 
         dita_processor.process(cloned_dita_sections, to:processed_dita_dir)
 
