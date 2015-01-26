@@ -17,7 +17,7 @@ module Bookbinder
 
     before do
       allow(configuration_fetcher).to receive(:fetch_config) { config }
-      allow(Commands::Publish).to receive(:new).with(logger, configuration_fetcher) { fake_publish }
+      allow(Commands::Publish).to receive(:new).with(logger, config) { fake_publish }
       allow(Commands::PushLocalToStaging).to receive(:new).with(logger, configuration_fetcher) { fake_push_local_to_staging }
       allow(Commands::BuildAndPushTarball).to receive(:new).with(logger, configuration_fetcher) { fake_build_and_push_tarball }
     end
@@ -53,7 +53,7 @@ module Bookbinder
       end
 
       it 'respects the --verbose flag' do
-        publish_command = expect_to_receive_and_return_real_now(Commands::Publish, :new, logger, configuration_fetcher)
+        publish_command = expect_to_receive_and_return_real_now(Commands::Publish, :new, logger, config)
         expect(publish_command).to receive(:run).with ['github', '--verbose']
         command.run ['--verbose']
       end

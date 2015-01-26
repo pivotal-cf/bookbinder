@@ -27,7 +27,7 @@ module Bookbinder
       end
 
       def publish(cli_args)
-        Publish.new(@logger, @configuration_fetcher).run(['github'] + cli_args)
+        Publish.new(@logger, @configuration_fetcher.fetch_config).run(['github'] + cli_args)
       end
 
       def push_to_staging
