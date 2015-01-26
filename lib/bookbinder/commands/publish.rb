@@ -81,8 +81,6 @@ module Bookbinder
           DitaSection.new(nil, relative_path_to_dita_map, full_name, target_ref, directory)
         end
 
-        # this only works for remote; fine for now
-        # -future: possible add a second clone(_from_local) method with a path?
         dita_section_gatherer = DitaSectionGatherer.new(version_control_system)
         cloned_dita_sections = dita_section_gatherer.gather(dita_sections, to: tmp_dir)
 
@@ -280,7 +278,7 @@ module Bookbinder
 
       def dita_transform_script(path_to_dita_ot_library)
         <<SCRIPT
-        <?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <project name="dita_transform_script" default="somebuild" basedir=".">
 
     <property name="dita.dir" location="src/main"/>
