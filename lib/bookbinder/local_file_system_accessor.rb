@@ -7,7 +7,7 @@ module Bookbinder
       File.exist?(path)
     end
 
-    def write(to: , text: )
+    def write(to: nil, text: nil)
       File.open(to, 'w') do |f|
         f.write(text)
       end
