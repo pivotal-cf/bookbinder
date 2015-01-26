@@ -14,6 +14,8 @@ module Bookbinder
       begin
         if command_name == '--help'
           command.new(logger, usage_message).run command_arguments
+        elsif command_name == 'publish'
+          command.new(logger, @configuration_fetcher.fetch_config).run command_arguments
         else
           command.new(logger, @configuration_fetcher).run command_arguments
         end

@@ -16,7 +16,7 @@ require_relative '../local_dita_processor'
 
 module Bookbinder
   module Commands
-    class Publish < BookbinderCommand
+    class Publish
       VersionUnsupportedError = Class.new(StandardError)
 
       include Bookbinder::DirectoryHelperMethods
@@ -26,21 +26,26 @@ module Bookbinder
         "publish <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
       end
 
+      def initialize(logger, config)
+        @logger = logger
+        @config = config
+      end
+
       def run(cli_arguments, version_control_system=GitAccessor.new)
         final_app_dir = File.absolute_path('final_app')
 
         raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
         @version_control_system = version_control_system
         @section_repository = Repositories::SectionRepository.new(
-            @logger,
+            logger,
             store: Repositories::SectionRepository::SHARED_CACHE
         )
         @gem_root = File.expand_path('../../../../', __FILE__)
-        spider = Spider.new(@logger, app_dir: final_app_dir)
-        middleman_runner = MiddlemanRunner.new(@logger, version_control_system)
-        server_director = ServerDirector.new(@logger, directory: final_app_dir)
+        spider = Spider.new(logger, app_dir: final_app_dir)
+        middleman_runner = MiddlemanRunner.new(logger, version_control_system)
+        server_director = ServerDirector.new(logger, directory: final_app_dir)
 
-        @publisher = Publisher.new(@logger, spider, middleman_runner, server_director)
+        @publisher = Publisher.new(logger, spider, middleman_runner, server_director)
 
         verbosity = cli_arguments.include?('--verbose')
         location = cli_arguments[0]
@@ -106,7 +111,7 @@ module Bookbinder
 
       private
 
-      attr_reader :publisher, :version_control_system
+      attr_reader :publisher, :version_control_system, :config, :logger
 
       def gather_sections(workspace, publish_config, output_paths, target_tag, version_control_system)
         publish_config.fetch(:sections).map do |attributes|
@@ -115,11 +120,11 @@ module Bookbinder
           vcs_repo =
               if local_repo_dir
                 GitHubRepository.
-                    build_from_local(@logger, attributes, local_repo_dir, version_control_system).
+                    build_from_local(logger, attributes, local_repo_dir, version_control_system).
                     tap { |repo| repo.copy_from_local(workspace) }
               else
                 GitHubRepository.
-                    build_from_remote(@logger, attributes, target_tag, version_control_system).
+                    build_from_remote(logger, attributes, target_tag, version_control_system).
                     tap { |repo| repo.copy_from_remote(workspace) }
               end
 
@@ -162,7 +167,7 @@ module Bookbinder
       def copy_version_master_middleman(dest_dir, version_control_system)
         @versions.each do |version|
           Dir.mktmpdir(version) do |tmpdir|
-            book = Book.from_remote(logger: @logger,
+            book = Book.from_remote(logger: logger,
                                     full_name: @book_repo,
                                     destination_dir: tmpdir,
                                     ref: version,
@@ -221,7 +226,7 @@ module Bookbinder
 
       def book_checkout(ref, version_control_system)
         temp_workspace = Dir.mktmpdir('book_checkout')
-        book = Book.from_remote(logger: @logger,
+        book = Book.from_remote(logger: logger,
                                 full_name: config.book_repo,
                                 destination_dir: temp_workspace,
                                 ref: ref,
@@ -238,7 +243,7 @@ module Bookbinder
           else
             section = {'repository' => {'name' => config.layout_repo}}
             destination_dir = Dir.mktmpdir
-            repository = GitHubRepository.build_from_remote(@logger,
+            repository = GitHubRepository.build_from_remote(logger,
                                                             section,
                                                             'master',
                                                             version_control_system)
