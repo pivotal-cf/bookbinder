@@ -2,10 +2,11 @@ require_relative 'cli_error'
 
 module Bookbinder
   class CommandRunner
-    def initialize(configuration_fetcher, usage_message, logger, commands)
+    def initialize(configuration_fetcher, usage_message, logger, version_control_system, commands)
       @configuration_fetcher = configuration_fetcher
       @usage_message = usage_message
       @logger = logger
+      @version_control_system = version_control_system
       @commands = commands
     end
 
@@ -15,15 +16,15 @@ module Bookbinder
         if command_name == '--help'
           command.new(logger, usage_message).run command_arguments
         elsif command_name == 'publish'
-          command.new(logger, @configuration_fetcher.fetch_config).run command_arguments
+          command.new(logger, configuration_fetcher.fetch_config, version_control_system).run command_arguments
         elsif command_name == 'run_publish_ci'
-          publish_command = Commands::Publish.new(logger, @configuration_fetcher.fetch_config)
-          push_local_to_staging_command = Commands::PushLocalToStaging.new(logger, @configuration_fetcher)
-          build_and_push_tarball_command = Commands::BuildAndPushTarball.new(logger, @configuration_fetcher)
+          publish_command = Commands::Publish.new(logger, configuration_fetcher.fetch_config, version_control_system)
+          push_local_to_staging_command = Commands::PushLocalToStaging.new(logger, configuration_fetcher)
+          build_and_push_tarball_command = Commands::BuildAndPushTarball.new(logger, configuration_fetcher)
 
           command.new(publish_command, push_local_to_staging_command, build_and_push_tarball_command).run command_arguments
         else
-          command.new(logger, @configuration_fetcher).run command_arguments
+          command.new(logger, configuration_fetcher).run command_arguments
         end
       rescue CliError::InvalidArguments
         logger.log command.usage
@@ -33,7 +34,7 @@ module Bookbinder
 
     private
 
-    attr_reader :logger, :usage_message, :commands
+    attr_reader :logger, :usage_message, :commands, :version_control_system, :configuration_fetcher
 
   end
 end

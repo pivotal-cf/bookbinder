@@ -4,6 +4,7 @@ require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/spec_git_accessor'
 require_relative '../../../helpers/tmp_dirs'
+require_relative '../../../../lib/bookbinder/configuration'
 
 module Bookbinder
   describe Commands::Publish do
@@ -46,14 +47,14 @@ module Bookbinder
       let(:config) { Configuration.new(logger, config_hash) }
       let(:book) { 'fantastic/book' }
       let(:logger) { NilLogger.new }
-      let(:publish_command) { Commands::Publish.new(logger, config) }
+      let(:publish_command) { Commands::Publish.new(logger, config, SpecGitAccessor) }
       let(:git_client) { GitClient.new }
 
       describe 'local' do
         let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
 
         def response_for(page)
-          publish_command.run(['local'], SpecGitAccessor)
+          publish_command.run(['local'])
 
           response = nil
           ServerDirector.new(logger, directory: 'final_app').use_server do |port|
@@ -66,15 +67,15 @@ module Bookbinder
 
         it 'runs idempotently' do
           silence_io_streams do
-            publish_command.run(['local'], SpecGitAccessor) # Run Once
+            publish_command.run(['local']) # Run Once
             expect(File.exist? dogs_index).to eq true
-            publish_command.run(['local'], SpecGitAccessor) # Run twice
+            publish_command.run(['local']) # Run twice
             expect(File.exist? dogs_index).to eq true
           end
         end
 
         it 'creates some static HTML' do
-          publish_command.run(['local'], SpecGitAccessor)
+          publish_command.run(['local'])
 
           index_html = File.read dogs_index
           expect(index_html).to include 'Woof'
@@ -90,7 +91,7 @@ module Bookbinder
 
         it 'it can find repos locally rather than going to github' do
           final_app_dir = File.absolute_path('final_app')
-          publish_command.run(['local'], SpecGitAccessor)
+          publish_command.run(['local'])
 
           index_html = File.read File.join(final_app_dir, 'public', 'foods/sweet', 'index.html')
           expect(index_html).to include 'This is a Markdown Page'
@@ -107,7 +108,7 @@ module Bookbinder
             expect(fake_publisher).to receive(:publish) do |sections, cli_options, output_paths, publish_config, git_accessor|
               expect(output_paths[:master_middleman_dir]).to match('layout-repo')
             end
-            publish_command.run(['local'], SpecGitAccessor)
+            publish_command.run(['local'])
           end
         end
 
@@ -118,7 +119,7 @@ module Bookbinder
             it 'can find code example repos locally rather than going to github' do
               expect(SpecGitAccessor).to_not receive(:clone)
 
-              publish_command.run(['local'], SpecGitAccessor)
+              publish_command.run(['local'])
             end
           end
 
@@ -142,11 +143,11 @@ module Bookbinder
 
               config = Configuration.new(logger, config_hash)
 
-              publish_command = Commands::Publish.new(logger, config)
+              publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
 
               allow(logger).to receive(:log)
               expect(logger).to receive(:log).with /skipping \(not found\)/
-              publish_command.run(['local'], SpecGitAccessor)
+              publish_command.run(['local'])
             end
           end
         end
@@ -156,7 +157,7 @@ module Bookbinder
         let(:zipped_repo_url) { "https://github.com/#{book}/archive/master.tar.gz" }
 
         it 'creates some static HTML' do
-          publish_command.run(['github'], SpecGitAccessor)
+          publish_command.run(['github'])
 
           index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
           expect(index_html).to include 'This is a Markdown Page'
@@ -176,7 +177,7 @@ module Bookbinder
                                                           anything).and_call_original
 
           silence_io_streams do
-            publish_command.run(['github'], SpecGitAccessor)
+            publish_command.run(['github'])
           end
 
           final_app_dir = File.absolute_path('final_app')
@@ -206,7 +207,7 @@ module Bookbinder
             expect(fake_publisher).to receive(:publish) do |sections, cli_options, output_paths, publish_config, git_accessor|
               expect(output_paths[:master_middleman_dir]).to match('layout-repo')
             end
-            publish_command.run(['github'], SpecGitAccessor)
+            publish_command.run(['github'])
           end
         end
 
@@ -234,13 +235,13 @@ module Bookbinder
           let(:config) { Configuration.new(logger, config_hash) }
           let(:book) { 'fantastic/book' }
           let(:logger) { NilLogger.new }
-          let(:publish_commander) { Commands::Publish.new(logger, config) }
+          let(:publish_commander) { Commands::Publish.new(logger, config, SpecGitAccessor) }
           let(:temp_dir) { Dir.mktmpdir }
           let(:git_accessor_1) { SpecGitAccessor.new('dogs-repo', temp_dir) }
           let(:git_accessor_2) { SpecGitAccessor.new('dogs-repo', temp_dir) }
 
           it 'publishes previous versions of the book down paths named for the version tag' do
-            publish_commander.run(cli_args, SpecGitAccessor)
+            publish_commander.run(cli_args)
 
             index_html = File.read File.join('final_app', 'public', 'dogs', 'index.html')
             expect(index_html).to include 'images/breeds.png'
@@ -287,7 +288,7 @@ module Bookbinder
                                  "---\nsections: ")
 
               expect {
-                publish_command.run ['github'], SpecGitAccessor
+                publish_command.run ['github']
               }.to raise_error(Commands::Publish::VersionUnsupportedError)
             end
           end
@@ -297,18 +298,18 @@ module Bookbinder
       describe 'invalid arguments' do
         it 'raises Cli::InvalidArguments' do
           expect {
-            publish_command.run(['blah', 'blah', 'whatever'], SpecGitAccessor)
+            publish_command.run(['blah', 'blah', 'whatever'])
           }.to raise_error(CliError::InvalidArguments)
 
           expect {
-            publish_command.run([], SpecGitAccessor)
+            publish_command.run([])
           }.to raise_error(CliError::InvalidArguments)
         end
       end
 
       describe 'generating links' do
         it 'succeeds when all links are functional' do
-          no_broken_links = publish_command.run(['github'], SpecGitAccessor)
+          no_broken_links = publish_command.run(['github'])
 
           expect(no_broken_links).to eq 0
         end
@@ -333,8 +334,8 @@ module Bookbinder
 
           config = Configuration.new(logger, config_hash)
 
-          publish_command = Commands::Publish.new(logger, config)
-          publish_command.run(['github'], SpecGitAccessor)
+          publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
+          publish_command.run(['github'])
 
           final_app_dir = File.absolute_path('final_app')
           index_html = File.read File.join(final_app_dir, 'public', 'var-repo', 'variable_index.html')
@@ -378,9 +379,9 @@ module Bookbinder
 
           config = Configuration.new(logger, config_hash)
 
-          publish_command = Commands::Publish.new(logger, config)
+          publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
           silence_io_streams do
-            publish_command.run(['github'], SpecGitAccessor)
+            publish_command.run(['github'])
           end
 
           final_app_dir = File.absolute_path('final_app')
@@ -425,8 +426,8 @@ module Bookbinder
 
               config = Configuration.new(logger, config_hash)
 
-              publish_command = Commands::Publish.new(logger, config)
-              publish_command.run(['github'], SpecGitAccessor)
+              publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
+              publish_command.run(['github'])
             end.to raise_error "Your public host must be a single String."
           end
         end
@@ -450,8 +451,8 @@ module Bookbinder
 
             config = Configuration.new(logger, config_hash)
 
-            publish_command = Commands::Publish.new(logger, config)
-            publish_command.run(['github'], SpecGitAccessor)
+            publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
+            publish_command.run(['github'])
 
             final_app_dir = File.absolute_path('final_app')
             doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
@@ -482,8 +483,8 @@ module Bookbinder
 
           config = Configuration.new(logger, config_hash)
 
-          publish_command = Commands::Publish.new(logger, config)
-          publish_command.run(['github'], SpecGitAccessor)
+          publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
+          publish_command.run(['github'])
 
           final_app_dir = File.absolute_path('final_app')
           index_html = File.read(File.join(final_app_dir, 'public', 'a', 'b', 'c', 'index.html'))
@@ -524,7 +525,7 @@ module Bookbinder
 
         it 'pass the appropriate arguments to publish from the config' do
           expect(fake_publisher).to receive(:publish).with anything, expected_cli_options, expected_output_paths, expected_publish_config
-          publish_command.run(['local'], SpecGitAccessor)
+          publish_command.run(['local'])
         end
       end
 
@@ -544,17 +545,15 @@ module Bookbinder
             }
 
             config = Configuration.new(logger, config_hash)
-            configuration_fetcher = double('configuration_fetcher')
-            allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
 
-            publish_command = Commands::Publish.new(logger, configuration_fetcher)
+            publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
 
             begin
               real_stdout = $stdout
               $stdout = StringIO.new
 
               expect do
-                publish_command.run(['github'], SpecGitAccessor)
+                publish_command.run(['github'])
               end.to raise_error
 
               $stdout.rewind
@@ -583,14 +582,14 @@ module Bookbinder
 
           config = Configuration.new(logger, config_hash)
 
-          publish_command = Commands::Publish.new(logger, config)
+          publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
 
           begin
             real_stdout = $stdout
             $stdout = StringIO.new
 
             expect do
-              publish_command.run(['github', '--verbose'], SpecGitAccessor)
+              publish_command.run(['github', '--verbose'])
             end.to raise_error
 
             $stdout.rewind
@@ -615,7 +614,7 @@ module Bookbinder
 
             config = Configuration.new(logger, config_hash)
 
-            Commands::Publish.new(logger, config)
+            Commands::Publish.new(logger, config, SpecGitAccessor)
           end
 
           it 'creates the output directory' do
@@ -625,7 +624,7 @@ module Bookbinder
 
             expect(File.exists?(output_dir)).to eq false
 
-            publish_command.run(['github'], SpecGitAccessor)
+            publish_command.run(['github'])
 
             expect(File.exists?(output_dir)).to eq true
           end
@@ -640,7 +639,7 @@ module Bookbinder
 
             expect(File.exists?(pre_existing_file)).to eq true
 
-            publish_command.run(['github'], SpecGitAccessor)
+            publish_command.run(['github'])
 
             expect(File.exists?(pre_existing_file)).to eq false
           end
@@ -652,7 +651,7 @@ module Bookbinder
             FileUtils.touch pre_existing_file
 
             publish_command = create_publish_command
-            publish_command.run(['github'], SpecGitAccessor)
+            publish_command.run(['github'])
 
             expect(File.exists?(pre_existing_file)).to eq false
             copied_manifest = File.read File.join(final_app_dir, 'app.rb')

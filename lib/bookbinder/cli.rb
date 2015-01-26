@@ -1,7 +1,7 @@
 require_relative 'command_runner'
 require_relative 'local_file_system_accessor'
 require_relative 'command_validator'
-
+require_relative 'git_accessor'
 require_relative 'commands/build_and_push_tarball'
 require_relative 'commands/generate_pdf'
 require_relative 'commands/publish'
@@ -39,8 +39,9 @@ module Bookbinder
       usage_messenger = UsageMessenger.new
       usage_message = usage_messenger.construct_for(COMMANDS, FLAGS)
       command_validator = CommandValidator.new usage_messenger, COMMANDS + FLAGS, usage_message
+      git_accessor = GitAccessor.new
 
-      command_runner = CommandRunner.new(configuration_fetcher, usage_message, logger, COMMANDS + FLAGS)
+      command_runner = CommandRunner.new(configuration_fetcher, usage_message, logger, git_accessor, COMMANDS + FLAGS)
 
       begin
         command_name ? command_validator.validate!(command_name) : command_name = '--help'

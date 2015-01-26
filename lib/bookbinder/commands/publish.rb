@@ -1,13 +1,10 @@
 require_relative '../book'
-require_relative '../git_accessor'
 require_relative '../cli_error'
-require_relative '../configuration'
 require_relative '../directory_helpers'
 require_relative '../middleman_runner'
 require_relative '../publisher'
 require_relative '../section'
 require_relative '../spider'
-require_relative 'bookbinder_command'
 require_relative 'naming'
 require_relative '../dita_section_gatherer'
 require_relative '../sheller'
@@ -26,16 +23,16 @@ module Bookbinder
         "publish <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
       end
 
-      def initialize(logger, config)
+      def initialize(logger, config,  version_control_system)
         @logger = logger
         @config = config
+        @version_control_system = version_control_system
       end
 
-      def run(cli_arguments, version_control_system=GitAccessor.new)
+      def run(cli_arguments)
         final_app_dir = File.absolute_path('final_app')
 
         raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
-        @version_control_system = version_control_system
         @section_repository = Repositories::SectionRepository.new(
             logger,
             store: Repositories::SectionRepository::SHARED_CACHE
