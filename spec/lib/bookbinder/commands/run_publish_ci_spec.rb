@@ -1,6 +1,5 @@
 require_relative '../../../../lib/bookbinder/commands/run_publish_ci'
 require_relative '../../../helpers/middleman'
-require_relative '../../../helpers/nil_logger'
 
 module Bookbinder
   describe Commands::RunPublishCI do
@@ -9,18 +8,7 @@ module Bookbinder
     let(:fake_publish) { double 'fake_publish' }
     let(:fake_push_local_to_staging) { double 'fake_push_to_staging' }
     let(:fake_build_and_push_tarball) { double 'fake_build_and_push_tarball' }
-    let(:config_hash) { {'book_repo' => 'foo/bar'} }
-    let(:config) { Configuration.new(logger, config_hash) }
-    let(:logger) { NilLogger.new }
-    let(:configuration_fetcher) { double 'configuration_fetcher' }
-    let(:command) { Commands::RunPublishCI.new(logger, configuration_fetcher) }
-
-    before do
-      allow(configuration_fetcher).to receive(:fetch_config) { config }
-      allow(Commands::Publish).to receive(:new).with(logger, config) { fake_publish }
-      allow(Commands::PushLocalToStaging).to receive(:new).with(logger, configuration_fetcher) { fake_push_local_to_staging }
-      allow(Commands::BuildAndPushTarball).to receive(:new).with(logger, configuration_fetcher) { fake_build_and_push_tarball }
-    end
+    let(:command) { Commands::RunPublishCI.new(fake_publish, fake_push_local_to_staging, fake_build_and_push_tarball) }
 
     context 'when ENV["BUILD_NUMBER"] is set' do
       before do
@@ -53,8 +41,7 @@ module Bookbinder
       end
 
       it 'respects the --verbose flag' do
-        publish_command = expect_to_receive_and_return_real_now(Commands::Publish, :new, logger, config)
-        expect(publish_command).to receive(:run).with ['github', '--verbose']
+        expect(fake_publish).to receive(:run).with ['github', '--verbose']
         command.run ['--verbose']
       end
     end
