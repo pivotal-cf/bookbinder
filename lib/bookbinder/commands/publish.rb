@@ -24,7 +24,8 @@ module Bookbinder
                      file_system_accessor,
                      static_site_generator,
                      sitemap_generator,
-                     final_app_directory)
+                     final_app_directory,
+                     server_director)
         @logger = logger
         @config = config
         @version_control_system = version_control_system
@@ -32,6 +33,7 @@ module Bookbinder
         @static_site_generator = static_site_generator
         @sitemap_generator = sitemap_generator
         @final_app_directory = final_app_directory
+        @server_director = server_director
       end
 
       def run(cli_arguments)
@@ -41,7 +43,6 @@ module Bookbinder
             store: Repositories::SectionRepository::SHARED_CACHE
         )
         @gem_root = File.expand_path('../../../../', __FILE__)
-        server_director = ServerDirector.new(logger, directory: final_app_directory)
 
         @publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director)
 
@@ -85,7 +86,8 @@ module Bookbinder
                   :file_system_accessor,
                   :static_site_generator,
                   :final_app_directory,
-                  :sitemap_generator
+                  :sitemap_generator,
+                  :server_director
 
       def gather_sections(workspace, publish_config, output_paths, target_tag)
         publish_config.fetch(:sections).map do |attributes|

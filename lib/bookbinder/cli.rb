@@ -45,6 +45,7 @@ module Bookbinder
       middleman_runner = MiddlemanRunner.new(logger, git_accessor)
       final_app_directory = File.absolute_path('final_app')
       spider = Spider.new(logger, app_dir: final_app_directory)
+      server_director = ServerDirector.new(logger, directory: final_app_directory)
 
       command_runner = CommandRunner.new(configuration_fetcher,
                                          usage_message,
@@ -54,6 +55,7 @@ module Bookbinder
                                          middleman_runner,
                                          spider,
                                          final_app_directory,
+                                         server_director,
                                          COMMANDS + FLAGS)
 
       begin
