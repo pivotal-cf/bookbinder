@@ -20,25 +20,29 @@ module Bookbinder
         "publish <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
       end
 
-      def initialize(logger, config,  version_control_system, file_system_accessor, static_site_generator)
+      def initialize(logger,
+                     config,
+                     version_control_system,
+                     file_system_accessor,
+                     static_site_generator,
+                     final_app_directory)
         @logger = logger
         @config = config
         @version_control_system = version_control_system
         @file_system_accessor = file_system_accessor
         @static_site_generator = static_site_generator
+        @final_app_directory = final_app_directory
       end
 
       def run(cli_arguments)
-        final_app_dir = File.absolute_path('final_app')
-
         raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
         @section_repository = Repositories::SectionRepository.new(
             logger,
             store: Repositories::SectionRepository::SHARED_CACHE
         )
         @gem_root = File.expand_path('../../../../', __FILE__)
-        spider = Spider.new(logger, app_dir: final_app_dir)
-        server_director = ServerDirector.new(logger, directory: final_app_dir)
+        spider = Spider.new(logger, app_dir: final_app_directory)
+        server_director = ServerDirector.new(logger, directory: final_app_directory)
 
         @publisher = Publisher.new(logger, spider, static_site_generator, server_director)
 
@@ -46,7 +50,7 @@ module Bookbinder
         location = cli_arguments[0]
 
         cli_options = {verbose: verbosity, target_tag: nil}
-        output_paths = output_directory_paths(location, final_app_dir)
+        output_paths = output_directory_paths(location)
         publish_config = publish_config(location)
         @versions = publish_config.fetch(:versions, [])
         @book_repo = publish_config[:book_repo]
@@ -56,7 +60,7 @@ module Bookbinder
 
         master_dir = File.join output_dir, 'master_middleman'
         workspace_dir = File.join master_dir, 'source'
-        prepare_directories(final_app_dir,
+        prepare_directories(final_app_directory,
                             output_dir,
                             workspace_dir,
                             master_middleman_dir,
@@ -75,7 +79,13 @@ module Bookbinder
 
       private
 
-      attr_reader :publisher, :version_control_system, :config, :logger, :file_system_accessor, :static_site_generator
+      attr_reader :publisher,
+                  :version_control_system,
+                  :config,
+                  :logger,
+                  :file_system_accessor,
+                  :static_site_generator,
+                  :final_app_directory
 
       def gather_sections(workspace, publish_config, output_paths, target_tag)
         publish_config.fetch(:sections).map do |attributes|
@@ -144,11 +154,11 @@ module Bookbinder
         end
       end
 
-      def output_directory_paths(location, final_app_dir)
+      def output_directory_paths(location)
         local_repo_dir = (location == 'local') ? File.absolute_path('..') : nil
 
         {
-          final_app_dir: final_app_dir,
+          final_app_dir: final_app_directory,
           local_repo_dir: local_repo_dir,
           output_dir: File.absolute_path(output_dir_name),
           master_middleman_dir: layout_repo_path(local_repo_dir)

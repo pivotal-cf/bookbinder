@@ -24,18 +24,8 @@ module Bookbinder
         if command_name == '--help'
           command.new(logger, usage_message).run command_arguments
         elsif command_name == 'publish'
-          command.new(logger,
-                      configuration_fetcher.fetch_config,
-                      version_control_system,
-                      file_system_accessor,
-                      static_site_generator).run command_arguments
+          publish_command.run command_arguments
         elsif command_name == 'run_publish_ci'
-          publish_command = Commands::Publish.new(logger,
-                                                  configuration_fetcher.fetch_config,
-                                                  version_control_system,
-                                                  file_system_accessor,
-                                                  static_site_generator)
-
           push_local_to_staging_command = Commands::PushLocalToStaging.new(logger, configuration_fetcher)
           build_and_push_tarball_command = Commands::BuildAndPushTarball.new(logger, configuration_fetcher)
 
@@ -58,6 +48,15 @@ module Bookbinder
                 :configuration_fetcher,
                 :static_site_generator,
                 :file_system_accessor
+
+    def publish_command
+      Commands::Publish.new(logger,
+                            configuration_fetcher.fetch_config,
+                            version_control_system,
+                            file_system_accessor,
+                            static_site_generator,
+                            File.absolute_path('final_app'))
+    end
 
   end
 end

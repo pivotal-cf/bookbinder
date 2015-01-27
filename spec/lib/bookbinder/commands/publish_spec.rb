@@ -50,11 +50,13 @@ module Bookbinder
       let(:logger) { NilLogger.new }
       let(:file_system_accessor) { LocalFileSystemAccessor.new }
       let(:middleman_runner) { MiddlemanRunner.new(logger, SpecGitAccessor) }
+      let(:final_app_dir) { File.absolute_path('final_app') }
       let(:publish_command) { Commands::Publish.new(logger,
                                                     config,
                                                     SpecGitAccessor,
                                                     file_system_accessor,
-                                                    middleman_runner) }
+                                                    middleman_runner,
+                                                    final_app_dir) }
       let(:git_client) { GitClient.new }
 
       describe 'local' do
@@ -154,7 +156,8 @@ module Bookbinder
                                                       config,
                                                       SpecGitAccessor,
                                                       file_system_accessor,
-                                                      middleman_runner)
+                                                      middleman_runner,
+                                                      final_app_dir)
 
               allow(logger).to receive(:log)
               expect(logger).to receive(:log).with /skipping \(not found\)/
@@ -250,7 +253,8 @@ module Bookbinder
                                                         config,
                                                         SpecGitAccessor,
                                                         file_system_accessor,
-                                                        middleman_runner) }
+                                                        middleman_runner,
+                                                        final_app_dir) }
           let(:temp_dir) { Dir.mktmpdir }
           let(:git_accessor_1) { SpecGitAccessor.new('dogs-repo', temp_dir) }
           let(:git_accessor_2) { SpecGitAccessor.new('dogs-repo', temp_dir) }
@@ -353,7 +357,8 @@ module Bookbinder
                                                   config,
                                                   SpecGitAccessor,
                                                   file_system_accessor,
-                                                  middleman_runner)
+                                                  middleman_runner,
+                                                  final_app_dir)
           publish_command.run(['github'])
 
           final_app_dir = File.absolute_path('final_app')
@@ -402,7 +407,8 @@ module Bookbinder
                                                   config,
                                                   SpecGitAccessor,
                                                   file_system_accessor,
-                                                  middleman_runner)
+                                                  middleman_runner,
+                                                  final_app_dir)
           silence_io_streams do
             publish_command.run(['github'])
           end
@@ -453,7 +459,8 @@ module Bookbinder
                                                       config,
                                                       SpecGitAccessor,
                                                       file_system_accessor,
-                                                      middleman_runner)
+                                                      middleman_runner,
+                                                      final_app_dir)
               publish_command.run(['github'])
             end.to raise_error "Your public host must be a single String."
           end
@@ -482,7 +489,8 @@ module Bookbinder
                                                     config,
                                                     SpecGitAccessor,
                                                     file_system_accessor,
-                                                    middleman_runner)
+                                                    middleman_runner,
+                                                    final_app_dir)
             publish_command.run(['github'])
 
             final_app_dir = File.absolute_path('final_app')
@@ -518,7 +526,8 @@ module Bookbinder
                                                   config,
                                                   SpecGitAccessor,
                                                   file_system_accessor,
-                                                  middleman_runner)
+                                                  middleman_runner,
+                                                  final_app_dir)
           publish_command.run(['github'])
 
           final_app_dir = File.absolute_path('final_app')
@@ -585,7 +594,8 @@ module Bookbinder
                                                     config,
                                                     SpecGitAccessor,
                                                     file_system_accessor,
-                                                    middleman_runner)
+                                                    middleman_runner,
+                                                    final_app_dir)
             begin
               real_stdout = $stdout
               $stdout = StringIO.new
@@ -624,7 +634,8 @@ module Bookbinder
                                                   config,
                                                   SpecGitAccessor,
                                                   file_system_accessor,
-                                                  middleman_runner)
+                                                  middleman_runner,
+                                                  final_app_dir)
           begin
             real_stdout = $stdout
             $stdout = StringIO.new
@@ -655,8 +666,14 @@ module Bookbinder
 
             config = Configuration.new(logger, config_hash)
             middleman_runner = MiddlemanRunner.new(logger, SpecGitAccessor)
+            final_app_dir = File.absolute_path('final_app')
 
-            Commands::Publish.new(logger, config, SpecGitAccessor, file_system_accessor, middleman_runner)
+            Commands::Publish.new(logger,
+                                  config,
+                                  SpecGitAccessor,
+                                  file_system_accessor,
+                                  middleman_runner,
+                                  final_app_dir)
           end
 
           it 'creates the output directory' do
