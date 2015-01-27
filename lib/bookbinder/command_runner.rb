@@ -8,6 +8,8 @@ module Bookbinder
                    version_control_system,
                    file_system_accessor,
                    static_site_generator,
+                   sitemap_generator,
+                   final_app_directory,
                    commands)
       @configuration_fetcher = configuration_fetcher
       @usage_message = usage_message
@@ -15,6 +17,8 @@ module Bookbinder
       @version_control_system = version_control_system
       @file_system_accessor = file_system_accessor
       @static_site_generator = static_site_generator
+      @sitemap_generator = sitemap_generator
+      @final_app_directory = final_app_directory
       @commands = commands
     end
 
@@ -47,7 +51,9 @@ module Bookbinder
                 :version_control_system,
                 :configuration_fetcher,
                 :static_site_generator,
-                :file_system_accessor
+                :file_system_accessor,
+                :sitemap_generator,
+                :final_app_directory
 
     def publish_command
       Commands::Publish.new(logger,
@@ -55,7 +61,8 @@ module Bookbinder
                             version_control_system,
                             file_system_accessor,
                             static_site_generator,
-                            File.absolute_path('final_app'))
+                            sitemap_generator,
+                            final_app_directory)
     end
 
   end

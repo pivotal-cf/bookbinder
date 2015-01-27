@@ -6,6 +6,8 @@ require_relative '../../../helpers/spec_git_accessor'
 require_relative '../../../helpers/tmp_dirs'
 require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
+require_relative '../../../../lib/bookbinder/middleman_runner'
+require_relative '../../../../lib/bookbinder/spider'
 
 module Bookbinder
   describe Commands::Publish do
@@ -51,11 +53,13 @@ module Bookbinder
       let(:file_system_accessor) { LocalFileSystemAccessor.new }
       let(:middleman_runner) { MiddlemanRunner.new(logger, SpecGitAccessor) }
       let(:final_app_dir) { File.absolute_path('final_app') }
+      let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
       let(:publish_command) { Commands::Publish.new(logger,
                                                     config,
                                                     SpecGitAccessor,
                                                     file_system_accessor,
                                                     middleman_runner,
+                                                    spider,
                                                     final_app_dir) }
       let(:git_client) { GitClient.new }
 
@@ -157,6 +161,7 @@ module Bookbinder
                                                       SpecGitAccessor,
                                                       file_system_accessor,
                                                       middleman_runner,
+                                                      spider,
                                                       final_app_dir)
 
               allow(logger).to receive(:log)
@@ -254,6 +259,7 @@ module Bookbinder
                                                         SpecGitAccessor,
                                                         file_system_accessor,
                                                         middleman_runner,
+                                                        spider,
                                                         final_app_dir) }
           let(:temp_dir) { Dir.mktmpdir }
           let(:git_accessor_1) { SpecGitAccessor.new('dogs-repo', temp_dir) }
@@ -358,6 +364,7 @@ module Bookbinder
                                                   SpecGitAccessor,
                                                   file_system_accessor,
                                                   middleman_runner,
+                                                  spider,
                                                   final_app_dir)
           publish_command.run(['github'])
 
@@ -408,6 +415,7 @@ module Bookbinder
                                                   SpecGitAccessor,
                                                   file_system_accessor,
                                                   middleman_runner,
+                                                  spider,
                                                   final_app_dir)
           silence_io_streams do
             publish_command.run(['github'])
@@ -460,6 +468,7 @@ module Bookbinder
                                                       SpecGitAccessor,
                                                       file_system_accessor,
                                                       middleman_runner,
+                                                      spider,
                                                       final_app_dir)
               publish_command.run(['github'])
             end.to raise_error "Your public host must be a single String."
@@ -490,6 +499,7 @@ module Bookbinder
                                                     SpecGitAccessor,
                                                     file_system_accessor,
                                                     middleman_runner,
+                                                    spider,
                                                     final_app_dir)
             publish_command.run(['github'])
 
@@ -527,6 +537,7 @@ module Bookbinder
                                                   SpecGitAccessor,
                                                   file_system_accessor,
                                                   middleman_runner,
+                                                  spider,
                                                   final_app_dir)
           publish_command.run(['github'])
 
@@ -595,6 +606,7 @@ module Bookbinder
                                                     SpecGitAccessor,
                                                     file_system_accessor,
                                                     middleman_runner,
+                                                    spider,
                                                     final_app_dir)
             begin
               real_stdout = $stdout
@@ -635,6 +647,7 @@ module Bookbinder
                                                   SpecGitAccessor,
                                                   file_system_accessor,
                                                   middleman_runner,
+                                                  spider,
                                                   final_app_dir)
           begin
             real_stdout = $stdout
@@ -667,12 +680,14 @@ module Bookbinder
             config = Configuration.new(logger, config_hash)
             middleman_runner = MiddlemanRunner.new(logger, SpecGitAccessor)
             final_app_dir = File.absolute_path('final_app')
+            spider = Spider.new(logger, app_dir: final_app_dir)
 
             Commands::Publish.new(logger,
                                   config,
                                   SpecGitAccessor,
                                   file_system_accessor,
                                   middleman_runner,
+                                  spider,
                                   final_app_dir)
           end
 

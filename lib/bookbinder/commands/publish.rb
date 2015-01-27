@@ -1,10 +1,8 @@
 require_relative '../book'
 require_relative '../cli_error'
 require_relative '../directory_helpers'
-require_relative '../middleman_runner'
 require_relative '../publisher'
 require_relative '../section'
-require_relative '../spider'
 require_relative 'naming'
 require_relative '../local_file_system_accessor'
 
@@ -25,12 +23,14 @@ module Bookbinder
                      version_control_system,
                      file_system_accessor,
                      static_site_generator,
+                     sitemap_generator,
                      final_app_directory)
         @logger = logger
         @config = config
         @version_control_system = version_control_system
         @file_system_accessor = file_system_accessor
         @static_site_generator = static_site_generator
+        @sitemap_generator = sitemap_generator
         @final_app_directory = final_app_directory
       end
 
@@ -41,10 +41,9 @@ module Bookbinder
             store: Repositories::SectionRepository::SHARED_CACHE
         )
         @gem_root = File.expand_path('../../../../', __FILE__)
-        spider = Spider.new(logger, app_dir: final_app_directory)
         server_director = ServerDirector.new(logger, directory: final_app_directory)
 
-        @publisher = Publisher.new(logger, spider, static_site_generator, server_director)
+        @publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director)
 
         verbosity = cli_arguments.include?('--verbose')
         location = cli_arguments[0]
@@ -85,7 +84,8 @@ module Bookbinder
                   :logger,
                   :file_system_accessor,
                   :static_site_generator,
-                  :final_app_directory
+                  :final_app_directory,
+                  :sitemap_generator
 
       def gather_sections(workspace, publish_config, output_paths, target_tag)
         publish_config.fetch(:sections).map do |attributes|

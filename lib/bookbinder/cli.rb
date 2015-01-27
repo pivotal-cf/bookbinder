@@ -8,6 +8,7 @@ require_relative 'commands/publish'
 require_relative 'commands/version'
 require_relative 'commands/help'
 require_relative 'middleman_runner'
+require_relative 'spider'
 
 module Bookbinder
   class Cli
@@ -42,7 +43,8 @@ module Bookbinder
       command_validator = CommandValidator.new usage_messenger, COMMANDS + FLAGS, usage_message
       git_accessor = GitAccessor.new
       middleman_runner = MiddlemanRunner.new(logger, git_accessor)
-
+      final_app_directory = File.absolute_path('final_app')
+      spider = Spider.new(logger, app_dir: final_app_directory)
 
       command_runner = CommandRunner.new(configuration_fetcher,
                                          usage_message,
@@ -50,6 +52,8 @@ module Bookbinder
                                          git_accessor,
                                          local_file_system_accessor,
                                          middleman_runner,
+                                         spider,
+                                         final_app_directory,
                                          COMMANDS + FLAGS)
 
       begin
