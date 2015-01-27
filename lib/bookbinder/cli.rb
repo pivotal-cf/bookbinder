@@ -7,6 +7,7 @@ require_relative 'commands/generate_pdf'
 require_relative 'commands/publish'
 require_relative 'commands/version'
 require_relative 'commands/help'
+require_relative 'middleman_runner'
 
 module Bookbinder
   class Cli
@@ -40,12 +41,15 @@ module Bookbinder
       usage_message = usage_messenger.construct_for(COMMANDS, FLAGS)
       command_validator = CommandValidator.new usage_messenger, COMMANDS + FLAGS, usage_message
       git_accessor = GitAccessor.new
+      middleman_runner = MiddlemanRunner.new(logger, git_accessor)
+
 
       command_runner = CommandRunner.new(configuration_fetcher,
                                          usage_message,
                                          logger,
                                          git_accessor,
                                          local_file_system_accessor,
+                                         middleman_runner,
                                          COMMANDS + FLAGS)
 
       begin

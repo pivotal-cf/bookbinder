@@ -2,12 +2,19 @@ require_relative 'cli_error'
 
 module Bookbinder
   class CommandRunner
-    def initialize(configuration_fetcher, usage_message, logger, version_control_system, file_system_accessor, commands)
+    def initialize(configuration_fetcher,
+                   usage_message,
+                   logger,
+                   version_control_system,
+                   file_system_accessor,
+                   static_site_generator,
+                   commands)
       @configuration_fetcher = configuration_fetcher
       @usage_message = usage_message
       @logger = logger
       @version_control_system = version_control_system
       @file_system_accessor = file_system_accessor
+      @static_site_generator = static_site_generator
       @commands = commands
     end
 
@@ -20,12 +27,14 @@ module Bookbinder
           command.new(logger,
                       configuration_fetcher.fetch_config,
                       version_control_system,
-                      file_system_accessor).run command_arguments
+                      file_system_accessor,
+                      static_site_generator).run command_arguments
         elsif command_name == 'run_publish_ci'
           publish_command = Commands::Publish.new(logger,
                                                   configuration_fetcher.fetch_config,
                                                   version_control_system,
-                                                  file_system_accessor)
+                                                  file_system_accessor,
+                                                  static_site_generator)
 
           push_local_to_staging_command = Commands::PushLocalToStaging.new(logger, configuration_fetcher)
           build_and_push_tarball_command = Commands::BuildAndPushTarball.new(logger, configuration_fetcher)
@@ -47,6 +56,7 @@ module Bookbinder
                 :commands,
                 :version_control_system,
                 :configuration_fetcher,
+                :static_site_generator,
                 :file_system_accessor
 
   end

@@ -20,11 +20,12 @@ module Bookbinder
         "publish <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
       end
 
-      def initialize(logger, config,  version_control_system, file_system_accessor)
+      def initialize(logger, config,  version_control_system, file_system_accessor, static_site_generator)
         @logger = logger
         @config = config
         @version_control_system = version_control_system
         @file_system_accessor = file_system_accessor
+        @static_site_generator = static_site_generator
       end
 
       def run(cli_arguments)
@@ -37,10 +38,9 @@ module Bookbinder
         )
         @gem_root = File.expand_path('../../../../', __FILE__)
         spider = Spider.new(logger, app_dir: final_app_dir)
-        middleman_runner = MiddlemanRunner.new(logger, version_control_system)
         server_director = ServerDirector.new(logger, directory: final_app_dir)
 
-        @publisher = Publisher.new(logger, spider, middleman_runner, server_director)
+        @publisher = Publisher.new(logger, spider, static_site_generator, server_director)
 
         verbosity = cli_arguments.include?('--verbose')
         location = cli_arguments[0]
@@ -75,7 +75,7 @@ module Bookbinder
 
       private
 
-      attr_reader :publisher, :version_control_system, :config, :logger, :file_system_accessor
+      attr_reader :publisher, :version_control_system, :config, :logger, :file_system_accessor, :static_site_generator
 
       def gather_sections(workspace, publish_config, output_paths, target_tag)
         publish_config.fetch(:sections).map do |attributes|
