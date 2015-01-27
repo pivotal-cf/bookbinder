@@ -67,8 +67,7 @@ module Bookbinder
                             processed_dita_dir,
                             workspace_dir,
                             master_middleman_dir,
-                            master_dir,
-                            @version_control_system)
+                            master_dir)
 
         target_tag = cli_options[:target_tag]
 
@@ -97,7 +96,7 @@ module Bookbinder
 
         dita_processor.process(cloned_dita_sections, to:processed_dita_dir)
 
-        sections = gather_sections(workspace_dir, publish_config, output_paths, target_tag, @version_control_system)
+        sections = gather_sections(workspace_dir, publish_config, output_paths, target_tag)
 
         subnavs = subnavs_by_dir_name(sections)
 
@@ -110,7 +109,7 @@ module Bookbinder
 
       attr_reader :publisher, :version_control_system, :config, :logger
 
-      def gather_sections(workspace, publish_config, output_paths, target_tag, version_control_system)
+      def gather_sections(workspace, publish_config, output_paths, target_tag)
         publish_config.fetch(:sections).map do |attributes|
 
           local_repo_dir = output_paths[:local_repo_dir]
@@ -132,7 +131,7 @@ module Bookbinder
         end
       end
 
-      def prepare_directories(final_app, output_dir, tmp_dir, processed_dita_dir, middleman_source, master_middleman_dir, middleman_dir, version_control_system)
+      def prepare_directories(final_app, output_dir, tmp_dir, processed_dita_dir, middleman_source, master_middleman_dir, middleman_dir)
         forget_sections(output_dir)
         FileUtils.rm_rf File.join final_app, '.'
         FileUtils.rm_rf File.join tmp_dir, '.'
@@ -146,7 +145,7 @@ module Bookbinder
         copy_directory_from_gem 'master_middleman', middleman_dir
         FileUtils.cp_r File.join(master_middleman_dir, '.'), middleman_dir
 
-        copy_version_master_middleman(middleman_source, version_control_system)
+        copy_version_master_middleman(middleman_source)
       end
 
       def forget_sections(middleman_scratch)
@@ -161,7 +160,7 @@ module Bookbinder
       # Copy the index file from each version into the version's directory. Because version
       # subdirectories are sections, this is the only way they get content from their master
       # middleman directory.
-      def copy_version_master_middleman(dest_dir, version_control_system)
+      def copy_version_master_middleman(dest_dir)
         @versions.each do |version|
           Dir.mktmpdir(version) do |tmpdir|
             book = Book.from_remote(logger: logger,
@@ -202,15 +201,15 @@ module Bookbinder
         optional_arguments = {}
         optional_arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
         if publishing_to_github? location
-          config.versions.each { |version| arguments[:sections].concat sections_from version, version_control_system }
+          config.versions.each { |version| arguments[:sections].concat sections_from version }
           optional_arguments.merge!(versions: config.versions)
         end
 
         arguments.merge! optional_arguments
       end
 
-      def sections_from(version, version_control_system)
-        config_file = File.join book_checkout(version, version_control_system), 'config.yml'
+      def sections_from(version)
+        config_file = File.join book_checkout(version), 'config.yml'
         attrs       = YAML.load(File.read(config_file))['sections']
         raise VersionUnsupportedError.new(version) if attrs.nil?
 
@@ -221,7 +220,7 @@ module Bookbinder
         end
       end
 
-      def book_checkout(ref, version_control_system)
+      def book_checkout(ref)
         temp_workspace = Dir.mktmpdir('book_checkout')
         book = Book.from_remote(logger: logger,
                                 full_name: config.book_repo,
