@@ -23,10 +23,11 @@ module Bookbinder
         "publish <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
       end
 
-      def initialize(logger, config,  version_control_system)
+      def initialize(logger, config,  version_control_system, file_system_accessor)
         @logger = logger
         @config = config
         @version_control_system = version_control_system
+        @file_system_accessor = file_system_accessor
       end
 
       def run(cli_arguments)
@@ -85,7 +86,6 @@ module Bookbinder
         dita_section_gatherer = DitaSectionGatherer.new(version_control_system)
         cloned_dita_sections = dita_section_gatherer.gather(dita_sections, to: tmp_dir)
 
-        file_system_accessor = LocalFileSystemAccessor.new
         location_of_dita_template_file = file_system_accessor.write(
             to: File.join(output_dir, 'transform_dita.xml'),
             text: dita_transform_script(config.path_to_dita_ot_library)
@@ -107,7 +107,7 @@ module Bookbinder
 
       private
 
-      attr_reader :publisher, :version_control_system, :config, :logger
+      attr_reader :publisher, :version_control_system, :config, :logger, :file_system_accessor
 
       def gather_sections(workspace, publish_config, output_paths, target_tag)
         publish_config.fetch(:sections).map do |attributes|

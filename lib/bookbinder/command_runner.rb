@@ -2,11 +2,12 @@ require_relative 'cli_error'
 
 module Bookbinder
   class CommandRunner
-    def initialize(configuration_fetcher, usage_message, logger, version_control_system, commands)
+    def initialize(configuration_fetcher, usage_message, logger, version_control_system, file_system_accessor, commands)
       @configuration_fetcher = configuration_fetcher
       @usage_message = usage_message
       @logger = logger
       @version_control_system = version_control_system
+      @file_system_accessor = file_system_accessor
       @commands = commands
     end
 
@@ -16,9 +17,16 @@ module Bookbinder
         if command_name == '--help'
           command.new(logger, usage_message).run command_arguments
         elsif command_name == 'publish'
-          command.new(logger, configuration_fetcher.fetch_config, version_control_system).run command_arguments
+          command.new(logger,
+                      configuration_fetcher.fetch_config,
+                      version_control_system,
+                      file_system_accessor).run command_arguments
         elsif command_name == 'run_publish_ci'
-          publish_command = Commands::Publish.new(logger, configuration_fetcher.fetch_config, version_control_system)
+          publish_command = Commands::Publish.new(logger,
+                                                  configuration_fetcher.fetch_config,
+                                                  version_control_system,
+                                                  file_system_accessor)
+
           push_local_to_staging_command = Commands::PushLocalToStaging.new(logger, configuration_fetcher)
           build_and_push_tarball_command = Commands::BuildAndPushTarball.new(logger, configuration_fetcher)
 
@@ -34,7 +42,12 @@ module Bookbinder
 
     private
 
-    attr_reader :logger, :usage_message, :commands, :version_control_system, :configuration_fetcher
+    attr_reader :logger,
+                :usage_message,
+                :commands,
+                :version_control_system,
+                :configuration_fetcher,
+                :file_system_accessor
 
   end
 end

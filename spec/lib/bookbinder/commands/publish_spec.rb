@@ -5,6 +5,7 @@ require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/spec_git_accessor'
 require_relative '../../../helpers/tmp_dirs'
 require_relative '../../../../lib/bookbinder/configuration'
+require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 
 module Bookbinder
   describe Commands::Publish do
@@ -47,7 +48,8 @@ module Bookbinder
       let(:config) { Configuration.new(logger, config_hash) }
       let(:book) { 'fantastic/book' }
       let(:logger) { NilLogger.new }
-      let(:publish_command) { Commands::Publish.new(logger, config, SpecGitAccessor) }
+      let(:file_system_accessor) { LocalFileSystemAccessor.new }
+      let(:publish_command) { Commands::Publish.new(logger, config, SpecGitAccessor, file_system_accessor) }
       let(:git_client) { GitClient.new }
 
       describe 'local' do
@@ -143,7 +145,7 @@ module Bookbinder
 
               config = Configuration.new(logger, config_hash)
 
-              publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
+              publish_command = Commands::Publish.new(logger, config, SpecGitAccessor, file_system_accessor)
 
               allow(logger).to receive(:log)
               expect(logger).to receive(:log).with /skipping \(not found\)/
@@ -235,7 +237,7 @@ module Bookbinder
           let(:config) { Configuration.new(logger, config_hash) }
           let(:book) { 'fantastic/book' }
           let(:logger) { NilLogger.new }
-          let(:publish_commander) { Commands::Publish.new(logger, config, SpecGitAccessor) }
+          let(:publish_commander) { Commands::Publish.new(logger, config, SpecGitAccessor, file_system_accessor) }
           let(:temp_dir) { Dir.mktmpdir }
           let(:git_accessor_1) { SpecGitAccessor.new('dogs-repo', temp_dir) }
           let(:git_accessor_2) { SpecGitAccessor.new('dogs-repo', temp_dir) }
@@ -334,7 +336,7 @@ module Bookbinder
 
           config = Configuration.new(logger, config_hash)
 
-          publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
+          publish_command = Commands::Publish.new(logger, config, SpecGitAccessor, file_system_accessor)
           publish_command.run(['github'])
 
           final_app_dir = File.absolute_path('final_app')
@@ -379,7 +381,7 @@ module Bookbinder
 
           config = Configuration.new(logger, config_hash)
 
-          publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
+          publish_command = Commands::Publish.new(logger, config, SpecGitAccessor, file_system_accessor)
           silence_io_streams do
             publish_command.run(['github'])
           end
@@ -426,7 +428,7 @@ module Bookbinder
 
               config = Configuration.new(logger, config_hash)
 
-              publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
+              publish_command = Commands::Publish.new(logger, config, SpecGitAccessor, file_system_accessor)
               publish_command.run(['github'])
             end.to raise_error "Your public host must be a single String."
           end
@@ -451,7 +453,7 @@ module Bookbinder
 
             config = Configuration.new(logger, config_hash)
 
-            publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
+            publish_command = Commands::Publish.new(logger, config, SpecGitAccessor, file_system_accessor)
             publish_command.run(['github'])
 
             final_app_dir = File.absolute_path('final_app')
@@ -483,7 +485,7 @@ module Bookbinder
 
           config = Configuration.new(logger, config_hash)
 
-          publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
+          publish_command = Commands::Publish.new(logger, config, SpecGitAccessor, file_system_accessor)
           publish_command.run(['github'])
 
           final_app_dir = File.absolute_path('final_app')
@@ -546,7 +548,7 @@ module Bookbinder
 
             config = Configuration.new(logger, config_hash)
 
-            publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
+            publish_command = Commands::Publish.new(logger, config, SpecGitAccessor, file_system_accessor)
 
             begin
               real_stdout = $stdout
@@ -582,7 +584,7 @@ module Bookbinder
 
           config = Configuration.new(logger, config_hash)
 
-          publish_command = Commands::Publish.new(logger, config, SpecGitAccessor)
+          publish_command = Commands::Publish.new(logger, config, SpecGitAccessor, file_system_accessor)
 
           begin
             real_stdout = $stdout
@@ -614,7 +616,7 @@ module Bookbinder
 
             config = Configuration.new(logger, config_hash)
 
-            Commands::Publish.new(logger, config, SpecGitAccessor)
+            Commands::Publish.new(logger, config, SpecGitAccessor, file_system_accessor)
           end
 
           it 'creates the output directory' do
