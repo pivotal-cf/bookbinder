@@ -113,25 +113,25 @@ module Bookbinder
 
       def prepare_directories(final_app, output_dir, middleman_source, master_middleman_dir, middleman_dir)
         forget_sections(output_dir)
-        FileUtils.rm_rf File.join final_app, '.'
-        FileUtils.mkdir_p output_dir
-        FileUtils.mkdir_p File.join final_app, 'public'
-        FileUtils.mkdir_p middleman_source
+        file_system_accessor.remove_directory File.join final_app, '.'
+        file_system_accessor.make_directory output_dir
+        file_system_accessor.make_directory File.join final_app, 'public'
+        file_system_accessor.make_directory middleman_source
 
         copy_directory_from_gem 'template_app', final_app
         copy_directory_from_gem 'master_middleman', middleman_dir
-        FileUtils.cp_r File.join(master_middleman_dir, '.'), middleman_dir
+        file_system_accessor.copy File.join(master_middleman_dir, '.'), middleman_dir
 
         copy_version_master_middleman(middleman_source)
       end
 
       def forget_sections(middleman_scratch)
         Repositories::SectionRepository::SHARED_CACHE.clear
-        FileUtils.rm_rf File.join middleman_scratch, '.'
+        file_system_accessor.remove_directory File.join middleman_scratch, '.'
       end
 
       def copy_directory_from_gem(dir, output_dir)
-        FileUtils.cp_r File.join(@gem_root, "#{dir}/."), output_dir
+        file_system_accessor.copy File.join(@gem_root, "#{dir}/."), output_dir
       end
 
       # Copy the index file from each version into the version's directory. Because version
@@ -147,10 +147,10 @@ module Bookbinder
                                     git_accessor: version_control_system)
             index_source_dir = File.join(tmpdir, book.directory, 'master_middleman', source_dir_name)
             index_dest_dir = File.join(dest_dir, version)
-            FileUtils.mkdir_p(index_dest_dir)
+            file_system_accessor.make_directory(index_dest_dir)
 
             Dir.glob(File.join(index_source_dir, 'index.*')) do |f|
-              FileUtils.cp(File.expand_path(f), index_dest_dir)
+              file_system_accessor.copy(File.expand_path(f), index_dest_dir)
             end
           end
         end
@@ -186,27 +186,25 @@ module Bookbinder
       end
 
       def sections_from(version)
-        config_file = File.join book_checkout(version), 'config.yml'
-        attrs       = YAML.load(File.read(config_file))['sections']
-        raise VersionUnsupportedError.new(version) if attrs.nil?
+        Dir.mktmpdir('book_checkout') do |temp_workspace|
+          book = Book.from_remote(logger: logger,
+                                  full_name: config.book_repo,
+                                  destination_dir: temp_workspace,
+                                  ref: version,
+                                  git_accessor: version_control_system,
+          )
 
-        attrs.map do |section_hash|
-          section_hash['repository']['ref'] = version
-          section_hash['directory'] = File.join(version, section_hash['directory'])
-          section_hash
+          book_checkout_value = File.join temp_workspace, book.directory
+          config_file = File.join book_checkout_value, 'config.yml'
+          attrs = YAML.load(File.read(config_file))['sections']
+          raise VersionUnsupportedError.new(version) if attrs.nil?
+
+          attrs.map do |section_hash|
+            section_hash['repository']['ref'] = version
+            section_hash['directory'] = File.join(version, section_hash['directory'])
+            section_hash
+          end
         end
-      end
-
-      def book_checkout(ref)
-        temp_workspace = Dir.mktmpdir('book_checkout')
-        book = Book.from_remote(logger: logger,
-                                full_name: config.book_repo,
-                                destination_dir: temp_workspace,
-                                ref: ref,
-                                git_accessor: version_control_system,
-                               )
-
-        File.join temp_workspace, book.directory
       end
 
       def layout_repo_path(local_repo_dir)

@@ -14,6 +14,18 @@ module Bookbinder
 
       to
     end
+
+    def remove_directory(path)
+      FileUtils.rm_rf(path)
+    end
+
+    def make_directory(path)
+      FileUtils.mkdir_p(path)
+    end
+
+    def copy(src, dest)
+      FileUtils.cp_r src, dest
+    end
   end
 
 end
