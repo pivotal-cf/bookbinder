@@ -1,18 +1,16 @@
 require_relative '../book'
-require_relative '../git_accessor'
 require_relative '../cli_error'
-require_relative '../configuration'
 require_relative '../directory_helpers'
 require_relative '../middleman_runner'
 require_relative '../publisher'
 require_relative '../section'
 require_relative '../spider'
-require_relative 'bookbinder_command'
 require_relative 'naming'
+require_relative '../local_file_system_accessor'
 
 module Bookbinder
   module Commands
-    class Publish < BookbinderCommand
+    class Publish
       VersionUnsupportedError = Class.new(StandardError)
 
       include Bookbinder::DirectoryHelperMethods
@@ -22,21 +20,27 @@ module Bookbinder
         "publish <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
       end
 
-      def run(cli_arguments, version_control_system=GitAccessor.new)
+      def initialize(logger, config,  version_control_system, file_system_accessor)
+        @logger = logger
+        @config = config
+        @version_control_system = version_control_system
+        @file_system_accessor = file_system_accessor
+      end
+
+      def run(cli_arguments)
         final_app_dir = File.absolute_path('final_app')
 
         raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
-        @version_control_system = version_control_system
         @section_repository = Repositories::SectionRepository.new(
-            @logger,
+            logger,
             store: Repositories::SectionRepository::SHARED_CACHE
         )
         @gem_root = File.expand_path('../../../../', __FILE__)
-        spider = Spider.new(@logger, app_dir: final_app_dir)
-        middleman_runner = MiddlemanRunner.new(@logger, version_control_system)
-        server_director = ServerDirector.new(@logger, directory: final_app_dir)
+        spider = Spider.new(logger, app_dir: final_app_dir)
+        middleman_runner = MiddlemanRunner.new(logger, version_control_system)
+        server_director = ServerDirector.new(logger, directory: final_app_dir)
 
-        @publisher = Publisher.new(@logger, spider, middleman_runner, server_director)
+        @publisher = Publisher.new(logger, spider, middleman_runner, server_director)
 
         verbosity = cli_arguments.include?('--verbose')
         location = cli_arguments[0]
@@ -48,19 +52,19 @@ module Bookbinder
         @book_repo = publish_config[:book_repo]
 
         master_middleman_dir = output_paths.fetch(:master_middleman_dir)
-        intermediate_directory = output_paths.fetch(:output_dir)
-        master_dir = File.join intermediate_directory, 'master_middleman'
+        output_dir = output_paths.fetch(:output_dir)
+
+        master_dir = File.join output_dir, 'master_middleman'
         workspace_dir = File.join master_dir, 'source'
         prepare_directories(final_app_dir,
-                            intermediate_directory,
+                            output_dir,
                             workspace_dir,
                             master_middleman_dir,
-                            master_dir,
-                            @version_control_system)
+                            master_dir)
 
         target_tag = cli_options[:target_tag]
 
-        sections = gather_sections(workspace_dir, publish_config, output_paths, target_tag, @version_control_system)
+        sections = gather_sections(workspace_dir, publish_config, output_paths, target_tag)
 
         subnavs = subnavs_by_dir_name(sections)
 
@@ -71,20 +75,20 @@ module Bookbinder
 
       private
 
-      attr_reader :publisher, :version_control_system
+      attr_reader :publisher, :version_control_system, :config, :logger, :file_system_accessor
 
-      def gather_sections(workspace, publish_config, output_paths, target_tag, version_control_system)
+      def gather_sections(workspace, publish_config, output_paths, target_tag)
         publish_config.fetch(:sections).map do |attributes|
 
           local_repo_dir = output_paths[:local_repo_dir]
           vcs_repo =
               if local_repo_dir
                 GitHubRepository.
-                    build_from_local(@logger, attributes, local_repo_dir, version_control_system).
+                    build_from_local(logger, attributes, local_repo_dir, version_control_system).
                     tap { |repo| repo.copy_from_local(workspace) }
               else
                 GitHubRepository.
-                    build_from_remote(@logger, attributes, target_tag, version_control_system).
+                    build_from_remote(logger, attributes, target_tag, version_control_system).
                     tap { |repo| repo.copy_from_remote(workspace) }
               end
 
@@ -95,10 +99,10 @@ module Bookbinder
         end
       end
 
-      def prepare_directories(final_app, middleman_scratch_space, middleman_source, master_middleman_dir, middleman_dir, version_control_system)
-        forget_sections(middleman_scratch_space)
+      def prepare_directories(final_app, output_dir, middleman_source, master_middleman_dir, middleman_dir)
+        forget_sections(output_dir)
         FileUtils.rm_rf File.join final_app, '.'
-        FileUtils.mkdir_p middleman_scratch_space
+        FileUtils.mkdir_p output_dir
         FileUtils.mkdir_p File.join final_app, 'public'
         FileUtils.mkdir_p middleman_source
 
@@ -106,7 +110,7 @@ module Bookbinder
         copy_directory_from_gem 'master_middleman', middleman_dir
         FileUtils.cp_r File.join(master_middleman_dir, '.'), middleman_dir
 
-        copy_version_master_middleman(middleman_source, version_control_system)
+        copy_version_master_middleman(middleman_source)
       end
 
       def forget_sections(middleman_scratch)
@@ -121,10 +125,10 @@ module Bookbinder
       # Copy the index file from each version into the version's directory. Because version
       # subdirectories are sections, this is the only way they get content from their master
       # middleman directory.
-      def copy_version_master_middleman(dest_dir, version_control_system)
+      def copy_version_master_middleman(dest_dir)
         @versions.each do |version|
           Dir.mktmpdir(version) do |tmpdir|
-            book = Book.from_remote(logger: @logger,
+            book = Book.from_remote(logger: logger,
                                     full_name: @book_repo,
                                     destination_dir: tmpdir,
                                     ref: version,
@@ -156,21 +160,21 @@ module Bookbinder
             sections: config.sections,
             book_repo: config.book_repo,
             host_for_sitemap: config.public_host,
-            archive_menu: config.archive_menu
+            archive_menu: config.archive_menu,
         }
 
         optional_arguments = {}
         optional_arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
         if publishing_to_github? location
-          config.versions.each { |version| arguments[:sections].concat sections_from version, version_control_system }
+          config.versions.each { |version| arguments[:sections].concat sections_from version }
           optional_arguments.merge!(versions: config.versions)
         end
 
         arguments.merge! optional_arguments
       end
 
-      def sections_from(version, version_control_system)
-        config_file = File.join book_checkout(version, version_control_system), 'config.yml'
+      def sections_from(version)
+        config_file = File.join book_checkout(version), 'config.yml'
         attrs       = YAML.load(File.read(config_file))['sections']
         raise VersionUnsupportedError.new(version) if attrs.nil?
 
@@ -181,9 +185,9 @@ module Bookbinder
         end
       end
 
-      def book_checkout(ref, version_control_system)
+      def book_checkout(ref)
         temp_workspace = Dir.mktmpdir('book_checkout')
-        book = Book.from_remote(logger: @logger,
+        book = Book.from_remote(logger: logger,
                                 full_name: config.book_repo,
                                 destination_dir: temp_workspace,
                                 ref: ref,
@@ -200,7 +204,7 @@ module Bookbinder
           else
             section = {'repository' => {'name' => config.layout_repo}}
             destination_dir = Dir.mktmpdir
-            repository = GitHubRepository.build_from_remote(@logger,
+            repository = GitHubRepository.build_from_remote(logger,
                                                             section,
                                                             'master',
                                                             version_control_system)
