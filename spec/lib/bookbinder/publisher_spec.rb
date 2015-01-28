@@ -29,7 +29,10 @@ module Bookbinder
               book_repo: 'some-repo/some-book',
         }
 
-        publisher = Publisher.new(logger, spider, static_site_generator, server_director)
+        fs_accessor = double('file_system_accessor')
+        allow(fs_accessor).to receive(:copy)
+
+        publisher = Publisher.new(logger, spider, static_site_generator, server_director, fs_accessor)
         publisher.publish([], cli_options, output_paths, publish_config)
       end
 

@@ -44,7 +44,7 @@ module Bookbinder
         )
         @gem_root = File.expand_path('../../../../', __FILE__)
 
-        @publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director)
+        @publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director, file_system_accessor)
 
         verbosity = cli_arguments.include?('--verbose')
         location = cli_arguments[0]

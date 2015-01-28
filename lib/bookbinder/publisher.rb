@@ -8,11 +8,12 @@ module Bookbinder
   class Publisher
     include DirectoryHelperMethods
 
-    def initialize(logger, spider, static_site_generator, server_director)
+    def initialize(logger, spider, static_site_generator, server_director, file_system_accessor)
       @logger = logger
       @spider = spider
       @static_site_generator = static_site_generator
       @server_director = server_director
+      @file_system_accessor = file_system_accessor
     end
 
     def publish(subnavs, cli_options, output_paths, publish_config)
@@ -40,7 +41,7 @@ module Bookbinder
 
     private
 
-    attr_reader :section_repository, :logger
+    attr_reader :section_repository, :logger, :file_system_accessor
 
     def generate_sitemap(host_for_sitemap, spider)
       raise "Your public host must be a single String." unless host_for_sitemap.is_a?(String)
@@ -57,7 +58,7 @@ module Bookbinder
                                  subnavs,
                                  publish_config[:host_for_sitemap],
                                  publish_config[:archive_menu])
-      FileUtils.cp_r build_dir, public_dir
+      file_system_accessor.copy build_dir, public_dir
     end
   end
 end
