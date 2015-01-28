@@ -305,7 +305,7 @@ You should only need to run the `bundle` the first time around.
 
 ### CI for Books
 
-The currently recommended tool for CI with Bookbinder is [GoCD](go.cd).
+The currently recommended tool for CI with Bookbinder is [GoCD](http://www.go.cd).
 
 #### CI Runner
 You will want a build that executes this shell command:
