@@ -25,7 +25,8 @@ module Bookbinder
                      static_site_generator,
                      sitemap_generator,
                      final_app_directory,
-                     server_director)
+                     server_director,
+                     context_dir)
         @logger = logger
         @config = config
         @version_control_system = version_control_system
@@ -34,6 +35,7 @@ module Bookbinder
         @sitemap_generator = sitemap_generator
         @final_app_directory = final_app_directory
         @server_director = server_director
+        @context_dir = context_dir
       end
 
       def run(cli_arguments)
@@ -87,7 +89,8 @@ module Bookbinder
                   :static_site_generator,
                   :final_app_directory,
                   :sitemap_generator,
-                  :server_director
+                  :server_director,
+                  :context_dir
 
       def gather_sections(workspace, publish_config, output_paths, target_tag)
         publish_config.fetch(:sections).map do |attributes|
@@ -157,12 +160,12 @@ module Bookbinder
       end
 
       def output_directory_paths(location)
-        local_repo_dir = (location == 'local') ? File.absolute_path('..') : nil
+        local_repo_dir = (location == 'local') ? File.expand_path('..', context_dir) : nil
 
         {
           final_app_dir: final_app_directory,
           local_repo_dir: local_repo_dir,
-          output_dir: File.absolute_path(output_dir_name),
+          output_dir: File.join(context_dir, output_dir_name),
           master_middleman_dir: layout_repo_path(local_repo_dir)
         }
       end

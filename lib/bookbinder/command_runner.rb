@@ -66,7 +66,8 @@ module Bookbinder
                             static_site_generator,
                             sitemap_generator,
                             final_app_directory,
-                            server_director)
+                            server_director,
+                            File.absolute_path('.'))
     end
 
   end

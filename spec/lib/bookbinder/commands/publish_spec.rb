@@ -62,7 +62,8 @@ module Bookbinder
                                                     middleman_runner,
                                                     spider,
                                                     final_app_dir,
-                                                    server_director) }
+                                                    server_director,
+                                                    File.absolute_path('.')) }
       let(:git_client) { GitClient.new }
 
       describe 'local' do
@@ -165,7 +166,8 @@ module Bookbinder
                                                       middleman_runner,
                                                       spider,
                                                       final_app_dir,
-                                                      server_director)
+                                                      server_director,
+                                                      File.absolute_path('.'))
 
               allow(logger).to receive(:log)
               expect(logger).to receive(:log).with /skipping \(not found\)/
@@ -264,7 +266,8 @@ module Bookbinder
                                                         middleman_runner,
                                                         spider,
                                                         final_app_dir,
-                                                        server_director) }
+                                                        server_director,
+                                                        File.absolute_path('.')) }
           let(:temp_dir) { Dir.mktmpdir }
           let(:git_accessor_1) { SpecGitAccessor.new('dogs-repo', temp_dir) }
           let(:git_accessor_2) { SpecGitAccessor.new('dogs-repo', temp_dir) }
@@ -370,7 +373,8 @@ module Bookbinder
                                                   middleman_runner,
                                                   spider,
                                                   final_app_dir,
-                                                  server_director)
+                                                  server_director,
+                                                  File.absolute_path('.'))
           publish_command.run(['github'])
 
           final_app_dir = File.absolute_path('final_app')
@@ -422,7 +426,8 @@ module Bookbinder
                                                   middleman_runner,
                                                   spider,
                                                   final_app_dir,
-                                                  server_director)
+                                                  server_director,
+                                                  File.absolute_path('.'))
           silence_io_streams do
             publish_command.run(['github'])
           end
@@ -476,7 +481,8 @@ module Bookbinder
                                                       middleman_runner,
                                                       spider,
                                                       final_app_dir,
-                                                      server_director)
+                                                      server_director,
+                                                      File.absolute_path('.'))
               publish_command.run(['github'])
             end.to raise_error "Your public host must be a single String."
           end
@@ -508,7 +514,8 @@ module Bookbinder
                                                     middleman_runner,
                                                     spider,
                                                     final_app_dir,
-                                                    server_director)
+                                                    server_director,
+                                                    File.absolute_path('.'))
             publish_command.run(['github'])
 
             final_app_dir = File.absolute_path('final_app')
@@ -547,7 +554,8 @@ module Bookbinder
                                                   middleman_runner,
                                                   spider,
                                                   final_app_dir,
-                                                  server_director)
+                                                  server_director,
+                                                  File.absolute_path('.'))
           publish_command.run(['github'])
 
           final_app_dir = File.absolute_path('final_app')
@@ -617,7 +625,8 @@ module Bookbinder
                                                     middleman_runner,
                                                     spider,
                                                     final_app_dir,
-                                                    server_director)
+                                                    server_director,
+                                                    File.absolute_path('.'))
             begin
               real_stdout = $stdout
               $stdout = StringIO.new
@@ -659,7 +668,8 @@ module Bookbinder
                                                   middleman_runner,
                                                   spider,
                                                   final_app_dir,
-                                                  server_director)
+                                                  server_director,
+                                                  File.absolute_path('.'))
           begin
             real_stdout = $stdout
             $stdout = StringIO.new
@@ -701,7 +711,8 @@ module Bookbinder
                                   middleman_runner,
                                   spider,
                                   final_app_dir,
-                                  server_director)
+                                  server_director,
+                                  File.absolute_path('.'))
           end
 
           it 'creates the output directory' do
