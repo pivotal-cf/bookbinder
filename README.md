@@ -6,12 +6,20 @@ Bookbinder is a gem that binds together a unified documentation web-app from dis
 ## About
 
 Bookbinder is meant to be used from within a "book" project. 
-The book project provides a configuration of which documentation repositories to pull in; the bookbinder gem provides a set of scripts to aggregate those repositories and publish them to various locations.
+The book project provides a configuration of which documentation repositories to pull in; the bookbindery gem provides a set of scripts to aggregate those repositories and publish them to various locations.
 It also provides scripts for running a CI system that can detect when a documentation repository has been updated with new content, and then verify that the composed book is free of any dead links.
 
 ## Setting Up a Book Project
 
 **Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
+
+### Installation
+
+_The Bookbinder gem is now known as Bookbindery! Please update your Gemfiles accordingly._
+
+To install, add the following to your Gemfile:
+
+`gem bookbindery`
 
 ### Setup Checklist
 Please read this document to understand how to set up a new book project.  You can refer to this checklist for the steps that must completed manually when setting up your book:
@@ -55,7 +63,7 @@ A book project needs a few things to allow Bookbinder to run. Here's the minimal
         └── (optional) index(.html)(.md)(.erb)
 ```
 
-`Gemfile` needs to point to this bookbinder gem, and probably no other gems.
+`Gemfile` needs to point to this bookbindery gem, and any gems required by your book.
 
 `config.yml` is a YAML file that holds all the information bookbinder needs. The following keys are used:
 
@@ -297,7 +305,7 @@ You should only need to run the `bundle` the first time around.
 
 ### CI for Books
 
-The currently recommended tool for CI with Bookbinder is GoCD.
+The currently recommended tool for CI with Bookbinder is [GoCD](go.cd).
 
 #### CI Runner
 You will want a build that executes this shell command:
@@ -340,4 +348,8 @@ The sitemap file `/sitemap.xml` is automatically regenerated when publishing. Wh
 
 ### Running Tests
 
-To run bookbinder's rspec suite, use bundler like this: `bundle exec rspec`.
+To run bookbinder's rspec suite, install binstubs, then run the included rake task:
+
+Once: `bundle install --binstubs=bbin`
+
+Then at any time: `bbin/rake`
