@@ -26,7 +26,7 @@ module Bookbinder
       Commands::RunPublishCI,
       Commands::Tag,
       Commands::UpdateLocalDocRepos,
-    ].freeze
+    ]
 
     def run(args)
       command_name = args[0]
