@@ -20,113 +20,111 @@ module Bookbinder
       allow(logger).to receive(:error)
     end
 
-    describe '#run' do
-      Cli::COMMANDS.each do |klass|
-        let(:extra_args) { ['arg1', 'arg2'] }
-        let(:fake_command) { double }
+    Cli::COMMANDS.each do |klass|
+      let(:extra_args) { ['arg1', 'arg2'] }
+      let(:fake_command) { double }
 
-        context "running the #{klass.command_name} command" do
-          let(:arguments) { [klass.command_name] + extra_args }
+      context "running the #{klass.command_name} command" do
+        let(:arguments) { [klass.command_name] + extra_args }
 
-          before do
-            allow(klass).to receive(:new).and_return(fake_command)
-          end
+        before do
+          allow(klass).to receive(:new).and_return(fake_command)
+        end
 
-          it "calls run #{klass} for the #{klass.command_name} command" do
-            expect(fake_command).to receive(:run).with(['arg1', 'arg2'])
-            cli.run arguments
-          end
+        it "calls run #{klass} for the #{klass.command_name} command" do
+          expect(fake_command).to receive(:run).with(['arg1', 'arg2'])
+          cli.run arguments
+        end
 
-          it "returns the return value of #{klass} for the #{klass.command_name} command" do
-            expect(fake_command).to receive(:run).and_return(42)
-            expect(cli.run arguments).to eq(42)
-          end
+        it "returns the return value of #{klass} for the #{klass.command_name} command" do
+          expect(fake_command).to receive(:run).and_return(42)
+          expect(cli.run arguments).to eq(42)
         end
       end
+    end
 
-      context 'when no arguments are supplied' do
-        let(:arguments) { [] }
-        it 'should print a helpful message' do
-          expect(logger).to receive(:log).with(/Usage/)
+    context 'when no arguments are supplied' do
+      let(:arguments) { [] }
+      it 'should print a helpful message' do
+        expect(logger).to receive(:log).with(/Usage/)
+        run
+      end
+    end
+
+    context 'when a command that is not recognized is supplied' do
+      let(:arguments) { ['foo'] }
+      it 'should print a helpful message' do
+        expect(logger).to receive(:log).with(/Unrecognized command 'foo'/)
+        expect(run).to eq(1)
+      end
+    end
+
+    context 'when run raises' do
+      context 'a KeyError' do
+        before do
+          allow_any_instance_of(Commands::Publish).to receive(:run).and_raise KeyError.new 'I broke'
+        end
+
+        let(:arguments) { ['publish', 'local'] }
+
+        it 'logs the error with the config file name' do
+          expect(logger).to receive(:error).with(/I broke.*your configuration/)
           run
         end
-      end
 
-      context 'when a command that is not recognized is supplied' do
-        let(:arguments) { ['foo'] }
-        it 'should print a helpful message' do
-          expect(logger).to receive(:log).with(/Unrecognized command 'foo'/)
-          expect(run).to eq(1)
+        it 'should return 1' do
+          expect(run).to eq 1
         end
       end
 
-      context 'when run raises' do
-        context 'a KeyError' do
-          before do
-            allow_any_instance_of(Commands::Publish).to receive(:run).and_raise KeyError.new 'I broke'
-          end
-
-          let(:arguments) { ['publish', 'local'] }
-
-          it 'logs the error with the config file name' do
-            expect(logger).to receive(:error).with(/I broke.*your configuration/)
-            run
-          end
-
-          it 'should return 1' do
-            expect(run).to eq 1
-          end
+      context 'a Configuration::CredentialKeyError' do
+        before do
+          allow_any_instance_of(Commands::Publish).to receive(:run).and_raise Configuration::CredentialKeyError.new 'I broke'
         end
 
-        context 'a Configuration::CredentialKeyError' do
-          before do
-            allow_any_instance_of(Commands::Publish).to receive(:run).and_raise Configuration::CredentialKeyError.new 'I broke'
-          end
+        let(:arguments) { ['publish', 'local'] }
 
-          let(:arguments) { ['publish', 'local'] }
-
-          it 'logs the error with the credentials file name' do
-            expect(logger).to receive(:error).with(/I broke.*in credentials\.yml/)
-            run
-          end
-
-          it 'should return 1' do
-            expect(run).to eq 1
-          end
+        it 'logs the error with the credentials file name' do
+          expect(logger).to receive(:error).with(/I broke.*in credentials\.yml/)
+          run
         end
 
-        context 'for InvalidArguments' do
-          before do
-            allow_any_instance_of(Commands::Publish).to receive(:run).and_raise CliError::InvalidArguments.new
-          end
+        it 'should return 1' do
+          expect(run).to eq 1
+        end
+      end
 
-          let(:arguments) { ['publish', 'local'] }
-
-          it 'shows the command usage' do
-            expect(logger).to receive(:log).with(Commands::Publish.usage)
-            run
-          end
-
-          it 'should return 1' do
-            expect(run).to eq 1
-          end
+      context 'for InvalidArguments' do
+        before do
+          allow_any_instance_of(Commands::Publish).to receive(:run).and_raise CliError::InvalidArguments.new
         end
 
-        context 'any other error' do
-          before do
-            allow_any_instance_of(Commands::Publish).to receive(:run).and_raise 'I broke'
-          end
+        let(:arguments) { ['publish', 'local'] }
 
-          let(:arguments) { ['publish', 'local'] }
+        it 'shows the command usage' do
+          expect(logger).to receive(:log).with(Commands::Publish.usage)
+          run
+        end
 
-          it 'logs the error message' do
-            expect(logger).to receive(:error).with(/I broke/)
-            run
-          end
+        it 'should return 1' do
+          expect(run).to eq 1
+        end
+      end
 
-          it 'should return 1' do
-            expect(run).to eq 1
-          end
+      context 'any other error' do
+        before do
+          allow_any_instance_of(Commands::Publish).to receive(:run).and_raise 'I broke'
+        end
+
+        let(:arguments) { ['publish', 'local'] }
+
+        it 'logs the error message' do
+          expect(logger).to receive(:error).with(/I broke/)
+          run
+        end
+
+        it 'should return 1' do
+          expect(run).to eq 1
         end
       end
     end
