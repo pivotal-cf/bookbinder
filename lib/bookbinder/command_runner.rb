@@ -1,4 +1,6 @@
 require_relative 'cli_error'
+require_relative 'local_dita_processor'
+require_relative 'sheller'
 
 module Bookbinder
   class CommandRunner
@@ -59,6 +61,10 @@ module Bookbinder
                 :server_director
 
     def publish_command
+      config = configuration_fetcher.fetch_config
+      sheller = Sheller.new
+      local_dita_processor = LocalDitaProcessor.new(sheller, config.path_to_dita_ot_library)
+
       Commands::Publish.new(logger,
                             configuration_fetcher.fetch_config,
                             version_control_system,
@@ -67,7 +73,8 @@ module Bookbinder
                             sitemap_generator,
                             final_app_directory,
                             server_director,
-                            File.absolute_path('.'))
+                            File.absolute_path('.'),
+                            local_dita_processor)
     end
 
   end

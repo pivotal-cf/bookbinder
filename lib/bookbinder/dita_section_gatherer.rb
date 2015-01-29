@@ -6,9 +6,11 @@ module Bookbinder
 
     def gather(dita_sections, to: nil)
       dita_sections.map do |dita_section|
+        p "Copying..."
         version_control_system.clone("git@github.com:#{dita_section.full_name}",
                                      dita_section.directory,
                                      path: to)
+        p "Cloned #{dita_section.full_name}"
 
         DitaSection.new(File.join(to, dita_section.directory),
                         dita_section.ditamap_location,

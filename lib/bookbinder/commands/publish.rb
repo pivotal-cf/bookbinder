@@ -3,6 +3,8 @@ require_relative '../cli_error'
 require_relative '../directory_helpers'
 require_relative '../publisher'
 require_relative '../section'
+require_relative '../dita_section'
+require_relative '../dita_section_gatherer'
 require_relative 'naming'
 require_relative '../local_file_system_accessor'
 
@@ -26,7 +28,8 @@ module Bookbinder
                      sitemap_generator,
                      final_app_directory,
                      server_director,
-                     context_dir)
+                     context_dir,
+                     dita_processor)
         @logger = logger
         @config = config
         @version_control_system = version_control_system
@@ -36,6 +39,7 @@ module Bookbinder
         @final_app_directory = final_app_directory
         @server_director = server_director
         @context_dir = context_dir
+        @dita_processor = dita_processor
       end
 
       def run(cli_arguments)
@@ -60,17 +64,45 @@ module Bookbinder
         master_middleman_dir = output_paths.fetch(:master_middleman_dir)
         output_dir = output_paths.fetch(:output_dir)
 
+        tmp_dir = File.join output_dir, 'tmp'
+        dita_section_dir = File.join tmp_dir, 'dita_sections'
+        dita_processed_dir = File.join tmp_dir, 'processed_dita'
+
         master_dir = File.join output_dir, 'master_middleman'
         workspace_dir = File.join master_dir, 'source'
         prepare_directories(final_app_directory,
                             output_dir,
                             workspace_dir,
                             master_middleman_dir,
-                            master_dir)
+                            master_dir,
+                            tmp_dir)
 
         target_tag = cli_options[:target_tag]
 
-        sections = gather_sections(workspace_dir, publish_config, output_paths, target_tag)
+        dita_section_config_hash = config.dita_sections || {}
+        dita_sections = dita_section_config_hash.map do |dita_section_config|
+          relative_path_to_dita_map = dita_section_config['ditamap_location']
+          full_name = dita_section_config.fetch('repository', {}).fetch('name')
+          target_ref = dita_section_config.fetch('repository', {})['ref']
+          directory = dita_section_config['directory']
+
+          DitaSection.new(nil, relative_path_to_dita_map, full_name, target_ref, directory)
+        end
+
+
+        dita_section_gatherer = DitaSectionGatherer.new(version_control_system)
+        cloned_dita_sections = dita_section_gatherer.gather(dita_sections, to: dita_section_dir)
+
+        processed_dita_section_paths = dita_processor.process(cloned_dita_sections,
+                                                               to: dita_processed_dir)
+
+        p "PROCESSED DITA: " + processed_dita_section_paths.to_s
+
+        processed_dita_section_paths.each do |processed_dita_source|
+          file_system_accessor.copy(processed_dita_source, workspace_dir)
+        end
+
+        sections = gather_sections(workspace_dir, output_paths, target_tag)
 
         subnavs = subnavs_by_dir_name(sections)
 
@@ -90,10 +122,11 @@ module Bookbinder
                   :final_app_directory,
                   :sitemap_generator,
                   :server_director,
-                  :context_dir
+                  :context_dir,
+                  :dita_processor
 
-      def gather_sections(workspace, publish_config, output_paths, target_tag)
-        publish_config.fetch(:sections).map do |attributes|
+      def gather_sections(workspace, output_paths, target_tag)
+        config.sections.map do |attributes|
 
           local_repo_dir = output_paths[:local_repo_dir]
           vcs_repo =
@@ -114,10 +147,13 @@ module Bookbinder
         end
       end
 
-      def prepare_directories(final_app, output_dir, middleman_source, master_middleman_dir, middleman_dir)
+      def prepare_directories(final_app, output_dir, middleman_source, master_middleman_dir, middleman_dir, tmp_dir)
         forget_sections(output_dir)
         file_system_accessor.remove_directory File.join final_app, '.'
+        file_system_accessor.remove_directory tmp_dir
         file_system_accessor.make_directory output_dir
+        file_system_accessor.make_directory File.join tmp_dir, 'dita_sections'
+        file_system_accessor.make_directory File.join tmp_dir, 'processed_dita'
         file_system_accessor.make_directory File.join final_app, 'public'
         file_system_accessor.make_directory middleman_source
 
