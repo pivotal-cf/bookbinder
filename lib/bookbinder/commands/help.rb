@@ -11,10 +11,6 @@ module Bookbinder
         @logger = logger
       end
 
-      def self.to_s
-        'help'
-      end
-
       def command_name
         '--help'
       end

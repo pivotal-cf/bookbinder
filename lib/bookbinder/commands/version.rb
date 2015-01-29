@@ -9,10 +9,6 @@ module Bookbinder
         @logger = logger
       end
 
-      def self.to_s
-        'version'
-      end
-
       def command_name
         '--version'
       end
