@@ -2,8 +2,7 @@ require_relative 'cli_error'
 
 module Bookbinder
   class CommandValidator
-    def initialize(usage_messenger, commands, usage_text)
-      @usage_messenger = usage_messenger
+    def initialize(commands, usage_text)
       @commands = commands
       @usage_text = usage_text
     end
@@ -17,7 +16,7 @@ module Bookbinder
 
     private
 
-    attr_reader :usage_messenger, :commands, :usage_text
+    attr_reader :commands, :usage_text
   end
 end
 
