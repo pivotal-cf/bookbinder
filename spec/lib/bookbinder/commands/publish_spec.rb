@@ -13,6 +13,13 @@ module Bookbinder
   describe Commands::Publish do
     let(:null_dita_processor) { double('null dita processor', process: []) }
 
+    describe "routing" do
+      subject { Commands::Publish.new(*[double('unused dependency')]*8) }
+      it { should be_command_for('publish') }
+      it { should be_command_for('bind') }
+      it { should_not be_command_for('grill') }
+    end
+
     describe 'integration' do
       include SpecHelperMethods
       include_context 'tmp_dirs'

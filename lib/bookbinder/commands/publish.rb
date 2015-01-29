@@ -42,6 +42,10 @@ module Bookbinder
         @dita_processor = dita_processor
       end
 
+      def command_for?(test_command_name)
+        %w(bind publish).include?(test_command_name)
+      end
+
       def run(cli_arguments)
         raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
         @section_repository = Repositories::SectionRepository.new(

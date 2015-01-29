@@ -42,7 +42,7 @@ module Bookbinder
           allow_any_instance_of(Commands::Publish).to receive(:run).and_raise KeyError.new 'I broke'
         end
 
-        let(:arguments) { ['publish', 'local'] }
+        let(:arguments) { ['bind', 'local'] }
 
         it 'logs the error with the config file name' do
           expect(logger).to receive(:error).with(/I broke.*your configuration/)
@@ -76,7 +76,7 @@ module Bookbinder
           allow_any_instance_of(Commands::Publish).to receive(:run).and_raise CliError::InvalidArguments.new
         end
 
-        let(:arguments) { ['publish', 'local'] }
+        let(:arguments) { ['bind', 'local'] }
 
         it 'shows the command usage' do
           expect(logger).to receive(:log).with(duck_type(:to_s))

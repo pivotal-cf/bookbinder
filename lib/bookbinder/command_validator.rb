@@ -9,9 +9,8 @@ module Bookbinder
     end
 
     def validate! command_name
-      known_command_names = commands.map(&:command_name)
       command_type = "#{command_name}".match(/^--/) ? 'flag' : 'command'
-      if !known_command_names.include?(command_name)
+      if commands.none? { |command| command.command_for?(command_name) }
         raise CliError::UnknownCommand.new "Unrecognized #{command_type} '#{command_name}'\n" + usage_text
       end
     end
