@@ -13,22 +13,6 @@ require_relative 'spider'
 module Bookbinder
   class Cli
     def run(args)
-      flags = [
-        Commands::Version,
-        Commands::Help
-      ]
-
-      commands = [
-        Commands::BuildAndPushTarball,
-        Commands::GeneratePDF,
-        Commands::Publish,
-        Commands::PushLocalToStaging,
-        Commands::PushToProd,
-        Commands::RunPublishCI,
-        Commands::Tag,
-        Commands::UpdateLocalDocRepos,
-      ]
-
       command_name = args[0]
       command_arguments = args[1..-1]
 
@@ -38,25 +22,45 @@ module Bookbinder
       configuration_validator = ConfigurationValidator.new(logger, local_file_system_accessor)
       configuration_fetcher = ConfigurationFetcher.new(logger, configuration_validator, yaml_loader)
       configuration_fetcher.set_config_file_path './config.yml'
-      usage_messenger = UsageMessenger.new
-      usage_message = usage_messenger.construct_for(commands, flags)
-      command_validator = CommandValidator.new usage_messenger, commands + flags, usage_message
       git_accessor = GitAccessor.new
       middleman_runner = MiddlemanRunner.new(logger, git_accessor)
       final_app_directory = File.absolute_path('final_app')
       spider = Spider.new(logger, app_dir: final_app_directory)
       server_director = ServerDirector.new(logger, directory: final_app_directory)
 
-      command_runner = CommandRunner.new(configuration_fetcher,
-                                         usage_message,
-                                         logger,
-                                         git_accessor,
-                                         local_file_system_accessor,
-                                         middleman_runner,
-                                         spider,
-                                         final_app_directory,
-                                         server_director,
-                                         commands + flags)
+      commands = [
+        build_and_push_tarball_command = Commands::BuildAndPushTarball.new(logger, configuration_fetcher),
+        Commands::GeneratePDF.new(logger, configuration_fetcher),
+        publish_command = Commands::Publish.new(logger,
+                                                configuration_fetcher,
+                                                git_accessor,
+                                                local_file_system_accessor,
+                                                middleman_runner,
+                                                spider,
+                                                final_app_directory,
+                                                server_director),
+        push_local_to_staging_command = Commands::PushLocalToStaging.new(logger, configuration_fetcher),
+        Commands::PushToProd.new(logger, configuration_fetcher),
+        Commands::RunPublishCI.new(publish_command,
+                                   push_local_to_staging_command,
+                                   build_and_push_tarball_command),
+        Commands::Tag.new(logger, configuration_fetcher),
+        Commands::UpdateLocalDocRepos.new(logger, configuration_fetcher),
+      ]
+
+      usage_messenger = UsageMessenger.new
+
+      help_command = Commands::Help.new(logger)
+      flags = [
+        Commands::Version.new(logger),
+        help_command
+      ]
+      usage_message = usage_messenger.construct_for(commands, flags)
+      help_command.usage_message = usage_message
+
+      command_validator = CommandValidator.new usage_messenger, commands + flags, usage_message
+
+      command_runner = CommandRunner.new(logger, commands + flags)
 
       begin
         command_name ? command_validator.validate!(command_name) : command_name = '--help'

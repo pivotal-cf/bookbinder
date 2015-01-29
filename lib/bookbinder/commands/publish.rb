@@ -14,9 +14,9 @@ module Bookbinder
       VersionUnsupportedError = Class.new(RuntimeError)
 
       include Bookbinder::DirectoryHelperMethods
-      extend Commands::Naming
+      include Commands::Naming
 
-      def self.usage
+      def usage
         "publish <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
       end
 

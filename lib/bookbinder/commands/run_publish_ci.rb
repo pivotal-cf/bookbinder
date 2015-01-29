@@ -7,9 +7,9 @@ require_relative 'build_and_push_tarball'
 module Bookbinder
   module Commands
     class RunPublishCI
-      extend Commands::Naming
+      include Commands::Naming
 
-      def self.usage
+      def usage
         "run_publish_ci \t \t \t \t Run publish, push_local_to_staging, and build_and_push_tarball for CI purposes"
       end
 

@@ -79,7 +79,7 @@ module Bookbinder
         let(:arguments) { ['publish', 'local'] }
 
         it 'shows the command usage' do
-          expect(logger).to receive(:log).with(Commands::Publish.usage)
+          expect(logger).to receive(:log).with(duck_type(:to_s))
           run
         end
 

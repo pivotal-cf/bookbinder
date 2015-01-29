@@ -2,7 +2,7 @@ module Bookbinder
   module Commands
     module Naming
       def command_name
-        name.demodulize.underscore
+        self.class.name.demodulize.underscore
       end
     end
   end

@@ -5,7 +5,7 @@ require_relative '../archive'
 module Bookbinder
   module Commands
     class BuildAndPushTarball < BookbinderCommand
-      extend Commands::Naming
+      include Commands::Naming
 
       class MissingBuildNumber < StandardError
         def initialize
@@ -13,7 +13,7 @@ module Bookbinder
         end
       end
 
-      def self.usage
+      def usage
         "build_and_push_tarball \t  \t  \t Create a tarball from the final_app directory and push to the S3 bucket specified in your credentials.yml"
       end
 

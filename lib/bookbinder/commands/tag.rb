@@ -8,9 +8,9 @@ require_relative 'naming'
 module Bookbinder
   module Commands
     class Tag < BookbinderCommand
-      extend Commands::Naming
+      include Commands::Naming
 
-      def self.usage
+      def usage
         "tag <git tag> \t \t \t \t Apply the specified <git tag> to your book and all sections of your book"
       end
 

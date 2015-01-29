@@ -1,17 +1,19 @@
-require_relative 'bookbinder_command'
-
 module Bookbinder
   module Commands
-    class Version < BookbinderCommand
+    class Version
+      def initialize(logger)
+        @logger = logger
+      end
+
       def self.to_s
         'version'
       end
 
-      def self.command_name
+      def command_name
         '--version'
       end
 
-      def self.usage
+      def usage
         "--version \t \t \t \t Print the version of bookbinder"
       end
 

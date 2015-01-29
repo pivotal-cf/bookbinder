@@ -1,20 +1,21 @@
 module Bookbinder
   module Commands
     class Help
-      def initialize(logger, usage_message)
+      attr_writer :usage_message
+
+      def initialize(logger)
         @logger = logger
-        @usage_message = usage_message
       end
 
       def self.to_s
         'help'
       end
 
-      def self.command_name
+      def command_name
         '--help'
       end
 
-      def self.usage
+      def usage
         "--help \t \t \t \t \t Print this message"
       end
 

@@ -4,9 +4,9 @@ require_relative 'naming'
 module Bookbinder
   module Commands
     class UpdateLocalDocRepos < BookbinderCommand
-      extend Commands::Naming
+      include Commands::Naming
 
-      def self.usage
+      def usage
         "update_local_doc_repos \t \t \t Run `git pull` on all sections that exist at the same directory level as your book directory"
       end
 
