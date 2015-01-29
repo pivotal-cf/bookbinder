@@ -1,13 +1,13 @@
 [![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/cloudfoundry-incubator/bookbinder) [![Build Status](https://travis-ci.org/cloudfoundry-incubator/bookbinder.png)](https://travis-ci.org/cloudfoundry-incubator/bookbinder)
 # Bookbinder
 
-Bookbinder is a gem that binds together a unified documentation web-app from disparate source material, stored as repositories of markdown or plain HTML on GitHub. It runs [middleman](http://middlemanapp.com/) to produce a (CF-pushable) Rackup app.
+Bookbinder is a gem that binds together a unified documentation web application from disparate source material. Currently, the source material must be markdown or plain HTML, and must be stored in local directories or in GitHub repositories. Bookbinder runs [middleman](http://middlemanapp.com/) to produce a Rackup app that can be deployed to Cloud Foundry.
 
 ## About
 
-Bookbinder is meant to be used from within a "book" project. 
-The book project provides a configuration of which documentation repositories to pull in; the bookbindery gem provides a set of scripts to aggregate those repositories and publish them to various locations.
-It also provides scripts for running a CI system that can detect when a documentation repository has been updated with new content, and then verify that the composed book is free of any dead links.
+Bookbinder is meant to be used from within project called a **book**. 
+The book includes a configuration file that describes which documentation repositories to use as source materials. The bookbindery gem provides a set of scripts to aggregate those repositories and publish them to various locations.
+Bookbinder also provides scripts for running a Continuous Integration system that can detect when a documentation repository has been updated with new content and that can verify a composed book is free of any dead links.
 
 ## Setting Up a Book Project
 
@@ -22,7 +22,8 @@ To install, add the following to your Gemfile:
 `gem bookbindery`
 
 ### Setup Checklist
-Please read this document to understand how to set up a new book project.  You can refer to this checklist for the steps that must completed manually when setting up your book:
+Please read this document to understand how to set up a new book project.
+You can refer to this checklist for the steps that must completed manually when setting up your book:
 
 #### Creating and configuring your book
 - Create a git repo for the book and populate it with the required files (or use an existing book repo as a template).
