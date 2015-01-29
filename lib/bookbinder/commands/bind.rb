@@ -15,10 +15,6 @@ module Bookbinder
       include Bookbinder::DirectoryHelperMethods
       include Commands::Naming
 
-      def usage
-        "bind <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
-      end
-
       def initialize(logger,
                      config_fetcher,
                      version_control_system,
@@ -39,6 +35,10 @@ module Bookbinder
         @server_director = server_director
         @context_dir = context_dir
         @dita_processor = dita_processor
+      end
+
+      def usage
+        "bind <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
       end
 
       def command_for?(test_command_name)
