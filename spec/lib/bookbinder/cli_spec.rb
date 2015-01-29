@@ -20,29 +20,6 @@ module Bookbinder
       allow(logger).to receive(:error)
     end
 
-    Cli::COMMANDS.each do |klass|
-      let(:extra_args) { ['arg1', 'arg2'] }
-      let(:fake_command) { double }
-
-      context "running the #{klass.command_name} command" do
-        let(:arguments) { [klass.command_name] + extra_args }
-
-        before do
-          allow(klass).to receive(:new).and_return(fake_command)
-        end
-
-        it "calls run #{klass} for the #{klass.command_name} command" do
-          expect(fake_command).to receive(:run).with(['arg1', 'arg2'])
-          cli.run arguments
-        end
-
-        it "returns the return value of #{klass} for the #{klass.command_name} command" do
-          expect(fake_command).to receive(:run).and_return(42)
-          expect(cli.run arguments).to eq(42)
-        end
-      end
-    end
-
     context 'when no arguments are supplied' do
       let(:arguments) { [] }
       it 'should print a helpful message' do
