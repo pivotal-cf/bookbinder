@@ -11,7 +11,7 @@ require_relative '../local_file_system_accessor'
 module Bookbinder
   module Commands
     class Publish
-      VersionUnsupportedError = Class.new(StandardError)
+      VersionUnsupportedError = Class.new(RuntimeError)
 
       include Bookbinder::DirectoryHelperMethods
       extend Commands::Naming
@@ -90,13 +90,11 @@ module Bookbinder
         end
 
 
-        dita_section_gatherer = DitaSectionGatherer.new(version_control_system)
+        dita_section_gatherer = DitaSectionGatherer.new(version_control_system, logger)
         cloned_dita_sections = dita_section_gatherer.gather(dita_sections, to: dita_section_dir)
 
         processed_dita_section_paths = dita_processor.process(cloned_dita_sections,
                                                                to: dita_processed_dir)
-
-        p "PROCESSED DITA: " + processed_dita_section_paths.to_s
 
         processed_dita_section_paths.each do |processed_dita_source|
           file_system_accessor.copy(processed_dita_source, workspace_dir)

@@ -62,7 +62,7 @@ module Bookbinder
 
     def publish_command
       config = configuration_fetcher.fetch_config
-      sheller = Sheller.new
+      sheller = Sheller.new(logger)
       local_dita_processor = LocalDitaProcessor.new(sheller, config.path_to_dita_ot_library)
 
       Commands::Publish.new(logger,

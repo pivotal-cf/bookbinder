@@ -3,16 +3,12 @@ require 'open3'
 module Bookbinder
   module ShellOut
     def shell_out(command, failure_okay = false)
-      IO.popen(command) do |stdout|
-        stdout.each { |line| puts line }
-      end
+      Open3.popen3(command) do |input, stdout, stderr, wait_thr|
 
-      # Open3.popen3(command) do |input, stdout, stderr, wait_thr|
-      #
-      #   command_failed = (wait_thr.value != 0)
-      #   announce_failure(failure_okay, stderr, stdout) if command_failed
-      #   stdout.read
-      # end
+        command_failed = (wait_thr.value != 0)
+        announce_failure(failure_okay, stderr, stdout) if command_failed
+        stdout.read
+      end
     end
 
     def announce_failure(failure_okay, stderr, stdout)

@@ -1,11 +1,19 @@
-require_relative 'shell_out'
-
 module Bookbinder
   class Sheller
-    include ShellOut
+    ShelloutFailure = Class.new(RuntimeError)
 
-    def run_command(command, failure_okay = false)
-      shell_out(command, failure_okay)
+    def initialize(view_updater)
+      @view_updater = view_updater
     end
+
+    def run_command(command)
+      IO.popen(command) do |stdout|
+        stdout.each { |line| view_updater.log line }
+      end
+
+      raise ShelloutFailure.new "Shelling out failed." unless $?.success?
+    end
+
+    attr_reader :view_updater
   end
 end
