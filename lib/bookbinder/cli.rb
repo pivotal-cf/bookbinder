@@ -12,23 +12,23 @@ require_relative 'spider'
 
 module Bookbinder
   class Cli
-    FLAGS = [
-      Commands::Version,
-      Commands::Help
-    ]
-
-    COMMANDS = [
-      Commands::BuildAndPushTarball,
-      Commands::GeneratePDF,
-      Commands::Publish,
-      Commands::PushLocalToStaging,
-      Commands::PushToProd,
-      Commands::RunPublishCI,
-      Commands::Tag,
-      Commands::UpdateLocalDocRepos,
-    ]
-
     def run(args)
+      flags = [
+        Commands::Version,
+        Commands::Help
+      ]
+
+      commands = [
+        Commands::BuildAndPushTarball,
+        Commands::GeneratePDF,
+        Commands::Publish,
+        Commands::PushLocalToStaging,
+        Commands::PushToProd,
+        Commands::RunPublishCI,
+        Commands::Tag,
+        Commands::UpdateLocalDocRepos,
+      ]
+
       command_name = args[0]
       command_arguments = args[1..-1]
 
@@ -39,8 +39,8 @@ module Bookbinder
       configuration_fetcher = ConfigurationFetcher.new(logger, configuration_validator, yaml_loader)
       configuration_fetcher.set_config_file_path './config.yml'
       usage_messenger = UsageMessenger.new
-      usage_message = usage_messenger.construct_for(COMMANDS, FLAGS)
-      command_validator = CommandValidator.new usage_messenger, COMMANDS + FLAGS, usage_message
+      usage_message = usage_messenger.construct_for(commands, flags)
+      command_validator = CommandValidator.new usage_messenger, commands + flags, usage_message
       git_accessor = GitAccessor.new
       middleman_runner = MiddlemanRunner.new(logger, git_accessor)
       final_app_directory = File.absolute_path('final_app')
@@ -56,7 +56,7 @@ module Bookbinder
                                          spider,
                                          final_app_directory,
                                          server_director,
-                                         COMMANDS + FLAGS)
+                                         commands + flags)
 
       begin
         command_name ? command_validator.validate!(command_name) : command_name = '--help'
