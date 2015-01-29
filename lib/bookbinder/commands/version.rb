@@ -1,6 +1,10 @@
+require_relative 'naming'
+
 module Bookbinder
   module Commands
     class Version
+      include Commands::Naming
+
       def initialize(logger)
         @logger = logger
       end

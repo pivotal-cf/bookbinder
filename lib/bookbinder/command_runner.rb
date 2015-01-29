@@ -10,7 +10,7 @@ module Bookbinder
     end
 
     def run(command_name, command_arguments)
-      command = commands.detect { |known_command| known_command.command_name == command_name }
+      command = commands.detect { |known_command| known_command.command_for?(command_name) }
       command.run(command_arguments)
     rescue CliError::InvalidArguments
       logger.log command.usage
@@ -19,8 +19,7 @@ module Bookbinder
 
     private
 
-    attr_reader :logger,
-                :commands
+    attr_reader :logger, :commands
   end
 end
 

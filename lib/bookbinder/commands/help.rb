@@ -1,6 +1,10 @@
+require_relative 'naming'
+
 module Bookbinder
   module Commands
     class Help
+      include Commands::Naming
+
       attr_writer :usage_message
 
       def initialize(logger)
