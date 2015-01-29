@@ -1,4 +1,4 @@
-require_relative '../../../../lib/bookbinder/commands/publish'
+require_relative '../../../../lib/bookbinder/commands/bind'
 require_relative '../../../helpers/expectations'
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
@@ -10,15 +10,8 @@ require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/spider'
 
 module Bookbinder
-  describe Commands::Publish do
+  describe Commands::Bind do
     let(:null_dita_processor) { double('null dita processor', process: []) }
-
-    describe "routing" do
-      subject { Commands::Publish.new(*[double('unused dependency')]*8) }
-      it { should be_command_for('publish') }
-      it { should be_command_for('bind') }
-      it { should_not be_command_for('grill') }
-    end
 
     describe 'integration' do
       include SpecHelperMethods
@@ -65,17 +58,17 @@ module Bookbinder
       let(:final_app_dir) { File.absolute_path('final_app') }
       let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
       let(:server_director) { ServerDirector.new(logger, directory: final_app_dir) }
-      let(:publish_command) { Commands::Publish.new(logger,
-                                                    config_fetcher,
-                                                    SpecGitAccessor,
-                                                    file_system_accessor,
-                                                    middleman_runner,
-                                                    spider,
-                                                    final_app_dir,
-                                                    server_director,
-                                                    File.absolute_path('.'),
-                                                    null_dita_processor) }
-        let(:git_client) { GitClient.new }
+      let(:publish_command) { Commands::Bind.new(logger,
+                                                 config_fetcher,
+                                                 SpecGitAccessor,
+                                                 file_system_accessor,
+                                                 middleman_runner,
+                                                 spider,
+                                                 final_app_dir,
+                                                 server_director,
+                                                 File.absolute_path('.'),
+                                                 null_dita_processor) }
+      let(:git_client) { GitClient.new }
 
         describe 'local' do
           let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
@@ -169,18 +162,18 @@ module Bookbinder
                 }
 
                 config = Configuration.new(logger, config_hash)
-                allow(config_fetcher).to receive(:fetch_config) { config }
+                config_fetcher = double('config fetcher', fetch_config: config)
 
-                publish_command = Commands::Publish.new(logger,
-                                                        config_fetcher,
-                                                        SpecGitAccessor,
-                                                        file_system_accessor,
-                                                        middleman_runner,
-                                                        spider,
-                                                        final_app_dir,
-                                                        server_director,
-                                                        File.absolute_path('.'),
-                                                        null_dita_processor)
+                publish_command = Commands::Bind.new(logger,
+                                                     config_fetcher,
+                                                     SpecGitAccessor,
+                                                     file_system_accessor,
+                                                     middleman_runner,
+                                                     spider,
+                                                     final_app_dir,
+                                                     server_director,
+                                                     File.absolute_path('.'),
+                                                     null_dita_processor)
                 publish_command.run(['local'])
               end
             end
@@ -259,26 +252,26 @@ module Bookbinder
             let(:cli_args) { ['github'] }
             let(:config_hash) do
               {
-                  'versions' => versions,
-                  'sections' => sections,
-                  'book_repo' => book,
-                  'pdf_index' => [],
-                  'public_host' => 'example.com'
+                'versions' => versions,
+                'sections' => sections,
+                'book_repo' => book,
+                'pdf_index' => [],
+                'public_host' => 'example.com'
               }
             end
             let(:config) { Configuration.new(logger, config_hash) }
             let(:book) { 'fantastic/book' }
             let(:logger) { NilLogger.new }
-            let(:publish_command) { Commands::Publish.new(logger,
-                                                          config_fetcher,
-                                                          SpecGitAccessor,
-                                                          file_system_accessor,
-                                                          middleman_runner,
-                                                          spider,
-                                                          final_app_dir,
-                                                          server_director,
-                                                          File.absolute_path('.'),
-                                                          null_dita_processor) }
+            let(:publish_command) { Commands::Bind.new(logger,
+                                                       config_fetcher,
+                                                       SpecGitAccessor,
+                                                       file_system_accessor,
+                                                       middleman_runner,
+                                                       spider,
+                                                       final_app_dir,
+                                                       server_director,
+                                                       File.absolute_path('.'),
+                                                       null_dita_processor) }
             let(:temp_dir) { Dir.mktmpdir }
             let(:git_accessor_1) { SpecGitAccessor.new('dogs-repo', temp_dir) }
             let(:git_accessor_2) { SpecGitAccessor.new('dogs-repo', temp_dir) }
@@ -332,7 +325,7 @@ module Bookbinder
 
                 expect {
                   publish_command.run ['github']
-                }.to raise_error(Commands::Publish::VersionUnsupportedError)
+                }.to raise_error(Commands::Bind::VersionUnsupportedError)
               end
             end
           end
@@ -376,18 +369,18 @@ module Bookbinder
             }
 
             config = Configuration.new(logger, config_hash)
-            allow(config_fetcher).to receive(:fetch_config) { config }
+            config_fetcher = double('config fetcher', fetch_config: config)
 
-            publish_command = Commands::Publish.new(logger,
-                                                    config_fetcher,
-                                                    SpecGitAccessor,
-                                                    file_system_accessor,
-                                                    middleman_runner,
-                                                    spider,
-                                                    final_app_dir,
-                                                    server_director,
-                                                    File.absolute_path('.'),
-                                                    null_dita_processor)
+            publish_command = Commands::Bind.new(logger,
+                                                 config_fetcher,
+                                                 SpecGitAccessor,
+                                                 file_system_accessor,
+                                                 middleman_runner,
+                                                 spider,
+                                                 final_app_dir,
+                                                 server_director,
+                                                 File.absolute_path('.'),
+                                                 null_dita_processor)
             publish_command.run(['github'])
 
             final_app_dir = File.absolute_path('final_app')
@@ -431,18 +424,18 @@ module Bookbinder
             }
 
             config = Configuration.new(logger, config_hash)
-            allow(config_fetcher).to receive(:fetch_config) { config }
+            config_fetcher = double('config fetcher', fetch_config: config)
 
-            publish_command = Commands::Publish.new(logger,
-                                                    config_fetcher,
-                                                    SpecGitAccessor,
-                                                    file_system_accessor,
-                                                    middleman_runner,
-                                                    spider,
-                                                    final_app_dir,
-                                                    server_director,
-                                                    File.absolute_path('.'),
-                                                    null_dita_processor)
+            publish_command = Commands::Bind.new(logger,
+                                                 config_fetcher,
+                                                 SpecGitAccessor,
+                                                 file_system_accessor,
+                                                 middleman_runner,
+                                                 spider,
+                                                 final_app_dir,
+                                                 server_director,
+                                                 File.absolute_path('.'),
+                                                 null_dita_processor)
             silence_io_streams do
               publish_command.run(['github'])
             end
@@ -488,18 +481,18 @@ module Bookbinder
                 }
 
                 config = Configuration.new(logger, config_hash)
-                allow(config_fetcher).to receive(:fetch_config) { config }
+                config_fetcher = double('config fetcher', fetch_config: config)
 
-                publish_command = Commands::Publish.new(logger,
-                                                        config_fetcher,
-                                                        SpecGitAccessor,
-                                                        file_system_accessor,
-                                                        middleman_runner,
-                                                        spider,
-                                                        final_app_dir,
-                                                        server_director,
-                                                        File.absolute_path('.'),
-                                                        null_dita_processor)
+                publish_command = Commands::Bind.new(logger,
+                                                     config_fetcher,
+                                                     SpecGitAccessor,
+                                                     file_system_accessor,
+                                                     middleman_runner,
+                                                     spider,
+                                                     final_app_dir,
+                                                     server_director,
+                                                     File.absolute_path('.'),
+                                                     null_dita_processor)
                 publish_command.run(['github'])
               end.to raise_error "Your public host must be a single String."
             end
@@ -523,18 +516,18 @@ module Bookbinder
               }
 
               config = Configuration.new(logger, config_hash)
-              allow(config_fetcher).to receive(:fetch_config) { config }
+              config_fetcher = double('config fetcher', fetch_config: config)
 
-              publish_command = Commands::Publish.new(logger,
-                                                      config_fetcher,
-                                                      SpecGitAccessor,
-                                                      file_system_accessor,
-                                                      middleman_runner,
-                                                      spider,
-                                                      final_app_dir,
-                                                      server_director,
-                                                      File.absolute_path('.'),
-                                                      null_dita_processor)
+              publish_command = Commands::Bind.new(logger,
+                                                   config_fetcher,
+                                                   SpecGitAccessor,
+                                                   file_system_accessor,
+                                                   middleman_runner,
+                                                   spider,
+                                                   final_app_dir,
+                                                   server_director,
+                                                   File.absolute_path('.'),
+                                                   null_dita_processor)
               publish_command.run(['github'])
 
               final_app_dir = File.absolute_path('final_app')
@@ -565,18 +558,18 @@ module Bookbinder
             }
 
             config = Configuration.new(logger, config_hash)
-            allow(config_fetcher).to receive(:fetch_config) { config }
+            config_fetcher = double('config fetcher', fetch_config: config)
 
-            publish_command = Commands::Publish.new(logger,
-                                                    config_fetcher,
-                                                    SpecGitAccessor,
-                                                    file_system_accessor,
-                                                    middleman_runner,
-                                                    spider,
-                                                    final_app_dir,
-                                                    server_director,
-                                                    File.absolute_path('.'),
-                                                    null_dita_processor)
+            publish_command = Commands::Bind.new(logger,
+                                                 config_fetcher,
+                                                 SpecGitAccessor,
+                                                 file_system_accessor,
+                                                 middleman_runner,
+                                                 spider,
+                                                 final_app_dir,
+                                                 server_director,
+                                                 File.absolute_path('.'),
+                                                 null_dita_processor)
             publish_command.run(['github'])
 
             final_app_dir = File.absolute_path('final_app')
@@ -638,18 +631,18 @@ module Bookbinder
               }
 
               config = Configuration.new(logger, config_hash)
-              allow(config_fetcher).to receive(:fetch_config) { config }
+              config_fetcher = double('config fetcher', fetch_config: config)
 
-              publish_command = Commands::Publish.new(logger,
-                                                      config_fetcher,
-                                                      SpecGitAccessor,
-                                                      file_system_accessor,
-                                                      middleman_runner,
-                                                      spider,
-                                                      final_app_dir,
-                                                      server_director,
-                                                      File.absolute_path('.'),
-                                                      null_dita_processor)
+              publish_command = Commands::Bind.new(logger,
+                                                   config_fetcher,
+                                                   SpecGitAccessor,
+                                                   file_system_accessor,
+                                                   middleman_runner,
+                                                   spider,
+                                                   final_app_dir,
+                                                   server_director,
+                                                   File.absolute_path('.'),
+                                                   null_dita_processor)
               begin
                 real_stdout = $stdout
                 $stdout = StringIO.new
@@ -683,18 +676,18 @@ module Bookbinder
             }
 
             config = Configuration.new(logger, config_hash)
-            allow(config_fetcher).to receive(:fetch_config) { config }
+            config_fetcher = double('config fetcher', fetch_config: config)
 
-            publish_command = Commands::Publish.new(logger,
-                                                    config_fetcher,
-                                                    SpecGitAccessor,
-                                                    file_system_accessor,
-                                                    middleman_runner,
-                                                    spider,
-                                                    final_app_dir,
-                                                    server_director,
-                                                    File.absolute_path('.'),
-                                                    null_dita_processor)
+            publish_command = Commands::Bind.new(logger,
+                                                 config_fetcher,
+                                                 SpecGitAccessor,
+                                                 file_system_accessor,
+                                                 middleman_runner,
+                                                 spider,
+                                                 final_app_dir,
+                                                 server_director,
+                                                 File.absolute_path('.'),
+                                                 null_dita_processor)
             begin
               real_stdout = $stdout
               $stdout = StringIO.new
@@ -724,23 +717,23 @@ module Bookbinder
               }
 
               config = Configuration.new(logger, config_hash)
-              allow(config_fetcher).to receive(:fetch_config) { config }
+              config_fetcher = double('config fetcher', fetch_config: config)
               middleman_runner = MiddlemanRunner.new(logger, SpecGitAccessor)
               final_app_dir = File.absolute_path('final_app')
             spider = Spider.new(logger, app_dir: final_app_dir)
             server_director = ServerDirector.new(logger, directory: final_app_dir)
 
-            Commands::Publish.new(logger,
-                                  config_fetcher,
-                                  SpecGitAccessor,
-                                  file_system_accessor,
-                                  middleman_runner,
-                                  spider,
-                                  final_app_dir,
-                                  server_director,
-                                  File.absolute_path('.'),
-                                  null_dita_processor)
-          end
+            Commands::Bind.new(logger,
+                               config_fetcher,
+                               SpecGitAccessor,
+                               file_system_accessor,
+                               middleman_runner,
+                               spider,
+                               final_app_dir,
+                               server_director,
+                               File.absolute_path('.'),
+                               null_dita_processor)
+            end
 
           it 'creates the output directory' do
             publish_command = create_publish_command
@@ -818,16 +811,16 @@ module Bookbinder
             config_containing_dita_sections = Configuration.new(logger, user_config)
             config_fetcher = double('config fetcher', fetch_config: config_containing_dita_sections)
 
-            publish_command = Commands::Publish.new(logger,
-                                                    config_fetcher,
-                                                    version_control_system,
-                                                    fs_accessor,
-                                                    static_site_generator,
-                                                    sitemap_generator,
-                                                    final_app_dir,
-                                                    server_director,
-                                                    'irrelevant/path',
-                                                    null_dita_processor)
+            publish_command = Commands::Bind.new(logger,
+                                                 config_fetcher,
+                                                 version_control_system,
+                                                 fs_accessor,
+                                                 static_site_generator,
+                                                 sitemap_generator,
+                                                 final_app_dir,
+                                                 server_director,
+                                                 'irrelevant/path',
+                                                 null_dita_processor)
 
             expect(version_control_system).to receive(:clone).with('git@github.com:org/dita_section',
                                                                    'my_dita_section',
@@ -865,16 +858,16 @@ module Bookbinder
             config_fetcher = double('config fetcher', fetch_config: config_containing_dita_sections)
 
             dita_processor = double('dita processor')
-            publish_command = Commands::Publish.new(logger,
-                                                    config_fetcher,
-                                                    version_control_system,
-                                                    fs_accessor,
-                                                    static_site_generator,
-                                                    sitemap_generator,
-                                                    final_app_dir,
-                                                    server_director,
-                                                    'base',
-                                                    dita_processor)
+            publish_command = Commands::Bind.new(logger,
+                                                 config_fetcher,
+                                                 version_control_system,
+                                                 fs_accessor,
+                                                 static_site_generator,
+                                                 sitemap_generator,
+                                                 final_app_dir,
+                                                 server_director,
+                                                 'base',
+                                                 dita_processor)
 
             dita_section = DitaSection.new('base/output/tmp/dita_sections/my_dita_section',
                                            'path/to/dita.ditamap',
@@ -925,16 +918,16 @@ module Bookbinder
             config_fetcher = double('config fetcher', fetch_config: config_containing_dita_sections)
 
             dita_processor = double('dita processor')
-            publish_command = Commands::Publish.new(logger,
-                                                    config_fetcher,
-                                                    version_control_system,
-                                                    fs_accessor,
-                                                    static_site_generator,
-                                                    sitemap_generator,
-                                                    final_app_dir,
-                                                    server_director,
-                                                    '/parent-of-book/book',
-                                                    dita_processor)
+            publish_command = Commands::Bind.new(logger,
+                                                 config_fetcher,
+                                                 version_control_system,
+                                                 fs_accessor,
+                                                 static_site_generator,
+                                                 sitemap_generator,
+                                                 final_app_dir,
+                                                 server_director,
+                                                 '/parent-of-book/book',
+                                                 dita_processor)
 
             expected_dita_section = DitaSection.new('/parent-of-book/my_dita_section',
                                            'path/to/dita.ditamap',

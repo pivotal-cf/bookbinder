@@ -4,7 +4,7 @@ require_relative 'command_validator'
 require_relative 'git_accessor'
 require_relative 'commands/build_and_push_tarball'
 require_relative 'commands/generate_pdf'
-require_relative 'commands/publish'
+require_relative 'commands/bind'
 require_relative 'commands/version'
 require_relative 'commands/help'
 require_relative 'middleman_runner'
@@ -31,17 +31,17 @@ module Bookbinder
       commands = [
         build_and_push_tarball_command = Commands::BuildAndPushTarball.new(logger, configuration_fetcher),
         Commands::GeneratePDF.new(logger, configuration_fetcher),
-        publish_command = Commands::Publish.new(logger,
-                                                configuration_fetcher,
-                                                git_accessor,
-                                                local_file_system_accessor,
-                                                middleman_runner,
-                                                spider,
-                                                final_app_directory,
-                                                server_director),
+        bind_command = Commands::Bind.new(logger,
+                                          configuration_fetcher,
+                                          git_accessor,
+                                          local_file_system_accessor,
+                                          middleman_runner,
+                                          spider,
+                                          final_app_directory,
+                                          server_director),
         push_local_to_staging_command = Commands::PushLocalToStaging.new(logger, configuration_fetcher),
         Commands::PushToProd.new(logger, configuration_fetcher),
-        Commands::RunPublishCI.new(publish_command,
+        Commands::RunPublishCI.new(bind_command,
                                    push_local_to_staging_command,
                                    build_and_push_tarball_command),
         Commands::Tag.new(logger, configuration_fetcher),
@@ -67,7 +67,7 @@ module Bookbinder
 
         command_runner.run command_name, command_arguments
 
-      rescue Commands::Publish::VersionUnsupportedError => e
+      rescue Commands::Bind::VersionUnsupportedError => e
         logger.error "config.yml at version '#{e.message}' has an unsupported API."
         1
       rescue Configuration::CredentialKeyError => e

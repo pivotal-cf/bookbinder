@@ -39,7 +39,7 @@ module Bookbinder
     context 'when run raises' do
       context 'a KeyError' do
         before do
-          allow_any_instance_of(Commands::Publish).to receive(:run).and_raise KeyError.new 'I broke'
+          allow_any_instance_of(Commands::Bind).to receive(:run).and_raise KeyError.new 'I broke'
         end
 
         let(:arguments) { ['bind', 'local'] }
@@ -56,7 +56,7 @@ module Bookbinder
 
       context 'a Configuration::CredentialKeyError' do
         before do
-          allow_any_instance_of(Commands::Publish).to receive(:run).and_raise Configuration::CredentialKeyError.new 'I broke'
+          allow_any_instance_of(Commands::Bind).to receive(:run).and_raise Configuration::CredentialKeyError.new 'I broke'
         end
 
         let(:arguments) { ['publish', 'local'] }
@@ -73,7 +73,7 @@ module Bookbinder
 
       context 'for InvalidArguments' do
         before do
-          allow_any_instance_of(Commands::Publish).to receive(:run).and_raise CliError::InvalidArguments.new
+          allow_any_instance_of(Commands::Bind).to receive(:run).and_raise CliError::InvalidArguments.new
         end
 
         let(:arguments) { ['bind', 'local'] }
@@ -90,7 +90,7 @@ module Bookbinder
 
       context 'any other error' do
         before do
-          allow_any_instance_of(Commands::Publish).to receive(:run).and_raise 'I broke'
+          allow_any_instance_of(Commands::Bind).to receive(:run).and_raise 'I broke'
         end
 
         let(:arguments) { ['publish', 'local'] }

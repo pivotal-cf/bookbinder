@@ -10,14 +10,14 @@ require_relative '../local_file_system_accessor'
 
 module Bookbinder
   module Commands
-    class Publish
+    class Bind
       VersionUnsupportedError = Class.new(RuntimeError)
 
       include Bookbinder::DirectoryHelperMethods
       include Commands::Naming
 
       def usage
-        "publish <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
+        "bind <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
       end
 
       def initialize(logger,
