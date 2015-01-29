@@ -6,7 +6,6 @@ require_relative '../section'
 require_relative '../dita_section'
 require_relative '../dita_section_gatherer'
 require_relative 'naming'
-require_relative '../local_file_system_accessor'
 
 module Bookbinder
   module Commands
