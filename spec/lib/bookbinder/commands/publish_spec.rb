@@ -50,6 +50,7 @@ module Bookbinder
       end
 
       let(:config) { Configuration.new(logger, config_hash) }
+      let(:config_fetcher) { double('config fetcher', fetch_config: config) }
       let(:book) { 'fantastic/book' }
       let(:logger) { NilLogger.new }
       let(:file_system_accessor) { LocalFileSystemAccessor.new }
@@ -58,7 +59,7 @@ module Bookbinder
       let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
       let(:server_director) { ServerDirector.new(logger, directory: final_app_dir) }
       let(:publish_command) { Commands::Publish.new(logger,
-                                                    config,
+                                                    config_fetcher,
                                                     SpecGitAccessor,
                                                     file_system_accessor,
                                                     middleman_runner,
@@ -161,9 +162,10 @@ module Bookbinder
                 }
 
                 config = Configuration.new(logger, config_hash)
+                allow(config_fetcher).to receive(:fetch_config) { config }
 
                 publish_command = Commands::Publish.new(logger,
-                                                        config,
+                                                        config_fetcher,
                                                         SpecGitAccessor,
                                                         file_system_accessor,
                                                         middleman_runner,
@@ -261,7 +263,7 @@ module Bookbinder
             let(:book) { 'fantastic/book' }
             let(:logger) { NilLogger.new }
             let(:publish_command) { Commands::Publish.new(logger,
-                                                          config,
+                                                          config_fetcher,
                                                           SpecGitAccessor,
                                                           file_system_accessor,
                                                           middleman_runner,
@@ -367,9 +369,10 @@ module Bookbinder
             }
 
             config = Configuration.new(logger, config_hash)
+            allow(config_fetcher).to receive(:fetch_config) { config }
 
             publish_command = Commands::Publish.new(logger,
-                                                    config,
+                                                    config_fetcher,
                                                     SpecGitAccessor,
                                                     file_system_accessor,
                                                     middleman_runner,
@@ -421,9 +424,10 @@ module Bookbinder
             }
 
             config = Configuration.new(logger, config_hash)
+            allow(config_fetcher).to receive(:fetch_config) { config }
 
             publish_command = Commands::Publish.new(logger,
-                                                    config,
+                                                    config_fetcher,
                                                     SpecGitAccessor,
                                                     file_system_accessor,
                                                     middleman_runner,
@@ -477,9 +481,10 @@ module Bookbinder
                 }
 
                 config = Configuration.new(logger, config_hash)
+                allow(config_fetcher).to receive(:fetch_config) { config }
 
                 publish_command = Commands::Publish.new(logger,
-                                                        config,
+                                                        config_fetcher,
                                                         SpecGitAccessor,
                                                         file_system_accessor,
                                                         middleman_runner,
@@ -511,9 +516,10 @@ module Bookbinder
               }
 
               config = Configuration.new(logger, config_hash)
+              allow(config_fetcher).to receive(:fetch_config) { config }
 
               publish_command = Commands::Publish.new(logger,
-                                                      config,
+                                                      config_fetcher,
                                                       SpecGitAccessor,
                                                       file_system_accessor,
                                                       middleman_runner,
@@ -552,9 +558,10 @@ module Bookbinder
             }
 
             config = Configuration.new(logger, config_hash)
+            allow(config_fetcher).to receive(:fetch_config) { config }
 
             publish_command = Commands::Publish.new(logger,
-                                                    config,
+                                                    config_fetcher,
                                                     SpecGitAccessor,
                                                     file_system_accessor,
                                                     middleman_runner,
@@ -624,9 +631,10 @@ module Bookbinder
               }
 
               config = Configuration.new(logger, config_hash)
+              allow(config_fetcher).to receive(:fetch_config) { config }
 
               publish_command = Commands::Publish.new(logger,
-                                                      config,
+                                                      config_fetcher,
                                                       SpecGitAccessor,
                                                       file_system_accessor,
                                                       middleman_runner,
@@ -668,9 +676,10 @@ module Bookbinder
             }
 
             config = Configuration.new(logger, config_hash)
+            allow(config_fetcher).to receive(:fetch_config) { config }
 
             publish_command = Commands::Publish.new(logger,
-                                                    config,
+                                                    config_fetcher,
                                                     SpecGitAccessor,
                                                     file_system_accessor,
                                                     middleman_runner,
@@ -708,13 +717,14 @@ module Bookbinder
               }
 
               config = Configuration.new(logger, config_hash)
+              allow(config_fetcher).to receive(:fetch_config) { config }
               middleman_runner = MiddlemanRunner.new(logger, SpecGitAccessor)
               final_app_dir = File.absolute_path('final_app')
             spider = Spider.new(logger, app_dir: final_app_dir)
             server_director = ServerDirector.new(logger, directory: final_app_dir)
 
             Commands::Publish.new(logger,
-                                  config,
+                                  config_fetcher,
                                   SpecGitAccessor,
                                   file_system_accessor,
                                   middleman_runner,
@@ -799,9 +809,10 @@ module Bookbinder
             }
 
             config_containing_dita_sections = Configuration.new(logger, user_config)
+            config_fetcher = double('config fetcher', fetch_config: config_containing_dita_sections)
 
             publish_command = Commands::Publish.new(logger,
-                                                    config_containing_dita_sections,
+                                                    config_fetcher,
                                                     version_control_system,
                                                     fs_accessor,
                                                     static_site_generator,
@@ -844,10 +855,11 @@ module Bookbinder
             }
 
             config_containing_dita_sections = Configuration.new(logger, user_config)
+            config_fetcher = double('config fetcher', fetch_config: config_containing_dita_sections)
 
             dita_processor = double('dita processor')
             publish_command = Commands::Publish.new(logger,
-                                                    config_containing_dita_sections,
+                                                    config_fetcher,
                                                     version_control_system,
                                                     fs_accessor,
                                                     static_site_generator,
@@ -903,10 +915,11 @@ module Bookbinder
                 ]
             }
             config_containing_dita_sections = Configuration.new(logger, user_config)
+            config_fetcher = double('config fetcher', fetch_config: config_containing_dita_sections)
 
             dita_processor = double('dita processor')
             publish_command = Commands::Publish.new(logger,
-                                                    config_containing_dita_sections,
+                                                    config_fetcher,
                                                     version_control_system,
                                                     fs_accessor,
                                                     static_site_generator,

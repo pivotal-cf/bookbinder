@@ -21,7 +21,7 @@ module Bookbinder
       end
 
       def initialize(logger,
-                     config,
+                     config_fetcher,
                      version_control_system,
                      file_system_accessor,
                      static_site_generator,
@@ -31,7 +31,7 @@ module Bookbinder
                      context_dir,
                      dita_processor)
         @logger = logger
-        @config = config
+        @config_fetcher = config_fetcher
         @version_control_system = version_control_system
         @file_system_accessor = file_system_accessor
         @static_site_generator = static_site_generator
@@ -125,7 +125,7 @@ module Bookbinder
 
       attr_reader :publisher,
                   :version_control_system,
-                  :config,
+                  :config_fetcher,
                   :logger,
                   :file_system_accessor,
                   :static_site_generator,
@@ -232,6 +232,10 @@ module Bookbinder
         end
 
         arguments.merge! optional_arguments
+      end
+
+      def config
+        config_fetcher.fetch_config
       end
 
       def sections_from(version)

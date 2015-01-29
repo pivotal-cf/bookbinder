@@ -66,7 +66,7 @@ module Bookbinder
       local_dita_processor = LocalDitaProcessor.new(sheller, config.path_to_dita_ot_library)
 
       Commands::Publish.new(logger,
-                            configuration_fetcher.fetch_config,
+                            configuration_fetcher,
                             version_control_system,
                             file_system_accessor,
                             static_site_generator,
