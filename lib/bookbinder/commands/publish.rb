@@ -89,11 +89,23 @@ module Bookbinder
           DitaSection.new(nil, relative_path_to_dita_map, full_name, target_ref, directory)
         end
 
+        if location == 'github'
+          dita_section_gatherer = DitaSectionGatherer.new(version_control_system, logger)
+          final_dita_sections = dita_section_gatherer.gather(dita_sections, to: dita_section_dir)
+        else
+          final_dita_sections = dita_sections.map do |dita_section|
+            relative_path_to_dita_map = dita_section.ditamap_location
+            full_name = dita_section.full_name
+            target_ref = dita_section.target_ref
+            directory = dita_section.directory
 
-        dita_section_gatherer = DitaSectionGatherer.new(version_control_system, logger)
-        cloned_dita_sections = dita_section_gatherer.gather(dita_sections, to: dita_section_dir)
+            path_to_local_copy = File.join output_paths[:local_repo_dir], directory
 
-        processed_dita_section_paths = dita_processor.process(cloned_dita_sections,
+            DitaSection.new(path_to_local_copy, relative_path_to_dita_map, full_name, target_ref, directory)
+          end
+        end
+
+        processed_dita_section_paths = dita_processor.process(final_dita_sections,
                                                                to: dita_processed_dir)
 
         processed_dita_section_paths.each do |processed_dita_source|

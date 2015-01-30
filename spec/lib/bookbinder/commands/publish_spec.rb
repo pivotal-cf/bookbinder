@@ -771,108 +771,166 @@ module Bookbinder
     end
 
     describe 'unit' do
-      context 'when the config contains dita sections' do
-        it 'clones the dita sections to a dita directory' do
-          logger = double('logger', log: true)
-          version_control_system = double('vcs')
-          fs_accessor = double('fs_accessor', remove_directory: true, make_directory: true, copy: true)
-          static_site_generator = double('static_site_generator', run: true)
-          sitemap_generator = double('sitemap_generator', has_broken_links?: false)
-          server_director = double('server_director', use_server: true)
+      context 'when publishing from github' do
 
-          final_app_dir = ''
+        context 'when the config contains dita sections' do
+          it 'clones the dita sections to a dita directory' do
+            logger = double('logger', log: true)
+            version_control_system = double('vcs')
+            fs_accessor = double('fs_accessor', remove_directory: true, make_directory: true, copy: true)
+            static_site_generator = double('static_site_generator', run: true)
+            sitemap_generator = double('sitemap_generator', has_broken_links?: false)
+            server_director = double('server_director', use_server: true)
 
-          user_config = {
-            'book_repo' => 'my_dita_book',
-            'public_host' => 'my public host',
-            'dita_sections' => [
-              {
-                'repository' => {
-                  'name' => 'org/dita_section'
-                },
-                'ditamap_location' => 'path/to/dita.ditamap',
-                'directory' => 'my_dita_section'
-              }
-            ]
-          }
+            final_app_dir = ''
 
-          config_containing_dita_sections = Configuration.new(logger, user_config)
+            user_config = {
+              'book_repo' => 'my_dita_book',
+              'public_host' => 'my public host',
+              'dita_sections' => [
+                {
+                  'repository' => {
+                    'name' => 'org/dita_section'
+                  },
+                  'ditamap_location' => 'path/to/dita.ditamap',
+                  'directory' => 'my_dita_section'
+                }
+              ]
+            }
 
-          publish_command = Commands::Publish.new(logger,
-                                                  config_containing_dita_sections,
-                                                  version_control_system,
-                                                  fs_accessor,
-                                                  static_site_generator,
-                                                  sitemap_generator,
-                                                  final_app_dir,
-                                                  server_director,
-                                                  'irrelevant/path',
-                                                  null_dita_processor)
+            config_containing_dita_sections = Configuration.new(logger, user_config)
 
-          expect(version_control_system).to receive(:clone).with('git@github.com:org/dita_section',
-                                                                 'my_dita_section',
-                                                                 path: /output\/tmp\/dita_sections/).once
+            publish_command = Commands::Publish.new(logger,
+                                                    config_containing_dita_sections,
+                                                    version_control_system,
+                                                    fs_accessor,
+                                                    static_site_generator,
+                                                    sitemap_generator,
+                                                    final_app_dir,
+                                                    server_director,
+                                                    'irrelevant/path',
+                                                    null_dita_processor)
 
-          publish_command.run(['github'])
+            expect(version_control_system).to receive(:clone).with('git@github.com:org/dita_section',
+                                                                   'my_dita_section',
+                                                                   path: /output\/tmp\/dita_sections/).once
+
+            publish_command.run(['github'])
+          end
+
+          it 'copies processed dita sections into static site generator directory' do
+            logger = double('logger', log: true)
+            version_control_system = double('vcs', clone: nil)
+            fs_accessor = double('fs_accessor', remove_directory: true, make_directory: true, copy: true)
+            static_site_generator = double('static_site_generator', run: true)
+            sitemap_generator = double('sitemap_generator', has_broken_links?: false)
+            server_director = double('server_director', use_server: true)
+
+            final_app_dir = ''
+
+            user_config = {
+              'book_repo' => 'my_dita_book',
+              'public_host' => 'my public host',
+              'dita_sections' => [
+                {
+                  'repository' => {
+                    'name' => 'org/dita_section',
+                    'ref' => 'my-ref-SHA'
+                  },
+                  'ditamap_location' => 'path/to/dita.ditamap',
+                  'directory' => 'my_dita_section'
+                }
+              ]
+            }
+
+            config_containing_dita_sections = Configuration.new(logger, user_config)
+
+            dita_processor = double('dita processor')
+            publish_command = Commands::Publish.new(logger,
+                                                    config_containing_dita_sections,
+                                                    version_control_system,
+                                                    fs_accessor,
+                                                    static_site_generator,
+                                                    sitemap_generator,
+                                                    final_app_dir,
+                                                    server_director,
+                                                    'base',
+                                                    dita_processor)
+
+            dita_section = DitaSection.new('base/output/tmp/dita_sections/my_dita_section',
+                                           'path/to/dita.ditamap',
+                                           'org/dita_section',
+                                           'my-ref-SHA',
+                                           'my_dita_section')
+            allow(dita_processor).
+              to receive(:process).
+              with([dita_section], to: 'base/output/tmp/processed_dita').
+              and_return(['processed_dita/my_dita_section'])
+
+            expect(fs_accessor).
+              to receive(:copy).
+              with('processed_dita/my_dita_section', /middleman\/source/)
+
+            publish_command.run(['github'])
+          end
         end
       end
 
-      it 'copies processed dita sections into static site generator directory' do
-        logger = double('logger', log: true)
-        version_control_system = double('vcs', clone: nil)
-        fs_accessor = double('fs_accessor', remove_directory: true, make_directory: true, copy: true)
-        static_site_generator = double('static_site_generator', run: true)
-        sitemap_generator = double('sitemap_generator', has_broken_links?: false)
-        server_director = double('server_director', use_server: true)
+      context 'when publishing from local' do
+        context 'when the config contains dita sections' do
+          it 'processes the dita sections from their local dir to a processed-dita directory' do
+            logger = double('logger', log: true)
+            version_control_system = double('vcs')
+            fs_accessor = double('fs_accessor', remove_directory: true, make_directory: true, copy: true)
+            static_site_generator = double('static_site_generator', run: true)
+            sitemap_generator = double('sitemap_generator', has_broken_links?: false)
+            server_director = double('server_director', use_server: true)
 
-        final_app_dir = ''
+            final_app_dir = ''
+            user_config = {
+                'book_repo' => 'my_dita_book',
+                'public_host' => 'my public host',
+                'dita_sections' => [
+                    {
+                        'repository' => {
+                            'name' => 'org/dita_section',
+                            'ref' => 'my-ref-SHA'
+                        },
+                        'ditamap_location' => 'path/to/dita.ditamap',
+                        'directory' => 'my_dita_section',
 
-        user_config = {
-          'book_repo' => 'my_dita_book',
-          'public_host' => 'my public host',
-          'dita_sections' => [
-            {
-              'repository' => {
-                'name' => 'org/dita_section',
-                'ref' => 'my-ref-SHA'
-              },
-              'ditamap_location' => 'path/to/dita.ditamap',
-              'directory' => 'my_dita_section'
+                    }
+                ]
             }
-          ]
-        }
+            config_containing_dita_sections = Configuration.new(logger, user_config)
 
-        config_containing_dita_sections = Configuration.new(logger, user_config)
+            dita_processor = double('dita processor')
+            publish_command = Commands::Publish.new(logger,
+                                                    config_containing_dita_sections,
+                                                    version_control_system,
+                                                    fs_accessor,
+                                                    static_site_generator,
+                                                    sitemap_generator,
+                                                    final_app_dir,
+                                                    server_director,
+                                                    '/parent-of-book/book',
+                                                    dita_processor)
 
-        dita_processor = double('dita processor')
-        publish_command = Commands::Publish.new(logger,
-                                                config_containing_dita_sections,
-                                                version_control_system,
-                                                fs_accessor,
-                                                static_site_generator,
-                                                sitemap_generator,
-                                                final_app_dir,
-                                                server_director,
-                                                'base',
-                                                dita_processor)
+            expected_dita_section = DitaSection.new('/parent-of-book/my_dita_section',
+                                           'path/to/dita.ditamap',
+                                           'org/dita_section',
+                                           'my-ref-SHA',
+                                           'my_dita_section')
 
-        dita_section = DitaSection.new('base/output/tmp/dita_sections/my_dita_section',
-                                       'path/to/dita.ditamap',
-                                       'org/dita_section',
-                                       'my-ref-SHA',
-                                       'my_dita_section')
-        allow(dita_processor).
-          to receive(:process).
-          with([dita_section], to: 'base/output/tmp/processed_dita').
-          and_return(['processed_dita/my_dita_section'])
+            expect(dita_processor).
+                to receive(:process).
+                       with([expected_dita_section], to: '/parent-of-book/book/output/tmp/processed_dita').
+                       and_return(['processed_dita/my_dita_section'])
 
-        expect(fs_accessor).
-          to receive(:copy).
-          with('processed_dita/my_dita_section', /middleman\/source/)
-
-        publish_command.run(['github'])
+            publish_command.run(['local'])
+          end
+        end
       end
     end
   end
 end
-
