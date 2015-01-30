@@ -1,15 +1,15 @@
+require_relative 'bind'
 require_relative 'bookbinder_command'
-require_relative 'naming'
-require_relative 'publish'
-require_relative 'push_local_to_staging'
 require_relative 'build_and_push_tarball'
+require_relative 'naming'
+require_relative 'push_local_to_staging'
 
 module Bookbinder
   module Commands
     class RunPublishCI
-      extend Commands::Naming
+      include Commands::Naming
 
-      def self.usage
+      def usage
         "run_publish_ci \t \t \t \t Run publish, push_local_to_staging, and build_and_push_tarball for CI purposes"
       end
 

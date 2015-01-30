@@ -24,7 +24,7 @@ module Bookbinder
         expect(result).to eq(0)
       end
 
-      it 'does not execute PushLocalToStaging if Publish fails' do
+      it 'does not execute PushLocalToStaging if Bind fails' do
         expect(fake_publish).to receive(:run).with(['github']).and_return(1)
         expect(fake_push_local_to_staging).not_to receive(:run)
         expect(fake_build_and_push_tarball).not_to receive(:run)

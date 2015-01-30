@@ -1,20 +1,25 @@
-require_relative '../../../lib/bookbinder/local_dita_processor'
+require_relative '../../../lib/bookbinder/configuration'
 require_relative '../../../lib/bookbinder/dita_section'
+require_relative '../../../lib/bookbinder/local_dita_processor'
 require_relative '../../../lib/bookbinder/sheller'
 
 module Bookbinder
   describe LocalDitaProcessor do
     describe 'processing sections' do
+      let(:path_to_dita_ot_library) { '/path/to/dita/ot' }
+      let(:config) { Configuration.new(double('logger'),
+                                       'path_to_dita_ot_library' => path_to_dita_ot_library) }
+      let(:config_fetcher) { double('config fetcher', fetch_config: config) }
+
       it 'returns the local paths of the processed dita' do
         shell = double('shell_out')
-        path_to_dita_ot_library = '/path/to/dita_ot'
         processed_dita_location = '/path/to/processed/dita'
         dita_sections = [
             DitaSection.new('/local/path/to/repo', 'path/to/map.ditamap', 'org/foo', nil, 'boo')
         ]
 
         allow(shell).to receive(:run_command)
-        dita_processor = LocalDitaProcessor.new(shell, path_to_dita_ot_library)
+        dita_processor = LocalDitaProcessor.new(shell, config_fetcher)
         processed_dita_paths = dita_processor.process(dita_sections, to: processed_dita_location)
 
         expect(processed_dita_paths).to eq ['/path/to/processed/dita/boo']
@@ -22,7 +27,6 @@ module Bookbinder
 
       it 'runs the dita-processing library against the given ditamap locations' do
         shell = double('shell_out')
-        path_to_dita_ot_library = '/path/to/dita/ot'
         processed_dita_location = '/path/to/processed/dita'
         classpath = '/path/to/dita/ot/lib/xercesImpl.jar:' +
                     '/path/to/dita/ot/lib/xml-apis.jar:' +
@@ -38,7 +42,7 @@ module Bookbinder
             DitaSection.new('/local/path/to/repo', 'path/to/map.ditamap', 'org/foo', nil, 'boo')
         ]
 
-        dita_processor = LocalDitaProcessor.new(shell, path_to_dita_ot_library)
+        dita_processor = LocalDitaProcessor.new(shell, config_fetcher)
         expect(shell).to receive(:run_command)
                          .with('export DITA_DIR=/path/to/dita/ot; ' +
                                "export CLASSPATH=#{classpath}; " +
@@ -53,7 +57,6 @@ module Bookbinder
       context 'when running the dita processing library fails' do
         it 're-raises with a helpful message' do
           shell = double('shell_out')
-          path_to_dita_ot_library = '/path/to/dita_ot'
           processed_dita_location = '/path/to/processed/dita'
           dita_sections = [
               DitaSection.new('/local/path/to/repo', 'path/to/map.ditamap', 'org/foo', nil, 'boo')
@@ -61,7 +64,7 @@ module Bookbinder
 
           allow(shell).to receive(:run_command).and_raise Sheller::ShelloutFailure
 
-          dita_processor = LocalDitaProcessor.new(shell, path_to_dita_ot_library)
+          dita_processor = LocalDitaProcessor.new(shell, config_fetcher)
           expect { dita_processor.process(dita_sections, to: processed_dita_location) }.
               to raise_error(LocalDitaProcessor::DitaLibraryFailure,
                              'The DITA-to-HTML conversion failed. Please check your DITA-specific keys/values in ' +

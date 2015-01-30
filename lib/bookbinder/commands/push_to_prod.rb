@@ -5,9 +5,9 @@ require_relative 'naming'
 module Bookbinder
   module Commands
     class PushToProd < BookbinderCommand
-      extend Commands::Naming
+      include Commands::Naming
 
-      def self.usage
+      def usage
         "push_to_prod [build_#] \t \t \t Push latest or <build_#> from your S3 bucket to the production host specified in credentials.yml"
       end
 

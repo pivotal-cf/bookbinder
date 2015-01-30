@@ -21,7 +21,7 @@ Please read this document to understand how to set up a new book project.  You c
 - Add list of included doc sections to `config.yml`.
 - (For private repositories) Create a Github [SSH key](https://help.github.com/articles/generating-ssh-keys/) for bookbinder from an account that has access to the documentation repositories.
 - (For private repositories) ssh-add this key locally. Bookbinder will use whatever keys your system knows about by default.
-- Publish and run the server locally to test your book.
+- Bind and run the server locally to test your book.
 
 #### Deploying your book
 - Create AWS bucket for green builds and put info into `credentials.yml`
@@ -93,7 +93,7 @@ template_variables:					# optional
     output
     final_app
 
-`master_middleman` is a directory which forms the basis of your site. [Middleman](http://middlemanapp.com/) configuration and top-level assets, javascripts, and stylesheets should all be placed in here. You can also have ERB layout files. Each time a publish operation is run, this directory is copied to `output/master_middleman`. Then each section repo is copied (as a directory) into `output/master_middleman/source/`, before middleman is run to generate the final app. If you specify a `layout_repo:` in `config.yml`, that directory will be copied instead of `master_middleman`.
+`master_middleman` is a directory which forms the basis of your site. [Middleman](http://middlemanapp.com/) configuration and top-level assets, javascripts, and stylesheets should all be placed in here. You can also have ERB layout files. Each time a bind operation is run, this directory is copied to `output/master_middleman`. Then each section repo is copied (as a directory) into `output/master_middleman/source/`, before middleman is run to generate the final app. If you specify a `layout_repo:` in `config.yml`, that directory will be copied instead of `master_middleman`.
 
 `.ruby-version` is used by [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/) to find the right ruby.  WARNING: If you install rbenv, you MUST uninstall RVM first: [see details here](http://robots.thoughtbot.com/post/47273164981/using-rbenv-to-manage-rubies-and-gems).
 
@@ -190,19 +190,19 @@ And you should be good to go!
 
 Bookbinder's entry point is the `bookbinder` executable. It should be invoked from the book directory. The following commands are available:
 
-### `publish` command
+### `bind` command
 
-Bookbinder's most important command is `publish`. It takes one argument on the command line:
+Bookbinder's most important command is `bind`. It takes one argument on the command line:
 
-        bundle exec bookbinder publish local
+        bundle exec bookbinder bind local
 
 will find documentation repositories in directories that are siblings to your current directory, while
 
-        bundle exec bookbinder publish github
+        bundle exec bookbinder bind github
 
 will find doc repos by downloading the latest version from github.
 
-The publish command creates 2 output directories, one named `output/` and one named `final_app/`. These are placed in the current directory and are cleared each time you run bookbinder.
+The bind command creates 2 output directories, one named `output/` and one named `final_app/`. These are placed in the current directory and are cleared each time you run bookbinder.
 
 `final_app/` contains bookbinder's ultimate output: a Rack web-app that can be pushed to cloud foundry or run locally.
 
@@ -216,13 +216,13 @@ r301      %r{/wiki/(\w+)_\w+},    '/$1'
 ```
 
 
-`output/` contains intermediary state, including the final prepared directory that the `publish` script ran middleman against, in `output/master_middleman`.
+`output/` contains intermediary state, including the final prepared directory that the `bind` script ran middleman against, in `output/master_middleman`.
 
-As of version 0.2.0, the `publish` command no longer generates PDFs.
+As of version 0.2.0, the `bind` command no longer generates PDFs.
 
 ### `generate_pdf` command
 
-`$ bookbinder generate_pdf` will generate a PDF against the currently available `final_app` directory. You must run `publish [local | github]` before running `generate_pdf`.
+`$ bookbinder generate_pdf` will generate a PDF against the currently available `final_app` directory. You must run `bind [local | github]` before running `generate_pdf`.
 
 You can specify which pages to include in a PDF using `$ bookbinder generate_pdf my-pdf.yml`. `my-pdf.yml` contains the configuration for the pdf. It must be formatted as YAML and **requires the keys** `header` and `pages`.
 
@@ -305,7 +305,7 @@ You will want a build that executes this shell command:
     bundle install
     bundle exec bookbinder run_publish_ci
     
-This will publish a book and push it to staging.
+This will bind a book and push it to staging.
 
 ## <a name="deploying"></a>Deploying
 
@@ -326,7 +326,7 @@ The following command will deploy the build in your local 'final_app' directory 
     bundle exec bookbinder push_local_to_staging
 
 ### Deploy to Production
-Deploying to prod is always done manually. It can be done from any machine with the book project checked out, but does not depend on the results from a local publish (or the contents of your `final_app` directory). Instead, it pulls the latest green build from S3, untars it locally, and then pushes it up to prod:
+Deploying to prod is always done manually. It can be done from any machine with the book project checked out, but does not depend on the results from a local bind (or the contents of your `final_app` directory). Instead, it pulls the latest green build from S3, untars it locally, and then pushes it up to prod:
 
     bundle exec bookbinder push_to_prod <build_number>
 
@@ -334,7 +334,7 @@ If the build_number argument is left out, the latest green build will be deploye
 
 ## Generating a Sitemap for Google Search Indexing
 
-The sitemap file `/sitemap.xml` is automatically regenerated when publishing. When setting up a new docs website, make sure to add this sitemap's url in Google Webmaster Tools (for better reindexing?).
+The sitemap file `/sitemap.xml` is automatically regenerated when binding. When setting up a new docs website, make sure to add this sitemap's url in Google Webmaster Tools (for better reindexing?).
 
 ## Contributing to Bookbinder
 

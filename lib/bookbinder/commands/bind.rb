@@ -6,22 +6,17 @@ require_relative '../section'
 require_relative '../dita_section'
 require_relative '../dita_section_gatherer'
 require_relative 'naming'
-require_relative '../local_file_system_accessor'
 
 module Bookbinder
   module Commands
-    class Publish
+    class Bind
       VersionUnsupportedError = Class.new(RuntimeError)
 
       include Bookbinder::DirectoryHelperMethods
-      extend Commands::Naming
-
-      def self.usage
-        "publish <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
-      end
+      include Commands::Naming
 
       def initialize(logger,
-                     config,
+                     config_fetcher,
                      version_control_system,
                      file_system_accessor,
                      static_site_generator,
@@ -31,7 +26,7 @@ module Bookbinder
                      context_dir,
                      dita_processor)
         @logger = logger
-        @config = config
+        @config_fetcher = config_fetcher
         @version_control_system = version_control_system
         @file_system_accessor = file_system_accessor
         @static_site_generator = static_site_generator
@@ -40,6 +35,14 @@ module Bookbinder
         @server_director = server_director
         @context_dir = context_dir
         @dita_processor = dita_processor
+      end
+
+      def usage
+        "bind <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
+      end
+
+      def command_for?(test_command_name)
+        %w(bind publish).include?(test_command_name)
       end
 
       def run(cli_arguments)
@@ -125,7 +128,7 @@ module Bookbinder
 
       attr_reader :publisher,
                   :version_control_system,
-                  :config,
+                  :config_fetcher,
                   :logger,
                   :file_system_accessor,
                   :static_site_generator,
@@ -232,6 +235,10 @@ module Bookbinder
         end
 
         arguments.merge! optional_arguments
+      end
+
+      def config
+        config_fetcher.fetch_config
       end
 
       def sections_from(version)
