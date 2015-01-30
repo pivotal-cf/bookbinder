@@ -42,6 +42,6 @@ module Bookbinder
     end
 
     private
-    attr_reader :sheller, :path_to_dita_dir, :path_to_dita_ant_script
+    attr_reader :sheller, :path_to_dita_dir
   end
 end
