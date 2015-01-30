@@ -4,9 +4,9 @@ module Bookbinder
   class LocalDitaProcessor
     DitaLibraryFailure = Class.new(RuntimeError)
 
-    def initialize(sheller, path_to_dita_dir)
+    def initialize(sheller, configuration_fetcher)
       @sheller = sheller
-      @path_to_dita_dir = path_to_dita_dir
+      @configuration_fetcher = configuration_fetcher
     end
 
     def process(dita_sections, to: nil)
@@ -42,6 +42,11 @@ module Bookbinder
     end
 
     private
-    attr_reader :sheller, :path_to_dita_dir
+
+    attr_reader :sheller
+
+    def path_to_dita_dir
+      @path_to_dita_dir ||= @configuration_fetcher.fetch_config.path_to_dita_ot_library
+    end
   end
 end
