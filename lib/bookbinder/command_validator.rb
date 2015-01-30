@@ -1,7 +1,12 @@
 require_relative 'cli_error'
+require 'ostruct'
 
 module Bookbinder
+  EscalationType = OpenStruct.new(error: 0, success: 1)
+
   class CommandValidator
+    UserMessage = Struct.new(:message, :escalation_type)
+
     def initialize(commands, usage_text)
       @commands = commands
       @usage_text = usage_text
@@ -10,7 +15,9 @@ module Bookbinder
     def validate! command_name
       command_type = "#{command_name}".match(/^--/) ? 'flag' : 'command'
       if commands.none? { |command| command.command_for?(command_name) }
-        raise CliError::UnknownCommand.new "Unrecognized #{command_type} '#{command_name}'\n" + usage_text
+        UserMessage.new "Unrecognized #{command_type} '#{command_name}'\n" + usage_text, EscalationType.error
+      else
+        UserMessage.new "Success", EscalationType.success
       end
     end
 

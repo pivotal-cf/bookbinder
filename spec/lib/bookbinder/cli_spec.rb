@@ -31,8 +31,20 @@ module Bookbinder
     context 'when a command that is not recognized is supplied' do
       let(:arguments) { ['foo'] }
       it 'should print a helpful message' do
-        expect(logger).to receive(:log).with(/Unrecognized command 'foo'/)
-        expect(run).to eq(1)
+        begin
+          real_stdout = $stdout
+          $stdout = StringIO.new
+
+          expect(run).to eq(1)
+
+          $stdout.rewind
+          collected_output = $stdout.read
+
+          expect(collected_output).to match(/Unrecognized command 'foo'/)
+
+        ensure
+          $stdout = real_stdout
+        end
       end
     end
 
@@ -130,8 +142,19 @@ module Bookbinder
         let(:arguments) { ['--foo'] }
 
         it 'should print a helpful message' do
-          expect(logger).to receive(:log).with(/Unrecognized flag '--foo'/)
-          run
+          begin
+            real_stdout = $stdout
+            $stdout = StringIO.new
+
+            run
+
+            $stdout.rewind
+            collected_output = $stdout.read
+
+            expect(collected_output).to match(/Unrecognized flag '--foo'/)
+          ensure
+            $stdout = real_stdout
+          end
         end
       end
     end

@@ -10,6 +10,8 @@ require_relative 'local_dita_processor'
 require_relative 'local_file_system_accessor'
 require_relative 'middleman_runner'
 require_relative 'spider'
+require_relative 'terminal'
+require_relative 'colorizer'
 
 module Bookbinder
   class Cli
@@ -29,6 +31,8 @@ module Bookbinder
       spider = Spider.new(logger, app_dir: final_app_directory)
       server_director = ServerDirector.new(logger, directory: final_app_directory)
       sheller = Sheller.new(logger)
+      colorizer = Colorizer.new
+      terminal = Terminal.new(colorizer)
       local_dita_processor = LocalDitaProcessor.new(sheller, configuration_fetcher)
 
       commands = [
@@ -64,12 +68,18 @@ module Bookbinder
       help_command.usage_message = usage_message
 
       command_validator = CommandValidator.new commands + flags, usage_message
-
       command_runner = CommandRunner.new(logger, commands + flags)
+      command_name = command_name ? command_name : '--help'
+
+      validation_result = command_validator.validate!(command_name)
+      escalation_type = validation_result.escalation_type
+
+      if escalation_type == EscalationType.error
+        terminal.update(validation_result)
+        return 1
+      end
 
       begin
-        command_name ? command_validator.validate!(command_name) : command_name = '--help'
-
         command_runner.run command_name, command_arguments
 
       rescue Commands::Bind::VersionUnsupportedError => e
