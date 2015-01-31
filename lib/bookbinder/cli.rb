@@ -12,6 +12,7 @@ require_relative 'middleman_runner'
 require_relative 'spider'
 require_relative 'terminal'
 require_relative 'colorizer'
+require_relative 'user_message_presenter'
 
 module Bookbinder
   class Cli
@@ -32,7 +33,8 @@ module Bookbinder
       server_director = ServerDirector.new(logger, directory: final_app_directory)
       sheller = Sheller.new(logger)
       colorizer = Colorizer.new
-      terminal = Terminal.new(colorizer)
+      user_message_presenter = UserMessagePresenter.new(colorizer)
+      terminal = Terminal.new
       local_dita_processor = LocalDitaProcessor.new(sheller, configuration_fetcher)
 
       commands = [
@@ -71,11 +73,10 @@ module Bookbinder
       command_runner = CommandRunner.new(logger, commands + flags)
       command_name = command_name ? command_name : '--help'
 
-      validation_result = command_validator.validate!(command_name)
-      escalation_type = validation_result.escalation_type
-
-      if escalation_type == EscalationType.error
-        terminal.update(validation_result)
+      user_message = command_validator.validate(command_name)
+      if user_message.escalation_type == EscalationType.error
+        error_message = user_message_presenter.get_error(user_message)
+        terminal.update(error_message)
         return 1
       end
 

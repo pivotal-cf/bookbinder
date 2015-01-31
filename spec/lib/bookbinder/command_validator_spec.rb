@@ -7,7 +7,7 @@ module Bookbinder
         commands = [double('command', command_for?: false)]
         command_validator = CommandValidator.new(commands, 'usage_message')
 
-        validation_result = command_validator.validate!('not_a_valid_command')
+        validation_result = command_validator.validate('not_a_valid_command')
 
         expect(validation_result.escalation_type).to eq(EscalationType.error)
       end
