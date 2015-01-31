@@ -45,6 +45,10 @@ module Bookbinder
         %w(bind publish).include?(test_command_name)
       end
 
+      def deprecated_command_for?(command_name)
+        %w(publish).include?(command_name)
+      end
+
       def run(cli_arguments)
         raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
         @section_repository = Repositories::SectionRepository.new(

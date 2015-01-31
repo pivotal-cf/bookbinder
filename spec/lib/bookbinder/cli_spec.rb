@@ -48,6 +48,26 @@ module Bookbinder
       end
     end
 
+    context 'when a command is deprecated' do
+      let(:arguments) { ['publish'] }
+      it 'should print a helpful message' do
+        begin
+          real_stdout = $stdout
+          $stdout = StringIO.new
+
+          expect(run).to eq(1)
+
+          $stdout.rewind
+          collected_output = $stdout.read
+
+          expect(collected_output).to match(/bind <local|github>/)
+
+        ensure
+          $stdout = real_stdout
+        end
+      end
+    end
+
     context 'when run raises' do
       context 'a KeyError' do
         before do
@@ -71,7 +91,7 @@ module Bookbinder
           allow_any_instance_of(Commands::Bind).to receive(:run).and_raise Configuration::CredentialKeyError.new 'I broke'
         end
 
-        let(:arguments) { ['publish', 'local'] }
+        let(:arguments) { ['bind', 'local'] }
 
         it 'logs the error with the credentials file name' do
           expect(logger).to receive(:error).with(/I broke.*in credentials\.yml/)
@@ -105,7 +125,7 @@ module Bookbinder
           allow_any_instance_of(Commands::Bind).to receive(:run).and_raise 'I broke'
         end
 
-        let(:arguments) { ['publish', 'local'] }
+        let(:arguments) { ['bind', 'local'] }
 
         it 'logs the error message' do
           expect(logger).to receive(:error).with(/I broke/)
