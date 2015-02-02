@@ -20,9 +20,8 @@ describe 'generating a book' do
   let(:gem_root) { File.expand_path('../../../', __FILE__) }
 
   it 'provides the production host to the ERB templates', integration: true do
-    #pending 'Revisit when publishing locally no longer accesses GitHub.'
     silence_io_streams do
-      `#{gem_root}/bin/bookbinder publish local`
+      `#{gem_root}/bin/bookbinder bind local`
     end
 
     index = File.read File.join('final_app', 'public', 'index.html')
@@ -50,7 +49,7 @@ YAML
 
     it 'uses the provided layout', integration: true do
       silence_io_streams do
-        `#{gem_root}/bin/bookbinder publish local`
+        `#{gem_root}/bin/bookbinder bind local`
       end
 
       index = File.read File.join('final_app', 'public', 'index.html')
