@@ -1,3 +1,12 @@
+require_relative '../commands/bind'
+require_relative '../commands/build_and_push_tarball'
+require_relative '../commands/generate_pdf'
+require_relative '../commands/help'
+require_relative '../commands/version'
+require_relative '../local_dita_processor'
+require_relative '../middleman_runner'
+require_relative '../spider'
+
 module Bookbinder
   module Repositories
     class CommandRepository
@@ -6,21 +15,11 @@ module Bookbinder
       def initialize(logger,
                      configuration_fetcher,
                      git_accessor,
-                     local_file_system_accessor,
-                     middleman_runner,
-                     spider,
-                     final_app_directory,
-                     server_director,
-                     local_dita_processor)
+                     local_file_system_accessor)
         @logger = logger
         @configuration_fetcher = configuration_fetcher
         @git_accessor = git_accessor
         @local_file_system_accessor = local_file_system_accessor
-        @middleman_runner = middleman_runner
-        @spider = spider
-        @final_app_directory = final_app_directory
-        @server_director = server_director
-        @local_dita_processor = local_dita_processor
       end
 
       def each(&block)
@@ -39,12 +38,7 @@ module Bookbinder
       attr_reader(:logger,
                   :configuration_fetcher,
                   :git_accessor,
-                  :local_file_system_accessor,
-                  :middleman_runner,
-                  :spider,
-                  :final_app_directory,
-                  :server_director,
-                  :local_dita_processor)
+                  :local_file_system_accessor)
 
       def list
         standard_commands + flags
@@ -57,32 +51,18 @@ module Bookbinder
       def standard_commands
         @standard_commands ||= [
           build_and_push_tarball,
-          generate_pdf,
+          Commands::GeneratePDF.new(logger, configuration_fetcher),
           bind,
           push_local_to_staging,
-          push_to_prod,
-          run_publish_ci,
-          tag,
-          update_local_doc_repos,
+          Commands::PushToProd.new(logger, configuration_fetcher),
+          Commands::RunPublishCI.new(bind, push_local_to_staging, build_and_push_tarball),
+          Commands::Tag.new(logger, configuration_fetcher),
+          Commands::UpdateLocalDocRepos.new(logger, configuration_fetcher),
         ]
       end
 
       def version
         @version ||= Commands::Version.new(logger)
-      end
-
-      def build_and_push_tarball
-        @build_and_push_tarball ||= Commands::BuildAndPushTarball.new(
-          logger,
-          configuration_fetcher
-        )
-      end
-
-      def generate_pdf
-        @generate_pdf ||= Commands::GeneratePDF.new(
-          logger,
-          configuration_fetcher
-        )
       end
 
       def bind
@@ -107,30 +87,35 @@ module Bookbinder
         )
       end
 
-      def push_to_prod
-        @push_to_prod ||= Commands::PushToProd.new(
+      def build_and_push_tarball
+        @build_and_push_tarball ||= Commands::BuildAndPushTarball.new(
           logger,
           configuration_fetcher
         )
       end
 
-      def run_publish_ci
-        @run_publish_ci ||= Commands::RunPublishCI.new(
-          bind,
-          push_local_to_staging,
-          build_and_push_tarball
-        )
+      def local_dita_processor
+        @local_dita_processor ||=
+          LocalDitaProcessor.new(Sheller.new(logger), configuration_fetcher)
       end
 
-      def tag
-        @tag ||= Commands::Tag.new(logger, configuration_fetcher)
+      def spider
+        @spider ||= Spider.new(logger, app_dir: final_app_directory)
       end
 
-      def update_local_doc_repos
-        @update_local_doc_repos ||= Commands::UpdateLocalDocRepos.new(
+      def server_director
+        @server_director ||= ServerDirector.new(
           logger,
-          configuration_fetcher
+          directory: final_app_directory
         )
+      end
+
+      def middleman_runner
+        @middleman_runner ||= MiddlemanRunner.new(logger, git_accessor)
+      end
+
+      def final_app_directory
+        @final_app_directory ||= File.absolute_path('final_app')
       end
     end
   end
