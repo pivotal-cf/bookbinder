@@ -29,6 +29,19 @@ module Bookbinder
         list + other
       end
 
+      def in_usage_order
+        [
+          build_and_push_tarball,
+          generate_pdf,
+          bind,
+          push_local_to_staging,
+          push_to_prod,
+          run_publish_ci,
+          tag,
+          update_local_doc_repos
+        ]
+      end
+
       private
 
       attr_reader(:logger,
@@ -40,6 +53,19 @@ module Bookbinder
                   :final_app_directory,
                   :server_director,
                   :local_dita_processor)
+
+      def list
+        @list ||= [
+          build_and_push_tarball,
+          generate_pdf,
+          bind,
+          push_local_to_staging,
+          push_to_prod,
+          run_publish_ci,
+          tag,
+          update_local_doc_repos
+      ]
+      end
 
       def build_and_push_tarball
         @build_and_push_tarball ||= Commands::BuildAndPushTarball.new(
@@ -101,19 +127,6 @@ module Bookbinder
           logger,
           configuration_fetcher
         )
-      end
-
-      def list
-        @list ||= [
-          build_and_push_tarball,
-          generate_pdf,
-          bind,
-          push_local_to_staging,
-          push_to_prod,
-          run_publish_ci,
-          tag,
-          update_local_doc_repos
-      ]
       end
     end
   end

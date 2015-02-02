@@ -55,7 +55,7 @@ module Bookbinder
         Commands::Version.new(logger),
         help_command
       ]
-      usage_message = usage_messenger.construct_for(commands, flags)
+      usage_message = usage_messenger.construct_for(commands.in_usage_order, flags)
       help_command.usage_message = usage_message
 
       command_validator = CommandValidator.new commands + flags, usage_message
