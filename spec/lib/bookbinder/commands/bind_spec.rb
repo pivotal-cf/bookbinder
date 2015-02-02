@@ -1,5 +1,5 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
-require_relative '../../../helpers/expectations'
+require_relative '../../../helpers/use_fixture_repo'
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/spec_git_accessor'

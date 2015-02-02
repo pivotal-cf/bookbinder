@@ -1,7 +1,7 @@
 require 'yaml'
 
 require_relative '../helpers/tmp_dirs'
-require_relative '../helpers/expectations'
+require_relative '../helpers/use_fixture_repo'
 require_relative '../helpers/middleman'
 
 describe 'generating a book' do
