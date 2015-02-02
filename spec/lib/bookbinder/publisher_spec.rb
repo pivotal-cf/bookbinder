@@ -5,7 +5,7 @@ require_relative '../../../lib/bookbinder/publisher'
 require_relative '../../../lib/bookbinder/spider'
 require_relative '../../../lib/bookbinder/book'
 require_relative '../../../lib/bookbinder/middleman_runner'
-require_relative '../../helpers/expectations'
+require_relative '../../helpers/use_fixture_repo'
 
 module Bookbinder
   describe Publisher do
