@@ -8,6 +8,10 @@ module Bookbinder
       def command_for?(test_command_name)
         command_name == test_command_name
       end
+
+      def flag?
+        command_name.match(/^--/)
+      end
     end
   end
 end

@@ -1,6 +1,8 @@
 module Bookbinder
   module Repositories
     class CommandRepository
+      include Enumerable
+
       def initialize(logger,
                      configuration_fetcher,
                      git_accessor,
@@ -25,21 +27,11 @@ module Bookbinder
         list.each(&block)
       end
 
-      def +(other)
-        list + other
-      end
-
-      def in_usage_order
-        [
-          build_and_push_tarball,
-          generate_pdf,
-          bind,
-          push_local_to_staging,
-          push_to_prod,
-          run_publish_ci,
-          tag,
-          update_local_doc_repos
-        ]
+      def help
+        @help ||= Commands::Help.new(
+          logger,
+          [version] + standard_commands
+        )
       end
 
       private
@@ -55,7 +47,15 @@ module Bookbinder
                   :local_dita_processor)
 
       def list
-        @list ||= [
+        standard_commands + flags
+      end
+
+      def flags
+        @flags ||= [ version, help ]
+      end
+
+      def standard_commands
+        @standard_commands ||= [
           build_and_push_tarball,
           generate_pdf,
           bind,
@@ -63,8 +63,12 @@ module Bookbinder
           push_to_prod,
           run_publish_ci,
           tag,
-          update_local_doc_repos
-      ]
+          update_local_doc_repos,
+        ]
+      end
+
+      def version
+        @version ||= Commands::Version.new(logger)
       end
 
       def build_and_push_tarball

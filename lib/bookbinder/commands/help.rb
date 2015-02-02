@@ -5,10 +5,9 @@ module Bookbinder
     class Help
       include Commands::Naming
 
-      attr_writer :usage_message
-
-      def initialize(logger)
+      def initialize(logger, other_commands)
         @logger = logger
+        @other_commands = other_commands
       end
 
       def command_name
@@ -24,9 +23,36 @@ module Bookbinder
         0
       end
 
+      def usage_message
+        [usage_header, command_usage_messages].join("\n")
+      end
+
       private
 
-      attr_reader :logger, :usage_message
+      def command_usage_messages
+        (flags + standard_commands).reduce('') { |message, command|
+          message + " \t#{command.usage}\n"
+        }
+      end
+
+      def flags
+        other_commands.select(&:flag?) + [self]
+      end
+
+      def standard_commands
+        other_commands.reject(&:flag?)
+      end
+
+      def usage_header
+        <<TEXT
+
+  \e[1;39;49mDocumentation\e[0m: https://github.com/pivotal-cf/docs-bookbinder
+
+  \e[1;39;49mUsage\e[0m: bookbinder <command|flag> [args]
+TEXT
+      end
+
+      attr_reader :logger, :other_commands
     end
   end
 end

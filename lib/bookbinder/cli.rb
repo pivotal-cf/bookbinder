@@ -48,18 +48,8 @@ module Bookbinder
                                                      server_director,
                                                      local_dita_processor)
 
-      usage_messenger = UsageMessenger.new
-
-      help_command = Commands::Help.new(logger)
-      flags = [
-        Commands::Version.new(logger),
-        help_command
-      ]
-      usage_message = usage_messenger.construct_for(commands.in_usage_order, flags)
-      help_command.usage_message = usage_message
-
-      command_validator = CommandValidator.new commands + flags, usage_message
-      command_runner = CommandRunner.new(logger, commands + flags)
+      command_validator = CommandValidator.new(commands, commands.help.usage_message)
+      command_runner = CommandRunner.new(logger, commands)
       command_name = command_name ? command_name : '--help'
 
       user_message = command_validator.validate(command_name)
