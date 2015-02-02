@@ -41,27 +41,78 @@ module Bookbinder
                   :server_director,
                   :local_dita_processor)
 
+      def build_and_push_tarball
+        @build_and_push_tarball ||= Commands::BuildAndPushTarball.new(
+          logger,
+          configuration_fetcher
+        )
+      end
+
+      def generate_pdf
+        @generate_pdf ||= Commands::GeneratePDF.new(
+          logger,
+          configuration_fetcher
+        )
+      end
+
+      def bind
+        @bind ||= Commands::Bind.new(
+          logger,
+          configuration_fetcher,
+          git_accessor,
+          local_file_system_accessor,
+          middleman_runner,
+          spider,
+          final_app_directory,
+          server_director,
+          File.absolute_path('.'),
+          local_dita_processor
+        )
+      end
+
+      def push_local_to_staging
+        @push_local_to_staging ||= Commands::PushLocalToStaging.new(
+          logger,
+          configuration_fetcher
+        )
+      end
+
+      def push_to_prod
+        @push_to_prod ||= Commands::PushToProd.new(
+          logger,
+          configuration_fetcher
+        )
+      end
+
+      def run_publish_ci
+        @run_publish_ci ||= Commands::RunPublishCI.new(
+          bind,
+          push_local_to_staging,
+          build_and_push_tarball
+        )
+      end
+
+      def tag
+        @tag ||= Commands::Tag.new(logger, configuration_fetcher)
+      end
+
+      def update_local_doc_repos
+        @update_local_doc_repos ||= Commands::UpdateLocalDocRepos.new(
+          logger,
+          configuration_fetcher
+        )
+      end
+
       def list
         @list ||= [
-          build_and_push_tarball_command = Commands::BuildAndPushTarball.new(logger, configuration_fetcher),
-          Commands::GeneratePDF.new(logger, configuration_fetcher),
-          bind_command = Commands::Bind.new(logger,
-                                            configuration_fetcher,
-                                            git_accessor,
-                                            local_file_system_accessor,
-                                            middleman_runner,
-                                            spider,
-                                            final_app_directory,
-                                            server_director,
-                                            File.absolute_path('.'),
-                                            local_dita_processor),
-          push_local_to_staging_command = Commands::PushLocalToStaging.new(logger, configuration_fetcher),
-          Commands::PushToProd.new(logger, configuration_fetcher),
-          Commands::RunPublishCI.new(bind_command,
-                                     push_local_to_staging_command,
-                                     build_and_push_tarball_command),
-          Commands::Tag.new(logger, configuration_fetcher),
-          Commands::UpdateLocalDocRepos.new(logger, configuration_fetcher),
+          build_and_push_tarball,
+          generate_pdf,
+          bind,
+          push_local_to_staging,
+          push_to_prod,
+          run_publish_ci,
+          tag,
+          update_local_doc_repos
       ]
       end
     end
