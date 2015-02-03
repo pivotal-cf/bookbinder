@@ -1,4 +1,6 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/cli'
+require_relative '../../helpers/nil_logger'
+require_relative '../../helpers/use_fixture_repo'
 
 module Bookbinder
   describe Cli do
@@ -139,7 +141,8 @@ module Bookbinder
     describe 'flags' do
       context 'when the input flag is --version' do
         it 'should log the gemspec version' do
-          expect(logger).to receive(:log).with("bookbinder #{Gem::Specification::load(File.join GEM_ROOT, "bookbinder.gemspec").version}")
+          gem_root = File.expand_path('../../../../', __FILE__)
+          expect(logger).to receive(:log).with("bookbinder #{Gem::Specification::load(File.join gem_root, "bookbinder.gemspec").version}")
           expect(cli.run ['--version']).to eq(0)
         end
 

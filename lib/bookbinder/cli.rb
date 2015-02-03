@@ -1,11 +1,15 @@
 require_relative 'colorizer'
 require_relative 'command_runner'
 require_relative 'command_validator'
+require_relative 'configuration'
+require_relative 'configuration_fetcher'
+require_relative 'configuration_validator'
 require_relative 'git_accessor'
 require_relative 'local_file_system_accessor'
 require_relative 'repositories/command_repository'
 require_relative 'terminal'
 require_relative 'user_message_presenter'
+require_relative 'yaml_loader'
 
 module Bookbinder
   class Cli

@@ -1,8 +1,6 @@
-require_relative '../commands/bind'
-require_relative '../commands/build_and_push_tarball'
-require_relative '../commands/generate_pdf'
-require_relative '../commands/help'
-require_relative '../commands/version'
+Dir.glob(File.expand_path('../../commands/*.rb', __FILE__)).each do |command_file|
+  require command_file
+end
 require_relative '../local_dita_processor'
 require_relative '../middleman_runner'
 require_relative '../spider'

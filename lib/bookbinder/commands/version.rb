@@ -18,7 +18,8 @@ module Bookbinder
       end
 
       def run(*)
-        @logger.log "bookbinder #{Gem::Specification::load(File.join GEM_ROOT, "bookbinder.gemspec").version}"
+        root = File.expand_path('../../../../', __FILE__)
+        @logger.log "bookbinder #{Gem::Specification::load(File.join root, "bookbinder.gemspec").version}"
         0
       end
 
