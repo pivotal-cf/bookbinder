@@ -2,8 +2,6 @@ require 'spec_helper'
 
 module Bookbinder
   describe Cli do
-    include_context 'tmp_dirs'
-
     let(:cli) { Cli.new }
     let(:cred_repo) { 'fantastic/creds-repo' }
     let(:logger) { NilLogger.new }

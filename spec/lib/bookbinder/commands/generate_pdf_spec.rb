@@ -2,13 +2,10 @@ require 'yaml'
 require_relative '../../../../lib/bookbinder/commands/generate_pdf'
 require_relative '../../../../lib/bookbinder/sitemap_generator'
 require_relative '../../../helpers/use_fixture_repo'
-require_relative '../../../helpers/tmp_dirs'
 require_relative '../../../helpers/nil_logger'
 
 module Bookbinder
   describe Commands::GeneratePDF do
-    include_context 'tmp_dirs'
-
     let(:fake_generator) { double(generate: double) }
     let(:links) { %w(such-uri.html wow-uri.html amaze-uri.html) }
     let(:urls) { links.map { |l| l.prepend('http://localhost:41722/') } }
