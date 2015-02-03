@@ -181,8 +181,6 @@ module Bookbinder
         end
 
         describe 'github' do
-          let(:zipped_repo_url) { "https://github.com/#{book}/archive/master.tar.gz" }
-
           it 'creates some static HTML' do
             publish_command.run(['github'])
 
