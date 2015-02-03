@@ -96,7 +96,7 @@ module Bookbinder
 
       def local_dita_processor
         @local_dita_processor ||=
-          LocalDitaProcessor.new(Sheller.new(logger), configuration_fetcher)
+          LocalDitaProcessor.new(Sheller.new(logger), ENV['PATH_TO_DITA_OT_LIBRARY'])
       end
 
       def spider

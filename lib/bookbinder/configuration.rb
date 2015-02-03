@@ -107,7 +107,7 @@ module Bookbinder
     end
 
     CONFIG_REQUIRED_KEYS = %w(book_repo layout_repo cred_repo public_host pdf pdf_index versions)
-    CONFIG_OPTIONAL_KEYS = %w(archive_menu path_to_dita_ot_library dita_sections)
+    CONFIG_OPTIONAL_KEYS = %w(archive_menu dita_sections)
 
     CONFIG_REQUIRED_KEYS.each do |method_name|
       define_method(method_name) do
