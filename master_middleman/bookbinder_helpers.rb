@@ -4,12 +4,6 @@ require_relative 'quicklinks_renderer'
 
 I18n.enforce_available_locales = false
 
-class ArchiveMenuTemplateNotFound < StandardError;
-end
-
-class ArchiveConfigFormatError < StandardError;
-end
-
 module Bookbinder
   module Navigation
     class << self
