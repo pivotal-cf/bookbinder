@@ -79,16 +79,14 @@ module Bookbinder
       end
 
       def yield_for_archive_drop_down_menu
-        if config.respond_to?(:archive_menu)
-          first_version, *versions_to_paths = config[:archive_menu]
+        first_version, *versions_to_paths = config[:archive_menu]
 
-          versions_to_full_paths = versions_to_paths.map { |version_path|
-            {version_path.keys.first => "/#{version_path.values.first}"}
-          }
+        versions_to_full_paths = versions_to_paths.map { |version_path|
+          {version_path.keys.first => "/#{version_path.values.first}"}
+        }
 
-          partial 'archive_menus/default', locals: { menu_title: first_version,
-                                                     dropdown_links: versions_to_full_paths }
-        end
+        partial 'archive_menus/default', locals: { menu_title: first_version,
+                                                   dropdown_links: versions_to_full_paths }
       end
 
       def breadcrumbs
