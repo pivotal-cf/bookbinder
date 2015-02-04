@@ -4,8 +4,13 @@ require_relative 'naming'
 
 module Bookbinder
   module Commands
-    class PushToProd < BookbinderCommand
+    class PushToProd
       include Commands::Naming
+
+      def initialize(logger, configuration_fetcher)
+        @logger = logger
+        @configuration_fetcher = configuration_fetcher
+      end
 
       def usage
         "push_to_prod [build_#] \t \t \t Push latest or <build_#> from your S3 bucket to the production host specified in credentials.yml"
@@ -17,6 +22,8 @@ module Bookbinder
       end
 
       private
+
+      attr_reader :configuration_fetcher
 
       def options(arguments)
         {
@@ -30,6 +37,11 @@ module Bookbinder
           production: true
         }
       end
+
+      def config
+        @config ||= configuration_fetcher.fetch_config
+      end
+
     end
   end
 end
