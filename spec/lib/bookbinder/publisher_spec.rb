@@ -1,4 +1,3 @@
-require_relative '../../helpers/tmp_dirs'
 require_relative '../../helpers/spec_git_accessor'
 require_relative '../../helpers/nil_logger'
 require_relative '../../../lib/bookbinder/publisher'
@@ -10,8 +9,6 @@ require_relative '../../helpers/use_fixture_repo'
 module Bookbinder
   describe Publisher do
     describe '#publish' do
-      include_context 'tmp_dirs'
-
       use_fixture_repo
 
       def publish(logger, spider, static_site_generator, final_app_dir, master_middleman_dir, output_dir, server_director)

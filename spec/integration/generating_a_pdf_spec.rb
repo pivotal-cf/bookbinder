@@ -1,8 +1,6 @@
 require 'spec_helper'
 
 describe 'generating a book' do
-  include_context 'tmp_dirs'
-
   use_fixture_repo
 
   before do

@@ -3,7 +3,6 @@ require_relative '../../../helpers/use_fixture_repo'
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/spec_git_accessor'
-require_relative '../../../helpers/tmp_dirs'
 require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
@@ -15,7 +14,6 @@ module Bookbinder
 
     describe 'integration' do
       include SpecHelperMethods
-      include_context 'tmp_dirs'
 
       use_fixture_repo
 
@@ -181,8 +179,6 @@ module Bookbinder
         end
 
         describe 'github' do
-          let(:zipped_repo_url) { "https://github.com/#{book}/archive/master.tar.gz" }
-
           it 'creates some static HTML' do
             publish_command.run(['github'])
 

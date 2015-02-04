@@ -1,8 +1,6 @@
 require 'spec_helper'
 
 describe '$ bookbinder' do
-  include_context 'tmp_dirs'
-
   use_fixture_repo
 
   before do
