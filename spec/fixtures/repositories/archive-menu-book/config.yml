@@ -1,0 +1,13 @@
+---
+book_repo: unused/book_repo
+cred_repo: unused/cred_repo
+
+public_host: idontcare.rip
+
+sections:
+  - repository:
+      name: awesome/non-existent-section
+
+archive_menu:
+  - v1.3.0.0
+  - v1.2.0.0: archives/my-great-file
