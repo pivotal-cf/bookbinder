@@ -53,5 +53,41 @@ module Bookbinder
 
       command.run([build_number])
     end
+
+    context 'when missing credential repo' do
+      let (:section1) do
+        {
+            'repository'=> {
+                'name'=> 'cloudfoundry/docs-cloudfoundry-concepts'
+            },
+            'directory'=> 'concepts'
+        }
+      end
+
+      let(:section2) do
+        {
+            'repository' => {
+                'name' => 'cloudfoundry/docs-cloudfoundry-foo'
+            },
+            'directory' => 'foo'
+        }
+      end
+
+      let(:invalid_push_to_prod_config_hash) do
+        {
+            'book_repo' => 'my_book',
+            'public_host' => 'public_host',
+            'pdf' => 'pdf',
+            'pdf_index' => 'pdf_index',
+            'sections' => [section1, section2]
+        }
+      end
+      let(:config) { Configuration.new(logger, invalid_push_to_prod_config_hash) }
+
+      it 'raises missing credential key error' do
+        expect { command.run([build_number]) }.to raise_error PushToProdValidator::MissingRequiredKeyError, /Your config.yml is missing required key\(s\). The require keys for this commands are /
+      end
+    end
+
   end
 end

@@ -3,9 +3,14 @@ require_relative 'bookbinder_command'
 require_relative 'naming'
 
 module Bookbinder
+  class PushToProdValidator
+    MissingRequiredKeyError = Class.new(RuntimeError)
+  end
+
   module Commands
     class PushToProd
       include Commands::Naming
+      CONFIG_REQUIRED_KEYS = %w(cred_repo)
 
       def initialize(logger, configuration_fetcher)
         @logger = logger
@@ -17,6 +22,7 @@ module Bookbinder
       end
 
       def run(arguments)
+        validate
         Distributor.build(@logger, options(arguments)).distribute
         0
       end
@@ -40,6 +46,19 @@ module Bookbinder
 
       def config
         @config ||= configuration_fetcher.fetch_config
+      end
+
+      def validate
+        missing_keys = []
+        CONFIG_REQUIRED_KEYS.map do |required_key|
+          unless config.has_option?(required_key)
+            missing_keys.push(required_key)
+          end
+        end
+
+        if missing_keys.length > 0
+          raise PushToProdValidator::MissingRequiredKeyError.new "Your config.yml is missing required key(s). The require keys for this commands are " + missing_keys.join(", ")
+        end
       end
 
     end
