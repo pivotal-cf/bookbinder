@@ -4,8 +4,9 @@ module Bookbinder
   class LocalDitaProcessor
     DitaToHtmlLibraryFailure = Class.new(RuntimeError)
 
-    def initialize(sheller, path_to_dita_ot_library, path_to_dita_css_file)
+    def initialize(sheller, preprocessing_formatter, path_to_dita_ot_library, path_to_dita_css_file)
       @sheller = sheller
+      @preprocessing_formatter = preprocessing_formatter
       @path_to_dita_ot_library = path_to_dita_ot_library
       @path_to_dita_css_file = path_to_dita_css_file
     end
@@ -43,12 +44,15 @@ module Bookbinder
               'and that your DITA toolkit is correctly configured.'
 
         end
-        File.join to, dita_section.directory
+
+        preprocessing_formatter.convert(out_dir)
+
+        out_dir
       end
     end
 
     private
 
-    attr_reader :sheller, :path_to_dita_ot_library, :path_to_dita_css_file
+    attr_reader :sheller, :preprocessing_formatter, :path_to_dita_ot_library, :path_to_dita_css_file
   end
 end

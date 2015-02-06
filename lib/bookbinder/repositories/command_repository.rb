@@ -2,6 +2,7 @@ Dir.glob(File.expand_path('../../commands/*.rb', __FILE__)).each do |command_fil
   require command_file
 end
 require_relative '../local_dita_processor'
+require_relative '../dita_output_file_converter'
 require_relative '../middleman_runner'
 require_relative '../spider'
 
@@ -95,6 +96,7 @@ module Bookbinder
       def local_dita_processor
         @local_dita_processor ||=
           LocalDitaProcessor.new(Sheller.new(logger),
+                                 DitaOutputFileConverter.new(local_file_system_accessor),
                                  ENV['PATH_TO_DITA_OT_LIBRARY'],
                                  ENV['PATH_TO_DITA_CSS_FILE'])
       end

@@ -1,4 +1,5 @@
 require_relative '../../../lib/bookbinder/cli'
+require_relative '../../../lib/bookbinder/dita_output_file_converter'
 require_relative '../../helpers/nil_logger'
 require_relative '../../helpers/use_fixture_repo'
 
