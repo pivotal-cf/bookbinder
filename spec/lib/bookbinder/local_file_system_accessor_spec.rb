@@ -124,6 +124,48 @@ module Bookbinder
         end
       end
     end
+
+    describe 'renaming a file' do
+      it 'renames a file in the same location' do
+        fs_accessor = local_file_system_accessor
+
+        Dir.mktmpdir do |tmpdir|
+          filepath = File.join tmpdir, 'file.txt'
+          File.write filepath, 'this is some text'
+
+          expect { fs_accessor.rename_file filepath, 'changed_file.txt' }.
+              to change{ File.exist?(File.join tmpdir, 'changed_file.txt') }.from(false).to(true)
+        end
+      end
+    end
+
+    describe 'finding all files with an extension' do
+      it 'finds all files containing the extension in the given directory' do
+        fs_accessor = local_file_system_accessor
+
+        Dir.mktmpdir do |tmpdir|
+          filepath = File.join tmpdir, 'file.txt'
+          File.write filepath, 'this is some text'
+
+          expect(fs_accessor.find_files_with_ext('.txt', tmpdir)).to include filepath
+        end
+      end
+
+      it 'finds all files containing the extension in any subdirectories' do
+        fs_accessor = local_file_system_accessor
+
+        Dir.mktmpdir do |tmpdir|
+          filepath = File.join tmpdir, 'file.txt'
+          File.write filepath, 'this is some text'
+
+          nested_filepath = File.join tmpdir, 'nested-dir', 'nested-file.txt'
+          FileUtils.mkdir File.join tmpdir, 'nested-dir'
+          File.write nested_filepath, 'this is some text in a nested file'
+
+          expect(fs_accessor.find_files_with_ext('.txt', tmpdir)).to include filepath, nested_filepath
+        end
+      end
+    end
   end
 end
 

@@ -26,6 +26,16 @@ module Bookbinder
     def copy(src, dest)
       FileUtils.cp_r src, dest
     end
+
+    def rename_file(path, new_name)
+      new_path = File.expand_path File.join path, '..', new_name
+      File.rename(path, new_path)
+    end
+
+    def find_files_with_ext(ext, path)
+      Dir[File.join path, '**/*'].select { |file| File.basename(file).match(ext) }
+    end
+
   end
 
 end
