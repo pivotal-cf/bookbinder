@@ -30,7 +30,7 @@ class QuicklinksRenderer < Redcarpet::Render::Base
     @items[header_level] = li
     nil
   rescue BadHeadingLevelError => e
-    raise BadHeadingLevelError.new "The header \"#{text}\", which is at level #{e.message} has no higher-level headers occuring before it."
+    raise BadHeadingLevelError.new "The header \"#{text}\", which is at level #{e.message}, has no higher-level headers occurring before it."
   end
 
   private
