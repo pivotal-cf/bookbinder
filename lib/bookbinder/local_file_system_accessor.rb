@@ -15,6 +15,17 @@ module Bookbinder
       to
     end
 
+    def read(path)
+      File.read(path)
+    end
+
+    def read_from_marker_to(path: nil, marker: nil, to: nil)
+      text = read(path)
+      marker_pos = text.index(marker) + marker.length
+      to_pos = text.index(to)
+      text[marker_pos...to_pos]
+    end
+
     def remove_directory(path)
       FileUtils.rm_rf(path)
     end

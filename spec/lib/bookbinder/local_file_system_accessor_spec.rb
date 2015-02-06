@@ -1,4 +1,5 @@
 require_relative '../../../lib/bookbinder/local_file_system_accessor'
+require_relative '../../helpers/use_fixture_repo'
 
 module Bookbinder
   describe LocalFileSystemAccessor do
@@ -21,6 +22,44 @@ module Bookbinder
           location_of_file = local_file_system_accessor.write(to: filepath,
                                                               text: 'this is some text')
           expect(location_of_file).to eq filepath
+        end
+      end
+    end
+
+    describe 'reading a file' do
+      it 'returns the contents of the file as a string' do
+        Dir.mktmpdir do |tmpdir|
+          filepath = File.join tmpdir, 'filename.txt'
+          File.write(filepath, 'this is some text')
+
+          expect(local_file_system_accessor.read filepath).to eq 'this is some text'
+        end
+      end
+    end
+
+    describe 'reading from a particular part of a file' do
+      it 'returns the desired content as a string' do
+        Dir.mktmpdir do |tmpdir|
+          filepath = File.join tmpdir, 'filename.txt'
+          File.write(filepath, '<head><body>this is some text</body></head>')
+
+          expect(local_file_system_accessor.read_from_marker_to(path: filepath,
+                                                                marker: '<head>',
+                                                                to: '</head>')).
+              to eq '<body>this is some text</body>'
+        end
+      end
+
+      context 'when the files are multiline' do
+        use_fixture_repo('my-dita-output-repo')
+
+        it 'returns the correct selection' do
+          filepath =         File.expand_path './output.html'
+
+          expect(local_file_system_accessor.read_from_marker_to(path: filepath,
+                                                                marker: '<title>',
+                                                                to: '</title>')).
+              to eq 'GemFire XD Features and Benefits'
         end
       end
     end
