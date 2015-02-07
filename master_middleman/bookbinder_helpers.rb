@@ -73,7 +73,10 @@ module Bookbinder
       end
 
       def yield_for_archive_drop_down_menu
-        menu = ArchiveDropDownMenu.new(config[:archive_menu])
+        menu = ArchiveDropDownMenu.new(
+          {'.' => config[:archive_menu]},
+          current_path: current_page.path
+        )
 
         partial 'archive_menus/default', locals: { menu_title: menu.title,
                                                    dropdown_links: menu.dropdown_links }

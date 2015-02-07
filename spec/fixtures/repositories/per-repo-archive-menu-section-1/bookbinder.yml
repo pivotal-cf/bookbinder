@@ -1,0 +1,5 @@
+---
+archive_menu:
+  - section-specific-current-version
+  - section-specific-previous-version: archives/my-specific-file
+
