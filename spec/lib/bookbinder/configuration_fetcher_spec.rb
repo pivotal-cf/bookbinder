@@ -41,14 +41,16 @@ module Bookbinder
 
       context 'and the configuration file does not exist' do
         it 'should raise an informative error' do
-          allow(loader).to receive(:load).and_raise FileNotFoundError, "YAML"
+          allow(loader).to receive(:load).with(path_to_config_file).
+            and_raise FileNotFoundError, "YAML"
           expect { config_fetcher.fetch_config }.to raise_error /The configuration file specified does not exist. Please create a config YAML file/
         end
       end
 
       context 'and the configuration file has valid syntax' do
         it 'should read a new configuration object from the configuration file' do
-          allow(loader).to receive(:load).and_return(config_hash_in_file)
+          allow(loader).to receive(:load).with(path_to_config_file).
+            and_return(config_hash_in_file)
           expect(Configuration).to receive(:new).with(logger, expected_config_hash)
           config_fetcher.fetch_config
         end
