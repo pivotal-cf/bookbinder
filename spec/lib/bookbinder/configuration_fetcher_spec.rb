@@ -9,18 +9,8 @@ module Bookbinder
     let(:loader)              { double('loader') }
     let(:config_fetcher)      { ConfigurationFetcher.new(logger, config_validator, loader) }
 
-    it 'should have access to a ConfigurationValidator' do
-      expect(config_fetcher.configuration_validator).to eq config_validator
-    end
-
     before do
       config_fetcher.set_config_file_path(path_to_config_file)
-    end
-
-    describe 'setting the file path' do
-      it 'should set the configuration file path' do
-        expect(config_fetcher.config_file_path).to eq path_to_config_file
-      end
     end
 
     describe 'fetching the config' do

@@ -3,11 +3,6 @@ require_relative 'yaml_loader'
 module Bookbinder
 
   class ConfigurationFetcher
-    attr_reader   :logger,
-                  :configuration_validator,
-                  :config,
-                  :config_file_path
-
     def initialize(logger, configuration_validator, loader)
       @loader = loader
       @logger = logger
@@ -25,7 +20,8 @@ module Bookbinder
 
     private
 
-    attr_reader :loader
+    attr_reader(:loader, :logger, :configuration_validator, :config, :config_file_path)
+
 
     def read_config_file
 
