@@ -31,12 +31,10 @@ module Bookbinder
         raise "There is a syntax error in your config file: \n #{e}"
       end
 
-      if config_hash
-        if File.exists?('./pdf_index.yml')
-          config_hash['pdf_index'] = loader.load(config_file_path)
-        else
-          config_hash['pdf_index'] = nil
-        end
+      if File.exists?('./pdf_index.yml')
+        config_hash['pdf_index'] = loader.load(config_file_path)
+      else
+        config_hash['pdf_index'] = nil
       end
 
       config_hash
