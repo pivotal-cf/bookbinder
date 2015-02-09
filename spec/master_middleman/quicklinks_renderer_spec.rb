@@ -23,7 +23,7 @@ EOT
     context 'when an h3 is included before any h2s' do
       it 'raises a BadHeadingLevelError' do
         expected_error = <<EOT
-The header "<a id="backing-up"></a>Backing Up and Restoring", which is at level 3 has no higher-level headers occuring before it.
+The header "<a id="backing-up"></a>Backing Up and Restoring", which is at level 3, has no higher-level headers occurring before it.
 EOT
 
         page_src = <<-EOT
