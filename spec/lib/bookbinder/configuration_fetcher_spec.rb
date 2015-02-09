@@ -1,7 +1,6 @@
 require_relative '../../../lib/bookbinder/configuration_fetcher'
 
 module Bookbinder
-
   describe ConfigurationFetcher do
     let(:path_to_config_file) { './config.yml' }
     let(:config_validator)    { double('validator') }
@@ -74,18 +73,16 @@ module Bookbinder
         let(:config_fetcher) { ConfigurationFetcher.new(logger, config_validator, loader) }
         let(:config_object) { double('config object') }
 
-        it 'should not parse the user yml' do
+        it 'caches configuration loads' do
           allow(config_validator).to receive(:valid?).and_return(true)
-          expect(loader).to receive(:load).and_return({})
 
+          expect(loader).to receive(:load).and_return({})
           config_fetcher.fetch_config
 
           expect(loader).not_to receive(:load)
-
           config_fetcher.fetch_config
         end
       end
-
     end
   end
 end
