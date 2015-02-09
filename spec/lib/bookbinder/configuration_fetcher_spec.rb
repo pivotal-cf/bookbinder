@@ -13,9 +13,7 @@ module Bookbinder
     end
 
     describe 'fetching the config' do
-
       context 'when no configuration object exists' do
-        let(:config_object) { nil }
         let(:section1) do
           {
               'repository' => {
@@ -71,7 +69,6 @@ module Bookbinder
       context 'when a configuration object exists' do
         let(:loader) { double('loader') }
         let(:config_fetcher) { ConfigurationFetcher.new(logger, config_validator, loader) }
-        let(:config_object) { double('config object') }
 
         it 'caches configuration loads' do
           allow(config_validator).to receive(:valid?).and_return(true)
