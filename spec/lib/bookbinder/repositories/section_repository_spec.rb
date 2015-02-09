@@ -8,38 +8,9 @@ module Bookbinder
   module Repositories
     describe SectionRepository do
       let(:logger) { NilLogger.new }
-      let(:repository) do
-        SectionRepository.new(
-            logger,
-            store: {}
-        )
-      end
+      let(:repository) { SectionRepository.new(logger) }
 
       describe 'getting a section' do
-        context 'when requested more than once' do
-          it 'always returns the same instance for the same arguments' do
-            vcs_repo = double 'vcs_repo', path_to_local_repo: 'path/to/repo', full_name: 'org/repo', copied_to: 'path/to/repo', copied?: true, directory: 'repo'
-            first_instance = repository.get_instance({'repository' => {'name' => 'foo/book'}},
-                                                     vcs_repo: vcs_repo,
-                                                     build: ->(*args) { Section.new(*args) })
-            second_instance = repository.get_instance({'repository' => {'name' => 'foo/book'}},
-                                                      vcs_repo: vcs_repo,
-                                                      build: ->(*args) { Section.new(*args) })
-            expect(first_instance).to be(second_instance)
-          end
-
-          it 'returns different instances for different repo names' do
-            vcs_repo = double 'vcs_repo', path_to_local_repo: 'path/to/repo', full_name: 'org/repo', copied_to: 'path/to/repo', copied?: true, directory: 'repo'
-            first_instance = repository.get_instance({'repository' => {'name' => 'foo/dogs-repo'}},
-                                                     vcs_repo: vcs_repo,
-                                                     build: ->(*args) { Section.new(*args) })
-            second_instance = repository.get_instance({'repository' => {'name' => 'foo/book'}},
-                                                      vcs_repo: vcs_repo,
-                                                      build: ->(*args) { Section.new(*args) })
-            expect(first_instance).not_to be(second_instance)
-          end
-        end
-
         it 'logs the name of the repository' do
           expect(logger).to receive(:log).with(/foo\/book/)
 
