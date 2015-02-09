@@ -18,14 +18,11 @@ module Bookbinder
       @config_file_path = config_file_path
     end
 
-
     private
 
     attr_reader(:loader, :logger, :configuration_validator, :config, :config_file_path)
 
-
     def read_config_file
-
       begin
         config_hash = loader.load(config_file_path)
       rescue FileNotFoundError => e
