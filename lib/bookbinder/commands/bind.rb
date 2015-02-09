@@ -113,7 +113,7 @@ module Bookbinder
         end
 
         processed_dita_section_paths = dita_processor.process(final_dita_sections,
-                                                               to: dita_processed_dir)
+                                                              to: dita_processed_dir)
 
         processed_dita_section_paths.each do |processed_dita_source|
           file_system_accessor.copy(processed_dita_source, workspace_dir)
