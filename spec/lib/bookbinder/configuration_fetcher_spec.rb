@@ -1,11 +1,11 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/configuration_fetcher'
 
 module Bookbinder
 
   describe ConfigurationFetcher do
     let(:path_to_config_file) { './config.yml' }
     let(:config_validator)    { double('validator') }
-    let(:logger)              { NilLogger.new }
+    let(:logger)              { double('logger') }
     let(:loader)              { double('loader') }
     let(:config_fetcher)      { ConfigurationFetcher.new(logger, config_validator, loader) }
 

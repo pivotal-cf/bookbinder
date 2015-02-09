@@ -1,3 +1,4 @@
+require_relative 'configuration'
 require_relative 'yaml_loader'
 
 module Bookbinder
