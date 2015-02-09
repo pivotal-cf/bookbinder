@@ -51,10 +51,7 @@ module Bookbinder
 
       def run(cli_arguments)
         raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
-        @section_repository = Repositories::SectionRepository.new(
-            logger,
-            store: Repositories::SectionRepository::SHARED_CACHE
-        )
+        @section_repository = Repositories::SectionRepository.new(logger)
         @gem_root = File.expand_path('../../../../', __FILE__)
 
         @publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director, file_system_accessor)
@@ -158,9 +155,9 @@ module Bookbinder
               end
 
           @section_repository.get_instance(attributes,
-                                          vcs_repo: vcs_repo,
-                                          destination_dir: workspace,
-                                          build: ->(*args) { Section.new(*args) })
+                                           vcs_repo: vcs_repo,
+                                           destination_dir: workspace,
+                                           build: ->(*args) { Section.new(*args) })
         end
       end
 
@@ -182,7 +179,6 @@ module Bookbinder
       end
 
       def forget_sections(middleman_scratch)
-        Repositories::SectionRepository::SHARED_CACHE.clear
         file_system_accessor.remove_directory File.join middleman_scratch, '.'
       end
 
