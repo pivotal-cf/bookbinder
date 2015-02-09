@@ -268,9 +268,6 @@ module Bookbinder
                                                        server_director,
                                                        File.absolute_path('.'),
                                                        null_dita_processor) }
-            let(:temp_dir) { Dir.mktmpdir }
-            let(:git_accessor_1) { SpecGitAccessor.new('dogs-repo', temp_dir) }
-            let(:git_accessor_2) { SpecGitAccessor.new('dogs-repo', temp_dir) }
 
             it 'publishes previous versions of the book down paths named for the version tag' do
               publish_command.run(cli_args)
