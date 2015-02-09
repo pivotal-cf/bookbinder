@@ -1,14 +1,8 @@
 require 'date'
-# mostly from https://github.com/multiscan/middleman-navigation but modified slightly
+require_relative 'archive_drop_down_menu'
 require_relative 'quicklinks_renderer'
 
 I18n.enforce_available_locales = false
-
-class ArchiveMenuTemplateNotFound < StandardError;
-end
-
-class ArchiveConfigFormatError < StandardError;
-end
 
 module Bookbinder
   module Navigation
@@ -79,16 +73,13 @@ module Bookbinder
       end
 
       def yield_for_archive_drop_down_menu
-        if config.respond_to?(:archive_menu)
-          first_version, *versions_to_paths = config[:archive_menu]
+        menu = ArchiveDropDownMenu.new(
+          {'.' => config[:archive_menu]},
+          current_path: current_page.path
+        )
 
-          versions_to_full_paths = versions_to_paths.map { |version_path|
-            {version_path.keys.first => "/#{version_path.values.first}"}
-          }
-
-          partial 'archive_menus/default', locals: { menu_title: first_version,
-                                                     dropdown_links: versions_to_full_paths }
-        end
+        partial 'archive_menus/default', locals: { menu_title: menu.title,
+                                                   dropdown_links: menu.dropdown_links }
       end
 
       def breadcrumbs

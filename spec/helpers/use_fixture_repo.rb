@@ -12,3 +12,13 @@ def use_fixture_repo(repo_name = 'book')
     end
   end
 end
+
+def before_all_in_fixture_repo(repo_name, &block)
+  before(:all) do
+    temp_library = tmp_subdir 'repositories'
+    FileUtils.cp_r File.join(Bookbinder::RepoFixture.repos_dir, '.'), temp_library
+    FileUtils.cd(File.join(temp_library, 'archive-menu-book')) do
+      block.call
+    end
+  end
+end

@@ -1,0 +1,17 @@
+---
+book_repo: unused/book_repo
+cred_repo: unused/cred_repo
+
+public_host: idontcare.rip
+
+sections:
+  - repository:
+      name: awesome/per-repo-archive-menu-section-1
+
+archive_menu:
+  - v1.3.0.0
+  - v1.2.0.0: archives/my-great-file
+
+pdf:
+  filename: required.pdf
+  header: "for/linux-only-feature.html"
