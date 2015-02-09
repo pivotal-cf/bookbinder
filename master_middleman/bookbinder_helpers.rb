@@ -113,10 +113,7 @@ module Bookbinder
       private
 
       def code_example_repo
-        @code_example_repo ||= Repositories::SectionRepository.new(
-          bookbinder_logger,
-          store: Repositories::SectionRepository::SHARED_CACHE
-        )
+        @code_example_repo ||= Repositories::SectionRepository.new(bookbinder_logger)
       end
 
       def index_subnav

@@ -1,10 +1,8 @@
 module Bookbinder
   module Repositories
     class SectionRepository
-      SHARED_CACHE = {}
-
       def initialize(logger,
-                     store: nil)
+                     store: {})
         @store = store
         @logger = logger
       end
