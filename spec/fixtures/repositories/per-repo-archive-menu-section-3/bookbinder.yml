@@ -1,0 +1,3 @@
+---
+# deliberately blank, to exercise situation where this config exists, but
+# there's no archive_menu stanza

@@ -22,6 +22,17 @@ module Bookbinder
       expect(menu.dropdown_links).to eq([{'v1.1' => '/great/place'}])
     end
 
+    it "uses a subdir menu when at a sub path with a special menu" do
+      menu = ArchiveDropDownMenu.new(
+        { '.'         => ['not',
+                          {'this' => 'one-please'}],
+          'some_dir'  => ['v1.0',
+                          {'v0.9' => 'old/place'}]},
+        current_path: 'some_dir/index.html')
+      expect(menu.title).to eq('v1.0')
+      expect(menu.dropdown_links).to eq([{'v0.9' => '/old/place'}])
+    end
+
     describe "when misconfigured" do
       context "with nil config" do
         it "provides nil title and empty dropdown links" do

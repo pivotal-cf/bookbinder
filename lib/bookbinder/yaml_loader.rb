@@ -1,24 +1,33 @@
 require 'yaml'
 
 module Bookbinder
-
   FileNotFoundError = Class.new(RuntimeError)
   InvalidSyntaxError = Class.new(RuntimeError)
 
   class YAMLLoader
     def load(path)
-      unless File.exist? path
+      if File.exist?(path)
+        config(path)
+      else
         raise FileNotFoundError.new, "YAML"
       end
+    rescue Psych::SyntaxError => e
+      raise InvalidSyntaxError.new e
+    end
 
-      begin
-        YAML.load_file(path) || {}
-      rescue Psych::SyntaxError => e
-        raise InvalidSyntaxError.new e
+    def load_key(path, key)
+      if File.exist?(path)
+        config(path)[key]
       end
+    rescue Psych::SyntaxError => e
+      raise InvalidSyntaxError.new e
+    end
 
+    private
+
+    def config(path)
+      YAML.load_file(path) || {}
     end
   end
-
 end
 

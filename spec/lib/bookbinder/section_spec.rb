@@ -2,6 +2,18 @@ require_relative '../../../lib/bookbinder/section'
 
 module Bookbinder
   describe Section do
+    describe "repo path" do
+      it "wraps the input in a Pathname, for easier manipulation" do
+        expect(Section.new('some/path/to/repo').
+               path_to_repository.join('or/something')).
+        to eq(Pathname('some/path/to/repo/or/something'))
+      end
+
+      it "even wraps a nil repo path, so that e.g. file existence checks fail" do
+        expect(Section.new.path_to_repository.join('foo')).
+          to eq(Pathname('foo'))
+      end
+    end
 
     describe '#subnav_template' do
       let(:repo) { Section.new('directory',

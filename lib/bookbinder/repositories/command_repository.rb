@@ -65,6 +65,10 @@ module Bookbinder
         @bind ||= Commands::Bind.new(
           logger,
           configuration_fetcher,
+          ArchiveMenuConfiguration.new(
+            loader: config_loader,
+            config_filename: 'bookbinder.yml'
+          ),
           git_accessor,
           local_file_system_accessor,
           middleman_runner,
@@ -117,10 +121,14 @@ module Bookbinder
         @configuration_fetcher ||= ConfigurationFetcher.new(
           logger,
           ConfigurationValidator.new(logger, local_file_system_accessor),
-          YAMLLoader.new
+          config_loader
         ).tap do |fetcher|
           fetcher.set_config_file_path './config.yml'
         end
+      end
+
+      def config_loader
+        @config_loader ||= YAMLLoader.new
       end
 
       def final_app_directory

@@ -11,7 +11,14 @@ require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
 
 module Bookbinder
   describe Commands::Bind do
+    class FakeArchiveMenuConfig
+      def generate(base_config, *)
+        base_config
+      end
+    end
+
     let(:null_dita_processor) { double('null dita processor', process: []) }
+    let(:archive_menu_config) { FakeArchiveMenuConfig.new }
 
     describe 'integration' do
       include SpecHelperMethods
@@ -60,6 +67,7 @@ module Bookbinder
       let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor) }
       let(:publish_command) { Commands::Bind.new(logger,
                                                  config_fetcher,
+                                                 archive_menu_config,
                                                  SpecGitAccessor,
                                                  file_system_accessor,
                                                  middleman_runner,
@@ -167,6 +175,7 @@ module Bookbinder
 
               publish_command = Commands::Bind.new(logger,
                                                    config_fetcher,
+                                                   archive_menu_config,
                                                    SpecGitAccessor,
                                                    file_system_accessor,
                                                    middleman_runner,
@@ -264,6 +273,7 @@ module Bookbinder
           let(:logger) { NilLogger.new }
           let(:publish_command) { Commands::Bind.new(logger,
                                                      config_fetcher,
+                                                     archive_menu_config,
                                                      SpecGitAccessor,
                                                      file_system_accessor,
                                                      middleman_runner,
@@ -370,6 +380,7 @@ module Bookbinder
 
           publish_command = Commands::Bind.new(logger,
                                                config_fetcher,
+                                               archive_menu_config,
                                                SpecGitAccessor,
                                                file_system_accessor,
                                                middleman_runner,
@@ -426,6 +437,7 @@ module Bookbinder
 
           publish_command = Commands::Bind.new(logger,
                                                config_fetcher,
+                                               archive_menu_config,
                                                SpecGitAccessor,
                                                file_system_accessor,
                                                middleman_runner,
@@ -484,6 +496,7 @@ module Bookbinder
 
               publish_command = Commands::Bind.new(logger,
                                                    config_fetcher,
+                                                   archive_menu_config,
                                                    SpecGitAccessor,
                                                    file_system_accessor,
                                                    middleman_runner,
@@ -520,6 +533,7 @@ module Bookbinder
 
             publish_command = Commands::Bind.new(logger,
                                                  config_fetcher,
+                                                 archive_menu_config,
                                                  SpecGitAccessor,
                                                  file_system_accessor,
                                                  middleman_runner,
@@ -563,6 +577,7 @@ module Bookbinder
 
           publish_command = Commands::Bind.new(logger,
                                                config_fetcher,
+                                               archive_menu_config,
                                                SpecGitAccessor,
                                                file_system_accessor,
                                                middleman_runner,
@@ -637,6 +652,7 @@ module Bookbinder
 
             publish_command = Commands::Bind.new(logger,
                                                  config_fetcher,
+                                                 archive_menu_config,
                                                  SpecGitAccessor,
                                                  file_system_accessor,
                                                  middleman_runner,
@@ -683,6 +699,7 @@ module Bookbinder
 
           publish_command = Commands::Bind.new(logger,
                                                config_fetcher,
+                                               archive_menu_config,
                                                SpecGitAccessor,
                                                file_system_accessor,
                                                middleman_runner,
@@ -729,6 +746,7 @@ module Bookbinder
 
             Commands::Bind.new(logger,
                                config_fetcher,
+                               archive_menu_config,
                                SpecGitAccessor,
                                file_system_accessor,
                                middleman_runner,
@@ -823,6 +841,7 @@ module Bookbinder
 
             publish_command = Commands::Bind.new(logger,
                                                  config_fetcher,
+                                                 archive_menu_config,
                                                  version_control_system,
                                                  fs_accessor,
                                                  static_site_generator,
@@ -876,6 +895,7 @@ module Bookbinder
             dita_processor = double('dita processor')
             publish_command = Commands::Bind.new(logger,
                                                  config_fetcher,
+                                                 archive_menu_config,
                                                  version_control_system,
                                                  fs_accessor,
                                                  static_site_generator,
@@ -938,6 +958,7 @@ module Bookbinder
             dita_processor = double('dita processor')
             publish_command = Commands::Bind.new(logger,
                                                  config_fetcher,
+                                                 archive_menu_config,
                                                  version_control_system,
                                                  fs_accessor,
                                                  static_site_generator,
@@ -1007,6 +1028,7 @@ module Bookbinder
             dita_processor = double('dita processor')
             publish_command = Commands::Bind.new(logger,
                                                  config_fetcher,
+                                                 archive_menu_config,
                                                  version_control_system,
                                                  fs_accessor,
                                                  static_site_generator,

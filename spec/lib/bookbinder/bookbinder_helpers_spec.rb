@@ -56,10 +56,7 @@ module Bookbinder
       let(:first_version) { 'v3.0.0.0' }
       let(:past_versions) { { 'v2.0.0.0' => 'archives/pcf-docs-1.2.pdf' } }
       let(:archive_menu) do
-        [
-            first_version,
-            past_versions
-        ]
+        { '.' => [ first_version, past_versions ] }
       end
 
       before do
@@ -106,9 +103,7 @@ module Bookbinder
 
         context 'when only one version is specified' do
           let(:archive_menu) do
-            [
-                first_version
-            ]
+            { '.' => [ first_version ] }
           end
 
           it 'renders an archive_menu template with the archive version' do
