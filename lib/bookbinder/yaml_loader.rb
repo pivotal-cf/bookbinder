@@ -1,3 +1,5 @@
+require 'yaml'
+
 module Bookbinder
 
   FileNotFoundError = Class.new(RuntimeError)
@@ -10,7 +12,7 @@ module Bookbinder
       end
 
       begin
-        YAML.load_file(path)
+        YAML.load_file(path) || {}
       rescue Psych::SyntaxError => e
         raise InvalidSyntaxError.new e
       end
