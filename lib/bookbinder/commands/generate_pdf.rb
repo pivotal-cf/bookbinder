@@ -33,7 +33,8 @@ module Bookbinder
       end
 
       def usage
-        "generate_pdf [<file_name>.yml] \t \t Generate a PDF from the files specified in <file_name.yml>"
+        ["generate_pdf [<file_name>.yml]",
+         "Generate a PDF from the files specified in <file_name.yml>"]
       end
 
       def run(params)

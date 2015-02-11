@@ -15,7 +15,7 @@ module Bookbinder
       end
 
       def usage
-        "--help \t \t \t \t \t Print this message"
+        [command_name, "Print this message"]
       end
 
       def run(*)
@@ -31,8 +31,20 @@ module Bookbinder
 
       def command_usage_messages
         (flags + standard_commands).reduce('') { |message, command|
-          message + " \t#{command.usage}\n"
+          "#{message}#{usage_indent}#{formatted_usage(command)}\n"
         }
+      end
+
+      def formatted_usage(command)
+        "#{command.usage[0].ljust(chars_for_usage_definition)}#{command.usage[1]}"
+      end
+
+      def usage_indent
+        " " * 4
+      end
+
+      def chars_for_usage_definition
+        33
       end
 
       def flags

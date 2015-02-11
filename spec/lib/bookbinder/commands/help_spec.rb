@@ -10,14 +10,24 @@ module Bookbinder
 
       it "constructs its message from the other commands passed in" do
         commands = [
-          double(usage: '--version something something', flag?: true),
-          double(usage: '--anotherflag something something', flag?: true),
-          double(usage: 'bind something something', flag?: false),
+          double(usage: ['--version', 'You can probably guess'], flag?: true),
+          double(usage: ['--anotherflag', 'Something wild'], flag?: true),
+          double(usage: ['bind <local|github> [--verbose]', 'Bind a booky wooky'], flag?: false),
         ]
         help = Help.new(unused_logger = nil, commands)
 
         expect(help.usage_message).
-          to match(/--version.+--anotherflag.+--help.+bind/m)
+          to eq(<<-MSG)
+
+  \e[1;39;49mDocumentation\e[0m: https://github.com/pivotal-cf/docs-bookbinder
+
+  \e[1;39;49mUsage\e[0m: bookbinder <command|flag> [args]
+
+    --version                        You can probably guess
+    --anotherflag                    Something wild
+    --help                           Print this message
+    bind <local|github> [--verbose]  Bind a booky wooky
+        MSG
       end
     end
   end

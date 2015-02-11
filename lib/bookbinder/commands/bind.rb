@@ -43,7 +43,8 @@ module Bookbinder
       end
 
       def usage
-        "bind <local|github> [--verbose] \t Bind the sections specified in config.yml from <local> or <github> into the final_app directory"
+        ["bind <local|github> [--verbose]",
+         "Bind the sections specified in config.yml from <local> or <github> into the final_app directory"]
       end
 
       def command_for?(test_command_name)

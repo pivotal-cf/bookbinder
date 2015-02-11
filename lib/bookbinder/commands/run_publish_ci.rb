@@ -10,7 +10,8 @@ module Bookbinder
       include Commands::Naming
 
       def usage
-        "run_publish_ci \t \t \t \t Run publish, push_local_to_staging, and build_and_push_tarball for CI purposes"
+        [command_name,
+         "Run publish, push_local_to_staging, and build_and_push_tarball for CI purposes"]
       end
 
       def initialize(publish_command, push_local_to_staging_command, build_and_push_tarball_command)
