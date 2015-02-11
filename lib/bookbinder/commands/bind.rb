@@ -58,10 +58,8 @@ module Bookbinder
 
         @publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director, file_system_accessor)
 
-        verbosity = cli_arguments.include?('--verbose')
         location = cli_arguments[0]
 
-        cli_options = {verbose: verbosity, target_tag: nil}
         output_paths = output_directory_paths(location)
         publish_config = publish_config(location)
         @versions = publish_config.fetch(:versions, [])
@@ -84,8 +82,6 @@ module Bookbinder
                             master_dir,
                             tmp_dir,
                             formatted_dir)
-
-        target_tag = cli_options[:target_tag]
 
         dita_section_config_hash = config.dita_sections || {}
         dita_sections = dita_section_config_hash.map do |dita_section_config|
@@ -118,11 +114,16 @@ module Bookbinder
         file_system_accessor.copy_contents(dita_processed_dir, workspace_dir)
         file_system_accessor.copy_contents(formatted_dir, workspace_dir)
 
-        sections = gather_sections(workspace_dir, output_paths, target_tag)
+        sections = gather_sections(workspace_dir, output_paths)
 
         subnavs = subnavs_by_dir_name(sections)
 
-        success = publisher.publish(subnavs, cli_options, output_paths, publish_config)
+        success = publisher.publish(
+          subnavs,
+          {verbose: cli_arguments.include?('--verbose')},
+          output_paths,
+          publish_config
+        )
 
         success ? 0 : 1
       end
@@ -142,7 +143,7 @@ module Bookbinder
                   :dita_processor,
                   :static_site_generator_formatter
 
-      def gather_sections(workspace, output_paths, target_tag)
+      def gather_sections(workspace, output_paths)
         config.sections.map do |attributes|
 
           local_repo_dir = output_paths[:local_repo_dir]
@@ -153,7 +154,7 @@ module Bookbinder
                     tap { |repo| repo.copy_from_local(workspace) }
               else
                 GitHubRepository.
-                    build_from_remote(logger, attributes, target_tag, version_control_system).
+                    build_from_remote(logger, attributes, nil, version_control_system).
                     tap { |repo| repo.copy_from_remote(workspace) }
               end
 

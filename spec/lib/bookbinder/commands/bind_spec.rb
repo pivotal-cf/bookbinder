@@ -586,7 +586,6 @@ module Bookbinder
         let(:expected_cli_options) do
           {
               verbose: false,
-              target_tag: nil
           }
         end
         let(:expected_publish_config) do
