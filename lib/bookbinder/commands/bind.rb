@@ -115,6 +115,7 @@ module Bookbinder
 
         dita_processor.process(final_dita_sections, to: dita_processed_dir)
         static_site_generator_formatter.format(dita_processed_dir, formatted_dir)
+        file_system_accessor.copy_contents(dita_processed_dir, workspace_dir)
         file_system_accessor.copy_contents(formatted_dir, workspace_dir)
 
         sections = gather_sections(workspace_dir, output_paths, target_tag)

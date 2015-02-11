@@ -902,7 +902,7 @@ module Bookbinder
             publish_command.run(['github'])
           end
 
-          it 'copies processed dita sections into static site generator directory' do
+          it 'copies processed dita sections and all non-html files into static site generator directory' do
             logger = double('logger', log: true)
             version_control_system = double('vcs', clone: nil)
             fs_accessor = double('fs_accessor',
@@ -960,6 +960,10 @@ module Bookbinder
             allow(static_site_generator_formatter).
               to receive(:format).
               with('base/output/tmp/html_from_dita', 'base/output/tmp/site_generator_ready')
+
+            expect(fs_accessor).
+                to receive(:copy_contents).
+                       with('base/output/tmp/html_from_dita', /middleman\/source/)
 
             expect(fs_accessor).
               to receive(:copy_contents).
