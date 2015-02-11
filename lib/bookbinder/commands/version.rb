@@ -14,7 +14,7 @@ module Bookbinder
       end
 
       def usage
-        "--version \t \t \t \t Print the version of bookbinder"
+        [command_name, "Print the version of bookbinder"]
       end
 
       def run(*)

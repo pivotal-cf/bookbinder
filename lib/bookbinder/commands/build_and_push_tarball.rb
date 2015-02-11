@@ -14,7 +14,8 @@ module Bookbinder
       end
 
       def usage
-        "build_and_push_tarball \t  \t  \t Create a tarball from the final_app directory and push to the S3 bucket specified in your credentials.yml"
+        [command_name,
+         "Create a tarball from the final_app directory and push to the S3 bucket specified in your credentials.yml"]
       end
 
       def run(_)

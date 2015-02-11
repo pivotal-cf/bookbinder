@@ -8,7 +8,8 @@ module Bookbinder
       include Commands::Naming
 
       def usage
-        "push_local_to_staging \t \t  \t Push the contents of final_app to the staging host specified in credentials.yml"
+        [command_name,
+         "Push the contents of final_app to the staging host specified in credentials.yml"]
       end
 
       def run(_)

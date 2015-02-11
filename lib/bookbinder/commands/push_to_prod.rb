@@ -18,7 +18,8 @@ module Bookbinder
       end
 
       def usage
-        "push_to_prod [build_#] \t \t \t Push latest or <build_#> from your S3 bucket to the production host specified in credentials.yml"
+        ["push_to_prod [build_#]",
+         "Push latest or <build_#> from your S3 bucket to the production host specified in credentials.yml"]
       end
 
       def run(arguments)
