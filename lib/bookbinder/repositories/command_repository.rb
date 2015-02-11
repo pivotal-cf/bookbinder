@@ -4,7 +4,6 @@ end
 require_relative '../configuration_fetcher'
 require_relative '../configuration_validator'
 require_relative '../dita_html_to_middleman_formatter'
-require_relative '../dita_output_file_converter'
 require_relative '../git_accessor'
 require_relative '../local_dita_processor'
 require_relative '../local_dita_processor'
