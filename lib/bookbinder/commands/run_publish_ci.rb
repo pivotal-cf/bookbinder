@@ -1,6 +1,6 @@
 require_relative 'bind'
-require_relative 'bookbinder_command'
 require_relative 'build_and_push_tarball'
+require_relative 'chain'
 require_relative 'naming'
 require_relative 'push_local_to_staging'
 
@@ -8,6 +8,7 @@ module Bookbinder
   module Commands
     class RunPublishCI
       include Commands::Naming
+      include Commands::Chain
 
       def usage
         "run_publish_ci \t \t \t \t Run publish, push_local_to_staging, and build_and_push_tarball for CI purposes"
@@ -22,12 +23,11 @@ module Bookbinder
       def run(cli_args)
         raise BuildAndPushTarball::MissingBuildNumber unless ENV['BUILD_NUMBER']
 
-        all_successfully_ran =
-            publish_command.run(['github'] + cli_args) == 0 &&
-            push_local_to_staging_command.run([]) == 0 &&
-            build_and_push_tarball_command.run([]) == 0
-
-        all_successfully_ran ? 0 : 1
+        command_chain(
+          ->{publish_command.run(['github'] + cli_args)},
+          ->{push_local_to_staging_command.run([])},
+          ->{build_and_push_tarball_command.run([])}
+        )
       end
 
       private
