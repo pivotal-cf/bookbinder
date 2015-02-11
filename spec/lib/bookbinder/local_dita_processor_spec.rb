@@ -7,7 +7,6 @@ module Bookbinder
   describe LocalDitaProcessor do
     describe 'processing sections' do
       let(:path_to_dita_ot_library) { '/path/to/dita/ot' }
-      let(:path_to_dita_css_file) { '/path/to/dita/css' }
 
       it 'runs the dita-processing library against the given ditamap and css locations' do
         shell = double('shell_out')
@@ -15,7 +14,8 @@ module Bookbinder
         classpath = '/path/to/dita/ot/lib/xercesImpl.jar:' +
                     '/path/to/dita/ot/lib/xml-apis.jar:' +
                     '/path/to/dita/ot/lib/resolver.jar:' +
-                    '/path/to/dita/ot/lib/commons-codec-1.4.jar:$DITA_DIR/lib/icu4j.jar:' +
+                    '/path/to/dita/ot/lib/commons-codec-1.4.jar:' +
+                    '/path/to/dita/ot/lib/icu4j.jar:' +
                     '/path/to/dita/ot/lib/saxon/saxon9-dom.jar:' +
                     '/path/to/dita/ot/lib/saxon/saxon9.jar:target/classes:' +
                     '/path/to/dita/ot:' +
@@ -26,18 +26,14 @@ module Bookbinder
             DitaSection.new('/local/path/to/repo', 'path/to/map.ditamap', 'org/foo', nil, 'boo')
         ]
 
-        dita_processor = LocalDitaProcessor.new(shell, path_to_dita_ot_library, path_to_dita_css_file)
+        dita_processor = LocalDitaProcessor.new(shell, path_to_dita_ot_library)
         expect(shell).to receive(:run_command)
-                         .with('export DITA_DIR=/path/to/dita/ot; ' +
-                               "export CLASSPATH=#{classpath}; " +
+                         .with("export CLASSPATH=#{classpath}; " +
                                'ant -f /path/to/dita/ot ' +
                                "-Dbasedir='/' " +
                                '-Doutput.dir=/path/to/processed/dita/boo ' +
                                "-Dtranstype='htmlhelp' " +
-                               '-Dargs.input=/local/path/to/repo/path/to/map.ditamap ' +
-                               "-Dargs.copycss=yes " +
-                               "-Dargs.css=/path/to/dita/css " +
-                               "-Dargs.csspath='css'"
+                               '-Dargs.input=/local/path/to/repo/path/to/map.ditamap '
                          )
         dita_processor.process(dita_sections, to: processed_dita_location)
       end
@@ -52,7 +48,7 @@ module Bookbinder
 
           allow(shell).to receive(:run_command).and_raise Sheller::ShelloutFailure
 
-          dita_processor = LocalDitaProcessor.new(shell, path_to_dita_ot_library, path_to_dita_css_file)
+          dita_processor = LocalDitaProcessor.new(shell, path_to_dita_ot_library)
           expect { dita_processor.process(dita_sections, to: processed_dita_location) }.
               to raise_error(LocalDitaProcessor::DitaToHtmlLibraryFailure,
                              'The DITA-to-HTML conversion failed. Please check that you have specified the ' +

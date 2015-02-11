@@ -4,10 +4,9 @@ module Bookbinder
   class LocalDitaProcessor
     DitaToHtmlLibraryFailure = Class.new(RuntimeError)
 
-    def initialize(sheller, path_to_dita_ot_library, path_to_dita_css_file)
+    def initialize(sheller, path_to_dita_ot_library)
       @sheller = sheller
       @path_to_dita_ot_library = path_to_dita_ot_library
-      @path_to_dita_css_file = path_to_dita_css_file
     end
 
     def process(dita_sections, to: nil)
@@ -16,23 +15,20 @@ module Bookbinder
         classpath = "#{path_to_dita_ot_library}/lib/xercesImpl.jar:" +
                     "#{path_to_dita_ot_library}/lib/xml-apis.jar:" +
                     "#{path_to_dita_ot_library}/lib/resolver.jar:" +
-                    "#{path_to_dita_ot_library}/lib/commons-codec-1.4.jar:$DITA_DIR/lib/icu4j.jar:" +
+                    "#{path_to_dita_ot_library}/lib/commons-codec-1.4.jar:" +
+                    "#{path_to_dita_ot_library}/lib/icu4j.jar:" +
                     "#{path_to_dita_ot_library}/lib/saxon/saxon9-dom.jar:" +
                     "#{path_to_dita_ot_library}/lib/saxon/saxon9.jar:target/classes:" +
                     "#{path_to_dita_ot_library}:" +
                     "#{path_to_dita_ot_library}/lib/:" +
                     "#{path_to_dita_ot_library}/lib/dost.jar"
         out_dir = File.join to, dita_section.directory
-        command = "export DITA_DIR=#{path_to_dita_ot_library}; " +
-                  "export CLASSPATH=#{classpath}; " +
+        command = "export CLASSPATH=#{classpath}; " +
                   "ant -f #{path_to_dita_ot_library} " +
                   "-Dbasedir='/' " +
                   "-Doutput.dir=#{out_dir} " +
                   "-Dtranstype='htmlhelp' " +
-                  "-Dargs.input=#{absolute_path_to_ditamap} " +
-                  "-Dargs.copycss=yes " +
-                  "-Dargs.css=#{path_to_dita_css_file} " +
-                  "-Dargs.csspath='css'"
+                  "-Dargs.input=#{absolute_path_to_ditamap} "
 
         begin
           sheller.run_command(command)
@@ -48,6 +44,6 @@ module Bookbinder
 
     private
 
-    attr_reader :sheller, :preprocessing_formatter, :path_to_dita_ot_library, :path_to_dita_css_file
+    attr_reader :sheller, :preprocessing_formatter, :path_to_dita_ot_library
   end
 end
