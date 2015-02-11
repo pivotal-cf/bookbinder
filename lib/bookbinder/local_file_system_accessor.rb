@@ -1,4 +1,6 @@
 require 'find'
+require 'pathname'
+require 'nokogiri'
 
 module Bookbinder
 
@@ -8,7 +10,9 @@ module Bookbinder
     end
 
     def write(to: nil, text: nil)
-      File.open(to, 'w') do |f|
+      make_directory(File.dirname to)
+
+      File.open(to, 'a') do |f|
         f.write(text)
       end
 
@@ -19,11 +23,9 @@ module Bookbinder
       File.read(path)
     end
 
-    def read_from_marker_to(path: nil, marker: nil, to: nil)
-      text = read(path)
-      marker_pos = text.index(marker) + marker.length
-      to_pos = text.index(to)
-      text[marker_pos...to_pos]
+    def read_html_in_tag(path: nil, marker: nil)
+      doc = Nokogiri::XML(File.open path)
+      doc.css(marker).inner_html
     end
 
     def remove_directory(path)
@@ -38,6 +40,13 @@ module Bookbinder
       FileUtils.cp_r src, dest
     end
 
+    def copy_contents(src, dest)
+      contents = Dir.glob File.join(src, '**')
+      contents.each do |dir|
+        FileUtils.cp_r dir, dest
+      end
+    end
+
     def rename_file(path, new_name)
       new_path = File.expand_path File.join path, '..', new_name
       File.rename(path, new_path)
@@ -45,6 +54,12 @@ module Bookbinder
 
     def find_files_with_ext(ext, path)
       Dir[File.join path, '**/*'].select { |file| File.basename(file).match(ext) }
+    end
+
+    def relative_path_from(src, target)
+      target_path = Pathname(File.absolute_path target)
+      relative_path = target_path.relative_path_from(Pathname(File.absolute_path src))
+      relative_path.to_s
     end
 
   end

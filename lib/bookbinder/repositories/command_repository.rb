@@ -2,7 +2,7 @@ Dir.glob(File.expand_path('../../commands/*.rb', __FILE__)).each do |command_fil
   require command_file
 end
 require_relative '../local_dita_processor'
-require_relative '../dita_output_file_converter'
+require_relative '../dita_html_to_middleman_formatter'
 require_relative '../middleman_runner'
 require_relative '../spider'
 
@@ -75,7 +75,8 @@ module Bookbinder
           final_app_directory,
           server_director,
           File.absolute_path('.'),
-          local_dita_processor
+          local_dita_processor,
+          dita_html_to_middleman_formatter
         )
       end
 
@@ -96,7 +97,6 @@ module Bookbinder
       def local_dita_processor
         @local_dita_processor ||=
           LocalDitaProcessor.new(Sheller.new(logger),
-                                 DitaOutputFileConverter.new(local_file_system_accessor),
                                  ENV['PATH_TO_DITA_OT_LIBRARY'],
                                  ENV['PATH_TO_DITA_CSS_FILE'])
       end
@@ -118,6 +118,10 @@ module Bookbinder
 
       def final_app_directory
         @final_app_directory ||= File.absolute_path('final_app')
+      end
+
+      def dita_html_to_middleman_formatter
+        @dita_html_to_middleman_formatter ||= DitaHtmlToMiddlemanFormatter.new(local_file_system_accessor)
       end
     end
   end

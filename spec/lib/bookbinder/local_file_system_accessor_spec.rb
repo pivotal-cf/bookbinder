@@ -8,11 +8,21 @@ module Bookbinder
     end
 
     describe 'writing to a new file' do
-      it 'writes text to the specified place in the filesystem' do
+      it 'appends text to the specified place in the filesystem' do
         Dir.mktmpdir do |tmpdir|
           filepath = File.join tmpdir, 'filename.txt'
           local_file_system_accessor.write(to: filepath, text: 'this is some text')
-          expect(File.read(filepath)).to eq 'this is some text'
+          local_file_system_accessor.write(to: filepath, text: ' and this is more text')
+          expect(File.read(filepath)).to eq 'this is some text and this is more text'
+        end
+      end
+
+      it 'creates any intermediate directories' do
+        Dir.mktmpdir do |tmpdir|
+          filepath = File.join tmpdir, 'intermediate_dir', 'filename.txt'
+
+          local_file_system_accessor.write(to: filepath, text: 'this is some text')
+          expect(Dir.exist? File.join tmpdir, 'intermediate_dir').to eq true
         end
       end
 
@@ -43,9 +53,8 @@ module Bookbinder
           filepath = File.join tmpdir, 'filename.txt'
           File.write(filepath, '<head><body>this is some text</body></head>')
 
-          expect(local_file_system_accessor.read_from_marker_to(path: filepath,
-                                                                marker: '<head>',
-                                                                to: '</head>')).
+          expect(local_file_system_accessor.read_html_in_tag(path: filepath,
+                                                             marker: 'head')).
               to eq '<body>this is some text</body>'
         end
       end
@@ -54,12 +63,24 @@ module Bookbinder
         use_fixture_repo('my-dita-output-repo')
 
         it 'returns the correct selection' do
-          filepath =         File.expand_path './output.html'
+          filepath = File.expand_path './output.html'
 
-          expect(local_file_system_accessor.read_from_marker_to(path: filepath,
-                                                                marker: '<title>',
-                                                                to: '</title>')).
-              to eq 'GemFire XD Features and Benefits'
+          expect(local_file_system_accessor.read_html_in_tag(path: filepath,
+                                                             marker: 'title')).
+              to eq 'GemFire XD\'s Features and Benefits ("Features")'
+        end
+      end
+
+      context 'when the file does not contain the marker' do
+        it 'returns an empty string' do
+          Dir.mktmpdir do |tmpdir|
+            filepath = File.join tmpdir, 'filename.txt'
+            File.write(filepath, '<head><body>this is some text</body></head>')
+
+            expect(local_file_system_accessor.read_html_in_tag(path: filepath,
+                                                               marker: 'nonexistent')).
+                to eq ''
+          end
         end
       end
     end
@@ -164,6 +185,26 @@ module Bookbinder
       end
     end
 
+    describe 'copying the contents of a directory' do
+      it 'recursively copies the contents to a specified location' do
+        fs_accessor = local_file_system_accessor
+
+        Dir.mktmpdir do |tmpdir|
+          dest_dir_path = File.join(tmpdir, 'dest_dir')
+          source_dir_path = File.join tmpdir, 'source_dir'
+
+          FileUtils.mkdir_p(dest_dir_path)
+          FileUtils.mkdir_p(source_dir_path)
+
+          filepath = File.join source_dir_path, 'file.txt'
+          File.write filepath, 'this is some text'
+
+          expect { fs_accessor.copy_contents source_dir_path, dest_dir_path }.
+              to change{ File.exist? File.join(dest_dir_path, 'file.txt') }.from(false).to(true)
+        end
+      end
+    end
+
     describe 'renaming a file' do
       it 'renames a file in the same location' do
         fs_accessor = local_file_system_accessor
@@ -202,6 +243,20 @@ module Bookbinder
           File.write nested_filepath, 'this is some text in a nested file'
 
           expect(fs_accessor.find_files_with_ext('.txt', tmpdir)).to include filepath, nested_filepath
+        end
+      end
+    end
+
+    describe 'calculating a relative path' do
+      it 'returns the path from the source to the target directory' do
+        fs_accessor = local_file_system_accessor
+
+        Dir.mktmpdir do |tmpdir|
+          nested_filepath = File.join tmpdir, 'nested-dir', 'nested-file.txt'
+          FileUtils.mkdir File.join tmpdir, 'nested-dir'
+          File.write nested_filepath, 'this is some text in a nested file'
+
+          expect(fs_accessor.relative_path_from(tmpdir, nested_filepath)).to eq 'nested-dir/nested-file.txt'
         end
       end
     end
