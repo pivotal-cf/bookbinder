@@ -14,12 +14,17 @@ module Bookbinder
       end
     end
 
+    def get_doc(path)
+      Nokogiri::HTML(
+        File.read(
+          tmpdir.
+          join(*%w(repositories archive-menu-book final_app public)).
+          join(path)))
+    end
+
     context "when on a book page" do
       it "exposes archive variables from the book" do
-        doc = Nokogiri::HTML(
-          File.read(
-            tmpdir.join(*%w(
-            repositories archive-menu-book final_app public index.html))))
+        doc = get_doc('index.html')
 
         expect(doc.css("#menu_title").text).to eq(first_book_version)
         expect(doc.css("#version_0").text).to eq(second_book_version)
@@ -27,31 +32,33 @@ module Bookbinder
       end
     end
 
-    context "when on a section with no special archive menu" do
-      it "exposes archive variables from the book" do
-        doc = Nokogiri::HTML(
-          File.read(
-            tmpdir.join(*%w(
-            repositories archive-menu-book final_app public
-            per-repo-archive-menu-section-1 index.html))))
-
-        expect(doc.css("#menu_title").text).to eq(first_book_version)
-        expect(doc.css("#version_0").text).to eq(second_book_version)
-        expect(doc.css("#path_0").text).to eq(second_book_version_path)
-      end
-    end
-
-    xcontext "when on a section with a special archive menu" do
+    context "when on a section with a special archive menu in its config" do
       it "exposes archive variables from the section" do
-        doc = Nokogiri::HTML(
-          File.read(
-            tmpdir.join(*%w(
-            repositories archive-menu-book final_app public
-            per-repo-archive-menu-section-1 index.html))))
+        doc = get_doc('per-repo-archive-menu-section-2/index.html')
 
         expect(doc.css("#menu_title").text).to eq(first_section_version)
         expect(doc.css("#version_0").text).to eq(second_section_version)
         expect(doc.css("#path_0").text).to eq(second_section_version_path)
+      end
+    end
+
+    context "when on a section without its own config" do
+      it "exposes archive variables from the book" do
+        doc = get_doc('per-repo-archive-menu-section-1/index.html')
+
+        expect(doc.css("#menu_title").text).to eq(first_book_version)
+        expect(doc.css("#version_0").text).to eq(second_book_version)
+        expect(doc.css("#path_0").text).to eq(second_book_version_path)
+      end
+    end
+
+    context "when on a section with its own config, but no archive menu stanza" do
+      it "exposes archive variables from the section" do
+        doc = get_doc('per-repo-archive-menu-section-3/index.html')
+
+        expect(doc.css("#menu_title").text).to eq(first_book_version)
+        expect(doc.css("#version_0").text).to eq(second_book_version)
+        expect(doc.css("#path_0").text).to eq(second_book_version_path)
       end
     end
 
@@ -84,7 +91,7 @@ module Bookbinder
     end
 
     def section_config
-      @section_config ||= load_config('per-repo-archive-menu-section-1', 'bookbinder.yml')
+      @section_config ||= load_config('per-repo-archive-menu-section-2', 'bookbinder.yml')
     end
 
     def load_config(repo_name, config_file)

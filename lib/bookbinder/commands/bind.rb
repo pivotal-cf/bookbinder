@@ -1,3 +1,4 @@
+require_relative '../archive_menu_configuration'
 require_relative '../book'
 require_relative '../cli_error'
 require_relative '../directory_helpers'
@@ -17,6 +18,7 @@ module Bookbinder
 
       def initialize(logger,
                      config_fetcher,
+                     archive_menu_config,
                      version_control_system,
                      file_system_accessor,
                      static_site_generator,
@@ -28,6 +30,7 @@ module Bookbinder
                      static_site_generator_formatter)
         @logger = logger
         @config_fetcher = config_fetcher
+        @archive_menu_config = archive_menu_config
         @version_control_system = version_control_system
         @file_system_accessor = file_system_accessor
         @static_site_generator = static_site_generator
@@ -123,7 +126,7 @@ module Bookbinder
           subnavs,
           {verbose: cli_arguments.include?('--verbose')},
           output_paths,
-          publish_config
+          archive_menu_config.generate(publish_config, sections)
         )
 
         success ? 0 : 1
@@ -134,6 +137,7 @@ module Bookbinder
       attr_reader :publisher,
                   :version_control_system,
                   :config_fetcher,
+                  :archive_menu_config,
                   :logger,
                   :file_system_accessor,
                   :static_site_generator,
@@ -235,7 +239,7 @@ module Bookbinder
             sections: config.sections,
             book_repo: config.book_repo,
             host_for_sitemap: config.public_host,
-            archive_menu: config.archive_menu,
+            archive_menu: config.archive_menu
         }
 
         optional_arguments = {}

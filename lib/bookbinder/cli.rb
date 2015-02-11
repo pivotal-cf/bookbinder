@@ -2,14 +2,9 @@ require_relative 'colorizer'
 require_relative 'command_runner'
 require_relative 'command_validator'
 require_relative 'configuration'
-require_relative 'configuration_fetcher'
-require_relative 'configuration_validator'
-require_relative 'git_accessor'
-require_relative 'local_file_system_accessor'
 require_relative 'repositories/command_repository'
 require_relative 'terminal'
 require_relative 'user_message_presenter'
-require_relative 'yaml_loader'
 
 module Bookbinder
   class Cli
@@ -18,17 +13,7 @@ module Bookbinder
       command_arguments = args[1..-1]
 
       logger = BookbinderLogger.new
-      yaml_loader = YAMLLoader.new
-      local_file_system_accessor = LocalFileSystemAccessor.new
-      configuration_validator = ConfigurationValidator.new(logger, local_file_system_accessor)
-      configuration_fetcher = ConfigurationFetcher.new(logger, configuration_validator, yaml_loader)
-      configuration_fetcher.set_config_file_path './config.yml'
-      git_accessor = GitAccessor.new
-
-      commands = Repositories::CommandRepository.new(logger,
-                                                     configuration_fetcher,
-                                                     git_accessor,
-                                                     local_file_system_accessor)
+      commands = Repositories::CommandRepository.new(logger)
 
       command_validator = CommandValidator.new(commands, commands.help.usage_message)
       command_runner = CommandRunner.new(logger, commands)

@@ -1,24 +1,24 @@
 Dir.glob(File.expand_path('../../commands/*.rb', __FILE__)).each do |command_file|
   require command_file
 end
-require_relative '../local_dita_processor'
+require_relative '../configuration_fetcher'
+require_relative '../configuration_validator'
 require_relative '../dita_html_to_middleman_formatter'
+require_relative '../git_accessor'
+require_relative '../local_dita_processor'
+require_relative '../local_dita_processor'
+require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../spider'
+require_relative '../yaml_loader'
 
 module Bookbinder
   module Repositories
     class CommandRepository
       include Enumerable
 
-      def initialize(logger,
-                     configuration_fetcher,
-                     git_accessor,
-                     local_file_system_accessor)
+      def initialize(logger)
         @logger = logger
-        @configuration_fetcher = configuration_fetcher
-        @git_accessor = git_accessor
-        @local_file_system_accessor = local_file_system_accessor
       end
 
       def each(&block)
@@ -34,10 +34,7 @@ module Bookbinder
 
       private
 
-      attr_reader(:logger,
-                  :configuration_fetcher,
-                  :git_accessor,
-                  :local_file_system_accessor)
+      attr_reader :logger
 
       def list
         standard_commands + flags
@@ -68,6 +65,10 @@ module Bookbinder
         @bind ||= Commands::Bind.new(
           logger,
           configuration_fetcher,
+          ArchiveMenuConfiguration.new(
+            loader: config_loader,
+            config_filename: 'bookbinder.yml'
+          ),
           git_accessor,
           local_file_system_accessor,
           middleman_runner,
@@ -116,12 +117,34 @@ module Bookbinder
         @middleman_runner ||= MiddlemanRunner.new(logger, git_accessor)
       end
 
+      def configuration_fetcher
+        @configuration_fetcher ||= ConfigurationFetcher.new(
+          logger,
+          ConfigurationValidator.new(logger, local_file_system_accessor),
+          config_loader
+        ).tap do |fetcher|
+          fetcher.set_config_file_path './config.yml'
+        end
+      end
+
+      def config_loader
+        @config_loader ||= YAMLLoader.new
+      end
+
       def final_app_directory
         @final_app_directory ||= File.absolute_path('final_app')
       end
 
       def dita_html_to_middleman_formatter
         @dita_html_to_middleman_formatter ||= DitaHtmlToMiddlemanFormatter.new(local_file_system_accessor)
+      end
+
+      def git_accessor
+        @git_accessor ||= GitAccessor.new
+      end
+
+      def local_file_system_accessor
+        @local_file_system_accessor ||= LocalFileSystemAccessor.new
       end
     end
   end
