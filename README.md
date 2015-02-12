@@ -17,7 +17,7 @@ _The Bookbinder gem is now known as bookbindery! Please update your Gemfiles acc
 
 To install, add the following to your Gemfile:
 
-`gem bookbindery`
+`gem "bookbindery"`
 
 ### Setup Checklist
 Please read this document to understand how to set up a new book project.
