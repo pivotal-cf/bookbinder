@@ -45,6 +45,14 @@ module Bookbinder
     end
 
     describe 'having a target for a uri' do
+      context 'when the page does not have a doc' do
+        let(:page) { double(Anemone::Page, referer: referer, not_found?: not_found?, url: url, doc: nil) }
+
+        it 'returns false' do
+          expect(subject).to_not have_target_for(URI('#existing-fragment-id'))
+        end
+      end
+
       it 'has a target if its page includes the URI fragment as an ID' do
         expect(subject).to have_target_for(URI('#existing-fragment-id'))
       end
