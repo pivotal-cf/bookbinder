@@ -23,7 +23,11 @@ module Bookbinder
         id_selector = uri.fragment
         name_selector = "[name=#{uri.fragment}]"
 
-        @page.doc.css("##{id_selector}").any? || @page.doc.css(name_selector).any?
+        if @page.doc
+          @page.doc.css("##{id_selector}").any? || @page.doc.css(name_selector).any?
+        else
+          false
+        end
       rescue Nokogiri::CSS::SyntaxError
         false
       end
