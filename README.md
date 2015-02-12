@@ -26,7 +26,7 @@ You can refer to this checklist for the steps that must completed manually when 
 #### Creating and configuring your book
 - Create a git repo for the book and populate it with the required files (or use an existing book repo as a template).
 - Add list of included doc sections to `config.yml`.
-- (For private repositories) Create a Github [SSH key](https://help.github.com/articles/generating-ssh-keys/) for bookbinder from an account that has access to the documentation repositories.
+- (For private repositories) Create a GitHub [SSH key](https://help.github.com/articles/generating-ssh-keys/) for bookbinder from an account that has access to the documentation repositories.
 - (For private repositories) ssh-add this key locally. Bookbinder will use whatever keys your system knows about by default.
 - Bind and run the server locally to test your book.
 
@@ -106,7 +106,7 @@ template_variables:					# optional
 
 ### Layout Repository
 
-If layout repository is set to the full name of a Github repository (eg `cloudfoundry/bosh`), it will be downloaded for use as your book's `master_middleman` directory.
+If layout repository is set to the full name of a GitHub repository (eg `cloudfoundry/bosh`), it will be downloaded for use as your book's `master_middleman` directory.
 
 ### Credentials Repository
 
@@ -207,7 +207,7 @@ will find documentation repositories in directories that are siblings to your cu
 
         bin/bookbinder bind github
 
-will find doc repos by downloading the latest version from github.
+will find doc repos by downloading the latest version from GitHub.
 
 The bind command creates 2 output directories, one named `output/` and one named `final_app/`. These are placed in the current directory and are cleared each time you run bookbinder.
 
