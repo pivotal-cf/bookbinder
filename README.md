@@ -188,10 +188,10 @@ Bookbinder also includes helper code to correctly find image, stylesheet, and ja
 
 ## Bootstrapping with Bundler
 
-Once rbenv or rvm is set up and the correct ruby version is set up (2.0.0-p195), run (in your book project)
+Once the correct Ruby version is set up (at least 2.0.0), run the following from your book project's directory:
 
     gem install bundler
-    bundle
+    bundle install --binstubs
 
 And you should be good to go!
 
@@ -201,11 +201,11 @@ Bookbinder's entry point is the `bookbinder` executable. It should be invoked fr
 
 Bookbinder's most important command is `bind`. It takes one argument on the command line:
 
-        bundle exec bookbinder bind local
+        bin/bookbinder bind local
 
 will find documentation repositories in directories that are siblings to your current directory, while
 
-        bundle exec bookbinder bind github
+        bin/bookbinder bind github
 
 will find doc repos by downloading the latest version from github.
 
@@ -229,9 +229,11 @@ As of version 0.2.0, the `bind` command no longer generates PDFs.
 
 ### `generate_pdf` command
 
-`$ bookbinder generate_pdf` will generate a PDF against the currently available `final_app` directory. You must run `bind [local | github]` before running `generate_pdf`.
+        bin/bookbinder generate_pdf
 
-You can specify which pages to include in a PDF using `$ bookbinder generate_pdf my-pdf.yml`. `my-pdf.yml` contains the configuration for the pdf. It must be formatted as YAML and **requires the keys** `header` and `pages`.
+This will generate a PDF against the currently available `final_app` directory. You must run `bind [local | github]` before running `generate_pdf`.
+
+You can specify which pages to include in a PDF using `bin/bookbinder generate_pdf my-pdf.yml`. `my-pdf.yml` contains the configuration for the pdf. It must be formatted as YAML and **requires the keys** `header` and `pages`.
 
 `my-pdf.yml` example:
 
@@ -245,16 +247,15 @@ pages:
     - my-book/denouement.html
 ```
 
-Each path provided under `pages` must match the `directory` of its `repository` in `config.yml`.
-The header is pulled in from the `layout_repo`, so the file `some-header.html` is expected to exist at the top level in the repo `my-username/my-layout`. The contents of `some-header.html` will be added as a header to each page within the generated pdf.
+Each path provided under `pages` must match the `directory` of its `repository` in `config.yml`. The header is pulled in from the `layout_repo`, so the file `some-header.html` is expected to exist at the top level in the repo `my-username/my-layout`. The contents of `some-header.html` will be added as a header to each page within the generated pdf.
 
 Here's an example of `some-header.html`:
-```
+```html
 <!DOCTYPE html>
 <html>
   <body>
     <div class='pdf_header' style="background-color:#ffffff; padding:12px 0px 12px 10px">
-    	<img src='images/logo-big.png' style="height:20px">
+        <img src='images/logo-big.png' style="height:20px">
     </div>
   </body>
 </html>
@@ -275,19 +276,19 @@ and in turn, `my-username/my-layout` must contain `some-header.html`; and `my-us
 
 An optional copyright notice may be provided as shown in the example.
 
-The output pdf file will have the same name as the YAML file used to generate it. In this example, it will be `my-pdf.pdf` since its configuration was specfied in `my-pdf.yml`.
+The output PDF file will have the same name as the YAML file used to generate it. In this example, it will be `my-pdf.pdf` since its configuration was specified in `my-pdf.yml`.
 
 ### `update_local_doc_repos` command
 
 As a convenience, Bookbinder provides a command to update all your local doc repos, performing a git pull on each one:
 
-        bundle exec bookbinder update_local_doc_repos
+        bin/bookbinder update_local_doc_repos
 
 ### `tag` command
 
 The `bookbinder tag` command commits Git tags to checkpoint a book and its constituent document repositories. This allows the tagged version of the documentation to be re-generated at a later time.
 
-    bundle exec bookbinder tag book-formerly-known-as-v1.0.1
+        bin/bookbinder tag book-formerly-known-as-v1.0.1
 
 ## Running the App Locally
 
@@ -309,8 +310,8 @@ The currently recommended tool for CI with Bookbinder is [GoCD](http://www.go.cd
 #### CI Runner
 You will want a build that executes this shell command:
 
-    bundle install
-    bundle exec bookbinder run_publish_ci
+        bundle install --binstubs
+        bin/bookbinder run_publish_ci
     
 This will bind a book and push it to staging.
 
@@ -330,12 +331,12 @@ Deploying to staging is not normally something a human needs to do: the book's C
 
 The following command will deploy the build in your local 'final_app' directory to staging:
 
-    bundle exec bookbinder push_local_to_staging
+        bin/bookbinder push_local_to_staging
 
 ### Deploy to Production
 Deploying to prod is always done manually. It can be done from any machine with the book project checked out, but does not depend on the results from a local bind (or the contents of your `final_app` directory). Instead, it pulls the latest green build from S3, untars it locally, and then pushes it up to prod:
 
-    bundle exec bookbinder push_to_prod <build_number>
+        bin/bookbinder push_to_prod <build_number>
 
 If the build_number argument is left out, the latest green build will be deployed to production.
 
@@ -352,3 +353,5 @@ To run bookbinder's rspec suite, install binstubs, then run the included rake ta
 Once: `bundle install --binstubs=bbin`
 
 Then at any time: `bbin/rake`
+
+NB: we specify a custom binstub directory here to avoid clashing with the bin/ directory already present in the Bookbinder repo.
