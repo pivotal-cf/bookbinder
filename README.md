@@ -100,13 +100,13 @@ template_variables:					# optional
     output
     final_app
 
-`master_middleman` is a directory which forms the basis of your site. [Middleman](http://middlemanapp.com/) configuration and top-level assets, javascripts, and stylesheets should all be placed in here. You can also have ERB layout files. Each time a bind operation is run, this directory is copied to `output/master_middleman`. Then each section repo is copied (as a directory) into `output/master_middleman/source/`, before middleman is run to generate the final app. If you specify a `layout_repo:` in `config.yml`, that directory will be copied instead of `master_middleman`.
+`master_middleman` is a directory which forms the basis of your site. [Middleman](http://middlemanapp.com/) configuration and top-level assets, javascripts, and stylesheets should all be placed in here. You can also have ERB layout files. Each time a bind operation is run, this directory is copied to `output/master_middleman`. Then each section repo is copied (as a directory) into `output/master_middleman/source/`, before middleman is run to generate the final app.
 
 `.ruby-version` is used by [Ruby version managers](https://www.ruby-toolbox.com/categories/ruby_version_management) to select the appropriate Ruby version for a given project.
 
 ### Layout Repository
 
-If layout repository is set to the full name of a GitHub repository (eg `cloudfoundry/bosh`), it will be downloaded for use as your book's `master_middleman` directory.
+If you specify a `layout_repo:` in `config.yml` to the full name of a GitHub repository (eg `cloudfoundry/my-doc-layout`), it will be downloaded for use as your book's `master_middleman` directory.
 
 ### Credentials Repository
 
@@ -136,9 +136,9 @@ cloud_foundry:
 
 ## Middleman Templating Helpers
 
-Bookbinder comes with a Middleman configuration that provides a handful of helpful functions, and should work for most Book Projects. To use a custom Middleman configuration instead, place a `config.rb` file in the `master_middleman` directory of the Book Project (this will overwrite Bookbinder's `config.rb`).
+Bookbinder comes with a Middleman configuration that provides a handful of helpful functions, and should work for most Book projects. To use a custom Middleman configuration instead, place a `config.rb` file in the `master_middleman` directory of the Book project (this will overwrite Bookbinder's `config.rb`).
 
-Bookbinder provides several helper functions that can be called from within a .erb file in a doc repo, such as a layout file.
+Bookbinder provides several helper functions that can be called from within an .erb file in a doc repo, such as a layout file.
 
 ### Quick Links
 `<%= quick_links %>` produces a table of contents based on in-page anchors.
