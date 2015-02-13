@@ -1,3 +1,5 @@
+require_relative 'spider'
+
 module Bookbinder
   class Sieve
     def initialize(domain: ->(){ raise 'You must supply a domain parameter.' }.call)

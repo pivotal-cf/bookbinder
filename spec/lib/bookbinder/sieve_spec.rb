@@ -1,4 +1,6 @@
-require 'spec_helper'
+require 'anemone/page'
+require_relative '../../../lib/bookbinder/sieve'
+require_relative '../../../lib/bookbinder/stabilimentum'
 
 module Bookbinder
   describe Sieve do
