@@ -5,8 +5,8 @@ require_relative '../configuration_fetcher'
 require_relative '../configuration_validator'
 require_relative '../dita_html_to_middleman_formatter'
 require_relative '../git_accessor'
-require_relative '../local_dita_processor'
-require_relative '../local_dita_processor'
+require_relative '../local_dita_to_html_converter'
+require_relative '../local_dita_to_html_converter'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../spider'
@@ -97,7 +97,7 @@ module Bookbinder
 
       def local_dita_processor
         @local_dita_processor ||=
-          LocalDitaProcessor.new(Sheller.new(logger),
+          LocalDitaToHtmlConverter.new(Sheller.new(logger),
                                  ENV['PATH_TO_DITA_OT_LIBRARY'])
       end
 

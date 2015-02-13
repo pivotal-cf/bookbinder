@@ -1,5 +1,5 @@
 require_relative 'cli_error'
-require_relative 'local_dita_processor'
+require_relative 'local_dita_to_html_converter'
 require_relative 'sheller'
 
 module Bookbinder

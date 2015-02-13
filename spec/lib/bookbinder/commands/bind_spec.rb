@@ -17,7 +17,7 @@ module Bookbinder
       end
     end
 
-    let(:null_dita_processor) { double('null dita processor', process: []) }
+    let(:null_dita_processor) { double('null dita processor', convert: []) }
     let(:archive_menu_config) { FakeArchiveMenuConfig.new }
 
     describe 'integration' do
@@ -913,7 +913,7 @@ module Bookbinder
                                            'my-ref-SHA',
                                            'my_dita_section')
             allow(dita_processor).
-              to receive(:process).
+              to receive(:convert).
               with([dita_section], to: 'base/output/tmp/html_from_dita')
 
             expect(static_site_generator_formatter).
@@ -976,7 +976,7 @@ module Bookbinder
                                            'my-ref-SHA',
                                            'my_dita_section')
             allow(dita_processor).
-              to receive(:process).
+              to receive(:convert).
               with([dita_section], to: 'base/output/tmp/html_from_dita')
 
             allow(static_site_generator_formatter).
@@ -1052,7 +1052,7 @@ module Bookbinder
                                            'my_dita_section')
 
             expect(dita_processor).
-                to receive(:process).
+                to receive(:convert).
                        with([expected_dita_section], to: '/parent-of-book/book/output/tmp/html_from_dita').
                        and_return(['html_from_dita/my_dita_section'])
 

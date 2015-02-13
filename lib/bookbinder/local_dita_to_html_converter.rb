@@ -1,7 +1,7 @@
 require_relative '../bookbinder/dita_section'
 
 module Bookbinder
-  class LocalDitaProcessor
+  class LocalDitaToHtmlConverter
     DitaToHtmlLibraryFailure = Class.new(RuntimeError)
 
     def initialize(sheller, path_to_dita_ot_library)
@@ -9,7 +9,7 @@ module Bookbinder
       @path_to_dita_ot_library = path_to_dita_ot_library
     end
 
-    def process(dita_sections, to: nil)
+    def convert(dita_sections, to: nil)
       dita_sections.map do |dita_section|
         absolute_path_to_ditamap = File.join dita_section.path_to_local_repo, dita_section.ditamap_location
         classpath = "#{path_to_dita_ot_library}/lib/xercesImpl.jar:" +
@@ -44,6 +44,6 @@ module Bookbinder
 
     private
 
-    attr_reader :sheller, :preprocessing_formatter, :path_to_dita_ot_library
+    attr_reader :sheller, :path_to_dita_ot_library
   end
 end

@@ -26,7 +26,7 @@ module Bookbinder
                      final_app_directory,
                      server_director,
                      context_dir,
-                     dita_processor,
+                     dita_to_html_converter,
                      static_site_generator_formatter)
         @logger = logger
         @config_fetcher = config_fetcher
@@ -38,7 +38,7 @@ module Bookbinder
         @final_app_directory = final_app_directory
         @server_director = server_director
         @context_dir = context_dir
-        @dita_processor = dita_processor
+        @dita_to_html_converter = dita_to_html_converter
         @static_site_generator_formatter = static_site_generator_formatter
       end
 
@@ -113,7 +113,7 @@ module Bookbinder
           end
         end
 
-        dita_processor.process(final_dita_sections, to: dita_processed_dir)
+        dita_to_html_converter.convert(final_dita_sections, to: dita_processed_dir)
         static_site_generator_formatter.format(dita_processed_dir, formatted_dir)
         file_system_accessor.copy_named_directory_with_path('images', dita_processed_dir, workspace_dir)
         file_system_accessor.copy_contents(formatted_dir, workspace_dir)
@@ -145,7 +145,7 @@ module Bookbinder
                   :sitemap_generator,
                   :server_director,
                   :context_dir,
-                  :dita_processor,
+                  :dita_to_html_converter,
                   :static_site_generator_formatter
 
       def gather_sections(workspace, output_paths)
