@@ -27,7 +27,7 @@ module Bookbinder
                   "ant -f #{path_to_dita_ot_library} " +
                   "-Dbasedir='/' " +
                   "-Doutput.dir=#{out_dir} " +
-                  "-Dtranstype='htmlhelp' " +
+                  "-Dtranstype='tocjs' " +
                   "-Dargs.input=#{absolute_path_to_ditamap} "
 
         begin

@@ -32,7 +32,7 @@ module Bookbinder
                                'ant -f /path/to/dita/ot ' +
                                "-Dbasedir='/' " +
                                '-Doutput.dir=/path/to/processed/dita/boo ' +
-                               "-Dtranstype='htmlhelp' " +
+                               "-Dtranstype='tocjs' " +
                                '-Dargs.input=/local/path/to/repo/path/to/map.ditamap '
                          )
         dita_processor.convert(dita_sections, to: processed_dita_location)
