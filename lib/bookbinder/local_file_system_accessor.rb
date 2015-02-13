@@ -47,6 +47,16 @@ module Bookbinder
       end
     end
 
+    def copy_named_directory_with_path(dir_name, src, dest)
+      contents = Dir.glob File.join(src, "**/#{dir_name}")
+      contents.each do |dir|
+        relative_path_to_dir = relative_path_from(src, dir)
+        extended_dest = File.join dest, relative_path_to_dir
+        FileUtils.mkdir_p extended_dest
+        copy_contents dir, extended_dest
+      end
+    end
+
     def rename_file(path, new_name)
       new_path = File.expand_path File.join path, '..', new_name
       File.rename(path, new_path)

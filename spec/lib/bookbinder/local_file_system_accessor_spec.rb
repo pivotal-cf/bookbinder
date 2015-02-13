@@ -168,6 +168,45 @@ module Bookbinder
       end
     end
 
+    describe 'copying directories with a specific name' do
+      it 'copies the contents of all directories matching the specified name to the destination' do
+        fs_accessor = local_file_system_accessor
+
+        Dir.mktmpdir do |tmpdir|
+          intermediate_dirpath = File.join tmpdir, 'intermediate_dir'
+          dirpath = File.join intermediate_dirpath, 'target_dir'
+          filepath = File.join dirpath, 'file.txt'
+          FileUtils.mkdir_p dirpath
+          FileUtils.touch filepath
+          dest_path = File.join tmpdir, 'destination'
+          FileUtils.mkdir_p dest_path
+
+          expected_filepath_in_destination = File.join dest_path, 'intermediate_dir/target_dir/file.txt'
+          expect { fs_accessor.copy_named_directory_with_path 'target_dir', tmpdir, dest_path }.
+              to change{ File.exist? expected_filepath_in_destination }.from(false).to(true)
+        end
+      end
+
+      context 'when the directory found has nested directories in its path' do
+        it 'recreates the nested directories inside the destination directory' do
+          fs_accessor = local_file_system_accessor
+
+          Dir.mktmpdir do |tmpdir|
+            intermediate_dirpath = File.join tmpdir, 'intermediate_dir'
+            dirpath = File.join intermediate_dirpath, 'target_dir'
+            dest_path = File.join tmpdir, 'destination'
+            FileUtils.mkdir_p dirpath
+            FileUtils.mkdir_p dest_path
+
+            expected_intermediate_path_in_destination = File.join dest_path, 'intermediate_dir'
+
+            expect { fs_accessor.copy_named_directory_with_path 'target_dir', tmpdir, dest_path }.
+                to change{ Dir.exist? expected_intermediate_path_in_destination }.from(false).to(true)
+          end
+        end
+      end
+    end
+
     describe 'copying a file' do
       it 'copies a file to a specified location' do
         fs_accessor = local_file_system_accessor

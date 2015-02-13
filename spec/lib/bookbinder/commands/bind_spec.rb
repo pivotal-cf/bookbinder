@@ -813,7 +813,8 @@ module Bookbinder
                                  remove_directory: true,
                                  make_directory: true,
                                  copy: true,
-                                 copy_contents: true)
+                                 copy_contents: true,
+                                 copy_named_directory_with_path: true)
             static_site_generator = double('static_site_generator', run: true)
             sitemap_generator = double('sitemap_generator', has_broken_links?: false)
             server_director = double('server_director', use_server: true)
@@ -865,7 +866,8 @@ module Bookbinder
                                  remove_directory: true,
                                  make_directory: true,
                                  copy: true,
-                                 copy_contents: true)
+                                 copy_contents: true,
+                                 copy_named_directory_with_path: true)
             static_site_generator = double('static_site_generator', run: true)
             sitemap_generator = double('sitemap_generator', has_broken_links?: false)
             server_director = double('server_director', use_server: true)
@@ -921,7 +923,7 @@ module Bookbinder
             publish_command.run(['github'])
           end
 
-          it 'copies processed dita sections and all non-html files into static site generator directory' do
+          it 'copies processed dita sections and all image files into static site generator directory' do
             logger = double('logger', log: true)
             version_control_system = double('vcs', clone: nil)
             fs_accessor = double('fs_accessor',
@@ -982,8 +984,8 @@ module Bookbinder
               with('base/output/tmp/html_from_dita', 'base/output/tmp/site_generator_ready')
 
             expect(fs_accessor).
-                to receive(:copy_contents).
-                       with('base/output/tmp/html_from_dita', /middleman\/source/)
+                to receive(:copy_named_directory_with_path).
+                       with('images', 'base/output/tmp/html_from_dita', /middleman\/source/)
 
             expect(fs_accessor).
               to receive(:copy_contents).
@@ -999,7 +1001,12 @@ module Bookbinder
           it 'processes the dita sections from their local dir to a processed-dita directory' do
             logger = double('logger', log: true)
             version_control_system = double('vcs')
-            fs_accessor = double('fs_accessor', remove_directory: true, make_directory: true, copy: true, copy_contents: true)
+            fs_accessor = double('fs_accessor',
+                                 remove_directory: true,
+                                 make_directory: true,
+                                 copy: true,
+                                 copy_contents: true,
+                                 copy_named_directory_with_path:true)
             static_site_generator = double('static_site_generator', run: true)
             sitemap_generator = double('sitemap_generator', has_broken_links?: false)
             server_director = double('server_director', use_server: true)
