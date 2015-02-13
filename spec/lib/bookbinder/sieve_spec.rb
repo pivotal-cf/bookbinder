@@ -38,8 +38,7 @@ module Bookbinder
         end
 
         it 'returns the arrays passed to it, filled with links from the given page' do
-          is_second_pass = true
-          broken_links, working_links = sieve.links_from(page, is_second_pass)
+          broken_links, working_links = sieve.links_from(page, is_first_pass = true)
 
           expect(broken_links).to eq(['/ => http://example.com/fake'])
           expect(working_links).to eq([])
