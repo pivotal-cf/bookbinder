@@ -40,6 +40,14 @@ module Bookbinder
           expect(broken_links).to eq(['/ => http://example.com/fake'])
           expect(working_links).to eq([])
         end
+
+        it 'reports no broken links if the page has no referer e.g. root index page' do
+          broken_links, _ = sieve.links_from(
+            new_page('http://foo.bar/index.html', code: 404),
+            first_pass = true
+          )
+          expect(broken_links).to be_empty
+        end
       end
     end
   end
