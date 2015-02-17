@@ -6,7 +6,7 @@ require_relative 'naming'
 module Bookbinder
   module Commands
     class GeneratePDF < BookbinderCommand
-      extend Commands::Naming
+      include Commands::Naming
 
       class AppNotPublished < StandardError
         def initialize(msg='You must publish locally before you generate a PDF.')
@@ -32,8 +32,9 @@ module Bookbinder
         end
       end
 
-      def self.usage
-        "generate_pdf [<file_name>.yml] \t \t Generate a PDF from the files specified in <file_name.yml>"
+      def usage
+        ["generate_pdf [<file_name>.yml]",
+         "Generate a PDF from the files specified in <file_name.yml>"]
       end
 
       def run(params)

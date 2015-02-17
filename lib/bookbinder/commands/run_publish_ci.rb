@@ -1,42 +1,39 @@
-require_relative 'bookbinder_command'
-require_relative 'naming'
-require_relative 'publish'
-require_relative 'push_local_to_staging'
+require_relative 'bind'
 require_relative 'build_and_push_tarball'
+require_relative 'chain'
+require_relative 'naming'
+require_relative 'push_local_to_staging'
 
 module Bookbinder
   module Commands
-    class RunPublishCI < BookbinderCommand
-      extend Commands::Naming
+    class RunPublishCI
+      include Commands::Naming
+      include Commands::Chain
 
-      def self.usage
-        "run_publish_ci \t \t \t \t Run publish, push_local_to_staging, and build_and_push_tarball for CI purposes"
+      def usage
+        [command_name,
+         "Run publish, push_local_to_staging, and build_and_push_tarball for CI purposes"]
+      end
+
+      def initialize(publish_command, push_local_to_staging_command, build_and_push_tarball_command)
+        @publish_command = publish_command
+        @push_local_to_staging_command = push_local_to_staging_command
+        @build_and_push_tarball_command = build_and_push_tarball_command
       end
 
       def run(cli_args)
-        check_params
-        all_successfully_ran = publish(cli_args) == 0 && push_to_staging == 0 && push_tarball == 0
-        all_successfully_ran ? 0 : 1
+        raise BuildAndPushTarball::MissingBuildNumber unless ENV['BUILD_NUMBER']
+
+        command_chain(
+          ->{publish_command.run(['github'] + cli_args)},
+          ->{push_local_to_staging_command.run([])},
+          ->{build_and_push_tarball_command.run([])}
+        )
       end
 
       private
 
-      def check_params
-        raise BuildAndPushTarball::MissingBuildNumber unless ENV['BUILD_NUMBER']
-        config.book_repo
-      end
-
-      def publish(cli_args)
-        Publish.new(@logger, @configuration_fetcher).run(['github'] + cli_args)
-      end
-
-      def push_to_staging
-        PushLocalToStaging.new(@logger, @configuration_fetcher).run []
-      end
-
-      def push_tarball
-        BuildAndPushTarball.new(@logger, @configuration_fetcher).run []
-      end
+      attr_reader :publish_command, :push_local_to_staging_command, :build_and_push_tarball_command
     end
   end
 end

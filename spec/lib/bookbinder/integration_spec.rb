@@ -1,11 +1,7 @@
 require 'spec_helper'
 
 describe '$ bookbinder' do
-  include_context 'tmp_dirs'
-
-  around_with_fixture_repo do |spec|
-    spec.run
-  end
+  use_fixture_repo
 
   before do
     config = YAML.load(File.read('./config.yml'))
@@ -16,9 +12,8 @@ describe '$ bookbinder' do
   describe 'publish' do
     describe 'local' do
       it 'generates a rack app', integration: true do
-        #pending 'Revisit when publishing locally no longer accesses GitHub.'
         silence_io_streams do
-          `#{GEM_ROOT}/bin/bookbinder publish local`
+          `#{GEM_ROOT}/install_bin/bookbinder publish local`
         end
 
         index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
@@ -26,9 +21,8 @@ describe '$ bookbinder' do
       end
 
       it 'respects subnav includes', integration: true do
-        #pending 'Revisit when publishing locally no longer accesses GitHub.'
         silence_io_streams do
-          `#{GEM_ROOT}/bin/bookbinder publish local`
+          `#{GEM_ROOT}/install_bin/bookbinder publish local`
         end
 
         dogs_index = File.read File.join('final_app', 'public', 'dogs', 'index.html')

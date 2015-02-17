@@ -1,21 +1,21 @@
+require_relative 'naming'
+
 module Bookbinder
   module Commands
     class Help
-      def initialize(logger, usage_message)
+      include Commands::Naming
+
+      def initialize(logger, other_commands)
         @logger = logger
-        @usage_message = usage_message
+        @other_commands = other_commands
       end
 
-      def self.to_s
-        'help'
-      end
-
-      def self.command_name
+      def command_name
         '--help'
       end
 
-      def self.usage
-        "--help \t \t \t \t \t Print this message"
+      def usage
+        [command_name, "Print this message"]
       end
 
       def run(*)
@@ -23,9 +23,48 @@ module Bookbinder
         0
       end
 
+      def usage_message
+        [usage_header, command_usage_messages].join("\n")
+      end
+
       private
 
-      attr_reader :logger, :usage_message
+      def command_usage_messages
+        (flags + standard_commands).reduce('') { |message, command|
+          "#{message}#{usage_indent}#{formatted_usage(command)}\n"
+        }
+      end
+
+      def formatted_usage(command)
+        "#{command.usage[0].ljust(chars_for_usage_definition)}#{command.usage[1]}"
+      end
+
+      def usage_indent
+        " " * 4
+      end
+
+      def chars_for_usage_definition
+        33
+      end
+
+      def flags
+        other_commands.select(&:flag?) + [self]
+      end
+
+      def standard_commands
+        other_commands.reject(&:flag?)
+      end
+
+      def usage_header
+        <<TEXT
+
+  \e[1;39;49mDocumentation\e[0m: https://github.com/pivotal-cf/docs-bookbinder
+
+  \e[1;39;49mUsage\e[0m: bookbinder <command|flag> [args]
+TEXT
+      end
+
+      attr_reader :logger, :other_commands
     end
   end
 end

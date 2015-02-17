@@ -4,14 +4,8 @@ require_relative '../../helpers/nil_logger'
 
 module Bookbinder
   describe Archive do
-
-    around do |example|
-      if ENV['REAL_S3']
-        net_connect_previously_allowed = WebMock.net_connect_allowed?
-        WebMock.allow_net_connect!
-        example.run
-        WebMock.disable_net_connect! unless net_connect_previously_allowed
-      else
+    unless ENV['REAL_S3']
+      around do |example|
         Fog.mock!
         Fog::Mock.reset
         example.run

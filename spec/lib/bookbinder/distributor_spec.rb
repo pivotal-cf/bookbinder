@@ -65,10 +65,6 @@ module Bookbinder
     end
 
     describe '#distribute' do
-      it 'returns nil' do
-        expect(distributor.distribute).to be_nil
-      end
-
       context 'uploading the trace' do
         it 'uploads the tracefile to the archive after pushing' do
           expect(fake_pusher).to receive(:push).ordered

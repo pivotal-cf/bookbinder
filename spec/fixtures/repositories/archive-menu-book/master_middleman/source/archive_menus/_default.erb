@@ -1,0 +1,5 @@
+<div id="menu_title"><%= menu_title %></div>
+<% dropdown_links.each_with_index do |link, index| %>
+  <div id="version_<%= index %>"><%= link.keys.first %></div>
+  <div id="path_<%= index %>"><%= link.values.first %></div>
+<% end %>

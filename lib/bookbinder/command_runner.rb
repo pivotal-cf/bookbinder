@@ -1,32 +1,25 @@
 require_relative 'cli_error'
+require_relative 'local_dita_to_html_converter'
+require_relative 'sheller'
 
 module Bookbinder
   class CommandRunner
-    def initialize(configuration_fetcher, usage_message, logger, commands)
-      @configuration_fetcher = configuration_fetcher
-      @usage_message = usage_message
+    def initialize(logger, commands)
       @logger = logger
       @commands = commands
     end
 
     def run(command_name, command_arguments)
-      command = commands.detect { |known_command| known_command.command_name == command_name }
-      begin
-        if command_name == '--help'
-          command.new(logger, usage_message).run command_arguments
-        else
-          command.new(logger, @configuration_fetcher).run command_arguments
-        end
-      rescue CliError::InvalidArguments
-        logger.log command.usage
-        1
-      end
+      command = commands.detect { |known_command| known_command.command_for?(command_name) }
+      command.run(command_arguments)
+    rescue CliError::InvalidArguments
+      logger.log command.usage
+      1
     end
 
     private
 
-    attr_reader :logger, :usage_message, :commands
-
+    attr_reader :logger, :commands
   end
 end
 

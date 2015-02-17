@@ -5,7 +5,7 @@ module Bookbinder
     EXPIRATION_HOURS = 2
 
     def self.build(logger, options)
-      namespace = GitHubRepository.new(logger: logger, full_name: options[:book_repo]).short_name
+      namespace = GitHubRepository.new(logger: logger, full_name: options[:book_repo], git_accessor: Git).short_name
       namer = ArtifactNamer.new(namespace, options[:build_number], 'log', '/tmp')
 
       archive = Archive.new(logger: logger, key: options[:aws_credentials].access_key, secret: options[:aws_credentials].secret_key)

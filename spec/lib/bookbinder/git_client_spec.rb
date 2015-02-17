@@ -3,7 +3,7 @@ require 'spec_helper'
 module Bookbinder
   describe GitClient do
     let(:logger) { NilLogger.new }
-    let(:client) { GitClient.new(logger) }
+    let(:client) { GitClient.new }
     let(:repo_name) { 'foo/bar' }
 
     describe 'create_tag!' do
@@ -33,15 +33,10 @@ module Bookbinder
     end
 
     describe '#head_sha' do
-      let(:latest_commit) { double(:commit, sha: 'gummy-bears') }
-
-      before do
-        stub_request(:get, 'https://api.github.com/repos/foo/bar/commits').
-            to_return(:status => 200, :body => [latest_commit], :headers => {})
-      end
+      let(:latest_commit) { double(:commit, sha: '54ef8f581b3542cbbca4219d7c69bf3d9831cdbe') }
 
       it 'returns the sha of the latest commit' do
-        expect(client.head_sha(repo_name)).to eq latest_commit.sha
+        expect(client.head_sha('Duckburg/scrooge')).to eq latest_commit.sha
       end
     end
 

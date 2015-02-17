@@ -2,11 +2,12 @@ require 'middleman-core'
 require 'middleman-core/cli'
 require 'middleman-core/profiling'
 require_relative 'code_example'
+require_relative 'code_example_reader'
 
 class Middleman::Cli::BuildAction
   def handle_error(file_name, response, e=Thor::Error.new(response))
     our_errors = [Bookbinder::GitClient::TokenException,
-                  Bookbinder::CodeExample::InvalidSnippet,
+                  Bookbinder::CodeExampleReader::InvalidSnippet,
                   QuicklinksRenderer::BadHeadingLevelError,
                   Git::GitExecuteError]
     raise e if our_errors.include?(e.class)
@@ -31,19 +32,35 @@ end
 
 module Bookbinder
   class MiddlemanRunner
-    def initialize(logger)
+    def initialize(logger, git_accessor)
       @logger = logger
+      @git_accessor = git_accessor
     end
 
-    def run(middleman_dir, template_variables, local_repo_dir, verbose = false, book = nil, sections = [], production_host=nil, archive_menu=nil, git_accessor=Git)
+    def run(middleman_dir,
+            workspace_dir,
+            template_variables,
+            local_repo_dir,
+            verbose = false,
+            subnav_templates_by_directory = {},
+            production_host=nil,
+            archive_menu=nil)
       @logger.log "\nRunning middleman...\n\n"
 
       within(middleman_dir) do
-        invoke_against_current_dir(local_repo_dir, production_host, book, sections, template_variables, archive_menu, verbose, git_accessor)
+        invoke_against_current_dir(local_repo_dir,
+                                   workspace_dir,
+                                   production_host,
+                                   subnav_templates_by_directory,
+                                   template_variables,
+                                   archive_menu,
+                                   verbose)
       end
     end
 
     private
+
+    attr_reader :git_accessor
 
     def within(temp_root, &block)
       Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
@@ -55,32 +72,28 @@ module Bookbinder
       ENV['MM_ROOT']    = original_mm_root
     end
 
-    def invoke_against_current_dir(local_repo_dir, production_host, book, sections, template_variables, archive_menu, verbose, git_accessor)
+    def invoke_against_current_dir(local_repo_dir,
+                                   workspace_dir,
+                                   production_host,
+                                   subnav_templates,
+                                   template_variables,
+                                   archive_menu,
+                                   verbose)
       builder = Middleman::Cli::Build.shared_instance(verbose)
 
       config = {
           local_repo_dir: local_repo_dir,
+          workspace: workspace_dir,
           production_host: production_host,
           git_accessor: git_accessor,
-          sections: sections,
-          book: book,
           template_variables: template_variables,
           relative_links: false,
-          subnav_templates: subnavs_by_dir_name(sections),
+          subnav_templates: subnav_templates,
           archive_menu: archive_menu
       }
 
       config.each { |k, v| builder.config[k] = v }
       Middleman::Cli::Build.new([], {quiet: !verbose}, {}).invoke :build, [], {verbose: verbose}
-    end
-
-    def subnavs_by_dir_name(sections)
-      sections.reduce({}) do |final_map, section|
-        namespace = section.directory.gsub('/', '_')
-        template = section.subnav_template || 'default'
-
-        final_map.merge(namespace => template)
-      end
     end
   end
 end

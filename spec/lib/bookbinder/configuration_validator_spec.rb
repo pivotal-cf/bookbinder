@@ -15,6 +15,17 @@ module Bookbinder
           expect { subject.valid? config_hash, bookbinder_schema_version, user_schema_version }.to raise_error /Your config.yml appears to be empty. Please check and try again./
         end
       end
+      context 'when the required key is missing' do
+        let(:config_hash) do
+          {
+              'versions' => %w(v1.7.1.9 redacted v3),
+          }
+        end
+
+        it 'raises missing key error' do
+          expect { subject.valid? config_hash, bookbinder_schema_version, user_schema_version }.to raise_error ConfigurationValidator::MissingRequiredKeyError
+        end
+      end
 
       context 'when the configuration hash is populated' do
         let(:archive_menu) { [] }
@@ -26,6 +37,7 @@ module Bookbinder
               'directory' => 'concepts'
           }
         end
+
         let(:config_hash) do
           {
               'book_repo' => 'some-org/some-repo',
@@ -36,7 +48,9 @@ module Bookbinder
               'public_host' => 'http://www.example.com',
               'template_variables' => {'some-var' => 'some-value'},
               'schema_version' => user_schema_version,
-              'archive_menu' => archive_menu
+              'archive_menu' => archive_menu,
+              'pdf' => 'pdf',
+              'pdf_index' => 'pdf_index'
           }
         end
 
@@ -148,7 +162,14 @@ module Bookbinder
             'directory' => 'foo'
         }
 
-        valid_config_hash = {'sections' => [section1, section2]}
+        valid_config_hash = {
+          'book_repo' => 'my_book',
+              'cred_repo' => 'my_cred_repo',
+              'public_host' => 'public_host',
+              'pdf' => 'pdf',
+              'pdf_index' => 'pdf_index',
+              'sections' => [section1, section2]
+        }
 
         expect(subject.valid?(valid_config_hash, bookbinder_schema_version, user_schema_version)).to eq true
       end
@@ -160,7 +181,15 @@ module Bookbinder
             },
             'directory' => 'concepts'
         }
-        invalid_config_hash = {'sections' => [section1, section1]}
+
+        invalid_config_hash = {
+            'book_repo' => 'my_book',
+            'cred_repo' => 'my_cred_repo',
+            'public_host' => 'public_host',
+            'pdf' => 'pdf',
+            'pdf_index' => 'pdf_index',
+            'sections' => [section1, section1]
+        }
 
         expect{subject.valid? invalid_config_hash, bookbinder_schema_version, user_schema_version}.to raise_error ConfigurationValidator::DuplicateSectionNameError
       end
@@ -179,8 +208,14 @@ module Bookbinder
                   'name' => 'cloudfoundry/docs-cloudfoundry-concepts'
                 }
               }
-            ]
+            ],
+            'book_repo' => 'my_book',
+            'cred_repo' => 'my_cred_repo',
+            'public_host' => 'public_host',
+            'pdf' => 'pdf',
+            'pdf_index' => 'pdf_index'
           }
+
           expect(subject.valid?(config, bookbinder_schema_version, user_schema_version)).to be_truthy
         end
       end
@@ -211,7 +246,12 @@ module Bookbinder
               'archive_menu' => [
                   'v1.3.0.0'
               ],
-              'sections' => [section1, section2]
+              'sections' => [section1, section2],
+              'book_repo' => 'my_book',
+              'cred_repo' => 'my_cred_repo',
+              'public_host' => 'public_host',
+              'pdf' => 'pdf',
+              'pdf_index' => 'pdf_index'
           }
 
           expect { subject.valid? valid_config_hash, bookbinder_schema_version, user_schema_version }.to raise_error ConfigurationValidator::MissingArchiveMenuPartialError
@@ -223,6 +263,11 @@ module Bookbinder
           allow(file_system_accessor).to receive(:file_exist?).and_return false
 
           config = {
+            'book_repo' => 'my_book',
+            'cred_repo' => 'my_cred_repo',
+            'public_host' => 'public_host',
+            'pdf' => 'pdf',
+            'pdf_index' => 'pdf_index',
             'sections' => [
               {
                 'repository' => {
@@ -246,7 +291,12 @@ module Bookbinder
                   'name' => 'cloudfoundry/docs-cloudfoundry-foo'
                 },
               }
-            ]
+            ],
+            'book_repo' => 'my_book',
+            'cred_repo' => 'my_cred_repo',
+            'public_host' => 'public_host',
+            'pdf' => 'pdf',
+            'pdf_index' => 'pdf_index'
           }
           expect { subject.valid? config, bookbinder_schema_version, user_schema_version }.
             to raise_error ConfigurationValidator::EmptyArchiveItemsError
@@ -263,7 +313,12 @@ module Bookbinder
                   'name' => 'cloudfoundry/docs-cloudfoundry-foo'
                 }
               }
-            ]
+            ],
+            'book_repo' => 'my_book',
+            'cred_repo' => 'my_cred_repo',
+            'public_host' => 'public_host',
+            'pdf' => 'pdf',
+            'pdf_index' => 'pdf_index'
           }
           expect { subject.valid? config, bookbinder_schema_version, user_schema_version }.
             to raise_error ConfigurationValidator::ArchiveMenuNotDefinedError

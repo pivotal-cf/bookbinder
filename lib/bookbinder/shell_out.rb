@@ -4,6 +4,7 @@ module Bookbinder
   module ShellOut
     def shell_out(command, failure_okay = false)
       Open3.popen3(command) do |input, stdout, stderr, wait_thr|
+
         command_failed = (wait_thr.value != 0)
         announce_failure(failure_okay, stderr, stdout) if command_failed
         stdout.read

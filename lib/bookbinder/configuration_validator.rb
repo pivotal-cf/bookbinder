@@ -127,11 +127,31 @@ module Bookbinder
     end
   end
 
+  class RequiredKeysChecker
+    def check(config)
+      missing_keys = []
+
+      Configuration::CONFIG_REQUIRED_KEYS.map do |required_key|
+        config_keys = config.keys
+        unless config_keys.include?(required_key)
+          missing_keys.push(required_key)
+        end
+      end
+
+      if missing_keys.length > 0
+        raise ConfigurationValidator::MissingRequiredKeyError.new(
+          "Your config.yml is missing required key(s). Required keys are #{missing_keys.join(", ")}."
+        )
+      end
+    end
+  end
+
   class ConfigurationValidator
     DuplicateSectionNameError = Class.new(RuntimeError)
     MissingArchiveMenuPartialError = Class.new(RuntimeError)
     EmptyArchiveItemsError = Class.new(RuntimeError)
     ArchiveMenuNotDefinedError = Class.new(RuntimeError)
+    MissingRequiredKeyError = Class.new(RuntimeError)
 
     def initialize(logger, file_system_accessor)
       @logger = logger
@@ -143,6 +163,7 @@ module Bookbinder
 
       user_config_schema_version = config_hash['schema_version']
       exceptions = [
+        RequiredKeysChecker.new,
         ConfigVersionChecker.new(Version.parse(bookbinder_schema_version),
                                  Version.parse(starting_schema_version),
                                  VersionCheckerMessages.new(Version.parse(user_config_schema_version),

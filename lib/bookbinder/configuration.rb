@@ -1,5 +1,6 @@
 require_relative 'remote_yaml_credential_provider'
 require_relative 'git_hub_repository'
+require 'git'
 
 module Bookbinder
   class Configuration
@@ -105,8 +106,8 @@ module Bookbinder
       @config = config_hash
     end
 
-    CONFIG_REQUIRED_KEYS = %w(book_repo layout_repo cred_repo sections public_host pdf pdf_index versions)
-    CONFIG_OPTIONAL_KEYS = %w(archive_menu)
+    CONFIG_REQUIRED_KEYS = %w(book_repo public_host pdf)
+    CONFIG_OPTIONAL_KEYS = %w(archive_menu dita_sections layout_repo versions pdf_index cred_repo)
 
     CONFIG_REQUIRED_KEYS.each do |method_name|
       define_method(method_name) do
@@ -118,6 +119,10 @@ module Bookbinder
       define_method(method_name) do
         config[method_name]
       end
+    end
+
+    def sections
+      config.fetch('sections', [])
     end
 
     def has_option?(key)
@@ -157,7 +162,7 @@ module Bookbinder
     end
 
     def credentials_repository
-      @credentials_repository ||= GitHubRepository.new(logger: @logger, full_name: cred_repo)
+      @credentials_repository ||= GitHubRepository.new(logger: @logger, full_name: cred_repo, git_accessor: Git)
     end
   end
 end

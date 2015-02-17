@@ -1,14 +1,8 @@
 require 'date'
-# mostly from https://github.com/multiscan/middleman-navigation but modified slightly
+require_relative 'archive_drop_down_menu'
 require_relative 'quicklinks_renderer'
 
 I18n.enforce_available_locales = false
-
-class ArchiveMenuTemplateNotFound < StandardError;
-end
-
-class ArchiveConfigFormatError < StandardError;
-end
 
 module Bookbinder
   module Navigation
@@ -23,8 +17,44 @@ module Bookbinder
     module HelperMethods
 
       def yield_for_code_snippet(from: nil, at: nil)
-        example = CodeExample.get_instance(bookbinder_logger, section_hash: {'repository' => {'name' => from}}, local_repo_dir: config[:local_repo_dir], git_accessor: config[:git_accessor])
-        snippet, language = example.get_snippet_and_language_at(at)
+        git_accessor = config[:git_accessor]
+        local_repo_dir = config[:local_repo_dir]
+        attributes = {'repository' => {'name' => from}}
+        workspace = config[:workspace]
+        code_example_reader = CodeExampleReader.new(bookbinder_logger)
+
+        vcs_repo =
+          if local_repo_dir
+            GitHubRepository.
+              build_from_local(bookbinder_logger,
+                               attributes,
+                               local_repo_dir,
+                               git_accessor).
+              tap { |repo| repo.copy_from_local(workspace) }
+          else
+            GitHubRepository.
+              build_from_remote(bookbinder_logger, attributes, nil, git_accessor).
+              tap { |repo| repo.copy_from_remote(workspace) }
+          end
+        example = code_example_repo.get_instance(attributes,
+                                                 vcs_repo: vcs_repo,
+                                                 build: ->(path_to_repository,
+                                                     full_name,
+                                                     copied,
+                                                     _,
+                                                     destination_dir,
+                                                     directory_name) {
+                                                   CodeExample.new(path_to_repository,
+                                                                   full_name,
+                                                                   copied,
+                                                                   destination_dir,
+                                                                   directory_name)
+        })
+        snippet, language = code_example_reader.get_snippet_and_language_at(at,
+                                                                            example.path_to_repository,
+                                                                            example.copied,
+                                                                            example.full_name)
+
         delimiter = '```'
 
         snippet.prepend("#{delimiter}#{language}\n").concat("\n#{delimiter}")
@@ -43,20 +73,13 @@ module Bookbinder
       end
 
       def yield_for_archive_drop_down_menu
-        if config.respond_to?(:archive_menu)
-          title = config[:archive_menu].first
-          links = config[:archive_menu][1..-1]
+        menu = ArchiveDropDownMenu.new(
+          config[:archive_menu],
+          current_path: current_page.path
+        )
 
-          new_links_based_from_root = links.map do |link|
-            link_from_root = link.dup
-            link_from_root.map do |k, v|
-              link_from_root[k] = "/#{v}"
-            end
-            link_from_root
-          end
-
-          partial 'archive_menus/default', locals: { menu_title: title, dropdown_links: new_links_based_from_root }
-        end
+        partial 'archive_menus/default', locals: { menu_title: menu.title,
+                                                   dropdown_links: menu.dropdown_links }
       end
 
       def breadcrumbs
@@ -72,13 +95,6 @@ module Bookbinder
         OpenStruct.new config[:template_variables]
       end
 
-      def modified_date(format=nil)
-        current_file_in_repo = current_path.dup.gsub(File.basename(current_path), File.basename(current_page.source_file))
-        current_section = get_section_or_book_for(current_file_in_repo)
-        modified_time = current_section.get_modification_date_for(file: current_file_in_repo, full_path: current_page.source_file)
-        (format.nil? ? modified_time : modified_time.strftime(format))
-      end
-
       def quick_links
         page_src = File.read(current_page.source_file)
         quicklinks_renderer = QuicklinksRenderer.new(vars)
@@ -87,17 +103,8 @@ module Bookbinder
 
       private
 
-      def get_section_or_book_for(path)
-        sections = config[:sections]
-        book = config[:book]
-
-        raise "Book or Selections are incorrectly specified for Middleman." if book.nil? || sections.nil?
-
-        current_section = nil
-        sections.each { |section| current_section = section if File.dirname(current_path).match(/^#{section.directory}/) }
-
-        return book if current_section.nil?
-        return current_section
+      def code_example_repo
+        @code_example_repo ||= Repositories::SectionRepository.new(bookbinder_logger)
       end
 
       def index_subnav

@@ -28,10 +28,6 @@ module Bookbinder
     end
 
     context 'when generating pages from a live web-server' do
-      before do
-        stub_request(:get, "http://example.com/").to_return(:status => 200, :body => 'fortune', :headers => {})
-      end
-
       it 'generates a PDF from a live web-page and header' do
         skip 'This test can only run in a linux environment.' if RbConfig::CONFIG['host_os'] =~ /darwin/
 
@@ -44,8 +40,7 @@ module Bookbinder
     end
 
     it 'raises an exception if the specified source URL does not exist' do
-      bad_website = 'http://website.invalid/pdf.html'
-      stub_request(:get, bad_website).to_return(:status => 404)
+      bad_website = 'http://website.invalid.com/pdf.html'
       expect do
         silence_io_streams do
           PdfGenerator.new(logger).generate [bad_website], 'irrelevant.pdf', header_file

@@ -56,10 +56,7 @@ module Bookbinder
       let(:first_version) { 'v3.0.0.0' }
       let(:past_versions) { { 'v2.0.0.0' => 'archives/pcf-docs-1.2.pdf' } }
       let(:archive_menu) do
-        [
-            first_version,
-            past_versions
-        ]
+        { '.' => [ first_version, past_versions ] }
       end
 
       before do
@@ -106,9 +103,7 @@ module Bookbinder
 
         context 'when only one version is specified' do
           let(:archive_menu) do
-            [
-                first_version
-            ]
+            { '.' => [ first_version ] }
           end
 
           it 'renders an archive_menu template with the archive version' do
@@ -146,7 +141,8 @@ MARKDOWN
       let(:excerpt_mark) { 'complicated_function' }
 
       context 'when not local' do
-        let(:config) { {local_repo_dir: nil, git_accessor: SpecGitAccessor} }
+        let(:config) { {local_repo_dir: nil, workspace: 'code-example-repo', git_accessor: SpecGitAccessor} }
+        use_fixture_repo
 
         it 'returns markdown from github' do
           expect(yielded_snippet).to eq(markdown_snippet.chomp)
@@ -154,8 +150,9 @@ MARKDOWN
       end
 
       context 'when local' do
-        let(:config) { {local_repo_dir: '..'} }
-        around_with_fixture_repo &:run
+        UNUSED_BUT_TRUTHY_GIT_ACCESSOR = "UNUSED BUT TRUTHY GIT ACCESSOR"
+        let(:config) { {local_repo_dir: '..', workspace: 'code-example-repo', git_accessor: UNUSED_BUT_TRUTHY_GIT_ACCESSOR} }
+        use_fixture_repo
 
         it 'returns markdown from the local repo' do
           expect(yielded_snippet).to eq(markdown_snippet.chomp)
@@ -242,103 +239,6 @@ MARKDOWN
             run_middleman(subnav_templates: { section_directory => subnav })
             expect(output).to be_empty
           end
-        end
-      end
-    end
-
-    describe '#modified_date' do
-      subject(:an_instance) { klass.new(config) }
-
-      let(:moon_section) { Section.new(logger, repo, 'my_subnav_template') }
-      let(:fraggle_section) { Section.new(logger, GitHubRepository.new(full_name: '', directory: 'fraggles/rock'), nil) }
-      let(:sections) { [moon_section, fraggle_section] }
-      let(:book){ Book.new(full_name: 'full/path') }
-      let(:config) { {sections: sections, book: book} }
-      let(:file_path) { "moon/history.html" }
-      let(:source_file_path) { "/my/full/path/moon/history.html.md" }
-      let(:file_modification_date) { '19 Jan 3028' }
-
-      let(:repo_name) { '' }
-      let(:repo) { GitHubRepository.new(logger: logger, full_name: repo_name, directory: 'moon') }
-      let(:destination_dir) { tmp_subdir('destination') }
-      let(:git_base_object) { double Git::Base }
-      let(:git_history) { double Git::Log }
-      let(:git_history_most_recent_entry) { double Git::Log }
-      let(:most_recent_commit) { double Git::Object::Commit }
-
-      let(:current_page_object) { double Middleman::Sitemap::Resource }
-
-      let(:some_time) { Time.new(3028, 1, 19) }
-
-      before do
-        allow(Git).to receive(:clone).and_return(git_base_object)
-        allow(git_base_object).to receive(:checkout)
-        repo.copy_from_remote(destination_dir)
-
-        allow(git_base_object).to receive(:log).with(1).and_return(git_history)
-
-        allow(git_history).to receive(:object).with('history.html.md').and_return(git_history_most_recent_entry)
-        allow(git_history_most_recent_entry).to receive(:first).and_return most_recent_commit
-        allow(most_recent_commit).to receive(:date).and_return some_time
-
-        allow(an_instance).to receive(:current_path).and_return file_path
-        allow(an_instance).to receive(:current_page).and_return current_page_object
-        allow(current_page_object).to receive(:source_file).and_return source_file_path
-      end
-
-      it 'gets the date for each file from the section' do
-        expect(an_instance.modified_date('%e %b %Y')).to eq file_modification_date
-      end
-
-      it 'gets the date even if the file path is more specific than the directory of the section' do
-        file_path = "moon/colonization/history.html"
-        allow(an_instance).to receive(:current_path).and_return file_path
-        allow(git_history).to receive(:object).with('colonization/history.html.md').and_return(git_history_most_recent_entry)
-        expect(an_instance.modified_date('%e %b %Y')).to eq file_modification_date
-      end
-
-      context 'the sections are incorrectly passed to middleman' do
-        let(:config) { { sections: nil, book: nil } }
-        it 'raises an informative error' do
-          allow(an_instance).to receive(:current_path).and_return('some-path')
-          expect{ an_instance.modified_date }.to raise_error(/Book or Selections are incorrectly specified/)
-        end
-      end
-
-      context 'when the current path belongs to the book' do
-        let(:destination_dir) { tmp_subdir('destination') }
-        let(:git_base_object) { double Git::Base }
-        let(:git_history) { double Git::Log }
-        let(:git_history_most_recent_entry) { double Git::Log }
-        let(:most_recent_commit) { double Git::Object::Commit }
-
-        let(:book) { Book.new(full_name: 'stars/my-galaxy-book') }
-        let(:config) { { book: book, sections: [] } }
-        let(:file_path) { 'index.html' }
-        let(:current_page_object) { double Middleman::Sitemap::Resource }
-        let(:source_file_path) { '/my/long/path/my-galaxy-book/output/master_middleman/source/index.html.md' }
-
-        let(:file_modification_date) { '19 Jan 3028' }
-        let(:some_time) { Time.new(3028, 1, 19) }
-
-        before do
-          allow(Git).to receive(:open).with('/my/long/path/my-galaxy-book/').and_return(git_base_object)
-          allow(git_base_object).to receive(:log).with(1).and_return(git_history)
-          allow(git_history).to receive(:object).with('master_middleman/source/index.html.md').and_return(git_history_most_recent_entry)
-          allow(git_history_most_recent_entry).to receive(:first).and_return most_recent_commit
-          allow(most_recent_commit).to receive(:date).and_return some_time
-
-          allow(an_instance).to receive(:current_path).and_return file_path
-          allow(an_instance).to receive(:current_page).and_return current_page_object
-          allow(current_page_object).to receive(:source_file).and_return source_file_path
-        end
-
-        it 'gets the date for each file in the book' do
-          expect(an_instance.modified_date).to eq some_time
-        end
-
-        it 'gets the formatted date for each file in the book' do
-          expect(an_instance.modified_date('%e %b %Y')).to eq file_modification_date
         end
       end
     end

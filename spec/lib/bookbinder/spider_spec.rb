@@ -3,7 +3,6 @@ require_relative '../../../lib/bookbinder/stabilimentum'
 
 module Bookbinder
   describe Spider do
-
     def write_arbitrary_yaml_to(location)
       File.open(File.join(location, 'yaml_page.yml'), 'w').puts({foo: 'bar'}.to_yaml)
     end
@@ -18,9 +17,6 @@ module Bookbinder
     let(:logger) { NilLogger.new }
 
     around do |spec|
-      stub_request(:get, "http://something-nonexistent.com/absent-remote.gif").to_return(:status => 404, :body => "", :headers => {})
-      stub_request(:get, "http://something-surely-existenz.com/present-remote.png").to_return(:status => 200, :body => "", :headers => {})
-
       FileUtils.mkdir_p public_directory
       FileUtils.mkdir_p File.join(public_directory, 'stylesheets')
       FileUtils.cp_r 'template_app/.', final_app_dir
@@ -31,7 +27,6 @@ module Bookbinder
       FileUtils.cp portal_page, File.join(public_directory, 'index.html')
       FileUtils.cp other_page, File.join(public_directory, 'other_page.html')
       write_arbitrary_yaml_to(public_directory)
-      WebMock.disable_net_connect!(:allow_localhost => true)
 
       server_director = ServerDirector.new(logger, directory: final_app_dir, port: port)
 
@@ -50,8 +45,6 @@ module Bookbinder
       let(:log_file) { File.join(output_dir, 'wget.log') }
       let(:logger) { NilLogger.new }
       let(:spider) { Spider.new logger, app_dir: final_app_dir }
-
-      after { WebMock.disable_net_connect! }
 
       context 'when there are no broken links' do
         let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }

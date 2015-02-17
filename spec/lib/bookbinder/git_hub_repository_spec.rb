@@ -1,75 +1,50 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/git_hub_repository'
+require_relative '../../helpers/nil_logger'
+require_relative '../../helpers/tmp_dirs'
 
 module Bookbinder
   describe GitHubRepository do
     include_context 'tmp_dirs'
 
+    class UnexercisedGitAccessor
+      class << self
+        def clone(*)
+          raise "Tried to call clone on an UnexercisedGitAccessor!"
+        end
+
+        def open(*)
+          raise "Tried to call open on an UnexercisedGitAccessor!"
+        end
+      end
+    end
+
     let(:logger) { NilLogger.new }
     let(:github_token) { 'blahblah' }
-    let(:git_client) { GitClient.new(logger, access_token: github_token) }
+    let(:git_client) { GitClient.new(access_token: github_token) }
     let(:repo_name) { 'great_org/dogs-repo' }
     let(:section_hash) { {'repository' => {'name' => repo_name}} }
     let(:destination_dir) { tmp_subdir('output') }
     let(:local_repo_dir) { 'spec/fixtures/repositories' }
     let(:repository) { double GitHubRepository }
 
+    def build(args)
+      GitHubRepository.new({git_accessor: UnexercisedGitAccessor}.merge(args))
+    end
+
     before do
       allow(GitClient).to receive(:new).and_call_original
-      allow(GitClient).to receive(:new).with(logger, access_token: github_token).and_return(git_client)
+      allow(GitClient).to receive(:new).with(access_token: github_token).and_return(git_client)
     end
 
     it 'requires a full_name' do
-      expect {
-        GitHubRepository.new(logger: logger, github_token: github_token, full_name: '')
-      }.not_to raise_error
+      expect(
+        build(logger: logger, github_token: github_token, full_name: '').
+        full_name
+      ).to eq('')
 
       expect {
-        GitHubRepository.new(logger: logger, github_token: github_token)
+        build(logger: logger, github_token: github_token)
       }.to raise_error(/full_name/)
-    end
-
-    describe '.build_from_remote' do
-
-      it 'calls copy_from_remote if destination dir is specified' do
-        allow(GitHubRepository).to receive(:new).and_return repository
-        expect(repository).to receive(:copy_from_remote).with(destination_dir, Git)
-        GitHubRepository.build_from_remote(logger, section_hash, destination_dir, nil, Git)
-      end
-
-      it 'does not copy_from_remote if destination dir is not specified' do
-        allow(GitHubRepository).to receive(:new).and_return repository
-        expect(GitHubRepository.build_from_remote(logger, section_hash, nil, nil, Git)).to eq repository
-      end
-    end
-
-    describe '.build_from_local' do
-      it 'performs the copy if destination dir is specified' do
-        expect(Dir.entries(destination_dir)).not_to include('dogs-repo')
-        GitHubRepository.build_from_local(logger,
-                                          section_hash,
-                                          local_repo_dir,
-                                          destination_dir)
-        expect(Dir.entries(destination_dir)).to include('dogs-repo')
-      end
-
-      it "doesn't perform the copy if destination dir is not specified" do
-        expect(GitHubRepository.build_from_local(logger, section_hash, local_repo_dir, nil)).
-          to be_a(GitHubRepository)
-      end
-
-      it "doesn't copy if destination (e.g. book) and source (e.g. section) repos are the same" do
-        destination_dir = Pathname(tmp_subdir('monolithrepo')).join('output')
-        FileUtils.mkdir(destination_dir)
-
-        expect {
-          GitHubRepository.build_from_local(
-            logger,
-            { 'repository' => {'name' => 'camelpunch/monolithrepo'} },
-            tmpdir,
-            destination_dir
-          )
-        }.not_to change { Dir.entries(destination_dir).size }
-      end
     end
 
     describe '#tag_with' do
@@ -79,13 +54,14 @@ module Bookbinder
         expect(git_client).to receive(:head_sha).with('org/repo').and_return head_sha
         expect(git_client).to receive(:create_tag!).with('org/repo', 'the_tag_name', head_sha)
 
-        GitHubRepository.new(logger: logger, github_token: github_token, full_name: 'org/repo').tag_with('the_tag_name')
+        build(logger: logger, github_token: github_token, full_name: 'org/repo').tag_with('the_tag_name')
       end
     end
 
     describe '#short_name' do
       it 'returns the repo name when org and repo name are provided' do
-        expect(GitHubRepository.new(full_name: 'some-org/some-name').short_name).to eq('some-name')
+        repo = build(full_name: 'some-org/some-name')
+        expect(repo.short_name).to eq('some-name')
       end
     end
 
@@ -95,38 +71,44 @@ module Bookbinder
       it "returns the first (most recent) commit's sha if @head_sha is unset" do
         fake_github = double(:github)
 
-        expect(GitClient).to receive(:new).
-                                 with(logger, access_token: github_token).
-                                 and_return(fake_github)
+        expect(GitClient).
+          to receive(:new).
+          with(access_token: github_token).
+          and_return(fake_github)
 
         expect(fake_github).to receive(:head_sha).with('org/repo').and_return('dcba')
 
-        repository = GitHubRepository.new(logger: logger, full_name: 'org/repo', github_token: github_token)
+        repository = build(logger: logger, full_name: 'org/repo', github_token: github_token)
         expect(repository.head_sha).to eq('dcba')
       end
     end
 
     describe '#directory' do
       it 'returns @directory if set' do
-        expect(GitHubRepository.new(full_name: '', directory: 'the_directory').directory).to eq('the_directory')
+        expect(build(full_name: '', directory: 'the_directory').directory).to eq('the_directory')
       end
 
       it 'returns #short_name if @directory is unset' do
-        expect(GitHubRepository.new(full_name: 'org/repo').directory).to eq('repo')
+        expect(build(full_name: 'org/repo').directory).to eq('repo')
       end
     end
 
     describe '#copy_from_remote' do
       let(:repo_name) { 'org/my-docs-repo' }
       let(:target_ref) { 'some-sha' }
-      let(:repo) { GitHubRepository.new(logger: logger, full_name: repo_name, target_ref: target_ref, github_token: 'foo') }
+      let(:git_accessor) { double('git accessor') }
+      let(:repo) { build(logger: logger,
+                         full_name: repo_name,
+                         target_ref: target_ref,
+                         github_token: 'foo',
+                         git_accessor: git_accessor) }
       let(:destination_dir) { tmp_subdir('destination') }
       let(:git_base_object) { double Git::Base }
 
       it 'retrieves the repo from github' do
-        expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
-                                            File.basename(repo_name),
-                                            path: destination_dir).and_return(git_base_object)
+        expect(git_accessor).to receive(:clone).with("git@github.com:#{repo_name}",
+                                                     File.basename(repo_name),
+                                                     path: destination_dir).and_return(git_base_object)
         expect(git_base_object).to receive(:checkout).with(target_ref)
         repo.copy_from_remote(destination_dir)
       end
@@ -134,9 +116,9 @@ module Bookbinder
       context 'when the target ref is master' do
         let(:target_ref) { 'master' }
         it 'does not check out a ref' do
-          expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
-                                             File.basename(repo_name),
-                                             path: destination_dir).and_return(git_base_object)
+          expect(git_accessor).to receive(:clone).with("git@github.com:#{repo_name}",
+                                                       File.basename(repo_name),
+                                                       path: destination_dir).and_return(git_base_object)
           expect(git_base_object).to_not receive(:checkout)
           repo.copy_from_remote(destination_dir)
         end
@@ -144,9 +126,30 @@ module Bookbinder
 
       context 'when the target ref is not master' do
         it 'checks out a ref' do
-          expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
-                                             File.basename(repo_name),
-                                             path: destination_dir).and_return(git_base_object)
+          expect(git_accessor).to receive(:clone).with("git@github.com:#{repo_name}",
+                                                       File.basename(repo_name),
+                                                       path: destination_dir).and_return(git_base_object)
+          expect(git_base_object).to receive(:checkout).with(target_ref)
+          repo.copy_from_remote(destination_dir)
+        end
+      end
+
+      context 'when no ref is provided' do
+        it 'fetches the target ref from the section config hash' do
+          target_ref = 'my-special-ref'
+          section_hash = {
+              'repository' => {
+                  'name' => repo_name,
+                  'ref'  => target_ref
+              },
+              'directory' => File.basename(repo_name),
+          }
+
+          accessor = double('git accessor')
+          allow(accessor).to receive(:clone).
+            with("git@github.com:#{repo_name}", File.basename(repo_name), path: destination_dir).
+            and_return(git_base_object)
+          repo = GitHubRepository.build_from_remote(logger, section_hash, nil, accessor)
           expect(git_base_object).to receive(:checkout).with(target_ref)
           repo.copy_from_remote(destination_dir)
         end
@@ -158,9 +161,9 @@ module Bookbinder
         }
 
         it 'provides an informative message' do
-          allow(git_base_object).to receive(:clone).and_raise(StandardError.new("Permission denied (publickey)"))
+          allow(git_accessor).to receive(:clone).and_raise(StandardError.new("Permission denied (publickey)"))
 
-          expect { repo.copy_from_remote(destination_dir, git_base_object) }.to raise_error(credential_error_message)
+          expect { repo.copy_from_remote(destination_dir) }.to raise_error(credential_error_message)
         end
       end
 
@@ -168,30 +171,32 @@ module Bookbinder
         let(:repo_dne_error_message) { "Could not read from repository. Please make sure you have the correct access rights and the repository #{repo_name} exists." }
 
         it 'provides an informative error message' do
-          allow(git_base_object).to receive(:clone).and_raise(StandardError.new("Repository not found."))
+          allow(git_accessor).
+            to receive(:clone).and_raise(StandardError.new("Repository not found."))
 
-          expect { repo.copy_from_remote(destination_dir, git_base_object) }.to raise_error(repo_dne_error_message)
+          expect { repo.copy_from_remote(destination_dir) }.
+            to raise_error(repo_dne_error_message)
         end
       end
 
       context 'when it throws a general error' do
         it 'should forward error' do
-          allow(git_base_object).to receive(:clone).and_raise(StandardError.new("Error"))
+          allow(git_accessor).to receive(:clone).and_raise("Error")
 
-          expect { repo.copy_from_remote(destination_dir, git_base_object) }.to raise_error("Error")
+          expect { repo.copy_from_remote(destination_dir) }.to raise_error("Error")
         end
       end
 
       it 'returns the location of the copied directory' do
-        expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
+        expect(git_accessor).to receive(:clone).with("git@github.com:#{repo_name}",
                                            File.basename(repo_name),
                                            path: destination_dir).and_return(git_base_object)
         expect(git_base_object).to receive(:checkout).with(target_ref)
-        expect(repo.copy_from_remote(destination_dir)).to eq(destination_dir)
+        expect(repo.copy_from_remote(destination_dir)).to eq(File.join(destination_dir + 'my-docs-repo'))
       end
 
       it 'sets copied? to true' do
-        expect(Git).to receive(:clone).with("git@github.com:#{repo_name}",
+        expect(git_accessor).to receive(:clone).with("git@github.com:#{repo_name}",
                                            File.basename(repo_name),
                                            path: destination_dir).and_return(git_base_object)
         expect(git_base_object).to receive(:checkout).with(target_ref)
@@ -203,7 +208,10 @@ module Bookbinder
       let(:full_name) { 'org/my-docs-repo' }
       let(:target_ref) { 'some-sha' }
       let(:local_repo_dir) { tmp_subdir 'local_repo_dir' }
-      let(:repo) { GitHubRepository.new(logger: logger, full_name: full_name, target_ref: target_ref, local_repo_dir: local_repo_dir) }
+      let(:repo) { build(logger: logger,
+                         full_name: full_name,
+                         target_ref: target_ref,
+                         local_repo_dir: local_repo_dir) }
       let(:destination_dir) { tmp_subdir('destination') }
       let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
       let(:copy_to) { repo.copy_from_local destination_dir }
@@ -244,10 +252,12 @@ module Bookbinder
     end
 
     describe '#has_tag?' do
+      let(:git_accessor) { double('git_accessor') }
       let(:repo) { GitHubRepository.new(full_name: 'my-docs-org/my-docs-repo',
-                                  target_ref: 'some_sha',
-                                  directory: 'pretty_url_path',
-                                  local_repo_dir: '') }
+                                        target_ref: 'some_sha',
+                                        directory: 'pretty_url_path',
+                                        local_repo_dir: '',
+                                        git_accessor: git_accessor) }
       let(:my_tag) { '#hashtag' }
 
       before do
@@ -257,7 +267,7 @@ module Bookbinder
 
       context 'when a tag has been applied' do
         let(:tags) do
-          [OpenStruct.new(name: my_tag)]
+          [double(name: my_tag)]
         end
 
         it 'is true when checking that tag' do
@@ -279,18 +289,18 @@ module Bookbinder
 
     describe '#tag_with' do
       let(:repo_sha) { 'some-sha' }
-      let(:repo) { GitHubRepository.new(logger: logger,
-                                  github_token: github_token,
-                                  full_name: 'my-docs-org/my-docs-repo',
-                                  target_ref: repo_sha,
-                                  directory: 'pretty_url_path',
-                                  local_repo_dir: '') }
+      let(:repo) { build(logger: logger,
+                         github_token: github_token,
+                         full_name: 'my-docs-org/my-docs-repo',
+                         target_ref: repo_sha,
+                         directory: 'pretty_url_path',
+                         local_repo_dir: '') }
       let(:my_tag) { '#hashtag' }
 
       before do
         allow(git_client).to receive(:validate_authorization)
         allow(git_client).to receive(:commits).with(repo.full_name)
-                             .and_return([OpenStruct.new(sha: repo_sha)])
+                             .and_return([double(sha: repo_sha)])
       end
 
       it 'should apply a tag' do
@@ -305,7 +315,7 @@ module Bookbinder
       let(:local_repo_dir) { tmpdir }
       let(:full_name) { 'org/repo-name' }
       let(:repo_dir) { File.join(local_repo_dir, 'repo-name') }
-      let(:repository) { GitHubRepository.new(logger: logger, github_token: github_token, full_name: full_name, local_repo_dir: local_repo_dir) }
+      let(:repository) { build(logger: logger, github_token: github_token, full_name: full_name, local_repo_dir: local_repo_dir) }
 
       context 'when the repo dirs are there' do
         before do
@@ -330,92 +340,23 @@ module Bookbinder
       let(:full_name) { 'org/my-docs-repo' }
       let(:target_ref) { 'arbitrary-reference' }
       let(:made_up_dir) { 'this/doesnt/exist' }
+      let(:git_accessor) { double('git accessor') }
       let(:git_base_object) { double Git::Base }
       let(:repo) do
-        GitHubRepository.new(logger: logger, github_token: github_token, full_name: full_name, target_ref: target_ref)
+        build(logger: logger,
+              github_token: github_token,
+              full_name: full_name,
+              target_ref: target_ref,
+              git_accessor: git_accessor)
       end
 
       context 'when no special Git accessor is specified' do
         it 'clones the repo into a specified folder' do
-          expect(Git).to receive(:clone).with("git@github.com:#{full_name}",
-                                              File.basename(full_name),
-                                              path: made_up_dir).and_return(git_base_object)
+          expect(git_accessor).to receive(:clone).with("git@github.com:#{full_name}",
+                                                       File.basename(full_name),
+                                                       path: made_up_dir).and_return(git_base_object)
           expect(git_base_object).to receive(:checkout).with(target_ref)
           repo.copy_from_remote(made_up_dir)
-        end
-      end
-
-      context 'when using a special Git accessor' do
-        before do
-          class MyGitClass
-            def self.clone(arg1, arg2, path: nil)
-              #do nothing
-            end
-          end
-        end
-
-        it 'clones using the specified accessor' do
-          expect(MyGitClass).to receive(:clone).with("git@github.com:#{full_name}",
-                                                     File.basename(full_name),
-                                                     path: made_up_dir).and_return(git_base_object)
-          expect(git_base_object).to receive(:checkout).with(target_ref)
-          repo.copy_from_remote(made_up_dir, MyGitClass)
-        end
-      end
-    end
-
-    describe '#get_modification_date_for' do
-      let(:repo_name) { 'org/my-docs-repo' }
-      let(:target_ref) { 'some-sha' }
-      let(:repo) { GitHubRepository.new(logger: logger, full_name: repo_name, target_ref: target_ref, github_token: 'foo') }
-      let(:destination_dir) { tmp_subdir('destination') }
-      let(:git_base_object) { double Git::Base }
-      let(:git_history) { double Git::Log }
-      let(:git_history_most_recent_entry) { double Git::Log }
-      let(:most_recent_commit) { double Git::Object::Commit }
-
-      before do
-        allow(Git).to receive(:clone).and_return(git_base_object)
-      end
-
-      context 'if the git accessor is nil' do
-        let(:git_base_object) { nil }
-        it 'raises' do
-          expect{ repo.get_modification_date_for(file: 'path/file.html', git: nil) }.
-              to raise_error(/Unexpected Error: Git accessor unavailable/)
-        end
-      end
-
-      context 'if the git accessor exists' do
-        before do
-          allow(git_base_object).to receive(:checkout).with(target_ref)
-          allow(git_base_object).to receive(:log).with(1).and_return(git_history)
-        end
-
-        context 'and when the file exists' do
-          it 'returns the most recent modification date' do
-            some_time = Time.now
-
-            allow(git_history).to receive(:object).with('path/file.html').and_return(git_history_most_recent_entry)
-            allow(git_history_most_recent_entry).to receive(:first).and_return most_recent_commit
-            allow(most_recent_commit).to receive(:date).and_return some_time
-
-            repo.copy_from_remote(destination_dir)
-
-            expect(repo.get_modification_date_for(file: 'path/file.html')).to eq(some_time)
-          end
-        end
-
-        context 'when the file does not exist or is not tracked by git' do
-          it 'raises an error to the user' do
-            allow(git_history).to receive(:object).with('does/not/exist.html').and_return(git_history_most_recent_entry)
-            allow(git_history_most_recent_entry).to receive(:first).and_return most_recent_commit
-            allow(most_recent_commit).to receive(:date).and_raise(Git::GitExecuteError)
-
-            repo.copy_from_remote(destination_dir)
-            expect{repo.get_modification_date_for(file: 'does/not/exist.html')}.
-                to raise_error(/This file does not exist or is not tracked by git!/)
-          end
         end
       end
     end

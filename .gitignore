@@ -3,3 +3,5 @@ Gemfile.lock
 .bundle
 file_modification_dates
 tags
+.DS_Store
+bin
