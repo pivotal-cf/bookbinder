@@ -13,7 +13,7 @@ describe '$ bookbinder' do
     describe 'local' do
       it 'generates a rack app', integration: true do
         silence_io_streams do
-          `#{GEM_ROOT}/bin/bookbinder publish local`
+          `#{GEM_ROOT}/install_bin/bookbinder publish local`
         end
 
         index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
@@ -22,7 +22,7 @@ describe '$ bookbinder' do
 
       it 'respects subnav includes', integration: true do
         silence_io_streams do
-          `#{GEM_ROOT}/bin/bookbinder publish local`
+          `#{GEM_ROOT}/install_bin/bookbinder publish local`
         end
 
         dogs_index = File.read File.join('final_app', 'public', 'dogs', 'index.html')

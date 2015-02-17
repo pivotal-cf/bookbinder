@@ -18,7 +18,7 @@ describe 'generating a book' do
 
   it 'provides the production host to the ERB templates', integration: true do
     silence_io_streams do
-      `#{gem_root}/bin/bookbinder bind local`
+      `#{gem_root}/install_bin/bookbinder bind local`
     end
 
     index = File.read File.join('final_app', 'public', 'index.html')
@@ -46,7 +46,7 @@ YAML
 
     it 'uses the provided layout', integration: true do
       silence_io_streams do
-        `#{gem_root}/bin/bookbinder bind local`
+        `#{gem_root}/install_bin/bookbinder bind local`
       end
 
       index = File.read File.join('final_app', 'public', 'index.html')
