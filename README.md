@@ -14,7 +14,7 @@ Bookbinder is meant to be used from within a project called a **book**. The book
 **Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
 
 Installation of the gem is easy: simply add `gem "bookbindery"` to your
-Gemfile. Creating a Book is currently a little more involved, but there are
+Gemfile. Creating a book is currently a little more involved, but there are
 plans afoot to automate this process.
 
 ### Creating a book from scratch using local sections
@@ -158,7 +158,7 @@ cloud_foundry:
 
 ## Middleman Templating Helpers
 
-Bookbinder comes with a Middleman configuration that provides a handful of helpful functions, and should work for most Book projects. To use a custom Middleman configuration instead, place a `config.rb` file in the `master_middleman` directory of the Book project (this will overwrite Bookbinder's `config.rb`).
+Bookbinder comes with a Middleman configuration that provides a handful of helpful functions, and should work for most book projects. To use a custom Middleman configuration instead, place a `config.rb` file in the `master_middleman` directory of the book project (this will overwrite Bookbinder's `config.rb`).
 
 Bookbinder provides several helper functions that can be called from within an .erb file in a doc repo, such as a layout file.
 
@@ -322,7 +322,7 @@ You should only need to run the `bundle` the first time around.
 
 ## Continuous Integration
 
-### CI for Books
+### CI for books
 
 The currently recommended tool for CI with Bookbinder is [GoCD](http://www.go.cd).
 
