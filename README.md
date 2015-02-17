@@ -172,9 +172,6 @@ Bookbinder provides several helper functions that can be called from within an .
 ### Subnavs
 `<%= yield_for_subnav %>` inserts the appropriate template in /subnavs, based on each constituent repositories' `subnav_template:` parameter in config.yml. The default template (`\_default.erb`) uses the label `default` and is applied to all sections unless another template is specified with subnav\_template. Template labels are the name of the template file with extensions removed. ("sample" for a template named "sample.erb")
 
-### Last Modified
-`<%= modified_date [format]%>` will evaluate to the time at which the current page was last modified. The format string is optional: if specified (e.g. "%Y/%m/%d"), the date will be printed accordingly. If not specified, the date will look like '2013-11-13 20:00:18 UTC'.
-
 ### Code Snippets
 `<%= yield_for_code_snippet from: 'my-org/code-repo', at: 'myCodeSnippetA' %>` inserts code snippets extracted from code repositories.
 
