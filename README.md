@@ -15,9 +15,24 @@ Bookbinder is meant to be used from within a project called a **book**. The book
 
 ### Installation
 
-The following is an annotated script that sets up a new book allowing 'bind' to
-run successfully. It assumes you want to call your book 'mynewbook' and that
-the first and only section within the book is
+Installation of the gem is easy: simply add `gem "bookbindery"` to your
+Gemfile. Creating a Book is currently a little more involved, but there are
+plans afoot to automate this process.
+
+#### Creating a book from scratch using local sections
+
+The disparate source material of your book is organized into separate
+git repositories. When writing documentation on your local machine, however,
+you'll want uncommitted changes to be added to the preview web site you serve
+on your machine.
+
+The `bind local` command performs this operation: it gathers sections from
+sibling directories of your book. These sections' directories must have the
+same name as their GitHub repositories, but don't need to be git repositories.
+
+The following is an annotated script that sets up a new book allowing 'bind
+local' to run successfully. It assumes you want to call your book 'mynewbook'
+and that the first and only section within the book is
 [cloudfoundry/docs-dev-guide](https://github.com/cloudfoundry/docs-dev-guide).
 
     mkdir mynewbook
@@ -63,11 +78,7 @@ You should now be able to visit
 and see the section that was brought in. The [home page](http://localhost:9292/)
 currently 404s, because we didn't put anything inside master_middleman/source/.
 
-Note that if any of the repositories configured as 'sections' are private, you should
-[create a GitHub SSH key](https://help.github.com/articles/generating-ssh-keys/)
-for Bookbinder from an account that has access to the section repositories.
-
-You should ssh-add this key to give Bookbinder access to the repositories.
+You can skip ahead for [more information on the bind command](#bind-command).
 
 #### Deploying your book
 - Create AWS bucket for green builds and put info into `credentials.yml`
@@ -199,14 +210,7 @@ Finally, to insert the archive menu, use the `<%= yield_for_archive_menu %>` tag
 ### Including Assets 
 Bookbinder also includes helper code to correctly find image, stylesheet, and javascript assets. When using `<% image_tag ...`, `<% stylesheet_link_tag ...`, or `<% javascript_include_tag ...` to include assets, Bookbinder will search the entire directory structure starting at the top-level until it finds an asset with the provided name. For example, when resolving `<% image_tag 'great_dane.png' %>` called from the page `dogs/big_dogs/index.html.md.erb`, Middleman will first look in `images/great_dane.png.` If that file does not exist, it will try `dogs/images/great_dane.png`, then `dogs/big_dogs/images/great_dane.png`.
 
-## Bootstrapping with Bundler
-
-Once the correct Ruby version is set up (at least 2.0.0), run the following from your book project's directory:
-
-    gem install bundler
-    bundle install --binstubs
-
-And you should be good to go!
+## Commands
 
 Bookbinder's entry point is the `bookbinder` executable. It should be invoked from the book directory. The following commands are available:
 
@@ -220,11 +224,16 @@ will find documentation repositories in directories that are siblings to your cu
 
         bin/bookbinder bind github
 
-will find doc repos by downloading the latest version from GitHub.
+will find doc repos by downloading the latest version from GitHub. Note that if
+any of the repositories configured as 'sections' are private, you should
+[create a GitHub SSH key](https://help.github.com/articles/generating-ssh-keys/)
+for Bookbinder from an account that has access to the section repositories.
+
+You should ssh-add this key to give Bookbinder access to the repositories.
 
 The bind command creates 2 output directories, one named `output/` and one named `final_app/`. These are placed in the current directory and are cleared each time you run bookbinder.
 
-`final_app/` contains bookbinder's ultimate output: a Rack web-app that can be pushed to cloud foundry or run locally.
+`final_app/` contains bookbinder's ultimate output: a Rack web-app that can be pushed to Cloud Foundry or run locally.
 
 The Rack web-app will respect redirect rules specified in `redirects.rb`, so long as they conform to the `rack/rewrite` [syntax](https://github.com/jtrupiano/rack-rewrite), eg:
 
@@ -234,7 +243,6 @@ r301      '/wiki/Yair_Flicker',   '/yair'
 r302      '/wiki/Greg_Jastrab',   '/greg'
 r301      %r{/wiki/(\w+)_\w+},    '/$1'
 ```
-
 
 `output/` contains intermediary state, including the final prepared directory that the `bind` script ran middleman against, in `output/master_middleman`.
 
