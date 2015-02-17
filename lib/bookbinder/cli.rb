@@ -9,8 +9,7 @@ require_relative 'user_message_presenter'
 module Bookbinder
   class Cli
     def run(args)
-      command_name = args[0]
-      command_arguments = args[1..-1]
+      command_name, *command_arguments = args
 
       logger = BookbinderLogger.new
       commands = Repositories::CommandRepository.new(logger)
