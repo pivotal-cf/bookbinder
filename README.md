@@ -3,70 +3,90 @@
 
 Bookbinder is a gem that binds together a unified documentation web application from disparate source material. Currently, the source material must be markdown or plain HTML, and must be stored in local directories or in GitHub repositories. Bookbinder runs [middleman](http://middlemanapp.com/) to produce a Rackup app that can be deployed to Cloud Foundry.
 
-## About
+_The Bookbinder gem is now known as bookbindery! Please update your Gemfiles accordingly._
 
-Bookbinder is meant to be used from within project called a **book**. 
-The book includes a configuration file that describes which documentation repositories to use as source materials. The bookbindery gem provides a set of scripts to aggregate those repositories and publish them to various locations.
-Bookbinder also provides scripts for running a Continuous Integration system that can detect when a documentation repository has been updated with new content and that can verify a composed book is free of any dead links.
+## Usage
 
-## Setting Up a Book Project
+Bookbinder is meant to be used from within a project called a **book**. The book includes a configuration file that describes which documentation repositories to use as source materials. The bookbindery gem provides a set of scripts to aggregate those repositories and publish them to various locations. Bookbinder also provides scripts for running on a Continuous Integration system that can detect when a documentation repository has been updated with new content and that can verify a composed book is free of any dead links.
+
+## Installation
 
 **Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
 
-### Installation
+Installation of the gem is easy: simply add `gem "bookbindery"` to your
+Gemfile. Creating a book is currently a little more involved, but there are
+plans afoot to automate this process.
 
-_The Bookbinder gem is now known as Bookbindery! Please update your Gemfiles accordingly._
+### Creating a book from scratch using local sections
 
-To install, add the following to your Gemfile:
+The disparate source material of your book is organized into separate
+git repositories. When writing documentation on your local machine, however,
+you'll want uncommitted changes to be added to the preview web site you serve
+on your machine.
 
-`gem bookbindery`
+The `bind local` command performs this operation: it gathers sections from
+sibling directories of your book. These sections' directories must have the
+same name as their GitHub repositories, but don't need to be git repositories.
 
-### Setup Checklist
-Please read this document to understand how to set up a new book project.
-You can refer to this checklist for the steps that must completed manually when setting up your book:
+The following is an annotated script that sets up a new book allowing 'bind
+local' to run successfully. It assumes you want to call your book 'mynewbook'
+and that the first and only section within the book is
+[cloudfoundry/docs-dev-guide](https://github.com/cloudfoundry/docs-dev-guide).
 
-#### Creating and configuring your book
-- Create a git repo for the book and populate it with the required files (or use an existing book repo as a template).
-- Add list of included doc sections to `config.yml`.
-- (For private repositories) Create a Github [SSH key](https://help.github.com/articles/generating-ssh-keys/) for bookbinder from an account that has access to the documentation repositories.
-- (For private repositories) ssh-add this key locally. Bookbinder will use whatever keys your system knows about by default.
-- Bind and run the server locally to test your book.
+    mkdir mynewbook
+    cd mynewbook
 
-#### Deploying your book
+    # Create a Gemfile.
+    bundle init
+
+    # Add the bookbindery gem to it.
+    echo 'gem "bookbindery"' >> Gemfile
+
+    # Install gems listed in the Gemfile, creating a bin/ dir for executables.
+    bundle install --binstubs
+
+    # Create a minimal configuration file.
+    cat > config.yml <<YAML
+    book_repo: myorg/myrepo
+    public_host: localhost:9292
+    sections:
+    - repository:
+        name: cloudfoundry/docs-dev-guide
+      directory: my/included-section
+    pdf:
+    YAML
+
+    # Create a directory required by Middleman.
+    mkdir -p master_middleman/build
+
+    # Clone the section in the config.yml so it can be included in the
+    # final site.
+    git clone https://github.com/cloudfoundry/docs-dev-guide ../docs-dev-guide
+
+    # Run the bind local command, which pulls in the section from the directory
+    # cloned above.
+    bin/bookbinder bind local
+
+    # Start up the web site locally
+    cd final_app
+    bundle
+    rackup
+
+You should now be able to visit
+[localhost:9292/my/included-section](http://localhost:9292/my/included-section)
+and see the section that was brought in. The [home page](http://localhost:9292/)
+currently 404s, because we didn't put anything inside master_middleman/source/.
+
+You can skip ahead for [more information on the bind command](#bind-command).
+
+### Deploying your book
 - Create AWS bucket for green builds and put info into `credentials.yml`
 - Set up CF spaces for staging and production and put details into `credentials.yml`
 - Deploy to production
 - (optional) Register your sitemap with Google Webmaster Tools
 
-### Book Repository
-A book project needs a few things to allow Bookbinder to run. Here's the minimal directory structure you need in a book project:
 
-```
-.
-├── Gemfile
-├── Gemfile.lock
-├── .gitignore
-├── .ruby-version
-├── (optional) <PDF index>.yml
-├── (optional) redirects.rb
-├── config.yml
-└── master_middleman
-    ├── config.rb
-    ├── source
-    |   ├── index.html.md
-    |   ├── layouts
-    |   |   └── layout.erb
-    |   └── subnavs
-    |   |   └── _default.erb
-    |   └── (optional) archive_menus
-    |	    └── _default.erb
-    └── <Top level folder of "pretty" directory path>
-        └── (optional) index(.html)(.md)(.erb)
-```
-
-`Gemfile` needs to point to this bookbindery gem, and any gems required by your book.
-
-`config.yml` is a YAML file that holds all the information bookbinder needs. The following keys are used:
+### A more exhaustive config.yml example
 
 ```YAML
 book_repo: org-name/repo-name
@@ -97,18 +117,19 @@ template_variables:					# optional
 
 ```
 
-`.gitignore` should contain the following entries, which are directories generated by bookbinder:
+Assuming your book is in git, your `.gitignore` should contain the following
+entries, which are directories generated by bookbinder:
 
     output
     final_app
 
-`master_middleman` is a directory which forms the basis of your site. [Middleman](http://middlemanapp.com/) configuration and top-level assets, javascripts, and stylesheets should all be placed in here. You can also have ERB layout files. Each time a bind operation is run, this directory is copied to `output/master_middleman`. Then each section repo is copied (as a directory) into `output/master_middleman/source/`, before middleman is run to generate the final app. If you specify a `layout_repo:` in `config.yml`, that directory will be copied instead of `master_middleman`.
+`master_middleman` is a directory which forms the basis of your site. [Middleman](http://middlemanapp.com/) configuration and top-level assets, javascripts, and stylesheets should all be placed in here. You can also have ERB layout files. Each time a bind operation is run, this directory is copied to `output/master_middleman`. Then each section repo is copied (as a directory) into `output/master_middleman/source/`, before middleman is run to generate the final app.
 
-`.ruby-version` is used by [rbenv](https://github.com/sstephenson/rbenv) or [rvm](https://rvm.io/) to find the right ruby.  WARNING: If you install rbenv, you MUST uninstall RVM first: [see details here](http://robots.thoughtbot.com/post/47273164981/using-rbenv-to-manage-rubies-and-gems).
+`.ruby-version` is used by [Ruby version managers](https://www.ruby-toolbox.com/categories/ruby_version_management) to select the appropriate Ruby version for a given project.
 
 ### Layout Repository
 
-If layout repository is set to the full name of a Github repository (eg `cloudfoundry/bosh`), it will be downloaded for use as your book's `master_middleman` directory.
+If you specify a `layout_repo:` in `config.yml` to the full name of a GitHub repository (eg `cloudfoundry/my-doc-layout`), it will be downloaded for use as your book's `master_middleman` directory.
 
 ### Credentials Repository
 
@@ -138,9 +159,9 @@ cloud_foundry:
 
 ## Middleman Templating Helpers
 
-Bookbinder comes with a Middleman configuration that provides a handful of helpful functions, and should work for most Book Projects. To use a custom Middleman configuration instead, place a `config.rb` file in the `master_middleman` directory of the Book Project (this will overwrite Bookbinder's `config.rb`).
+Bookbinder comes with a Middleman configuration that provides a handful of helpful functions, and should work for most book projects. To use a custom Middleman configuration instead, place a `config.rb` file in the `master_middleman` directory of the book project (this will overwrite Bookbinder's `config.rb`).
 
-Bookbinder provides several helper functions that can be called from within a .erb file in a doc repo, such as a layout file.
+Bookbinder provides several helper functions that can be called from within an .erb file in a doc repo, such as a layout file.
 
 ### Quick Links
 `<%= quick_links %>` produces a table of contents based on in-page anchors.
@@ -188,14 +209,7 @@ Finally, to insert the archive menu, use the `<%= yield_for_archive_menu %>` tag
 ### Including Assets 
 Bookbinder also includes helper code to correctly find image, stylesheet, and javascript assets. When using `<% image_tag ...`, `<% stylesheet_link_tag ...`, or `<% javascript_include_tag ...` to include assets, Bookbinder will search the entire directory structure starting at the top-level until it finds an asset with the provided name. For example, when resolving `<% image_tag 'great_dane.png' %>` called from the page `dogs/big_dogs/index.html.md.erb`, Middleman will first look in `images/great_dane.png.` If that file does not exist, it will try `dogs/images/great_dane.png`, then `dogs/big_dogs/images/great_dane.png`.
 
-## Bootstrapping with Bundler
-
-Once rbenv or rvm is set up and the correct ruby version is set up (2.0.0-p195), run (in your book project)
-
-    gem install bundler
-    bundle
-
-And you should be good to go!
+## Commands
 
 Bookbinder's entry point is the `bookbinder` executable. It should be invoked from the book directory. The following commands are available:
 
@@ -203,17 +217,22 @@ Bookbinder's entry point is the `bookbinder` executable. It should be invoked fr
 
 Bookbinder's most important command is `bind`. It takes one argument on the command line:
 
-        bundle exec bookbinder bind local
+        bin/bookbinder bind local
 
 will find documentation repositories in directories that are siblings to your current directory, while
 
-        bundle exec bookbinder bind github
+        bin/bookbinder bind github
 
-will find doc repos by downloading the latest version from github.
+will find doc repos by downloading the latest version from GitHub. Note that if
+any of the repositories configured as 'sections' are private, you should
+[create a GitHub SSH key](https://help.github.com/articles/generating-ssh-keys/)
+for Bookbinder from an account that has access to the section repositories.
+
+You should ssh-add this key to give Bookbinder access to the repositories.
 
 The bind command creates 2 output directories, one named `output/` and one named `final_app/`. These are placed in the current directory and are cleared each time you run bookbinder.
 
-`final_app/` contains bookbinder's ultimate output: a Rack web-app that can be pushed to cloud foundry or run locally.
+`final_app/` contains bookbinder's ultimate output: a Rack web-app that can be pushed to Cloud Foundry or run locally.
 
 The Rack web-app will respect redirect rules specified in `redirects.rb`, so long as they conform to the `rack/rewrite` [syntax](https://github.com/jtrupiano/rack-rewrite), eg:
 
@@ -224,16 +243,17 @@ r302      '/wiki/Greg_Jastrab',   '/greg'
 r301      %r{/wiki/(\w+)_\w+},    '/$1'
 ```
 
-
 `output/` contains intermediary state, including the final prepared directory that the `bind` script ran middleman against, in `output/master_middleman`.
 
 As of version 0.2.0, the `bind` command no longer generates PDFs.
 
 ### `generate_pdf` command
 
-`$ bookbinder generate_pdf` will generate a PDF against the currently available `final_app` directory. You must run `bind [local | github]` before running `generate_pdf`.
+        bin/bookbinder generate_pdf
 
-You can specify which pages to include in a PDF using `$ bookbinder generate_pdf my-pdf.yml`. `my-pdf.yml` contains the configuration for the pdf. It must be formatted as YAML and **requires the keys** `header` and `pages`.
+This will generate a PDF against the currently available `final_app` directory. You must run `bind [local | github]` before running `generate_pdf`.
+
+You can specify which pages to include in a PDF using `bin/bookbinder generate_pdf my-pdf.yml`. `my-pdf.yml` contains the configuration for the pdf. It must be formatted as YAML and **requires the keys** `header` and `pages`.
 
 `my-pdf.yml` example:
 
@@ -247,16 +267,15 @@ pages:
     - my-book/denouement.html
 ```
 
-Each path provided under `pages` must match the `directory` of its `repository` in `config.yml`.
-The header is pulled in from the `layout_repo`, so the file `some-header.html` is expected to exist at the top level in the repo `my-username/my-layout`. The contents of `some-header.html` will be added as a header to each page within the generated pdf.
+Each path provided under `pages` must match the `directory` of its `repository` in `config.yml`. The header is pulled in from the `layout_repo`, so the file `some-header.html` is expected to exist at the top level in the repo `my-username/my-layout`. The contents of `some-header.html` will be added as a header to each page within the generated pdf.
 
 Here's an example of `some-header.html`:
-```
+```html
 <!DOCTYPE html>
 <html>
   <body>
     <div class='pdf_header' style="background-color:#ffffff; padding:12px 0px 12px 10px">
-    	<img src='images/logo-big.png' style="height:20px">
+        <img src='images/logo-big.png' style="height:20px">
     </div>
   </body>
 </html>
@@ -277,42 +296,43 @@ and in turn, `my-username/my-layout` must contain `some-header.html`; and `my-us
 
 An optional copyright notice may be provided as shown in the example.
 
-The output pdf file will have the same name as the YAML file used to generate it. In this example, it will be `my-pdf.pdf` since its configuration was specfied in `my-pdf.yml`.
+The output PDF file will have the same name as the YAML file used to generate it. In this example, it will be `my-pdf.pdf` since its configuration was specified in `my-pdf.yml`.
 
 ### `update_local_doc_repos` command
 
 As a convenience, Bookbinder provides a command to update all your local doc repos, performing a git pull on each one:
 
-        bundle exec bookbinder update_local_doc_repos
+        bin/bookbinder update_local_doc_repos
 
 ### `tag` command
 
 The `bookbinder tag` command commits Git tags to checkpoint a book and its constituent document repositories. This allows the tagged version of the documentation to be re-generated at a later time.
 
-    bundle exec bookbinder tag book-formerly-known-as-v1.0.1
+        bin/bookbinder tag book-formerly-known-as-v1.0.1
 
 ## Running the App Locally
 
     cd final_app
     bundle
-    ruby app.rb
+    rackup
 
-This will start a Rackup server to serve your documentation website locally at [http://localhost:4567/](http://localhost:4567/). While making edits in documentation repos, we recommend leaving this running in a dedicated shell window.  It can be terminated by hitting `ctrl-c`.
-
-You should only need to run the `bundle` the first time around.
-
+This will start a [rack](http://rack.github.io) server to serve your
+documentation website locally at
+[http://localhost:9292/](http://localhost:9292/). While making edits in
+documentation repos, we recommend leaving this running in a dedicated shell
+window. It can be terminated by hitting `ctrl-c`.
 
 ## Continuous Integration
 
-### CI for Books
+### CI for books
 
 The currently recommended tool for CI with Bookbinder is [GoCD](http://www.go.cd).
 
 #### CI Runner
 You will want a build that executes this shell command:
 
-    bundle install
-    bundle exec bookbinder run_publish_ci
+        bundle install --binstubs
+        bin/bookbinder run_publish_ci
     
 This will bind a book and push it to staging.
 
@@ -332,12 +352,12 @@ Deploying to staging is not normally something a human needs to do: the book's C
 
 The following command will deploy the build in your local 'final_app' directory to staging:
 
-    bundle exec bookbinder push_local_to_staging
+        bin/bookbinder push_local_to_staging
 
 ### Deploy to Production
 Deploying to prod is always done manually. It can be done from any machine with the book project checked out, but does not depend on the results from a local bind (or the contents of your `final_app` directory). Instead, it pulls the latest green build from S3, untars it locally, and then pushes it up to prod:
 
-    bundle exec bookbinder push_to_prod <build_number>
+        bin/bookbinder push_to_prod <build_number>
 
 If the build_number argument is left out, the latest green build will be deployed to production.
 
@@ -351,6 +371,6 @@ The sitemap file `/sitemap.xml` is automatically regenerated when binding. When 
 
 To run bookbinder's rspec suite, install binstubs, then run the included rake task:
 
-Once: `bundle install --binstubs=bbin`
+Once: `bundle install --binstubs`
 
-Then at any time: `bbin/rake`
+Then at any time: `bin/rake`
