@@ -7,7 +7,7 @@ _The Bookbinder gem is now known as bookbindery! Please update your Gemfiles acc
 
 ## Usage
 
-Bookbinder is meant to be used from within project called a **book**. The book includes a configuration file that describes which documentation repositories to use as source materials. The bookbindery gem provides a set of scripts to aggregate those repositories and publish them to various locations. Bookbinder also provides scripts for running on a Continuous Integration system that can detect when a documentation repository has been updated with new content and that can verify a composed book is free of any dead links.
+Bookbinder is meant to be used from within a project called a **book**. The book includes a configuration file that describes which documentation repositories to use as source materials. The bookbindery gem provides a set of scripts to aggregate those repositories and publish them to various locations. Bookbinder also provides scripts for running on a Continuous Integration system that can detect when a documentation repository has been updated with new content and that can verify a composed book is free of any dead links.
 
 ## Setting Up a Book Project
 
