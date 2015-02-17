@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.files       = Dir['lib/**/*'] + Dir['template_app/**/*'] + Dir['master_middleman/**/*'] + Dir['bin/**/*']
   s.homepage    = 'https://github.com/cloudfoundry-incubator/bookbinder'
   s.license     = 'MIT'
-  s.executable  = 'bookbinder'
+  s.executables = ['bookbinder', 'bookserver']
 
   s.add_runtime_dependency 'fog-aws', ['~> 0.0.6']
   s.add_runtime_dependency 'octokit', ['2.7.0']

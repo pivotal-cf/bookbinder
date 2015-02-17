@@ -794,9 +794,9 @@ module Bookbinder
             publish_command.run(['github'])
 
             expect(File.exists?(pre_existing_file)).to eq false
-            copied_manifest = File.read File.join(final_app_dir, 'app.rb')
-            template_manifest = File.read(File.expand_path('../../../../../template_app/app.rb', __FILE__))
-            expect(copied_manifest).to eq(template_manifest)
+            copied_config = File.read File.join(final_app_dir, 'config.ru')
+            template_config = File.read(File.expand_path('../../../../../template_app/config.ru', __FILE__))
+            expect(copied_config).to eq(template_config)
           end
         end
       end

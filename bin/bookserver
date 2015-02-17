@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+
+exec 'bin/rackup -I final_app final_app/config.ru'
