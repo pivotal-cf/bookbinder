@@ -3,6 +3,8 @@
 
 Bookbinder is a gem that binds together a unified documentation web application from disparate source material. Currently, the source material must be markdown or plain HTML, and must be stored in local directories or in GitHub repositories. Bookbinder runs [middleman](http://middlemanapp.com/) to produce a Rackup app that can be deployed to Cloud Foundry.
 
+_The Bookbinder gem is now known as bookbindery! Please update your Gemfiles accordingly._
+
 ## Usage
 
 Bookbinder is meant to be used from within project called a **book**. The book includes a configuration file that describes which documentation repositories to use as source materials. The bookbindery gem provides a set of scripts to aggregate those repositories and publish them to various locations. Bookbinder also provides scripts for running on a Continuous Integration system that can detect when a documentation repository has been updated with new content and that can verify a composed book is free of any dead links.
@@ -12,8 +14,6 @@ Bookbinder is meant to be used from within project called a **book**. The book i
 **Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
 
 ### Installation
-
-_The Bookbinder gem is now known as bookbindery! Please update your Gemfiles accordingly._
 
 To install, add the following to your Gemfile:
 
