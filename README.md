@@ -69,6 +69,7 @@ and that the first and only section within the book is
 
     # Start up the web site locally
     cd final_app
+    bundle
     rackup
 
 You should now be able to visit
@@ -313,12 +314,13 @@ The `bookbinder tag` command commits Git tags to checkpoint a book and its const
 
     cd final_app
     bundle
-    ruby app.rb
+    rackup
 
-This will start a Rackup server to serve your documentation website locally at [http://localhost:4567/](http://localhost:4567/). While making edits in documentation repos, we recommend leaving this running in a dedicated shell window.  It can be terminated by hitting `ctrl-c`.
-
-You should only need to run the `bundle` the first time around.
-
+This will start a [rack](http://rack.github.io) server to serve your
+documentation website locally at
+[http://localhost:9292/](http://localhost:9292/). While making edits in
+documentation repos, we recommend leaving this running in a dedicated shell
+window. It can be terminated by hitting `ctrl-c`.
 
 ## Continuous Integration
 
