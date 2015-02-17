@@ -8,6 +8,7 @@ require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/spider'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
+require_relative '../../../../lib/bookbinder/local_dita_preprocessor'
 
 module Bookbinder
   describe Commands::Bind do
@@ -17,7 +18,7 @@ module Bookbinder
       end
     end
 
-    let(:null_dita_processor) { double('null dita processor', convert: []) }
+    let(:null_dita_to_html_converter) { double('null dita-to-html converter', convert: []) }
     let(:archive_menu_config) { FakeArchiveMenuConfig.new }
 
     describe 'integration' do
@@ -65,6 +66,7 @@ module Bookbinder
       let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
       let(:server_director) { ServerDirector.new(logger, directory: final_app_dir) }
       let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor) }
+      let(:dita_preprocessor) { LocalDitaPreprocessor.new(null_dita_to_html_converter, static_site_generator_formatter, file_system_accessor) }
       let(:publish_command) { Commands::Bind.new(logger,
                                                  config_fetcher,
                                                  archive_menu_config,
@@ -75,8 +77,7 @@ module Bookbinder
                                                  final_app_dir,
                                                  server_director,
                                                  File.absolute_path('.'),
-                                                 null_dita_processor,
-                                                 static_site_generator_formatter) }
+                                                 dita_preprocessor ) }
       let(:git_client) { GitClient.new }
 
       describe 'local' do
@@ -183,8 +184,8 @@ module Bookbinder
                                                    final_app_dir,
                                                    server_director,
                                                    File.absolute_path('.'),
-                                                   null_dita_processor,
-                                                   static_site_generator_formatter)
+                                                   dita_preprocessor
+              )
               publish_command.run(['local'])
             end
           end
@@ -281,8 +282,8 @@ module Bookbinder
                                                      final_app_dir,
                                                      server_director,
                                                      File.absolute_path('.'),
-                                                     null_dita_processor,
-                                                     static_site_generator_formatter) }
+                                                     dita_preprocessor
+          ) }
 
           it 'publishes previous versions of the book down paths named for the version tag' do
             publish_command.run(cli_args)
@@ -388,8 +389,8 @@ module Bookbinder
                                                final_app_dir,
                                                server_director,
                                                File.absolute_path('.'),
-                                               null_dita_processor,
-                                               static_site_generator_formatter)
+                                               dita_preprocessor
+          )
           publish_command.run(['github'])
 
           final_app_dir = File.absolute_path('final_app')
@@ -445,8 +446,8 @@ module Bookbinder
                                                final_app_dir,
                                                server_director,
                                                File.absolute_path('.'),
-                                               null_dita_processor,
-                                               static_site_generator_formatter)
+                                               dita_preprocessor
+          )
           silence_io_streams do
             publish_command.run(['github'])
           end
@@ -504,8 +505,8 @@ module Bookbinder
                                                    final_app_dir,
                                                    server_director,
                                                    File.absolute_path('.'),
-                                                   null_dita_processor,
-                                                   static_site_generator_formatter)
+                                                   dita_preprocessor
+              )
               publish_command.run(['github'])
             end.to raise_error "Your public host must be a single String."
           end
@@ -541,8 +542,8 @@ module Bookbinder
                                                  final_app_dir,
                                                  server_director,
                                                  File.absolute_path('.'),
-                                                 null_dita_processor,
-                                                 static_site_generator_formatter)
+                                                 dita_preprocessor
+            )
             publish_command.run(['github'])
 
             final_app_dir = File.absolute_path('final_app')
@@ -585,8 +586,8 @@ module Bookbinder
                                                final_app_dir,
                                                server_director,
                                                File.absolute_path('.'),
-                                               null_dita_processor,
-                                               static_site_generator_formatter)
+                                               dita_preprocessor
+          )
           publish_command.run(['github'])
 
           final_app_dir = File.absolute_path('final_app')
@@ -659,8 +660,8 @@ module Bookbinder
                                                  final_app_dir,
                                                  server_director,
                                                  File.absolute_path('.'),
-                                                 null_dita_processor,
-                                                 static_site_generator_formatter)
+                                                 dita_preprocessor
+            )
             begin
               real_stdout = $stdout
               $stdout = StringIO.new
@@ -706,8 +707,8 @@ module Bookbinder
                                                final_app_dir,
                                                server_director,
                                                File.absolute_path('.'),
-                                               null_dita_processor,
-                                               static_site_generator_formatter)
+                                               dita_preprocessor
+          )
           begin
             real_stdout = $stdout
             $stdout = StringIO.new
@@ -753,8 +754,8 @@ module Bookbinder
                                final_app_dir,
                                server_director,
                                File.absolute_path('.'),
-                               null_dita_processor,
-                               static_site_generator_formatter)
+                               dita_preprocessor
+            )
           end
 
           it 'creates the output directory' do
@@ -818,7 +819,7 @@ module Bookbinder
             static_site_generator = double('static_site_generator', run: true)
             sitemap_generator = double('sitemap_generator', has_broken_links?: false)
             server_director = double('server_director', use_server: true)
-            static_site_generator_formatter = double('static_site_generator_formatter', format: nil)
+            dita_preprocessor = double('dita preprocessor', preprocess: nil)
 
             final_app_dir = ''
 
@@ -849,17 +850,17 @@ module Bookbinder
                                                  final_app_dir,
                                                  server_director,
                                                  'irrelevant/path',
-                                                 null_dita_processor,
-                                                 static_site_generator_formatter)
+                                                 dita_preprocessor
+            )
 
             expect(version_control_system).to receive(:clone).with('git@github.com:org/dita_section',
                                                                    'my_dita_section',
-                                                                   path: /output\/tmp\/dita_sections/).once
+                                                                   path: /output\/dita\/dita_sections/).once
 
             publish_command.run(['github'])
           end
 
-          it 'formats the processed DITA output to a format processable by the static site generator' do
+          it 'preprocesses the dita sections from their local dir to the final directory needed for middleman' do
             logger = double('logger', log: true)
             version_control_system = double('vcs', clone: nil)
             fs_accessor = double('fs_accessor',
@@ -872,6 +873,7 @@ module Bookbinder
             sitemap_generator = double('sitemap_generator', has_broken_links?: false)
             server_director = double('server_director', use_server: true)
             static_site_generator_formatter = double('static_site_generator_formatter')
+            dita_preprocessor = double('dita preprocessor')
 
             final_app_dir = ''
 
@@ -893,7 +895,6 @@ module Bookbinder
             config_containing_dita_sections = Configuration.new(logger, user_config)
             config_fetcher = double('config fetcher', fetch_config: config_containing_dita_sections)
 
-            dita_processor = double('dita processor')
             publish_command = Commands::Bind.new(logger,
                                                  config_fetcher,
                                                  archive_menu_config,
@@ -904,92 +905,17 @@ module Bookbinder
                                                  final_app_dir,
                                                  server_director,
                                                  'base',
-                                                 dita_processor,
-                                                 static_site_generator_formatter)
+                                                 dita_preprocessor
+            )
 
-            dita_section = DitaSection.new('base/output/tmp/dita_sections/my_dita_section',
+            dita_section = DitaSection.new('base/output/dita/dita_sections/my_dita_section',
                                            'path/to/dita.ditamap',
                                            'org/dita_section',
                                            'my-ref-SHA',
                                            'my_dita_section')
-            allow(dita_processor).
-              to receive(:convert).
-              with([dita_section], to: 'base/output/tmp/html_from_dita')
-
-            expect(static_site_generator_formatter).
-              to receive(:format).
-              with('base/output/tmp/html_from_dita', 'base/output/tmp/site_generator_ready')
-
-            publish_command.run(['github'])
-          end
-
-          it 'copies processed dita sections and all image files into static site generator directory' do
-            logger = double('logger', log: true)
-            version_control_system = double('vcs', clone: nil)
-            fs_accessor = double('fs_accessor',
-                                 remove_directory: true,
-                                 make_directory: true,
-                                 copy: true,
-                                 copy_contents: true)
-            static_site_generator = double('static_site_generator', run: true)
-            sitemap_generator = double('sitemap_generator', has_broken_links?: false)
-            server_director = double('server_director', use_server: true)
-            static_site_generator_formatter = double('static_site_generator_formatter')
-
-            final_app_dir = ''
-
-            user_config = {
-              'book_repo' => 'my_dita_book',
-              'public_host' => 'my public host',
-              'dita_sections' => [
-                {
-                  'repository' => {
-                    'name' => 'org/dita_section',
-                    'ref' => 'my-ref-SHA'
-                  },
-                  'ditamap_location' => 'path/to/dita.ditamap',
-                  'directory' => 'my_dita_section'
-                }
-              ]
-            }
-
-            config_containing_dita_sections = Configuration.new(logger, user_config)
-            config_fetcher = double('config fetcher', fetch_config: config_containing_dita_sections)
-
-            dita_processor = double('dita processor')
-            publish_command = Commands::Bind.new(logger,
-                                                 config_fetcher,
-                                                 archive_menu_config,
-                                                 version_control_system,
-                                                 fs_accessor,
-                                                 static_site_generator,
-                                                 sitemap_generator,
-                                                 final_app_dir,
-                                                 server_director,
-                                                 'base',
-                                                 dita_processor,
-                                                 static_site_generator_formatter)
-
-            dita_section = DitaSection.new('base/output/tmp/dita_sections/my_dita_section',
-                                           'path/to/dita.ditamap',
-                                           'org/dita_section',
-                                           'my-ref-SHA',
-                                           'my_dita_section')
-            allow(dita_processor).
-              to receive(:convert).
-              with([dita_section], to: 'base/output/tmp/html_from_dita')
-
-            allow(static_site_generator_formatter).
-              to receive(:format).
-              with('base/output/tmp/html_from_dita', 'base/output/tmp/site_generator_ready')
-
-            expect(fs_accessor).
-                to receive(:copy_named_directory_with_path).
-                       with('images', 'base/output/tmp/html_from_dita', /middleman\/source/)
-
-            expect(fs_accessor).
-              to receive(:copy_contents).
-              with('base/output/tmp/site_generator_ready', /middleman\/source/)
+            expect(dita_preprocessor).
+              to receive(:preprocess).
+              with([dita_section], 'base/output/dita/html_from_dita', 'base/output/dita/site_generator_ready', /middleman\/source/)
 
             publish_command.run(['github'])
           end
@@ -998,7 +924,7 @@ module Bookbinder
 
       context 'when publishing from local' do
         context 'when the config contains dita sections' do
-          it 'processes the dita sections from their local dir to a processed-dita directory' do
+          it 'preprocesses the dita sections from their local dir to the final directory needed for middleman' do
             logger = double('logger', log: true)
             version_control_system = double('vcs')
             fs_accessor = double('fs_accessor',
@@ -1011,6 +937,7 @@ module Bookbinder
             sitemap_generator = double('sitemap_generator', has_broken_links?: false)
             server_director = double('server_director', use_server: true)
             static_site_generator_formatter = double('static_site_generator_formatter', format: nil)
+            dita_preprocessor = double('dita preprocessor')
 
             final_app_dir = ''
             user_config = {
@@ -1031,7 +958,6 @@ module Bookbinder
             config_containing_dita_sections = Configuration.new(logger, user_config)
             config_fetcher = double('config fetcher', fetch_config: config_containing_dita_sections)
 
-            dita_processor = double('dita processor')
             publish_command = Commands::Bind.new(logger,
                                                  config_fetcher,
                                                  archive_menu_config,
@@ -1042,8 +968,8 @@ module Bookbinder
                                                  final_app_dir,
                                                  server_director,
                                                  '/parent-of-book/book',
-                                                 dita_processor,
-                                                 static_site_generator_formatter)
+                                                 dita_preprocessor
+            )
 
             expected_dita_section = DitaSection.new('/parent-of-book/my_dita_section',
                                            'path/to/dita.ditamap',
@@ -1051,10 +977,9 @@ module Bookbinder
                                            'my-ref-SHA',
                                            'my_dita_section')
 
-            expect(dita_processor).
-                to receive(:convert).
-                       with([expected_dita_section], to: '/parent-of-book/book/output/tmp/html_from_dita').
-                       and_return(['html_from_dita/my_dita_section'])
+            expect(dita_preprocessor).
+                to receive(:preprocess).
+                       with([expected_dita_section], '/parent-of-book/book/output/dita/html_from_dita', '/parent-of-book/book/output/dita/site_generator_ready', /middleman\/source/)
 
             publish_command.run(['local'])
           end

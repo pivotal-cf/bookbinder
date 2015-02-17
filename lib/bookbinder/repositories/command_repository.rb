@@ -6,7 +6,7 @@ require_relative '../configuration_validator'
 require_relative '../dita_html_to_middleman_formatter'
 require_relative '../git_accessor'
 require_relative '../local_dita_to_html_converter'
-require_relative '../local_dita_to_html_converter'
+require_relative '../local_dita_preprocessor'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../spider'
@@ -76,8 +76,7 @@ module Bookbinder
           final_app_directory,
           server_director,
           File.absolute_path('.'),
-          local_dita_processor,
-          dita_html_to_middleman_formatter
+          dita_preprocessor
         )
       end
 
@@ -93,12 +92,6 @@ module Bookbinder
           logger,
           configuration_fetcher
         )
-      end
-
-      def local_dita_processor
-        @local_dita_processor ||=
-          LocalDitaToHtmlConverter.new(Sheller.new(logger),
-                                 ENV['PATH_TO_DITA_OT_LIBRARY'])
       end
 
       def spider
@@ -132,6 +125,19 @@ module Bookbinder
 
       def final_app_directory
         @final_app_directory ||= File.absolute_path('final_app')
+      end
+
+      def dita_preprocessor
+        @dita_preprocessor ||=
+            LocalDitaPreprocessor.new(local_dita_processor,
+                                 dita_html_to_middleman_formatter,
+                                 local_file_system_accessor)
+      end
+
+      def local_dita_processor
+        @local_dita_processor ||=
+            LocalDitaToHtmlConverter.new(Sheller.new(logger),
+                                         ENV['PATH_TO_DITA_OT_LIBRARY'])
       end
 
       def dita_html_to_middleman_formatter

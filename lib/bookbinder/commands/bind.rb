@@ -26,8 +26,7 @@ module Bookbinder
                      final_app_directory,
                      server_director,
                      context_dir,
-                     dita_to_html_converter,
-                     static_site_generator_formatter)
+                     dita_preprocessor)
         @logger = logger
         @config_fetcher = config_fetcher
         @archive_menu_config = archive_menu_config
@@ -38,8 +37,7 @@ module Bookbinder
         @final_app_directory = final_app_directory
         @server_director = server_director
         @context_dir = context_dir
-        @dita_to_html_converter = dita_to_html_converter
-        @static_site_generator_formatter = static_site_generator_formatter
+        @dita_preprocessor = dita_preprocessor
       end
 
       def usage
@@ -72,10 +70,10 @@ module Bookbinder
         master_middleman_dir = output_paths.fetch(:master_middleman_dir)
         output_dir = output_paths.fetch(:output_dir)
 
-        tmp_dir = File.join output_dir, 'tmp'
-        dita_section_dir = File.join tmp_dir, 'dita_sections'
-        dita_processed_dir = File.join tmp_dir, 'html_from_dita'
-        formatted_dir = File.join tmp_dir, 'site_generator_ready'
+        dita_processing_dir = File.join output_dir, 'dita'
+        dita_section_dir = File.join dita_processing_dir, 'dita_sections'
+        dita_processed_dir = File.join dita_processing_dir, 'html_from_dita'
+        formatted_dir = File.join dita_processing_dir, 'site_generator_ready'
 
         master_dir = File.join output_dir, 'master_middleman'
         workspace_dir = File.join master_dir, 'source'
@@ -84,7 +82,7 @@ module Bookbinder
                             workspace_dir,
                             master_middleman_dir,
                             master_dir,
-                            tmp_dir,
+                            dita_processing_dir,
                             formatted_dir)
 
         dita_section_config_hash = config.dita_sections || {}
@@ -113,10 +111,7 @@ module Bookbinder
           end
         end
 
-        dita_to_html_converter.convert(final_dita_sections, to: dita_processed_dir)
-        static_site_generator_formatter.format(dita_processed_dir, formatted_dir)
-        file_system_accessor.copy_named_directory_with_path('images', dita_processed_dir, workspace_dir)
-        file_system_accessor.copy_contents(formatted_dir, workspace_dir)
+        dita_preprocessor.preprocess final_dita_sections, dita_processed_dir, formatted_dir, workspace_dir
 
         sections = gather_sections(workspace_dir, output_paths)
 
@@ -145,8 +140,7 @@ module Bookbinder
                   :sitemap_generator,
                   :server_director,
                   :context_dir,
-                  :dita_to_html_converter,
-                  :static_site_generator_formatter
+                  :dita_preprocessor
 
       def gather_sections(workspace, output_paths)
         config.sections.map do |attributes|
@@ -175,14 +169,14 @@ module Bookbinder
                               middleman_source,
                               master_middleman_dir,
                               middleman_dir,
-                              tmp_dir,
+                              dita_processing_dir,
                               formatted_dir)
         forget_sections(output_dir)
         file_system_accessor.remove_directory File.join final_app, '.'
-        file_system_accessor.remove_directory tmp_dir
+        file_system_accessor.remove_directory dita_processing_dir
         file_system_accessor.make_directory output_dir
         file_system_accessor.make_directory formatted_dir
-        file_system_accessor.make_directory File.join tmp_dir, 'dita_sections'
+        file_system_accessor.make_directory File.join dita_processing_dir, 'dita_sections'
         file_system_accessor.make_directory File.join final_app, 'public'
         file_system_accessor.make_directory middleman_source
 
