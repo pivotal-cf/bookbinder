@@ -11,21 +11,36 @@ module Bookbinder
     end
 
     def validate(command_name)
-      candidate = Candidate.new(command_name)
-      if commands.none? { |command| command.command_for?(command_name) }
-        UserMessage.new "Unrecognized #{candidate.command_type} '#{command_name}'\n" + usage_text, EscalationType.error
-      elsif command = commands.find { |command| (command.respond_to? :deprecated_command_for?) &&
-                                                                        (command.deprecated_command_for? command_name) }
-        UserMessage.new "Use of #{command_name} is deprecated. " +
-                            "The preferred usage is below: \n#{command.usage}",
-                        EscalationType.warn
+      candidate = Candidate.new(command_name, commands)
+      if candidate.unrecognized?
+        UserMessage.new(
+          "Unrecognized #{candidate.command_type} '#{command_name}'\n#{usage_text}",
+          EscalationType.error
+        )
+      elsif candidate.deprecated_match
+        UserMessage.new(
+          "Use of #{command_name} is deprecated. " +
+          "The preferred usage is below: \n#{candidate.deprecated_match.usage}",
+          EscalationType.warn
+        )
       else
         UserMessage.new "Success", EscalationType.success
       end
     end
 
-    Candidate = Struct.new(:command_name) do
+    Candidate = Struct.new(:command_name, :commands) do
       include Bookbinder::Commands::Naming
+
+      def unrecognized?
+        commands.none? { |command| command.command_for?(command_name) }
+      end
+
+      def deprecated_match
+        @deprecated_match ||= commands.find { |command|
+          command.respond_to?(:deprecated_command_for?) &&
+            command.deprecated_command_for?(command_name)
+        }
+      end
     end
 
     private
