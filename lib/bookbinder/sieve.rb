@@ -1,3 +1,5 @@
+require_relative 'spider'
+
 module Bookbinder
   class Sieve
     def initialize(domain: ->(){ raise 'You must supply a domain parameter.' }.call)
@@ -6,9 +8,12 @@ module Bookbinder
     end
 
     def links_from(page, is_first_pass)
-      if page.not_found?
+      if page.not_found? && page.referer
         working = []
         broken  = [Spider.prepend_location(page.referer, page.url)]
+      elsif page.not_found?
+        working = []
+        broken  = []
       else
         working = [page.url.to_s]
         broken  = broken_fragments_targeting(page, is_first_pass)
