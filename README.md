@@ -9,17 +9,15 @@ _The Bookbinder gem is now known as bookbindery! Please update your Gemfiles acc
 
 Bookbinder is meant to be used from within a project called a **book**. The book includes a configuration file that describes which documentation repositories to use as source materials. The bookbindery gem provides a set of scripts to aggregate those repositories and publish them to various locations. Bookbinder also provides scripts for running on a Continuous Integration system that can detect when a documentation repository has been updated with new content and that can verify a composed book is free of any dead links.
 
-## Setting Up a Book Project
+## Installation
 
 **Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
-
-### Installation
 
 Installation of the gem is easy: simply add `gem "bookbindery"` to your
 Gemfile. Creating a Book is currently a little more involved, but there are
 plans afoot to automate this process.
 
-#### Creating a book from scratch using local sections
+### Creating a book from scratch using local sections
 
 The disparate source material of your book is organized into separate
 git repositories. When writing documentation on your local machine, however,
@@ -80,14 +78,14 @@ currently 404s, because we didn't put anything inside master_middleman/source/.
 
 You can skip ahead for [more information on the bind command](#bind-command).
 
-#### Deploying your book
+### Deploying your book
 - Create AWS bucket for green builds and put info into `credentials.yml`
 - Set up CF spaces for staging and production and put details into `credentials.yml`
 - Deploy to production
 - (optional) Register your sitemap with Google Webmaster Tools
 
 
-#### A more exhaustive config.yml example
+### A more exhaustive config.yml example
 
 ```YAML
 book_repo: org-name/repo-name
