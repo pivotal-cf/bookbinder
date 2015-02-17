@@ -4,4 +4,4 @@ Gemfile.lock
 file_modification_dates
 tags
 .DS_Store
-bbin
+bin
