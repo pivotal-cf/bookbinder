@@ -23,7 +23,7 @@ module Bookbinder
         end
 
         it 'raises missing key error' do
-          expect { subject.valid? config_hash, bookbinder_schema_version, user_schema_version }.to raise_error ConfigurationValidator::MissingRequiredKeyError, /Your config.yml missing required key. The requires are/
+          expect { subject.valid? config_hash, bookbinder_schema_version, user_schema_version }.to raise_error ConfigurationValidator::MissingRequiredKeyError
         end
       end
 

@@ -139,7 +139,9 @@ module Bookbinder
       end
 
       if missing_keys.length > 0
-        raise ConfigurationValidator::MissingRequiredKeyError.new "Your config.yml missing required key. The requires are " + missing_keys.join(", ")
+        raise ConfigurationValidator::MissingRequiredKeyError.new(
+          "Your config.yml is missing required key(s). Required keys are #{missing_keys.join(", ")}."
+        )
       end
     end
   end
