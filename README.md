@@ -350,8 +350,6 @@ The sitemap file `/sitemap.xml` is automatically regenerated when binding. When 
 
 To run bookbinder's rspec suite, install binstubs, then run the included rake task:
 
-Once: `bundle install --binstubs=bbin`
+Once: `bundle install --binstubs`
 
-Then at any time: `bbin/rake`
-
-NB: we specify a custom binstub directory here to avoid clashing with the bin/ directory already present in the Bookbinder repo.
+Then at any time: `bin/rake`
