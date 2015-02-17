@@ -1,5 +1,6 @@
-require_relative 'cli_error'
 require 'ostruct'
+require_relative 'cli_error'
+require_relative 'commands/naming'
 require_relative 'user_message'
 
 module Bookbinder
@@ -9,10 +10,10 @@ module Bookbinder
       @usage_text = usage_text
     end
 
-    def validate command_name
-      command_type = "#{command_name}".match(/^--/) ? 'flag' : 'command'
+    def validate(command_name)
+      candidate = Candidate.new(command_name)
       if commands.none? { |command| command.command_for?(command_name) }
-        UserMessage.new "Unrecognized #{command_type} '#{command_name}'\n" + usage_text, EscalationType.error
+        UserMessage.new "Unrecognized #{candidate.command_type} '#{command_name}'\n" + usage_text, EscalationType.error
       elsif command = commands.find { |command| (command.respond_to? :deprecated_command_for?) &&
                                                                         (command.deprecated_command_for? command_name) }
         UserMessage.new "Use of #{command_name} is deprecated. " +
@@ -21,6 +22,10 @@ module Bookbinder
       else
         UserMessage.new "Success", EscalationType.success
       end
+    end
+
+    Candidate = Struct.new(:command_name) do
+      include Bookbinder::Commands::Naming
     end
 
     private

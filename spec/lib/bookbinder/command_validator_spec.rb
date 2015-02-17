@@ -11,6 +11,18 @@ module Bookbinder
 
         expect(validation_result.escalation_type).to eq(EscalationType.error)
       end
+
+      it 'identifies it as a "flag" if it starts with --' do
+        command_validator = CommandValidator.new([], 'usage_text')
+        result = command_validator.validate('--foo')
+        expect(result.message).to match(/^Unrecognized flag/)
+      end
+
+      it 'identifies it as a "command" if it starts with any other char' do
+        command_validator = CommandValidator.new([], 'usage_text')
+        result = command_validator.validate('^foo')
+        expect(result.message).to match(/^Unrecognized command/)
+      end
     end
 
     context 'when the command is deprecated' do
