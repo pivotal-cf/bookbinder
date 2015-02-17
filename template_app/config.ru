@@ -5,5 +5,7 @@ if File.exists?('redirects.rb')
   use(Rack::Rewrite) { eval File.read('redirects.rb') }
 end
 
-require './app'
+require_relative 'lib/vienna_application'
+require_relative 'lib/rack_static'
+
 run Vienna
