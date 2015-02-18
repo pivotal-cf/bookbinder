@@ -1,3 +1,5 @@
+require 'active_support/inflector'
+
 module Bookbinder
   module Commands
     module Naming
