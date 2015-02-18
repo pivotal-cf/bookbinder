@@ -1,3 +1,5 @@
+require 'active_support'
+
 module Bookbinder
   module Commands
     module Naming
