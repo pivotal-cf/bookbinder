@@ -1,5 +1,5 @@
 require 'middleman-syntax'
-require_relative 'bookbinder_logger'
+require_relative 'deprecated_logger'
 require_relative 'directory_helpers'
 require_relative 'repositories/section_repository'
 require_relative 'server_director'

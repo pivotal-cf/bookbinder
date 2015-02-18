@@ -11,7 +11,7 @@ module Bookbinder
     def run(args)
       command_name, *command_arguments = args
 
-      logger = BookbinderLogger.new
+      logger = DeprecatedLogger.new
       commands = Repositories::CommandRepository.new(logger)
 
       command_validator = CommandValidator.new(commands, commands.help.usage_message)

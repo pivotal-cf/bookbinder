@@ -25,7 +25,7 @@ module Bookbinder
     end
 
     before do
-      allow(BookbinderLogger).to receive(:new).and_return(logger)
+      allow(DeprecatedLogger).to receive(:new).and_return(logger)
     end
 
     def run_middleman(template_variables: {}, subnav_templates: {}, archive_menu: {})

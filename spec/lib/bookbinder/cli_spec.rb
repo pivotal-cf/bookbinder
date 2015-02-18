@@ -16,7 +16,7 @@ module Bookbinder
     end
 
     before do
-      allow(BookbinderLogger).to receive(:new).and_return(logger)
+      allow(DeprecatedLogger).to receive(:new).and_return(logger)
       allow(logger).to receive(:log)
       allow(logger).to receive(:error)
     end
