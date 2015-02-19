@@ -14,7 +14,7 @@ module Bookbinder
     end
 
     def set_config_file_path config_file_path
-      @config_file_path = config_file_path
+      @config_file_path = File.expand_path config_file_path
     end
 
     private

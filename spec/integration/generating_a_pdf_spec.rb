@@ -13,8 +13,8 @@ describe 'generating a book' do
     it 'generates a pdf based on the filename option', integration: true do
       skip 'Skipping because this test can only be run in a linux environment.' if RbConfig::CONFIG['host_os'] =~ /darwin/
       silence_io_streams do
-        `#{GEM_ROOT}/bin/bookbinder publish local`
-        `#{GEM_ROOT}/bin/bookbinder generate_pdf`
+        `#{GEM_ROOT}/install_bin/bookbinder publish local`
+        `#{GEM_ROOT}/install_bin/bookbinder generate_pdf`
       end
       expect(File.exists?(File.join('final_app', 'TestPdf.pdf'))).to eq(true)
     end
@@ -31,8 +31,8 @@ describe 'generating a book' do
     it 'generates a pdf with the same name as the index file', integration: true do
       skip 'Skipping because this test can only be run in a linux environment.' if RbConfig::CONFIG['host_os'] =~ /darwin/
       silence_io_streams do
-        `#{GEM_ROOT}/bin/bookbinder publish local`
-        `#{GEM_ROOT}/bin/bookbinder generate_pdf #{filename}.yml`
+        `#{GEM_ROOT}/install_bin/bookbinder publish local`
+        `#{GEM_ROOT}/install_bin/bookbinder generate_pdf #{filename}.yml`
       end
       expect(File.exists?(File.join('final_app', "#{filename}.pdf"))).to eq(true)
     end
