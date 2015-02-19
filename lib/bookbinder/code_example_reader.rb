@@ -1,4 +1,4 @@
-require_relative '../../lib/bookbinder/bookbinder_logger'
+require_relative '../../lib/bookbinder/deprecated_logger'
 
 module Bookbinder
   class CodeExampleReader

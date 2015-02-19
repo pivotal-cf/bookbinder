@@ -132,7 +132,7 @@ module Bookbinder
       end
 
       def bookbinder_logger
-        BookbinderLogger.new
+        DeprecatedLogger.new
       end
     end
   end

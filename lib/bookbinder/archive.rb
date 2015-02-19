@@ -1,7 +1,7 @@
 require 'fog/aws'
 require 'tmpdir'
-require_relative 'bookbinder_logger'
 require_relative 'artifact_namer'
+require_relative 'deprecated_logger'
 
 module Bookbinder
   class Archive

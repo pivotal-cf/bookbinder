@@ -14,6 +14,14 @@ module Bookbinder
       def flag?
         command_name.match(/^--/)
       end
+
+      def command_type
+        if flag?
+          'flag'
+        else
+          'command'
+        end
+      end
     end
   end
 end

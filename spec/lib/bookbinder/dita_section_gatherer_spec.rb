@@ -1,6 +1,6 @@
-require_relative '../../../lib/bookbinder/dita_section_gatherer'
+require_relative '../../../lib/bookbinder/deprecated_logger'
 require_relative '../../../lib/bookbinder/dita_section'
-require_relative '../../../lib/bookbinder/bookbinder_logger'
+require_relative '../../../lib/bookbinder/dita_section_gatherer'
 
 module Bookbinder
   describe DitaSectionGatherer do

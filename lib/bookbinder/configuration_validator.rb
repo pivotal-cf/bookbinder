@@ -1,6 +1,40 @@
 require 'active_support/core_ext/object/blank'
 
 module Bookbinder
+  class ConfigurationValidator
+    DuplicateSectionNameError = Class.new(RuntimeError)
+    MissingArchiveMenuPartialError = Class.new(RuntimeError)
+    EmptyArchiveItemsError = Class.new(RuntimeError)
+    ArchiveMenuNotDefinedError = Class.new(RuntimeError)
+    MissingRequiredKeyError = Class.new(RuntimeError)
+
+    def initialize(logger, file_system_accessor)
+      @logger = logger
+      @file_system_accessor = file_system_accessor
+    end
+
+    def valid?(config_hash, bookbinder_schema_version, starting_schema_version)
+      raise 'Your config.yml appears to be empty. Please check and try again.' unless config_hash
+
+      user_config_schema_version = config_hash['schema_version']
+      exceptions = [
+        RequiredKeysChecker.new,
+        ConfigVersionChecker.new(Version.parse(bookbinder_schema_version),
+                                 Version.parse(starting_schema_version),
+                                 VersionCheckerMessages.new(Version.parse(user_config_schema_version),
+                                                         bookbinder_schema_version),
+                                 @logger),
+        DuplicateSectionNameChecker.new,
+        ArchiveMenuChecker.new(@file_system_accessor)
+      ].map do |checker|
+        checker.check(config_hash)
+      end
+      exception = exceptions.compact.first
+      raise exception if exception
+
+      true
+    end
+  end
 
   class DuplicateSectionNameChecker
     def check(config)
@@ -145,41 +179,6 @@ module Bookbinder
           "Your config.yml is missing required key(s). Required keys are #{missing_keys.join(", ")}."
         )
       end
-    end
-  end
-
-  class ConfigurationValidator
-    DuplicateSectionNameError = Class.new(RuntimeError)
-    MissingArchiveMenuPartialError = Class.new(RuntimeError)
-    EmptyArchiveItemsError = Class.new(RuntimeError)
-    ArchiveMenuNotDefinedError = Class.new(RuntimeError)
-    MissingRequiredKeyError = Class.new(RuntimeError)
-
-    def initialize(logger, file_system_accessor)
-      @logger = logger
-      @file_system_accessor = file_system_accessor
-    end
-
-    def valid?(config_hash, bookbinder_schema_version, starting_schema_version)
-      raise 'Your config.yml appears to be empty. Please check and try again.' unless config_hash
-
-      user_config_schema_version = config_hash['schema_version']
-      exceptions = [
-        RequiredKeysChecker.new,
-        ConfigVersionChecker.new(Version.parse(bookbinder_schema_version),
-                                 Version.parse(starting_schema_version),
-                                 VersionCheckerMessages.new(Version.parse(user_config_schema_version),
-                                                         bookbinder_schema_version),
-                                 @logger),
-        DuplicateSectionNameChecker.new,
-        ArchiveMenuChecker.new(@file_system_accessor)
-      ].map do |checker|
-        checker.check(config_hash)
-      end
-      exception = exceptions.compact.first
-      raise exception if exception
-
-      true
     end
   end
 end

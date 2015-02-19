@@ -11,7 +11,7 @@ require 'vienna'
 require 'popen4'
 require 'puma'
 
-require_relative 'bookbinder/bookbinder_logger'
+require_relative 'bookbinder/deprecated_logger'
 require_relative 'bookbinder/git_client'
 require_relative 'bookbinder/section'
 require_relative 'bookbinder/book'

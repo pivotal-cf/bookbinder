@@ -9,10 +9,9 @@ require_relative 'user_message_presenter'
 module Bookbinder
   class Cli
     def run(args)
-      command_name = args[0]
-      command_arguments = args[1..-1]
+      command_name, *command_arguments = args
 
-      logger = BookbinderLogger.new
+      logger = DeprecatedLogger.new
       commands = Repositories::CommandRepository.new(logger)
 
       command_validator = CommandValidator.new(commands, commands.help.usage_message)
@@ -24,11 +23,11 @@ module Bookbinder
       terminal = Terminal.new
 
       user_message = command_validator.validate(command_name)
-      if user_message.escalation_type == EscalationType.error
+      if user_message.error?
         error_message = user_message_presenter.get_error(user_message)
         terminal.update(error_message)
         return 1
-      elsif user_message.escalation_type == EscalationType.warn
+      elsif user_message.warn?
         warning_message = user_message_presenter.get_warning(user_message)
         terminal.update(warning_message)
       end

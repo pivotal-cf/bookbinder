@@ -1,6 +1,6 @@
 require 'bookbinder/shell_out'
 require 'git'
-require_relative 'bookbinder_logger'
+require_relative 'deprecated_logger'
 require_relative 'git_client'
 
 module Bookbinder

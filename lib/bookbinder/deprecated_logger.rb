@@ -5,7 +5,7 @@ class String
 end
 
 module Bookbinder
-  class BookbinderLogger
+  class DeprecatedLogger
     def log(message)
       puts message
     end
