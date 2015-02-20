@@ -11,6 +11,8 @@ require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../spider'
 require_relative '../yaml_loader'
+require_relative '../subnav_formatter'
+require_relative '../html_document_manipulator'
 
 module Bookbinder
   module Repositories
@@ -141,7 +143,17 @@ module Bookbinder
       end
 
       def dita_html_to_middleman_formatter
-        @dita_html_to_middleman_formatter ||= DitaHtmlToMiddlemanFormatter.new(local_file_system_accessor)
+        @dita_html_to_middleman_formatter ||= DitaHtmlToMiddlemanFormatter.new(local_file_system_accessor,
+                                                                               subnav_formatter,
+                                                                               html_document_manipulator)
+      end
+
+      def subnav_formatter
+        @subnav_formatter ||= SubnavFormatter.new
+      end
+
+      def html_document_manipulator
+        @html_document_manipulator ||= HtmlDocumentManipulator.new
       end
 
       def git_accessor

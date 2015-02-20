@@ -9,6 +9,8 @@ require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/spider'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
 require_relative '../../../../lib/bookbinder/local_dita_preprocessor'
+require_relative '../../../../lib/bookbinder/subnav_formatter'
+require_relative '../../../../lib/bookbinder/html_document_manipulator'
 
 module Bookbinder
   describe Commands::Bind do
@@ -65,7 +67,9 @@ module Bookbinder
       let(:final_app_dir) { File.absolute_path('final_app') }
       let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
       let(:server_director) { ServerDirector.new(logger, directory: final_app_dir) }
-      let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor) }
+      let(:subnav_formatter) { SubnavFormatter.new }
+      let(:document_parser) { HtmlDocumentManipulator.new }
+      let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
       let(:dita_preprocessor) { LocalDitaPreprocessor.new(null_dita_to_html_converter, static_site_generator_formatter, file_system_accessor) }
       let(:publish_command) { Commands::Bind.new(logger,
                                                  config_fetcher,
@@ -915,7 +919,12 @@ module Bookbinder
                                            'my_dita_section')
             expect(dita_preprocessor).
               to receive(:preprocess).
-              with([dita_section], 'base/output/dita/html_from_dita', 'base/output/dita/site_generator_ready', /middleman\/source/)
+              with([dita_section],
+                   'base/output/dita/html_from_dita',
+                   'base/output/dita/site_generator_ready',
+                   /middleman\/source/,
+                   /master_middleman\/source\/subnavs/,
+                   /_dita_subnav_template/)
 
             publish_command.run(['github'])
           end
@@ -979,7 +988,12 @@ module Bookbinder
 
             expect(dita_preprocessor).
                 to receive(:preprocess).
-                       with([expected_dita_section], '/parent-of-book/book/output/dita/html_from_dita', '/parent-of-book/book/output/dita/site_generator_ready', /middleman\/source/)
+                       with([expected_dita_section],
+                            '/parent-of-book/book/output/dita/html_from_dita',
+                            '/parent-of-book/book/output/dita/site_generator_ready',
+                            /middleman\/source/,
+                            /master_middleman\/source\/subnavs/,
+                            /_dita_subnav_template/)
 
             publish_command.run(['local'])
           end

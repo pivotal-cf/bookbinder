@@ -70,13 +70,16 @@ module Bookbinder
         master_middleman_dir = output_paths.fetch(:master_middleman_dir)
         output_dir = output_paths.fetch(:output_dir)
 
+        master_dir = File.join output_dir, 'master_middleman'
+        workspace_dir = File.join master_dir, 'source'
+
         dita_processing_dir = File.join output_dir, 'dita'
         dita_section_dir = File.join dita_processing_dir, 'dita_sections'
         dita_processed_dir = File.join dita_processing_dir, 'html_from_dita'
+        subnavs_dir = File.join workspace_dir, 'subnavs'
+        dita_subnav_template_path = File.join workspace_dir, 'subnavs', '_dita_subnav_template.erb'
         formatted_dir = File.join dita_processing_dir, 'site_generator_ready'
 
-        master_dir = File.join output_dir, 'master_middleman'
-        workspace_dir = File.join master_dir, 'source'
         prepare_directories(final_app_directory,
                             output_dir,
                             workspace_dir,
@@ -97,9 +100,9 @@ module Bookbinder
 
         if location == 'github'
           dita_section_gatherer = DitaSectionGatherer.new(version_control_system, logger)
-          final_dita_sections = dita_section_gatherer.gather(dita_sections, to: dita_section_dir)
+          gathered_dita_sections = dita_section_gatherer.gather(dita_sections, to: dita_section_dir)
         else
-          final_dita_sections = dita_sections.map do |dita_section|
+          gathered_dita_sections = dita_sections.map do |dita_section|
             relative_path_to_dita_map = dita_section.ditamap_location
             full_name = dita_section.full_name
             target_ref = dita_section.target_ref
@@ -111,11 +114,16 @@ module Bookbinder
           end
         end
 
-        dita_preprocessor.preprocess final_dita_sections, dita_processed_dir, formatted_dir, workspace_dir
+        dita_preprocessor.preprocess(gathered_dita_sections,
+                                     dita_processed_dir,
+                                     formatted_dir,
+                                     workspace_dir,
+                                     subnavs_dir,
+                                     dita_subnav_template_path)
 
         sections = gather_sections(workspace_dir, output_paths)
 
-        subnavs = subnavs_by_dir_name(sections)
+        subnavs = (sections + gathered_dita_sections).map(&:subnav).reduce(&:merge)
 
         success = publisher.publish(
           subnavs,
@@ -306,15 +314,6 @@ module Bookbinder
 
       def publishing_to_github?(publish_location)
         config.has_option?('versions') && publish_location != 'local'
-      end
-
-      def subnavs_by_dir_name(sections)
-        sections.reduce({}) do |subnavs, section|
-          namespace = section.directory.gsub('/', '_')
-          template = section.subnav_template || 'default'
-
-          subnavs.merge(namespace => template)
-        end
       end
     end
   end
