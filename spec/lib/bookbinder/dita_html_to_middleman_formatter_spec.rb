@@ -1,5 +1,6 @@
 require_relative '../../../lib/bookbinder/dita_html_to_middleman_formatter'
 require_relative '../../../lib/bookbinder/local_file_system_accessor'
+require_relative '../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../lib/bookbinder/dita_section'
 require_relative '../../helpers/use_fixture_repo'
 
@@ -10,11 +11,11 @@ module Bookbinder
 
     def dita_html_to_middleman_formatter
       file_accessor = LocalFileSystemAccessor.new
+      html_document_manipulator = HtmlDocumentManipulator.new
       null_subnav_formatter = double('null_subnav_formatter')
-      null_document_parser = double('null_document_parser')
       DitaHtmlToMiddlemanFormatter.new(file_accessor,
                                        null_subnav_formatter,
-                                       null_document_parser)
+                                       html_document_manipulator)
     end
 
     describe 'formatting HTML from DITA' do

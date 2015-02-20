@@ -47,44 +47,6 @@ module Bookbinder
       end
     end
 
-    describe 'reading from a particular part of a file' do
-      it 'returns the desired content as a string' do
-        Dir.mktmpdir do |tmpdir|
-          filepath = File.join tmpdir, 'filename.txt'
-          File.write(filepath, '<head><body>this is some text</body></head>')
-
-          expect(local_file_system_accessor.read_html_in_tag(path: filepath,
-                                                             marker: 'head')).
-              to eq '<body>this is some text</body>'
-        end
-      end
-
-      context 'when the files are multiline' do
-        use_fixture_repo('my-dita-output-repo')
-
-        it 'returns the correct selection' do
-          filepath = File.expand_path './output.html'
-
-          expect(local_file_system_accessor.read_html_in_tag(path: filepath,
-                                                             marker: 'title')).
-              to eq 'GemFire XD\'s Features and Benefits ("Features")'
-        end
-      end
-
-      context 'when the file does not contain the marker' do
-        it 'returns an empty string' do
-          Dir.mktmpdir do |tmpdir|
-            filepath = File.join tmpdir, 'filename.txt'
-            File.write(filepath, '<head><body>this is some text</body></head>')
-
-            expect(local_file_system_accessor.read_html_in_tag(path: filepath,
-                                                               marker: 'nonexistent')).
-                to eq ''
-          end
-        end
-      end
-    end
-
     describe 'removing a directory' do
       it 'remove the specified directory from the filesystem' do
         fs_accessor = local_file_system_accessor

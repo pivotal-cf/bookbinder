@@ -23,11 +23,6 @@ module Bookbinder
       File.read(path)
     end
 
-    def read_html_in_tag(path: nil, marker: nil)
-      doc = Nokogiri::XML(File.open path)
-      doc.css(marker).inner_html
-    end
-
     def remove_directory(path)
       FileUtils.rm_rf(path)
     end
