@@ -37,12 +37,16 @@ module Bookbinder
     end
 
     class CfCredentials
-      REQUIRED_KEYS = %w(api_endpoint organization app_name).freeze
-      OPTIONAL_KEYS = %w(username password production_space production_host staging_space staging_host).freeze
+      def self.environment_keys
+        %w(production staging).flat_map {|env| ["#{env}_space", "#{env}_host"] }
+      end
 
-      def initialize(cred_hash, is_production)
+      REQUIRED_KEYS = %w(api_endpoint organization app_name)
+      OPTIONAL_KEYS = %w(username password) + environment_keys
+
+      def initialize(cred_hash, environment)
         @creds = cred_hash
-        @is_production = is_production
+        @environment = environment
       end
 
       REQUIRED_KEYS.each do |method_name|
@@ -58,8 +62,7 @@ module Bookbinder
       end
 
       def routes
-        key = is_production ? 'production_host' : 'staging_host'
-        fetch(key) if correctly_formatted_domain_and_routes?(key)
+        fetch(host_key) if correctly_formatted_domain_and_routes?(host_key)
       end
 
       def flat_routes
@@ -70,13 +73,12 @@ module Bookbinder
       end
 
       def space
-        key = is_production ? 'production_space' : 'staging_space'
-        fetch(key)
+        fetch(space_key)
       end
 
       private
 
-      attr_reader :creds, :is_production
+      attr_reader :creds, :environment
 
       def fetch(key)
         creds.fetch(key)
@@ -96,6 +98,14 @@ module Bookbinder
         raise "Did you mean to add a list of hosts for domain #{domain}? Check your credentials.yml." unless routes_hash[domain]
         raise "Hosts in credentials must be nested as an array under the desired domain #{domain}." unless routes_hash[domain].is_a? Array
         raise "Did you mean to provide a hostname for the domain #{domain}? Check your credentials.yml." if routes_hash[domain].any?(&:nil?)
+      end
+
+      def host_key
+        "#{environment}_host"
+      end
+
+      def space_key
+        "#{environment}_space"
       end
     end
 
@@ -138,11 +148,17 @@ module Bookbinder
     end
 
     def cf_staging_credentials
-      @cf_staging_creds ||= CfCredentials.new(credentials.fetch('cloud_foundry'), false)
+      @cf_staging_creds ||= CfCredentials.new(
+        credentials.fetch('cloud_foundry'),
+        'staging'
+      )
     end
 
     def cf_production_credentials
-      @cf_prod_creds ||= CfCredentials.new(credentials.fetch('cloud_foundry'), true)
+      @cf_prod_creds ||= CfCredentials.new(
+        credentials.fetch('cloud_foundry'),
+        'production'
+      )
     end
 
     def ==(o)

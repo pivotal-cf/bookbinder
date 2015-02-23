@@ -94,8 +94,8 @@ module Bookbinder
       end
 
       describe Configuration::CfCredentials do
-        let(:is_production) { nil }
-        let(:cf_credentials) { Configuration::CfCredentials.new(cf_hash, is_production) }
+        let(:environment) { 'staging' }
+        let(:cf_credentials) { Configuration::CfCredentials.new(cf_hash, environment) }
 
         it 'returns a Configuration with the CF credentials from the credentials repository' do
           expect(cf_credentials.api_endpoint).to eq('http://some-api-endpoint.example.com')
@@ -129,9 +129,9 @@ module Bookbinder
           end
         end
 
-        describe 'is_production' do
+        describe 'environment' do
           context 'when production' do
-            let(:is_production) { true }
+            let(:environment) { 'production' }
 
             it 'uses production values for host and space' do
               expect(cf_credentials.routes).to eq('some-prod-domain.io'=>['some-prod-host'])
@@ -140,7 +140,7 @@ module Bookbinder
           end
 
           context 'when staging' do
-            let(:is_production) { false }
+            let(:environment) { 'staging' }
 
             it 'uses staging values for host and space' do
               expect(cf_credentials.routes).to eq('some-staging-domain.io'=>['some-staging-host'])
@@ -150,7 +150,7 @@ module Bookbinder
         end
 
         describe '#routes' do
-          let(:is_production) { true }
+          let(:environment) { 'production' }
 
           context 'with a correctly formatted domain' do
             let(:cf_prod_routes) {{ 'some-prod-domain.io' => ['some-prod-host'] }}
