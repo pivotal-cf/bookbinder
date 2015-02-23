@@ -1,4 +1,6 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/configuration'
+require_relative '../../helpers/nil_logger'
+
 module Bookbinder
   describe Configuration do
     let(:bookbinder_schema_version) { '1.0.0' }
