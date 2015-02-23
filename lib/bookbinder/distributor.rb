@@ -1,4 +1,5 @@
 require_relative 'app_fetcher'
+require_relative 'artifact_namer'
 
 module Bookbinder
   class Distributor

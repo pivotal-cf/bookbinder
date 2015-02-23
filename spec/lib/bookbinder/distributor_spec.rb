@@ -1,4 +1,7 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/configuration'
+require_relative '../../../lib/bookbinder/distributor'
+require_relative '../../helpers/nil_logger'
+require_relative '../../helpers/tmp_dirs'
 
 module Bookbinder
   describe Distributor do
