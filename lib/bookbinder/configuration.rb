@@ -58,6 +58,10 @@ module Bookbinder
         end
       end
 
+      def download_archive_before_push?
+        environment == 'production'
+      end
+
       def routes
         fetch(host_key) if correctly_formatted_domain_and_routes?(host_key)
       end

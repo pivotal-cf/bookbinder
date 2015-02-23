@@ -28,7 +28,7 @@ module Bookbinder
 
     def distribute
       begin
-        download if options[:production]
+        download if cf_credentials.download_archive_before_push?
         push_app
         nil
       rescue => e

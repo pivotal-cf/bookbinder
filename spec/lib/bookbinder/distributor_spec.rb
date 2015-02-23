@@ -55,7 +55,7 @@ module Bookbinder
     end
 
     let(:fake_dir) { 'my-directory/path/path/stuff' }
-    let(:fake_archive) { double }
+    let(:fake_archive) { double('archiver') }
     let(:fake_cf) { double }
     let(:fake_pusher) { double }
     let(:fake_uploaded_file) { double(url: fake_url) }
@@ -70,6 +70,7 @@ module Bookbinder
     describe '#distribute' do
       context 'uploading the trace' do
         it 'uploads the tracefile to the archive after pushing' do
+          allow(fake_archive).to receive(:download)
           expect(fake_pusher).to receive(:push).ordered
           expect(fake_archive).to receive(:upload_file).with(bucket, namer_filename, namer_full_path).ordered
           distributor.distribute
@@ -77,6 +78,7 @@ module Bookbinder
 
         it 'logs the tracefile URL' do
           expect(fake_archive).to receive(:upload_file).and_return(fake_uploaded_file)
+          allow(fake_archive).to receive(:download)
           allow(logger).to receive(:log)
           expect(logger).to receive(:log).with(/#{Regexp.escape(fake_url)}/)
           distributor.distribute
@@ -84,6 +86,7 @@ module Bookbinder
 
         it 'uploads despite push raising' do
           allow(fake_pusher).to receive(:push).and_raise('Hi there')
+          allow(fake_archive).to receive(:download)
           expect(fake_archive).to receive(:upload_file)
           distributor.distribute
         end
@@ -99,6 +102,7 @@ module Bookbinder
 
         context 'fails' do
           before do
+            allow(fake_archive).to receive(:download)
             allow(fake_archive).to receive(:upload_file).and_raise(Errno::ENOENT.new)
           end
 
@@ -196,8 +200,8 @@ module Bookbinder
       end
 
       it 'pushes the repo' do
+        allow(fake_archive).to receive(:download)
         expect(fake_pusher).to receive(:push).with(fake_dir)
-
         distributor.distribute
       end
     end
