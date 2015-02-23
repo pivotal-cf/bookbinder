@@ -28,7 +28,6 @@ module Bookbinder
             cf_credentials: config.cf_staging_credentials,
 
             book_repo: config.book_repo,
-            production: false
         }
       end
     end

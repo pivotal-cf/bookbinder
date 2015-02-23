@@ -25,7 +25,6 @@ module Bookbinder
           cf_credentials: config.cf_production_credentials,
 
           book_repo: book_repo,
-          production: true
       }
     end
 
