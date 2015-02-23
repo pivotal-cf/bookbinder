@@ -1,6 +1,6 @@
-require_relative 'remote_yaml_credential_provider'
-require_relative 'git_hub_repository'
 require 'git'
+require_relative 'git_hub_repository'
+require_relative 'remote_yaml_credential_provider'
 
 module Bookbinder
   class Configuration
@@ -8,14 +8,11 @@ module Bookbinder
     CURRENT_SCHEMA_VERSION = '1.0.0'
     STARTING_SCHEMA_VERSION = '1.0.0'
 
-    class CredentialKeyError < StandardError;
-    end
-
-    class ConfigSchemaUnsupportedError < StandardError;
-    end
+    CredentialKeyError = Class.new(StandardError)
+    ConfigSchemaUnsupportedError = Class.new(StandardError)
 
     class AwsCredentials
-      REQUIRED_KEYS = %w(access_key secret_key green_builds_bucket).freeze
+      REQUIRED_KEYS = %w(access_key secret_key green_builds_bucket)
 
       def initialize(cred_hash)
         @creds = cred_hash
