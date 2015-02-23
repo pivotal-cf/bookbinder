@@ -50,7 +50,7 @@ module Bookbinder
     end
 
     def push_app
-      warn if options[:production]
+      @logger.warn(cf_credentials.push_warning) if cf_credentials.push_warning
       pusher.push(options[:app_dir])
     end
 
@@ -60,10 +60,6 @@ module Bookbinder
       @logger.log("This URL will expire in #{EXPIRATION_HOURS} hours, so if you need to share it, make sure to save a copy now.")
     rescue Errno::ENOENT
       @logger.error "Could not find CF trace file: #{namer.full_path}"
-    end
-
-    def warn
-      @logger.warn 'Warning: You are pushing to CF Docs production. Be careful.'
     end
 
     def cf_credentials

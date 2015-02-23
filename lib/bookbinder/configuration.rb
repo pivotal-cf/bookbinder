@@ -59,7 +59,13 @@ module Bookbinder
       end
 
       def download_archive_before_push?
-        environment == 'production'
+        production?
+      end
+
+      def push_warning
+        if production?
+          'Warning: You are pushing to CF Docs production. Be careful.'
+        end
       end
 
       def routes
@@ -80,6 +86,10 @@ module Bookbinder
       private
 
       attr_reader :creds, :environment
+
+      def production?
+        environment == 'production'
+      end
 
       def fetch(key)
         creds.fetch(key)
