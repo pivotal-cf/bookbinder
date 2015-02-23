@@ -16,7 +16,7 @@ describe 'generating a book' do
 
   let(:gem_root) { File.expand_path('../../../', __FILE__) }
 
-  it 'provides the production host to the ERB templates', integration: true do
+  it 'provides the production host to the ERB templates' do
     silence_io_streams do
       `#{gem_root}/install_bin/bookbinder bind local`
     end
@@ -44,7 +44,7 @@ YAML
       File.write('./config.yml', config.to_yaml)
     end
 
-    it 'uses the provided layout', integration: true do
+    it 'uses the provided layout' do
       silence_io_streams do
         `#{gem_root}/install_bin/bookbinder bind local`
       end

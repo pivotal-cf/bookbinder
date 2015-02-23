@@ -10,7 +10,7 @@ describe 'generating a book' do
   end
 
   context 'when no PDF config file is specified' do
-    it 'generates a pdf based on the filename option', integration: true do
+    it 'generates a pdf based on the filename option' do
       skip 'Skipping because this test can only be run in a linux environment.' if RbConfig::CONFIG['host_os'] =~ /darwin/
       silence_io_streams do
         `#{GEM_ROOT}/install_bin/bookbinder publish local`
@@ -28,7 +28,7 @@ describe 'generating a book' do
 
     let(:filename) { 'PDFsAreCool' }
 
-    it 'generates a pdf with the same name as the index file', integration: true do
+    it 'generates a pdf with the same name as the index file' do
       skip 'Skipping because this test can only be run in a linux environment.' if RbConfig::CONFIG['host_os'] =~ /darwin/
       silence_io_streams do
         `#{GEM_ROOT}/install_bin/bookbinder publish local`

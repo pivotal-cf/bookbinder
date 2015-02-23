@@ -11,7 +11,7 @@ describe '$ bookbinder' do
 
   describe 'publish' do
     describe 'local' do
-      it 'generates a rack app', integration: true do
+      it 'generates a rack app' do
         silence_io_streams do
           `#{GEM_ROOT}/install_bin/bookbinder publish local`
         end
@@ -20,7 +20,7 @@ describe '$ bookbinder' do
         expect(index_html).to include 'This is a Markdown Page'
       end
 
-      it 'respects subnav includes', integration: true do
+      it 'respects subnav includes' do
         silence_io_streams do
           `#{GEM_ROOT}/install_bin/bookbinder publish local`
         end
