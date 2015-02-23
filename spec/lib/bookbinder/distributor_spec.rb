@@ -21,15 +21,15 @@ module Bookbinder
 
     let(:cf_credentials) do
       Configuration::CfCredentials.new({
-                                           'api_endpoint' => 'http://get.your.apis.here.io',
-                                           'production_host' => {
-                                               'get.your.apis.here.io' => 'a_production_host'
-                                            },
-                                           'organization' => 'foooo',
-                                           'production_space' => 'foooo',
-                                           'app_name' => 'foooo',
-                                           'username' => 'username'
-                                       }, true)
+        'api_endpoint' => 'http://get.your.apis.here.io',
+        'production_host' => {
+          'get.your.apis.here.io' => 'a_production_host'
+        },
+        'organization' => 'foooo',
+        'production_space' => 'foooo',
+        'app_name' => 'foooo',
+        'username' => 'username'
+      }, 'production')
     end
 
     let(:book_repo_short_name) { 'fixture-book-title' }
@@ -169,7 +169,7 @@ module Bookbinder
           'staging_space' => 'foo_stage',
           'app_name' => 'foooo',
           'username' => 'username'
-          }, false)
+          }, 'staging')
         end
 
         it 'does not download the repo' do
