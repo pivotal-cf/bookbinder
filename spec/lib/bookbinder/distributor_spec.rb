@@ -23,7 +23,7 @@ module Bookbinder
       Configuration::CfCredentials.new({
         'api_endpoint' => 'http://get.your.apis.here.io',
         'production_host' => {
-          'get.your.apis.here.io' => 'a_production_host'
+          'get.your.apis.here.io' => ['a_production_host']
         },
         'organization' => 'foooo',
         'production_space' => 'foooo',
@@ -137,25 +137,31 @@ module Bookbinder
         end
 
         context 'when an error is thrown from downloading' do
-          let(:error_message) {
-            "[ERROR] failed to download because of reason.\n[DEBUG INFO]\nCF organization: foooo\nCF space: foooo\nCF account: username\nroutes: #{cf_credentials.production_host}"
-          }
           it 'logs an informative message' do
             allow(fake_archive).to receive(:download).and_raise("failed to download because of reason.")
-            expect(logger).to receive(:error).with(error_message)
-
+            expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
+[ERROR] failed to download because of reason.
+[DEBUG INFO]
+CF organization: foooo
+CF space: foooo
+CF account: username
+routes: #{cf_credentials.routes}
+            ERROR_MESSAGE
             distributor.distribute
           end
         end
 
         context 'when an error is thrown from pushing' do
-          let(:error_message) {
-            "[ERROR] failed to push because of reason.\n[DEBUG INFO]\nCF organization: foooo\nCF space: foooo\nCF account: username\nroutes: #{cf_credentials.production_host}"
-          }
           it 'logs an informative message' do
             allow(fake_pusher).to receive(:push).and_raise("failed to push because of reason.")
-            expect(logger).to receive(:error).with(error_message)
-
+            expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
+[ERROR] failed to push because of reason.
+[DEBUG INFO]
+CF organization: foooo
+CF space: foooo
+CF account: username
+routes: #{cf_credentials.routes}
+ERROR_MESSAGE
             distributor.distribute
           end
         end
@@ -167,7 +173,7 @@ module Bookbinder
           Configuration::CfCredentials.new({
           'api_endpoint' => 'http://get.your.apis.here.io',
           'staging_host' => {
-              'http://get.your.apis.for.staging.here.io' => 'a_staging_host'
+              'http://get.your.apis.for.staging.here.io' => ['a_staging_host']
           },
           'organization' => 'foooo',
           'staging_space' => 'foo_stage',
@@ -187,13 +193,16 @@ module Bookbinder
         end
 
         context 'when an error is thrown from pushing an app' do
-          let(:error_message) {
-            "[ERROR] failed to push because of reason.\n[DEBUG INFO]\nCF organization: foooo\nCF space: foo_stage\nCF account: username\nroutes: #{cf_credentials.staging_host}"
-          }
           it 'logs an informative message' do
             allow(fake_pusher).to receive(:push).and_raise("failed to push because of reason.")
-            expect(logger).to receive(:error).with(error_message)
-
+            expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
+[ERROR] failed to push because of reason.
+[DEBUG INFO]
+CF organization: foooo
+CF space: foo_stage
+CF account: username
+routes: #{cf_credentials.routes}
+            ERROR_MESSAGE
             distributor.distribute
           end
         end

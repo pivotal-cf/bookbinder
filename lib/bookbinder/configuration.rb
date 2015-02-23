@@ -34,12 +34,7 @@ module Bookbinder
     end
 
     class CfCredentials
-      def self.environment_keys
-        %w(production staging).flat_map {|env| ["#{env}_space", "#{env}_host"] }
-      end
-
       REQUIRED_KEYS = %w(api_endpoint organization app_name)
-      OPTIONAL_KEYS = %w(username password) + environment_keys
 
       def initialize(cred_hash, environment)
         @creds = cred_hash
@@ -52,10 +47,12 @@ module Bookbinder
         end
       end
 
-      OPTIONAL_KEYS.each do |method_name|
-        define_method(method_name) do
-          creds.fetch(method_name, nil)
-        end
+      def username
+        creds['username']
+      end
+
+      def password
+        creds['password']
       end
 
       def download_archive_before_push?
