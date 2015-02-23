@@ -32,7 +32,6 @@ module Bookbinder
         push_app
         nil
       rescue => e
-        cf_credentials = options[:cf_credentials]
         cf_space = options[:production] ? cf_credentials.production_space : cf_credentials.staging_space
         cf_routes = options[:production] ? cf_credentials.production_host : cf_credentials.staging_host
         @logger.error "[ERROR] #{e.message}\n[DEBUG INFO]\nCF organization: #{cf_credentials.organization}\nCF space: #{cf_space}\nCF account: #{cf_credentials.username}\nroutes: #{cf_routes}"
@@ -65,6 +64,10 @@ module Bookbinder
 
     def warn
       @logger.warn 'Warning: You are pushing to CF Docs production. Be careful.'
+    end
+
+    def cf_credentials
+      options[:cf_credentials]
     end
   end
 end
