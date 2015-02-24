@@ -60,10 +60,11 @@ module Bookbinder
 
         @publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director, file_system_accessor)
 
-        location = cli_arguments[0]
+        bind_source = cli_arguments[0]
 
-        output_paths = output_directory_paths(location)
-        bind_config = bind_config(location)
+        output_paths = output_directory_paths(bind_source)
+
+        bind_config = bind_config(bind_source)
         @versions = bind_config.fetch(:versions, [])
         @book_repo = bind_config[:book_repo]
 
@@ -98,7 +99,7 @@ module Bookbinder
           DitaSection.new(nil, relative_path_to_dita_map, full_name, target_ref, directory)
         end
 
-        if location == 'github'
+        if bind_source == 'github'
           dita_section_gatherer = DitaSectionGatherer.new(version_control_system, logger)
           gathered_dita_sections = dita_section_gatherer.gather(dita_sections, to: dita_section_dir)
         else
@@ -121,7 +122,12 @@ module Bookbinder
                                      subnavs_dir,
                                      dita_subnav_template_path)
 
-        sections = gather_sections(workspace_dir, output_paths)
+        cloner_factory = ClonerFactory.new(logger, version_control_system)
+        cloner = cloner_factory.produce(
+          bind_source,
+          output_paths[:local_repo_dir]
+        )
+        sections = gather_sections(workspace_dir, cloner)
 
         subnavs = (sections + gathered_dita_sections).map(&:subnav).reduce(&:merge)
 
@@ -150,27 +156,87 @@ module Bookbinder
                   :context_dir,
                   :dita_preprocessor
 
-      def gather_sections(workspace, output_paths)
+      def gather_sections(workspace, cloner)
         config.sections.map do |attributes|
-
-          local_repo_dir = output_paths[:local_repo_dir]
-          vcs_repo =
-              if local_repo_dir
-                GitHubRepository.
-                    build_from_local(logger, attributes, local_repo_dir, version_control_system).
-                    tap { |repo| repo.copy_from_local(workspace) }
-              else
-                target_ref = attributes.fetch('repository', {})['ref'] || 'master'
-                GitHubRepository.
-                    build_from_remote(logger, attributes, version_control_system).
-                    tap { |repo| repo.copy_from_remote(workspace, target_ref) }
-              end
-
+          target_ref = attributes.fetch('repository', {})['ref'] || 'master'
+          repo_name = attributes.fetch('repository').fetch('name')
+          directory = attributes['directory']
+          vcs_repo = cloner.clone(from: repo_name,
+                                  ref: target_ref,
+                                  parent_dir: workspace,
+                                  dir_name: directory)
           @section_repository.get_instance(attributes,
                                            vcs_repo: vcs_repo,
                                            destination_dir: workspace,
                                            build: ->(*args) { Section.new(*args) })
         end
+      end
+
+      class ClonerFactory
+        def initialize(logger, version_control_system)
+          @logger = logger
+          @version_control_system = version_control_system
+        end
+
+        def produce(source, user_repo_dir)
+          if user_repo_dir
+            LocalFilesystemClonerFacade.new(logger, version_control_system, user_repo_dir)
+          else
+            GitHubRepositoryClonerFacade.new(logger, version_control_system)
+          end
+        end
+
+        private
+
+        attr_reader :logger, :version_control_system
+      end
+
+      class LocalFilesystemClonerFacade
+        def initialize(logger, version_control_system, user_repo_dir)
+          @logger = logger
+          @version_control_system = version_control_system
+          @user_repo_dir = user_repo_dir
+        end
+
+        def clone(from: nil,
+                  ref: nil,
+                  parent_dir: nil,
+                  dir_name: nil)
+          GitHubRepository.
+            build_from_local(logger,
+                             {'repository' => {'name' => from},
+                              'directory' => dir_name},
+                             user_repo_dir,
+                             version_control_system).
+              tap { |repo| repo.copy_from_local(parent_dir) }
+        end
+
+        private
+
+        attr_reader :logger, :version_control_system, :user_repo_dir
+      end
+
+      class GitHubRepositoryClonerFacade
+        def initialize(logger, version_control_system)
+          @logger = logger
+          @version_control_system = version_control_system
+        end
+
+        def clone(from: nil,
+                  ref: nil,
+                  parent_dir: nil,
+                  dir_name: nil)
+          GitHubRepository.
+            build_from_remote(logger,
+                              {'repository' => {'name' => from},
+                               'directory' => dir_name},
+                              version_control_system).
+              tap { |repo| repo.copy_from_remote(parent_dir, ref) }
+        end
+
+        private
+
+        attr_reader :logger, :version_control_system
       end
 
       def prepare_directories(final_app,
@@ -226,8 +292,8 @@ module Bookbinder
         end
       end
 
-      def output_directory_paths(location)
-        local_repo_dir = (location == 'local') ? File.expand_path('..', context_dir) : nil
+      def output_directory_paths(bind_source)
+        local_repo_dir = (bind_source == 'local') ? File.expand_path('..', context_dir) : nil
 
         {
           final_app_dir: final_app_directory,
@@ -237,7 +303,7 @@ module Bookbinder
         }
       end
 
-      def bind_config(location)
+      def bind_config(bind_source)
         arguments = {
             sections: config.sections,
             book_repo: config.book_repo,
@@ -247,7 +313,7 @@ module Bookbinder
 
         optional_arguments = {}
         optional_arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
-        if binding_from_github? location
+        if binding_from_github? bind_source
           config.versions.each { |version| arguments[:sections].concat sections_from version }
           optional_arguments.merge!(versions: config.versions)
         end
