@@ -71,7 +71,7 @@ module Bookbinder
       let(:document_parser) { HtmlDocumentManipulator.new }
       let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
       let(:dita_preprocessor) { LocalDitaPreprocessor.new(null_dita_to_html_converter, static_site_generator_formatter, file_system_accessor) }
-      let(:publish_command) { Commands::Bind.new(logger,
+      let(:command) { Commands::Bind.new(logger,
                                                  config_fetcher,
                                                  archive_menu_config,
                                                  SpecGitAccessor,
@@ -88,7 +88,7 @@ module Bookbinder
         let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
 
         def response_for(page)
-          publish_command.run(['local'])
+          command.run(['local'])
 
           response = nil
           ServerDirector.new(logger, directory: 'final_app').use_server do |port|
@@ -101,15 +101,15 @@ module Bookbinder
 
         it 'runs idempotently' do
           silence_io_streams do
-            publish_command.run(['local']) # Run Once
+            command.run(['local']) # Run Once
             expect(File.exist? dogs_index).to eq true
-            publish_command.run(['local']) # Run twice
+            command.run(['local']) # Run twice
             expect(File.exist? dogs_index).to eq true
           end
         end
 
         it 'creates some static HTML' do
-          publish_command.run(['local'])
+          command.run(['local'])
 
           index_html = File.read dogs_index
           expect(index_html).to include 'Woof'
@@ -125,7 +125,7 @@ module Bookbinder
 
         it 'it can find repos locally rather than going to github' do
           final_app_dir = File.absolute_path('final_app')
-          publish_command.run(['local'])
+          command.run(['local'])
 
           index_html = File.read File.join(final_app_dir, 'public', 'foods/sweet', 'index.html')
           expect(index_html).to include 'This is a Markdown Page'
@@ -142,7 +142,7 @@ module Bookbinder
             expect(fake_publisher).to receive(:publish) do |sections, cli_options, output_paths, publish_config, git_accessor|
               expect(output_paths[:master_middleman_dir]).to match('layout-repo')
             end
-            publish_command.run(['local'])
+            command.run(['local'])
           end
         end
 
@@ -153,7 +153,7 @@ module Bookbinder
             it 'can find code example repos locally rather than going to github' do
               expect(SpecGitAccessor).to_not receive(:clone)
 
-              publish_command.run(['local'])
+              command.run(['local'])
             end
           end
 
@@ -178,19 +178,18 @@ module Bookbinder
               config = Configuration.new(logger, config_hash)
               config_fetcher = double('config fetcher', fetch_config: config)
 
-              publish_command = Commands::Bind.new(logger,
-                                                   config_fetcher,
-                                                   archive_menu_config,
-                                                   SpecGitAccessor,
-                                                   file_system_accessor,
-                                                   middleman_runner,
-                                                   spider,
-                                                   final_app_dir,
-                                                   server_director,
-                                                   File.absolute_path('.'),
-                                                   dita_preprocessor
-              )
-              publish_command.run(['local'])
+              command = Commands::Bind.new(logger,
+                                           config_fetcher,
+                                           archive_menu_config,
+                                           SpecGitAccessor,
+                                           file_system_accessor,
+                                           middleman_runner,
+                                           spider,
+                                           final_app_dir,
+                                           server_director,
+                                           File.absolute_path('.'),
+                                           dita_preprocessor)
+              command.run(['local'])
             end
           end
         end
@@ -198,7 +197,7 @@ module Bookbinder
 
       describe 'github' do
         it 'creates some static HTML' do
-          publish_command.run(['github'])
+          command.run(['github'])
 
           index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
           expect(index_html).to include 'This is a Markdown Page'
@@ -218,7 +217,7 @@ module Bookbinder
                                                           anything).and_call_original
 
           silence_io_streams do
-            publish_command.run(['github'])
+            command.run(['github'])
           end
 
           final_app_dir = File.absolute_path('final_app')
@@ -248,7 +247,7 @@ module Bookbinder
             expect(fake_publisher).to receive(:publish) do |sections, cli_options, output_paths, publish_config, git_accessor|
               expect(output_paths[:master_middleman_dir]).to match('layout-repo')
             end
-            publish_command.run(['github'])
+            command.run(['github'])
           end
         end
 
@@ -276,7 +275,7 @@ module Bookbinder
           let(:config) { Configuration.new(logger, config_hash) }
           let(:book) { 'fantastic/book' }
           let(:logger) { NilLogger.new }
-          let(:publish_command) { Commands::Bind.new(logger,
+          let(:command) { Commands::Bind.new(logger,
                                                      config_fetcher,
                                                      archive_menu_config,
                                                      SpecGitAccessor,
@@ -290,7 +289,7 @@ module Bookbinder
           ) }
 
           it 'binds previous versions of the book down paths named for the version tag' do
-            publish_command.run(cli_args)
+            command.run(cli_args)
 
             index_html = File.read File.join('final_app', 'public', 'dogs', 'index.html')
             expect(index_html).to include 'images/breeds.png'
@@ -337,7 +336,7 @@ module Bookbinder
                                  "---\nsections: ")
 
               expect {
-                publish_command.run ['github']
+                command.run ['github']
               }.to raise_error(Commands::Bind::VersionUnsupportedError)
             end
           end
@@ -347,18 +346,18 @@ module Bookbinder
       describe 'invalid arguments' do
         it 'raises Cli::InvalidArguments' do
           expect {
-            publish_command.run(['blah', 'blah', 'whatever'])
+            command.run(['blah', 'blah', 'whatever'])
           }.to raise_error(CliError::InvalidArguments)
 
           expect {
-            publish_command.run([])
+            command.run([])
           }.to raise_error(CliError::InvalidArguments)
         end
       end
 
       describe 'generating links' do
           it 'succeeds when all links are functional' do
-          exit_code = publish_command.run(['github'])
+          exit_code = command.run(['github'])
           expect(exit_code).to eq 0
         end
       end
@@ -383,19 +382,18 @@ module Bookbinder
           config = Configuration.new(logger, config_hash)
           config_fetcher = double('config fetcher', fetch_config: config)
 
-          publish_command = Commands::Bind.new(logger,
-                                               config_fetcher,
-                                               archive_menu_config,
-                                               SpecGitAccessor,
-                                               file_system_accessor,
-                                               middleman_runner,
-                                               spider,
-                                               final_app_dir,
-                                               server_director,
-                                               File.absolute_path('.'),
-                                               dita_preprocessor
-          )
-          publish_command.run(['github'])
+          command = Commands::Bind.new(logger,
+                                       config_fetcher,
+                                       archive_menu_config,
+                                       SpecGitAccessor,
+                                       file_system_accessor,
+                                       middleman_runner,
+                                       spider,
+                                       final_app_dir,
+                                       server_director,
+                                       File.absolute_path('.'),
+                                       dita_preprocessor)
+          command.run(['github'])
 
           final_app_dir = File.absolute_path('final_app')
           index_html = File.read File.join(final_app_dir, 'public', 'var-repo', 'variable_index.html')
@@ -440,20 +438,19 @@ module Bookbinder
           config = Configuration.new(logger, config_hash)
           config_fetcher = double('config fetcher', fetch_config: config)
 
-          publish_command = Commands::Bind.new(logger,
-                                               config_fetcher,
-                                               archive_menu_config,
-                                               SpecGitAccessor,
-                                               file_system_accessor,
-                                               middleman_runner,
-                                               spider,
-                                               final_app_dir,
-                                               server_director,
-                                               File.absolute_path('.'),
-                                               dita_preprocessor
-          )
+          command = Commands::Bind.new(logger,
+                                       config_fetcher,
+                                       archive_menu_config,
+                                       SpecGitAccessor,
+                                       file_system_accessor,
+                                       middleman_runner,
+                                       spider,
+                                       final_app_dir,
+                                       server_director,
+                                       File.absolute_path('.'),
+                                       dita_preprocessor)
           silence_io_streams do
-            publish_command.run(['github'])
+            command.run(['github'])
           end
 
           final_app_dir = File.absolute_path('final_app')
@@ -499,19 +496,18 @@ module Bookbinder
               config = Configuration.new(logger, config_hash)
               config_fetcher = double('config fetcher', fetch_config: config)
 
-              publish_command = Commands::Bind.new(logger,
-                                                   config_fetcher,
-                                                   archive_menu_config,
-                                                   SpecGitAccessor,
-                                                   file_system_accessor,
-                                                   middleman_runner,
-                                                   spider,
-                                                   final_app_dir,
-                                                   server_director,
-                                                   File.absolute_path('.'),
-                                                   dita_preprocessor
-              )
-              publish_command.run(['github'])
+              command = Commands::Bind.new(logger,
+                                           config_fetcher,
+                                           archive_menu_config,
+                                           SpecGitAccessor,
+                                           file_system_accessor,
+                                           middleman_runner,
+                                           spider,
+                                           final_app_dir,
+                                           server_director,
+                                           File.absolute_path('.'),
+                                           dita_preprocessor)
+              command.run(['github'])
             end.to raise_error "Your public host must be a single String."
           end
         end
@@ -536,19 +532,18 @@ module Bookbinder
             config = Configuration.new(logger, config_hash)
             config_fetcher = double('config fetcher', fetch_config: config)
 
-            publish_command = Commands::Bind.new(logger,
-                                                 config_fetcher,
-                                                 archive_menu_config,
-                                                 SpecGitAccessor,
-                                                 file_system_accessor,
-                                                 middleman_runner,
-                                                 spider,
-                                                 final_app_dir,
-                                                 server_director,
-                                                 File.absolute_path('.'),
-                                                 dita_preprocessor
-            )
-            publish_command.run(['github'])
+            command = Commands::Bind.new(logger,
+                                         config_fetcher,
+                                         archive_menu_config,
+                                         SpecGitAccessor,
+                                         file_system_accessor,
+                                         middleman_runner,
+                                         spider,
+                                         final_app_dir,
+                                         server_director,
+                                         File.absolute_path('.'),
+                                         dita_preprocessor)
+            command.run(['github'])
 
             final_app_dir = File.absolute_path('final_app')
             doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
@@ -580,19 +575,18 @@ module Bookbinder
           config = Configuration.new(logger, config_hash)
           config_fetcher = double('config fetcher', fetch_config: config)
 
-          publish_command = Commands::Bind.new(logger,
-                                               config_fetcher,
-                                               archive_menu_config,
-                                               SpecGitAccessor,
-                                               file_system_accessor,
-                                               middleman_runner,
-                                               spider,
-                                               final_app_dir,
-                                               server_director,
-                                               File.absolute_path('.'),
-                                               dita_preprocessor
-          )
-          publish_command.run(['github'])
+          command = Commands::Bind.new(logger,
+                                       config_fetcher,
+                                       archive_menu_config,
+                                       SpecGitAccessor,
+                                       file_system_accessor,
+                                       middleman_runner,
+                                       spider,
+                                       final_app_dir,
+                                       server_director,
+                                       File.absolute_path('.'),
+                                       dita_preprocessor)
+          command.run(['github'])
 
           final_app_dir = File.absolute_path('final_app')
           index_html = File.read(File.join(final_app_dir, 'public', 'a', 'b', 'c', 'index.html'))
@@ -632,7 +626,7 @@ module Bookbinder
 
         it 'pass the appropriate arguments to publish from the config' do
           expect(fake_publisher).to receive(:publish).with anything, expected_cli_options, expected_output_paths, expected_publish_config
-          publish_command.run(['local'])
+          command.run(['local'])
         end
       end
 
@@ -654,24 +648,23 @@ module Bookbinder
             config = Configuration.new(logger, config_hash)
             config_fetcher = double('config fetcher', fetch_config: config)
 
-            publish_command = Commands::Bind.new(logger,
-                                                 config_fetcher,
-                                                 archive_menu_config,
-                                                 SpecGitAccessor,
-                                                 file_system_accessor,
-                                                 middleman_runner,
-                                                 spider,
-                                                 final_app_dir,
-                                                 server_director,
-                                                 File.absolute_path('.'),
-                                                 dita_preprocessor
-            )
+            command = Commands::Bind.new(logger,
+                                         config_fetcher,
+                                         archive_menu_config,
+                                         SpecGitAccessor,
+                                         file_system_accessor,
+                                         middleman_runner,
+                                         spider,
+                                         final_app_dir,
+                                         server_director,
+                                         File.absolute_path('.'),
+                                         dita_preprocessor)
             begin
               real_stdout = $stdout
               $stdout = StringIO.new
 
               expect do
-                publish_command.run(['github'])
+                command.run(['github'])
               end.to raise_error
 
               $stdout.rewind
@@ -701,24 +694,23 @@ module Bookbinder
           config = Configuration.new(logger, config_hash)
           config_fetcher = double('config fetcher', fetch_config: config)
 
-          publish_command = Commands::Bind.new(logger,
-                                               config_fetcher,
-                                               archive_menu_config,
-                                               SpecGitAccessor,
-                                               file_system_accessor,
-                                               middleman_runner,
-                                               spider,
-                                               final_app_dir,
-                                               server_director,
-                                               File.absolute_path('.'),
-                                               dita_preprocessor
-          )
+          command = Commands::Bind.new(logger,
+                                       config_fetcher,
+                                       archive_menu_config,
+                                       SpecGitAccessor,
+                                       file_system_accessor,
+                                       middleman_runner,
+                                       spider,
+                                       final_app_dir,
+                                       server_director,
+                                       File.absolute_path('.'),
+                                       dita_preprocessor)
           begin
             real_stdout = $stdout
             $stdout = StringIO.new
 
             expect do
-              publish_command.run(['github', '--verbose'])
+              command.run(['github', '--verbose'])
             end.to raise_error
 
             $stdout.rewind
@@ -734,14 +726,11 @@ module Bookbinder
 
       describe 'creating necessary directories' do
         context 'when the output directory does not yet exist' do
-          def create_publish_command
-            config_hash = {
-                'sections' => [],
-                'book_repo' => book,
-                'public_host' => 'docs.dogs.com'
-            }
-
-            config = Configuration.new(logger, config_hash)
+          def create_command
+            config = Configuration.new(logger,
+                                       'sections' => [],
+                                       'book_repo' => book,
+                                       'public_host' => 'docs.dogs.com')
             config_fetcher = double('config fetcher', fetch_config: config)
             middleman_runner = MiddlemanRunner.new(logger, SpecGitAccessor)
             final_app_dir = File.absolute_path('final_app')
@@ -758,24 +747,23 @@ module Bookbinder
                                final_app_dir,
                                server_director,
                                File.absolute_path('.'),
-                               dita_preprocessor
-            )
+                               dita_preprocessor)
           end
 
           it 'creates the output directory' do
-            publish_command = create_publish_command
+            command = create_command
 
             output_dir = File.absolute_path('./output')
 
             expect(File.exists?(output_dir)).to eq false
 
-            publish_command.run(['github'])
+            command.run(['github'])
 
             expect(File.exists?(output_dir)).to eq true
           end
 
           it 'clears the output directory before running' do
-            publish_command = create_publish_command
+            command = create_command
 
             output_dir = File.absolute_path('./output')
             FileUtils.mkdir_p output_dir
@@ -784,7 +772,7 @@ module Bookbinder
 
             expect(File.exists?(pre_existing_file)).to eq true
 
-            publish_command.run(['github'])
+            command.run(['github'])
 
             expect(File.exists?(pre_existing_file)).to eq false
           end
@@ -795,8 +783,8 @@ module Bookbinder
             pre_existing_file = File.join(final_app_dir, 'happy')
             FileUtils.touch pre_existing_file
 
-            publish_command = create_publish_command
-            publish_command.run(['github'])
+            command = create_command
+            command.run(['github'])
 
             expect(File.exists?(pre_existing_file)).to eq false
             copied_manifest = File.read File.join(final_app_dir, 'app.rb')
@@ -844,24 +832,23 @@ module Bookbinder
             config_containing_dita_sections = Configuration.new(logger, user_config)
             config_fetcher = double('config fetcher', fetch_config: config_containing_dita_sections)
 
-            publish_command = Commands::Bind.new(logger,
-                                                 config_fetcher,
-                                                 archive_menu_config,
-                                                 version_control_system,
-                                                 fs_accessor,
-                                                 static_site_generator,
-                                                 sitemap_generator,
-                                                 final_app_dir,
-                                                 server_director,
-                                                 'irrelevant/path',
-                                                 dita_preprocessor
-            )
+            command = Commands::Bind.new(logger,
+                                         config_fetcher,
+                                         archive_menu_config,
+                                         version_control_system,
+                                         fs_accessor,
+                                         static_site_generator,
+                                         sitemap_generator,
+                                         final_app_dir,
+                                         server_director,
+                                         'irrelevant/path',
+                                         dita_preprocessor)
 
             expect(version_control_system).to receive(:clone).with('git@github.com:org/dita_section',
                                                                    'my_dita_section',
                                                                    path: /output\/dita\/dita_sections/).once
 
-            publish_command.run(['github'])
+            command.run(['github'])
           end
 
           it 'preprocesses the dita sections from their local dir to the final directory needed for middleman' do
@@ -899,18 +886,17 @@ module Bookbinder
             config_containing_dita_sections = Configuration.new(logger, user_config)
             config_fetcher = double('config fetcher', fetch_config: config_containing_dita_sections)
 
-            publish_command = Commands::Bind.new(logger,
-                                                 config_fetcher,
-                                                 archive_menu_config,
-                                                 version_control_system,
-                                                 fs_accessor,
-                                                 static_site_generator,
-                                                 sitemap_generator,
-                                                 final_app_dir,
-                                                 server_director,
-                                                 'base',
-                                                 dita_preprocessor
-            )
+            command = Commands::Bind.new(logger,
+                                         config_fetcher,
+                                         archive_menu_config,
+                                         version_control_system,
+                                         fs_accessor,
+                                         static_site_generator,
+                                         sitemap_generator,
+                                         final_app_dir,
+                                         server_director,
+                                         'base',
+                                         dita_preprocessor)
 
             dita_section = DitaSection.new('base/output/dita/dita_sections/my_dita_section',
                                            'path/to/dita.ditamap',
@@ -926,7 +912,7 @@ module Bookbinder
                    /master_middleman\/source\/subnavs/,
                    /_dita_subnav_template/)
 
-            publish_command.run(['github'])
+            command.run(['github'])
           end
         end
       end
@@ -967,18 +953,17 @@ module Bookbinder
             config_containing_dita_sections = Configuration.new(logger, user_config)
             config_fetcher = double('config fetcher', fetch_config: config_containing_dita_sections)
 
-            publish_command = Commands::Bind.new(logger,
-                                                 config_fetcher,
-                                                 archive_menu_config,
-                                                 version_control_system,
-                                                 fs_accessor,
-                                                 static_site_generator,
-                                                 sitemap_generator,
-                                                 final_app_dir,
-                                                 server_director,
-                                                 '/parent-of-book/book',
-                                                 dita_preprocessor
-            )
+            command = Commands::Bind.new(logger,
+                                         config_fetcher,
+                                         archive_menu_config,
+                                         version_control_system,
+                                         fs_accessor,
+                                         static_site_generator,
+                                         sitemap_generator,
+                                         final_app_dir,
+                                         server_director,
+                                         '/parent-of-book/book',
+                                         dita_preprocessor)
 
             expected_dita_section = DitaSection.new('/parent-of-book/my_dita_section',
                                            'path/to/dita.ditamap',
@@ -995,7 +980,7 @@ module Bookbinder
                             /master_middleman\/source\/subnavs/,
                             /_dita_subnav_template/)
 
-            publish_command.run(['local'])
+            command.run(['local'])
           end
         end
       end
