@@ -725,72 +725,70 @@ module Bookbinder
       end
 
       describe 'creating necessary directories' do
-        context 'when the output directory does not yet exist' do
-          def create_command
-            config = Configuration.new(logger,
-                                       'sections' => [],
-                                       'book_repo' => book,
-                                       'public_host' => 'docs.dogs.com')
-            config_fetcher = double('config fetcher', fetch_config: config)
-            middleman_runner = MiddlemanRunner.new(logger, SpecGitAccessor)
-            final_app_dir = File.absolute_path('final_app')
-            spider = Spider.new(logger, app_dir: final_app_dir)
-            server_director = ServerDirector.new(logger, directory: final_app_dir)
+        def create_command
+          config = Configuration.new(logger,
+                                     'sections' => [],
+                                     'book_repo' => book,
+                                     'public_host' => 'docs.dogs.com')
+          config_fetcher = double('config fetcher', fetch_config: config)
+          middleman_runner = MiddlemanRunner.new(logger, SpecGitAccessor)
+          final_app_dir = File.absolute_path('final_app')
+          spider = Spider.new(logger, app_dir: final_app_dir)
+          server_director = ServerDirector.new(logger, directory: final_app_dir)
 
-            Commands::Bind.new(logger,
-                               config_fetcher,
-                               archive_menu_config,
-                               SpecGitAccessor,
-                               file_system_accessor,
-                               middleman_runner,
-                               spider,
-                               final_app_dir,
-                               server_director,
-                               File.absolute_path('.'),
-                               dita_preprocessor)
-          end
+          Commands::Bind.new(logger,
+                             config_fetcher,
+                             archive_menu_config,
+                             SpecGitAccessor,
+                             file_system_accessor,
+                             middleman_runner,
+                             spider,
+                             final_app_dir,
+                             server_director,
+                             File.absolute_path('.'),
+                             dita_preprocessor)
+        end
 
-          it 'creates the output directory' do
-            command = create_command
+        it 'creates the output directory' do
+          command = create_command
 
-            output_dir = File.absolute_path('./output')
+          output_dir = File.absolute_path('./output')
 
-            expect(File.exists?(output_dir)).to eq false
+          expect(File.exists?(output_dir)).to eq false
 
-            command.run(['github'])
+          command.run(['github'])
 
-            expect(File.exists?(output_dir)).to eq true
-          end
+          expect(File.exists?(output_dir)).to eq true
+        end
 
-          it 'clears the output directory before running' do
-            command = create_command
+        it 'clears the output directory before running' do
+          command = create_command
 
-            output_dir = File.absolute_path('./output')
-            FileUtils.mkdir_p output_dir
-            pre_existing_file = File.join(output_dir, 'happy')
-            FileUtils.touch pre_existing_file
+          output_dir = File.absolute_path('./output')
+          FileUtils.mkdir_p output_dir
+          pre_existing_file = File.join(output_dir, 'happy')
+          FileUtils.touch pre_existing_file
 
-            expect(File.exists?(pre_existing_file)).to eq true
+          expect(File.exists?(pre_existing_file)).to eq true
 
-            command.run(['github'])
+          command.run(['github'])
 
-            expect(File.exists?(pre_existing_file)).to eq false
-          end
+          expect(File.exists?(pre_existing_file)).to eq false
+        end
 
-          it 'clears and then copies the template_app skeleton inside final_app' do
-            final_app_dir = File.absolute_path('./final_app')
-            FileUtils.mkdir_p final_app_dir
-            pre_existing_file = File.join(final_app_dir, 'happy')
-            FileUtils.touch pre_existing_file
+        it 'clears and then copies the template_app skeleton inside final_app' do
+          final_app_dir = File.absolute_path('./final_app')
+          FileUtils.mkdir_p final_app_dir
+          pre_existing_file = File.join(final_app_dir, 'happy')
+          FileUtils.touch pre_existing_file
 
-            command = create_command
-            command.run(['github'])
+          command = create_command
+          command.run(['github'])
 
-            expect(File.exists?(pre_existing_file)).to eq false
-            copied_manifest = File.read File.join(final_app_dir, 'app.rb')
-            template_manifest = File.read(File.expand_path('../../../../../template_app/app.rb', __FILE__))
-            expect(copied_manifest).to eq(template_manifest)
-          end
+          expect(File.exists?(pre_existing_file)).to eq false
+          copied_manifest = File.read File.join(final_app_dir, 'app.rb')
+          template_manifest = File.read(File.expand_path('../../../../../template_app/app.rb', __FILE__))
+          expect(copied_manifest).to eq(template_manifest)
         end
       end
     end
