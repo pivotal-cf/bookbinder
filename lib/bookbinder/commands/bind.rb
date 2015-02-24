@@ -246,7 +246,7 @@ module Bookbinder
 
         optional_arguments = {}
         optional_arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
-        if publishing_to_github? location
+        if binding_from_github? location
           config.versions.each { |version| arguments[:sections].concat sections_from version }
           optional_arguments.merge!(versions: config.versions)
         end
@@ -312,8 +312,8 @@ module Bookbinder
         %w(local github).include?(arguments[0]) && (tag_provided || verbose || nothing_special)
       end
 
-      def publishing_to_github?(publish_location)
-        config.has_option?('versions') && publish_location != 'local'
+      def binding_from_github?(bind_location)
+        config.has_option?('versions') && bind_location != 'local'
       end
     end
   end
