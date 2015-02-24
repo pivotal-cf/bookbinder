@@ -23,9 +23,10 @@ module Bookbinder
                              git_accessor: git_accessor)
       end
 
+      @target_ref = target_ref || 'master'
+
       @repository = GitHubRepository.new(logger: logger,
                                          full_name: full_name,
-                                         target_ref: target_ref,
                                          github_token: github_token,
                                          git_accessor: git_accessor)
       @git_accessor = git_accessor
@@ -44,11 +45,15 @@ module Bookbinder
     end
 
     def copy_from_remote(destination_dir)
-      @repository.copy_from_remote(destination_dir)
+      @repository.copy_from_remote(destination_dir, target_ref)
     end
 
     def tag_self_and_sections_with(tag)
       (@section_vcs_repos + [@repository]).each { |repo| repo.tag_with tag }
     end
+
+    private
+
+    attr_reader :target_ref
   end
 end

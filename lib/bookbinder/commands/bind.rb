@@ -160,9 +160,10 @@ module Bookbinder
                     build_from_local(logger, attributes, local_repo_dir, version_control_system).
                     tap { |repo| repo.copy_from_local(workspace) }
               else
+                target_ref = attributes.fetch('repository', {})['ref'] || 'master'
                 GitHubRepository.
-                    build_from_remote(logger, attributes, nil, version_control_system).
-                    tap { |repo| repo.copy_from_remote(workspace) }
+                    build_from_remote(logger, attributes, version_control_system).
+                    tap { |repo| repo.copy_from_remote(workspace, target_ref) }
               end
 
           @section_repository.get_instance(attributes,
@@ -289,9 +290,8 @@ module Bookbinder
             destination_dir = Dir.mktmpdir
             repository = GitHubRepository.build_from_remote(logger,
                                                             section,
-                                                            'master',
                                                             version_control_system)
-            repository.copy_from_remote(destination_dir)
+            repository.copy_from_remote(destination_dir, 'master')
             if repository
               File.join(destination_dir, repository.directory)
             else

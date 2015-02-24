@@ -289,7 +289,7 @@ module Bookbinder
                                                      dita_preprocessor
           ) }
 
-          it 'publishes previous versions of the book down paths named for the version tag' do
+          it 'binds previous versions of the book down paths named for the version tag' do
             publish_command.run(cli_args)
 
             index_html = File.read File.join('final_app', 'public', 'dogs', 'index.html')

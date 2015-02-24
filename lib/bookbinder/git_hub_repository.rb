@@ -13,14 +13,11 @@ module Bookbinder
 
     def self.build_from_remote(logger,
                                section_hash,
-                               target_ref,
                                git_accessor)
       full_name = section_hash.fetch('repository', {}).fetch('name')
-      target_ref = target_ref || section_hash.fetch('repository', {})['ref']
       directory = section_hash['directory']
       new(logger: logger,
           full_name: full_name,
-          target_ref: target_ref,
           github_token: ENV['GITHUB_API_TOKEN'],
           directory: directory,
           git_accessor: git_accessor)
@@ -42,7 +39,6 @@ module Bookbinder
 
     def initialize(logger: nil,
                    full_name: nil,
-                   target_ref: nil,
                    github_token: nil,
                    directory: nil,
                    local_repo_dir: nil,
@@ -50,7 +46,6 @@ module Bookbinder
       @logger = logger
       raise 'No full_name provided ' unless full_name
       @full_name = full_name
-      @target_ref = target_ref
       @directory = directory
       @local_repo_dir = local_repo_dir
 
@@ -75,7 +70,7 @@ module Bookbinder
       @directory || short_name
     end
 
-    def copy_from_remote(destination_dir)
+    def copy_from_remote(destination_dir, target_ref)
       begin
         @git_base_object = git_accessor.clone("git@github.com:#{full_name}",
                                               directory,
@@ -139,10 +134,6 @@ module Bookbinder
       if @local_repo_dir
         File.join(@local_repo_dir, short_name)
       end
-    end
-
-    def target_ref
-      @target_ref ||= 'master'
     end
 
     def tags

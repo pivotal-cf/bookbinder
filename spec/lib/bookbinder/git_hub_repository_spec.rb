@@ -99,19 +99,10 @@ module Bookbinder
       let(:git_accessor) { double('git accessor') }
       let(:repo) { build(logger: logger,
                          full_name: repo_name,
-                         target_ref: target_ref,
                          github_token: 'foo',
                          git_accessor: git_accessor) }
       let(:destination_dir) { tmp_subdir('destination') }
       let(:git_base_object) { double Git::Base }
-
-      it 'retrieves the repo from github' do
-        expect(git_accessor).to receive(:clone).with("git@github.com:#{repo_name}",
-                                                     File.basename(repo_name),
-                                                     path: destination_dir).and_return(git_base_object)
-        expect(git_base_object).to receive(:checkout).with(target_ref)
-        repo.copy_from_remote(destination_dir)
-      end
 
       context 'when the target ref is master' do
         let(:target_ref) { 'master' }
@@ -120,7 +111,7 @@ module Bookbinder
                                                        File.basename(repo_name),
                                                        path: destination_dir).and_return(git_base_object)
           expect(git_base_object).to_not receive(:checkout)
-          repo.copy_from_remote(destination_dir)
+          repo.copy_from_remote(destination_dir, target_ref)
         end
       end
 
@@ -130,28 +121,7 @@ module Bookbinder
                                                        File.basename(repo_name),
                                                        path: destination_dir).and_return(git_base_object)
           expect(git_base_object).to receive(:checkout).with(target_ref)
-          repo.copy_from_remote(destination_dir)
-        end
-      end
-
-      context 'when no ref is provided' do
-        it 'fetches the target ref from the section config hash' do
-          target_ref = 'my-special-ref'
-          section_hash = {
-              'repository' => {
-                  'name' => repo_name,
-                  'ref'  => target_ref
-              },
-              'directory' => File.basename(repo_name),
-          }
-
-          accessor = double('git accessor')
-          allow(accessor).to receive(:clone).
-            with("git@github.com:#{repo_name}", File.basename(repo_name), path: destination_dir).
-            and_return(git_base_object)
-          repo = GitHubRepository.build_from_remote(logger, section_hash, nil, accessor)
-          expect(git_base_object).to receive(:checkout).with(target_ref)
-          repo.copy_from_remote(destination_dir)
+          repo.copy_from_remote(destination_dir, target_ref)
         end
       end
 
@@ -163,7 +133,7 @@ module Bookbinder
         it 'provides an informative message' do
           allow(git_accessor).to receive(:clone).and_raise(StandardError.new("Permission denied (publickey)"))
 
-          expect { repo.copy_from_remote(destination_dir) }.to raise_error(credential_error_message)
+          expect { repo.copy_from_remote(destination_dir, 'master') }.to raise_error(credential_error_message)
         end
       end
 
@@ -174,7 +144,7 @@ module Bookbinder
           allow(git_accessor).
             to receive(:clone).and_raise(StandardError.new("Repository not found."))
 
-          expect { repo.copy_from_remote(destination_dir) }.
+          expect { repo.copy_from_remote(destination_dir, 'master') }.
             to raise_error(repo_dne_error_message)
         end
       end
@@ -183,16 +153,18 @@ module Bookbinder
         it 'should forward error' do
           allow(git_accessor).to receive(:clone).and_raise("Error")
 
-          expect { repo.copy_from_remote(destination_dir) }.to raise_error("Error")
+          expect { repo.copy_from_remote(destination_dir, 'master') }.to raise_error("Error")
         end
       end
 
       it 'returns the location of the copied directory' do
-        expect(git_accessor).to receive(:clone).with("git@github.com:#{repo_name}",
-                                           File.basename(repo_name),
-                                           path: destination_dir).and_return(git_base_object)
+        expect(git_accessor).to receive(:clone).with(
+          "git@github.com:#{repo_name}",
+          File.basename(repo_name),
+          path: destination_dir
+        ).and_return(git_base_object)
         expect(git_base_object).to receive(:checkout).with(target_ref)
-        expect(repo.copy_from_remote(destination_dir)).to eq(File.join(destination_dir + 'my-docs-repo'))
+        expect(repo.copy_from_remote(destination_dir, target_ref)).to eq(File.join(destination_dir + 'my-docs-repo'))
       end
 
       it 'sets copied? to true' do
@@ -200,7 +172,7 @@ module Bookbinder
                                            File.basename(repo_name),
                                            path: destination_dir).and_return(git_base_object)
         expect(git_base_object).to receive(:checkout).with(target_ref)
-        expect { repo.copy_from_remote(destination_dir) }.to change { repo.copied? }.to(true)
+        expect { repo.copy_from_remote(destination_dir, target_ref) }.to change { repo.copied? }.to(true)
       end
     end
 
@@ -210,7 +182,6 @@ module Bookbinder
       let(:local_repo_dir) { tmp_subdir 'local_repo_dir' }
       let(:repo) { build(logger: logger,
                          full_name: full_name,
-                         target_ref: target_ref,
                          local_repo_dir: local_repo_dir) }
       let(:destination_dir) { tmp_subdir('destination') }
       let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
@@ -254,7 +225,6 @@ module Bookbinder
     describe '#has_tag?' do
       let(:git_accessor) { double('git_accessor') }
       let(:repo) { GitHubRepository.new(full_name: 'my-docs-org/my-docs-repo',
-                                        target_ref: 'some_sha',
                                         directory: 'pretty_url_path',
                                         local_repo_dir: '',
                                         git_accessor: git_accessor) }
@@ -292,7 +262,6 @@ module Bookbinder
       let(:repo) { build(logger: logger,
                          github_token: github_token,
                          full_name: 'my-docs-org/my-docs-repo',
-                         target_ref: repo_sha,
                          directory: 'pretty_url_path',
                          local_repo_dir: '') }
       let(:my_tag) { '#hashtag' }
@@ -346,7 +315,6 @@ module Bookbinder
         build(logger: logger,
               github_token: github_token,
               full_name: full_name,
-              target_ref: target_ref,
               git_accessor: git_accessor)
       end
 
@@ -356,7 +324,7 @@ module Bookbinder
                                                        File.basename(full_name),
                                                        path: made_up_dir).and_return(git_base_object)
           expect(git_base_object).to receive(:checkout).with(target_ref)
-          repo.copy_from_remote(made_up_dir)
+          repo.copy_from_remote(made_up_dir, target_ref)
         end
       end
     end

@@ -33,8 +33,8 @@ module Bookbinder
               tap { |repo| repo.copy_from_local(workspace) }
           else
             GitHubRepository.
-              build_from_remote(bookbinder_logger, attributes, nil, git_accessor).
-              tap { |repo| repo.copy_from_remote(workspace) }
+              build_from_remote(bookbinder_logger, attributes, git_accessor).
+              tap { |repo| repo.copy_from_remote(workspace, 'master') }
           end
         example = code_example_repo.get_instance(attributes,
                                                  vcs_repo: vcs_repo,
