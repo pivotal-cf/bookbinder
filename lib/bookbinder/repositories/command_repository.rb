@@ -85,7 +85,8 @@ module Bookbinder
       def push_local_to_staging
         @push_local_to_staging ||= Commands::PushFromLocal.new(
           logger,
-          configuration_fetcher
+          configuration_fetcher,
+          'staging'
         )
       end
 
