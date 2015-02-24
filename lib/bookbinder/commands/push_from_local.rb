@@ -25,7 +25,7 @@ module Bookbinder
             build_number: ENV['BUILD_NUMBER'],
 
             aws_credentials: config.aws_credentials,
-            cf_credentials: config.cf_staging_credentials,
+            cf_credentials: config.cf_credentials('staging'),
 
             book_repo: config.book_repo,
         }

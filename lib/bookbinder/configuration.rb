@@ -47,6 +47,13 @@ module Bookbinder
         end
       end
 
+      def ==(other)
+        [@creds, @environment] == [
+          other.instance_variable_get(:@creds),
+          other.instance_variable_get(:@environment)
+        ]
+      end
+
       def username
         creds['username']
       end
@@ -155,18 +162,8 @@ module Bookbinder
       @aws_creds ||= AwsCredentials.new(credentials.fetch('aws'))
     end
 
-    def cf_staging_credentials
-      @cf_staging_creds ||= CfCredentials.new(
-        credentials.fetch('cloud_foundry'),
-        'staging'
-      )
-    end
-
-    def cf_production_credentials
-      @cf_prod_creds ||= CfCredentials.new(
-        credentials.fetch('cloud_foundry'),
-        'production'
-      )
+    def cf_credentials(environment)
+      CfCredentials.new(credentials.fetch('cloud_foundry'), environment)
     end
 
     def ==(o)

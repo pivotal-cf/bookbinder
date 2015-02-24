@@ -22,7 +22,7 @@ module Bookbinder
           build_number: build_number,
 
           aws_credentials: config.aws_credentials,
-          cf_credentials: config.cf_production_credentials,
+          cf_credentials: config.cf_credentials('production'),
 
           book_repo: book_repo,
       }

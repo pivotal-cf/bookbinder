@@ -19,7 +19,7 @@ module Bookbinder
           build_number: nil,
 
           aws_credentials: config.aws_credentials,
-          cf_credentials: config.cf_staging_credentials,
+          cf_credentials: config.cf_credentials('staging'),
 
           book_repo: book_repo,
       }
@@ -43,7 +43,9 @@ module Bookbinder
     end
 
     it 'builds a distributor with the right options and asks it to distribute' do
-      real_distributor = expect_to_receive_and_return_real_now(Distributor, :build, logger, options)
+      real_distributor = expect_to_receive_and_return_real_now(
+        Distributor, :build, logger, options
+      )
       expect(real_distributor).to receive(:distribute)
 
       command.run([])

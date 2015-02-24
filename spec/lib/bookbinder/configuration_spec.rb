@@ -222,31 +222,13 @@ module Bookbinder
         end
       end
 
-      describe '#cf_production_credentials' do
-        describe '#routes' do
-          it 'are the production routes' do
-            expect(config.cf_production_credentials.routes).to eq('some-prod-domain.io'=>['some-prod-host'])
-          end
+      describe '#cf_credentials' do
+        it 'returns the routes for the requested environment' do
+          expect(config.cf_credentials('production').routes).to eq('some-prod-domain.io'=>['some-prod-host'])
         end
 
-        describe '#space' do
-          it 'is the production space' do
-            expect(config.cf_production_credentials.space).to eq('some-prod-space')
-          end
-        end
-      end
-
-      describe '#cf_staging_credentials' do
-        describe '#routes' do
-          it 'are the staging routes' do
-            expect(config.cf_staging_credentials.routes).to eq('some-staging-domain.io'=>['some-staging-host'])
-          end
-        end
-
-        describe '#space' do
-          it 'is the staging space' do
-            expect(config.cf_staging_credentials.space).to eq('some-staging-space')
-          end
+        it 'returns the space for the requested environment' do
+          expect(config.cf_credentials('production').space).to eq('some-prod-space')
         end
       end
 
@@ -260,8 +242,8 @@ module Bookbinder
       it 'only fetches the credentials repository once' do
         expect(RemoteYamlCredentialProvider).to receive(:new).once
         config.aws_credentials
-        config.cf_staging_credentials
-        config.cf_production_credentials
+        config.cf_credentials('staging')
+        config.cf_credentials('production')
         config.aws_credentials
       end
     end
