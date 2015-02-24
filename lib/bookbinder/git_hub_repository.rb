@@ -137,10 +137,6 @@ module Bookbinder
       end
     end
 
-    def has_git_object?
-      !!@git_base_object
-    end
-
     private
 
     attr_reader :git_accessor
