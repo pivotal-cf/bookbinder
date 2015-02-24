@@ -131,15 +131,15 @@ module Bookbinder
       @logger.log '  skipping (not found) '.magenta + path_to_local_repo
     end
 
+    private
+
+    attr_reader :git_accessor
+
     def path_to_local_repo
       if @local_repo_dir
         File.join(@local_repo_dir, short_name)
       end
     end
-
-    private
-
-    attr_reader :git_accessor
 
     def target_ref
       @target_ref ||= 'master'
