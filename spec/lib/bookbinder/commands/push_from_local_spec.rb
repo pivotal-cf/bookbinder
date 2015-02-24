@@ -1,11 +1,11 @@
-require_relative '../../../../lib/bookbinder/commands/push_local_to_staging'
-require_relative '../../../../lib/bookbinder/remote_yaml_credential_provider'
+require_relative '../../../../lib/bookbinder/commands/push_from_local'
 require_relative '../../../../lib/bookbinder/configuration'
-require_relative '../../../helpers/nil_logger'
+require_relative '../../../../lib/bookbinder/remote_yaml_credential_provider'
 require_relative '../../../helpers/middleman'
+require_relative '../../../helpers/nil_logger'
 
 module Bookbinder
-  describe Commands::PushLocalToStaging do
+  describe Commands::PushFromLocal do
     include SpecHelperMethods
 
     let(:book_repo) { 'my-user/fixture-book-title' }

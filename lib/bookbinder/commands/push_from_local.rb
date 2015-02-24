@@ -4,7 +4,7 @@ require_relative 'naming'
 
 module Bookbinder
   module Commands
-    class PushLocalToStaging < BookbinderCommand
+    class PushFromLocal < BookbinderCommand
       include Commands::Naming
 
       def usage
