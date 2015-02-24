@@ -1,7 +1,7 @@
-require 'bookbinder/shell_out'
 require 'git'
 require_relative 'deprecated_logger'
 require_relative 'git_client'
+require_relative 'shell_out'
 
 module Bookbinder
   class GitHubRepository
