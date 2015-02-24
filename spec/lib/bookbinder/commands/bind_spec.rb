@@ -931,7 +931,7 @@ module Bookbinder
         end
       end
 
-      context 'when publishing from local' do
+      context 'when binding from local' do
         context 'when the config contains dita sections' do
           it 'preprocesses the dita sections from their local dir to the final directory needed for middleman' do
             logger = double('logger', log: true)

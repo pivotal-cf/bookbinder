@@ -63,9 +63,9 @@ module Bookbinder
         location = cli_arguments[0]
 
         output_paths = output_directory_paths(location)
-        publish_config = publish_config(location)
-        @versions = publish_config.fetch(:versions, [])
-        @book_repo = publish_config[:book_repo]
+        bind_config = bind_config(location)
+        @versions = bind_config.fetch(:versions, [])
+        @book_repo = bind_config[:book_repo]
 
         master_middleman_dir = output_paths.fetch(:master_middleman_dir)
         output_dir = output_paths.fetch(:output_dir)
@@ -129,7 +129,7 @@ module Bookbinder
           subnavs,
           {verbose: cli_arguments.include?('--verbose')},
           output_paths,
-          archive_menu_config.generate(publish_config, sections)
+          archive_menu_config.generate(bind_config, sections)
         )
 
         success ? 0 : 1
@@ -236,7 +236,7 @@ module Bookbinder
         }
       end
 
-      def publish_config(location)
+      def bind_config(location)
         arguments = {
             sections: config.sections,
             book_repo: config.book_repo,
