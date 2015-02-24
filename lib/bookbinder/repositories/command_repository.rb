@@ -51,6 +51,7 @@ module Bookbinder
           build_and_push_tarball,
           Commands::GeneratePDF.new(logger, configuration_fetcher),
           bind,
+          Commands::PushFromLocal.new(logger, configuration_fetcher, 'acceptance'),
           push_local_to_staging,
           Commands::PushToProd.new(logger, configuration_fetcher),
           Commands::RunPublishCI.new(bind, push_local_to_staging, build_and_push_tarball),
