@@ -19,6 +19,10 @@ module Bookbinder
 
       private
 
+      def command_name
+        'push_local_to_staging'
+      end
+
       def options
         {
             app_dir: './final_app',
