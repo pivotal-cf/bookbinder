@@ -57,11 +57,11 @@ module Bookbinder
         document_parser = double('doc_parser')
         dita_formatter = DitaHtmlToMiddlemanFormatter.new(fs_accessor, subnav_formatter, document_parser)
 
-        dita_sections = [DitaSection.new('path/to/local/repo',
+        dita_section = DitaSection.new('path/to/local/repo',
                                          'relative/path/to/ditamap',
                                          'org/my_dita_section',
                                          nil,
-                                         'my_dita_section')]
+                                         'my_dita_section')
 
         expect(fs_accessor).to receive(:read).
                                    with('path/to/html_from_dita_path/my_dita_section/index.html').
@@ -75,7 +75,7 @@ module Bookbinder
                                    with(text: '<div class=nav-content>this is formatted</div>',
                                         to: File.join('subnav_destination_dir', 'my_dita_section_subnav.erb'))
 
-        dita_formatter.format_subnavs(dita_sections,
+        dita_formatter.format_subnavs(dita_section,
                                       'path/to/html_from_dita_path',
                                       'subnav_destination_dir',
                                       '<div class=nav-content></div>')

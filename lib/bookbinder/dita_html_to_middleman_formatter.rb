@@ -27,21 +27,19 @@ module Bookbinder
       end
     end
 
-    def format_subnavs(dita_sections,
+    def format_subnavs(dita_section,
                        html_from_dita_dir,
                        subnav_destination_dir,
                        subnav_template_text)
-      dita_sections.each do |dita_section|
-        tocjs_text = file_system_accessor.read(File.join html_from_dita_dir, dita_section.directory, 'index.html')
+      tocjs_text = file_system_accessor.read(File.join html_from_dita_dir, dita_section.directory, 'index.html')
 
-        formatted_tocjs = subnav_formatter.format(tocjs_text, dita_section.directory)
+      formatted_tocjs = subnav_formatter.format(tocjs_text, dita_section.directory)
 
-        nav_text = html_document_manipulator.insert_text_after_selector(document: subnav_template_text,
-                                                                        text: formatted_tocjs,
-                                                                        selector:'div.nav-content')
+      nav_text = html_document_manipulator.insert_text_after_selector(document: subnav_template_text,
+                                                                      text: formatted_tocjs,
+                                                                      selector:'div.nav-content')
 
-        file_system_accessor.write text: nav_text, to: File.join(subnav_destination_dir, filename="#{dita_section.directory}_subnav.erb")
-      end
+      file_system_accessor.write text: nav_text, to: File.join(subnav_destination_dir, filename="#{dita_section.directory}_subnav.erb")
     end
 
     private

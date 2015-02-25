@@ -7,19 +7,19 @@ module Bookbinder
       @local_file_system_accessor = local_file_system_accessor
     end
 
-    def preprocess(dita_sections,
+    def preprocess(dita_section,
                    html_from_dita_dir,
                    formatted_dita_dir,
                    workspace_dir,
                    subnavs_dir,
                    dita_subnav_template_path)
-      dita_converter.convert dita_sections, to: html_from_dita_dir
+      dita_converter.convert dita_section, to: html_from_dita_dir
 
       dita_formatter.format html_from_dita_dir, formatted_dita_dir
 
       dita_subnav_template_text = local_file_system_accessor.read(dita_subnav_template_path)
 
-      dita_formatter.format_subnavs(dita_sections,
+      dita_formatter.format_subnavs(dita_section,
                                     html_from_dita_dir,
                                     subnavs_dir,
                                     dita_subnav_template_text)

@@ -117,12 +117,14 @@ module Bookbinder
           end
         end
 
-        dita_preprocessor.preprocess(gathered_dita_sections,
-                                     dita_processed_dir,
-                                     formatted_dir,
-                                     workspace_dir,
-                                     subnavs_dir,
-                                     dita_subnav_template_path)
+        gathered_dita_sections.each do |dita_section|
+          dita_preprocessor.preprocess(dita_section,
+                                       dita_processed_dir,
+                                       formatted_dir,
+                                       workspace_dir,
+                                       subnavs_dir,
+                                       dita_subnav_template_path)
+        end
 
         cloner = cloner_factory.produce(
           bind_source,

@@ -793,11 +793,19 @@ module Bookbinder
                 'dita_sections' => [
                     {
                         'repository' => {
-                            'name' => 'org/dita_section',
+                            'name' => 'org/dita_section_one',
                             'ref' => 'my-ref-SHA'
                         },
                         'ditamap_location' => 'path/to/dita.ditamap',
-                        'directory' => 'my_dita_section'
+                        'directory' => 'my_dita_section_one'
+                    },
+                    {
+                        'repository' => {
+                            'name' => 'org/dita_section_two',
+                            'ref' => 'my-ref-SHA'
+                        },
+                        'ditamap_location' => 'path/to/dita.ditamap',
+                        'directory' => 'my_dita_section_two'
                     }
                 ]
             }
@@ -814,19 +822,33 @@ module Bookbinder
                                dita_preprocessor: dita_preprocessor,
                                context_dir: 'base')
 
-            dita_section = DitaSection.new('base/output/dita/dita_sections/my_dita_section',
-                                           'path/to/dita.ditamap',
-                                           'org/dita_section',
-                                           'my-ref-SHA',
-                                           'my_dita_section')
+            expected_dita_section_one = DitaSection.new('base/output/dita/dita_sections/my_dita_section_one',
+                                               'path/to/dita.ditamap',
+                                               'org/dita_section_one',
+                                               'my-ref-SHA',
+                                               'my_dita_section_one')
+            expected_dita_section_two = DitaSection.new('base/output/dita/dita_sections/my_dita_section_two',
+                                               'path/to/dita.ditamap',
+                                               'org/dita_section_two',
+                                               'my-ref-SHA',
+                                               'my_dita_section_two')
             expect(dita_preprocessor).
               to receive(:preprocess).
-              with([dita_section],
+              with(expected_dita_section_one,
                    'base/output/dita/html_from_dita',
                    'base/output/dita/site_generator_ready',
                    /middleman\/source/,
                    /master_middleman\/source\/subnavs/,
                    /_dita_subnav_template/)
+
+            expect(dita_preprocessor).
+                to receive(:preprocess).
+                with(expected_dita_section_two,
+                   'base/output/dita/html_from_dita',
+                    'base/output/dita/site_generator_ready',
+                    /middleman\/source/,
+                    /master_middleman\/source\/subnavs/,
+                    /_dita_subnav_template/)
 
             command.run(['github'])
           end
@@ -886,7 +908,7 @@ module Bookbinder
 
             expect(dita_preprocessor).
                 to receive(:preprocess).
-                       with([expected_dita_section],
+                       with(expected_dita_section,
                             '/parent-of-book/book/output/dita/html_from_dita',
                             '/parent-of-book/book/output/dita/site_generator_ready',
                             /middleman\/source/,
