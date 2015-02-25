@@ -62,7 +62,7 @@ module Bookbinder
 
         @publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director, file_system_accessor)
 
-        bind_source = cli_arguments[0]
+        bind_source, *options = cli_arguments
 
         output_paths = output_directory_paths(bind_source)
 
@@ -128,7 +128,11 @@ module Bookbinder
           bind_source,
           output_paths[:local_repo_dir]
         )
-        sections = gather_sections(workspace_dir, cloner)
+        sections = gather_sections(
+          workspace_dir,
+          cloner,
+          ('master' if options.include?('--ignore-section-refs'))
+        )
 
         subnavs = (sections + gathered_dita_sections).map(&:subnav).reduce(&:merge)
 
@@ -158,9 +162,11 @@ module Bookbinder
                   :dita_preprocessor,
                   :cloner_factory
 
-      def gather_sections(workspace, cloner)
+      def gather_sections(workspace, cloner, ref_override)
         config.sections.map do |attributes|
-          target_ref = attributes.fetch('repository', {})['ref'] || 'master'
+          target_ref = ref_override ||
+            attributes.fetch('repository', {})['ref'] ||
+            'master'
           repo_name = attributes.fetch('repository').fetch('name')
           directory = attributes['directory']
           vcs_repo = cloner.call(from: repo_name,
@@ -305,12 +311,9 @@ module Bookbinder
       end
 
       def arguments_are_valid?(arguments)
-        return false unless arguments.any?
-        verbose           = arguments[1] && arguments[1..-1].include?('--verbose')
-        tag_provided      = arguments[1] && (arguments[1..-1] - ['--verbose']).any?
-        nothing_special   = arguments[1..-1].empty?
-
-        %w(local github).include?(arguments[0]) && (tag_provided || verbose || nothing_special)
+        bind_source, *options = arguments
+        valid_options = %w(--verbose --ignore-section-refs).to_set
+        %w(local github).include?(bind_source) && options.to_set.subset?(valid_options)
       end
 
       def binding_from_github?(bind_location)

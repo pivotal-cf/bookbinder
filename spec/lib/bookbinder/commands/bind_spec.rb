@@ -689,6 +689,36 @@ module Bookbinder
                            partial_args.fetch(:cloner_factory, double(produce: ->(*){})))
       end
 
+      it "ignores pinned refs when --ignore-section-refs is set" do
+        logger = NilLogger.new
+        git_hub_repo = GitHubRepository.new(logger: logger,
+                                            full_name: 'my/repo',
+                                            git_accessor: double)
+        config = Configuration.new(
+          logger,
+          'book_repo' => 'foo',
+          'public_host' => 'asdf',
+          'sections' => [
+            { 'repository' => { 'name' => 'my/repo',
+                                'ref' => 'A-PINNED-REF' },
+              'directory' => 'cool-section' }
+          ]
+        )
+        cloner = double('cloner')
+        expect(cloner).to receive(:call).with(from: 'my/repo',
+                                              ref: 'master',
+                                              parent_dir: anything,
+                                              dir_name: 'cool-section') { git_hub_repo }
+        bind_cmd(config_fetcher: double(fetch_config: config),
+                 cloner_factory: double(produce: cloner),
+                 file_system_accessor: double('fs accessor').as_null_object,
+                 dita_preprocessor: double('preprocessor').as_null_object,
+                 static_site_generator: double('static site generator').as_null_object,
+                 server_director: double('server director').as_null_object,
+                 sitemap_generator: double('sitemap generator').as_null_object).
+        run(['github', '--ignore-section-refs'])
+      end
+
       context 'when publishing from github' do
 
         context 'when the config contains dita sections' do
