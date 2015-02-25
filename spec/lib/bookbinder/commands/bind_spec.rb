@@ -156,42 +156,6 @@ module Bookbinder
               command.run(['local'])
             end
           end
-
-          context 'and the code repo is absent' do
-            it 'fails out' do
-              sections = [
-                  {'repository' => {
-                      'name' => 'dev/null',
-                      'ref' => 'dog-sha'},
-                   'directory' => 'dogs',
-                   'subnav_template' => 'dogs'}
-
-              ]
-
-              config_hash = {
-                  'sections' => sections,
-                  'book_repo' => book,
-                  'pdf_index' => [],
-                  'public_host' => 'example.com',
-              }
-
-              config = Configuration.new(logger, config_hash)
-              config_fetcher = double('config fetcher', fetch_config: config)
-
-              command = Commands::Bind.new(logger,
-                                           config_fetcher,
-                                           archive_menu_config,
-                                           SpecGitAccessor,
-                                           file_system_accessor,
-                                           middleman_runner,
-                                           spider,
-                                           final_app_dir,
-                                           server_director,
-                                           File.absolute_path('.'),
-                                           dita_preprocessor)
-              command.run(['local'])
-            end
-          end
         end
       end
 
