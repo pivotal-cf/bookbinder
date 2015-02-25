@@ -26,7 +26,8 @@ module Bookbinder
                      final_app_directory,
                      server_director,
                      context_dir,
-                     dita_preprocessor)
+                     dita_preprocessor,
+                     cloner_factory)
         @logger = logger
         @config_fetcher = config_fetcher
         @archive_menu_config = archive_menu_config
@@ -38,6 +39,7 @@ module Bookbinder
         @server_director = server_director
         @context_dir = context_dir
         @dita_preprocessor = dita_preprocessor
+        @cloner_factory = cloner_factory
       end
 
       def usage
@@ -122,7 +124,6 @@ module Bookbinder
                                      subnavs_dir,
                                      dita_subnav_template_path)
 
-        cloner_factory = ClonerFactory.new(logger, version_control_system)
         cloner = cloner_factory.produce(
           bind_source,
           output_paths[:local_repo_dir]
@@ -154,89 +155,23 @@ module Bookbinder
                   :sitemap_generator,
                   :server_director,
                   :context_dir,
-                  :dita_preprocessor
+                  :dita_preprocessor,
+                  :cloner_factory
 
       def gather_sections(workspace, cloner)
         config.sections.map do |attributes|
           target_ref = attributes.fetch('repository', {})['ref'] || 'master'
           repo_name = attributes.fetch('repository').fetch('name')
           directory = attributes['directory']
-          vcs_repo = cloner.clone(from: repo_name,
-                                  ref: target_ref,
-                                  parent_dir: workspace,
-                                  dir_name: directory)
+          vcs_repo = cloner.call(from: repo_name,
+                                 ref: target_ref,
+                                 parent_dir: workspace,
+                                 dir_name: directory)
           @section_repository.get_instance(attributes,
                                            vcs_repo: vcs_repo,
                                            destination_dir: workspace,
                                            build: ->(*args) { Section.new(*args) })
         end
-      end
-
-      class ClonerFactory
-        def initialize(logger, version_control_system)
-          @logger = logger
-          @version_control_system = version_control_system
-        end
-
-        def produce(source, user_repo_dir)
-          if user_repo_dir
-            LocalFilesystemClonerFacade.new(logger, version_control_system, user_repo_dir)
-          else
-            GitHubRepositoryClonerFacade.new(logger, version_control_system)
-          end
-        end
-
-        private
-
-        attr_reader :logger, :version_control_system
-      end
-
-      class LocalFilesystemClonerFacade
-        def initialize(logger, version_control_system, user_repo_dir)
-          @logger = logger
-          @version_control_system = version_control_system
-          @user_repo_dir = user_repo_dir
-        end
-
-        def clone(from: nil,
-                  ref: nil,
-                  parent_dir: nil,
-                  dir_name: nil)
-          GitHubRepository.
-            build_from_local(logger,
-                             {'repository' => {'name' => from},
-                              'directory' => dir_name},
-                             user_repo_dir,
-                             version_control_system).
-              tap { |repo| repo.copy_from_local(parent_dir) }
-        end
-
-        private
-
-        attr_reader :logger, :version_control_system, :user_repo_dir
-      end
-
-      class GitHubRepositoryClonerFacade
-        def initialize(logger, version_control_system)
-          @logger = logger
-          @version_control_system = version_control_system
-        end
-
-        def clone(from: nil,
-                  ref: nil,
-                  parent_dir: nil,
-                  dir_name: nil)
-          GitHubRepository.
-            build_from_remote(logger,
-                              {'repository' => {'name' => from},
-                               'directory' => dir_name},
-                              version_control_system).
-              tap { |repo| repo.copy_from_remote(parent_dir, ref) }
-        end
-
-        private
-
-        attr_reader :logger, :version_control_system
       end
 
       def prepare_directories(final_app,

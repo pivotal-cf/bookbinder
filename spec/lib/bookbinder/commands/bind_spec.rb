@@ -1,16 +1,17 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
-require_relative '../../../helpers/use_fixture_repo'
-require_relative '../../../helpers/middleman'
-require_relative '../../../helpers/nil_logger'
-require_relative '../../../helpers/spec_git_accessor'
 require_relative '../../../../lib/bookbinder/configuration'
+require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
+require_relative '../../../../lib/bookbinder/html_document_manipulator'
+require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
+require_relative '../../../../lib/bookbinder/local_dita_preprocessor'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/spider'
-require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
-require_relative '../../../../lib/bookbinder/local_dita_preprocessor'
 require_relative '../../../../lib/bookbinder/subnav_formatter'
-require_relative '../../../../lib/bookbinder/html_document_manipulator'
+require_relative '../../../helpers/middleman'
+require_relative '../../../helpers/nil_logger'
+require_relative '../../../helpers/spec_git_accessor'
+require_relative '../../../helpers/use_fixture_repo'
 
 module Bookbinder
   describe Commands::Bind do
@@ -69,7 +70,8 @@ module Bookbinder
                            partial_args.fetch(:final_app_directory, final_app_dir),
                            partial_args.fetch(:server_director, server_director),
                            partial_args.fetch(:context_dir, File.absolute_path('.')),
-                           partial_args.fetch(:dita_preprocessor, dita_preprocessor))
+                           partial_args.fetch(:dita_preprocessor, dita_preprocessor),
+                           partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, SpecGitAccessor)))
       end
 
       let(:config) { Configuration.new(logger, config_hash) }
@@ -683,7 +685,8 @@ module Bookbinder
                            partial_args.fetch(:final_app_directory, ''),
                            partial_args.fetch(:server_director, nil),
                            partial_args.fetch(:context_dir, File.absolute_path('.')),
-                           partial_args.fetch(:dita_preprocessor, nil))
+                           partial_args.fetch(:dita_preprocessor, nil),
+                           partial_args.fetch(:cloner_factory, double(produce: ->(*){})))
       end
 
       context 'when publishing from github' do

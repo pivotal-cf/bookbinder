@@ -5,14 +5,15 @@ require_relative '../configuration_fetcher'
 require_relative '../configuration_validator'
 require_relative '../dita_html_to_middleman_formatter'
 require_relative '../git_accessor'
-require_relative '../local_dita_to_html_converter'
+require_relative '../html_document_manipulator'
+require_relative '../ingest/cloner_factory'
 require_relative '../local_dita_preprocessor'
+require_relative '../local_dita_to_html_converter'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../spider'
-require_relative '../yaml_loader'
 require_relative '../subnav_formatter'
-require_relative '../html_document_manipulator'
+require_relative '../yaml_loader'
 
 module Bookbinder
   module Repositories
@@ -79,7 +80,8 @@ module Bookbinder
           final_app_directory,
           server_director,
           File.absolute_path('.'),
-          dita_preprocessor
+          dita_preprocessor,
+          Ingest::ClonerFactory.new(logger, git_accessor)
         )
       end
 
