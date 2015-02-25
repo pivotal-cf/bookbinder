@@ -8,15 +8,19 @@ module Bookbinder
       HtmlDocumentManipulator.new
     end
 
-    it 'inserts text into a document at a given marker' do
-      text_to_insert = '<div>I am inside</div>'
-      document_body = '<div class="wrapper"><div class="selector"></div></div>'
-      selector = 'div.selector'
+    describe 'setting an attribute' do
+      it 'returns a copy of the document with attribute set to the specified value' do
+        document_body = '<div class="wrapper"><div class="selector"></div></div>'
+        selector = 'div.selector'
+        attribute = 'data-name'
+        new_value = 'this is a name'
 
-      expect(html_document_manipulator.insert_text_after_selector(text: text_to_insert,
-                                                                  document: document_body,
-                                                                  selector: selector)).
-          to eq '<div class="wrapper"><div class="selector"><div>I am inside</div></div></div>'
+        expect(html_document_manipulator.set_attribute(document: document_body,
+                                                       selector: selector,
+                                                       attribute: attribute,
+                                                       value: new_value)
+        ).to eq '<div class="wrapper"><div class="selector" data-name="this is a name"></div></div>'
+      end
     end
 
     describe 'reading from a particular part of a file' do

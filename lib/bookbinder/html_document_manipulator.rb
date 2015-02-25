@@ -2,12 +2,13 @@ require 'nokogiri'
 
 module Bookbinder
   class HtmlDocumentManipulator
-    def insert_text_after_selector(text: nil, document: nil, selector: nil)
+    def set_attribute(document: nil,
+                      selector: nil,
+                      attribute: nil,
+                      value: nil)
       doc = Nokogiri::HTML.fragment(document)
       node_set = doc.css(selector)
-      node_set.each do |node|
-        node.add_child(text)
-      end
+      node_set.attr(attribute, value)
       doc.to_html
     end
 

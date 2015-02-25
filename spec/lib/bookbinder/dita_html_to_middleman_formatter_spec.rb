@@ -54,8 +54,8 @@ module Bookbinder
       it 'writes a subnav for each DITA-section to the subnavs directory using a provided subnav template' do
         fs_accessor = double('fs_accessor', read: nil)
         subnav_formatter = double('subnav_formatter')
-        document_parser = double('doc_parser')
-        dita_formatter = DitaHtmlToMiddlemanFormatter.new(fs_accessor, subnav_formatter, document_parser)
+        doc_manipulator = double('doc_manipulator')
+        dita_formatter = DitaHtmlToMiddlemanFormatter.new(fs_accessor, subnav_formatter, doc_manipulator)
 
         dita_section = DitaSection.new('path/to/local/repo',
                                          'relative/path/to/ditamap',
@@ -63,13 +63,17 @@ module Bookbinder
                                          nil,
                                          'my_dita_section')
 
-        expect(fs_accessor).to receive(:read).
-                                   with('path/to/html_from_dita_path/my_dita_section/index.html').
-                                   and_return('some text')
 
-        allow(document_parser).to receive(:insert_text_after_selector).and_return('<div class=nav-content>this is formatted</div>')
 
-        expect(subnav_formatter).to receive(:format).with('some text', 'my_dita_section').and_return('this is formatted')
+        expect(subnav_formatter).to receive(:get_links_as_json).with('some text',
+                                                                     'my_dita_section').
+                                        and_return(['this is some json'])
+
+        expect(doc_manipulator).to receive(:set_attribute).with(document:'<div class=nav-content></div>',
+                                                                selector: 'div.nav-content',
+                                                                attribute: 'data-props',
+                                                                value:['this is some json']).
+                                       and_return('<div class=nav-content>this is formatted</div>')
 
         expect(fs_accessor).to receive(:write).
                                    with(text: '<div class=nav-content>this is formatted</div>',

@@ -33,11 +33,13 @@ module Bookbinder
                        subnav_template_text)
       tocjs_text = file_system_accessor.read(File.join html_from_dita_dir, dita_section.directory, 'index.html')
 
-      formatted_tocjs = subnav_formatter.format(tocjs_text, dita_section.directory)
+      formatted_json_links = subnav_formatter.get_links_as_json(tocjs_text, dita_section.directory)
 
-      nav_text = html_document_manipulator.insert_text_after_selector(document: subnav_template_text,
-                                                                      text: formatted_tocjs,
-                                                                      selector:'div.nav-content')
+      nav_text = html_document_manipulator.set_attribute(document: subnav_template_text,
+                                                         selector: 'div.nav-content',
+                                                         attribute: 'data-props',
+                                                         value: formatted_json_links
+      )
 
       file_system_accessor.write text: nav_text, to: File.join(subnav_destination_dir, filename="#{dita_section.directory}_subnav.erb")
     end

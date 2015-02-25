@@ -1,32 +1,35 @@
 require 'nokogiri'
+require 'active_support/all'
 
 module Bookbinder
   class SubnavFormatter
 
-    def format(raw_subnav_text, base_dirname)
+    def get_links_as_json(raw_subnav_text, base_dirname)
       doc = Nokogiri::XML(raw_subnav_text)
-      containing_ul = doc.css('body > ul')
-      containing_ul.add_class('menu')
 
       all_anchors = doc.css('a')
       all_anchors.each do |anchor|
         anchor['href'] = "/#{base_dirname}/#{anchor['href']}"
       end
 
-      terminal_lis = doc.xpath('//li/ul/li[count(child::*) = 1]')
-      terminal_lis.add_class('menu-link')
-
-      non_leaf_lis = doc.css('ul > li:not(.menu-link)')
-      non_leaf_lis.add_class('menu-item js-menu-item')
-
-      top_level_menu_item_links = doc.css('ul > li:not(.menu-link) > a')
-      top_level_menu_item_links.wrap('<div class="menu-title js-menu-title"></div>')
-
-      nested_lists = doc.css('body ul > li ul')
-      nested_lists.wrap('<div class="menu-content js-menu-content" aria-hidden="true"></div>')
-
-      containing_ul.to_html
+      gather_urls_and_texts(doc.css('body > ul')).to_json
     end
 
+    private
+
+    def gather_urls_and_texts(base_node)
+      top_level_li = base_node.css("> li")
+      top_level_li.map do |li|
+        anchor = li.css('a')[0]
+        href = anchor['href']
+        text = anchor.inner_text
+        ul = li.css('> ul')
+        if ul.size > 0
+          {url: href, text: text, nestedLinks: gather_urls_and_texts(ul)}
+        else
+          {url: href, text: text}
+        end
+      end
+    end
   end
 end
