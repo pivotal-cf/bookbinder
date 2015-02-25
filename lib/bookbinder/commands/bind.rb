@@ -26,7 +26,8 @@ module Bookbinder
                      final_app_directory,
                      server_director,
                      context_dir,
-                     dita_preprocessor)
+                     dita_preprocessor,
+                     cloner_factory)
         @logger = logger
         @config_fetcher = config_fetcher
         @archive_menu_config = archive_menu_config
@@ -38,6 +39,7 @@ module Bookbinder
         @server_director = server_director
         @context_dir = context_dir
         @dita_preprocessor = dita_preprocessor
+        @cloner_factory = cloner_factory
       end
 
       def usage
@@ -60,12 +62,13 @@ module Bookbinder
 
         @publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director, file_system_accessor)
 
-        location = cli_arguments[0]
+        bind_source, *options = cli_arguments
 
-        output_paths = output_directory_paths(location)
-        publish_config = publish_config(location)
-        @versions = publish_config.fetch(:versions, [])
-        @book_repo = publish_config[:book_repo]
+        output_paths = output_directory_paths(bind_source)
+
+        bind_config = bind_config(bind_source)
+        @versions = bind_config.fetch(:versions, [])
+        @book_repo = bind_config[:book_repo]
 
         master_middleman_dir = output_paths.fetch(:master_middleman_dir)
         output_dir = output_paths.fetch(:output_dir)
@@ -98,7 +101,7 @@ module Bookbinder
           DitaSection.new(nil, relative_path_to_dita_map, full_name, target_ref, directory)
         end
 
-        if location == 'github'
+        if bind_source == 'github'
           dita_section_gatherer = DitaSectionGatherer.new(version_control_system, logger)
           gathered_dita_sections = dita_section_gatherer.gather(dita_sections, to: dita_section_dir)
         else
@@ -121,7 +124,15 @@ module Bookbinder
                                      subnavs_dir,
                                      dita_subnav_template_path)
 
-        sections = gather_sections(workspace_dir, output_paths)
+        cloner = cloner_factory.produce(
+          bind_source,
+          output_paths[:local_repo_dir]
+        )
+        sections = gather_sections(
+          workspace_dir,
+          cloner,
+          ('master' if options.include?('--ignore-section-refs'))
+        )
 
         subnavs = (sections + gathered_dita_sections).map(&:subnav).reduce(&:merge)
 
@@ -129,7 +140,7 @@ module Bookbinder
           subnavs,
           {verbose: cli_arguments.include?('--verbose')},
           output_paths,
-          archive_menu_config.generate(publish_config, sections)
+          archive_menu_config.generate(bind_config, sections)
         )
 
         success ? 0 : 1
@@ -148,23 +159,20 @@ module Bookbinder
                   :sitemap_generator,
                   :server_director,
                   :context_dir,
-                  :dita_preprocessor
+                  :dita_preprocessor,
+                  :cloner_factory
 
-      def gather_sections(workspace, output_paths)
+      def gather_sections(workspace, cloner, ref_override)
         config.sections.map do |attributes|
-
-          local_repo_dir = output_paths[:local_repo_dir]
-          vcs_repo =
-              if local_repo_dir
-                GitHubRepository.
-                    build_from_local(logger, attributes, local_repo_dir, version_control_system).
-                    tap { |repo| repo.copy_from_local(workspace) }
-              else
-                GitHubRepository.
-                    build_from_remote(logger, attributes, nil, version_control_system).
-                    tap { |repo| repo.copy_from_remote(workspace) }
-              end
-
+          target_ref = ref_override ||
+            attributes.fetch('repository', {})['ref'] ||
+            'master'
+          repo_name = attributes.fetch('repository').fetch('name')
+          directory = attributes['directory']
+          vcs_repo = cloner.call(from: repo_name,
+                                 ref: target_ref,
+                                 parent_dir: workspace,
+                                 dir_name: directory)
           @section_repository.get_instance(attributes,
                                            vcs_repo: vcs_repo,
                                            destination_dir: workspace,
@@ -225,8 +233,8 @@ module Bookbinder
         end
       end
 
-      def output_directory_paths(location)
-        local_repo_dir = (location == 'local') ? File.expand_path('..', context_dir) : nil
+      def output_directory_paths(bind_source)
+        local_repo_dir = (bind_source == 'local') ? File.expand_path('..', context_dir) : nil
 
         {
           final_app_dir: final_app_directory,
@@ -236,7 +244,7 @@ module Bookbinder
         }
       end
 
-      def publish_config(location)
+      def bind_config(bind_source)
         arguments = {
             sections: config.sections,
             book_repo: config.book_repo,
@@ -246,7 +254,7 @@ module Bookbinder
 
         optional_arguments = {}
         optional_arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
-        if publishing_to_github? location
+        if binding_from_github? bind_source
           config.versions.each { |version| arguments[:sections].concat sections_from version }
           optional_arguments.merge!(versions: config.versions)
         end
@@ -289,9 +297,8 @@ module Bookbinder
             destination_dir = Dir.mktmpdir
             repository = GitHubRepository.build_from_remote(logger,
                                                             section,
-                                                            'master',
                                                             version_control_system)
-            repository.copy_from_remote(destination_dir)
+            repository.copy_from_remote(destination_dir, 'master')
             if repository
               File.join(destination_dir, repository.directory)
             else
@@ -304,16 +311,13 @@ module Bookbinder
       end
 
       def arguments_are_valid?(arguments)
-        return false unless arguments.any?
-        verbose           = arguments[1] && arguments[1..-1].include?('--verbose')
-        tag_provided      = arguments[1] && (arguments[1..-1] - ['--verbose']).any?
-        nothing_special   = arguments[1..-1].empty?
-
-        %w(local github).include?(arguments[0]) && (tag_provided || verbose || nothing_special)
+        bind_source, *options = arguments
+        valid_options = %w(--verbose --ignore-section-refs).to_set
+        %w(local github).include?(bind_source) && options.to_set.subset?(valid_options)
       end
 
-      def publishing_to_github?(publish_location)
-        config.has_option?('versions') && publish_location != 'local'
+      def binding_from_github?(bind_location)
+        config.has_option?('versions') && bind_location != 'local'
       end
     end
   end

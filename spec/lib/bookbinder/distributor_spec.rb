@@ -1,4 +1,7 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/configuration'
+require_relative '../../../lib/bookbinder/distributor'
+require_relative '../../helpers/nil_logger'
+require_relative '../../helpers/tmp_dirs'
 
 module Bookbinder
   describe Distributor do
@@ -18,15 +21,15 @@ module Bookbinder
 
     let(:cf_credentials) do
       Configuration::CfCredentials.new({
-                                           'api_endpoint' => 'http://get.your.apis.here.io',
-                                           'production_host' => {
-                                               'get.your.apis.here.io' => 'a_production_host'
-                                            },
-                                           'organization' => 'foooo',
-                                           'production_space' => 'foooo',
-                                           'app_name' => 'foooo',
-                                           'username' => 'username'
-                                       }, true)
+        'api_endpoint' => 'http://get.your.apis.here.io',
+        'production_host' => {
+          'get.your.apis.here.io' => ['a_production_host']
+        },
+        'organization' => 'foooo',
+        'production_space' => 'foooo',
+        'app_name' => 'foooo',
+        'username' => 'username'
+      }, 'production')
     end
 
     let(:book_repo_short_name) { 'fixture-book-title' }
@@ -52,7 +55,7 @@ module Bookbinder
     end
 
     let(:fake_dir) { 'my-directory/path/path/stuff' }
-    let(:fake_archive) { double }
+    let(:fake_archive) { double('archiver') }
     let(:fake_cf) { double }
     let(:fake_pusher) { double }
     let(:fake_uploaded_file) { double(url: fake_url) }
@@ -67,6 +70,7 @@ module Bookbinder
     describe '#distribute' do
       context 'uploading the trace' do
         it 'uploads the tracefile to the archive after pushing' do
+          allow(fake_archive).to receive(:download)
           expect(fake_pusher).to receive(:push).ordered
           expect(fake_archive).to receive(:upload_file).with(bucket, namer_filename, namer_full_path).ordered
           distributor.distribute
@@ -74,6 +78,7 @@ module Bookbinder
 
         it 'logs the tracefile URL' do
           expect(fake_archive).to receive(:upload_file).and_return(fake_uploaded_file)
+          allow(fake_archive).to receive(:download)
           allow(logger).to receive(:log)
           expect(logger).to receive(:log).with(/#{Regexp.escape(fake_url)}/)
           distributor.distribute
@@ -81,6 +86,7 @@ module Bookbinder
 
         it 'uploads despite push raising' do
           allow(fake_pusher).to receive(:push).and_raise('Hi there')
+          allow(fake_archive).to receive(:download)
           expect(fake_archive).to receive(:upload_file)
           distributor.distribute
         end
@@ -96,6 +102,7 @@ module Bookbinder
 
         context 'fails' do
           before do
+            allow(fake_archive).to receive(:download)
             allow(fake_archive).to receive(:upload_file).and_raise(Errno::ENOENT.new)
           end
 
@@ -130,25 +137,31 @@ module Bookbinder
         end
 
         context 'when an error is thrown from downloading' do
-          let(:error_message) {
-            "[ERROR] failed to download because of reason.\n[DEBUG INFO]\nCF organization: foooo\nCF space: foooo\nCF account: username\nroutes: #{cf_credentials.production_host}"
-          }
           it 'logs an informative message' do
             allow(fake_archive).to receive(:download).and_raise("failed to download because of reason.")
-            expect(logger).to receive(:error).with(error_message)
-
+            expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
+[ERROR] failed to download because of reason.
+[DEBUG INFO]
+CF organization: foooo
+CF space: foooo
+CF account: username
+routes: #{cf_credentials.routes}
+            ERROR_MESSAGE
             distributor.distribute
           end
         end
 
         context 'when an error is thrown from pushing' do
-          let(:error_message) {
-            "[ERROR] failed to push because of reason.\n[DEBUG INFO]\nCF organization: foooo\nCF space: foooo\nCF account: username\nroutes: #{cf_credentials.production_host}"
-          }
           it 'logs an informative message' do
             allow(fake_pusher).to receive(:push).and_raise("failed to push because of reason.")
-            expect(logger).to receive(:error).with(error_message)
-
+            expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
+[ERROR] failed to push because of reason.
+[DEBUG INFO]
+CF organization: foooo
+CF space: foooo
+CF account: username
+routes: #{cf_credentials.routes}
+ERROR_MESSAGE
             distributor.distribute
           end
         end
@@ -160,13 +173,13 @@ module Bookbinder
           Configuration::CfCredentials.new({
           'api_endpoint' => 'http://get.your.apis.here.io',
           'staging_host' => {
-              'http://get.your.apis.for.staging.here.io' => 'a_staging_host'
+              'http://get.your.apis.for.staging.here.io' => ['a_staging_host']
           },
           'organization' => 'foooo',
           'staging_space' => 'foo_stage',
           'app_name' => 'foooo',
           'username' => 'username'
-          }, false)
+          }, 'staging')
         end
 
         it 'does not download the repo' do
@@ -180,21 +193,24 @@ module Bookbinder
         end
 
         context 'when an error is thrown from pushing an app' do
-          let(:error_message) {
-            "[ERROR] failed to push because of reason.\n[DEBUG INFO]\nCF organization: foooo\nCF space: foo_stage\nCF account: username\nroutes: #{cf_credentials.staging_host}"
-          }
           it 'logs an informative message' do
             allow(fake_pusher).to receive(:push).and_raise("failed to push because of reason.")
-            expect(logger).to receive(:error).with(error_message)
-
+            expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
+[ERROR] failed to push because of reason.
+[DEBUG INFO]
+CF organization: foooo
+CF space: foo_stage
+CF account: username
+routes: #{cf_credentials.routes}
+            ERROR_MESSAGE
             distributor.distribute
           end
         end
       end
 
       it 'pushes the repo' do
+        allow(fake_archive).to receive(:download)
         expect(fake_pusher).to receive(:push).with(fake_dir)
-
         distributor.distribute
       end
     end

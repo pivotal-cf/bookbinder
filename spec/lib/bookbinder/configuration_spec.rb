@@ -1,4 +1,6 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/configuration'
+require_relative '../../helpers/nil_logger'
+
 module Bookbinder
   describe Configuration do
     let(:bookbinder_schema_version) { '1.0.0' }
@@ -92,8 +94,8 @@ module Bookbinder
       end
 
       describe Configuration::CfCredentials do
-        let(:is_production) { nil }
-        let(:cf_credentials) { Configuration::CfCredentials.new(cf_hash, is_production) }
+        let(:environment) { 'staging' }
+        let(:cf_credentials) { Configuration::CfCredentials.new(cf_hash, environment) }
 
         it 'returns a Configuration with the CF credentials from the credentials repository' do
           expect(cf_credentials.api_endpoint).to eq('http://some-api-endpoint.example.com')
@@ -127,9 +129,9 @@ module Bookbinder
           end
         end
 
-        describe 'is_production' do
+        describe 'environment' do
           context 'when production' do
-            let(:is_production) { true }
+            let(:environment) { 'production' }
 
             it 'uses production values for host and space' do
               expect(cf_credentials.routes).to eq('some-prod-domain.io'=>['some-prod-host'])
@@ -138,7 +140,7 @@ module Bookbinder
           end
 
           context 'when staging' do
-            let(:is_production) { false }
+            let(:environment) { 'staging' }
 
             it 'uses staging values for host and space' do
               expect(cf_credentials.routes).to eq('some-staging-domain.io'=>['some-staging-host'])
@@ -148,7 +150,7 @@ module Bookbinder
         end
 
         describe '#routes' do
-          let(:is_production) { true }
+          let(:environment) { 'production' }
 
           context 'with a correctly formatted domain' do
             let(:cf_prod_routes) {{ 'some-prod-domain.io' => ['some-prod-host'] }}
@@ -220,31 +222,13 @@ module Bookbinder
         end
       end
 
-      describe '#cf_production_credentials' do
-        describe '#routes' do
-          it 'are the production routes' do
-            expect(config.cf_production_credentials.routes).to eq('some-prod-domain.io'=>['some-prod-host'])
-          end
+      describe '#cf_credentials' do
+        it 'returns the routes for the requested environment' do
+          expect(config.cf_credentials('production').routes).to eq('some-prod-domain.io'=>['some-prod-host'])
         end
 
-        describe '#space' do
-          it 'is the production space' do
-            expect(config.cf_production_credentials.space).to eq('some-prod-space')
-          end
-        end
-      end
-
-      describe '#cf_staging_credentials' do
-        describe '#routes' do
-          it 'are the staging routes' do
-            expect(config.cf_staging_credentials.routes).to eq('some-staging-domain.io'=>['some-staging-host'])
-          end
-        end
-
-        describe '#space' do
-          it 'is the staging space' do
-            expect(config.cf_staging_credentials.space).to eq('some-staging-space')
-          end
+        it 'returns the space for the requested environment' do
+          expect(config.cf_credentials('production').space).to eq('some-prod-space')
         end
       end
 
@@ -258,8 +242,8 @@ module Bookbinder
       it 'only fetches the credentials repository once' do
         expect(RemoteYamlCredentialProvider).to receive(:new).once
         config.aws_credentials
-        config.cf_staging_credentials
-        config.cf_production_credentials
+        config.cf_credentials('staging')
+        config.cf_credentials('production')
         config.aws_credentials
       end
     end

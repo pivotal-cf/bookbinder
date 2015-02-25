@@ -10,10 +10,6 @@ module Bookbinder
         @other_commands = other_commands
       end
 
-      def command_name
-        '--help'
-      end
-
       def usage
         [command_name, "Print this message"]
       end
@@ -28,6 +24,10 @@ module Bookbinder
       end
 
       private
+
+      def command_name
+        '--help'
+      end
 
       def command_usage_messages
         (flags + standard_commands).reduce('') { |message, command|

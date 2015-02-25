@@ -1,4 +1,5 @@
 require_relative 'app_fetcher'
+require_relative 'artifact_namer'
 
 module Bookbinder
   class Distributor
@@ -27,14 +28,18 @@ module Bookbinder
 
     def distribute
       begin
-        download if options[:production]
+        download if cf_credentials.download_archive_before_push?
         push_app
         nil
       rescue => e
-        cf_credentials = options[:cf_credentials]
-        cf_space = options[:production] ? cf_credentials.production_space : cf_credentials.staging_space
-        cf_routes = options[:production] ? cf_credentials.production_host : cf_credentials.staging_host
-        @logger.error "[ERROR] #{e.message}\n[DEBUG INFO]\nCF organization: #{cf_credentials.organization}\nCF space: #{cf_space}\nCF account: #{cf_credentials.username}\nroutes: #{cf_routes}"
+        @logger.error(<<-ERROR.chomp)
+[ERROR] #{e.message}
+[DEBUG INFO]
+CF organization: #{cf_credentials.organization}
+CF space: #{cf_credentials.space}
+CF account: #{cf_credentials.username}
+routes: #{cf_credentials.routes}
+        ERROR
       ensure
         upload_trace
       end
@@ -45,12 +50,14 @@ module Bookbinder
     attr_reader :options, :archive, :namer, :namespace, :pusher
 
     def download
-      archive.download(download_dir: options[:app_dir], bucket: options[:aws_credentials].green_builds_bucket, build_number: options[:build_number],
+      archive.download(download_dir: options[:app_dir],
+                       bucket: options[:aws_credentials].green_builds_bucket,
+                       build_number: options[:build_number],
                        namespace: namespace)
     end
 
     def push_app
-      warn if options[:production]
+      @logger.warn(cf_credentials.push_warning) if cf_credentials.push_warning
       pusher.push(options[:app_dir])
     end
 
@@ -62,8 +69,8 @@ module Bookbinder
       @logger.error "Could not find CF trace file: #{namer.full_path}"
     end
 
-    def warn
-      @logger.warn 'Warning: You are pushing to CF Docs production. Be careful.'
+    def cf_credentials
+      options[:cf_credentials]
     end
   end
 end

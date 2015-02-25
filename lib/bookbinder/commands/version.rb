@@ -9,10 +9,6 @@ module Bookbinder
         @logger = logger
       end
 
-      def command_name
-        '--version'
-      end
-
       def usage
         [command_name, "Print the version of bookbinder"]
       end
@@ -23,6 +19,11 @@ module Bookbinder
         0
       end
 
+      private
+
+      def command_name
+        '--version'
+      end
     end
   end
 end

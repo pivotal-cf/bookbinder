@@ -1,3 +1,5 @@
+require 'middleman-core/logger'
+
 module Bookbinder
   module SpecHelperMethods
     def expect_to_receive_and_return_real_now(subject, method, *args)

@@ -1,6 +1,6 @@
-require_relative 'remote_yaml_credential_provider'
-require_relative 'git_hub_repository'
 require 'git'
+require_relative 'git_hub_repository'
+require_relative 'remote_yaml_credential_provider'
 
 module Bookbinder
   class Configuration
@@ -8,14 +8,11 @@ module Bookbinder
     CURRENT_SCHEMA_VERSION = '1.0.0'
     STARTING_SCHEMA_VERSION = '1.0.0'
 
-    class CredentialKeyError < StandardError;
-    end
-
-    class ConfigSchemaUnsupportedError < StandardError;
-    end
+    CredentialKeyError = Class.new(StandardError)
+    ConfigSchemaUnsupportedError = Class.new(StandardError)
 
     class AwsCredentials
-      REQUIRED_KEYS = %w(access_key secret_key green_builds_bucket).freeze
+      REQUIRED_KEYS = %w(access_key secret_key green_builds_bucket)
 
       def initialize(cred_hash)
         @creds = cred_hash
@@ -37,12 +34,11 @@ module Bookbinder
     end
 
     class CfCredentials
-      REQUIRED_KEYS = %w(api_endpoint organization app_name).freeze
-      OPTIONAL_KEYS = %w(username password production_space production_host staging_space staging_host).freeze
+      REQUIRED_KEYS = %w(api_endpoint organization app_name)
 
-      def initialize(cred_hash, is_production)
+      def initialize(cred_hash, environment)
         @creds = cred_hash
-        @is_production = is_production
+        @environment = environment
       end
 
       REQUIRED_KEYS.each do |method_name|
@@ -51,15 +47,33 @@ module Bookbinder
         end
       end
 
-      OPTIONAL_KEYS.each do |method_name|
-        define_method(method_name) do
-          creds.fetch(method_name, nil)
+      def ==(other)
+        [@creds, @environment] == [
+          other.instance_variable_get(:@creds),
+          other.instance_variable_get(:@environment)
+        ]
+      end
+
+      def username
+        creds['username']
+      end
+
+      def password
+        creds['password']
+      end
+
+      def download_archive_before_push?
+        production?
+      end
+
+      def push_warning
+        if production?
+          'Warning: You are pushing to CF Docs production. Be careful.'
         end
       end
 
       def routes
-        key = is_production ? 'production_host' : 'staging_host'
-        fetch(key) if correctly_formatted_domain_and_routes?(key)
+        fetch(host_key) if correctly_formatted_domain_and_routes?(host_key)
       end
 
       def flat_routes
@@ -70,13 +84,16 @@ module Bookbinder
       end
 
       def space
-        key = is_production ? 'production_space' : 'staging_space'
-        fetch(key)
+        fetch(space_key)
       end
 
       private
 
-      attr_reader :creds, :is_production
+      attr_reader :creds, :environment
+
+      def production?
+        environment == 'production'
+      end
 
       def fetch(key)
         creds.fetch(key)
@@ -96,6 +113,14 @@ module Bookbinder
         raise "Did you mean to add a list of hosts for domain #{domain}? Check your credentials.yml." unless routes_hash[domain]
         raise "Hosts in credentials must be nested as an array under the desired domain #{domain}." unless routes_hash[domain].is_a? Array
         raise "Did you mean to provide a hostname for the domain #{domain}? Check your credentials.yml." if routes_hash[domain].any?(&:nil?)
+      end
+
+      def host_key
+        "#{environment}_host"
+      end
+
+      def space_key
+        "#{environment}_space"
       end
     end
 
@@ -137,12 +162,8 @@ module Bookbinder
       @aws_creds ||= AwsCredentials.new(credentials.fetch('aws'))
     end
 
-    def cf_staging_credentials
-      @cf_staging_creds ||= CfCredentials.new(credentials.fetch('cloud_foundry'), false)
-    end
-
-    def cf_production_credentials
-      @cf_prod_creds ||= CfCredentials.new(credentials.fetch('cloud_foundry'), true)
+    def cf_credentials(environment)
+      CfCredentials.new(credentials.fetch('cloud_foundry'), environment)
     end
 
     def ==(o)

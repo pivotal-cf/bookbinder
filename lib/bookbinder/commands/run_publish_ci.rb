@@ -2,7 +2,7 @@ require_relative 'bind'
 require_relative 'build_and_push_tarball'
 require_relative 'chain'
 require_relative 'naming'
-require_relative 'push_local_to_staging'
+require_relative 'push_from_local'
 
 module Bookbinder
   module Commands
