@@ -12,10 +12,10 @@ module Bookbinder
 
       expect(dita_converter).to receive(:convert).with(dita_section, to: 'output/tmp/html_from_dita')
       expect(dita_formatter).to receive(:format).with('output/tmp/html_from_dita', 'output/tmp/formatted_dita')
-      expect(dita_formatter).to receive(:format_subnavs).with(dita_section,
-                                                              'output/tmp/html_from_dita',
-                                                              'output/master_middleman/source/subnavs',
-                                                              'this is the dita subnav template')
+      expect(dita_formatter).to receive(:format_subnav).with(dita_section,
+                                                             'output/tmp/html_from_dita',
+                                                             'output/master_middleman/source/subnavs',
+                                                             'this is the dita subnav template')
       expect(local_file_system_accessor).to receive(:copy_named_directory_with_path).with('images',
                                                                                           'output/tmp/html_from_dita',
                                                                                           'output/master_middleman/source')

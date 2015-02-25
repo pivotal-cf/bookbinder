@@ -19,10 +19,10 @@ module Bookbinder
 
       dita_subnav_template_text = local_file_system_accessor.read(dita_subnav_template_path)
 
-      dita_formatter.format_subnavs(dita_section,
-                                    html_from_dita_dir,
-                                    subnavs_dir,
-                                    dita_subnav_template_text)
+      dita_formatter.format_subnav(dita_section,
+                                   html_from_dita_dir,
+                                   subnavs_dir,
+                                   dita_subnav_template_text)
 
       local_file_system_accessor.copy_named_directory_with_path('images',
                                                                 html_from_dita_dir,

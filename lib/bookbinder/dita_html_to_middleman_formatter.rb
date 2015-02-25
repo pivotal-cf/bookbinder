@@ -27,7 +27,7 @@ module Bookbinder
       end
     end
 
-    def format_subnavs(dita_section,
+    def format_subnav(dita_section,
                        html_from_dita_dir,
                        subnav_destination_dir,
                        subnav_template_text)

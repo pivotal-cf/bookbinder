@@ -50,9 +50,11 @@ module Bookbinder
       end
     end
 
-    describe 'formatting subnavs created from TOC-js' do
-      it 'writes a subnav for each DITA-section to the subnavs directory using a provided subnav template' do
+    describe 'formatting a subnav created from TOC-js' do
+      it 'writes a subnav for the DITA-section to the subnavs directory using the provided subnav template' do
         fs_accessor = double('fs_accessor', read: nil)
+        allow(fs_accessor).to receive(:read).and_return('some text')
+
         subnav_formatter = double('subnav_formatter')
         doc_manipulator = double('doc_manipulator')
         dita_formatter = DitaHtmlToMiddlemanFormatter.new(fs_accessor, subnav_formatter, doc_manipulator)
@@ -79,10 +81,10 @@ module Bookbinder
                                    with(text: '<div class=nav-content>this is formatted</div>',
                                         to: File.join('subnav_destination_dir', 'my_dita_section_subnav.erb'))
 
-        dita_formatter.format_subnavs(dita_section,
-                                      'path/to/html_from_dita_path',
-                                      'subnav_destination_dir',
-                                      '<div class=nav-content></div>')
+        dita_formatter.format_subnav(dita_section,
+                                     'path/to/html_from_dita_path',
+                                     'subnav_destination_dir',
+                                     '<div class=nav-content></div>')
       end
     end
   end
