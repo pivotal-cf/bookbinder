@@ -12,7 +12,9 @@ module Bookbinder
         anchor['href'] = "/#{base_dirname}/#{anchor['href']}"
       end
 
-      gather_urls_and_texts(doc.css('body > ul')).to_json
+      {
+        links: gather_urls_and_texts(doc.css('body > ul'))
+      }.to_json
     end
 
     private

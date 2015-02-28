@@ -1,31 +1,35 @@
-[
-  {
-    "url": "/sample-section/common/topics/pivotal-copyright.html", "text": "Copyright"
-  },
-  {
-    "url": "/sample-section/release-notes/release-notes.html",
-    "text": "A. Pivotal GemFire XD 1.4 Release Notes",
-    "nestedLinks": [
-      {
-        "url": "/sample-section/release-notes/release-notes-gemfirexd-1.4.0.html",
-        "text": "A.i. Pivotal GemFire XD 1.4.0 Release Notes"
-      },
-      {
-        "url": "/sample-section/release-notes/release-notes-gemfirexd-1.4.0.html",
-        "text": "A.ii. Pivotal GemFire XD 1.4.0 Release Notes",
-        "nestedLinks": [
-          {
-            "url": "/sample-section/inner-notes/inner-release-notes-gemfirexd-1.4.0.html",
-            "text": "B. Inner Pivotal GemFire XD 1.4.0 Release Notes",
-            "nestedLinks": [
-              {
-                "url": "/sample-section/inner-notes/inner-release-notes-gemfirexd-1.4.0.html",
-                "text": "Bi. Inner Pivotal GemFire XD 1.4.0 Release Notes"
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-]
+{
+  "links":
+  [
+    {
+      "url": "/sample-section/common/topics/pivotal-copyright.html", "text": "Copyright"
+    },
+    {
+      "url": "/sample-section/release-notes/release-notes.html",
+      "text": "A. Pivotal GemFire XD 1.4 Release Notes",
+      "nestedLinks": [
+        {
+          "url": "/sample-section/release-notes/release-notes-gemfirexd-1.4.0.html",
+          "text": "A.i. Pivotal GemFire XD 1.4.0 Release Notes"
+        },
+        {
+          "url": "/sample-section/release-notes/release-notes-gemfirexd-1.4.0.html",
+          "text": "A.ii. Pivotal GemFire XD 1.4.0 Release Notes",
+          "nestedLinks": [
+            {
+              "url": "/sample-section/inner-notes/inner-release-notes-gemfirexd-1.4.0.html",
+              "text": "B. Inner Pivotal GemFire XD 1.4.0 Release Notes",
+              "nestedLinks": [
+                {
+                  "url": "/sample-section/inner-notes/inner-release-notes-gemfirexd-1.4.0.html",
+                  "text": "Bi. Inner Pivotal GemFire XD 1.4.0 Release Notes"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
