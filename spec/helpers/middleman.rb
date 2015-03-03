@@ -56,8 +56,6 @@ module Bookbinder
         $stdout.reopen File.new('/dev/null', 'w')
         retval = yield
       rescue Exception => e
-        $stdout.reopen orig_stdout
-        $stderr.reopen orig_stderr
         raise e
       ensure
         $stdout.reopen orig_stdout
