@@ -193,6 +193,21 @@ module Bookbinder
 
         expect{subject.valid? invalid_config_hash, bookbinder_schema_version, user_schema_version}.to raise_error ConfigurationValidator::DuplicateSectionNameError
       end
+
+      context 'when there are no markdown sections' do
+        it 'should pass validation' do
+          invalid_config_hash = {
+              'book_repo' => 'my_book',
+              'cred_repo' => 'my_cred_repo',
+              'public_host' => 'public_host',
+              'pdf' => 'pdf',
+              'pdf_index' => 'pdf_index',
+          }
+
+          expect(subject.valid? invalid_config_hash, bookbinder_schema_version, user_schema_version).to be_truthy
+
+        end
+      end
     end
 
     describe 'validating the archive_menu' do

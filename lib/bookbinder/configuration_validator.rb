@@ -46,8 +46,12 @@ module Bookbinder
     private
 
     def duplicate_section_names?(config)
-      directory_names = config['sections'].map {|section| section['directory']}
-      directory_names.length != directory_names.uniq.length
+      if config['sections']
+        directory_names = config['sections'].map {|section| section['directory']}
+        directory_names.length != directory_names.uniq.length
+      else
+        false
+      end
     end
 
   end
