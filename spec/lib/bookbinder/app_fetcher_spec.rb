@@ -48,7 +48,7 @@ docs                    cfapps.io             #{eol_space}
 OUTPUT
         end
 
-        it "returns nil" do
+        it 'returns nil' do
           expect(subject.fetch_current_app).to be_nil
         end
       end
@@ -64,8 +64,8 @@ foo                     cfapps.io             fantastic-app #{eol_space}
 OUTPUT
         end
 
-        it 'raises' do
-          expect { subject.fetch_current_app }.to raise_error(/cannot find currently deployed app/)
+        it 'returns nil' do
+          expect(subject.fetch_current_app).to be_nil
         end
       end
 

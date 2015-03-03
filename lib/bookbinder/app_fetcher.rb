@@ -17,12 +17,8 @@ module Bookbinder
         cf_routes.apps_by_host_and_domain.has_key?([host, domain])
       end
 
-      app_groups =
-          if existing_hosts.any?
-            existing_hosts.map { |domain, host| apps_for_host(cf_routes, domain, host) }
-          else
-            raise "cannot find currently deployed app."
-          end
+      return nil if existing_hosts.empty?
+      app_groups = existing_hosts.map { |domain, host| apps_for_host(cf_routes, domain, host) }
       apps_for_existing_routes = app_groups.first
       apps_for_existing_routes.first
     end
