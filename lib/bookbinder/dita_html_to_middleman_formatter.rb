@@ -9,7 +9,7 @@ module Bookbinder
       @html_document_manipulator = html_document_manipulator
     end
 
-    def format_for_site_generator(src, dest)
+    def format_html(src, dest)
       all_files_with_ext = file_system_accessor.find_files_with_ext('.html', src)
 
       all_files_with_ext.map do |filepath|

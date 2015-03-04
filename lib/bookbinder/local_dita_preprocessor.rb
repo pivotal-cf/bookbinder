@@ -17,7 +17,7 @@ module Bookbinder
                    dita_subnav_template_path)
       dita_converter.convert_to_html dita_section, write_to: html_from_dita_dir
 
-      dita_formatter.format_for_site_generator html_from_dita_dir, formatted_dita_dir
+      dita_formatter.format_html html_from_dita_dir, formatted_dita_dir
 
       dita_subnav_template_text = local_file_system_accessor.read(dita_subnav_template_path)
       tocjs_text = local_file_system_accessor.read(File.join html_from_dita_dir,
