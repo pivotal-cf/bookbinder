@@ -9,7 +9,7 @@ module Bookbinder
       @path_to_dita_ot_library = path_to_dita_ot_library
     end
 
-    def convert(dita_section, to: nil)
+    def convert_to_html(dita_section, write_to: nil)
       absolute_path_to_ditamap = File.join dita_section.path_to_local_repo, dita_section.ditamap_location
       classpath = "#{path_to_dita_ot_library}/lib/xercesImpl.jar:" +
                   "#{path_to_dita_ot_library}/lib/xml-apis.jar:" +
@@ -21,7 +21,7 @@ module Bookbinder
                   "#{path_to_dita_ot_library}:" +
                   "#{path_to_dita_ot_library}/lib/:" +
                   "#{path_to_dita_ot_library}/lib/dost.jar"
-      out_dir = File.join to, dita_section.directory
+      out_dir = File.join write_to, dita_section.directory
       command = "export CLASSPATH=#{classpath}; " +
                 "ant -f #{path_to_dita_ot_library} " +
                 "-Dbasedir='/' " +

@@ -15,7 +15,7 @@ module Bookbinder
                    workspace_dir,
                    subnavs_dir,
                    dita_subnav_template_path)
-      dita_converter.convert dita_section, to: html_from_dita_dir
+      dita_converter.convert_to_html dita_section, write_to: html_from_dita_dir
 
       dita_formatter.format html_from_dita_dir, formatted_dita_dir
 

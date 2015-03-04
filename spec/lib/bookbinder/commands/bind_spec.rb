@@ -21,7 +21,7 @@ module Bookbinder
       end
     end
 
-    let(:null_dita_to_html_converter) { double('null dita-to-html converter', convert: []) }
+    let(:null_dita_to_html_converter) { double('null dita-to-html converter', convert_to_html: []) }
     let(:archive_menu_config) { FakeArchiveMenuConfig.new }
 
     describe 'integration' do

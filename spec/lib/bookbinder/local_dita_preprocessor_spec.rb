@@ -15,7 +15,7 @@ module Bookbinder
       dita_section = DitaSection.new(nil, nil, nil, nil, 'my_dita_section')
       props_file_location = 'output/master_middleman/source/subnavs/my_dita_section-props.json'
 
-      expect(dita_converter).to receive(:convert).with(dita_section, to: 'output/tmp/html_from_dita')
+      expect(dita_converter).to receive(:convert_to_html).with(dita_section, write_to: 'output/tmp/html_from_dita')
       expect(dita_formatter).to receive(:format).with('output/tmp/html_from_dita', 'output/tmp/formatted_dita')
       expect(dita_formatter).to receive(:format_subnav).with(dita_section,
                                                              'output/master_middleman/source/subnavs',
