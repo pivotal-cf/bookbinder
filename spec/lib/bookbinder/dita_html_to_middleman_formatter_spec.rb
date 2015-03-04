@@ -24,7 +24,7 @@ module Bookbinder
           expected_filepath = File.expand_path File.join tmpdir, 'output.html.erb'
           expected_nested_filepath = File.expand_path File.join tmpdir, 'nested-dir/nested-output.html.erb'
 
-          dita_html_to_middleman_formatter.format(File.expand_path('.'), tmpdir)
+          dita_html_to_middleman_formatter.format_for_site_generator(File.expand_path('.'), tmpdir)
           expect(File.exist? expected_filepath).to eq true
           expect(File.exist? expected_nested_filepath).to eq true
         end
@@ -34,7 +34,7 @@ module Bookbinder
         Dir.mktmpdir do |tmpdir|
           expected_filepath = File.expand_path File.join(tmpdir, 'output.html.erb')
 
-          dita_html_to_middleman_formatter.format(File.expand_path('.'), tmpdir)
+          dita_html_to_middleman_formatter.format_for_site_generator(File.expand_path('.'), tmpdir)
           expect(File.read expected_filepath).to include '<h1 class="title topictitle1">GemFire XD Features and Benefits</h1>'
         end
       end
@@ -44,7 +44,7 @@ module Bookbinder
           expected_filepath = File.expand_path File.join(tmpdir, 'output.html.erb')
           expected_frontmatter = "---\ntitle: \"GemFire XD's Features and Benefits (\\\"Features\\\")\"\ndita: true\n---"
 
-          dita_html_to_middleman_formatter.format(File.expand_path('.'), tmpdir)
+          dita_html_to_middleman_formatter.format_for_site_generator(File.expand_path('.'), tmpdir)
           expect(File.read expected_filepath).to include expected_frontmatter
         end
       end

@@ -869,7 +869,7 @@ module Bookbinder
             static_site_generator = double('static_site_generator', run: true)
             sitemap_generator = double('sitemap_generator', has_broken_links?: false)
             server_director = double('server_director', use_server: true)
-            static_site_generator_formatter = double('static_site_generator_formatter', format: nil)
+            static_site_generator_formatter = double('static_site_generator_formatter', format_for_site_generator: nil)
             dita_preprocessor = double('dita preprocessor')
 
             final_app_dir = ''
