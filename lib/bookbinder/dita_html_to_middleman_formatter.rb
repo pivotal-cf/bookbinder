@@ -1,3 +1,5 @@
+require_relative 'subnav'
+
 module Bookbinder
 
   class DitaHtmlToMiddlemanFormatter
@@ -28,20 +30,16 @@ module Bookbinder
     end
 
     def format_subnav(dita_section,
-                       html_from_dita_dir,
-                       subnav_destination_dir,
-                       subnav_template_text)
-      tocjs_text = file_system_accessor.read(File.join html_from_dita_dir, dita_section.directory, 'index.html')
-
-      formatted_json_links = subnav_formatter.get_links_as_json(tocjs_text, dita_section.directory)
+                      subnav_template_text,
+                      json_props_location,
+                      unformatted_subnav_text)
+      formatted_json_links = subnav_formatter.get_links_as_json(unformatted_subnav_text, dita_section.directory)
 
       nav_text = html_document_manipulator.set_attribute(document: subnav_template_text,
                                                          selector: 'div.nav-content',
-                                                         attribute: 'data-props',
-                                                         value: formatted_json_links
-      )
-
-      file_system_accessor.write text: nav_text, to: File.join(subnav_destination_dir, filename="#{dita_section.directory}_subnav.erb")
+                                                         attribute: 'data-props-location',
+                                                         value: json_props_location)
+      Subnav.new(formatted_json_links, nav_text)
     end
 
     private

@@ -1,3 +1,5 @@
+require_relative 'subnav'
+
 module Bookbinder
   class LocalDitaPreprocessor
 
@@ -18,11 +20,19 @@ module Bookbinder
       dita_formatter.format html_from_dita_dir, formatted_dita_dir
 
       dita_subnav_template_text = local_file_system_accessor.read(dita_subnav_template_path)
+      tocjs_text = local_file_system_accessor.read(File.join html_from_dita_dir, dita_section.directory, 'index.html')
 
-      dita_formatter.format_subnav(dita_section,
-                                   html_from_dita_dir,
-                                   subnavs_dir,
-                                   dita_subnav_template_text)
+      subnav = dita_formatter.format_subnav(dita_section,
+                                            subnavs_dir,
+                                            dita_subnav_template_text,
+                                            tocjs_text)
+
+      json_props_location = File.join(dita_section.directory + '-props.json')
+      props_file_location = File.join(subnavs_dir, json_props_location)
+      local_file_system_accessor.write text: subnav.json_links, to: props_file_location
+
+      local_file_system_accessor.write text: subnav.text,
+                                       to: File.join(subnavs_dir, filename="#{dita_section.directory}_subnav.erb")
 
       local_file_system_accessor.copy_named_directory_with_path('images',
                                                                 html_from_dita_dir,

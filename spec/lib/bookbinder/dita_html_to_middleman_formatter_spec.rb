@@ -51,13 +51,10 @@ module Bookbinder
     end
 
     describe 'formatting a subnav created from TOC-js' do
-      it 'writes a subnav for the DITA-section to the subnavs directory using the provided subnav template' do
-        fs_accessor = double('fs_accessor', read: nil)
-        allow(fs_accessor).to receive(:read).and_return('some text')
-
+      it 'formats a subnav for the DITA-section and add a data-prop-location attribute of the location of json links' do
         subnav_formatter = double('subnav_formatter')
         doc_manipulator = double('doc_manipulator')
-        dita_formatter = DitaHtmlToMiddlemanFormatter.new(fs_accessor, subnav_formatter, doc_manipulator)
+        dita_formatter = DitaHtmlToMiddlemanFormatter.new(nil, subnav_formatter, doc_manipulator)
 
         dita_section = DitaSection.new('path/to/local/repo',
                                          'relative/path/to/ditamap',
@@ -67,24 +64,22 @@ module Bookbinder
 
 
 
-        expect(subnav_formatter).to receive(:get_links_as_json).with('some text',
+        expect(subnav_formatter).to receive(:get_links_as_json).with('unformatted_subnav_text',
                                                                      'my_dita_section').
                                         and_return(['this is some json'])
 
         expect(doc_manipulator).to receive(:set_attribute).with(document:'<div class=nav-content></div>',
                                                                 selector: 'div.nav-content',
-                                                                attribute: 'data-props',
-                                                                value:['this is some json']).
+                                                                attribute: 'data-props-location',
+                                                                value: '/json/props/location').
                                        and_return('<div class=nav-content>this is formatted</div>')
 
-        expect(fs_accessor).to receive(:write).
-                                   with(text: '<div class=nav-content>this is formatted</div>',
-                                        to: File.join('subnav_destination_dir', 'my_dita_section_subnav.erb'))
+        subnav = dita_formatter.format_subnav(dita_section,
+                                              '<div class=nav-content></div>',
+                                              '/json/props/location',
+                                              'unformatted_subnav_text')
 
-        dita_formatter.format_subnav(dita_section,
-                                     'path/to/html_from_dita_path',
-                                     'subnav_destination_dir',
-                                     '<div class=nav-content></div>')
+        expect(subnav).to eq(Subnav.new(['this is some json'], '<div class=nav-content>this is formatted</div>'))
       end
     end
   end
