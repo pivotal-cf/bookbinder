@@ -18,8 +18,8 @@ module Bookbinder
       expect(dita_converter).to receive(:convert_to_html).with(dita_section, write_to: 'output/tmp/html_from_dita')
       expect(dita_formatter).to receive(:format_for_site_generator).with('output/tmp/html_from_dita', 'output/tmp/formatted_dita')
       expect(dita_formatter).to receive(:format_subnav).with(dita_section,
-                                                             'output/master_middleman/source/subnavs',
                                                              '<div>this is the dita subnav template</div>',
+                                                             'my_dita_section-props.json',
                                                              '<a href="subnav/link">Link</a>')
                                 .and_return Subnav.new(['formatted_json_links'], '<div data-props-location="output/master_middleman/source/subnavs/data_props_file.json">this is the dita subnav template</div>')
 

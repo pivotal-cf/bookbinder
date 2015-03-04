@@ -24,13 +24,14 @@ module Bookbinder
                                                              dita_section.directory,
                                                              'index.html')
 
-      subnav = dita_formatter.format_subnav(dita_section,
-                                            subnavs_dir,
-                                            dita_subnav_template_text,
-                                            tocjs_text)
-
       json_props_location = File.join(dita_section.directory + '-props.json')
       props_file_location = File.join(subnavs_dir, json_props_location)
+
+      subnav = dita_formatter.format_subnav(dita_section,
+                                            dita_subnav_template_text,
+                                            json_props_location,
+                                            tocjs_text)
+
       local_file_system_accessor.write text: subnav.json_links, to: props_file_location
 
       local_file_system_accessor.write text: subnav.text,
