@@ -27,9 +27,7 @@ module Bookbinder
       tmp_subdir("repositories/dita-section")
 
       Dir.chdir(book_dir) do
-        swallow_stdout do
-          Cli.new.run(%w(bind local --verbose))
-        end
+        Cli.new.run(%w(bind local --verbose))
       end
 
       expected_section_name = 'dita-section'
