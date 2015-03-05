@@ -31,6 +31,7 @@ module Bookbinder
                                "-Dbasedir='/' " +
                                '-Doutput.dir=/path/to/processed/dita/boo ' +
                                "-Dtranstype='tocjs' " +
+                               "-Ddita.temp.dir='/tmp/bookbinder_dita' " +
                                '-Dargs.input=/local/path/to/repo/path/to/map.ditamap '
                          )
         dita_converter.convert(dita_section, to: processed_dita_location)

@@ -5,3 +5,4 @@ file_modification_dates
 tags
 .DS_Store
 bin
+spec/utilities
