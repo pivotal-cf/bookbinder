@@ -12,18 +12,16 @@ module Bookbinder
     use_fixture_repo('dita-book')
 
     around do |example|
-      old_path = ENV['PATH_TO_DITA_OT_LIBRARY']
-      old_path = ENV['PATH']
-      old_java_home = ENV['JAVA_HOME']
-      ENV['PATH_TO_DITA_OT_LIBRARY'] = install_dita.to_s
-      ENV['JAVA_HOME'] = java_home
-      ENV['PATH'] = "#{spec_root.join("utilities", "apache-ant-1.9.4", "bin")}:#{ENV['PATH']}"
+      old_env = ENV.clone
+      ENV.update(
+        'PATH_TO_DITA_OT_LIBRARY' => install_dita.to_s,
+        'JAVA_HOME' => java_home,
+        'PATH' => "#{spec_root.join("utilities", "apache-ant-1.9.4", "bin")}:#{ENV['PATH']}"
+      )
       begin
         example.run
       ensure
-        ENV['PATH_TO_DITA_OT_LIBRARY'] = old_path
-        ENV['PATH'] = old_path
-        ENV['JAVA_HOME'] = old_java_home
+        ENV = old_env
       end
     end
 
@@ -33,7 +31,9 @@ module Bookbinder
       tmp_subdir("repositories/dita-section")
 
       Dir.chdir(book_dir) do
-        Cli.new.run(%w(bind local --verbose))
+        swallow_stdout do
+          Cli.new.run(%w(bind local --verbose))
+        end
       end
 
       expected_section_name = 'dita-section'
@@ -104,8 +104,11 @@ module Bookbinder
     end
 
     def java_home
-      `/usr/libexec/java_home -v '1.6*'`.chomp
+      if File.exist?('/usr/libexec/java_home')
+        `/usr/libexec/java_home -v '1.6*'`.chomp
+      else
+        ENV['JAVA_HOME']
+      end
     end
-
   end
 end
