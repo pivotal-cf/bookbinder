@@ -13,11 +13,17 @@ module Bookbinder
 
     around do |example|
       old_path = ENV['PATH_TO_DITA_OT_LIBRARY']
+      old_path = ENV['PATH']
+      old_java_home = ENV['JAVA_HOME']
       ENV['PATH_TO_DITA_OT_LIBRARY'] = install_dita.to_s
+      ENV['JAVA_HOME'] = java_home
+      ENV['PATH'] = "#{spec_root.join("utilities", "apache-ant-1.9.4", "bin")}:#{ENV['PATH']}"
       begin
         example.run
       ensure
         ENV['PATH_TO_DITA_OT_LIBRARY'] = old_path
+        ENV['PATH'] = old_path
+        ENV['JAVA_HOME'] = old_java_home
       end
     end
 
@@ -40,8 +46,13 @@ module Bookbinder
     end
 
     def install_dita
+      ant_tarball_path = download(ant_tarball_url, ant_tarball_filename)
+      tar('-jxf', ant_tarball_path)
+      ant = spec_root.join("utilities", ant_dir, "bin", "ant")
+
       dita_tarball_path = download(dita_tarball_url, dita_tarball_filename)
       tar('-zxf', dita_tarball_path)
+
       spec_root.join("utilities", dita_dir)
     end
 
@@ -60,6 +71,22 @@ module Bookbinder
       Pathname(File.expand_path("../..", __FILE__))
     end
 
+    def ant_tarball_url
+      "http://mirror.ox.ac.uk/sites/rsync.apache.org//ant/binaries/#{ant_tarball_filename}"
+    end
+
+    def ant_dir
+      "apache-ant-#{ant_version}"
+    end
+
+    def ant_tarball_filename
+      "apache-ant-#{ant_version}-bin.tar.bz2"
+    end
+
+    def ant_version
+      "1.9.4"
+    end
+
     def dita_tarball_url
       "http://heanet.dl.sourceforge.net/project/dita-ot/DITA-OT%20Stable%20Release/DITA%20Open%20Toolkit%201.7/DITA-OT1.7.5_full_easy_install_bin.tar.gz"
     end
@@ -75,5 +102,10 @@ module Bookbinder
     def dita_version
       "1.7.5"
     end
+
+    def java_home
+      `/usr/libexec/java_home -v '1.6*'`.chomp
+    end
+
   end
 end
