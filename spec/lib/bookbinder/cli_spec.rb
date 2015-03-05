@@ -1,8 +1,11 @@
 require_relative '../../../lib/bookbinder/cli'
+require_relative '../../helpers/redirection'
 require_relative '../../helpers/use_fixture_repo'
 
 module Bookbinder
   describe Cli do
+    include Redirection
+
     let(:cli) { Cli.new }
 
     def run
@@ -136,24 +139,6 @@ module Bookbinder
         subject { capture_stdout { run } }
         it { should have_output("Unrecognized flag '--foo'").in_red }
       end
-    end
-
-    def capture_stdout(&block)
-      real_stdout = $stdout
-      $stdout = StringIO.new
-      block.call
-      $stdout.rewind
-      $stdout.read
-    ensure
-      $stdout = real_stdout
-    end
-
-    def swallow_stdout(&block)
-      real_stdout = $stdout
-      $stdout = StringIO.new
-      block.call
-    ensure
-      $stdout = real_stdout
     end
 
     matcher(:have_output) do |regexp|
