@@ -46,20 +46,16 @@ module Bookbinder
     end
 
     def install_dita
-      ant_tarball_path = download(ant_tarball_url, ant_tarball_filename)
-      tar('-jxf', ant_tarball_path)
-      ant = spec_root.join("utilities", ant_dir, "bin", "ant")
-
-      dita_tarball_path = download(dita_tarball_url, dita_tarball_filename)
-      tar('-zxf', dita_tarball_path)
-
-      spec_root.join("utilities", dita_dir)
+      tar('-jxf', download(AntDownload.new))
+      dita_ot = DitaOTDownload.new
+      tar('-zxf', download(dita_ot))
+      spec_root.join("utilities", dita_ot.dir)
     end
 
-    def download(archive_url, archive_filename)
+    def download(resource)
       spec_root.join("utilities").tap(&:mkpath).
-        join(archive_filename).tap do |destination|
-        `curl -s #{archive_url} > #{destination}` unless destination.exist?
+        join(resource.tarball_filename).tap do |destination|
+        `curl -s #{resource.tarball_url} > #{destination}` unless destination.exist?
       end
     end
 
@@ -71,36 +67,40 @@ module Bookbinder
       Pathname(File.expand_path("../..", __FILE__))
     end
 
-    def ant_tarball_url
-      "http://mirror.ox.ac.uk/sites/rsync.apache.org//ant/binaries/#{ant_tarball_filename}"
+    class AntDownload
+      def tarball_url
+        "http://mirror.ox.ac.uk/sites/rsync.apache.org//ant/binaries/#{tarball_filename}"
+      end
+
+      def tarball_filename
+        "apache-ant-#{version}-bin.tar.bz2"
+      end
+
+      def dir
+        "apache-ant-#{version}"
+      end
+
+      def version
+        "1.9.4"
+      end
     end
 
-    def ant_dir
-      "apache-ant-#{ant_version}"
-    end
+    class DitaOTDownload
+      def tarball_url
+        "http://heanet.dl.sourceforge.net/project/dita-ot/DITA-OT%20Stable%20Release/DITA%20Open%20Toolkit%201.7/DITA-OT#{version}_full_easy_install_bin.tar.gz"
+      end
 
-    def ant_tarball_filename
-      "apache-ant-#{ant_version}-bin.tar.bz2"
-    end
+      def tarball_filename
+        "dita.tar.gz"
+      end
 
-    def ant_version
-      "1.9.4"
-    end
+      def dir
+        "DITA-OT#{version}"
+      end
 
-    def dita_tarball_url
-      "http://heanet.dl.sourceforge.net/project/dita-ot/DITA-OT%20Stable%20Release/DITA%20Open%20Toolkit%201.7/DITA-OT1.7.5_full_easy_install_bin.tar.gz"
-    end
-
-    def dita_tarball_filename
-      "dita.tar.gz"
-    end
-
-    def dita_dir
-      "DITA-OT#{dita_version}"
-    end
-
-    def dita_version
-      "1.7.5"
+      def version
+        "1.7.5"
+      end
     end
 
     def java_home
