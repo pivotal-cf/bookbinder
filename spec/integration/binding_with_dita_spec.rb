@@ -59,7 +59,7 @@ module Bookbinder
     def download(archive_url, archive_filename)
       spec_root.join("utilities").tap(&:mkpath).
         join(archive_filename).tap do |destination|
-        `curl #{archive_url} > #{destination}` unless destination.exist?
+        `curl -s #{archive_url} > #{destination}` unless destination.exist?
       end
     end
 
