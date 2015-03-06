@@ -82,14 +82,6 @@ module Bookbinder
     describe '#generate' do
       let(:target) { Tempfile.new('output.pdf').path }
 
-      it 'calls wkhtmltopdf with the --enable-external-links flag' do
-        pdf_generator = PdfGenerator.new(logger)
-        expect(pdf_generator).to receive(:`).with(/\s+--enable-external-links\s+/) do
-          `touch #{target}`
-        end
-        pdf_generator.generate([source_page], target, header_file)
-      end
-
       it 'calls wkhtmltopdf with the table of contents and stylesheet' do
         pdf_generator = PdfGenerator.new(logger)
         toc_xslt_path = File.expand_path('../../../../toc.xslt', __FILE__)

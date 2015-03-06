@@ -22,7 +22,7 @@ module Bookbinder
 
       command = <<-CMD
       wkhtmltopdf \
-      --enable-external-links \
+      --disable-external-links \
       --disable-javascript \
       --load-error-handling ignore \
       --margin-top 26mm \
