@@ -12,6 +12,6 @@ module Bookbinder
 
     private
 
-    attr_reader :cache, :third_party
+    attr_reader :cache
   end
 end
