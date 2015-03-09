@@ -4,7 +4,6 @@ end
 require_relative '../configuration_fetcher'
 require_relative '../configuration_validator'
 require_relative '../dita_html_to_middleman_formatter'
-require_relative '../git_accessor'
 require_relative '../html_document_manipulator'
 require_relative '../ingest/cloner_factory'
 require_relative '../local_dita_preprocessor'
@@ -20,8 +19,9 @@ module Bookbinder
     class CommandRepository
       include Enumerable
 
-      def initialize(logger)
+      def initialize(logger, version_control_system)
         @logger = logger
+        @version_control_system = version_control_system
       end
 
       def each(&block)
@@ -37,7 +37,7 @@ module Bookbinder
 
       private
 
-      attr_reader :logger
+      attr_reader :logger, :version_control_system
 
       def list
         standard_commands + flags
@@ -73,7 +73,7 @@ module Bookbinder
             loader: config_loader,
             config_filename: 'bookbinder.yml'
           ),
-          git_accessor,
+          version_control_system,
           local_file_system_accessor,
           middleman_runner,
           spider,
@@ -81,7 +81,7 @@ module Bookbinder
           server_director,
           File.absolute_path('.'),
           dita_preprocessor,
-          Ingest::ClonerFactory.new(logger, git_accessor)
+          Ingest::ClonerFactory.new(logger, version_control_system)
         )
       end
 
@@ -112,7 +112,7 @@ module Bookbinder
       end
 
       def middleman_runner
-        @middleman_runner ||= MiddlemanRunner.new(logger, git_accessor)
+        @middleman_runner ||= MiddlemanRunner.new(logger, version_control_system)
       end
 
       def configuration_fetcher
@@ -158,10 +158,6 @@ module Bookbinder
 
       def html_document_manipulator
         @html_document_manipulator ||= HtmlDocumentManipulator.new
-      end
-
-      def git_accessor
-        @git_accessor ||= GitAccessor.new
       end
 
       def local_file_system_accessor

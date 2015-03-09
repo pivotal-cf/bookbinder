@@ -8,11 +8,15 @@ require_relative 'user_message_presenter'
 
 module Bookbinder
   class Cli
+    def initialize(version_control_system)
+      @version_control_system = version_control_system
+    end
+
     def run(args)
       command_name, *command_arguments = args
 
       logger = DeprecatedLogger.new
-      commands = Repositories::CommandRepository.new(logger)
+      commands = Repositories::CommandRepository.new(logger, version_control_system)
 
       command_validator = CommandValidator.new(commands, commands.help.usage_message)
       command_runner = CommandRunner.new(logger, commands)
@@ -52,5 +56,10 @@ module Bookbinder
         1
       end
     end
+
+    private
+    
+    attr_reader :version_control_system
+
   end
 end

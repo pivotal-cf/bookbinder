@@ -2,17 +2,16 @@
 book_repo: my/book-repo
 cred_repo: my/cred-repo
 
-sections:
-  - repository:
-      name: i/would-rather-not
-
 dita_sections:
 
 - repository:
-    name: my-org/my-dita-section
-  directory: dita-section
+    name: my-org/my-dita-section-one
+  directory: dita-section-one
+  ditamap_location: example.ditamap
+
+- repository:
+    name: my-org/my-dita-section-two
+  directory: dita-section-two
   ditamap_location: example.ditamap
 
 public_host: something-irrelevant.cfapps.io
-
-pdf:
