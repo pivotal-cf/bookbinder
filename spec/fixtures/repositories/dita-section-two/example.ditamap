@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE bookmap PUBLIC "-//OASIS//DTD DITA BookMap//EN" "bookmap.dtd">
 
-<bookmap id="xxx.example.my">
+<bookmap id="xxx.example.my.2">
   <booktitle>
     <booklibrary id="product_name" otherprops="pdf">my library</booklibrary>
     <mainbooktitle otherprops="pdf">Version 0.0.1</mainbooktitle>
