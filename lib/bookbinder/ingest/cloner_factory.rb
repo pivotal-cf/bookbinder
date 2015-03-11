@@ -1,5 +1,5 @@
-require_relative 'git_hub_repository_cloner_facade'
-require_relative 'local_filesystem_cloner_facade'
+require_relative 'git_hub_repository_cloner'
+require_relative 'local_filesystem_cloner'
 
 module Bookbinder
   module Ingest
@@ -11,9 +11,9 @@ module Bookbinder
 
       def produce(source, user_repo_dir)
         if user_repo_dir
-          LocalFilesystemClonerFacade.new(logger, version_control_system, user_repo_dir)
+          LocalFilesystemCloner.new(logger, version_control_system, user_repo_dir)
         else
-          GitHubRepositoryClonerFacade.new(logger, version_control_system)
+          GitHubRepositoryCloner.new(logger, version_control_system)
         end
       end
 

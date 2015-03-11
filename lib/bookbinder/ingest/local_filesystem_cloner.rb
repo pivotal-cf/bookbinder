@@ -1,6 +1,6 @@
 module Bookbinder
   module Ingest
-    class LocalFilesystemClonerFacade
+    class LocalFilesystemCloner
       def initialize(logger, version_control_system, user_repo_dir)
         @logger = logger
         @version_control_system = version_control_system
