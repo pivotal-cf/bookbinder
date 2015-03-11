@@ -1,6 +1,6 @@
 module Bookbinder
   module Ingest
-    class GitHubRepositoryClonerFacade
+    class GitHubRepositoryCloner
       def initialize(logger, version_control_system)
         @logger = logger
         @version_control_system = version_control_system
