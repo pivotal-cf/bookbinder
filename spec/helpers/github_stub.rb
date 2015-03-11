@@ -1,11 +1,11 @@
 module Bookbinder
-  class Github
+  class GithubStub
     def initialize
       @git_urls = []
     end
 
     def clone(url, name, path: nil)
-      FileUtils.cp_r File.join(Bookbinder::RepoFixture.repos_dir, name), File.join(Dir.pwd, 'output/dita/dita_sections')
+      FileUtils.cp_r File.join(Bookbinder::RepoFixture.repos_dir, name), path
 
       @git_urls << url
     end

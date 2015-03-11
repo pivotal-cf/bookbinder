@@ -1,7 +1,7 @@
 require_relative '../helpers/environment_setups'
 require_relative '../helpers/book_fixture'
 require_relative '../helpers/application'
-require_relative '../helpers/github'
+require_relative '../helpers/github_stub'
 
 module Bookbinder
   describe 'binding a book with DITA sections' do
@@ -21,7 +21,7 @@ module Bookbinder
 
     context 'from Github' do
       it 'clones the dita sections from github, converts them into html' do
-        github = Github.new
+        github = GithubStub.new
         application = Application.new(github)
         dita_book = BookFixture.new('dita-book', SectionSource.remote)
 
