@@ -1,7 +1,8 @@
 module Bookbinder
   class DitaSectionGatherer
-    def initialize(version_control_system, view_updater)
+    def initialize(version_control_system, output_locations, view_updater)
       @version_control_system = version_control_system
+      @output_locations = output_locations
       @view_updater = view_updater
     end
 
@@ -16,13 +17,14 @@ module Bookbinder
                         dita_section.ditamap_location,
                         dita_section.full_name,
                         dita_section.target_ref,
-                        dita_section.directory)
+                        dita_section.directory,
+                        output_locations)
         end
     end
 
     private
 
-    attr_reader :version_control_system, :view_updater
+    attr_reader :version_control_system, :view_updater, :output_locations
 
   end
 end

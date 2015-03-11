@@ -9,7 +9,7 @@ module Bookbinder
       it 'clones the specified repos' do
         view_updater = double('view_updater')
         version_control_system = double('version_control_system')
-        dita_section_gatherer = DitaSectionGatherer.new(version_control_system, view_updater)
+        dita_section_gatherer = DitaSectionGatherer.new(version_control_system, nil, view_updater)
         dita_sections = [DitaSection.new(nil, '.ditamap', 'org/dita-repo', nil, 'dita-repo')]
         tmp_dir = 'output/tmpdir'
 
@@ -24,7 +24,7 @@ module Bookbinder
       it 'returns new sections with identical properties and the new path to the local repo' do
         view_updater = double('view_updater')
         version_control_system = double('version_control_system')
-        dita_section_gatherer = DitaSectionGatherer.new(version_control_system, view_updater)
+        dita_section_gatherer = DitaSectionGatherer.new(version_control_system, nil, view_updater)
         dita_sections = [DitaSection.new(nil, '.ditamap', 'org/dita-repo', nil, 'dita-repo')]
         tmp_dir = 'output/tmpdir'
 
@@ -44,7 +44,7 @@ module Bookbinder
       it 'updates the user on its progress' do
         version_control_system = double('version_control_system')
         view_updater = double('view_updater')
-        dita_section_gatherer = DitaSectionGatherer.new(version_control_system, view_updater)
+        dita_section_gatherer = DitaSectionGatherer.new(version_control_system, nil, view_updater)
         dita_sections = [DitaSection.new(nil, '.ditamap', 'org/dita-repo', nil, 'dita-repo')]
         tmp_dir = 'output/tmpdir'
 

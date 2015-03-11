@@ -21,11 +21,10 @@ module Bookbinder
                   "#{path_to_dita_ot_library}:" +
                   "#{path_to_dita_ot_library}/lib/:" +
                   "#{path_to_dita_ot_library}/lib/dost.jar"
-      out_dir = File.join write_to, dita_section.directory
       command = "export CLASSPATH=#{classpath}; " +
                 "ant -f #{path_to_dita_ot_library} " +
                 "-Dbasedir='/' " +
-                "-Doutput.dir=#{out_dir} " +
+                "-Doutput.dir=#{write_to} " +
                 "-Dtranstype='tocjs' " +
                 "-Ddita.temp.dir='/tmp/bookbinder_dita' " +
                 "-Dargs.input=#{absolute_path_to_ditamap} "

@@ -5,6 +5,7 @@ module Bookbinder
     end
 
     def clone(url, name, path: nil)
+      FileUtils.mkdir_p(path)
       FileUtils.cp_r File.join(Bookbinder::RepoFixture.repos_dir, name), path
 
       @git_urls << url

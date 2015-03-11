@@ -10,7 +10,7 @@ module Bookbinder
 
       it 'runs the dita-processing library against the given ditamap and css locations' do
         shell = double('shell_out')
-        processed_dita_location = '/path/to/processed/dita'
+        processed_dita_location = '/path/to/processed/dita/boo'
         classpath = '/path/to/dita/ot/lib/xercesImpl.jar:' +
                     '/path/to/dita/ot/lib/xml-apis.jar:' +
                     '/path/to/dita/ot/lib/resolver.jar:' +

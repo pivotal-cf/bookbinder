@@ -10,20 +10,14 @@ module Bookbinder
     end
 
     def preprocess(dita_section,
-                   html_from_dita_dir,
-                   formatted_dita_dir,
-                   workspace_dir,
                    subnavs_dir,
                    dita_subnav_template_path)
-      dita_converter.convert_to_html dita_section, write_to: html_from_dita_dir
+      dita_converter.convert_to_html dita_section, write_to: dita_section.html_from_dita_section_dir
 
-      dita_formatter.format_html File.join(html_from_dita_dir, dita_section.directory),
-                                 File.join(formatted_dita_dir, dita_section.directory)
+      dita_formatter.format_html dita_section.html_from_dita_section_dir, dita_section.formatted_section_dir
 
       dita_subnav_template_text = local_file_system_accessor.read(dita_subnav_template_path)
-      tocjs_text = local_file_system_accessor.read(File.join html_from_dita_dir,
-                                                             dita_section.directory,
-                                                             'index.html')
+      tocjs_text = local_file_system_accessor.read(File.join dita_section.html_from_dita_section_dir, 'index.html')
 
       json_props_location = File.join(dita_section.directory + '-props.json')
       props_file_location = File.join(subnavs_dir, json_props_location)
@@ -40,11 +34,11 @@ module Bookbinder
                                                      filename="#{dita_section.directory}_subnav.erb")
 
       local_file_system_accessor.copy_named_directory_with_path('images',
-                                                                File.join(html_from_dita_dir, dita_section.directory),
-                                                                File.join(workspace_dir, dita_section.directory))
+                                                                dita_section.html_from_dita_section_dir,
+                                                                dita_section.section_source_for_site_generator)
 
-      local_file_system_accessor.copy_contents(File.join(formatted_dita_dir, dita_section.directory),
-                                               File.join(workspace_dir, dita_section.directory))
+      local_file_system_accessor.copy_contents(dita_section.formatted_section_dir,
+                                               dita_section.section_source_for_site_generator)
     end
 
 
