@@ -1,4 +1,4 @@
-require_relative '../bookbinder/dita_section'
+require_relative '../bookbinder/values/dita_section'
 
 module Bookbinder
   class LocalDitaToHtmlConverter

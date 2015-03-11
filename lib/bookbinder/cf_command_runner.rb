@@ -1,5 +1,5 @@
 require 'open3'
-require_relative 'blue_green_app'
+require_relative 'values/blue_green_app'
 
 module Bookbinder
   class CfCommandRunner

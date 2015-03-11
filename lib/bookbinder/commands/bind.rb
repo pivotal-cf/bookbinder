@@ -1,12 +1,12 @@
 require_relative '../archive_menu_configuration'
 require_relative '../book'
-require_relative '../cli_error'
+require_relative '../errors/cli_error'
 require_relative '../directory_helpers'
 require_relative '../publisher'
-require_relative '../section'
-require_relative '../dita_section'
+require_relative '../values/section'
+require_relative '../values/dita_section'
 require_relative '../dita_section_gatherer'
-require_relative '../output_locations'
+require_relative '../values/output_locations'
 require_relative 'naming'
 
 module Bookbinder

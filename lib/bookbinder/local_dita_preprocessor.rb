@@ -1,4 +1,4 @@
-require_relative 'subnav'
+require_relative 'values/subnav'
 
 module Bookbinder
   class LocalDitaPreprocessor

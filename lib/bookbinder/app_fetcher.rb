@@ -1,5 +1,5 @@
-require_relative "blue_green_app"
-require_relative "cf_routes"
+require_relative 'values/blue_green_app'
+require_relative 'values/cf_routes'
 
 module Bookbinder
 

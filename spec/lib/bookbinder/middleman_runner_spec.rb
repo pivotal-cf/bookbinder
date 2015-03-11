@@ -1,8 +1,8 @@
 require_relative '../../../lib/bookbinder/middleman_runner'
-require_relative '../../helpers/middleman'
-require_relative '../../helpers/nil_logger'
+require_relative '../../../lib/bookbinder/values/section'
 require_relative '../../../lib/bookbinder/book'
-require_relative '../../../lib/bookbinder/section'
+require_relative '../../helpers/nil_logger'
+require_relative '../../helpers/middleman'
 
 module Bookbinder
   describe MiddlemanRunner do

@@ -1,7 +1,7 @@
 require 'ostruct'
-require_relative 'cli_error'
+require_relative 'errors/cli_error'
 require_relative 'commands/naming'
-require_relative 'user_message'
+require_relative 'values/user_message'
 
 module Bookbinder
   class CommandValidator

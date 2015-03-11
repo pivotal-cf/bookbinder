@@ -1,6 +1,6 @@
 require_relative '../../../lib/bookbinder/user_message_presenter'
+require_relative '../../../lib/bookbinder/values/user_message'
 require_relative '../../../lib/bookbinder/colorizer'
-require_relative '../../../lib/bookbinder/user_message'
 
 module Bookbinder
   describe UserMessagePresenter do

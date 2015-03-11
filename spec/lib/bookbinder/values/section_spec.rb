@@ -1,4 +1,4 @@
-require_relative '../../../lib/bookbinder/section'
+require_relative '../../../../lib/bookbinder/values/section'
 
 module Bookbinder
   describe Section do

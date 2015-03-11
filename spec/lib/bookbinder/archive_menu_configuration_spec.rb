@@ -1,6 +1,6 @@
 require 'tmpdir'
 require_relative '../../../lib/bookbinder/archive_menu_configuration'
-require_relative '../../../lib/bookbinder/section'
+require_relative '../../../lib/bookbinder/values/section'
 
 module Bookbinder
   describe ArchiveMenuConfiguration do

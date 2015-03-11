@@ -1,5 +1,5 @@
 require_relative '../../../lib/bookbinder/deprecated_logger'
-require_relative '../../../lib/bookbinder/dita_section'
+require_relative '../../../lib/bookbinder/values/dita_section'
 require_relative '../../../lib/bookbinder/dita_section_gatherer'
 
 module Bookbinder

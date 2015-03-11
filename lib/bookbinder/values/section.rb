@@ -1,5 +1,4 @@
 module Bookbinder
-
   Section = Struct.new(:path_to_repository,
                        :full_name,
                        :copied,

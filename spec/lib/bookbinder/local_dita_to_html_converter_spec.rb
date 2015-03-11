@@ -1,5 +1,5 @@
 require_relative '../../../lib/bookbinder/configuration'
-require_relative '../../../lib/bookbinder/dita_section'
+require_relative '../../../lib/bookbinder/values/dita_section'
 require_relative '../../../lib/bookbinder/local_dita_to_html_converter'
 require_relative '../../../lib/bookbinder/sheller'
 

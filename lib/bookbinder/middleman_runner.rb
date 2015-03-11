@@ -1,7 +1,7 @@
 require 'middleman-core'
 require 'middleman-core/cli'
 require 'middleman-core/profiling'
-require_relative 'code_example'
+require_relative 'values/code_example'
 require_relative 'code_example_reader'
 
 class Middleman::Cli::BuildAction

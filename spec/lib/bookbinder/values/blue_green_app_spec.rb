@@ -1,4 +1,4 @@
-require_relative '../../../lib/bookbinder/blue_green_app'
+require_relative '../../../../lib/bookbinder/values/blue_green_app'
 
 module Bookbinder
   describe BlueGreenApp do
