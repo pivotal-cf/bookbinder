@@ -32,6 +32,10 @@ module Bookbinder
     end
 
     def copy(src, dest)
+      unless File.directory?(dest)
+        FileUtils.mkdir_p(dest)
+      end
+
       FileUtils.cp_r src, dest
     end
 

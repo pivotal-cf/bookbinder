@@ -181,7 +181,23 @@ module Bookbinder
           File.write filepath, 'this is some text'
 
           expect { fs_accessor.copy filepath, dest_dir_path }.
-              to change{ File.exist?(File.join dest_dir_path, 'file.txt') }.from(false).to(true)
+              to change { File.exist?(File.join dest_dir_path, 'file.txt') }.from(false).to(true)
+        end
+      end
+
+      context 'when the destination dir does not exist' do
+        it 'creates the destination dir and copies the contents' do
+          fs_accessor = local_file_system_accessor
+
+          Dir.mktmpdir do |tmpdir|
+            dest_dir_path = File.join(tmpdir, 'dest_dir')
+
+            filepath = File.join tmpdir, 'file.txt'
+            File.write filepath, 'this is some text'
+
+            expect { fs_accessor.copy filepath, dest_dir_path }.
+                to change { File.exist?(File.join dest_dir_path, 'file.txt') }.from(false).to(true)
+          end
         end
       end
     end
