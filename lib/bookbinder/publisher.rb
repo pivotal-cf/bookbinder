@@ -17,8 +17,8 @@ module Bookbinder
     end
 
     def publish(subnavs, cli_options, output_paths, publish_config)
-      intermediate_directory = output_paths.fetch(:output_dir)
-      final_app_dir = output_paths.fetch(:final_app_dir)
+      intermediate_directory = output_paths.output_dir
+      final_app_dir = output_paths.final_app_dir
       master_dir = File.join intermediate_directory, 'master_middleman'
       workspace_dir = File.join master_dir, 'source'
       build_directory = File.join master_dir, 'build/.'
@@ -50,7 +50,7 @@ module Bookbinder
       @static_site_generator.run(middleman_dir,
                                  workspace_dir,
                                  publish_config.fetch(:template_variables, {}),
-                                 output_paths[:local_repo_dir],
+                                 output_paths.local_repo_dir,
                                  cli_options[:verbose],
                                  subnavs,
                                  publish_config[:host_for_sitemap],

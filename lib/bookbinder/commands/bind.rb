@@ -2,7 +2,6 @@ require_relative '../dita_section_gatherer_factory'
 require_relative '../archive_menu_configuration'
 require_relative '../values/output_locations'
 require_relative '../values/dita_section'
-require_relative '../directory_helpers'
 require_relative '../errors/cli_error'
 require_relative '../values/section'
 require_relative '../publisher'
@@ -63,7 +62,7 @@ module Bookbinder
 
         @section_repository = Repositories::SectionRepository.new(logger)
         @gem_root = File.expand_path('../../../../', __FILE__)
-        @publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director, file_system_accessor)
+        publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director, file_system_accessor)
 
         bind_source, *options = cli_arguments
 
@@ -71,26 +70,18 @@ module Bookbinder
         @versions = bind_config.fetch(:versions, [])
         @book_repo = bind_config[:book_repo]
 
-        local_repo_dir = (bind_source == 'local') ? File.expand_path('..', context_dir) : nil
-
-        output_paths = {
-          final_app_dir: final_app_directory,
-          local_repo_dir: local_repo_dir,
-          output_dir: File.join(context_dir, output_dir_name),
-          master_middleman_dir: layout_repo_path(local_repo_dir)
-        }
-
         output_locations = OutputLocations.new(
+          context_dir: context_dir,
           final_app_dir: final_app_directory,
-          layout_repo_dir: layout_repo_path(local_repo_dir),
-          output_dir: File.join(context_dir, output_dir_name),
+          layout_repo_dir: layout_repo_path(generate_local_repo_dir(context_dir, bind_source)),
+          local_repo_dir: generate_local_repo_dir(context_dir, bind_source)
         )
 
         prepare_directories(output_locations)
 
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source,
                                                               output_locations.cloned_dita_dir,
-                                                              local_repo_dir,
+                                                              output_locations.local_repo_dir,
                                                               output_locations)
         gathered_dita_sections = dita_gatherer.gather(config.dita_sections || {})
 
@@ -102,7 +93,7 @@ module Bookbinder
 
         cloner = cloner_factory.produce(
           bind_source,
-          local_repo_dir
+          output_locations.local_repo_dir
         )
         sections = gather_sections(
           output_locations.source_for_site_generator,
@@ -115,7 +106,7 @@ module Bookbinder
         success = publisher.publish(
           subnavs,
           {verbose: cli_arguments.include?('--verbose')},
-          output_paths,
+          output_locations,
           archive_menu_config.generate(bind_config, sections)
         )
 
@@ -124,8 +115,7 @@ module Bookbinder
 
       private
 
-      attr_reader :publisher,
-                  :version_control_system,
+      attr_reader :version_control_system,
                   :config_fetcher,
                   :archive_menu_config,
                   :logger,
@@ -138,6 +128,10 @@ module Bookbinder
                   :dita_preprocessor,
                   :cloner_factory,
                   :dita_section_gatherer_factory
+
+      def generate_local_repo_dir(context_dir, bind_source)
+        File.expand_path('..', context_dir) if bind_source == 'local'
+      end
 
       def gather_sections(workspace, cloner, ref_override)
         config.sections.map do |attributes|

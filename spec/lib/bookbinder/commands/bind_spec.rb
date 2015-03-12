@@ -149,7 +149,7 @@ module Bookbinder
             fake_publisher = double(:publisher)
             expect(Publisher).to receive(:new).and_return fake_publisher
             expect(fake_publisher).to receive(:publish) do |sections, cli_options, output_paths, publish_config, git_accessor|
-              expect(output_paths[:master_middleman_dir]).to match('layout-repo')
+              expect(output_paths.layout_repo_dir).to match('layout-repo')
             end
             command.run(['local'])
           end
@@ -218,7 +218,7 @@ module Bookbinder
             fake_publisher = double(:publisher)
             expect(Publisher).to receive(:new).and_return fake_publisher
             expect(fake_publisher).to receive(:publish) do |sections, cli_options, output_paths, publish_config, git_accessor|
-              expect(output_paths[:master_middleman_dir]).to match('layout-repo')
+              expect(output_paths.layout_repo_dir).to match('layout-repo')
             end
             command.run(['github'])
           end
@@ -520,21 +520,13 @@ module Bookbinder
               archive_menu: archive_menu
           }
         end
-        let(:expected_output_paths) do
-          {
-              output_dir: anything,
-              master_middleman_dir: anything,
-              final_app_dir: anything,
-              local_repo_dir: anything
-          }
-        end
 
         before do
           expect(Publisher).to receive(:new).and_return fake_publisher
         end
 
         it 'pass the appropriate arguments to publish from the config' do
-          expect(fake_publisher).to receive(:publish).with anything, expected_cli_options, expected_output_paths, expected_publish_config
+          expect(fake_publisher).to receive(:publish).with anything, expected_cli_options, anything, expected_publish_config
           command.run(['local'])
         end
       end

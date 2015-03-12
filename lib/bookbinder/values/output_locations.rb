@@ -1,11 +1,20 @@
+require_relative '../directory_helpers'
+
 module Bookbinder
   class OutputLocations
-    attr_reader :final_app_dir, :layout_repo_dir, :output_dir
+    attr_reader :final_app_dir, :layout_repo_dir, :local_repo_dir
 
-    def initialize(final_app_dir: nil, layout_repo_dir: nil, output_dir: nil)
+    include DirectoryHelperMethods
+
+    def initialize(final_app_dir: nil, layout_repo_dir: nil, context_dir: nil, local_repo_dir: nil)
       @final_app_dir = final_app_dir
       @layout_repo_dir = layout_repo_dir
-      @output_dir = Pathname(output_dir)
+      @context_dir = Pathname(context_dir)
+      @local_repo_dir = local_repo_dir
+    end
+
+    def output_dir
+      context_dir.join(output_dir_name)
     end
 
     def dita_home_dir
@@ -39,5 +48,9 @@ module Bookbinder
     def dita_subnav_template_path
       source_for_site_generator.join('subnavs', '_dita_subnav_template.erb')
     end
+
+    private
+
+    attr_reader :context_dir
   end
 end
