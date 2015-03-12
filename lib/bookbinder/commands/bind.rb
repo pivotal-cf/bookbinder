@@ -95,12 +95,7 @@ module Bookbinder
           dita_subnav_template_path = File.join(workspace_dir, 'subnavs', '_dita_subnav_template.erb')
         )
 
-        prepare_directories(final_app_directory,
-                            output_dir,
-                            workspace_dir,
-                            master_middleman_dir,
-                            master_dir,
-                            dita_home_dir)
+        prepare_directories(output_locations)
 
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source,
                                                               cloned_dita_dir,
@@ -171,21 +166,16 @@ module Bookbinder
         end
       end
 
-      def prepare_directories(final_app,
-                              output_dir,
-                              middleman_source,
-                              master_middleman_dir,
-                              middleman_dir,
-                              dita_processing_dir)
-        forget_sections(output_dir)
-        file_system_accessor.remove_directory File.join final_app, '.'
-        file_system_accessor.remove_directory dita_processing_dir
+      def prepare_directories(locations)
+        forget_sections(locations.output_dir)
+        file_system_accessor.remove_directory(File.join(locations.final_app_dir, '.'))
+        file_system_accessor.remove_directory(locations.dita_home_dir)
 
-        copy_directory_from_gem 'template_app', final_app
-        copy_directory_from_gem 'master_middleman', middleman_dir
-        file_system_accessor.copy File.join(master_middleman_dir, '.'), middleman_dir
+        copy_directory_from_gem('template_app', locations.final_app_dir)
+        copy_directory_from_gem('master_middleman', locations.site_generator_home)
+        file_system_accessor.copy(File.join(locations.layout_repo_dir, '.'), locations.site_generator_home)
 
-        copy_version_master_middleman(middleman_source)
+        copy_version_master_middleman(locations.source_for_site_generator)
       end
 
       def forget_sections(middleman_scratch)
