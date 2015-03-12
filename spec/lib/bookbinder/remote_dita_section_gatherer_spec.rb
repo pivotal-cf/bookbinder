@@ -62,13 +62,13 @@ module Bookbinder
                                                               view_updater,
                                                               output_locations)
         expected_dita_sections = [
-            DitaSection.new('context_dir/output/dita/dita_sections/dogs',
+            DitaSection.new(Pathname('context_dir/output/dita/dita_sections/dogs'),
                             'dita-section.ditamap',
                             'fantastic/dogs-repo',
                             'dog-sha',
                             'dogs',
                             output_locations),
-            DitaSection.new('context_dir/output/dita/dita_sections/foods/sweet',
+            DitaSection.new(Pathname('context_dir/output/dita/dita_sections/foods/sweet'),
                             'dita-section-two.ditamap',
                             'cool/dogs-repo',
                             'some-sha',
