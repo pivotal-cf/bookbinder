@@ -1,7 +1,6 @@
 module Bookbinder
   class LocalDitaSectionGatherer
     def initialize(output_locations)
-      @local_repo_dir = output_locations.local_repo_dir
       @output_locations = output_locations
     end
 
@@ -11,7 +10,7 @@ module Bookbinder
         full_name = dita_section_config.fetch('repository', {}).fetch('name')
         target_ref = dita_section_config.fetch('repository', {})['ref']
         directory = dita_section_config['directory']
-        path_to_local_copy = File.join local_repo_dir, directory
+        path_to_local_copy = output_locations.local_repo_dir.join(directory)
 
         DitaSection.new(path_to_local_copy,
                         relative_path_to_dita_map,
@@ -24,7 +23,7 @@ module Bookbinder
 
     private
 
-    attr_reader :local_repo_dir, :output_locations
+    attr_reader :output_locations
 
   end
 end

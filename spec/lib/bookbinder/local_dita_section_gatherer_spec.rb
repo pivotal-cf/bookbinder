@@ -23,13 +23,13 @@ module Bookbinder
 
       actual_sections = local_dita_section_gatherer.gather(dita_section_from_config)
       expected_sections = [
-          DitaSection.new('local/dogs',
+          DitaSection.new(Pathname('local/dogs'),
                           'dita-section.ditamap',
                           'fantastic/dogs-repo',
                           'dog-sha',
                           'dogs',
                           output_locations),
-          DitaSection.new('local/foods/sweet',
+          DitaSection.new(Pathname('local/foods/sweet'),
                           'dita-section-two.ditamap',
                           'fantastic/my-docs-repo',
                           'some-sha',

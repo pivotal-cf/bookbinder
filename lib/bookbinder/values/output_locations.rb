@@ -2,7 +2,7 @@ require_relative '../directory_helpers'
 
 module Bookbinder
   class OutputLocations
-    attr_reader :final_app_dir, :layout_repo_dir, :local_repo_dir
+    attr_reader :final_app_dir, :layout_repo_dir
 
     include DirectoryHelperMethods
 
@@ -15,6 +15,10 @@ module Bookbinder
 
     def output_dir
       context_dir.join(output_dir_name)
+    end
+
+    def local_repo_dir
+      Pathname(@local_repo_dir) if @local_repo_dir
     end
 
     def dita_home_dir
