@@ -1,12 +1,12 @@
+require_relative '../dita_section_gatherer_factory'
 require_relative '../archive_menu_configuration'
-require_relative '../book'
-require_relative '../errors/cli_error'
-require_relative '../directory_helpers'
-require_relative '../publisher'
-require_relative '../values/section'
-require_relative '../values/dita_section'
-require_relative '../dita_section_gatherer'
 require_relative '../values/output_locations'
+require_relative '../values/dita_section'
+require_relative '../directory_helpers'
+require_relative '../errors/cli_error'
+require_relative '../values/section'
+require_relative '../publisher'
+require_relative '../book'
 require_relative 'naming'
 
 module Bookbinder
@@ -41,6 +41,7 @@ module Bookbinder
         @context_dir = context_dir
         @dita_preprocessor = dita_preprocessor
         @cloner_factory = cloner_factory
+        @dita_section_gatherer_factory = DitaSectionGathererFactory.new(version_control_system, logger)
       end
 
       def usage
@@ -69,17 +70,26 @@ module Bookbinder
         @versions = bind_config.fetch(:versions, [])
         @book_repo = bind_config[:book_repo]
 
-        output_paths = output_directory_paths(bind_source)
-        master_middleman_dir = output_paths.fetch(:master_middleman_dir)
-        output_dir = output_paths.fetch(:output_dir)
-        master_dir = File.join output_dir, 'master_middleman'
+        local_repo_dir = (bind_source == 'local') ? File.expand_path('..', context_dir) : nil
+
+        output_directory_paths_value = {
+            final_app_dir: final_app_directory,
+            local_repo_dir: local_repo_dir,
+            output_dir: File.join(context_dir, output_dir_name),
+            master_middleman_dir: layout_repo_path(local_repo_dir)
+        }
+        output_paths = output_directory_paths_value
 
         output_locations = OutputLocations.new(
+          final_app_dir = final_app_directory,
+          master_middleman_dir = layout_repo_path(local_repo_dir),
+          output_dir =  File.join(context_dir, output_dir_name),
+          master_dir = File.join(output_dir, 'master_middleman'),
           workspace_dir = File.join(master_dir, 'source'),
           dita_home_dir = File.join(output_dir, 'dita'),
           cloned_dita_dir = File.join(dita_home_dir, 'dita_sections'),
-          html_from_dita_dir = File.join(dita_home_dir, 'html_from_dita'),
-          formatted_dir = File.join(dita_home_dir, 'site_generator_ready'),
+          File.join(dita_home_dir, 'html_from_dita'),
+          File.join(dita_home_dir, 'site_generator_ready'),
           subnavs_for_layout_dir = File.join(workspace_dir, 'subnavs'),
           dita_subnav_template_path = File.join(workspace_dir, 'subnavs', '_dita_subnav_template.erb')
         )
@@ -91,31 +101,11 @@ module Bookbinder
                             master_dir,
                             dita_home_dir)
 
-        dita_section_config_hash = config.dita_sections || {}
-        dita_sections = dita_section_config_hash.map do |dita_section_config|
-          relative_path_to_dita_map = dita_section_config['ditamap_location']
-          full_name = dita_section_config.fetch('repository', {}).fetch('name')
-          target_ref = dita_section_config.fetch('repository', {})['ref']
-          directory = dita_section_config['directory']
-
-          DitaSection.new(nil, relative_path_to_dita_map, full_name, target_ref, directory, output_locations)
-        end
-
-        if bind_source == 'github'
-          dita_section_gatherer = DitaSectionGatherer.new(version_control_system, output_locations, logger)
-          gathered_dita_sections = dita_section_gatherer.gather(dita_sections, to: cloned_dita_dir)
-        else
-          gathered_dita_sections = dita_sections.map do |dita_section|
-            relative_path_to_dita_map = dita_section.ditamap_location
-            full_name = dita_section.full_name
-            target_ref = dita_section.target_ref
-            directory = dita_section.directory
-
-            path_to_local_copy = File.join output_paths[:local_repo_dir], directory
-
-            DitaSection.new(path_to_local_copy, relative_path_to_dita_map, full_name, target_ref, directory, output_locations)
-          end
-        end
+        dita_gatherer = dita_section_gatherer_factory.produce(bind_source,
+                                                              cloned_dita_dir,
+                                                              local_repo_dir,
+                                                              output_locations)
+        gathered_dita_sections = dita_gatherer.gather(config.dita_sections || {})
 
         gathered_dita_sections.each do |dita_section|
           dita_preprocessor.preprocess(dita_section,
@@ -125,7 +115,7 @@ module Bookbinder
 
         cloner = cloner_factory.produce(
           bind_source,
-          output_paths[:local_repo_dir]
+          local_repo_dir
         )
         sections = gather_sections(
           workspace_dir,
@@ -159,7 +149,8 @@ module Bookbinder
                   :server_director,
                   :context_dir,
                   :dita_preprocessor,
-                  :cloner_factory
+                  :cloner_factory,
+                  :dita_section_gatherer_factory
 
       def gather_sections(workspace, cloner, ref_override)
         config.sections.map do |attributes|
@@ -226,16 +217,6 @@ module Bookbinder
         end
       end
 
-      def output_directory_paths(bind_source)
-        local_repo_dir = (bind_source == 'local') ? File.expand_path('..', context_dir) : nil
-
-        {
-          final_app_dir: final_app_directory,
-          local_repo_dir: local_repo_dir,
-          output_dir: File.join(context_dir, output_dir_name),
-          master_middleman_dir: layout_repo_path(local_repo_dir)
-        }
-      end
 
       def bind_config(bind_source)
         arguments = {

@@ -38,8 +38,8 @@ module Bookbinder
     end
 
     def it_correctly_binds_sections_in(dita_book)
-      expect(dita_book.html_files_for_dita_section('dita-section-one')) =~ ['some-guide']
-      expect(dita_book.html_files_for_dita_section('dita-section-two')) =~ ['some-guide']
+      expect(dita_book.html_files_for_dita_section('dita-section-one')).to match_array ['some-guide']
+      expect(dita_book.html_files_for_dita_section('dita-section-two')).to match_array ['some-guide']
 
       expect(dita_book.has_frontmatter('dita-section-one')).to be_truthy
       expect(dita_book.has_frontmatter('dita-section-two')).to be_truthy
@@ -47,12 +47,12 @@ module Bookbinder
       expect(dita_book.has_applied_layout('dita-section-one')).to be_truthy
       expect(dita_book.has_applied_layout('dita-section-two')).to be_truthy
 
-      expect(dita_book.final_images_for('dita-section-one')) =~
-          %w(./final_app/public/dita-section-one/images/image_one.png
-                           ./final_app/public/dita-section-one/images/image_two.jpeg)
-      expect(dita_book.final_images_for('dita-section-two')) =~
-          %w(./final_app/public/dita-section-two/images/image_one.png
-                           ./final_app/public/dita-section-two/images/image_two.jpeg)
+      expect(dita_book.final_images_for('dita-section-one'))
+      .to match_array %w(./final_app/public/dita-section-one/images/image_one.png
+                         ./final_app/public/dita-section-one/images/image_two.jpeg)
+      expect(dita_book.final_images_for('dita-section-two'))
+      .to match_array %w(./final_app/public/dita-section-two/images/image_one.png
+                         ./final_app/public/dita-section-two/images/image_two.jpeg)
 
       expect(dita_book.has_dita_subnav('dita-section-one')).to be_truthy
       expect(dita_book.has_dita_subnav('dita-section-two')).to be_truthy

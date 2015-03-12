@@ -41,7 +41,6 @@ module Bookbinder
                                                dita_section.section_source_for_site_generator)
     end
 
-
     private
 
     attr_reader :dita_converter, :dita_formatter, :local_file_system_accessor
