@@ -11,13 +11,12 @@ require_relative 'naming'
 module Bookbinder
   module Commands
     class Bind
-      VersionUnsupportedError = Class.new(RuntimeError)
-
       include Bookbinder::DirectoryHelperMethods
       include Commands::Naming
 
       def initialize(logger,
                      config_fetcher,
+                     config_factory,
                      archive_menu_config,
                      version_control_system,
                      file_system_accessor,
@@ -31,6 +30,7 @@ module Bookbinder
                      dita_section_gatherer_factory)
         @logger = logger
         @config_fetcher = config_fetcher
+        @config_factory = config_factory
         @archive_menu_config = archive_menu_config
         @version_control_system = version_control_system
         @file_system_accessor = file_system_accessor
@@ -66,7 +66,8 @@ module Bookbinder
 
         bind_source, *options = cli_arguments
 
-        bind_config = bind_config(bind_source)
+        bind_config = config_factory.produce(bind_source)
+
         @versions = bind_config.fetch(:versions, [])
         @book_repo = bind_config[:book_repo]
 
@@ -114,6 +115,7 @@ module Bookbinder
 
       attr_reader :version_control_system,
                   :config_fetcher,
+                  :config_factory,
                   :archive_menu_config,
                   :logger,
                   :file_system_accessor,
@@ -189,84 +191,6 @@ module Bookbinder
 
       def copy_directory_from_gem(dir, output_dir)
         file_system_accessor.copy File.join(@gem_root, "#{dir}/."), output_dir
-      end
-
-      class RemoteBindConfiguration
-        def initialize(logger, version_control_system, config_fetcher)
-          @logger = logger
-          @version_control_system = version_control_system
-          @config_fetcher = config_fetcher
-        end
-
-        def to_h
-          {
-            sections: base_config.sections,
-            book_repo: base_config.book_repo,
-            host_for_sitemap: base_config.public_host,
-            archive_menu: base_config.archive_menu,
-            versions: base_config.versions,
-            template_variables: base_config.template_variables
-          }.tap do |base|
-            base_config.versions.each { |version| base[:sections].concat(sections_from(version)) }
-          end
-        end
-
-        private
-
-        attr_reader :logger, :version_control_system, :config_fetcher
-
-        def base_config
-          @base_config ||= config_fetcher.fetch_config
-        end
-
-        def sections_from(version)
-          Dir.mktmpdir('book_checkout') do |temp_workspace|
-            book = Book.from_remote(logger: logger,
-                                    full_name: base_config.book_repo,
-                                    destination_dir: temp_workspace,
-                                    ref: version,
-                                    git_accessor: version_control_system)
-
-            book_checkout_value = File.join temp_workspace, book.directory
-            config_file = File.join book_checkout_value, 'config.yml'
-            attrs = YAML.load(File.read(config_file))['sections']
-            raise VersionUnsupportedError.new(version) if attrs.nil?
-
-            attrs.map do |section_hash|
-              section_hash['repository']['ref'] = version
-              section_hash['directory'] = File.join(version, section_hash['directory'])
-              section_hash
-            end
-          end
-        end
-      end
-
-      class LocalBindConfiguration
-        def initialize(base_config)
-          @base_config = base_config
-        end
-
-        def to_h
-          {
-            sections: base_config.sections,
-            book_repo: base_config.book_repo,
-            host_for_sitemap: base_config.public_host,
-            archive_menu: base_config.archive_menu,
-            template_variables: base_config.template_variables
-          }
-        end
-
-        private
-
-        attr_reader :base_config
-      end
-
-      def bind_config(bind_source)
-        if binding_from_github?(bind_source)
-          RemoteBindConfiguration.new(logger, version_control_system, config_fetcher).to_h
-        else
-          LocalBindConfiguration.new(config).to_h
-        end
       end
 
       def config
