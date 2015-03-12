@@ -60,10 +60,12 @@ module Bookbinder
       end
 
       def bind_cmd(partial_args = {})
-        Commands::Bind.new(partial_args.fetch(:logger, logger),
+        bind_version_control_system = partial_args.fetch(:version_control_system, SpecGitAccessor)
+        bind_logger = partial_args.fetch(:logger, logger)
+        Commands::Bind.new(bind_logger,
                            partial_args.fetch(:config_fetcher, config_fetcher),
                            partial_args.fetch(:archive_menu_config, archive_menu_config),
-                           partial_args.fetch(:version_control_system, SpecGitAccessor),
+                           bind_version_control_system,
                            partial_args.fetch(:file_system_accessor, file_system_accessor),
                            partial_args.fetch(:static_site_generator, middleman_runner),
                            partial_args.fetch(:sitemap_generator, spider),
@@ -71,7 +73,8 @@ module Bookbinder
                            partial_args.fetch(:server_director, server_director),
                            partial_args.fetch(:context_dir, File.absolute_path('.')),
                            partial_args.fetch(:dita_preprocessor, dita_preprocessor),
-                           partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, SpecGitAccessor)))
+                           partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, SpecGitAccessor)),
+                           DitaSectionGathererFactory.new(bind_version_control_system, bind_logger))
       end
 
       let(:config) { Configuration.new(logger, config_hash) }

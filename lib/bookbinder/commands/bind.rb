@@ -28,7 +28,8 @@ module Bookbinder
                      server_director,
                      context_dir,
                      dita_preprocessor,
-                     cloner_factory)
+                     cloner_factory,
+                     dita_section_gatherer_factory)
         @logger = logger
         @config_fetcher = config_fetcher
         @archive_menu_config = archive_menu_config
@@ -41,7 +42,7 @@ module Bookbinder
         @context_dir = context_dir
         @dita_preprocessor = dita_preprocessor
         @cloner_factory = cloner_factory
-        @dita_section_gatherer_factory = DitaSectionGathererFactory.new(version_control_system, logger)
+        @dita_section_gatherer_factory = dita_section_gatherer_factory
       end
 
       def usage

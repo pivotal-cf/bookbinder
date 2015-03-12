@@ -81,7 +81,8 @@ module Bookbinder
           server_director,
           File.absolute_path('.'),
           dita_preprocessor,
-          Ingest::ClonerFactory.new(logger, version_control_system)
+          Ingest::ClonerFactory.new(logger, version_control_system),
+          DitaSectionGathererFactory.new(version_control_system, logger)
         )
       end
 
