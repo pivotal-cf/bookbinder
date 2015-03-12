@@ -206,7 +206,7 @@ module Bookbinder
           optional_arguments.merge!(versions: config.versions)
         end
 
-        arguments.merge! optional_arguments
+        arguments.merge(optional_arguments)
       end
 
       def config
