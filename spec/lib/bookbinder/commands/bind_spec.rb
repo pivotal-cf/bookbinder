@@ -1,9 +1,9 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
 require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
+require_relative '../../../../lib/bookbinder/dita_preprocessor'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
-require_relative '../../../../lib/bookbinder/local_dita_preprocessor'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/spider'
@@ -77,21 +77,21 @@ module Bookbinder
                            DitaSectionGathererFactory.new(bind_version_control_system, bind_logger))
       end
 
+      let(:book) { 'fantastic/book' }
+      let(:command) { bind_cmd }
       let(:config) { Configuration.new(logger, config_hash) }
       let(:config_fetcher) { double('config fetcher', fetch_config: config) }
-      let(:book) { 'fantastic/book' }
-      let(:logger) { NilLogger.new }
-      let(:file_system_accessor) { LocalFileSystemAccessor.new }
-      let(:middleman_runner) { MiddlemanRunner.new(logger, SpecGitAccessor) }
-      let(:final_app_dir) { File.absolute_path('final_app') }
-      let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
-      let(:server_director) { ServerDirector.new(logger, directory: final_app_dir) }
-      let(:subnav_formatter) { SubnavFormatter.new }
+      let(:dita_preprocessor) { DitaPreprocessor.new(null_dita_to_html_converter, static_site_generator_formatter, file_system_accessor) }
       let(:document_parser) { HtmlDocumentManipulator.new }
-      let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
-      let(:dita_preprocessor) { LocalDitaPreprocessor.new(null_dita_to_html_converter, static_site_generator_formatter, file_system_accessor) }
-      let(:command) { bind_cmd }
+      let(:file_system_accessor) { LocalFileSystemAccessor.new }
+      let(:final_app_dir) { File.absolute_path('final_app') }
       let(:git_client) { GitClient.new }
+      let(:logger) { NilLogger.new }
+      let(:middleman_runner) { MiddlemanRunner.new(logger, SpecGitAccessor) }
+      let(:server_director) { ServerDirector.new(logger, directory: final_app_dir) }
+      let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
+      let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
+      let(:subnav_formatter) { SubnavFormatter.new }
 
       describe 'local' do
         let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }

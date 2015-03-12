@@ -4,9 +4,9 @@ end
 require_relative '../configuration_fetcher'
 require_relative '../configuration_validator'
 require_relative '../dita_html_to_middleman_formatter'
+require_relative '../dita_preprocessor'
 require_relative '../html_document_manipulator'
 require_relative '../ingest/cloner_factory'
-require_relative '../local_dita_preprocessor'
 require_relative '../local_dita_to_html_converter'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
@@ -136,7 +136,7 @@ module Bookbinder
 
       def dita_preprocessor
         @dita_preprocessor ||=
-            LocalDitaPreprocessor.new(local_dita_processor,
+            DitaPreprocessor.new(local_dita_processor,
                                  dita_html_to_middleman_formatter,
                                  local_file_system_accessor)
       end

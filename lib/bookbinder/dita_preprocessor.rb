@@ -1,7 +1,7 @@
 require_relative 'values/subnav'
 
 module Bookbinder
-  class LocalDitaPreprocessor
+  class DitaPreprocessor
 
     def initialize(dita_converter, dita_formatter, local_file_system_accessor)
       @dita_converter = dita_converter
