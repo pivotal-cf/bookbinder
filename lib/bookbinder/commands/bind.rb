@@ -192,36 +192,32 @@ module Bookbinder
       end
 
       class RemoteBindConfiguration
-        def initialize(logger, version_control_system, base_config)
+        def initialize(logger, version_control_system, config_fetcher)
           @logger = logger
           @version_control_system = version_control_system
-          @base_config = base_config
+          @config_fetcher = config_fetcher
         end
 
         def to_h
-          base = {
+          {
             sections: base_config.sections,
             book_repo: base_config.book_repo,
             host_for_sitemap: base_config.public_host,
             archive_menu: base_config.archive_menu,
-            versions: base_config.versions
-          }
-
-          optional =
-            if base_config.respond_to?(:template_variables)
-              { template_variables: base_config.template_variables }
-            else
-              {}
-            end
-
-          base_config.versions.each { |version| base[:sections].concat(sections_from(version)) }
-
-          base.merge(optional)
+            versions: base_config.versions,
+            template_variables: base_config.template_variables
+          }.tap do |base|
+            base_config.versions.each { |version| base[:sections].concat(sections_from(version)) }
+          end
         end
 
         private
 
-        attr_reader :logger, :version_control_system, :base_config
+        attr_reader :logger, :version_control_system, :config_fetcher
+
+        def base_config
+          @base_config ||= config_fetcher.fetch_config
+        end
 
         def sections_from(version)
           Dir.mktmpdir('book_checkout') do |temp_workspace|
@@ -251,21 +247,13 @@ module Bookbinder
         end
 
         def to_h
-          base = {
+          {
             sections: base_config.sections,
             book_repo: base_config.book_repo,
             host_for_sitemap: base_config.public_host,
-            archive_menu: base_config.archive_menu
+            archive_menu: base_config.archive_menu,
+            template_variables: base_config.template_variables
           }
-
-          optional =
-            if base_config.respond_to?(:template_variables)
-              { template_variables: base_config.template_variables }
-            else
-              {}
-            end
-
-          base.merge(optional)
         end
 
         private
@@ -275,7 +263,7 @@ module Bookbinder
 
       def bind_config(bind_source)
         if binding_from_github?(bind_source)
-          RemoteBindConfiguration.new(logger, version_control_system, config).to_h
+          RemoteBindConfiguration.new(logger, version_control_system, config_fetcher).to_h
         else
           LocalBindConfiguration.new(config).to_h
         end
