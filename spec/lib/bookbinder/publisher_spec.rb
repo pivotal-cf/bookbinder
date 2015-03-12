@@ -1,9 +1,10 @@
-require_relative '../../helpers/spec_git_accessor'
-require_relative '../../helpers/nil_logger'
-require_relative '../../../lib/bookbinder/publisher'
-require_relative '../../../lib/bookbinder/spider'
 require_relative '../../../lib/bookbinder/book'
 require_relative '../../../lib/bookbinder/middleman_runner'
+require_relative '../../../lib/bookbinder/publisher'
+require_relative '../../../lib/bookbinder/spider'
+require_relative '../../../lib/bookbinder/values/output_locations'
+require_relative '../../helpers/nil_logger'
+require_relative '../../helpers/spec_git_accessor'
 require_relative '../../helpers/use_fixture_repo'
 
 module Bookbinder
@@ -12,18 +13,18 @@ module Bookbinder
       use_fixture_repo
 
       def publish(logger, spider, static_site_generator, final_app_dir, master_middleman_dir, output_dir, server_director)
-        cli_options =   { verbose: false }
-        output_paths =  {
-              output_dir: output_dir,
-              master_middleman_dir: master_middleman_dir,
-              final_app_dir: final_app_dir,
-              local_repo_dir: nil
-        }
+        cli_options = { verbose: false }
+        output_paths = OutputLocations.new(
+          context_dir: File.join(output_dir, '..'),
+          layout_repo_dir: master_middleman_dir,
+          final_app_dir: final_app_dir,
+          local_repo_dir: nil
+        )
         publish_config = {
-              sections: [],
-              host_for_sitemap: 'example.com',
-              pdf: nil,
-              book_repo: 'some-repo/some-book',
+          sections: [],
+          host_for_sitemap: 'example.com',
+          pdf: nil,
+          book_repo: 'some-repo/some-book',
         }
 
         fs_accessor = double('file_system_accessor')

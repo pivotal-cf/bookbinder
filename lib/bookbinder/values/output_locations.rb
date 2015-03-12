@@ -9,7 +9,7 @@ module Bookbinder
     def initialize(final_app_dir: nil, layout_repo_dir: nil, context_dir: nil, local_repo_dir: nil)
       @final_app_dir = final_app_dir
       @layout_repo_dir = layout_repo_dir
-      @context_dir = Pathname(context_dir)
+      @context_dir = context_dir
       @local_repo_dir = local_repo_dir
     end
 
@@ -51,6 +51,8 @@ module Bookbinder
 
     private
 
-    attr_reader :context_dir
+    def context_dir
+      Pathname(@context_dir)
+    end
   end
 end

@@ -79,10 +79,7 @@ module Bookbinder
 
         prepare_directories(output_locations)
 
-        dita_gatherer = dita_section_gatherer_factory.produce(bind_source,
-                                                              output_locations.cloned_dita_dir,
-                                                              output_locations.local_repo_dir,
-                                                              output_locations)
+        dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
         gathered_dita_sections = dita_gatherer.gather(config.dita_sections || {})
 
         gathered_dita_sections.each do |dita_section|

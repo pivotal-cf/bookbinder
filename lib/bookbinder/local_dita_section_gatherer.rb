@@ -1,7 +1,7 @@
 module Bookbinder
   class LocalDitaSectionGatherer
-    def initialize(local_repo_dir, output_locations)
-      @local_repo_dir = local_repo_dir
+    def initialize(output_locations)
+      @local_repo_dir = output_locations.local_repo_dir
       @output_locations = output_locations
     end
 
