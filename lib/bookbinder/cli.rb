@@ -39,7 +39,7 @@ module Bookbinder
       begin
         command_runner.run command_name, command_arguments
 
-      rescue Commands::Bind::VersionUnsupportedError => e
+      rescue Config::RemoteBindConfiguration::VersionUnsupportedError => e
         logger.error "config.yml at version '#{e.message}' has an unsupported API."
         1
       rescue Configuration::CredentialKeyError => e
@@ -58,7 +58,7 @@ module Bookbinder
     end
 
     private
-    
+
     attr_reader :version_control_system
 
   end

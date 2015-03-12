@@ -1,4 +1,5 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
+require_relative '../../../../lib/bookbinder/config/bind_config_factory'
 require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
 require_relative '../../../../lib/bookbinder/dita_preprocessor'
@@ -62,8 +63,10 @@ module Bookbinder
       def bind_cmd(partial_args = {})
         bind_version_control_system = partial_args.fetch(:version_control_system, SpecGitAccessor)
         bind_logger = partial_args.fetch(:logger, logger)
+        bind_config_fetcher = partial_args.fetch(:config_fetcher, config_fetcher)
         Commands::Bind.new(bind_logger,
-                           partial_args.fetch(:config_fetcher, config_fetcher),
+                           bind_config_fetcher,
+                           partial_args.fetch(:bind_config_factory, Config::BindConfigFactory.new(bind_logger, bind_version_control_system, bind_config_fetcher)),
                            partial_args.fetch(:archive_menu_config, archive_menu_config),
                            bind_version_control_system,
                            partial_args.fetch(:file_system_accessor, file_system_accessor),
@@ -297,7 +300,7 @@ module Bookbinder
 
               expect {
                 command.run ['github']
-              }.to raise_error(Commands::Bind::VersionUnsupportedError)
+              }.to raise_error(Config::RemoteBindConfiguration::VersionUnsupportedError)
             end
           end
         end

@@ -13,6 +13,7 @@ require_relative '../middleman_runner'
 require_relative '../spider'
 require_relative '../subnav_formatter'
 require_relative '../yaml_loader'
+require_relative '../config/bind_config_factory'
 
 module Bookbinder
   module Repositories
@@ -69,6 +70,7 @@ module Bookbinder
         @bind ||= Commands::Bind.new(
           logger,
           configuration_fetcher,
+          bind_config_factory,
           ArchiveMenuConfiguration.new(
             loader: config_loader,
             config_filename: 'bookbinder.yml'
@@ -163,6 +165,10 @@ module Bookbinder
 
       def local_file_system_accessor
         @local_file_system_accessor ||= LocalFileSystemAccessor.new
+      end
+
+      def bind_config_factory
+        @bind_config_factory  ||= Config::BindConfigFactory.new(logger, version_control_system, configuration_fetcher)
       end
     end
   end
