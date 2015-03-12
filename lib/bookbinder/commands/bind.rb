@@ -192,25 +192,32 @@ module Bookbinder
       end
 
       def bind_config(bind_source)
-        arguments = {
+        base = {
             sections: config.sections,
             book_repo: config.book_repo,
             host_for_sitemap: config.public_host,
             archive_menu: config.archive_menu
         }
 
-        optional_arguments = {}
-        optional_arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
-        if binding_from_github? bind_source
-          config.versions.each { |version| arguments[:sections].concat sections_from version }
-          optional_arguments.merge!(versions: config.versions)
+        optional =
+          if config.respond_to?(:template_variables)
+            { template_variables: config.template_variables }
+          else
+            {}
+          end
+
+        if binding_from_github?(bind_source)
+          config.versions.each { |version| base[:sections].concat(sections_from(version)) }
         end
 
-        arguments.merge(optional_arguments)
-      end
+        bind_source_dependent_config =
+          if binding_from_github?(bind_source)
+            { versions: config.versions }
+          else
+            {}
+          end
 
-      def config
-        config_fetcher.fetch_config
+        base.merge(optional).merge(bind_source_dependent_config)
       end
 
       def sections_from(version)
@@ -233,6 +240,10 @@ module Bookbinder
             section_hash
           end
         end
+      end
+
+      def config
+        config_fetcher.fetch_config
       end
 
       def layout_repo_path(local_repo_dir)
