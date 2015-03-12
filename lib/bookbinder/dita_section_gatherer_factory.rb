@@ -8,11 +8,11 @@ module Bookbinder
       @view_updater = view_updater
     end
 
-    def produce(source_location, cloned_dita_dir, local_repo_dir, output_locations)
+    def produce(source_location, output_locations)
       if source_location == 'github'
-        RemoteDitaSectionGatherer.new(version_control_system, view_updater, cloned_dita_dir, output_locations)
+        RemoteDitaSectionGatherer.new(version_control_system, view_updater, output_locations)
       else
-        LocalDitaSectionGatherer.new(local_repo_dir, output_locations)
+        LocalDitaSectionGatherer.new(output_locations)
       end
     end
 

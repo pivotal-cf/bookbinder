@@ -3,10 +3,10 @@ require_relative '../../lib/bookbinder/values/dita_section'
 
 module Bookbinder
   class RemoteDitaSectionGatherer
-    def initialize(version_control_system, view_updater, cloned_dita_dir, output_locations)
+    def initialize(version_control_system, view_updater, output_locations)
       @version_control_system = version_control_system
       @view_updater = view_updater
-      @cloned_dita_dir = cloned_dita_dir
+      @cloned_dita_dir = output_locations.cloned_dita_dir
       @output_locations = output_locations
     end
 
@@ -17,7 +17,7 @@ module Bookbinder
                                      dita_section_config['directory'],
                                      path: cloned_dita_dir)
 
-        DitaSection.new(File.join(cloned_dita_dir, dita_section_config['directory']),
+        DitaSection.new(cloned_dita_dir.join(dita_section_config['directory']),
                         dita_section_config['ditamap_location'],
                         dita_section_config.fetch('repository', {}).fetch('name'),
                         dita_section_config.fetch('repository', {})['ref'],

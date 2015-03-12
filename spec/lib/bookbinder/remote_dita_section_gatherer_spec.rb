@@ -1,4 +1,5 @@
 require_relative '../../../lib/bookbinder/remote_dita_section_gatherer'
+require_relative '../../../lib/bookbinder/values/output_locations'
 
 module Bookbinder
   describe RemoteDitaSectionGatherer do
@@ -19,21 +20,23 @@ module Bookbinder
 
         view_updater = double('view_updater')
         version_control_system = double('version_control_system')
-        dita_section_gatherer = RemoteDitaSectionGatherer.new(version_control_system,
-                                                              view_updater,
-                                                              'cloned_dita_dir',
-                                                              nil)
+        dita_section_gatherer = RemoteDitaSectionGatherer.new(
+          version_control_system,
+          view_updater,
+          OutputLocations.new(context_dir: 'context_dir')
+        )
 
         allow(view_updater).to receive(:log)
+        path = Pathname('context_dir/output/dita/dita_sections')
         expect(version_control_system).to receive(:clone)
                                           .with('git@github.com:fantastic/dita-repo',
                                                 'dogs',
-                                                path: 'cloned_dita_dir')
+                                                path: path)
 
         expect(version_control_system).to receive(:clone)
                                           .with('git@github.com:cool/dita-repo',
                                                 'foods/sweet',
-                                                path: 'cloned_dita_dir')
+                                                path: path)
 
         dita_section_gatherer.gather(dita_section_from_config)
       end
@@ -54,28 +57,29 @@ module Bookbinder
 
         view_updater = double('view_updater')
         version_control_system = double('version_control_system')
+        output_locations = OutputLocations.new(context_dir: 'context_dir')
         dita_section_gatherer = RemoteDitaSectionGatherer.new(version_control_system,
                                                               view_updater,
-                                                              'cloned_dita_dir',
-                                                              nil)
+                                                              output_locations)
         expected_dita_sections = [
-            DitaSection.new('cloned_dita_dir/dogs',
+            DitaSection.new(Pathname('context_dir/output/dita/dita_sections/dogs'),
                             'dita-section.ditamap',
                             'fantastic/dogs-repo',
                             'dog-sha',
                             'dogs',
-                            nil),
-            DitaSection.new('cloned_dita_dir/foods/sweet',
+                            output_locations),
+            DitaSection.new(Pathname('context_dir/output/dita/dita_sections/foods/sweet'),
                             'dita-section-two.ditamap',
                             'cool/dogs-repo',
                             'some-sha',
                             'foods/sweet',
-                            nil)
+                            output_locations)
         ]
 
         allow(view_updater).to receive(:log)
         allow(version_control_system).to receive(:clone)
-        expect(dita_section_gatherer.gather(dita_section_from_config)).to match_array expected_dita_sections
+        expect(dita_section_gatherer.gather(dita_section_from_config)[0]).to eq(expected_dita_sections[0])
+        expect(dita_section_gatherer.gather(dita_section_from_config)[1]).to eq(expected_dita_sections[1])
       end
 
       it 'updates the user on its progress' do
@@ -94,10 +98,11 @@ module Bookbinder
 
         version_control_system = double('version_control_system')
         view_updater = double('view_updater')
-        dita_section_gatherer = RemoteDitaSectionGatherer.new(version_control_system,
-                                                              view_updater,
-                                                              'cloned_dita_dir',
-                                                              nil)
+        dita_section_gatherer = RemoteDitaSectionGatherer.new(
+          version_control_system,
+          view_updater,
+          OutputLocations.new(context_dir: 'context_dir')
+        )
         allow(version_control_system).to receive(:clone)
         expect(view_updater).to receive(:log).with("Gathering \e[36mfantastic/dita-repo\e[0m")
         expect(view_updater).to receive(:log).with("Gathering \e[36mcool/dita-repo\e[0m")

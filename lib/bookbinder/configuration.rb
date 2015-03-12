@@ -132,7 +132,7 @@ module Bookbinder
     end
 
     CONFIG_REQUIRED_KEYS = %w(book_repo public_host)
-    CONFIG_OPTIONAL_KEYS = %w(archive_menu dita_sections layout_repo versions pdf_index cred_repo pdf)
+    CONFIG_OPTIONAL_KEYS = %w(archive_menu layout_repo versions pdf_index cred_repo pdf)
 
     CONFIG_REQUIRED_KEYS.each do |method_name|
       define_method(method_name) do
@@ -148,6 +148,10 @@ module Bookbinder
 
     def sections
       config.fetch('sections', [])
+    end
+
+    def dita_sections
+      config.fetch('dita_sections', {})
     end
 
     def has_option?(key)

@@ -1,9 +1,9 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
 require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
+require_relative '../../../../lib/bookbinder/dita_preprocessor'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
-require_relative '../../../../lib/bookbinder/local_dita_preprocessor'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/spider'
@@ -60,10 +60,12 @@ module Bookbinder
       end
 
       def bind_cmd(partial_args = {})
-        Commands::Bind.new(partial_args.fetch(:logger, logger),
+        bind_version_control_system = partial_args.fetch(:version_control_system, SpecGitAccessor)
+        bind_logger = partial_args.fetch(:logger, logger)
+        Commands::Bind.new(bind_logger,
                            partial_args.fetch(:config_fetcher, config_fetcher),
                            partial_args.fetch(:archive_menu_config, archive_menu_config),
-                           partial_args.fetch(:version_control_system, SpecGitAccessor),
+                           bind_version_control_system,
                            partial_args.fetch(:file_system_accessor, file_system_accessor),
                            partial_args.fetch(:static_site_generator, middleman_runner),
                            partial_args.fetch(:sitemap_generator, spider),
@@ -71,24 +73,25 @@ module Bookbinder
                            partial_args.fetch(:server_director, server_director),
                            partial_args.fetch(:context_dir, File.absolute_path('.')),
                            partial_args.fetch(:dita_preprocessor, dita_preprocessor),
-                           partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, SpecGitAccessor)))
+                           partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, SpecGitAccessor)),
+                           DitaSectionGathererFactory.new(bind_version_control_system, bind_logger))
       end
 
+      let(:book) { 'fantastic/book' }
+      let(:command) { bind_cmd }
       let(:config) { Configuration.new(logger, config_hash) }
       let(:config_fetcher) { double('config fetcher', fetch_config: config) }
-      let(:book) { 'fantastic/book' }
-      let(:logger) { NilLogger.new }
-      let(:file_system_accessor) { LocalFileSystemAccessor.new }
-      let(:middleman_runner) { MiddlemanRunner.new(logger, SpecGitAccessor) }
-      let(:final_app_dir) { File.absolute_path('final_app') }
-      let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
-      let(:server_director) { ServerDirector.new(logger, directory: final_app_dir) }
-      let(:subnav_formatter) { SubnavFormatter.new }
+      let(:dita_preprocessor) { DitaPreprocessor.new(null_dita_to_html_converter, static_site_generator_formatter, file_system_accessor) }
       let(:document_parser) { HtmlDocumentManipulator.new }
-      let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
-      let(:dita_preprocessor) { LocalDitaPreprocessor.new(null_dita_to_html_converter, static_site_generator_formatter, file_system_accessor) }
-      let(:command) { bind_cmd }
+      let(:file_system_accessor) { LocalFileSystemAccessor.new }
+      let(:final_app_dir) { File.absolute_path('final_app') }
       let(:git_client) { GitClient.new }
+      let(:logger) { NilLogger.new }
+      let(:middleman_runner) { MiddlemanRunner.new(logger, SpecGitAccessor) }
+      let(:server_director) { ServerDirector.new(logger, directory: final_app_dir) }
+      let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
+      let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
+      let(:subnav_formatter) { SubnavFormatter.new }
 
       describe 'local' do
         let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
@@ -146,7 +149,7 @@ module Bookbinder
             fake_publisher = double(:publisher)
             expect(Publisher).to receive(:new).and_return fake_publisher
             expect(fake_publisher).to receive(:publish) do |sections, cli_options, output_paths, publish_config, git_accessor|
-              expect(output_paths[:master_middleman_dir]).to match('layout-repo')
+              expect(output_paths.layout_repo_dir).to match('layout-repo')
             end
             command.run(['local'])
           end
@@ -215,7 +218,7 @@ module Bookbinder
             fake_publisher = double(:publisher)
             expect(Publisher).to receive(:new).and_return fake_publisher
             expect(fake_publisher).to receive(:publish) do |sections, cli_options, output_paths, publish_config, git_accessor|
-              expect(output_paths[:master_middleman_dir]).to match('layout-repo')
+              expect(output_paths.layout_repo_dir).to match('layout-repo')
             end
             command.run(['github'])
           end
@@ -517,21 +520,13 @@ module Bookbinder
               archive_menu: archive_menu
           }
         end
-        let(:expected_output_paths) do
-          {
-              output_dir: anything,
-              master_middleman_dir: anything,
-              final_app_dir: anything,
-              local_repo_dir: anything
-          }
-        end
 
         before do
           expect(Publisher).to receive(:new).and_return fake_publisher
         end
 
         it 'pass the appropriate arguments to publish from the config' do
-          expect(fake_publisher).to receive(:publish).with anything, expected_cli_options, expected_output_paths, expected_publish_config
+          expect(fake_publisher).to receive(:publish).with anything, expected_cli_options, anything, expected_publish_config
           command.run(['local'])
         end
       end

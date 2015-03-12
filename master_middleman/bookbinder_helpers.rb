@@ -30,26 +30,16 @@ module Bookbinder
                                attributes,
                                local_repo_dir,
                                git_accessor).
-              tap { |repo| repo.copy_from_local(workspace) }
+                               tap { |repo| repo.copy_from_local(workspace) }
           else
             GitHubRepository.
               build_from_remote(bookbinder_logger, attributes, git_accessor).
               tap { |repo| repo.copy_from_remote(workspace, 'master') }
           end
-        example = code_example_repo.get_instance(attributes,
-                                                 vcs_repo: vcs_repo,
-                                                 build: ->(path_to_repository,
-                                                     full_name,
-                                                     copied,
-                                                     _,
-                                                     destination_dir,
-                                                     directory_name) {
-                                                   CodeExample.new(path_to_repository,
-                                                                   full_name,
-                                                                   copied,
-                                                                   destination_dir,
-                                                                   directory_name)
-        })
+        example = code_example_repo.get_instance(attributes, vcs_repo: vcs_repo) {
+          |path, name, copied, _, dest, directory|
+          CodeExample.new(path, name, copied, dest, directory)
+        }
         snippet, language = code_example_reader.get_snippet_and_language_at(at,
                                                                             example.path_to_repository,
                                                                             example.copied,

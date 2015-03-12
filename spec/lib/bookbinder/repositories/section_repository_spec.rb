@@ -16,8 +16,7 @@ module Bookbinder
 
           vcs_repo = double 'vcs_repo', path_to_local_repo: 'path/to/repo', full_name: 'org/repo', copied_to: 'path/to/repo', copied?: true, directory: 'repo'
           repository.get_instance({'repository' => {'name' => 'foo/book'}},
-                                  vcs_repo: vcs_repo,
-                                  build: ->(*args) { Section.new(*args) })
+                                  vcs_repo: vcs_repo) { |*args| Section.new(*args) }
         end
 
         context 'if the repo is not a hash' do
@@ -27,8 +26,7 @@ module Bookbinder
             expect {
               repository.get_instance({ 'repository' => 'foo/definitely-not-around' },
                                       vcs_repo: vcs_repo,
-                                      destination_dir: local_repo_dir,
-                                      build: ->(*args) { Section.new(*args) })
+                                      destination_dir: local_repo_dir) { |*args| Section.new(*args) }
             }.to raise_error(RuntimeError,
                              "section repository 'foo/definitely-not-around' is not a hash")
           end
@@ -41,8 +39,7 @@ module Bookbinder
             expect {
               repository.get_instance({ 'repository' => { some_key: 'test' }},
                                       vcs_repo: vcs_repo,
-                                      destination_dir: local_repo_dir,
-                                      build: ->(*args) { Section.new(*args) })
+                                      destination_dir: local_repo_dir) { |*args| Section.new(*args) }
             }.to raise_error(RuntimeError,
                              "section repository '{:some_key=>\"test\"}' missing name key")
           end

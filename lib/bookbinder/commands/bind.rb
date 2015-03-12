@@ -2,7 +2,6 @@ require_relative '../dita_section_gatherer_factory'
 require_relative '../archive_menu_configuration'
 require_relative '../values/output_locations'
 require_relative '../values/dita_section'
-require_relative '../directory_helpers'
 require_relative '../errors/cli_error'
 require_relative '../values/section'
 require_relative '../publisher'
@@ -28,7 +27,8 @@ module Bookbinder
                      server_director,
                      context_dir,
                      dita_preprocessor,
-                     cloner_factory)
+                     cloner_factory,
+                     dita_section_gatherer_factory)
         @logger = logger
         @config_fetcher = config_fetcher
         @archive_menu_config = archive_menu_config
@@ -41,7 +41,7 @@ module Bookbinder
         @context_dir = context_dir
         @dita_preprocessor = dita_preprocessor
         @cloner_factory = cloner_factory
-        @dita_section_gatherer_factory = DitaSectionGathererFactory.new(version_control_system, logger)
+        @dita_section_gatherer_factory = dita_section_gatherer_factory
       end
 
       def usage
@@ -62,7 +62,7 @@ module Bookbinder
 
         @section_repository = Repositories::SectionRepository.new(logger)
         @gem_root = File.expand_path('../../../../', __FILE__)
-        @publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director, file_system_accessor)
+        publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director, file_system_accessor)
 
         bind_source, *options = cli_arguments
 
@@ -70,55 +70,30 @@ module Bookbinder
         @versions = bind_config.fetch(:versions, [])
         @book_repo = bind_config[:book_repo]
 
-        local_repo_dir = (bind_source == 'local') ? File.expand_path('..', context_dir) : nil
-
-        output_directory_paths_value = {
-            final_app_dir: final_app_directory,
-            local_repo_dir: local_repo_dir,
-            output_dir: File.join(context_dir, output_dir_name),
-            master_middleman_dir: layout_repo_path(local_repo_dir)
-        }
-        output_paths = output_directory_paths_value
-
         output_locations = OutputLocations.new(
-          final_app_dir = final_app_directory,
-          master_middleman_dir = layout_repo_path(local_repo_dir),
-          output_dir =  File.join(context_dir, output_dir_name),
-          master_dir = File.join(output_dir, 'master_middleman'),
-          workspace_dir = File.join(master_dir, 'source'),
-          dita_home_dir = File.join(output_dir, 'dita'),
-          cloned_dita_dir = File.join(dita_home_dir, 'dita_sections'),
-          File.join(dita_home_dir, 'html_from_dita'),
-          File.join(dita_home_dir, 'site_generator_ready'),
-          subnavs_for_layout_dir = File.join(workspace_dir, 'subnavs'),
-          dita_subnav_template_path = File.join(workspace_dir, 'subnavs', '_dita_subnav_template.erb')
+          context_dir: context_dir,
+          final_app_dir: final_app_directory,
+          layout_repo_dir: layout_repo_path(generate_local_repo_dir(context_dir, bind_source)),
+          local_repo_dir: generate_local_repo_dir(context_dir, bind_source)
         )
 
-        prepare_directories(final_app_directory,
-                            output_dir,
-                            workspace_dir,
-                            master_middleman_dir,
-                            master_dir,
-                            dita_home_dir)
+        prepare_directories(output_locations)
 
-        dita_gatherer = dita_section_gatherer_factory.produce(bind_source,
-                                                              cloned_dita_dir,
-                                                              local_repo_dir,
-                                                              output_locations)
-        gathered_dita_sections = dita_gatherer.gather(config.dita_sections || {})
+        dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
+        gathered_dita_sections = dita_gatherer.gather(config.dita_sections)
 
         gathered_dita_sections.each do |dita_section|
           dita_preprocessor.preprocess(dita_section,
-                                       subnavs_for_layout_dir,
-                                       dita_subnav_template_path)
+                                       output_locations.subnavs_for_layout_dir,
+                                       output_locations.dita_subnav_template_path)
         end
 
         cloner = cloner_factory.produce(
           bind_source,
-          local_repo_dir
+          output_locations.local_repo_dir
         )
         sections = gather_sections(
-          workspace_dir,
+          output_locations.source_for_site_generator,
           cloner,
           ('master' if options.include?('--ignore-section-refs'))
         )
@@ -128,7 +103,7 @@ module Bookbinder
         success = publisher.publish(
           subnavs,
           {verbose: cli_arguments.include?('--verbose')},
-          output_paths,
+          output_locations,
           archive_menu_config.generate(bind_config, sections)
         )
 
@@ -137,8 +112,7 @@ module Bookbinder
 
       private
 
-      attr_reader :publisher,
-                  :version_control_system,
+      attr_reader :version_control_system,
                   :config_fetcher,
                   :archive_menu_config,
                   :logger,
@@ -152,6 +126,10 @@ module Bookbinder
                   :cloner_factory,
                   :dita_section_gatherer_factory
 
+      def generate_local_repo_dir(context_dir, bind_source)
+        File.expand_path('..', context_dir) if bind_source == 'local'
+      end
+
       def gather_sections(workspace, cloner, ref_override)
         config.sections.map do |attributes|
           target_ref = ref_override ||
@@ -163,36 +141,24 @@ module Bookbinder
                                  ref: target_ref,
                                  parent_dir: workspace,
                                  dir_name: directory)
-          @section_repository.get_instance(attributes,
-                                           vcs_repo: vcs_repo,
-                                           destination_dir: workspace,
-                                           build: ->(*args) { Section.new(*args) })
+          @section_repository.get_instance(
+            attributes,
+            vcs_repo: vcs_repo,
+            destination_dir: workspace
+          ) { |*args| Section.new(*args) }
         end
       end
 
-      def prepare_directories(final_app,
-                              output_dir,
-                              middleman_source,
-                              master_middleman_dir,
-                              middleman_dir,
-                              dita_processing_dir)
-        forget_sections(output_dir)
-        file_system_accessor.remove_directory File.join final_app, '.'
-        file_system_accessor.remove_directory dita_processing_dir
+      def prepare_directories(locations)
+        forget_sections(locations.output_dir)
+        file_system_accessor.remove_directory(File.join(locations.final_app_dir, '.'))
+        file_system_accessor.remove_directory(locations.dita_home_dir)
 
-        copy_directory_from_gem 'template_app', final_app
-        copy_directory_from_gem 'master_middleman', middleman_dir
-        file_system_accessor.copy File.join(master_middleman_dir, '.'), middleman_dir
+        copy_directory_from_gem('template_app', locations.final_app_dir)
+        copy_directory_from_gem('master_middleman', locations.site_generator_home)
+        file_system_accessor.copy(File.join(locations.layout_repo_dir, '.'), locations.site_generator_home)
 
-        copy_version_master_middleman(middleman_source)
-      end
-
-      def forget_sections(middleman_scratch)
-        file_system_accessor.remove_directory File.join middleman_scratch, '.'
-      end
-
-      def copy_directory_from_gem(dir, output_dir)
-        file_system_accessor.copy File.join(@gem_root, "#{dir}/."), output_dir
+        copy_version_master_middleman(locations.source_for_site_generator)
       end
 
       # Copy the index file from each version into the version's directory. Because version
@@ -217,49 +183,106 @@ module Bookbinder
         end
       end
 
+      def forget_sections(middleman_scratch)
+        file_system_accessor.remove_directory File.join middleman_scratch, '.'
+      end
 
-      def bind_config(bind_source)
-        arguments = {
-            sections: config.sections,
-            book_repo: config.book_repo,
-            host_for_sitemap: config.public_host,
-            archive_menu: config.archive_menu
-        }
+      def copy_directory_from_gem(dir, output_dir)
+        file_system_accessor.copy File.join(@gem_root, "#{dir}/."), output_dir
+      end
 
-        optional_arguments = {}
-        optional_arguments.merge!(template_variables: config.template_variables) if config.respond_to?(:template_variables)
-        if binding_from_github? bind_source
-          config.versions.each { |version| arguments[:sections].concat sections_from version }
-          optional_arguments.merge!(versions: config.versions)
+      class RemoteBindConfiguration
+        def initialize(logger, version_control_system, base_config)
+          @logger = logger
+          @version_control_system = version_control_system
+          @base_config = base_config
         end
 
-        arguments.merge! optional_arguments
+        def to_h
+          base = {
+            sections: base_config.sections,
+            book_repo: base_config.book_repo,
+            host_for_sitemap: base_config.public_host,
+            archive_menu: base_config.archive_menu,
+            versions: base_config.versions
+          }
+
+          optional =
+            if base_config.respond_to?(:template_variables)
+              { template_variables: base_config.template_variables }
+            else
+              {}
+            end
+
+          base_config.versions.each { |version| base[:sections].concat(sections_from(version)) }
+
+          base.merge(optional)
+        end
+
+        private
+
+        attr_reader :logger, :version_control_system, :base_config
+
+        def sections_from(version)
+          Dir.mktmpdir('book_checkout') do |temp_workspace|
+            book = Book.from_remote(logger: logger,
+                                    full_name: base_config.book_repo,
+                                    destination_dir: temp_workspace,
+                                    ref: version,
+                                    git_accessor: version_control_system)
+
+            book_checkout_value = File.join temp_workspace, book.directory
+            config_file = File.join book_checkout_value, 'config.yml'
+            attrs = YAML.load(File.read(config_file))['sections']
+            raise VersionUnsupportedError.new(version) if attrs.nil?
+
+            attrs.map do |section_hash|
+              section_hash['repository']['ref'] = version
+              section_hash['directory'] = File.join(version, section_hash['directory'])
+              section_hash
+            end
+          end
+        end
+      end
+
+      class LocalBindConfiguration
+        def initialize(base_config)
+          @base_config = base_config
+        end
+
+        def to_h
+          base = {
+            sections: base_config.sections,
+            book_repo: base_config.book_repo,
+            host_for_sitemap: base_config.public_host,
+            archive_menu: base_config.archive_menu
+          }
+
+          optional =
+            if base_config.respond_to?(:template_variables)
+              { template_variables: base_config.template_variables }
+            else
+              {}
+            end
+
+          base.merge(optional)
+        end
+
+        private
+
+        attr_reader :base_config
+      end
+
+      def bind_config(bind_source)
+        if binding_from_github?(bind_source)
+          RemoteBindConfiguration.new(logger, version_control_system, config).to_h
+        else
+          LocalBindConfiguration.new(config).to_h
+        end
       end
 
       def config
         config_fetcher.fetch_config
-      end
-
-      def sections_from(version)
-        Dir.mktmpdir('book_checkout') do |temp_workspace|
-          book = Book.from_remote(logger: logger,
-                                  full_name: config.book_repo,
-                                  destination_dir: temp_workspace,
-                                  ref: version,
-                                  git_accessor: version_control_system,
-          )
-
-          book_checkout_value = File.join temp_workspace, book.directory
-          config_file = File.join book_checkout_value, 'config.yml'
-          attrs = YAML.load(File.read(config_file))['sections']
-          raise VersionUnsupportedError.new(version) if attrs.nil?
-
-          attrs.map do |section_hash|
-            section_hash['repository']['ref'] = version
-            section_hash['directory'] = File.join(version, section_hash['directory'])
-            section_hash
-          end
-        end
       end
 
       def layout_repo_path(local_repo_dir)

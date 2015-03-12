@@ -1,10 +1,10 @@
 require 'yaml'
 
 require_relative '../helpers/use_fixture_repo'
-require_relative '../helpers/middleman'
+require_relative '../helpers/redirection'
 
 describe 'generating a book' do
-  include Bookbinder::SpecHelperMethods
+  include Bookbinder::Redirection
 
   use_fixture_repo
 
@@ -17,7 +17,7 @@ describe 'generating a book' do
   let(:gem_root) { File.expand_path('../../../', __FILE__) }
 
   it 'provides the production host to the ERB templates' do
-    silence_io_streams do
+    swallow_stdout do
       `#{gem_root}/install_bin/bookbinder bind local`
     end
 
@@ -45,7 +45,7 @@ YAML
     end
 
     it 'uses the provided layout' do
-      silence_io_streams do
+      swallow_stdout do
         `#{gem_root}/install_bin/bookbinder bind local`
       end
 
