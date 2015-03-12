@@ -161,14 +161,6 @@ module Bookbinder
         copy_version_master_middleman(locations.source_for_site_generator)
       end
 
-      def forget_sections(middleman_scratch)
-        file_system_accessor.remove_directory File.join middleman_scratch, '.'
-      end
-
-      def copy_directory_from_gem(dir, output_dir)
-        file_system_accessor.copy File.join(@gem_root, "#{dir}/."), output_dir
-      end
-
       # Copy the index file from each version into the version's directory. Because version
       # subdirectories are sections, this is the only way they get content from their master
       # middleman directory.
@@ -189,6 +181,14 @@ module Bookbinder
             end
           end
         end
+      end
+
+      def forget_sections(middleman_scratch)
+        file_system_accessor.remove_directory File.join middleman_scratch, '.'
+      end
+
+      def copy_directory_from_gem(dir, output_dir)
+        file_system_accessor.copy File.join(@gem_root, "#{dir}/."), output_dir
       end
 
       def bind_config(bind_source)
