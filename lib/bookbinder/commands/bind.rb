@@ -141,10 +141,11 @@ module Bookbinder
                                  ref: target_ref,
                                  parent_dir: workspace,
                                  dir_name: directory)
-          @section_repository.get_instance(attributes,
-                                           vcs_repo: vcs_repo,
-                                           destination_dir: workspace,
-                                           build: ->(*args) { Section.new(*args) })
+          @section_repository.get_instance(
+            attributes,
+            vcs_repo: vcs_repo,
+            destination_dir: workspace
+          ) { |*args| Section.new(*args) }
         end
       end
 

@@ -10,7 +10,7 @@ module Bookbinder
       def get_instance(attributes,
                        vcs_repo: nil,
                        destination_dir: Dir.mktmpdir,
-                       build: nil)
+                       &build)
         repository_config = attributes['repository']
         raise "section repository '#{repository_config}' is not a hash" unless repository_config.is_a?(Hash)
         raise "section repository '#{repository_config}' missing name key" unless repository_config['name']
