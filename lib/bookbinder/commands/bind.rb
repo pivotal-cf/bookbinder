@@ -191,54 +191,93 @@ module Bookbinder
         file_system_accessor.copy File.join(@gem_root, "#{dir}/."), output_dir
       end
 
-      def bind_config(bind_source)
-        base = {
-            sections: config.sections,
-            book_repo: config.book_repo,
-            host_for_sitemap: config.public_host,
-            archive_menu: config.archive_menu
-        }
-
-        optional =
-          if config.respond_to?(:template_variables)
-            { template_variables: config.template_variables }
-          else
-            {}
-          end
-
-        if binding_from_github?(bind_source)
-          config.versions.each { |version| base[:sections].concat(sections_from(version)) }
+      class RemoteBindConfiguration
+        def initialize(logger, version_control_system, base_config)
+          @logger = logger
+          @version_control_system = version_control_system
+          @base_config = base_config
         end
 
-        bind_source_dependent_config =
-          if binding_from_github?(bind_source)
-            { versions: config.versions }
-          else
-            {}
-          end
+        def to_h
+          base = {
+            sections: base_config.sections,
+            book_repo: base_config.book_repo,
+            host_for_sitemap: base_config.public_host,
+            archive_menu: base_config.archive_menu,
+            versions: base_config.versions
+          }
 
-        base.merge(optional).merge(bind_source_dependent_config)
+          optional =
+            if base_config.respond_to?(:template_variables)
+              { template_variables: base_config.template_variables }
+            else
+              {}
+            end
+
+          base_config.versions.each { |version| base[:sections].concat(sections_from(version)) }
+
+          base.merge(optional)
+        end
+
+        private
+
+        attr_reader :logger, :version_control_system, :base_config
+
+        def sections_from(version)
+          Dir.mktmpdir('book_checkout') do |temp_workspace|
+            book = Book.from_remote(logger: logger,
+                                    full_name: base_config.book_repo,
+                                    destination_dir: temp_workspace,
+                                    ref: version,
+                                    git_accessor: version_control_system)
+
+            book_checkout_value = File.join temp_workspace, book.directory
+            config_file = File.join book_checkout_value, 'config.yml'
+            attrs = YAML.load(File.read(config_file))['sections']
+            raise VersionUnsupportedError.new(version) if attrs.nil?
+
+            attrs.map do |section_hash|
+              section_hash['repository']['ref'] = version
+              section_hash['directory'] = File.join(version, section_hash['directory'])
+              section_hash
+            end
+          end
+        end
       end
 
-      def sections_from(version)
-        Dir.mktmpdir('book_checkout') do |temp_workspace|
-          book = Book.from_remote(logger: logger,
-                                  full_name: config.book_repo,
-                                  destination_dir: temp_workspace,
-                                  ref: version,
-                                  git_accessor: version_control_system,
-          )
+      class LocalBindConfiguration
+        def initialize(base_config)
+          @base_config = base_config
+        end
 
-          book_checkout_value = File.join temp_workspace, book.directory
-          config_file = File.join book_checkout_value, 'config.yml'
-          attrs = YAML.load(File.read(config_file))['sections']
-          raise VersionUnsupportedError.new(version) if attrs.nil?
+        def to_h
+          base = {
+            sections: base_config.sections,
+            book_repo: base_config.book_repo,
+            host_for_sitemap: base_config.public_host,
+            archive_menu: base_config.archive_menu
+          }
 
-          attrs.map do |section_hash|
-            section_hash['repository']['ref'] = version
-            section_hash['directory'] = File.join(version, section_hash['directory'])
-            section_hash
-          end
+          optional =
+            if base_config.respond_to?(:template_variables)
+              { template_variables: base_config.template_variables }
+            else
+              {}
+            end
+
+          base.merge(optional)
+        end
+
+        private
+
+        attr_reader :base_config
+      end
+
+      def bind_config(bind_source)
+        if binding_from_github?(bind_source)
+          RemoteBindConfiguration.new(logger, version_control_system, config).to_h
+        else
+          LocalBindConfiguration.new(config).to_h
         end
       end
 
