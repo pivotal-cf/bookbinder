@@ -1,7 +1,7 @@
 require_relative '../bookbinder/values/dita_section'
 
 module Bookbinder
-  class LocalDitaToHtmlConverter
+  class DitaToHtmlConverter
     DitaToHtmlLibraryFailure = Class.new(RuntimeError)
 
     def initialize(sheller, path_to_dita_ot_library)
