@@ -40,7 +40,11 @@ module Bookbinder
     end
 
     def copy_contents(src, dest)
-      contents = Dir.glob File.join(src, '**')
+      unless File.directory?(dest)
+        FileUtils.mkdir_p(dest)
+      end
+
+      contents = Dir.glob File.join(src, '**/*')
       contents.each do |dir|
         FileUtils.cp_r dir, dest
       end

@@ -220,6 +220,25 @@ module Bookbinder
               to change{ File.exist? File.join(dest_dir_path, 'file.txt') }.from(false).to(true)
         end
       end
+
+      context 'when the destination directory does not exists' do
+        it 'creates the directory and copies the contents to a specified location' do
+          fs_accessor = local_file_system_accessor
+
+          Dir.mktmpdir do |tmpdir|
+            dest_dir_path = File.join(tmpdir, 'dest_dir')
+            source_dir_path = File.join tmpdir, 'source_dir'
+
+            FileUtils.mkdir_p(source_dir_path)
+
+            filepath = File.join source_dir_path, 'file.txt'
+            File.write filepath, 'this is some text'
+
+            expect { fs_accessor.copy_contents source_dir_path, dest_dir_path }.
+                to change{ File.exist? File.join(dest_dir_path, 'file.txt') }.from(false).to(true)
+          end
+        end
+      end
     end
 
     describe 'renaming a file' do
