@@ -28,7 +28,7 @@ module Bookbinder
         application.bind_book_from_github(dita_book, silent: true) do
           expect(github.received_clone_with_urls(
                      %w(git@github.com:my-org/my-dita-section-one
-                        git@github.com:my-org/my-dita-section-two)
+                        git@github.com:my-org/dita-section-dependency)
                  )
           ).to be_truthy
 
@@ -38,27 +38,23 @@ module Bookbinder
     end
 
     def it_correctly_binds_sections_in(dita_book)
-      expect(dita_book.html_files_for_dita_section('dita-section-one')).to match_array ['some-guide']
-      expect(dita_book.html_files_for_dita_section('dita-section-two')).to match_array ['some-guide']
+      expect(dita_book.html_files_for_dita_section('dita-section-one')).to match_array ['some-guide', '../dita-section-dependency/some-guide-1']
 
       expect(dita_book.has_frontmatter('dita-section-one')).to be_truthy
-      expect(dita_book.has_frontmatter('dita-section-two')).to be_truthy
 
       expect(dita_book.has_applied_layout('dita-section-one')).to be_truthy
-      expect(dita_book.has_applied_layout('dita-section-two')).to be_truthy
 
       expect(dita_book.final_images_for('dita-section-one'))
       .to match_array %w(./final_app/public/dita-section-one/images/image_one.png
                          ./final_app/public/dita-section-one/images/image_two.jpeg)
-      expect(dita_book.final_images_for('dita-section-two'))
-      .to match_array %w(./final_app/public/dita-section-two/images/image_one.png
-                         ./final_app/public/dita-section-two/images/image_two.jpeg)
+
+      expect(dita_book.final_images_for('dita-section-dependency'))
+      .to match_array %w(./final_app/public/dita-section-dependency/images/image_one_dependency.jpeg
+                         ./final_app/public/dita-section-dependency/images/image_two_dependency.png)
 
       expect(dita_book.has_dita_subnav('dita-section-one')).to be_truthy
-      expect(dita_book.has_dita_subnav('dita-section-two')).to be_truthy
 
-      expect(dita_book.exposes_subnav_links_for_js('dita-section-one')).to be_truthy
-      expect(dita_book.exposes_subnav_links_for_js('dita-section-two')).to be_truthy
+      expect(dita_book.exposes_subnav_links_for_js).to be_truthy
     end
   end
 end

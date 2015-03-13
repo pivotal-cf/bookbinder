@@ -27,6 +27,7 @@ module Bookbinder
                 "-Doutput.dir=#{write_to} " +
                 "-Dtranstype='tocjs' " +
                 "-Ddita.temp.dir='/tmp/bookbinder_dita' " +
+                "-Dgenerate.copy.outer='2' " +
                 "-Dargs.input=#{absolute_path_to_ditamap} "
 
       begin

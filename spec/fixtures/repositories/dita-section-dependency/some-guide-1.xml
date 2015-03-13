@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
 <concept id="something">
-  <title>my topic 2</title>
+  <title>my topic dependency</title>
   <conbody>
-    <image href="images/image_one.png"></image>
-    <image href="images/image_two.jpeg"></image>
+    <image href="images/image_one_dependency.png"></image>
+    <image href="images/image_two_dependency.jpeg"></image>
   </conbody>
 </concept>

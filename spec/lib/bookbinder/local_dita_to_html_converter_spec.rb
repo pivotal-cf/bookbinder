@@ -8,7 +8,7 @@ module Bookbinder
     describe 'processing sections' do
       let(:path_to_dita_ot_library) { '/path/to/dita/ot' }
 
-      it 'runs the dita-processing library against the given ditamap and css locations' do
+      it 'runs the dita-processing library against the given ditamap locations' do
         shell = double('shell_out')
         processed_dita_location = '/path/to/processed/dita/boo'
         classpath = '/path/to/dita/ot/lib/xercesImpl.jar:' +
@@ -32,6 +32,7 @@ module Bookbinder
                                '-Doutput.dir=/path/to/processed/dita/boo ' +
                                "-Dtranstype='tocjs' " +
                                "-Ddita.temp.dir='/tmp/bookbinder_dita' " +
+                               "-Dgenerate.copy.outer='2' " +
                                '-Dargs.input=/local/path/to/repo/path/to/map.ditamap '
                          )
         dita_converter.convert_to_html(dita_section, write_to: processed_dita_location)

@@ -20,4 +20,7 @@
       navtitle="Some guide" print="yes" scope="local" toc="yes"
       type="concept"/>
   </frontmatter>
+  <part>
+    <topicref href="../dita-section-dependency/some-guide-1.xml" />
+  </part>
 </bookmap>

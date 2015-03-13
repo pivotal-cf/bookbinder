@@ -31,13 +31,13 @@ module Bookbinder
       topics(dita_section).all? { |topic| has_dita_subnav? topic }
     end
 
-    def exposes_subnav_links_for_js(dita_section)
-      text = File.read("./output/master_middleman/source/subnavs/#{dita_section}_subnav.erb")
+    def exposes_subnav_links_for_js
+      text = File.read("./output/master_middleman/source/subnavs/dita_subnav.erb")
       doc = Nokogiri::XML(text)
       props = doc.css('.nav-content').first.attr('data-props-location')
 
-      !File.zero?("./output/master_middleman/source/subnavs/#{dita_section}-props.json") &&
-          (props == "#{dita_section}-props.json")
+      !File.zero?("./output/master_middleman/source/subnavs/dita-subnav-props.json") &&
+          (props == "dita-subnav-props.json")
     end
 
     private
@@ -76,7 +76,7 @@ module Bookbinder
       doc = Nokogiri::HTML(text)
 
       text.include?('<div class="nav-content"') &&
-          doc.css('.nav-content').first.attr('data-props-location').present?
+          doc.css('.nav-content').first.attr('data-props-location') == 'dita-subnav-props.json'
     end
 
     def has_frontmatter?(topic)

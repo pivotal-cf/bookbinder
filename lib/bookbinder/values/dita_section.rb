@@ -7,7 +7,7 @@ module Bookbinder
                            :output_locations) do
                              def subnav
                                namespace = directory.gsub('/', '_')
-                               template = "#{directory}_subnav"
+                               template = "dita_subnav"
                                {namespace => template}
                              end
 

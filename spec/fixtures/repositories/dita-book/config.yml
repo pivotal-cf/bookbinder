@@ -10,8 +10,7 @@ dita_sections:
   ditamap_location: example.ditamap
 
 - repository:
-    name: my-org/my-dita-section-two
-  directory: dita-section-two
-  ditamap_location: example.ditamap
+    name: my-org/dita-section-dependency
+  directory: dita-section-dependency
 
 public_host: something-irrelevant.cfapps.io
