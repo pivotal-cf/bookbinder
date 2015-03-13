@@ -57,10 +57,11 @@ module Bookbinder
         dita_formatter = DitaHtmlToMiddlemanFormatter.new(nil, subnav_formatter, doc_manipulator)
 
         dita_section = DitaSection.new('path/to/local/repo',
-                                         'relative/path/to/ditamap',
-                                         'org/my_dita_section',
-                                         nil,
-                                         'my_dita_section')
+                                       'relative/path/to/ditamap',
+                                       nil,
+                                       'org/my_dita_section',
+                                       nil,
+                                       'my_dita_section')
 
 
 

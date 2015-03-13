@@ -18,6 +18,11 @@ module Bookbinder
       topics(dita_section).all? { |topic| has_applied_layout? topic }
     end
 
+    def uses_dita_filterd_values(dita_section, included_text, excluded_text)
+      topics(dita_section).all? { |topic| contains_text? topic, included_text } &&
+      topics(dita_section).all? { |topic| !contains_text? topic, excluded_text }
+    end
+
     def has_frontmatter(dita_section)
       topics(dita_section).all? { |topic| has_frontmatter? topic }
     end
@@ -88,6 +93,9 @@ module Bookbinder
       final_text.include? "---\ntitle: \"#{sanitized_topicname}\"\ndita: true\n---\n"
     end
 
+    def contains_text?(topic, text)
+      File.read(topic.final_path).include?(text)
+    end
   end
 
   Topic = Struct.new(:final_path, :site_generator_ready_path, :raw_dita_path, :name)

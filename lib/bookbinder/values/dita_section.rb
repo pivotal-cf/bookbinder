@@ -1,6 +1,7 @@
 module Bookbinder
   DitaSection = Struct.new(:path_to_local_repo,
                            :ditamap_location,
+                           :ditaval_location,
                            :full_name,
                            :target_ref,
                            :directory,
@@ -21,6 +22,14 @@ module Bookbinder
 
                              def section_source_for_site_generator
                                File.join(output_locations.source_for_site_generator, directory)
+                             end
+
+                             def absolute_path_to_ditamap
+                               ditamap_location ? File.join(path_to_local_repo, ditamap_location) : nil
+                             end
+
+                             def absolute_path_to_ditaval
+                               ditaval_location ? File.join(path_to_local_repo, ditaval_location) : nil
                              end
                            end
 end

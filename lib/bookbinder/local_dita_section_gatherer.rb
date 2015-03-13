@@ -7,6 +7,7 @@ module Bookbinder
     def gather(dita_section_config_hash)
       dita_section_config_hash.map do |dita_section_config|
         relative_path_to_dita_map = dita_section_config['ditamap_location']
+        relative_path_to_dita_val = dita_section_config['ditaval_location']
         full_name = dita_section_config.fetch('repository', {}).fetch('name')
         target_ref = dita_section_config.fetch('repository', {})['ref']
         directory = dita_section_config['directory']
@@ -14,6 +15,7 @@ module Bookbinder
 
         DitaSection.new(path_to_local_copy,
                         relative_path_to_dita_map,
+                        relative_path_to_dita_val,
                         full_name,
                         target_ref,
                         directory,

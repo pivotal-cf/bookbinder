@@ -8,6 +8,7 @@ dita_sections:
     name: my-org/my-dita-section-one
   directory: dita-section-one
   ditamap_location: example.ditamap
+  ditaval_location: dita-filter.ditaval
 
 - repository:
     name: my-org/dita-section-dependency

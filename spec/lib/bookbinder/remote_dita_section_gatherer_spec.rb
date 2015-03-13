@@ -10,12 +10,12 @@ module Bookbinder
                 'name' => 'fantastic/dita-repo',
                 'ref' => 'dog-sha'},
              'directory' => 'dogs',
-             'ditamap_location' => 'dita-section.ditamap'},
+             'ditamap_location' => 'dita-section.ditamap',
+             'ditaval_location' => 'dita-val.ditaval' },
             {'repository' => {
                 'name' => 'cool/dita-repo',
                 'ref' => 'some-sha'},
-             'directory' => 'foods/sweet',
-             'ditamap_location' => 'dita-section-two.ditamap'},
+             'directory' => 'foods/sweet'},
         ]
 
         view_updater = double('view_updater')
@@ -47,12 +47,12 @@ module Bookbinder
                 'name' => 'fantastic/dogs-repo',
                 'ref' => 'dog-sha'},
              'directory' => 'dogs',
-             'ditamap_location' => 'dita-section.ditamap'},
+             'ditamap_location' => 'dita-section.ditamap',
+             'ditaval_location' => 'dita-val.ditaval' },
             {'repository' => {
                 'name' => 'cool/dogs-repo',
                 'ref' => 'some-sha'},
-             'directory' => 'foods/sweet',
-             'ditamap_location' => 'dita-section-two.ditamap'},
+             'directory' => 'foods/sweet'},
         ]
 
         view_updater = double('view_updater')
@@ -64,12 +64,14 @@ module Bookbinder
         expected_dita_sections = [
             DitaSection.new(Pathname('context_dir/output/dita/dita_sections/dogs'),
                             'dita-section.ditamap',
+                            'dita-val.ditaval',
                             'fantastic/dogs-repo',
                             'dog-sha',
                             'dogs',
                             output_locations),
             DitaSection.new(Pathname('context_dir/output/dita/dita_sections/foods/sweet'),
-                            'dita-section-two.ditamap',
+                            nil,
+                            nil,
                             'cool/dogs-repo',
                             'some-sha',
                             'foods/sweet',
@@ -88,12 +90,12 @@ module Bookbinder
                 'name' => 'fantastic/dita-repo',
                 'ref' => 'dog-sha'},
              'directory' => 'dogs',
-             'ditamap_location' => 'dita-section.ditamap'},
+             'ditamap_location' => 'dita-section.ditamap',
+             'ditaval_location' => 'dita-val.ditaval' },
             {'repository' => {
                 'name' => 'cool/dita-repo',
                 'ref' => 'some-sha'},
-             'directory' => 'foods/sweet',
-             'ditamap_location' => 'dita-section-two.ditamap'},
+             'directory' => 'foods/sweet'},
         ]
 
         version_control_system = double('version_control_system')

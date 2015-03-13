@@ -13,24 +13,26 @@ module Bookbinder
               'name' => 'fantastic/dogs-repo',
               'ref' => 'dog-sha'},
            'directory' => 'dogs',
-           'ditamap_location' => 'dita-section.ditamap'},
+           'ditamap_location' => 'dita-section.ditamap',
+           'ditaval_location' => 'dita-val.ditaval'},
           {'repository' => {
               'name' => 'fantastic/my-docs-repo',
               'ref' => 'some-sha'},
-           'directory' => 'foods/sweet',
-           'ditamap_location' => 'dita-section-two.ditamap'},
+           'directory' => 'foods/sweet'},
       ]
 
       actual_sections = local_dita_section_gatherer.gather(dita_section_from_config)
       expected_sections = [
           DitaSection.new(Pathname('local/dogs'),
                           'dita-section.ditamap',
+                          'dita-val.ditaval',
                           'fantastic/dogs-repo',
                           'dog-sha',
                           'dogs',
                           output_locations),
           DitaSection.new(Pathname('local/foods/sweet'),
-                          'dita-section-two.ditamap',
+                          nil,
+                          nil,
                           'fantastic/my-docs-repo',
                           'some-sha',
                           'foods/sweet',

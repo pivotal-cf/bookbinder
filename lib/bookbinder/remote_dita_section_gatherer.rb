@@ -19,6 +19,7 @@ module Bookbinder
 
         DitaSection.new(cloned_dita_dir.join(dita_section_config['directory']),
                         dita_section_config['ditamap_location'],
+                        dita_section_config['ditaval_location'],
                         dita_section_config.fetch('repository', {}).fetch('name'),
                         dita_section_config.fetch('repository', {})['ref'],
                         dita_section_config['directory'],

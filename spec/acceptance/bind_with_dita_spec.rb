@@ -20,7 +20,7 @@ module Bookbinder
     end
 
     context 'from Github' do
-      it 'clones the dita sections from github, converts them into html' do
+      it 'clones the dita sections from github, converts them into html, including .ditaval variables' do
         github = GithubStub.new
         application = Application.new(github)
         dita_book = BookFixture.new('dita-book', SectionSource.remote)
@@ -38,11 +38,16 @@ module Bookbinder
     end
 
     def it_correctly_binds_sections_in(dita_book)
-      expect(dita_book.html_files_for_dita_section('dita-section-one')).to match_array ['some-guide', '../dita-section-dependency/some-guide-1']
+      expect(dita_book.html_files_for_dita_section('dita-section-one')).
+          to match_array ['some-guide', '../dita-section-dependency/some-guide-1']
 
       expect(dita_book.has_frontmatter('dita-section-one')).to be_truthy
 
       expect(dita_book.has_applied_layout('dita-section-one')).to be_truthy
+
+      expect(dita_book.uses_dita_filterd_values('dita-section-one',
+                                                'Include-me!',
+                                                'Exclude-me!')).to be_truthy
 
       expect(dita_book.final_images_for('dita-section-one'))
       .to match_array %w(./final_app/public/dita-section-one/images/image_one.png

@@ -10,7 +10,6 @@ module Bookbinder
     end
 
     def convert_to_html(dita_section, write_to: nil)
-      absolute_path_to_ditamap = File.join dita_section.path_to_local_repo, dita_section.ditamap_location
       classpath = "#{path_to_dita_ot_library}/lib/xercesImpl.jar:" +
                   "#{path_to_dita_ot_library}/lib/xml-apis.jar:" +
                   "#{path_to_dita_ot_library}/lib/resolver.jar:" +
@@ -28,7 +27,11 @@ module Bookbinder
                 "-Dtranstype='tocjs' " +
                 "-Ddita.temp.dir='/tmp/bookbinder_dita' " +
                 "-Dgenerate.copy.outer='2' " +
-                "-Dargs.input=#{absolute_path_to_ditamap} "
+                "-Dargs.input=#{dita_section.absolute_path_to_ditamap} "
+
+      if dita_section.absolute_path_to_ditaval
+        command += "-Dargs.filter=#{dita_section.absolute_path_to_ditaval} "
+      end
 
       begin
         sheller.run_command(command)
