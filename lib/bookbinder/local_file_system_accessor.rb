@@ -50,14 +50,10 @@ module Bookbinder
       end
     end
 
-    def copy_named_directory_with_path(dir_name, src, dest)
-      contents = Dir.glob File.join(src, "**/#{dir_name}")
-      contents.each do |dir|
-        relative_path_to_dir = relative_path_from(src, dir)
-        extended_dest = File.join dest, relative_path_to_dir
-        FileUtils.mkdir_p extended_dest
-        copy_contents dir, extended_dest
-      end
+    def copy_including_intermediate_dirs(file, root, dest)
+      path_within_destination = relative_path_from(root, file)
+      extended_dest = File.dirname(File.join dest, path_within_destination)
+      copy file, extended_dest
     end
 
     def rename_file(path, new_name)
@@ -66,7 +62,7 @@ module Bookbinder
     end
 
     def find_files_with_ext(ext, path)
-      Dir[File.join path, '**/*'].select { |file| File.basename(file).match(ext) }
+      Dir[File.join path, '**/*'].select { |file| File.basename(file).include?(".#{ext}") }
     end
 
     def relative_path_from(src, target)
