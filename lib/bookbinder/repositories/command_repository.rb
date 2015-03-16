@@ -78,7 +78,7 @@ module Bookbinder
           version_control_system,
           local_file_system_accessor,
           middleman_runner,
-          sitemap_writer,
+          PostProduction::SitemapWriter.build(logger, final_app_directory, sitemap_port),
           final_app_directory,
           File.absolute_path('.'),
           dita_preprocessor,
@@ -100,10 +100,6 @@ module Bookbinder
           logger,
           configuration_fetcher
         )
-      end
-
-      def sitemap_writer
-        PostProduction::SitemapWriter.build(logger, final_app_directory)
       end
 
       def middleman_runner
@@ -161,6 +157,10 @@ module Bookbinder
 
       def bind_config_factory
         @bind_config_factory  ||= Config::BindConfigFactory.new(logger, version_control_system, configuration_fetcher)
+      end
+
+      def sitemap_port
+        41722
       end
     end
   end

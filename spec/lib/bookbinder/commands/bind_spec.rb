@@ -82,6 +82,10 @@ module Bookbinder
                            DitaSectionGathererFactory.new(bind_version_control_system, bind_logger))
       end
 
+      def random_port
+        rand(49152..65535)
+      end
+
       let(:book) { 'fantastic/book' }
       let(:command) { bind_cmd }
       let(:config) { Configuration.new(logger, config_hash) }
@@ -93,7 +97,7 @@ module Bookbinder
       let(:git_client) { GitClient.new }
       let(:logger) { NilLogger.new }
       let(:middleman_runner) { MiddlemanRunner.new(logger, SpecGitAccessor) }
-      let(:sitemap_writer) { PostProduction::SitemapWriter.build(logger, final_app_dir) }
+      let(:sitemap_writer) { PostProduction::SitemapWriter.build(logger, final_app_dir, random_port) }
       let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
       let(:subnav_formatter) { SubnavFormatter.new }
 
