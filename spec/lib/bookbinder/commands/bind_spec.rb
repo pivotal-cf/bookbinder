@@ -420,27 +420,27 @@ module Bookbinder
         end
       end
 
-      describe 'generates a site-map' do
+      describe 'generating a site-map' do
         context 'when the hostname is not a single string' do
           it 'raises' do
-            expect do
-              sections = [
-                  { 'repository' => {'name' => 'org/dogs-repo'} }
-              ]
+            sections = [
+              { 'repository' => {'name' => 'org/dogs-repo'} }
+            ]
 
-              config_hash = {
-                  'sections' => sections,
-                  'book_repo' => book,
-                  'pdf_index' => [],
-                  'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
-              }
+            config_hash = {
+              'sections' => sections,
+              'book_repo' => book,
+              'pdf_index' => [],
+              'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
+            }
 
-              config = Configuration.new(logger, config_hash)
-              config_fetcher = double('config fetcher', fetch_config: config)
+            config = Configuration.new(logger, config_hash)
+            config_fetcher = double('config fetcher', fetch_config: config)
 
-              command = bind_cmd(config_fetcher: config_fetcher)
-              command.run(['github'])
-            end.to raise_error "Your public host must be a single String."
+            command = bind_cmd(config_fetcher: config_fetcher)
+
+            expect { command.run(['github']) }.
+              to raise_error "Your public host must be a single String."
           end
         end
 
