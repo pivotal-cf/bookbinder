@@ -2,17 +2,15 @@ require 'middleman-syntax'
 require_relative 'deprecated_logger'
 require_relative 'directory_helpers'
 require_relative 'repositories/section_repository'
-require_relative 'server_director'
 
 module Bookbinder
   class Publisher
     include DirectoryHelperMethods
 
-    def initialize(logger, spider, static_site_generator, server_director, file_system_accessor)
+    def initialize(logger, sitemap_writer, static_site_generator, file_system_accessor)
       @logger = logger
-      @spider = spider
+      @sitemap_writer = sitemap_writer
       @static_site_generator = static_site_generator
-      @server_director = server_director
       @file_system_accessor = file_system_accessor
     end
 
@@ -29,7 +27,7 @@ module Bookbinder
       host_for_sitemap = publish_config.fetch(:host_for_sitemap)
 
       generate_site(cli_options, output_paths, publish_config, master_dir, workspace_dir, subnavs, build_directory, public_directory)
-      result = generate_sitemap(host_for_sitemap, @spider)
+      result = generate_sitemap(host_for_sitemap)
 
       @logger.log "Bookbinder bound your book into #{final_app_dir.to_s.green}"
 
@@ -38,16 +36,11 @@ module Bookbinder
 
     private
 
-    attr_reader :section_repository, :logger, :file_system_accessor
+    attr_reader :section_repository, :logger, :file_system_accessor, :sitemap_writer
 
-    def generate_sitemap(host_for_sitemap, spider)
+    def generate_sitemap(host_for_sitemap)
       raise "Your public host must be a single String." unless host_for_sitemap.is_a?(String)
-
-      @server_director.use_server { |port|
-        spider.generate_sitemap host_for_sitemap, port
-      }.tap do |sitemap|
-        File.write(sitemap.to_path, sitemap.to_xml)
-      end
+      sitemap_writer.write(host_for_sitemap)
     end
 
     def generate_site(cli_options, output_paths, publish_config, middleman_dir, workspace_dir, subnavs, build_dir, public_dir)

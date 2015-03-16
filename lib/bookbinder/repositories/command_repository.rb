@@ -10,7 +10,7 @@ require_relative '../ingest/cloner_factory'
 require_relative '../dita_to_html_converter'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
-require_relative '../spider'
+require_relative '../post_production/sitemap_writer'
 require_relative '../subnav_formatter'
 require_relative '../yaml_loader'
 require_relative '../config/bind_config_factory'
@@ -78,9 +78,8 @@ module Bookbinder
           version_control_system,
           local_file_system_accessor,
           middleman_runner,
-          spider,
+          sitemap_writer,
           final_app_directory,
-          server_director,
           File.absolute_path('.'),
           dita_preprocessor,
           Ingest::ClonerFactory.new(logger, version_control_system),
@@ -103,15 +102,8 @@ module Bookbinder
         )
       end
 
-      def spider
-        @spider ||= Spider.new(logger, app_dir: final_app_directory)
-      end
-
-      def server_director
-        @server_director ||= ServerDirector.new(
-          logger,
-          directory: final_app_directory
-        )
+      def sitemap_writer
+        PostProduction::SitemapWriter.build(logger, final_app_directory)
       end
 
       def middleman_runner

@@ -21,9 +21,8 @@ module Bookbinder
                      version_control_system,
                      file_system_accessor,
                      static_site_generator,
-                     sitemap_generator,
+                     sitemap_writer,
                      final_app_directory,
-                     server_director,
                      context_dir,
                      dita_preprocessor,
                      cloner_factory,
@@ -35,9 +34,8 @@ module Bookbinder
         @version_control_system = version_control_system
         @file_system_accessor = file_system_accessor
         @static_site_generator = static_site_generator
-        @sitemap_generator = sitemap_generator
+        @sitemap_writer = sitemap_writer
         @final_app_directory = final_app_directory
-        @server_director = server_director
         @context_dir = context_dir
         @dita_preprocessor = dita_preprocessor
         @cloner_factory = cloner_factory
@@ -62,7 +60,7 @@ module Bookbinder
 
         @section_repository = Repositories::SectionRepository.new(logger)
         @gem_root = File.expand_path('../../../../', __FILE__)
-        publisher = Publisher.new(logger, sitemap_generator, static_site_generator, server_director, file_system_accessor)
+        publisher = Publisher.new(logger, sitemap_writer, static_site_generator, file_system_accessor)
 
         bind_source, *options = cli_arguments
 
@@ -121,8 +119,7 @@ module Bookbinder
                   :file_system_accessor,
                   :static_site_generator,
                   :final_app_directory,
-                  :sitemap_generator,
-                  :server_director,
+                  :sitemap_writer,
                   :context_dir,
                   :dita_preprocessor,
                   :cloner_factory,
