@@ -1,10 +1,14 @@
-require 'spec_helper'
+require 'yaml'
+require_relative '../../../lib/bookbinder/server_director'
+require_relative '../../../lib/bookbinder/spider'
 require_relative '../../../lib/bookbinder/stabilimentum'
+require_relative '../../helpers/nil_logger'
+require_relative '../../helpers/tmp_dirs'
 
 module Bookbinder
   describe Spider do
     def write_arbitrary_yaml_to(location)
-      File.open(File.join(location, 'yaml_page.yml'), 'w').puts({foo: 'bar'}.to_yaml)
+      File.write(File.join(location, 'yaml_page.yml'), {foo: 'bar'}.to_yaml)
     end
 
     include_context 'tmp_dirs'
@@ -29,10 +33,6 @@ module Bookbinder
       write_arbitrary_yaml_to(public_directory)
 
       server_director = ServerDirector.new(logger, directory: final_app_dir, port: port)
-
-      def server_director.log(message)
-
-      end
 
       server_director.use_server do
         Dir.chdir(final_app_dir) { spec.run }
@@ -76,18 +76,6 @@ module Bookbinder
       let(:host) { 'example.com' }
       let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
       let(:sitemap_links) { ["http://#{host}/index.html", "http://#{host}/other_page.html", "http://#{host}/yaml_page.yml"]}
-
-      it 'requests sitemap generation' do
-        sitemap_generator = SitemapGenerator.new
-        sitemap_path = File.join(final_app_dir, 'public', 'sitemap.xml')
-
-        allow(SitemapGenerator).to receive(:new).and_return(sitemap_generator)
-        expect(sitemap_generator).to receive(:generate) do |incoming_links, incoming_file|
-          expect(incoming_links).to match_array(sitemap_links)
-          expect(incoming_file).to eq(sitemap_path)
-        end
-        spider.generate_sitemap host, port
-      end
 
       context 'when there are broken links' do
         let(:portal_page) { File.join('spec', 'fixtures', 'broken_index.html') }

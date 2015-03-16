@@ -1,8 +1,7 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/sitemap_generator'
 
 module Bookbinder
   describe SitemapGenerator do
-    let(:sitemap_file) { File.join Dir.mktmpdir, 'sitemap.xml' }
     let(:links) { [
         'http://www.example.com/foo/bar.html',
         'http://www.example.com/grep/grok.cf',
@@ -27,11 +26,8 @@ module Bookbinder
 </urlset>
       XML
     }
-    subject { described_class.new }
-
-    it 'writes the links passed to it as valid XML' do
-      subject.generate(links, sitemap_file)
-      generated_sitemap = File.read sitemap_file
+    it 'returns the links passed to it as valid XML' do
+      generated_sitemap = SitemapGenerator.new.generate(links)
       expect(generated_sitemap).to eq(expected_xml)
     end
   end

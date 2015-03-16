@@ -44,9 +44,11 @@ module Bookbinder
     private
 
     def write_sitemap(host, port, working_links)
-      sitemap_file = File.join(@app_dir, 'public', 'sitemap.xml')
       sitemap_links = substitute_hostname(host, port, working_links)
-      SitemapGenerator.new.generate(sitemap_links, sitemap_file)
+      File.write(
+        File.join(@app_dir, 'public', 'sitemap.xml'),
+        SitemapGenerator.new.generate(sitemap_links)
+      )
     end
 
     def announce_broken_links(broken_links)
