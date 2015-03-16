@@ -179,7 +179,7 @@ module Bookbinder
         end
       end
 
-      context 'when the destination directory does not exists' do
+      context 'when the destination directory does not exist' do
         it 'creates the directory and copies the contents to a specified location' do
           Dir.mktmpdir do |tmpdir|
             dest_dir_path = File.join(tmpdir, 'dest_dir')
@@ -192,6 +192,26 @@ module Bookbinder
 
             expect { fs_accessor.copy_contents source_dir_path, dest_dir_path }.
                 to change{ File.exist? File.join(dest_dir_path, 'file.txt') }.from(false).to(true)
+          end
+        end
+      end
+
+      context 'when there are intermediate directories' do
+        it 'copies each file only once and preserves the intermediate directories in the copied filepaths' do
+          Dir.mktmpdir do |tmpdir|
+            dest_dir_path = File.join(tmpdir, 'dest_dir')
+            intermdiate_path = File.join tmpdir, 'intermediate'
+            FileUtils.mkdir_p(intermdiate_path)
+            inner_dir = File.join intermdiate_path, 'inner_dir'
+            FileUtils.mkdir_p(inner_dir)
+            src_file_path = File.join inner_dir, 'file.txt'
+            FileUtils.touch(src_file_path)
+
+            expect { fs_accessor.copy_contents intermdiate_path, dest_dir_path }.
+                to change{ File.exist? File.join(tmpdir, 'dest_dir', 'inner_dir', 'file.txt') }.
+                       from(false).to(true)
+
+            expect(File.exist? File.join(dest_dir_path, 'file.txt')).to_not be_truthy
           end
         end
       end

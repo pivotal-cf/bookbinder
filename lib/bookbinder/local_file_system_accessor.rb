@@ -44,7 +44,7 @@ module Bookbinder
         FileUtils.mkdir_p(dest)
       end
 
-      contents = Dir.glob File.join(src, '**/*')
+      contents = Dir.glob File.join(src, '**')
       contents.each do |dir|
         FileUtils.cp_r dir, dest
       end

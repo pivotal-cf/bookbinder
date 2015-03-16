@@ -22,10 +22,10 @@ module Bookbinder
 
       dita_formatter.format_html dita_section.html_from_dita_section_dir, dita_section.formatted_section_dir
 
-      copy_images(dita_section)
+      copy_images(dita_section.path_to_local_repo, dita_section.formatted_section_dir)
 
-     local_fs_accessor.copy_contents(dita_section.formatted_section_dir,
-                                     dita_section.section_source_for_site_generator)
+      local_fs_accessor.copy_contents(dita_section.formatted_section_dir,
+                                      dita_section.section_source_for_site_generator)
     end
 
     private
@@ -50,15 +50,15 @@ module Bookbinder
                                        to: File.join(subnavs_dir, "dita_subnav.erb")
     end
 
-    def copy_images(dita_section)
+    def copy_images(src, dest)
       image_paths = ACCEPTED_IMAGE_FORMATS.map do |format|
-        local_fs_accessor.find_files_with_ext(format, dita_section.path_to_local_repo)
+        local_fs_accessor.find_files_with_ext(format, src)
       end.flatten
 
       image_paths.each do |image_path|
         local_fs_accessor.copy_including_intermediate_dirs(image_path,
-                                                           dita_section.path_to_local_repo,
-                                                           dita_section.section_source_for_site_generator)
+                                                           src,
+                                                           dest)
       end
     end
 
