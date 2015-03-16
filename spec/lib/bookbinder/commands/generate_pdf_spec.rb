@@ -35,7 +35,7 @@ module Bookbinder
         `mkdir -p final_app/public`
         fake_server_director = double(:i_direct_servers)
         allow(ServerDirector).to receive(:new).and_return(fake_server_director)
-        SitemapGenerator.new.generate(links, File.join('final_app', 'public', 'sitemap.xml'))
+        File.write('final_app/public/sitemap.xml', SitemapGenerator.new.generate(links))
         allow(fake_server_director).to(receive(:use_server)) { |&block| Dir.chdir('final_app') { block.call 41722 } }
       end
 

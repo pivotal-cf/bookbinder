@@ -73,6 +73,11 @@ run MyApp
         }.to yield_with_args(port)
       end
 
+      it 'returns the result of the yielded expression' do
+        result = server_director.use_server { |_| 'hi there' }
+        expect(result).to eq('hi there')
+      end
+
       it 'does not execute it until the server has started' do
         allow(Process).to receive(:kill)
         allow(POpen4).to receive(:popen4) do |&blk|
@@ -87,7 +92,6 @@ run MyApp
         server_director.use_server { inner_worker.do_work }
       end
     end
-
 
     describe 'stopping the server' do
       let(:stdout_stream) { double(gets: 'Listening on') }

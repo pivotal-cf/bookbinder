@@ -2,8 +2,8 @@ require 'nokogiri'
 
 module Bookbinder
   class SitemapGenerator
-    def generate(links, sitemap_file)
-      builder = Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
+    def generate(links)
+      Nokogiri::XML::Builder.new(encoding: 'UTF-8') { |xml|
         xml.urlset('xmlns' => 'http://www.sitemaps.org/schemas/sitemap/0.9') {
           links.each do |link|
             xml.url {
@@ -12,8 +12,7 @@ module Bookbinder
             }
           end
         }
-      end
-      File.write(sitemap_file, builder.to_xml)
+      }.to_xml
     end
   end
 end

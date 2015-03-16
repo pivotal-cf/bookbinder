@@ -7,12 +7,15 @@ require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
-require_relative '../../../../lib/bookbinder/spider'
 require_relative '../../../../lib/bookbinder/subnav_formatter'
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/spec_git_accessor'
 require_relative '../../../helpers/use_fixture_repo'
+
+require_relative '../../../../lib/bookbinder/spider'
+require_relative '../../../../lib/bookbinder/server_director'
+require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
 
 module Bookbinder
   describe Commands::Bind do
@@ -71,13 +74,16 @@ module Bookbinder
                            bind_version_control_system,
                            partial_args.fetch(:file_system_accessor, file_system_accessor),
                            partial_args.fetch(:static_site_generator, middleman_runner),
-                           partial_args.fetch(:sitemap_generator, spider),
+                           partial_args.fetch(:sitemap_writer, sitemap_writer),
                            partial_args.fetch(:final_app_directory, final_app_dir),
-                           partial_args.fetch(:server_director, server_director),
                            partial_args.fetch(:context_dir, File.absolute_path('.')),
                            partial_args.fetch(:dita_preprocessor, dita_preprocessor),
                            partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, SpecGitAccessor)),
                            DitaSectionGathererFactory.new(bind_version_control_system, bind_logger))
+      end
+
+      def random_port
+        rand(49152..65535)
       end
 
       let(:book) { 'fantastic/book' }
@@ -91,8 +97,7 @@ module Bookbinder
       let(:git_client) { GitClient.new }
       let(:logger) { NilLogger.new }
       let(:middleman_runner) { MiddlemanRunner.new(logger, SpecGitAccessor) }
-      let(:server_director) { ServerDirector.new(logger, directory: final_app_dir) }
-      let(:spider) { Spider.new(logger, app_dir: final_app_dir) }
+      let(:sitemap_writer) { PostProduction::SitemapWriter.build(logger, final_app_dir, random_port) }
       let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
       let(:subnav_formatter) { SubnavFormatter.new }
 
@@ -420,27 +425,27 @@ module Bookbinder
         end
       end
 
-      describe 'generates a site-map' do
+      describe 'generating a site-map' do
         context 'when the hostname is not a single string' do
           it 'raises' do
-            expect do
-              sections = [
-                  { 'repository' => {'name' => 'org/dogs-repo'} }
-              ]
+            sections = [
+              { 'repository' => {'name' => 'org/dogs-repo'} }
+            ]
 
-              config_hash = {
-                  'sections' => sections,
-                  'book_repo' => book,
-                  'pdf_index' => [],
-                  'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
-              }
+            config_hash = {
+              'sections' => sections,
+              'book_repo' => book,
+              'pdf_index' => [],
+              'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
+            }
 
-              config = Configuration.new(logger, config_hash)
-              config_fetcher = double('config fetcher', fetch_config: config)
+            config = Configuration.new(logger, config_hash)
+            config_fetcher = double('config fetcher', fetch_config: config)
 
-              command = bind_cmd(config_fetcher: config_fetcher)
-              command.run(['github'])
-            end.to raise_error "Your public host must be a single String."
+            command = bind_cmd(config_fetcher: config_fetcher)
+
+            expect { command.run(['github']) }.
+              to raise_error "Your public host must be a single String."
           end
         end
 

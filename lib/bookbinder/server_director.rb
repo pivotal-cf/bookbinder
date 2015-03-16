@@ -10,16 +10,18 @@ module Bookbinder
 
     def use_server
       Dir.chdir(@directory) do
+        result = nil
         POpen4::popen4("puma -p #{@port}") do |stdout, stderr, stdin, pid|
           begin
             wait_for_server(stdout)
             consume_stream_in_separate_thread(stdout)
             consume_stream_in_separate_thread(stderr)
-            yield @port
+            result = yield @port
           ensure
             stop_server(pid)
           end
         end
+        result
       end
     end
 

@@ -7,6 +7,26 @@ require_relative 'sitemap_generator'
 
 module Bookbinder
   class Spider
+    class Result
+      def initialize(broken_links, sitemap, app_dir)
+        @broken_links = broken_links
+        @sitemap = sitemap
+        @app_dir = app_dir
+      end
+
+      def has_broken_links?
+        @broken_links.any? { |link| !link.include?('#') }
+      end
+
+      def to_xml
+        @sitemap
+      end
+
+      def to_path
+        Pathname(@app_dir).join('public/sitemap.xml')
+      end
+    end
+
     def initialize(logger, app_dir: nil)
       @logger = logger
       @app_dir = app_dir || raise('Spiders must be initialized with an app directory.')
@@ -18,16 +38,12 @@ module Bookbinder
 
       sieve = Sieve.new domain: "http://#{temp_host}"
       links = crawl_from "http://#{temp_host}/index.html", sieve
-      @broken_links, working_links = links
+      broken_links, working_links = links
 
-      announce_broken_links @broken_links
+      announce_broken_links broken_links
 
-      write_sitemap(target_host, temp_host, working_links)
-      working_links
-    end
-
-    def has_broken_links?
-      @broken_links.any? { |link| !link.include?('#') } if @broken_links
+      sitemap_links = substitute_hostname(temp_host, target_host, working_links)
+      Result.new(broken_links, SitemapGenerator.new.generate(sitemap_links), @app_dir)
     end
 
     def self.prepend_location(location, url)
@@ -35,12 +51,6 @@ module Bookbinder
     end
 
     private
-
-    def write_sitemap(host, port, working_links)
-      sitemap_file = File.join(@app_dir, 'public', 'sitemap.xml')
-      sitemap_links = substitute_hostname(host, port, working_links)
-      SitemapGenerator.new.generate(sitemap_links, sitemap_file)
-    end
 
     def announce_broken_links(broken_links)
       if broken_links.any?
@@ -84,7 +94,7 @@ module Bookbinder
       anemone.focus_crawl { |page| page.links.reject { |link| link.to_s.match(/%23/) } }
     end
 
-    def substitute_hostname(target_host, temp_host, links)
+    def substitute_hostname(temp_host, target_host, links)
       links.map { |l| l.gsub(/#{Regexp.escape(temp_host)}/, target_host) }
     end
   end
