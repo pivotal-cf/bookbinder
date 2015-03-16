@@ -28,8 +28,11 @@ module Bookbinder
     end
 
     def final_images_for(dita_section)
-      final_images_path = Pathname("./final_app/public/#{dita_section}/images")
-      Dir.glob(File.join final_images_path, "**/*")
+      dirpath = Pathname("./final_app/public/#{dita_section}")
+
+      png_images = Dir.glob(File.join dirpath, "**/*.png")
+      jpeg_images = Dir.glob(File.join dirpath, "**/*.jpeg")
+      png_images + jpeg_images
     end
 
     def has_dita_subnav(dita_section)

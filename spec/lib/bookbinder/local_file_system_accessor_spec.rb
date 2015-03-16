@@ -209,8 +209,8 @@ module Bookbinder
       end
     end
 
-    describe 'finding all files with an extension' do
-      it 'finds all files containing the extension in the given directory' do
+    describe 'finding all files with extensions' do
+      it 'finds all files containing the extensions in the given directory' do
         Dir.mktmpdir do |tmpdir|
           filepath = File.join tmpdir, 'file.txt'
           File.write filepath, 'this is some text'
@@ -219,7 +219,7 @@ module Bookbinder
         end
       end
 
-      it 'finds all files containing the extension in any subdirectories' do
+      it 'finds all files containing the extensions in any subdirectories' do
         Dir.mktmpdir do |tmpdir|
           filepath = File.join tmpdir, 'file.txt'
           File.write filepath, 'this is some text'

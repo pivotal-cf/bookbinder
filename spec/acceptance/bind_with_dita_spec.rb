@@ -50,11 +50,11 @@ module Bookbinder
                                                 'Exclude-me!')).to be_truthy
 
       expect(dita_book.final_images_for('dita-section-one'))
-      .to match_array %w(./final_app/public/dita-section-one/images/image_one.png
+      .to match_array %w(./final_app/public/dita-section-one/image_one.png
                          ./final_app/public/dita-section-one/images/image_two.jpeg)
 
       expect(dita_book.final_images_for('dita-section-dependency'))
-      .to match_array %w(./final_app/public/dita-section-dependency/images/image_one_dependency.jpeg
+      .to match_array %w(./final_app/public/dita-section-dependency/image_one_dependency.jpeg
                          ./final_app/public/dita-section-dependency/images/image_two_dependency.png)
 
       expect(dita_book.has_dita_subnav('dita-section-one')).to be_truthy

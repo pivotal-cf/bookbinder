@@ -3,7 +3,7 @@
 <concept id="something">
   <title>my topic 1</title>
   <conbody>
-    <image href="images/image_one.png" />
+    <image href="image_one.png" />
     <image href="images/image_two.jpeg" />
     <p><ph otherprops="test-phrase-included">Include-me!</ph></p>
     <p><ph otherprops="test-phrase-excluded">Exclude-me!</ph></p>

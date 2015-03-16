@@ -62,7 +62,7 @@ module Bookbinder
     end
 
     def find_files_with_ext(ext, path)
-      Dir[File.join path, '**/*'].select { |file| File.basename(file).include?(".#{ext}") }
+      Dir[File.join path, "**/*.#{ext}"]
     end
 
     def relative_path_from(src, target)
