@@ -57,6 +57,11 @@ module Bookbinder
           to eq('http://example.com/index.html')
       end
 
+      it 'suggests a path for the sitemap, based on the app dir' do
+        result = spider.generate_sitemap('example.com', port)
+        expect(result.to_path).to eq(Pathname(final_app_dir).join('public/sitemap.xml'))
+      end
+
       it 'reports no broken links' do
         result = spider.generate_sitemap 'example.com', port
         expect(result).not_to have_broken_links

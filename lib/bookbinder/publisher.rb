@@ -43,7 +43,11 @@ module Bookbinder
     def generate_sitemap(host_for_sitemap, spider)
       raise "Your public host must be a single String." unless host_for_sitemap.is_a?(String)
 
-      @server_director.use_server { |port| spider.generate_sitemap host_for_sitemap, port }
+      @server_director.use_server { |port|
+        spider.generate_sitemap host_for_sitemap, port
+      }.tap do |sitemap|
+        File.write(sitemap.to_path, sitemap.to_xml)
+      end
     end
 
     def generate_site(cli_options, output_paths, publish_config, middleman_dir, workspace_dir, subnavs, build_dir, public_dir)
