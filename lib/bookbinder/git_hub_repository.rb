@@ -94,8 +94,9 @@ module Bookbinder
         @logger.log '  copying '.yellow + path_to_local_repo
         destination = File.join(destination_dir, directory)
 
-        unless destination.include?(path_to_local_repo)
+        if !destination.include?(path_to_local_repo) && !File.exists?(destination)
           FileUtils.mkdir_p(destination)
+
           FileUtils.cp_r(File.join(path_to_local_repo, '.'), destination)
         end
 

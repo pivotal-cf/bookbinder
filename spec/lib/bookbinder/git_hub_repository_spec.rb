@@ -205,6 +205,21 @@ module Bookbinder
         it 'sets copied? to true' do
           expect { copy_to }.to change { repo.copied? }.to(true)
         end
+
+        context 'and has already been copied to the destination' do
+          before do
+            copy_to
+          end
+
+          it 'does not attempt to recopy' do
+            duplicate_repo = build(logger: logger,
+                                   full_name: full_name,
+                                   local_repo_dir: local_repo_dir)
+
+            expect(FileUtils).to_not receive(:cp_r)
+            duplicate_repo.copy_from_local destination_dir
+          end
+        end
       end
 
       context 'and the local repo is not there' do
