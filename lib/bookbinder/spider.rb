@@ -8,12 +8,17 @@ require_relative 'sitemap_generator'
 module Bookbinder
   class Spider
     class Result
-      def initialize(broken_links)
+      def initialize(broken_links, sitemap)
         @broken_links = broken_links
+        @sitemap = sitemap
       end
 
       def has_broken_links?
         @broken_links.any? { |link| !link.include?('#') }
+      end
+
+      def to_xml
+        @sitemap
       end
     end
 
@@ -32,9 +37,9 @@ module Bookbinder
 
       announce_broken_links broken_links
 
-      write_sitemap(target_host, temp_host, working_links)
+      sitemap = write_sitemap(target_host, temp_host, working_links)
 
-      Result.new(broken_links)
+      Result.new(broken_links, sitemap)
     end
 
     def self.prepend_location(location, url)
@@ -45,10 +50,12 @@ module Bookbinder
 
     def write_sitemap(host, port, working_links)
       sitemap_links = substitute_hostname(host, port, working_links)
+      sitemap = SitemapGenerator.new.generate(sitemap_links)
       File.write(
         File.join(@app_dir, 'public', 'sitemap.xml'),
-        SitemapGenerator.new.generate(sitemap_links)
+        sitemap
       )
+      sitemap
     end
 
     def announce_broken_links(broken_links)
