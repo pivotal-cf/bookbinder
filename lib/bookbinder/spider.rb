@@ -7,6 +7,16 @@ require_relative 'sitemap_generator'
 
 module Bookbinder
   class Spider
+    class Result
+      def initialize(broken_links)
+        @broken_links = broken_links
+      end
+
+      def has_broken_links?
+        @broken_links.any? { |link| !link.include?('#') }
+      end
+    end
+
     def initialize(logger, app_dir: nil)
       @logger = logger
       @app_dir = app_dir || raise('Spiders must be initialized with an app directory.')
@@ -18,15 +28,13 @@ module Bookbinder
 
       sieve = Sieve.new domain: "http://#{temp_host}"
       links = crawl_from "http://#{temp_host}/index.html", sieve
-      @broken_links, working_links = links
+      broken_links, working_links = links
 
-      announce_broken_links @broken_links
+      announce_broken_links broken_links
 
       write_sitemap(target_host, temp_host, working_links)
-    end
 
-    def has_broken_links?
-      @broken_links.any? { |link| !link.include?('#') } if @broken_links
+      Result.new(broken_links)
     end
 
     def self.prepend_location(location, url)

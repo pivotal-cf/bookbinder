@@ -39,14 +39,14 @@ module Bookbinder
       end
     end
 
-    describe '#has_broken_links?' do
+    describe 'broken link checking' do
       let(:output_dir) { tmp_subdir 'output' }
       let(:final_app_dir) { tmp_subdir 'final_app' }
       let(:log_file) { File.join(output_dir, 'wget.log') }
       let(:logger) { NilLogger.new }
       let(:spider) { Spider.new logger, app_dir: final_app_dir }
 
-      context 'when there are no broken links' do
+      context 'when there are no broken links, except for local-page ones' do
         let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
 
         before do
@@ -54,8 +54,8 @@ module Bookbinder
         end
 
         it 'returns false' do
-          spider.generate_sitemap 'example.com', port
-          expect(spider).to_not have_broken_links
+          result = spider.generate_sitemap 'example.com', port
+          expect(result).not_to have_broken_links
         end
       end
 
@@ -63,8 +63,8 @@ module Bookbinder
         let(:portal_page) { File.join('spec', 'fixtures', 'broken_index.html') }
 
         it 'returns true' do
-          spider.generate_sitemap 'example.com', port
-          expect(spider).to have_broken_links
+          result = spider.generate_sitemap 'example.com', port
+          expect(result).to have_broken_links
         end
       end
     end

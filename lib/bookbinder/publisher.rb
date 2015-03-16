@@ -29,11 +29,11 @@ module Bookbinder
       host_for_sitemap = publish_config.fetch(:host_for_sitemap)
 
       generate_site(cli_options, output_paths, publish_config, master_dir, workspace_dir, subnavs, build_directory, public_directory)
-      generate_sitemap(host_for_sitemap, @spider)
+      result = generate_sitemap(host_for_sitemap, @spider)
 
       @logger.log "Bookbinder bound your book into #{final_app_dir.to_s.green}"
 
-      !@spider.has_broken_links?
+      !result.has_broken_links?
     end
 
     private
