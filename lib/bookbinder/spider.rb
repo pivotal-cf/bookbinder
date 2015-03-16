@@ -23,7 +23,6 @@ module Bookbinder
       announce_broken_links @broken_links
 
       write_sitemap(target_host, temp_host, working_links)
-      working_links
     end
 
     def has_broken_links?

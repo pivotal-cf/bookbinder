@@ -89,12 +89,6 @@ module Bookbinder
         spider.generate_sitemap host, port
       end
 
-      it 'returns the working links' do
-        expect(spider.generate_sitemap(host, port)).to match_array(["http://localhost:#{port}/index.html",
-                                                                    "http://localhost:#{port}/other_page.html",
-                                                                    "http://localhost:#{port}/yaml_page.yml"])
-      end
-
       context 'when there are broken links' do
         let(:portal_page) { File.join('spec', 'fixtures', 'broken_index.html') }
         let(:other_page) { File.join('spec', 'fixtures', 'page_with_broken_links.html') }
