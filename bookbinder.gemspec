@@ -26,7 +26,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'anemone'
   s.add_runtime_dependency 'css_parser'
   s.add_runtime_dependency 'puma'
-  s.add_runtime_dependency 'popen4'
   s.add_runtime_dependency 'rack-rewrite'
   s.add_runtime_dependency 'therubyracer'
   s.add_runtime_dependency 'git', '~> 1.2.8'

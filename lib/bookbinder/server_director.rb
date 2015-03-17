@@ -1,4 +1,3 @@
-require 'popen4'
 require 'puma'
 require 'rack/rewrite'
 require 'vienna'
