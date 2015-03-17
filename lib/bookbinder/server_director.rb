@@ -12,7 +12,6 @@ module Bookbinder
 
     def use_server
       Dir.chdir(@directory) do
-        result = nil
         events = Puma::Events.new $stdout, $stderr
         server = Puma::Server.new app, events
         server.add_tcp_listener "localhost", @port
