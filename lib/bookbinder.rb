@@ -8,7 +8,6 @@ require 'middleman-core/profiling'
 require 'anemone'
 require 'css_parser'
 require 'vienna'
-require 'popen4'
 require 'puma'
 
 require_relative 'bookbinder/deprecated_logger'
