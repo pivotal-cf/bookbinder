@@ -26,7 +26,7 @@ module Bookbinder
 
     def error_message
       <<-ERROR
-Error in bind command: cannot locate your sections to bind.
+Cannot locate your sections.
 Must specify at least one of 'sections' and/or 'dita_sections' in config.yml:
 
 sections:

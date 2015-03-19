@@ -15,7 +15,7 @@ module Bookbinder
 
     def error_message
       <<-ERROR
-Missing for bind command: cannot locate a specific section.
+Cannot locate a specific section.
 All sections must provide the section 'name' key under the 'repository' key:
 
 sections:

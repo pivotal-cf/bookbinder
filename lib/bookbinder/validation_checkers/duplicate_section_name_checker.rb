@@ -18,7 +18,7 @@ module Bookbinder
 
     def error_message
       <<-ERROR
-Missing for bind command: duplicate repository names are not allowed.
+Duplicate repository names are not allowed.
       ERROR
     end
   end
