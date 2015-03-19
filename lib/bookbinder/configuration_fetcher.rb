@@ -22,7 +22,7 @@ module Bookbinder
     attr_reader(:loader, :logger, :configuration_validator, :config, :config_file_path)
 
     def read_config_file
-      loader.load(config_file_path).merge('pdf_index' => nil)
+      loader.load(config_file_path)
 
     rescue FileNotFoundError => e
       raise "The configuration file specified does not exist. Please create a config #{e} file at #{config_file_path} and try again."
@@ -31,7 +31,14 @@ module Bookbinder
     end
 
     def validate(config_hash)
-      Configuration.new(logger, config_hash) if configuration_validator.valid?(config_hash, Configuration::CURRENT_SCHEMA_VERSION, Configuration::STARTING_SCHEMA_VERSION)
+      raise 'Your config.yml appears to be empty. Please check and try again.' unless config_hash
+
+      error = configuration_validator.valid?(config_hash,
+                                             Configuration::CURRENT_SCHEMA_VERSION,
+                                             Configuration::STARTING_SCHEMA_VERSION)
+      raise error if error
+
+      Configuration.new(logger, config_hash)
     end
   end
 end
