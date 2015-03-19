@@ -8,8 +8,8 @@ module Bookbinder
     CURRENT_SCHEMA_VERSION = '1.0.0'
     STARTING_SCHEMA_VERSION = '1.0.0'
 
-    CredentialKeyError = Class.new(StandardError)
-    ConfigSchemaUnsupportedError = Class.new(StandardError)
+    CredentialKeyError = Class.new(RuntimeError)
+    ConfigSchemaUnsupportedError = Class.new(RuntimeError)
 
     class AwsCredentials
       REQUIRED_KEYS = %w(access_key secret_key green_builds_bucket)
