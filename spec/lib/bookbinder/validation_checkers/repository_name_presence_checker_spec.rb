@@ -30,6 +30,12 @@ module Bookbinder
                       {
                           'directory' => 'some-cool-name',
                           'repository' => {}
+                      },
+                      {
+                          'directory' => 'some-cool-name',
+                          'repository' => {
+                              'name' => 'an-awesome-name'
+                          }
                       }
                   ]
           }

@@ -4,11 +4,17 @@ module Bookbinder
 
     def check(config)
       all_sections = config['sections'].to_a + config['dita_sections'].to_a
-      all_sections.map do |section|
+      failures = all_sections.map do |section|
         if !section['repository'] || !section['repository']['name']
-          MissingRepositoryNameError.new error_message
+          true
         end
-      end.last
+      end
+
+      if failures.compact.empty?
+        nil
+      else
+        MissingRepositoryNameError.new error_message
+      end
     end
 
     private
