@@ -10,9 +10,15 @@ require_relative 'naming'
 
 module Bookbinder
   module Commands
+    class BindValidator
+      MissingRequiredKeyError = Class.new(RuntimeError)
+    end
+
     class Bind
       include Bookbinder::DirectoryHelperMethods
       include Commands::Naming
+      LOCAL_REQUIRED_KEYS = []
+      GITHUB_REQUIRED_KEYS = %w(cred_repo)
 
       def initialize(logger,
                      config_fetcher,
@@ -56,13 +62,14 @@ module Bookbinder
       end
 
       def run(cli_arguments)
-        raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
+        bind_source, *options = cli_arguments
+        raise CliError::InvalidArguments unless arguments_are_valid?(bind_source, options)
+        validate(bind_source)
 
         @section_repository = Repositories::SectionRepository.new(logger)
         @gem_root = File.expand_path('../../../../', __FILE__)
         publisher = Publisher.new(logger, sitemap_writer, static_site_generator, file_system_accessor)
 
-        bind_source, *options = cli_arguments
 
         bind_config = config_factory.produce(bind_source)
 
@@ -216,8 +223,7 @@ module Bookbinder
         end
       end
 
-      def arguments_are_valid?(arguments)
-        bind_source, *options = arguments
+      def arguments_are_valid?(bind_source, options)
         valid_options = %w(--verbose --ignore-section-refs).to_set
         %w(local github).include?(bind_source) && options.to_set.subset?(valid_options)
       end
@@ -225,6 +231,24 @@ module Bookbinder
       def binding_from_github?(bind_location)
         config.has_option?('versions') && bind_location != 'local'
       end
+
+      def validate(bind_source)
+        missing_keys = []
+
+        required_keys = LOCAL_REQUIRED_KEYS
+        required_keys += GITHUB_REQUIRED_KEYS if bind_source == 'github'
+
+        required_keys.map do |required_key|
+          unless config.has_option?(required_key)
+            missing_keys.push(required_key)
+          end
+        end
+
+        if missing_keys.length > 0
+          raise BindValidator::MissingRequiredKeyError.new "Your config.yml is missing required key(s). The required keys for this command include: " + missing_keys.join(", ") + "."
+        end
+      end
+
     end
   end
 end

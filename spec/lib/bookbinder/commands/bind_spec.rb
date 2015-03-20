@@ -19,6 +19,7 @@ require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
 
 module Bookbinder
   describe Commands::Bind do
+
     class FakeArchiveMenuConfig
       def generate(base_config, *)
         base_config
@@ -54,7 +55,7 @@ module Bookbinder
       end
       let(:archive_menu) { [] }
 
-      let(:config_hash) do
+      let(:base_config_hash) do
         {'sections' => sections,
          'book_repo' => book,
          'pdf_index' => [],
@@ -88,6 +89,7 @@ module Bookbinder
 
       let(:book) { 'fantastic/book' }
       let(:command) { bind_cmd }
+      let(:config_hash) { base_config_hash }
       let(:config) { Configuration.new(logger, config_hash) }
       let(:config_fetcher) { double('config fetcher', fetch_config: config) }
       let(:dita_preprocessor) { DitaPreprocessor.new(null_dita_to_html_converter, static_site_generator_formatter, file_system_accessor) }
@@ -177,6 +179,12 @@ module Bookbinder
       end
 
       describe 'github' do
+        let(:github_config_hash) do
+          base_config_hash.merge({'cred_repo' => 'my-org/my-creds'})
+        end
+
+        let(:config_hash) { github_config_hash }
+
         it 'creates some static HTML' do
           command.run(['github'])
 
@@ -215,11 +223,7 @@ module Bookbinder
 
         context 'when provided a layout repo' do
           let(:config_hash) do
-            {'sections' => sections,
-             'book_repo' => book,
-             'pdf_index' => [],
-             'public_host' => 'example.com',
-             'layout_repo' => 'such-org/layout-repo'}
+            github_config_hash.merge({'layout_repo' => 'such-org/layout-repo'})
           end
 
           it 'passes the provided repo as master_middleman_dir' do
@@ -242,19 +246,12 @@ module Bookbinder
             end
           end
 
-          let(:versions) { %w(v1 v2) }
           let(:cli_args) { ['github'] }
-          let(:config_hash) do
-            {
-              'versions' => versions,
-              'sections' => sections,
-              'book_repo' => book,
-              'pdf_index' => [],
-              'public_host' => 'example.com'
-            }
-          end
-          let(:config) { Configuration.new(logger, config_hash) }
+          let(:versions) { %w(v1 v2) }
           let(:book) { 'fantastic/book' }
+          let(:config_hash) do
+            github_config_hash.merge({'versions' => versions})
+          end
 
           it 'binds previous versions of the book down paths named for the version tag' do
             command.run(cli_args)
@@ -311,19 +308,46 @@ module Bookbinder
         end
       end
 
-      describe 'invalid arguments' do
-        it 'raises Cli::InvalidArguments' do
-          expect {
-            command.run(['blah', 'blah', 'whatever'])
-          }.to raise_error(CliError::InvalidArguments)
+      describe 'validating' do
+        context 'when there are invalid arguments' do
+          it 'raises Cli::InvalidArguments' do
+            expect {
+              command.run(['blah', 'blah', 'whatever'])
+            }.to raise_error(CliError::InvalidArguments)
 
-          expect {
-            command.run([])
-          }.to raise_error(CliError::InvalidArguments)
+            expect {
+              command.run([])
+            }.to raise_error(CliError::InvalidArguments)
+          end
         end
+
+        context 'when publishing from github' do
+          context 'and required keys are missing' do
+            let(:config_hash) do
+              {'sections' => sections,
+               'book_repo' => book,
+               'pdf_index' => [],
+               'public_host' => 'example.com',
+               'archive_menu' => archive_menu
+              }
+            end
+
+            it 'it raises an error describing the missing key' do
+              expect { command.run(['github']) }.
+                  to raise_error(Commands::BindValidator::MissingRequiredKeyError, /cred_repo/)
+            end
+          end
+        end
+
       end
 
       describe 'generating links' do
+        let(:github_config_hash) do
+          base_config_hash.merge({'cred_repo' => 'my-org/my-creds'})
+        end
+
+        let(:config_hash) { github_config_hash }
+
         it 'succeeds when all links are functional' do
           exit_code = command.run(['github'])
           expect(exit_code).to eq 0
@@ -343,8 +367,9 @@ module Bookbinder
               'sections' => sections,
               'book_repo' => book,
               'pdf_index' => [],
+              'cred_repo' => 'my-org/my-creds',
               'public_host' => 'example.com',
-              'template_variables' => { 'name' => 'Spartacus'}
+              'template_variables' => {'name' => 'Spartacus'}
           }
 
           config = Configuration.new(logger, config_hash)
@@ -388,6 +413,7 @@ module Bookbinder
           config_hash = {
               'sections' => sections,
               'book_repo' => book,
+              'cred_repo' => 'my-org/my-creds',
               'pdf_index' => [],
               'public_host' => 'example.com',
           }
@@ -429,14 +455,15 @@ module Bookbinder
         context 'when the hostname is not a single string' do
           it 'raises' do
             sections = [
-              { 'repository' => {'name' => 'org/dogs-repo'} }
+                {'repository' => {'name' => 'org/dogs-repo'}}
             ]
 
             config_hash = {
-              'sections' => sections,
-              'book_repo' => book,
-              'pdf_index' => [],
-              'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
+                'sections' => sections,
+                'book_repo' => book,
+                'cred_repo' => 'my-org/my-creds',
+                'pdf_index' => [],
+                'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
             }
 
             config = Configuration.new(logger, config_hash)
@@ -445,7 +472,7 @@ module Bookbinder
             command = bind_cmd(config_fetcher: config_fetcher)
 
             expect { command.run(['github']) }.
-              to raise_error "Your public host must be a single String."
+                to raise_error "Your public host must be a single String."
           end
         end
 
@@ -457,12 +484,13 @@ module Bookbinder
             FileUtils.cp File.expand_path('../../../../fixtures/dogs_index.html', __FILE__), File.join(middleman_source_dir, 'index.html.md.erb')
 
             sections = [
-                { 'repository' => {'name' => 'org/dogs-repo'} }
+                {'repository' => {'name' => 'org/dogs-repo'}}
             ]
 
             config_hash = {
                 'sections' => sections,
                 'book_repo' => book,
+                'cred_repo' => 'my-org/my-creds',
                 'public_host' => 'docs.dogs.com'
             }
 
@@ -488,7 +516,7 @@ module Bookbinder
         it 'creates intermediate directories' do
           sections = [
               {
-                  'repository' => { 'name' => 'my-docs-org/my-docs-repo', 'ref' => 'some-sha' },
+                  'repository' => {'name' => 'my-docs-org/my-docs-repo', 'ref' => 'some-sha'},
                   'directory' => 'a/b/c'
               }
           ]
@@ -496,6 +524,7 @@ module Bookbinder
           config_hash = {
               'sections' => sections,
               'book_repo' => book,
+              'cred_repo' => 'my-org/my-creds',
               'public_host' => 'docs.dogs.com'
           }
 
@@ -544,7 +573,7 @@ module Bookbinder
           it 'suppresses detailed output' do
             sections = [
                 {
-                    'repository' => { 'name' => 'my-docs-org/repo-with-nonexistent-helper-method' },
+                    'repository' => {'name' => 'my-docs-org/repo-with-nonexistent-helper-method'},
                     'directory' => nil
                 }
             ]
@@ -580,13 +609,14 @@ module Bookbinder
         it 'shows more detailed output when the verbose flag is set' do
           sections = [
               {
-                  'repository' => { 'name' => 'my-docs-org/repo-with-nonexistent-helper-method' },
+                  'repository' => {'name' => 'my-docs-org/repo-with-nonexistent-helper-method'},
                   'directory' => nil
               }
           ]
           config_hash = {
               'sections' => sections,
               'book_repo' => book,
+              'cred_repo' => 'my-org/my-creds',
               'public_host' => 'docs.dogs.com'
           }
 
@@ -618,6 +648,7 @@ module Bookbinder
           config = Configuration.new(logger,
                                      'sections' => [],
                                      'book_repo' => book,
+                                     'cred_repo' => 'my-org/my-creds',
                                      'public_host' => 'docs.dogs.com')
           config_fetcher = double('config fetcher', fetch_config: config)
           middleman_runner = MiddlemanRunner.new(logger, SpecGitAccessor)
