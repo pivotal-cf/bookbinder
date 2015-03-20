@@ -245,7 +245,7 @@ module Bookbinder
         end
 
         if missing_keys.length > 0
-          raise BindValidator::MissingRequiredKeyError.new "Your config.yml is missing required key(s). The required keys for this command include: " + missing_keys.join(", ") + "."
+          raise BindValidator::MissingRequiredKeyError.new "Your config.yml is missing required key(s). The required keys to bind include: " + missing_keys.join(", ") + "."
         end
       end
 
