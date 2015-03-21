@@ -20,11 +20,7 @@ module Bookbinder
 
       REQUIRED_KEYS.each do |method_name|
         define_method(method_name) do
-          begin
-            creds.fetch(method_name)
-          rescue KeyError => e
-            raise CredentialKeyError, e
-          end
+          creds.send(:[], method_name)
         end
       end
 
@@ -43,7 +39,7 @@ module Bookbinder
 
       REQUIRED_KEYS.each do |method_name|
         define_method(method_name) do
-          fetch(method_name)
+          creds.send(:[], method_name)
         end
       end
 
@@ -163,11 +159,11 @@ module Bookbinder
     end
 
     def aws_credentials
-      @aws_creds ||= AwsCredentials.new(credentials.fetch('aws'))
+      @aws_creds ||= AwsCredentials.new(credentials.fetch('aws', {}))
     end
 
     def cf_credentials(environment)
-      CfCredentials.new(credentials.fetch('cloud_foundry'), environment)
+      CfCredentials.new(credentials.fetch('cloud_foundry', {}), environment)
     end
 
     def ==(o)
