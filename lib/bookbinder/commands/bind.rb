@@ -17,8 +17,6 @@ module Bookbinder
     class Bind
       include Bookbinder::DirectoryHelperMethods
       include Commands::Naming
-      LOCAL_REQUIRED_KEYS = []
-      GITHUB_REQUIRED_KEYS = %w(cred_repo)
 
       def initialize(logger,
                      config_fetcher,
@@ -228,21 +226,6 @@ module Bookbinder
 
       def validate(bind_source, options)
         raise CliError::InvalidArguments unless arguments_are_valid?(bind_source, options)
-
-        missing_keys = []
-
-        required_keys = LOCAL_REQUIRED_KEYS
-        required_keys += GITHUB_REQUIRED_KEYS if bind_source == 'github'
-
-        required_keys.map do |required_key|
-          unless config.has_option?(required_key)
-            missing_keys.push(required_key)
-          end
-        end
-
-        if missing_keys.length > 0
-          raise BindValidator::MissingRequiredKeyError.new "Your config.yml is missing required key(s). The required keys to bind include: " + missing_keys.join(", ") + "."
-        end
       end
 
       def arguments_are_valid?(bind_source, options)

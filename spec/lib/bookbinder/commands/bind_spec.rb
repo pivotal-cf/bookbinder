@@ -320,25 +320,6 @@ module Bookbinder
             }.to raise_error(CliError::InvalidArguments)
           end
         end
-
-        context 'when publishing from github' do
-          context 'and required keys are missing' do
-            let(:config_hash) do
-              {'sections' => sections,
-               'book_repo' => book,
-               'pdf_index' => [],
-               'public_host' => 'example.com',
-               'archive_menu' => archive_menu
-              }
-            end
-
-            it 'it raises an error describing the missing key' do
-              expect { command.run(['github']) }.
-                  to raise_error(Commands::BindValidator::MissingRequiredKeyError, /cred_repo/)
-            end
-          end
-        end
-
       end
 
       describe 'generating links' do
