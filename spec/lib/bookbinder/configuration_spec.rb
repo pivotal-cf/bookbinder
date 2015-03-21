@@ -82,17 +82,6 @@ module Bookbinder
         end
       end
 
-      describe Configuration::AwsCredentials do
-        let(:aws_credentials) { Configuration::AwsCredentials.new(aws_hash) }
-
-        it 'raises CredentialKeyError when a required key is missing' do
-          aws_hash.clear
-          Configuration::AwsCredentials::REQUIRED_KEYS.each do |key|
-            expect { aws_credentials.send(key) }.to raise_error(Configuration::CredentialKeyError)
-          end
-        end
-      end
-
       describe Configuration::CfCredentials do
         let(:environment) { 'staging' }
         let(:cf_credentials) { Configuration::CfCredentials.new(cf_hash, environment) }
@@ -103,14 +92,6 @@ module Bookbinder
           expect(cf_credentials.username).to eq('some-user')
           expect(cf_credentials.password).to eq('some-pass')
           expect(cf_credentials.organization).to eq('some-org')
-        end
-
-        it 'raises CredentialKeyError when a required key is missing' do
-          cf_hash.clear
-          methods = Configuration::CfCredentials::REQUIRED_KEYS + [:routes, :space]
-          methods.each do |key|
-            expect { cf_credentials.send(key) }.to raise_error(Configuration::CredentialKeyError)
-          end
         end
 
         it 'memoizes' do
