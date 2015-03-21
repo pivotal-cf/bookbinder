@@ -80,7 +80,8 @@ module Bookbinder
                            partial_args.fetch(:context_dir, File.absolute_path('.')),
                            partial_args.fetch(:dita_preprocessor, dita_preprocessor),
                            partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, SpecGitAccessor)),
-                           DitaSectionGathererFactory.new(bind_version_control_system, bind_logger))
+                           DitaSectionGathererFactory.new(bind_version_control_system, bind_logger),
+                           Repositories::SectionRepository.new(logger))
       end
 
       def random_port

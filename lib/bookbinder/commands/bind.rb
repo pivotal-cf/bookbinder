@@ -30,7 +30,8 @@ module Bookbinder
                      context_dir,
                      dita_preprocessor,
                      cloner_factory,
-                     dita_section_gatherer_factory)
+                     dita_section_gatherer_factory,
+                     section_repository)
         @logger = logger
         @config_fetcher = config_fetcher
         @config_factory = config_factory
@@ -44,6 +45,7 @@ module Bookbinder
         @dita_preprocessor = dita_preprocessor
         @cloner_factory = cloner_factory
         @dita_section_gatherer_factory = dita_section_gatherer_factory
+        @section_repository = section_repository
       end
 
       def usage
@@ -63,7 +65,6 @@ module Bookbinder
         bind_source, *options = cli_arguments
         validate(bind_source, options)
 
-        @section_repository = Repositories::SectionRepository.new(logger)
         @gem_root = File.expand_path('../../../../', __FILE__)
         publisher = Publisher.new(logger, sitemap_writer, static_site_generator, file_system_accessor)
 
@@ -127,7 +128,8 @@ module Bookbinder
                   :context_dir,
                   :dita_preprocessor,
                   :cloner_factory,
-                  :dita_section_gatherer_factory
+                  :dita_section_gatherer_factory,
+                  :section_repository
 
       def generate_local_repo_dir(context_dir, bind_source)
         File.expand_path('..', context_dir) if bind_source == 'local'
