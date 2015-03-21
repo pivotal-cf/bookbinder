@@ -14,8 +14,8 @@ module Bookbinder
     class AwsCredentials
       REQUIRED_KEYS = %w(access_key secret_key green_builds_bucket)
 
-      def initialize(cred_hash)
-        @creds = cred_hash
+      def initialize(aws_cred_hash)
+        @creds = aws_cred_hash
       end
 
       REQUIRED_KEYS.each do |method_name|
@@ -36,8 +36,8 @@ module Bookbinder
     class CfCredentials
       REQUIRED_KEYS = %w(api_endpoint organization app_name)
 
-      def initialize(cred_hash, environment)
-        @creds = cred_hash
+      def initialize(cf_cred_hash, environment)
+        @creds = cf_cred_hash
         @environment = environment
       end
 
