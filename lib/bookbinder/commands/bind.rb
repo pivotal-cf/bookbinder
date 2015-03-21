@@ -63,8 +63,7 @@ module Bookbinder
 
       def run(cli_arguments)
         bind_source, *options = cli_arguments
-        raise CliError::InvalidArguments unless arguments_are_valid?(bind_source, options)
-        validate(bind_source)
+        validate(bind_source, options)
 
         @section_repository = Repositories::SectionRepository.new(logger)
         @gem_root = File.expand_path('../../../../', __FILE__)
@@ -223,16 +222,13 @@ module Bookbinder
         end
       end
 
-      def arguments_are_valid?(bind_source, options)
-        valid_options = %w(--verbose --ignore-section-refs).to_set
-        %w(local github).include?(bind_source) && options.to_set.subset?(valid_options)
-      end
-
       def binding_from_github?(bind_location)
         config.has_option?('versions') && bind_location != 'local'
       end
 
-      def validate(bind_source)
+      def validate(bind_source, options)
+        raise CliError::InvalidArguments unless arguments_are_valid?(bind_source, options)
+
         missing_keys = []
 
         required_keys = LOCAL_REQUIRED_KEYS
@@ -249,6 +245,10 @@ module Bookbinder
         end
       end
 
+      def arguments_are_valid?(bind_source, options)
+        valid_options = %w(--verbose --ignore-section-refs).to_set
+        %w(local github).include?(bind_source) && options.to_set.subset?(valid_options)
+      end
     end
   end
 end
