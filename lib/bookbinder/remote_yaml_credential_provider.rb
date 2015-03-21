@@ -10,6 +10,7 @@ module Bookbinder
 
     def credentials
       @logger.log "Processing #{@repository.full_name.cyan}"
+
       Dir.mktmpdir do |destination_dir|
         @repository.copy_from_remote(destination_dir, 'master')
         cred_file_yaml = File.join(destination_dir, @repository.short_name, 'credentials.yml')

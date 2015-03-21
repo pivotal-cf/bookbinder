@@ -1,5 +1,8 @@
 require_relative 'app_fetcher'
 require_relative 'artifact_namer'
+require_relative 'archive'
+require_relative 'cf_command_runner'
+require_relative 'pusher'
 
 module Bookbinder
   class Distributor

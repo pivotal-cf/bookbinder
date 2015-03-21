@@ -1,4 +1,5 @@
 require_relative '../distributor'
+require_relative '../configuration'
 require_relative 'bookbinder_command'
 require_relative 'naming'
 
@@ -6,6 +7,10 @@ module Bookbinder
   module Commands
     class PushFromLocal
       include Commands::Naming
+
+      CredentialKeyError = Class.new(RuntimeError)
+      REQUIRED_AWS_KEYS = %w(access_key secret_key green_builds_bucket)
+      REQUIRED_CF_KEYS = %w(username password api_endpoint organization app_name)
 
       def initialize(logger, configuration_fetcher, environment)
         @logger = logger
@@ -19,6 +24,7 @@ module Bookbinder
       end
 
       def run(_)
+        validate
         Distributor.build(@logger, options).distribute
         0
       end
@@ -45,6 +51,53 @@ module Bookbinder
 
             book_repo: config.book_repo,
         }
+      end
+
+      def error_message
+        <<-ERROR
+Cannot locate a specific key in credentials.yml.
+Your credentials file should follow this format:
+
+aws:
+  access_key: <your_AWS_access_key>
+  secret_key: <your_AWS_secret_key>
+  green_builds_bucket: <your_AWS_bucket>
+
+cloud_foundry:
+  username: <your_CF_account>
+  password: <your_CF_password>
+  staging_space: <your_CF_staging_space_name>
+  staging_host: <your_CF_staging_host_name>
+    <your-domain.com>:
+      - <your_hostname>
+  production_space: <your_CF_production_space_name>
+  production_host: <your_CF_production_host_name>
+    <your-domain.com>:
+      - <your_hostname>
+  app_name: <your_app_name>
+  api_endpoint: <your_api_endpoint>
+  organization: <your_organization>
+        ERROR
+      end
+
+      def validate
+        missing_keys = []
+
+        aws_creds = config.aws_credentials
+        cf_creds = config.cf_credentials(environment)
+
+        missing_keys << 'aws' unless aws_creds
+        missing_keys << 'cloud_foundry' unless cf_creds
+
+        REQUIRED_AWS_KEYS.map do |key|
+          missing_keys << key unless aws_creds.send(key)
+        end
+
+        REQUIRED_CF_KEYS.each do |key|
+          missing_keys << key unless cf_creds.send(key)
+        end
+
+        raise CredentialKeyError.new error_message if missing_keys.any?
       end
     end
   end
