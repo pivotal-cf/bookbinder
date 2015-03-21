@@ -30,7 +30,7 @@ module Bookbinder
     end
 
     class CfCredentials
-      REQUIRED_KEYS = %w(api_endpoint organization app_name)
+      REQUIRED_KEYS = %w(username password api_endpoint organization app_name)
 
       def initialize(cf_cred_hash, environment)
         @creds = cf_cred_hash
@@ -48,14 +48,6 @@ module Bookbinder
           other.instance_variable_get(:@creds),
           other.instance_variable_get(:@environment)
         ]
-      end
-
-      def username
-        creds['username']
-      end
-
-      def password
-        creds['password']
       end
 
       def download_archive_before_push?
