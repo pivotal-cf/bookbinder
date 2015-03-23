@@ -16,6 +16,15 @@ Bookbinder is meant to be used from within a project called a **book**. The book
 To install the Bookbinder gem, add `gem "bookbindery"` to your Gemfile. 
 Creating a book is currently a little more involved, but we plan to automate this process in the near future.
 
+### <a id='dita-ot'></a>DITA-OT
+
+If you have dita sections, you'll need to have installed DITA-OT.
+
+Specify the location of the DITA-OT library as an environment variable named PATH_TO_DITA_OT_LIBRARY.
+We recommend that you use the full_easy_install type for the DITA-OT library.
+
+**Note**: Please ensure that the version of the DITA-OT library supports your DITA version.
+
 ### Creating a book from scratch using local sections
 
 The disparate source material of your book is organized into separate
@@ -154,6 +163,45 @@ cloud_foundry:
     cfapps.io: 
       - production-route-subdomain
 ```
+## Supported Formats
+
+* [Markdown](#markdown)
+* [DITA](#dita)
+
+### <a id='markdown'></a>Markdown
+All markdown sections must be specified within the section key of the `config.yml`.
+
+### <a id='dita'></a>DITA
+
+Specify the following in the `config.yml`:
+
+* All dita sections within the dita_sections key of the `config.yml`.
+* In the first dita section, a key-value pair "ditamap_location: my-ditamap.ditamap"
+* (optional) A key-value pair "ditaval_location: my-ditaval.ditaval" in the first dita section with the `.ditamap`
+
+For example:
+
+
+```YAML
+dita_sections:
+
+  - repository:
+      name: org-name/bird-repo
+      ref: 165c28e967d58e6ff23a882689c953954a7b588d                #optional
+    directory: birds
+    ditamap_location: path/to/my-special-ditamap-location.ditamap
+    ditaval_location: path/to/my-special-ditaval-location.ditaval  #optional
+    
+ - repository:
+ 	 name: org-name/dependent-section
+ 	 ref: 165c28e967d58e6ff23a882689c123998a7b577e                 #optional
+   directory: dependent-section
+
+```
+
+**Note**: You'll need to have properly installed and specified the [DITA-OT](#dita-ot) library.
+
+**Note**: Bookbinder generates a subnav from the ditamap.
 
 ## Middleman Templating Helpers
 
