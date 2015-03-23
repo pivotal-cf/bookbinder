@@ -201,8 +201,6 @@ dita_sections:
 
 **Note**: You'll need to have properly installed and specified the [DITA-OT](#dita-ot) library.
 
-**Note**: Bookbinder generates a subnav from the ditamap.
-
 ## Middleman Templating Helpers
 
 Bookbinder comes with a Middleman configuration that provides a handful of helpful functions, and should work for most book projects. To use a custom Middleman configuration instead, place a `config.rb` file in the `master_middleman` directory of the book project. This will overwrite Bookbinder's `config.rb`.
@@ -217,6 +215,23 @@ Bookbinder provides several helper functions that can be called from within an .
 
 ### Subnavs
 `<%= yield_for_subnav %>` inserts the appropriate template in /subnavs, based on each constituent repositories' `subnav_template:` parameter in config.yml. The default template (`\_default.erb`) uses the label `default` and is applied to all sections unless another template is specified with subnav\_template. Template labels are the name of the template file with extensions removed. ("sample" for a template named "sample.erb")
+
+
+If your book includes a dita_section, instead of providing a subnav_template, Bookbinder will look for a file `_dita_subnav_template.erb` from `master_middleman/source/subnavs`. 
+
+Optionally, Bookbinder will make available subnav links in a json format at `/subnavs/dita-subnav-props.json`. They could be consumed with a javascript library (e.g. React.js) to create your subnav. Bookbinder will have written the name of the file containing the links (`dita-subnav-props.json`) from _dita_subnav_template.erb at a data attribute called data-props-location on 'div.nav-content'.
+
+An example of the json links:
+
+```code
+{
+  "links":
+  [
+    {"url": "/dita-section-one/some-guide.html", "text": "my topic 1"},
+    {"url": "/dita-section-one/../dita-section-dependency/some-guide-1.html", "text": "my topic dependency"}
+  ]
+}
+```
 
 ### Code Snippets
 `<%= yield_for_code_snippet from: 'my-org/code-repo', at: 'myCodeSnippetA' %>` inserts code snippets extracted from code repositories.
