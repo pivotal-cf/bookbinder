@@ -86,11 +86,9 @@ module Bookbinder
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
         gathered_dita_sections = dita_gatherer.gather(config.dita_sections)
 
-        gathered_dita_sections.each do |dita_section|
-          dita_preprocessor.preprocess(dita_section,
-                                       output_locations.subnavs_for_layout_dir,
-                                       output_locations.dita_subnav_template_path)
-        end
+        dita_preprocessor.preprocess(gathered_dita_sections,
+                                     output_locations.subnavs_for_layout_dir,
+                                     output_locations.dita_subnav_template_path)
 
         cloner = cloner_factory.produce(
           bind_source,
