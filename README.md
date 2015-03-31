@@ -83,7 +83,6 @@ This script names your book "mynewbook" and includes only one section,
     - repository:
         name: cloudfoundry/docs-dev-guide
       directory: my/included-section
-    pdf:
     YAML
 
     # Create a directory required by Middleman
@@ -120,7 +119,7 @@ You can skip ahead for [more information on the bind command](#bind-command).
 ```YAML
 book_repo: org-name/repo-name
 cred_repo: org-name/private-repo
-layout_repo: org-name/master-middleman-repo		# non-optional for the generate_pdf command
+layout_repo: org-name/master-middleman-repo
 
 sections:
   - repository:
@@ -138,8 +137,6 @@ archive_menu:						# optional
   - v1.2.0.0: archive-repo/your_pdf.yml
 
 public_host: animals.example.com
-pdf:
-  header: path/to/header-file.html
 template_variables:					# optional
   var_name: special-value
   other_var: 12
@@ -330,58 +327,6 @@ r301      %r{/wiki/(\w+)_\w+},    '/$1'
 `output/` contains an intermediary state. This includes `output/master_middleman`, the final prepared directory that the `bind` script ran middleman against.
 
 **Note**: As of version 0.2.0, the `bind` command no longer generates PDFs.
-
-### `generate_pdf` command
-
-        bin/bookbinder generate_pdf
-
-generates a PDF against the currently available `final_app` directory. **Note**: You must run `bind [local | github]` before running `generate_pdf`.
-
-You can specify which pages to include in a PDF using `bin/bookbinder generate_pdf my-pdf.yml`. `my-pdf.yml` contains the configuration for the pdf. It must be formatted as YAML and **requires the keys** `header` and `pages`.
-
-`my-pdf.yml` example:
-
-```yml
----
-copyright_notice: 'Copyright Pivotal Software Inc, 2042-2043'
-header: some-header.html
-pages:
-    - my-book/intro.html
-    - my-book/dramatic-peak.html
-    - my-book/denouement.html
-```
-
-Each path provided under `pages` must match the `directory` of its `repository` in `config.yml`. The header is pulled in from the `layout_repo`, so the file `some-header.html` is expected to exist at the top level in the repo `my-username/my-layout`. The contents of `some-header.html` will be added as a header to each page within the generated pdf.
-
-Example of `some-header.html`:
-
-```html
-<!DOCTYPE html>
-<html>
-  <body>
-    <div class='pdf_header' style="background-color:#ffffff; padding:12px 0px 12px 10px">
-        <img src='images/logo-big.png' style="height:20px">
-    </div>
-  </body>
-</html>
-```
-
-For the above pages to publish to pdf, your `config.yml` must contain the following:
-
-```yml
----
-layout_repo: my-username/my-layout
-sections:
-- repository:
-    name: my-username/my-book
-    directory: my-book
-```
-
-In turn, `my-username/my-layout` must contain `some-header.html`; and `my-username/my-book` must contain the pages `intro.html`, `dramatic-peak.html`, and `denouement.html`.
-
-An optional copyright notice may be provided as shown in the example.
-
-The output PDF file will have the same name as the YAML file used to generate it. In this example, it will be `my-pdf.pdf` since its configuration was specified in `my-pdf.yml`.
 
 ### `update_local_doc_repos` command
 

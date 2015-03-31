@@ -58,7 +58,6 @@ module Bookbinder
       let(:base_config_hash) do
         {'sections' => sections,
          'book_repo' => book,
-         'pdf_index' => [],
          'public_host' => 'example.com',
          'archive_menu' => archive_menu
         }
@@ -153,7 +152,7 @@ module Bookbinder
 
         context 'when provided a layout repo' do
           let(:config_hash) do
-            {'sections' => sections, 'book_repo' => book, 'pdf_index' => [], 'public_host' => 'example.com', 'layout_repo' => 'such-org/layout-repo'}
+            {'sections' => sections, 'book_repo' => book, 'public_host' => 'example.com', 'layout_repo' => 'such-org/layout-repo'}
           end
 
           it 'passes the provided repo as master_middleman_dir' do
@@ -348,7 +347,6 @@ module Bookbinder
           config_hash = {
               'sections' => sections,
               'book_repo' => book,
-              'pdf_index' => [],
               'cred_repo' => 'my-org/my-creds',
               'public_host' => 'example.com',
               'template_variables' => {'name' => 'Spartacus'}
@@ -396,7 +394,6 @@ module Bookbinder
               'sections' => sections,
               'book_repo' => book,
               'cred_repo' => 'my-org/my-creds',
-              'pdf_index' => [],
               'public_host' => 'example.com',
           }
 
@@ -444,7 +441,6 @@ module Bookbinder
                 'sections' => sections,
                 'book_repo' => book,
                 'cred_repo' => 'my-org/my-creds',
-                'pdf_index' => [],
                 'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
             }
 
