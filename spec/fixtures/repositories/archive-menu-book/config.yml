@@ -19,6 +19,3 @@ archive_menu:
   - v1.3.0.0
   - v1.2.0.0: archives/my-great-file
 
-pdf:
-  filename: required.pdf
-  header: "for/linux-only-feature.html"

@@ -76,8 +76,6 @@ module Bookbinder
         {
             'book_repo' => 'my_book',
             'public_host' => 'public_host',
-            'pdf' => 'pdf',
-            'pdf_index' => 'pdf_index',
             'sections' => [section1, section2]
         }
       end

@@ -120,7 +120,7 @@ module Bookbinder
     end
 
     CONFIG_REQUIRED_KEYS = %w(book_repo public_host)
-    CONFIG_OPTIONAL_KEYS = %w(archive_menu layout_repo versions pdf_index cred_repo pdf)
+    CONFIG_OPTIONAL_KEYS = %w(archive_menu layout_repo versions cred_repo)
 
     CONFIG_REQUIRED_KEYS.each do |method_name|
       define_method(method_name) do

@@ -51,7 +51,6 @@ module Bookbinder
       def standard_commands
         @standard_commands ||= [
           build_and_push_tarball,
-          Commands::GeneratePDF.new(logger, configuration_fetcher),
           bind,
           Commands::PushFromLocal.new(logger, configuration_fetcher, 'acceptance'),
           push_local_to_staging,
