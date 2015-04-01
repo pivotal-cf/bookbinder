@@ -36,12 +36,10 @@ module Bookbinder
       expect(view_updater.output).to eq "first\nsecond\nthird\n"
     end
 
-    context 'when the command exits with 1' do
-      it 'raises' do
-        view_updater = double('view_updater', log: nil)
-        sheller = Sheller.new(view_updater)
-        expect { sheller.run_command("exit 1") }.to raise_error Sheller::ShelloutFailure
-      end
+    it 'returns the exit status' do
+      sheller = Sheller.new(double('view updater'))
+      result = sheller.run_command("exit 1")
+      expect(result).not_to be_success
     end
   end
 end

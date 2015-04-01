@@ -8,12 +8,18 @@ module Bookbinder
     describe 'processing sections' do
       let(:path_to_dita_ot_library) { '/path/to/dita/ot' }
 
+      def stub_exit(code)
+        system("exit #{code}")
+        $?
+      end
+
       it 'runs the dita-processing library against the given ditamap locations' do
         shell = double('shell_out')
         processed_dita_location = '/path/to/processed/dita/boo'
         dita_section = DitaSection.new('/local/path/to/repo', 'path/to/map.ditamap', 'path/to/val.ditaval', 'org/foo', nil, 'boo')
 
         dita_converter = DitaToHtmlConverter.new(shell, path_to_dita_ot_library)
+
         expect(shell).to receive(:run_command)
                          .with("export CLASSPATH=#{classpath}; " +
                                'ant -f /path/to/dita/ot ' +
@@ -24,7 +30,7 @@ module Bookbinder
                                "-Dgenerate.copy.outer='2' " +
                                '-Dargs.input=/local/path/to/repo/path/to/map.ditamap ' +
                                '-Dargs.filter=/local/path/to/repo/path/to/val.ditaval '
-                         )
+                         ) { stub_exit(0) }
         dita_converter.convert_to_html(dita_section, write_to: processed_dita_location)
       end
 
@@ -45,7 +51,7 @@ module Bookbinder
                                      "-Ddita.temp.dir='/tmp/bookbinder_dita' " +
                                      "-Dgenerate.copy.outer='2' " +
                                      '-Dargs.input=/local/path/to/repo/path/to/map.ditamap '
-                           )
+                           ) { stub_exit(0) }
           dita_converter.convert_to_html(dita_section, write_to: processed_dita_location)
         end
       end
@@ -61,7 +67,7 @@ module Bookbinder
                                          nil,
                                          'boo')
 
-          allow(shell).to receive(:run_command).and_raise Sheller::ShelloutFailure
+          allow(shell).to receive(:run_command) { stub_exit(1) }
 
           dita_converter = DitaToHtmlConverter.new(shell, path_to_dita_ot_library)
           expect { dita_converter.convert_to_html(dita_section, write_to: processed_dita_location) }.

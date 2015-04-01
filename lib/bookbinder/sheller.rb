@@ -22,10 +22,7 @@ module Bookbinder
         t.join
         exit_status = wait_thr.value
       end
-
-      unless exit_status.success?
-        raise ShelloutFailure.new "Shelling out failed."
-      end
+      exit_status
     end
 
     attr_reader :view_updater
