@@ -21,6 +21,21 @@ module Bookbinder
       sheller.run_command(">&2 echo hello")
     end
 
+    it 'interleaves stdout and stderr' do
+      view_updater = Class.new do
+        attr_reader :output
+        def initialize; @output = ""; end
+        def log(line)
+          @output << line
+        end
+        alias :error :log
+      end.new
+
+      sheller = Sheller.new(view_updater)
+      sheller.run_command("echo first; sleep 0.01; >&2 echo second; sleep 0.01; >&1 echo third")
+      expect(view_updater.output).to eq "first\nsecond\nthird\n"
+    end
+
     context 'when the command exits with 1' do
       it 'raises' do
         view_updater = double('view_updater', log: nil)

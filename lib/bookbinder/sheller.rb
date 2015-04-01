@@ -11,12 +11,15 @@ module Bookbinder
     def run_command(command)
       exit_status = nil
       Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
-        stdout.each do |line|
-          view_updater.log(line)
+        t = Thread.new do
+          stdout.each do |line|
+            view_updater.log(line)
+          end
         end
         stderr.each do |line|
           view_updater.error(line)
         end
+        t.join
         exit_status = wait_thr.value
       end
 
