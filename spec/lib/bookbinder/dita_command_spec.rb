@@ -1,10 +1,10 @@
 require_relative '../../../lib/bookbinder/configuration'
 require_relative '../../../lib/bookbinder/values/dita_section'
-require_relative '../../../lib/bookbinder/dita_to_html_converter'
+require_relative '../../../lib/bookbinder/dita_command'
 require_relative '../../../lib/bookbinder/sheller'
 
 module Bookbinder
-  describe DitaToHtmlConverter do
+  describe DitaCommand do
     describe 'processing sections' do
       let(:path_to_dita_ot_library) { '/path/to/dita/ot' }
 
@@ -18,7 +18,7 @@ module Bookbinder
         processed_dita_location = '/path/to/processed/dita/boo'
         dita_section = DitaSection.new('/local/path/to/repo', 'path/to/map.ditamap', 'path/to/val.ditaval', 'org/foo', nil, 'boo')
 
-        dita_converter = DitaToHtmlConverter.new(shell, path_to_dita_ot_library)
+        dita_converter = DitaCommand.new(shell, path_to_dita_ot_library)
 
         expect(shell).to receive(:run_command)
                          .with("export CLASSPATH=#{classpath}; " +
@@ -41,7 +41,7 @@ module Bookbinder
 
           dita_section = DitaSection.new('/local/path/to/repo', 'path/to/map.ditamap', nil, 'org/foo', nil, 'boo')
 
-          dita_converter = DitaToHtmlConverter.new(shell, path_to_dita_ot_library)
+          dita_converter = DitaCommand.new(shell, path_to_dita_ot_library)
           expect(shell).to receive(:run_command)
                            .with("export CLASSPATH=#{classpath}; " +
                                      'ant -f /path/to/dita/ot ' +
@@ -69,9 +69,9 @@ module Bookbinder
 
           allow(shell).to receive(:run_command) { stub_exit(1) }
 
-          dita_converter = DitaToHtmlConverter.new(shell, path_to_dita_ot_library)
+          dita_converter = DitaCommand.new(shell, path_to_dita_ot_library)
           expect { dita_converter.convert_to_html(dita_section, write_to: processed_dita_location) }.
-              to raise_error(DitaToHtmlConverter::DitaToHtmlLibraryFailure,
+              to raise_error(DitaCommand::DitaToHtmlLibraryFailure,
                              'The DITA-to-HTML conversion failed. Please check that you have specified the ' +
                              'path to your DITA-OT library in the ENV, that your DITA-specific keys/values in ' +
                              'config.yml are set, and that your DITA toolkit is correctly configured.')

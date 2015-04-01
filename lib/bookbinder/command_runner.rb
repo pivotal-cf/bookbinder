@@ -1,6 +1,4 @@
 require_relative 'errors/cli_error'
-require_relative 'dita_to_html_converter'
-require_relative 'sheller'
 
 module Bookbinder
   class CommandRunner

@@ -5,8 +5,8 @@ module Bookbinder
 
     ACCEPTED_IMAGE_FORMATS = %w(png jpeg jpg svg gif bmp tif tiff eps)
 
-    def initialize(dita_converter, dita_formatter, local_fs_accessor)
-      @dita_converter = dita_converter
+    def initialize(command_creator, dita_formatter, local_fs_accessor)
+      @command_creator = command_creator
       @dita_formatter = dita_formatter
       @local_fs_accessor = local_fs_accessor
     end
@@ -16,7 +16,7 @@ module Bookbinder
                    dita_subnav_template_path)
       ditamap_location_sections = dita_sections.select { |dita_section| dita_section.ditamap_location }
       ditamap_location_sections.each do |dita_section|
-        dita_converter.convert_to_html dita_section, write_to: dita_section.html_from_dita_section_dir
+        command_creator.convert_to_html dita_section, write_to: dita_section.html_from_dita_section_dir
 
         generate_subnav(dita_section, dita_subnav_template_path, subnavs_dir)
       end
@@ -33,7 +33,7 @@ module Bookbinder
 
     private
 
-    attr_reader :dita_converter, :dita_formatter, :local_fs_accessor
+    attr_reader :command_creator, :dita_formatter, :local_fs_accessor
 
     def generate_subnav(dita_section, dita_subnav_template_path, subnavs_dir)
       dita_subnav_template_text = local_fs_accessor.read(dita_subnav_template_path)

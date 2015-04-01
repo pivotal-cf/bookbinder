@@ -1,19 +1,20 @@
 Dir.glob(File.expand_path('../../commands/*.rb', __FILE__)).each do |command_file|
   require command_file
 end
+require_relative '../config/bind_config_factory'
 require_relative '../configuration_fetcher'
 require_relative '../configuration_validator'
+require_relative '../dita_command'
 require_relative '../dita_html_to_middleman_formatter'
 require_relative '../dita_preprocessor'
 require_relative '../html_document_manipulator'
 require_relative '../ingest/cloner_factory'
-require_relative '../dita_to_html_converter'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../post_production/sitemap_writer'
+require_relative '../sheller'
 require_relative '../subnav_formatter'
 require_relative '../yaml_loader'
-require_relative '../config/bind_config_factory'
 
 module Bookbinder
   module Repositories
@@ -134,8 +135,8 @@ module Bookbinder
 
       def local_dita_processor
         @local_dita_processor ||=
-            DitaToHtmlConverter.new(Sheller.new(logger),
-                                    ENV['PATH_TO_DITA_OT_LIBRARY'])
+            DitaCommand.new(Sheller.new(logger),
+                            ENV['PATH_TO_DITA_OT_LIBRARY'])
       end
 
       def dita_html_to_middleman_formatter
