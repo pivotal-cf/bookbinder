@@ -85,7 +85,9 @@ module Bookbinder
           dita_preprocessor,
           Ingest::ClonerFactory.new(logger, version_control_system),
           DitaSectionGathererFactory.new(version_control_system, logger),
-          Repositories::SectionRepository.new(logger)
+          Repositories::SectionRepository.new(logger),
+          local_dita_processor,
+          Sheller.new(logger)
         )
       end
 

@@ -18,6 +18,8 @@ module Bookbinder
       include Bookbinder::DirectoryHelperMethods
       include Commands::Naming
 
+      DitaToHtmlLibraryFailure = Class.new(RuntimeError)
+
       def initialize(logger,
                      config_fetcher,
                      config_factory,
@@ -31,7 +33,9 @@ module Bookbinder
                      dita_preprocessor,
                      cloner_factory,
                      dita_section_gatherer_factory,
-                     section_repository)
+                     section_repository,
+                     command_creator,
+                     sheller)
         @logger = logger
         @config_fetcher = config_fetcher
         @config_factory = config_factory
@@ -46,6 +50,8 @@ module Bookbinder
         @cloner_factory = cloner_factory
         @dita_section_gatherer_factory = dita_section_gatherer_factory
         @section_repository = section_repository
+        @command_creator = command_creator
+        @sheller = sheller
       end
 
       def usage
@@ -88,7 +94,16 @@ module Bookbinder
 
         dita_preprocessor.preprocess(gathered_dita_sections,
                                      output_locations.subnavs_for_layout_dir,
-                                     output_locations.dita_subnav_template_path)
+                                     output_locations.dita_subnav_template_path) do |dita_section|
+          command = command_creator.convert_to_html(dita_section,
+                                                    write_to: dita_section.html_from_dita_section_dir)
+          unless sheller.run_command(command).success?
+            raise DitaToHtmlLibraryFailure.new 'The DITA-to-HTML conversion failed. ' +
+              'Please check that you have specified the path to your DITA-OT library in the ENV, ' +
+              'that your DITA-specific keys/values in config.yml are set, ' +
+              'and that your DITA toolkit is correctly configured.'
+          end
+        end
 
         cloner = cloner_factory.produce(
           bind_source,
@@ -127,7 +142,9 @@ module Bookbinder
                   :dita_preprocessor,
                   :cloner_factory,
                   :dita_section_gatherer_factory,
-                  :section_repository
+                  :section_repository,
+                  :command_creator,
+                  :sheller
 
       def generate_local_repo_dir(context_dir, bind_source)
         File.expand_path('..', context_dir) if bind_source == 'local'

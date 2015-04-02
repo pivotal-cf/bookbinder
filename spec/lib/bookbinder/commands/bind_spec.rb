@@ -7,6 +7,7 @@ require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
+require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../../lib/bookbinder/subnav_formatter'
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
@@ -80,7 +81,9 @@ module Bookbinder
                          partial_args.fetch(:dita_preprocessor, dita_preprocessor),
                          partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, SpecGitAccessor)),
                          DitaSectionGathererFactory.new(bind_version_control_system, bind_logger),
-                         Repositories::SectionRepository.new(logger))
+                         Repositories::SectionRepository.new(logger),
+                         partial_args.fetch(:command_creator, command_creator),
+                         partial_args.fetch(:sheller, sheller))
     end
 
     def random_port
@@ -89,9 +92,10 @@ module Bookbinder
 
     let(:book) { 'fantastic/book' }
     let(:command) { bind_cmd }
-    let(:config_hash) { base_config_hash }
+    let(:command_creator) { double('command creator', convert_to_html: 'stubbed command') }
     let(:config) { Configuration.new(logger, config_hash) }
     let(:config_fetcher) { double('config fetcher', fetch_config: config) }
+    let(:config_hash) { base_config_hash }
     let(:dita_preprocessor) { DitaPreprocessor.new(null_dita_to_html_converter, static_site_generator_formatter, file_system_accessor) }
     let(:document_parser) { HtmlDocumentManipulator.new }
     let(:file_system_accessor) { LocalFileSystemAccessor.new }
@@ -99,9 +103,25 @@ module Bookbinder
     let(:git_client) { GitClient.new }
     let(:logger) { NilLogger.new }
     let(:middleman_runner) { MiddlemanRunner.new(logger, SpecGitAccessor) }
+    let(:sheller) { double('sheller', run_command: double('status', success?: true)) }
     let(:sitemap_writer) { PostProduction::SitemapWriter.build(logger, final_app_dir, random_port) }
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
     let(:subnav_formatter) { SubnavFormatter.new }
+
+    describe "when the DITA processor fails" do
+      it "raises an exception" do
+        preprocessor = double('preprocessor')
+        command = bind_cmd(dita_preprocessor: preprocessor,
+                           sheller: Sheller.new(double),
+                           command_creator: double('command creator',
+                                                   convert_to_html: 'false'))
+        output_locations = OutputLocations.new(context_dir: Pathname('foo'))
+        allow(preprocessor).to receive(:preprocess).and_yield(
+          DitaSection.new(nil, nil, nil, 'foo', nil, nil, output_locations)
+        )
+        expect { command.run(['local']) }.to raise_exception(Commands::Bind::DitaToHtmlLibraryFailure)
+      end
+    end
 
     describe 'local' do
       let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }

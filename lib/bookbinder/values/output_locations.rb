@@ -6,7 +6,10 @@ module Bookbinder
 
     include DirectoryHelperMethods
 
-    def initialize(final_app_dir: nil, layout_repo_dir: nil, context_dir: nil, local_repo_dir: nil)
+    def initialize(final_app_dir: nil,
+                   layout_repo_dir: nil,
+                   context_dir: nil,
+                   local_repo_dir: nil)
       @final_app_dir = final_app_dir
       @layout_repo_dir = layout_repo_dir
       @context_dir = context_dir

@@ -13,11 +13,11 @@ module Bookbinder
 
     def preprocess(dita_sections,
                    subnavs_dir,
-                   dita_subnav_template_path)
+                   dita_subnav_template_path,
+                   &block)
       ditamap_location_sections = dita_sections.select { |dita_section| dita_section.ditamap_location }
       ditamap_location_sections.each do |dita_section|
-        command_creator.convert_to_html dita_section, write_to: dita_section.html_from_dita_section_dir
-
+        block.call(dita_section)
         generate_subnav(dita_section, dita_subnav_template_path, subnavs_dir)
       end
 
