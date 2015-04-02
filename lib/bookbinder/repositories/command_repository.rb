@@ -136,9 +136,7 @@ module Bookbinder
       end
 
       def local_dita_processor
-        @local_dita_processor ||=
-            DitaCommand.new(Sheller.new(logger),
-                            ENV['PATH_TO_DITA_OT_LIBRARY'])
+        @local_dita_processor ||= DitaCommand.new(ENV['PATH_TO_DITA_OT_LIBRARY'])
       end
 
       def dita_html_to_middleman_formatter

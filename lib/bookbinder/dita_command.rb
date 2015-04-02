@@ -2,8 +2,7 @@ require_relative '../bookbinder/values/dita_section'
 
 module Bookbinder
   class DitaCommand
-    def initialize(sheller, path_to_dita_ot_library)
-      @sheller = sheller
+    def initialize(path_to_dita_ot_library)
       @path_to_dita_ot_library = path_to_dita_ot_library
     end
 
@@ -35,6 +34,6 @@ module Bookbinder
 
     private
 
-    attr_reader :sheller, :path_to_dita_ot_library
+    attr_reader :path_to_dita_ot_library
   end
 end

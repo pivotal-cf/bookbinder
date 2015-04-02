@@ -7,11 +7,10 @@ module Bookbinder
     let(:path_to_dita_ot_library) { '/path/to/dita/ot' }
 
     it 'creates the command that will run the dita-processing library' do
-      shell = double('shell_out')
       processed_dita_location = '/path/to/processed/dita/boo'
       dita_section = DitaSection.new('/local/path/to/repo', 'path/to/map.ditamap', 'path/to/val.ditaval', 'org/foo', nil, 'boo')
 
-      dita_converter = DitaCommand.new(shell, path_to_dita_ot_library)
+      dita_converter = DitaCommand.new(path_to_dita_ot_library)
 
       expect(dita_converter.convert_to_html(dita_section, write_to: processed_dita_location)).
         to eq("export CLASSPATH=#{classpath}; " +
@@ -28,12 +27,11 @@ module Bookbinder
 
     context 'when no ditaval file is provided' do
       it 'does not apply the filters' do
-        shell = double('shell_out')
         processed_dita_location = '/path/to/processed/dita/boo'
 
         dita_section = DitaSection.new('/local/path/to/repo', 'path/to/map.ditamap', nil, 'org/foo', nil, 'boo')
 
-        dita_converter = DitaCommand.new(shell, path_to_dita_ot_library)
+        dita_converter = DitaCommand.new(path_to_dita_ot_library)
         expect(dita_converter.convert_to_html(dita_section, write_to: processed_dita_location)).
           to eq("export CLASSPATH=#{classpath}; " +
                 'ant -f /path/to/dita/ot ' +
