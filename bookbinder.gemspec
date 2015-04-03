@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'middleman-syntax', ['~> 2.0']
   s.add_runtime_dependency 'redcarpet', ['~> 3.0']
   s.add_runtime_dependency 'vienna', ['= 0.4.0']
-  s.add_runtime_dependency 'wkhtmltopdf-binary-cf', ['= 0.12.3']
   s.add_runtime_dependency 'anemone'
   s.add_runtime_dependency 'css_parser'
   s.add_runtime_dependency 'puma'
