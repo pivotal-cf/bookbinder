@@ -237,10 +237,6 @@ module Bookbinder
         end
       end
 
-      def binding_from_github?(bind_location)
-        config.has_option?('versions') && bind_location != 'local'
-      end
-
       def validate(bind_source, options)
         raise CliError::InvalidArguments unless arguments_are_valid?(bind_source, options)
       end
