@@ -1,5 +1,6 @@
-module Bookbinder
+require 'ostruct'
 
+module Bookbinder
   UserMessage = Struct.new(:message, :escalation_type) do
     def error?
       escalation_type == EscalationType.error
@@ -11,5 +12,4 @@ module Bookbinder
   end
 
   EscalationType = OpenStruct.new(success: 0, error: 1, warn: 2)
-
 end
