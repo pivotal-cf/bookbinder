@@ -95,7 +95,7 @@ module Bookbinder
         dita_preprocessor.preprocess(gathered_dita_sections,
                                      output_locations.subnavs_for_layout_dir,
                                      output_locations.dita_subnav_template_path) do |dita_section|
-          command = command_creator.convert_to_html(dita_section,
+          command = command_creator.convert_to_html_command(dita_section,
                                                     write_to: dita_section.html_from_dita_section_dir)
           unless sheller.run_command(command).success?
             raise DitaToHtmlLibraryFailure.new 'The DITA-to-HTML conversion failed. ' +

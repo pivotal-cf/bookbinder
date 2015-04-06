@@ -27,7 +27,7 @@ module Bookbinder
       end
     end
 
-    let(:null_dita_to_html_converter) { double('null dita-to-html converter', convert_to_html: []) }
+    let(:null_dita_to_html_converter) { double('null dita-to-html converter', convert_to_html_command: []) }
     let(:archive_menu_config) { FakeArchiveMenuConfig.new }
 
     include SpecHelperMethods
@@ -91,7 +91,7 @@ module Bookbinder
 
     let(:book) { 'fantastic/book' }
     let(:command) { bind_cmd }
-    let(:command_creator) { double('command creator', convert_to_html: 'stubbed command') }
+    let(:command_creator) { double('command creator', convert_to_html_command: 'stubbed command') }
     let(:config) { Configuration.new(logger, config_hash) }
     let(:config_fetcher) { double('config fetcher', fetch_config: config) }
     let(:config_hash) { base_config_hash }
@@ -113,7 +113,7 @@ module Bookbinder
         command = bind_cmd(dita_preprocessor: preprocessor,
                            sheller: Sheller.new(double),
                            command_creator: double('command creator',
-                                                   convert_to_html: 'false'))
+                                                   convert_to_html_command: 'false'))
         output_locations = OutputLocations.new(context_dir: Pathname('foo'))
         allow(preprocessor).to receive(:preprocess).and_yield(
           DitaSection.new(nil, nil, nil, 'foo', nil, nil, output_locations)

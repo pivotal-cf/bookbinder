@@ -1,12 +1,12 @@
 require_relative '../bookbinder/values/dita_section'
 
 module Bookbinder
-  class DitaCommand
+  class DitaCommandCreator
     def initialize(path_to_dita_ot_library)
       @path_to_dita_ot_library = path_to_dita_ot_library
     end
 
-    def convert_to_html(dita_section, write_to: nil)
+    def convert_to_html_command(dita_section, write_to: nil)
       classpath = "#{path_to_dita_ot_library}/lib/xercesImpl.jar:" +
                   "#{path_to_dita_ot_library}/lib/xml-apis.jar:" +
                   "#{path_to_dita_ot_library}/lib/resolver.jar:" +

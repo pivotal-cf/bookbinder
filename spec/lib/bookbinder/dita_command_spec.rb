@@ -1,18 +1,18 @@
 require_relative '../../../lib/bookbinder/configuration'
 require_relative '../../../lib/bookbinder/values/dita_section'
-require_relative '../../../lib/bookbinder/dita_command'
+require_relative '../../../lib/bookbinder/dita_command_creator'
 
 module Bookbinder
-  describe DitaCommand do
+  describe DitaCommandCreator do
     let(:path_to_dita_ot_library) { '/path/to/dita/ot' }
 
     it 'creates the command that will run the dita-processing library' do
       processed_dita_location = '/path/to/processed/dita/boo'
       dita_section = DitaSection.new('/local/path/to/repo', 'path/to/map.ditamap', 'path/to/val.ditaval', 'org/foo', nil, 'boo')
 
-      dita_converter = DitaCommand.new(path_to_dita_ot_library)
+      dita_converter = DitaCommandCreator.new(path_to_dita_ot_library)
 
-      expect(dita_converter.convert_to_html(dita_section, write_to: processed_dita_location)).
+      expect(dita_converter.convert_to_html_command(dita_section, write_to: processed_dita_location)).
         to eq("export CLASSPATH=#{classpath}; " +
               'ant -f /path/to/dita/ot ' +
               "-Dbasedir='/' " +
@@ -31,8 +31,8 @@ module Bookbinder
 
         dita_section = DitaSection.new('/local/path/to/repo', 'path/to/map.ditamap', nil, 'org/foo', nil, 'boo')
 
-        dita_converter = DitaCommand.new(path_to_dita_ot_library)
-        expect(dita_converter.convert_to_html(dita_section, write_to: processed_dita_location)).
+        dita_converter = DitaCommandCreator.new(path_to_dita_ot_library)
+        expect(dita_converter.convert_to_html_command(dita_section, write_to: processed_dita_location)).
           to eq("export CLASSPATH=#{classpath}; " +
                 'ant -f /path/to/dita/ot ' +
                   "-Dbasedir='/' " +

@@ -4,7 +4,7 @@ end
 require_relative '../config/bind_config_factory'
 require_relative '../configuration_fetcher'
 require_relative '../configuration_validator'
-require_relative '../dita_command'
+require_relative '../dita_command_creator'
 require_relative '../dita_html_to_middleman_formatter'
 require_relative '../dita_preprocessor'
 require_relative '../html_document_manipulator'
@@ -135,7 +135,7 @@ module Bookbinder
       end
 
       def local_dita_processor
-        @local_dita_processor ||= DitaCommand.new(ENV['PATH_TO_DITA_OT_LIBRARY'])
+        @local_dita_processor ||= DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY'])
       end
 
       def dita_html_to_middleman_formatter
