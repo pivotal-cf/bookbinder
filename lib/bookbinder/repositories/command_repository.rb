@@ -85,7 +85,7 @@ module Bookbinder
           Ingest::ClonerFactory.new(logger, version_control_system),
           DitaSectionGathererFactory.new(version_control_system, logger),
           Repositories::SectionRepository.new(logger),
-          local_dita_processor,
+          dita_command_creator,
           Sheller.new(logger)
         )
       end
@@ -133,8 +133,8 @@ module Bookbinder
                                  local_file_system_accessor)
       end
 
-      def local_dita_processor
-        @local_dita_processor ||= DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY'])
+      def dita_command_creator
+        @dita_command_creator ||= DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY'])
       end
 
       def dita_html_to_middleman_formatter
