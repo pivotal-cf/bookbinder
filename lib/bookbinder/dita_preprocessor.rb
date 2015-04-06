@@ -5,8 +5,7 @@ module Bookbinder
 
     ACCEPTED_IMAGE_FORMATS = %w(png jpeg jpg svg gif bmp tif tiff eps)
 
-    def initialize(command_creator, dita_formatter, local_fs_accessor)
-      @command_creator = command_creator
+    def initialize(dita_formatter, local_fs_accessor)
       @dita_formatter = dita_formatter
       @local_fs_accessor = local_fs_accessor
     end
@@ -33,7 +32,7 @@ module Bookbinder
 
     private
 
-    attr_reader :command_creator, :dita_formatter, :local_fs_accessor
+    attr_reader :dita_formatter, :local_fs_accessor
 
     def generate_subnav(dita_section, dita_subnav_template_path, subnavs_dir)
       dita_subnav_template_text = local_fs_accessor.read(dita_subnav_template_path)

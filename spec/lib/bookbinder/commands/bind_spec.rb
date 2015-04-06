@@ -27,7 +27,6 @@ module Bookbinder
       end
     end
 
-    let(:null_dita_to_html_converter) { double('null dita-to-html converter', convert_to_html_command: []) }
     let(:archive_menu_config) { FakeArchiveMenuConfig.new }
 
     include SpecHelperMethods
@@ -95,7 +94,7 @@ module Bookbinder
     let(:config) { Configuration.new(logger, config_hash) }
     let(:config_fetcher) { double('config fetcher', fetch_config: config) }
     let(:config_hash) { base_config_hash }
-    let(:dita_preprocessor) { DitaPreprocessor.new(null_dita_to_html_converter, static_site_generator_formatter, file_system_accessor) }
+    let(:dita_preprocessor) { DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor) }
     let(:document_parser) { HtmlDocumentManipulator.new }
     let(:file_system_accessor) { LocalFileSystemAccessor.new }
     let(:final_app_dir) { File.absolute_path('final_app') }
