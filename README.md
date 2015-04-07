@@ -328,6 +328,8 @@ You should `ssh-add` this key to give Bookbinder access to the repositories.
 
 The bind command creates two output directories, one named `output/` and one named `final_app/`. These are placed in the current directory and are overwritten each time you run Bookbinder.
 
+**Note**: When Bookbinder binds DITA sections of your book, it only sends error messages to the screen. Use the `--verbose` option with `bind` to see the non-filter output.
+
 #### The `final_app` directory
 
 `final_app/` contains Bookbinder's ultimate output: a Rack web-app that can be pushed to Cloud Foundry or run locally.
