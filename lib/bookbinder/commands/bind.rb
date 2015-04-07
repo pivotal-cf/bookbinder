@@ -1,11 +1,12 @@
-require_relative '../dita_section_gatherer_factory'
 require_relative '../archive_menu_configuration'
-require_relative '../values/output_locations'
-require_relative '../values/dita_section'
-require_relative '../errors/cli_error'
-require_relative '../values/section'
-require_relative '../publisher'
 require_relative '../book'
+require_relative '../dita_section_gatherer_factory'
+require_relative '../errors/cli_error'
+require_relative '../publisher'
+require_relative '../streams/switchable_stdout_and_red_stderr'
+require_relative '../values/dita_section'
+require_relative '../values/output_locations'
+require_relative '../values/section'
 require_relative 'naming'
 
 module Bookbinder
@@ -74,8 +75,8 @@ module Bookbinder
         @gem_root = File.expand_path('../../../../', __FILE__)
         publisher = Publisher.new(logger, sitemap_writer, static_site_generator, file_system_accessor)
 
-
         bind_config = config_factory.produce(bind_source)
+        output_streams = Streams::SwitchableStdoutAndRedStderr.new(options)
 
         @versions = bind_config.fetch(:versions, [])
         @book_repo = bind_config[:book_repo]
@@ -95,9 +96,12 @@ module Bookbinder
         dita_preprocessor.preprocess(gathered_dita_sections,
                                      output_locations.subnavs_for_layout_dir,
                                      output_locations.dita_subnav_template_path) do |dita_section|
-          command = command_creator.convert_to_html_command(dita_section,
-                                                    write_to: dita_section.html_from_dita_section_dir)
-          unless sheller.run_command(command).success?
+          command = command_creator.convert_to_html_command(
+            dita_section,
+            write_to: dita_section.html_from_dita_section_dir
+          )
+          status = sheller.run_command(command, output_streams.to_h)
+          unless status.success?
             raise DitaToHtmlLibraryFailure.new 'The DITA-to-HTML conversion failed. ' +
               'Please check that you have specified the path to your DITA-OT library in the ENV, ' +
               'that your DITA-specific keys/values in config.yml are set, ' +
@@ -119,7 +123,7 @@ module Bookbinder
 
         success = publisher.publish(
           subnavs,
-          {verbose: cli_arguments.include?('--verbose')},
+          {verbose: options.include?('--verbose')},
           output_locations,
           archive_menu_config.generate(bind_config, sections)
         )

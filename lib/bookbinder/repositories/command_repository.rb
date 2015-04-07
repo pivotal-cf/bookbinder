@@ -86,7 +86,7 @@ module Bookbinder
           DitaSectionGathererFactory.new(version_control_system, logger),
           Repositories::SectionRepository.new(logger),
           dita_command_creator,
-          Sheller.new(logger)
+          Sheller.new
         )
       end
 

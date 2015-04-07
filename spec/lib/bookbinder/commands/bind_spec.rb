@@ -12,6 +12,7 @@ require_relative '../../../../lib/bookbinder/subnav_formatter'
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/spec_git_accessor'
+require_relative '../../../helpers/redirection'
 require_relative '../../../helpers/use_fixture_repo'
 
 require_relative '../../../../lib/bookbinder/spider'
@@ -110,7 +111,7 @@ module Bookbinder
       it "raises an exception" do
         preprocessor = double('preprocessor')
         command = bind_cmd(dita_preprocessor: preprocessor,
-                           sheller: Sheller.new(double),
+                           sheller: Sheller.new,
                            command_creator: double('command creator',
                                                    convert_to_html_command: 'false'))
         output_locations = OutputLocations.new(context_dir: Pathname('foo'))
@@ -118,6 +119,55 @@ module Bookbinder
           DitaSection.new(nil, nil, nil, 'foo', nil, nil, output_locations)
         )
         expect { command.run(['local']) }.to raise_exception(Commands::Bind::DitaToHtmlLibraryFailure)
+      end
+    end
+
+    describe "DITA command output" do
+      include Redirection
+
+      it "sends to stdout when --verbose" do
+        preprocessor = double('preprocessor')
+        stdout_and_stderr_producer = 'echo foo; >&2 echo bar'
+        command = bind_cmd(dita_preprocessor: preprocessor,
+                           sheller: Sheller.new,
+                           command_creator: double('command creator',
+                                                   convert_to_html_command: stdout_and_stderr_producer))
+        output_locations = OutputLocations.new(context_dir: Pathname('foo'))
+        allow(preprocessor).to receive(:preprocess).and_yield(
+          DitaSection.new(nil, nil, nil, 'foo', nil, nil, output_locations)
+        )
+        stdout = capture_stdout { swallow_stderr { command.run(['local', '--verbose']) } }
+        expect(stdout.lines.first).to eq("foo\n")
+      end
+
+      it "doesn't send to stdout when not --verbose" do
+        preprocessor = double('preprocessor')
+        stdout_and_stderr_producer = 'echo foo; >&2 echo bar'
+        command = bind_cmd(dita_preprocessor: preprocessor,
+                           sheller: Sheller.new,
+                           command_creator: double('command creator',
+                                                   convert_to_html_command: stdout_and_stderr_producer))
+        output_locations = OutputLocations.new(context_dir: Pathname('foo'))
+        allow(preprocessor).to receive(:preprocess).and_yield(
+          DitaSection.new(nil, nil, nil, 'foo', nil, nil, output_locations)
+        )
+        stdout = capture_stdout { swallow_stderr { command.run(['local']) } }
+        expect(stdout).to eq("")
+      end
+
+      it "sends to stderr in red even when not --verbose" do
+        preprocessor = double('preprocessor')
+        stdout_and_stderr_producer = 'echo foo; >&2 echo bar'
+        command = bind_cmd(dita_preprocessor: preprocessor,
+                           sheller: Sheller.new,
+                           command_creator: double('command creator',
+                                                   convert_to_html_command: stdout_and_stderr_producer))
+        output_locations = OutputLocations.new(context_dir: Pathname('foo'))
+        allow(preprocessor).to receive(:preprocess).and_yield(
+          DitaSection.new(nil, nil, nil, 'foo', nil, nil, output_locations)
+        )
+        stderr = capture_stderr { swallow_stdout { command.run(['local']) } }
+        expect(stderr).to eq("\e[31mbar\n\e[0m")
       end
     end
 
@@ -172,7 +222,7 @@ module Bookbinder
         let(:config_hash) do
           {'sections' => sections, 'book_repo' => book, 'public_host' => 'example.com', 'layout_repo' => 'such-org/layout-repo'}
         end
-        
+
         it 'passes the provided repo as master_middleman_dir' do
           fake_publisher = double(:publisher)
           expect(Publisher).to receive(:new).and_return fake_publisher

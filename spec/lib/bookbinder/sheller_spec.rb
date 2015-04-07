@@ -3,43 +3,44 @@ require_relative '../../../lib/bookbinder/sheller'
 module Bookbinder
   describe Sheller do
 
-    it 'redirects stdout to a log' do
-      view_updater = double('view_updater', log: nil)
-      sheller = Sheller.new(view_updater)
-
-      expect(view_updater).to receive(:log).with("hello\n")
-
-      sheller.run_command("echo 'hello'")
+    it 'redirects stdout to specified target' do
+      sheller = Sheller.new
+      out = StringIO.new
+      sheller.run_command("echo 'hello'", out: out)
+      out.rewind
+      expect(out.read).to eq("hello\n")
     end
 
-    it 'redirects stderr to a log' do
-      view_updater = double('view_updater', log: nil)
-      sheller = Sheller.new(view_updater)
-
-      expect(view_updater).to receive(:error).with("hello\n")
-
-      sheller.run_command(">&2 echo hello")
+    it 'redirects stderr to specified target' do
+      sheller = Sheller.new
+      err = StringIO.new
+      sheller.run_command(">&2 echo hello", err: err)
+      err.rewind
+      expect(err.read).to eq("hello\n")
     end
 
     it 'interleaves stdout and stderr' do
-      view_updater = Class.new do
-        attr_reader :output
-        def initialize; @output = ""; end
-        def log(line)
-          @output << line
-        end
-        alias :error :log
-      end.new
+      shared = StringIO.new
 
-      sheller = Sheller.new(view_updater)
-      sheller.run_command("echo first; sleep 0.01; >&2 echo second; sleep 0.01; >&1 echo third")
-      expect(view_updater.output).to eq "first\nsecond\nthird\n"
+      sheller = Sheller.new
+      sheller.run_command(
+        "echo first; sleep 0.01; >&2 echo second; sleep 0.01; >&1 echo third",
+        out: shared, err: shared
+      )
+      shared.rewind
+      expect(shared.read).to eq "first\nsecond\nthird\n"
     end
 
     it 'returns the exit status' do
-      sheller = Sheller.new(double('view updater'))
+      sheller = Sheller.new
       result = sheller.run_command("exit 1")
       expect(result).not_to be_success
+    end
+
+    it 'sends un-redirected output to the abyss' do
+      sheller = Sheller.new
+      result = sheller.run_command("echo first; >&2 echo second")
+      expect(result).to be_success
     end
   end
 end
