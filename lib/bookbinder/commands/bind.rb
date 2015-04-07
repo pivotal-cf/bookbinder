@@ -16,7 +16,6 @@ module Bookbinder
     end
 
     class Bind
-      include Bookbinder::DirectoryHelperMethods
       include Commands::Naming
 
       DitaToHtmlLibraryFailure = Class.new(RuntimeError)
@@ -72,14 +71,10 @@ module Bookbinder
         bind_source, *options = cli_arguments
         validate(bind_source, options)
 
-        @gem_root = File.expand_path('../../../../', __FILE__)
         publisher = Publisher.new(logger, sitemap_writer, static_site_generator, file_system_accessor)
 
         bind_config = config_factory.produce(bind_source)
         output_streams = Streams::SwitchableStdoutAndRedStderr.new(options)
-
-        @versions = bind_config.fetch(:versions, [])
-        @book_repo = bind_config[:book_repo]
 
         output_locations = OutputLocations.new(
           context_dir: context_dir,
@@ -88,7 +83,10 @@ module Bookbinder
           local_repo_dir: generate_local_repo_dir(context_dir, bind_source)
         )
 
-        prepare_directories(output_locations)
+        gem_root = File.expand_path('../../../../', __FILE__)
+        versions = bind_config.fetch(:versions, [])
+        book_repo = bind_config[:book_repo]
+        prepare_directories(gem_root, versions, book_repo, output_locations)
 
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
         gathered_dita_sections = dita_gatherer.gather(config.dita_sections)
@@ -173,26 +171,38 @@ module Bookbinder
         end
       end
 
-      def prepare_directories(locations)
-        forget_sections(locations.output_dir)
-        file_system_accessor.remove_directory(File.join(locations.final_app_dir, '.'))
-        file_system_accessor.remove_directory(locations.dita_home_dir)
+      class DirectoryPreparer
+        include Bookbinder::DirectoryHelperMethods
 
-        copy_directory_from_gem('template_app', locations.final_app_dir)
-        copy_directory_from_gem('master_middleman', locations.site_generator_home)
-        file_system_accessor.copy(File.join(locations.layout_repo_dir, '.'), locations.site_generator_home)
+        def initialize(logger, file_system_accessor, version_control_system, book_repo)
+          @logger = logger
+          @file_system_accessor = file_system_accessor
+          @version_control_system = version_control_system
+          @book_repo = book_repo
+        end
 
-        copy_version_master_middleman(locations.source_for_site_generator)
-      end
+        def prepare_directories(gem_root, versions, locations)
+          forget_sections(locations.output_dir)
+          file_system_accessor.remove_directory(File.join(locations.final_app_dir, '.'))
+          file_system_accessor.remove_directory(locations.dita_home_dir)
 
-      # Copy the index file from each version into the version's directory. Because version
-      # subdirectories are sections, this is the only way they get content from their master
-      # middleman directory.
-      def copy_version_master_middleman(dest_dir)
-        @versions.each do |version|
+          copy_directory_from_gem(gem_root, 'template_app', locations.final_app_dir)
+          copy_directory_from_gem(gem_root, 'master_middleman', locations.site_generator_home)
+          file_system_accessor.copy(File.join(locations.layout_repo_dir, '.'), locations.site_generator_home)
+
+          versions.each do |version|
+            copy_index_file_from_version_to_master_middleman(version, locations.source_for_site_generator)
+          end
+        end
+
+        private
+
+        attr_reader :logger, :file_system_accessor, :version_control_system, :book_repo
+
+        def copy_index_file_from_version_to_master_middleman(version, dest_dir)
           Dir.mktmpdir(version) do |tmpdir|
             book = Book.from_remote(logger: logger,
-                                    full_name: @book_repo,
+                                    full_name: book_repo,
                                     destination_dir: tmpdir,
                                     ref: version,
                                     git_accessor: version_control_system)
@@ -205,14 +215,20 @@ module Bookbinder
             end
           end
         end
+
+        def forget_sections(middleman_scratch)
+          file_system_accessor.remove_directory File.join middleman_scratch, '.'
+        end
+
+        def copy_directory_from_gem(gem_root, dir, output_dir)
+          file_system_accessor.copy File.join(gem_root, "#{dir}/."), output_dir
+        end
       end
 
-      def forget_sections(middleman_scratch)
-        file_system_accessor.remove_directory File.join middleman_scratch, '.'
-      end
-
-      def copy_directory_from_gem(dir, output_dir)
-        file_system_accessor.copy File.join(@gem_root, "#{dir}/."), output_dir
+      def prepare_directories(gem_root, versions, book_repo, locations)
+        DirectoryPreparer.new(logger, file_system_accessor, version_control_system, book_repo).prepare_directories(
+          gem_root, versions, locations
+        )
       end
 
       def config
