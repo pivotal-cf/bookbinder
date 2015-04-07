@@ -85,11 +85,11 @@ module Bookbinder
           local_repo_dir: generate_local_repo_dir(context_dir, bind_source)
         )
 
-        gem_root = File.expand_path('../../../../', __FILE__)
-        versions = bind_config.fetch(:versions, [])
-        book_repo = bind_config[:book_repo]
         directory_preparer.prepare_directories(
-          gem_root, versions, output_locations, book_repo
+          File.expand_path('../../../../', __FILE__),
+          bind_config.fetch(:versions, []),
+          output_locations,
+          bind_config[:book_repo]
         )
 
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
