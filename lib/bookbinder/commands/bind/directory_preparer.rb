@@ -6,14 +6,13 @@ module Bookbinder
       class DirectoryPreparer
         include Bookbinder::DirectoryHelperMethods
 
-        def initialize(logger, file_system_accessor, version_control_system, book_repo)
+        def initialize(logger, file_system_accessor, version_control_system)
           @logger = logger
           @file_system_accessor = file_system_accessor
           @version_control_system = version_control_system
-          @book_repo = book_repo
         end
 
-        def prepare_directories(gem_root, versions, locations)
+        def prepare_directories(gem_root, versions, locations, book_repo)
           forget_sections(locations.output_dir)
           file_system_accessor.remove_directory(File.join(locations.final_app_dir, '.'))
           file_system_accessor.remove_directory(locations.dita_home_dir)
@@ -23,15 +22,15 @@ module Bookbinder
           file_system_accessor.copy(File.join(locations.layout_repo_dir, '.'), locations.site_generator_home)
 
           versions.each do |version|
-            copy_index_file_from_version_to_master_middleman(version, locations.source_for_site_generator)
+            copy_index_file_from_version_to_master_middleman(version, locations.source_for_site_generator, book_repo)
           end
         end
 
         private
 
-        attr_reader :logger, :file_system_accessor, :version_control_system, :book_repo
+        attr_reader :logger, :file_system_accessor, :version_control_system
 
-        def copy_index_file_from_version_to_master_middleman(version, dest_dir)
+        def copy_index_file_from_version_to_master_middleman(version, dest_dir, book_repo)
           Dir.mktmpdir(version) do |tmpdir|
             book = Book.from_remote(logger: logger,
                                     full_name: book_repo,

@@ -82,7 +82,8 @@ module Bookbinder
                          DitaSectionGathererFactory.new(bind_version_control_system, bind_logger),
                          Repositories::SectionRepository.new(logger),
                          partial_args.fetch(:command_creator, command_creator),
-                         partial_args.fetch(:sheller, sheller))
+                         partial_args.fetch(:sheller, sheller),
+                         Commands::BindComponents::DirectoryPreparer.new(bind_logger, file_system_accessor, bind_version_control_system))
     end
 
     def random_port

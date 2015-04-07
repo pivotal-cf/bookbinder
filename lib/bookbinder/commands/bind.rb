@@ -7,7 +7,6 @@ require_relative '../streams/switchable_stdout_and_red_stderr'
 require_relative '../values/dita_section'
 require_relative '../values/output_locations'
 require_relative '../values/section'
-require_relative 'bind/directory_preparer'
 require_relative 'naming'
 
 module Bookbinder
@@ -36,7 +35,8 @@ module Bookbinder
                      dita_section_gatherer_factory,
                      section_repository,
                      command_creator,
-                     sheller)
+                     sheller,
+                     directory_preparer)
         @logger = logger
         @config_fetcher = config_fetcher
         @config_factory = config_factory
@@ -53,6 +53,7 @@ module Bookbinder
         @section_repository = section_repository
         @command_creator = command_creator
         @sheller = sheller
+        @directory_preparer = directory_preparer
       end
 
       def usage
@@ -87,7 +88,9 @@ module Bookbinder
         gem_root = File.expand_path('../../../../', __FILE__)
         versions = bind_config.fetch(:versions, [])
         book_repo = bind_config[:book_repo]
-        prepare_directories(gem_root, versions, book_repo, output_locations)
+        directory_preparer.prepare_directories(
+          gem_root, versions, output_locations, book_repo
+        )
 
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
         gathered_dita_sections = dita_gatherer.gather(config.dita_sections)
@@ -147,7 +150,8 @@ module Bookbinder
                   :dita_section_gatherer_factory,
                   :section_repository,
                   :command_creator,
-                  :sheller
+                  :sheller,
+                  :directory_preparer
 
       def generate_local_repo_dir(context_dir, bind_source)
         File.expand_path('..', context_dir) if bind_source == 'local'
@@ -170,12 +174,6 @@ module Bookbinder
             destination_dir: workspace
           ) { |*args| Section.new(*args) }
         end
-      end
-
-      def prepare_directories(gem_root, versions, book_repo, locations)
-        BindComponents::DirectoryPreparer.new(logger, file_system_accessor, version_control_system, book_repo).prepare_directories(
-          gem_root, versions, locations
-        )
       end
 
       def config

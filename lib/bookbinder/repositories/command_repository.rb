@@ -15,6 +15,7 @@ require_relative '../post_production/sitemap_writer'
 require_relative '../sheller'
 require_relative '../subnav_formatter'
 require_relative '../yaml_loader'
+require_relative '../commands/bind/directory_preparer'
 
 module Bookbinder
   module Repositories
@@ -86,7 +87,8 @@ module Bookbinder
           DitaSectionGathererFactory.new(version_control_system, logger),
           Repositories::SectionRepository.new(logger),
           dita_command_creator,
-          Sheller.new
+          Sheller.new,
+          Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
         )
       end
 
