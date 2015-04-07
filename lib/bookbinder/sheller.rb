@@ -4,20 +4,21 @@ module Bookbinder
   class Sheller
     ShelloutFailure = Class.new(RuntimeError)
 
-    def initialize(view_updater)
-      @view_updater = view_updater
+    class DevNull
+      def puts(_)
+      end
     end
 
-    def run_command(command)
+    def run_command(command, out: DevNull.new, err: DevNull.new)
       exit_status = nil
       Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
         t = Thread.new do
           stdout.each do |line|
-            view_updater.log(line)
+            out.puts(line)
           end
         end
         stderr.each do |line|
-          view_updater.error(line)
+          err.puts(line)
         end
         t.join
         exit_status = wait_thr.value

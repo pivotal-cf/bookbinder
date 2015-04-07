@@ -1,5 +1,4 @@
 require_relative '../../../lib/bookbinder/values/user_message'
-require_relative '../../../lib/bookbinder/colorizer'
 require_relative '../../../lib/bookbinder/terminal'
 require_relative '../../helpers/redirection'
 require_relative '../../helpers/matchers'
