@@ -8,23 +8,19 @@ module Bookbinder
     CURRENT_SCHEMA_VERSION = '1.0.0'
     STARTING_SCHEMA_VERSION = '1.0.0'
 
-    CredentialKeyError = Class.new(StandardError)
-    ConfigSchemaUnsupportedError = Class.new(StandardError)
+    CredentialKeyError = Class.new(RuntimeError)
+    ConfigSchemaUnsupportedError = Class.new(RuntimeError)
 
     class AwsCredentials
       REQUIRED_KEYS = %w(access_key secret_key green_builds_bucket)
 
-      def initialize(cred_hash)
-        @creds = cred_hash
+      def initialize(aws_cred_hash)
+        @creds = aws_cred_hash
       end
 
       REQUIRED_KEYS.each do |method_name|
         define_method(method_name) do
-          begin
-            creds.fetch(method_name)
-          rescue KeyError => e
-            raise CredentialKeyError, e
-          end
+          creds.send(:[], method_name)
         end
       end
 
@@ -34,16 +30,16 @@ module Bookbinder
     end
 
     class CfCredentials
-      REQUIRED_KEYS = %w(api_endpoint organization app_name)
+      REQUIRED_KEYS = %w(username password api_endpoint organization app_name)
 
-      def initialize(cred_hash, environment)
-        @creds = cred_hash
+      def initialize(cf_cred_hash, environment)
+        @creds = cf_cred_hash
         @environment = environment
       end
 
       REQUIRED_KEYS.each do |method_name|
         define_method(method_name) do
-          fetch(method_name)
+          creds.send(:[], method_name)
         end
       end
 
@@ -52,14 +48,6 @@ module Bookbinder
           other.instance_variable_get(:@creds),
           other.instance_variable_get(:@environment)
         ]
-      end
-
-      def username
-        creds['username']
-      end
-
-      def password
-        creds['password']
       end
 
       def download_archive_before_push?
@@ -132,7 +120,7 @@ module Bookbinder
     end
 
     CONFIG_REQUIRED_KEYS = %w(book_repo public_host)
-    CONFIG_OPTIONAL_KEYS = %w(archive_menu layout_repo versions pdf_index cred_repo pdf)
+    CONFIG_OPTIONAL_KEYS = %w(archive_menu layout_repo versions cred_repo)
 
     CONFIG_REQUIRED_KEYS.each do |method_name|
       define_method(method_name) do
@@ -163,11 +151,11 @@ module Bookbinder
     end
 
     def aws_credentials
-      @aws_creds ||= AwsCredentials.new(credentials.fetch('aws'))
+      @aws_creds ||= AwsCredentials.new(credentials.fetch('aws', {}))
     end
 
     def cf_credentials(environment)
-      CfCredentials.new(credentials.fetch('cloud_foundry'), environment)
+      CfCredentials.new(credentials.fetch('cloud_foundry', {}), environment)
     end
 
     def ==(o)

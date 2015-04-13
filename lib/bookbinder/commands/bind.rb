@@ -1,18 +1,24 @@
-require_relative '../dita_section_gatherer_factory'
 require_relative '../archive_menu_configuration'
-require_relative '../values/output_locations'
-require_relative '../values/dita_section'
-require_relative '../errors/cli_error'
-require_relative '../values/section'
-require_relative '../publisher'
 require_relative '../book'
+require_relative '../dita_section_gatherer_factory'
+require_relative '../errors/cli_error'
+require_relative '../publisher'
+require_relative '../streams/switchable_stdout_and_red_stderr'
+require_relative '../values/dita_section'
+require_relative '../values/output_locations'
+require_relative '../values/section'
 require_relative 'naming'
 
 module Bookbinder
   module Commands
+    class BindValidator
+      MissingRequiredKeyError = Class.new(RuntimeError)
+    end
+
     class Bind
-      include Bookbinder::DirectoryHelperMethods
       include Commands::Naming
+
+      DitaToHtmlLibraryFailure = Class.new(RuntimeError)
 
       def initialize(logger,
                      config_fetcher,
@@ -26,7 +32,11 @@ module Bookbinder
                      context_dir,
                      dita_preprocessor,
                      cloner_factory,
-                     dita_section_gatherer_factory)
+                     dita_section_gatherer_factory,
+                     section_repository,
+                     command_creator,
+                     sheller,
+                     directory_preparer)
         @logger = logger
         @config_fetcher = config_fetcher
         @config_factory = config_factory
@@ -40,6 +50,10 @@ module Bookbinder
         @dita_preprocessor = dita_preprocessor
         @cloner_factory = cloner_factory
         @dita_section_gatherer_factory = dita_section_gatherer_factory
+        @section_repository = section_repository
+        @command_creator = command_creator
+        @sheller = sheller
+        @directory_preparer = directory_preparer
       end
 
       def usage
@@ -56,18 +70,13 @@ module Bookbinder
       end
 
       def run(cli_arguments)
-        raise CliError::InvalidArguments unless arguments_are_valid?(cli_arguments)
+        bind_source, *options = cli_arguments
+        validate(bind_source, options)
 
-        @section_repository = Repositories::SectionRepository.new(logger)
-        @gem_root = File.expand_path('../../../../', __FILE__)
         publisher = Publisher.new(logger, sitemap_writer, static_site_generator, file_system_accessor)
 
-        bind_source, *options = cli_arguments
-
         bind_config = config_factory.produce(bind_source)
-
-        @versions = bind_config.fetch(:versions, [])
-        @book_repo = bind_config[:book_repo]
+        output_streams = Streams::SwitchableStdoutAndRedStderr.new(options)
 
         output_locations = OutputLocations.new(
           context_dir: context_dir,
@@ -76,15 +85,30 @@ module Bookbinder
           local_repo_dir: generate_local_repo_dir(context_dir, bind_source)
         )
 
-        prepare_directories(output_locations)
+        directory_preparer.prepare_directories(
+          File.expand_path('../../../../', __FILE__),
+          bind_config.fetch(:versions, []),
+          output_locations,
+          bind_config[:book_repo]
+        )
 
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
         gathered_dita_sections = dita_gatherer.gather(config.dita_sections)
 
-        gathered_dita_sections.each do |dita_section|
-          dita_preprocessor.preprocess(dita_section,
-                                       output_locations.subnavs_for_layout_dir,
-                                       output_locations.dita_subnav_template_path)
+        dita_preprocessor.preprocess(gathered_dita_sections,
+                                     output_locations.subnavs_for_layout_dir,
+                                     output_locations.dita_subnav_template_path) do |dita_section|
+          command = command_creator.convert_to_html_command(
+            dita_section,
+            write_to: dita_section.html_from_dita_section_dir
+          )
+          status = sheller.run_command(command, output_streams.to_h)
+          unless status.success?
+            raise DitaToHtmlLibraryFailure.new 'The DITA-to-HTML conversion failed. ' +
+              'Please check that you have specified the path to your DITA-OT library in the ENV, ' +
+              'that your DITA-specific keys/values in config.yml are set, ' +
+              'and that your DITA toolkit is correctly configured.'
+          end
         end
 
         cloner = cloner_factory.produce(
@@ -101,7 +125,7 @@ module Bookbinder
 
         success = publisher.publish(
           subnavs,
-          {verbose: cli_arguments.include?('--verbose')},
+          {verbose: options.include?('--verbose')},
           output_locations,
           archive_menu_config.generate(bind_config, sections)
         )
@@ -123,7 +147,11 @@ module Bookbinder
                   :context_dir,
                   :dita_preprocessor,
                   :cloner_factory,
-                  :dita_section_gatherer_factory
+                  :dita_section_gatherer_factory,
+                  :section_repository,
+                  :command_creator,
+                  :sheller,
+                  :directory_preparer
 
       def generate_local_repo_dir(context_dir, bind_source)
         File.expand_path('..', context_dir) if bind_source == 'local'
@@ -146,48 +174,6 @@ module Bookbinder
             destination_dir: workspace
           ) { |*args| Section.new(*args) }
         end
-      end
-
-      def prepare_directories(locations)
-        forget_sections(locations.output_dir)
-        file_system_accessor.remove_directory(File.join(locations.final_app_dir, '.'))
-        file_system_accessor.remove_directory(locations.dita_home_dir)
-
-        copy_directory_from_gem('template_app', locations.final_app_dir)
-        copy_directory_from_gem('master_middleman', locations.site_generator_home)
-        file_system_accessor.copy(File.join(locations.layout_repo_dir, '.'), locations.site_generator_home)
-
-        copy_version_master_middleman(locations.source_for_site_generator)
-      end
-
-      # Copy the index file from each version into the version's directory. Because version
-      # subdirectories are sections, this is the only way they get content from their master
-      # middleman directory.
-      def copy_version_master_middleman(dest_dir)
-        @versions.each do |version|
-          Dir.mktmpdir(version) do |tmpdir|
-            book = Book.from_remote(logger: logger,
-                                    full_name: @book_repo,
-                                    destination_dir: tmpdir,
-                                    ref: version,
-                                    git_accessor: version_control_system)
-            index_source_dir = File.join(tmpdir, book.directory, 'master_middleman', source_dir_name)
-            index_dest_dir = File.join(dest_dir, version)
-            file_system_accessor.make_directory(index_dest_dir)
-
-            Dir.glob(File.join(index_source_dir, 'index.*')) do |f|
-              file_system_accessor.copy(File.expand_path(f), index_dest_dir)
-            end
-          end
-        end
-      end
-
-      def forget_sections(middleman_scratch)
-        file_system_accessor.remove_directory File.join middleman_scratch, '.'
-      end
-
-      def copy_directory_from_gem(dir, output_dir)
-        file_system_accessor.copy File.join(@gem_root, "#{dir}/."), output_dir
       end
 
       def config
@@ -216,14 +202,13 @@ module Bookbinder
         end
       end
 
-      def arguments_are_valid?(arguments)
-        bind_source, *options = arguments
-        valid_options = %w(--verbose --ignore-section-refs).to_set
-        %w(local github).include?(bind_source) && options.to_set.subset?(valid_options)
+      def validate(bind_source, options)
+        raise CliError::InvalidArguments unless arguments_are_valid?(bind_source, options)
       end
 
-      def binding_from_github?(bind_location)
-        config.has_option?('versions') && bind_location != 'local'
+      def arguments_are_valid?(bind_source, options)
+        valid_options = %w(--verbose --ignore-section-refs).to_set
+        %w(local github).include?(bind_source) && options.to_set.subset?(valid_options)
       end
     end
   end

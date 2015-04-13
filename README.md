@@ -1,50 +1,81 @@
 [![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/cloudfoundry-incubator/bookbinder) [![Build Status](https://travis-ci.org/cloudfoundry-incubator/bookbinder.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/bookbinder)
 # Bookbinder
 
-Bookbinder is a gem that binds together a unified documentation web application from disparate source material. Currently, the source material must be markdown or plain HTML, and must be stored in local directories or in GitHub repositories. Bookbinder runs [middleman](http://middlemanapp.com/) to produce a Rackup app that can be deployed to Cloud Foundry.
+Bookbinder is a gem that binds together a unified documentation web application
+from disparate source material.
+Source material can be in markdown, HTML, or
+[DITA](http://dita.xml.org/standard), and must be stored in local directories or
+in GitHub repositories.
+Bookbinder runs [middleman](http://middlemanapp.com/) to produce a Rackup app
+that you can deploy to Cloud Foundry.
 
-**Note**: The Bookbinder gem is now known as `bookbindery`. Please update your Gemfiles accordingly.
+**Note**: The Bookbinder gem is now known as `bookbindery`.
+Please update your Gemfiles accordingly.
 
 ## Usage
 
-Bookbinder is meant to be used from within a project called a **book**. The book includes a configuration file that describes which documentation repositories to use as source materials. The bookbindery gem provides a set of scripts to aggregate those repositories and publish them to various locations. Bookbinder also provides scripts for running on a Continuous Integration system that can detect when a documentation repository has been updated with new content and that can verify a composed book is free of any dead links.
+Bookbinder is meant to be used from within a project called a **book**.
+The book includes a configuration file that describes which documentation
+repositories to use as source materials.
+The bookbindery gem provides a set of scripts to aggregate those repositories
+and publish them to various locations.
+Bookbinder also provides scripts for running on a Continuous Integration system
+that can detect when a documentation repository has been updated with new
+content, and that can verify a composed book is free of any dead links.
 
 ## Installation
 
 **Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
 
-To install the Bookbinder gem, add `gem "bookbindery"` to your Gemfile. 
-Creating a book is currently a little more involved, but we plan to automate this process in the near future.
+To install the Bookbinder gem, add `gem "bookbindery"` to your Gemfile.
+Creating a book is more involved process, but we plan to automate this process
+in the near future.
+
+### <a id='dita-ot'></a>DITA-OT
+
+Bookbinder uses the [DITA Open Toolkit](http://www.dita-ot.org/) (DITA-OT) to
+process documents written in DITA.
+If you have DITA sections in your book, you must install DITA-OT to process
+them.
+
+Once installed, specify the location of the DITA-OT library as an environment
+variable named "PATH_TO_DITA_OT_LIBRARY".
+We recommend that you use the full_easy_install type for the DITA-OT library.
+
+**Note**: Ensure that the version of the DITA-OT library that you install
+supports the DITA version in which your documents are written.
 
 ### Creating a book from scratch using local sections
 
-The disparate source material of your book is organized into separate
-git repositories. When writing documentation on your local machine, however,
-you'll want uncommitted changes to be added to the preview web site that you serve
-on your machine.
+Typically, the disparate source materials of your book are organized into
+separate git repositories.
 
-The `bind local` command performs this operation by gathering local sections from
-sibling directories of your book. These sections' directories must have the
-same name as their GitHub repositories, but don't need to be git repositories.
+When writing documentation on your local machine, however, we recommend that you
+add uncommitted changes to the preview web site that you serve on your machine.
+
+The `bind local` command performs this operation by gathering local sections
+from sibling directories of your book.
+These sections' directories must have the same name as their GitHub
+repositories, but don't need to be git repositories.
 
 The following is an annotated script that sets up a new book allowing 'bind
-local' to run successfully. It assumes you want to call your book 'mynewbook'
-and that the first and only section within the book is
+local' to run successfully.
+This script names your book "mynewbook" and includes only one section,
 [cloudfoundry/docs-dev-guide](https://github.com/cloudfoundry/docs-dev-guide).
 
     mkdir mynewbook
     cd mynewbook
 
-    # Create a Gemfile.
+    # Create a Gemfile
     bundle init
 
-    # Add the bookbindery gem to it.
+    # Add the bookbindery gem to it
     echo 'gem "bookbindery"' >> Gemfile
 
-    # Install gems listed in the Gemfile, creating a bin/ dir for executables.
+    # Install gems listed in the Gemfile, creating a bin/ dir for executables
     bundle install --binstubs
 
-    # Create a minimal configuration file.
+    # Create a minimal configuration file
     cat > config.yml <<YAML
     book_repo: myorg/myrepo
     public_host: localhost:9292
@@ -52,18 +83,17 @@ and that the first and only section within the book is
     - repository:
         name: cloudfoundry/docs-dev-guide
       directory: my/included-section
-    pdf:
     YAML
 
-    # Create a directory required by Middleman.
+    # Create a directory required by Middleman
     mkdir -p master_middleman/build
 
-    # Clone the section in the config.yml so it can be included in the
-    # final site.
+    # Clone the section in the config.yml so it can be included in
+    # the final site
     git clone https://github.com/cloudfoundry/docs-dev-guide ../docs-dev-guide
 
-    # Run the bind local command, which pulls in the section from the directory
-    # cloned above.
+    # Run the bind local command, which pulls in the section from
+    # the directory cloned above
     bin/bookbinder bind local
 
     # Start up the web site locally
@@ -71,10 +101,10 @@ and that the first and only section within the book is
     bundle
     rackup
 
-You should now be able to visit
+After running the script, you can visit your book at
 [localhost:9292/my/included-section](http://localhost:9292/my/included-section)
-and see the section that was brought in. The [home page](http://localhost:9292/)
-currently 404s, because we didn't put anything inside master_middleman/source/.
+and see the section that was brought in. Browsing to the [home page](http://localhost:9292/) currently returns a 404 because we did not inlcude
+anything inside the `master_middleman/source/` directory.
 
 You can skip ahead for [more information on the bind command](#bind-command).
 
@@ -89,7 +119,7 @@ You can skip ahead for [more information on the bind command](#bind-command).
 ```YAML
 book_repo: org-name/repo-name
 cred_repo: org-name/private-repo
-layout_repo: org-name/master-middleman-repo		# non-optional for the generate_pdf command
+layout_repo: org-name/master-middleman-repo
 
 sections:
   - repository:
@@ -101,21 +131,19 @@ sections:
       name: org-name/reptile-repo
       ref: d07101dec08a698932ef0aa2fc36316d6f7c4851
     directory: reptiles
-    
+
 archive_menu:						# optional
   - v1.3.0.0
   - v1.2.0.0: archive-repo/your_pdf.yml
 
 public_host: animals.example.com
-pdf:
-  header: path/to/header-file.html
 template_variables:					# optional
   var_name: special-value
   other_var: 12
 
 ```
 
-Assuming your book is in git, your `.gitignore` should contain the following
+Assuming your book is in GitHub, your `.gitignore` should contain the following
 entries, which are directories generated by Bookbinder:
 
     output
@@ -125,13 +153,9 @@ entries, which are directories generated by Bookbinder:
 
 `.ruby-version` is used by [Ruby version managers](https://www.ruby-toolbox.com/categories/ruby_version_management) to select the appropriate Ruby version for a given project.
 
-### Layout Repository
-
-If you specify a `layout_repo:` in `config.yml` with the full name of a GitHub repository (e.g., `cloudfoundry/my-doc-layout`), it will be downloaded for use as your book's `master_middleman` directory.
-
 ### Credentials Repository
 
-The credentials repository should be a private repository, referenced in your config.yml as `cred_repo`. It contains `credentials.yml`, which must include your deployment credentials:
+The credentials repository should be a private repository, referenced in your `config.yml` as `cred_repo`. It contains `credentials.yml`, which must include your deployment credentials:
 
 ```YAML
 aws:
@@ -147,13 +171,73 @@ cloud_foundry:
   staging_space: docs-staging
   production_space: docs-production
   staging_host:
-    cfapps.io: 
+    cfapps.io:
       - staging-route-subdomain
       - another-staging-route-subdomain
   production_host:
-    cfapps.io: 
+    cfapps.io:
       - production-route-subdomain
 ```
+
+### Layout Repository
+
+If you specify a `layout_repo:` in `config.yml` with the full name of a GitHub repository (e.g., `cloudfoundry/my-doc-layout`), it will be downloaded for use as your book's `master_middleman` directory.
+
+### Section Repository Ref
+
+By default, the `bookbinder bind github` command binds the most current versions of the documents in the GitHub repositories specified by the `sections:` of your `config.yml`.
+
+To use a previous version of a repo:
+
+1. Add a `ref` key for the repository within your `config.yml`.
+2. Specify the SHA of the previous version as the value of the `ref` key.
+
+Example:
+
+```
+sections:
+  - repository:
+      name: org-name/bird-repo
+      ref: 165c28e967d58e6ff23a882689c953954a7b588d
+````
+
+## Supported Formats
+
+* [Markdown](#markdown)
+* [DITA](#dita)
+
+### <a id='markdown'></a>Markdown
+All markdown sections must be specified within the section key of the `config.yml`.
+
+### <a id='dita'></a>DITA
+
+Specify the following in the `config.yml`:
+
+* All DITA sections within the dita_sections key of the `config.yml`
+* In the first DITA section listed in the `config.yml`, a key-value pair "ditamap_location: my-ditamap.ditamap"
+* (optional) In the first DITA section listed in the `config.yml`, a key-value pair "ditaval_location: my-ditaval.ditaval"
+
+For example:
+
+
+```YAML
+dita_sections:
+
+  - repository:
+      name: org-name/bird-repo
+      ref: 165c28e967d58e6ff23a882689c953954a7b588d                #optional
+    directory: birds
+    ditamap_location: path/to/my-special-ditamap-location.ditamap
+    ditaval_location: path/to/my-special-ditaval-location.ditaval  #optional
+
+ - repository:
+ 	 name: org-name/dependent-section
+ 	 ref: 165c28e967d58e6ff23a882689c123998a7b577e                 #optional
+   directory: dependent-section
+
+```
+
+**Note**: You'll need to have properly installed and specified the [DITA-OT](#dita-ot) library.
 
 ## Middleman Templating Helpers
 
@@ -168,7 +252,23 @@ Bookbinder provides several helper functions that can be called from within an .
 `<%= breadcrumbs %>` generates a series of breadcrumbs as a UL HTML tag. The breadcrumbs go up to the site's top-level, based on the title of each page. The bottom-most entry in the list of breadcrumbs represents the current page; the rest of the breadcrumbs show the hiearchy of directories that the page lives in. Each breadcrumb above the current page is generated by looking at the [frontmatter](http://middlemanapp.com/basics/frontmatter/) title of the index template of that directory. If you'd like to use breadcrumb text that is different than the title, an optional 'breadcrumb' attribute can be used in the frontmatter section to override the title.
 
 ### Subnavs
-`<%= lsyield_for_subnav %>` inserts the appropriate template in /subnavs, based on each constituent repositories' `subnav_template:` parameter in config.yml. The default template (`\_default.erb`) uses the label `default` and is applied to all sections unless another template is specified with subnav\_template. Template labels are the name of the template file with extensions removed. ("sample" for a template named "sample.erb")
+`<%= yield_for_subnav %>` inserts the appropriate template in /subnavs, based on each constituent repositories' `subnav_template:` parameter in `config.yml`. The default template (`\_default.erb`) uses the label `default` and is applied to all sections unless another template is specified with subnav\_template. Template labels are the name of the template file with extensions removed. ("sample" for a template named "sample.erb")
+
+If your book includes a dita_section, instead of providing a subnav_template, Bookbinder will look for a file `_dita_subnav_template.erb` from `master_middleman/source/subnavs`.
+
+Optionally, Bookbinder will make available subnav links in a json format at `/subnavs/dita-subnav-props.json`. They could be consumed with a javascript library (e.g. React.js) to create your subnav. Bookbinder will have written the name of the file containing the links (`dita-subnav-props.json`) from _dita_subnav_template.erb at a data attribute called data-props-location on 'div.nav-content'.
+
+An example of the json links:
+
+```code
+{
+  "links":
+  [
+    {"url": "/dita-section-one/some-guide.html", "text": "my topic 1"},
+    {"url": "/dita-section-one/../dita-section-dependency/some-guide-1.html", "text": "my topic dependency"}
+  ]
+}
+```
 
 ### Code Snippets
 `<%= yield_for_code_snippet from: 'my-org/code-repo', at: 'myCodeSnippetA' %>` inserts code snippets extracted from code repositories.
@@ -191,7 +291,7 @@ Code snippet example:
 
 ### Archive Menu
 
-Bookbinder allows you to specify a drop-down menu template for use in the navbar. This can contain links to PDFs or other archived versions of documentation. To specify a dropdown menu, add the `archive_menu` key in config.yml as follows:
+Bookbinder allows you to specify a drop-down menu template for use in the navbar. This can contain links to PDFs or other archived versions of documentation. To specify a dropdown menu, add the `archive_menu` key in `config.yml` as follows:
 
 ```
   archive_menu:
@@ -203,7 +303,7 @@ The first key (e.g. v1.3.0.0) is available for use as a title in your navbar. Yo
 
 Finally, to insert the archive menu, use the `<%= yield_for_archive_drop_down_menu %>` tag in the appropriate part of the navbar in your layout.erb. 
 
-### Including Assets 
+### Including Assets
 
 Bookbinder also includes helper code to correctly find image, stylesheet, and javascript assets. When using `<% image_tag ...`, `<% stylesheet_link_tag ...`, or `<% javascript_include_tag ...` to include assets, Bookbinder will search the entire directory structure starting at the top-level until it finds an asset with the provided name. For example, when resolving `<% image_tag 'great_dane.png' %>` called from the page `dogs/big_dogs/index.html.md.erb`, Middleman will first look in `images/great_dane.png.` If that file does not exist, it will try `dogs/images/great_dane.png`, then `dogs/big_dogs/images/great_dane.png`.
 
@@ -219,13 +319,15 @@ Bookbinder's most important command is `bind`. It takes one argument on the comm
 
 will find documentation repositories in directories that are siblings to your current directory.
 
-        bin/bookbinder bind github 
+        bin/bookbinder bind github
 
 will find doc repos by downloading the latest version from GitHub. Note that if any of the repositories configured as 'sections' are private, you should [create a GitHub SSH key](https://help.github.com/articles/generating-ssh-keys/) for Bookbinder from an account that has access to the section repositories.
 
 You should `ssh-add` this key to give Bookbinder access to the repositories.
 
 The bind command creates two output directories, one named `output/` and one named `final_app/`. These are placed in the current directory and are overwritten each time you run Bookbinder.
+
+**Note**: When Bookbinder binds DITA sections of your book, it only sends error messages to the screen. Use the `--verbose` option with `bind` to see the non-filter output.
 
 #### The `final_app` directory
 
@@ -245,58 +347,6 @@ r301      %r{/wiki/(\w+)_\w+},    '/$1'
 `output/` contains an intermediary state. This includes `output/master_middleman`, the final prepared directory that the `bind` script ran middleman against.
 
 **Note**: As of version 0.2.0, the `bind` command no longer generates PDFs.
-
-### `generate_pdf` command
-
-        bin/bookbinder generate_pdf
-
-generates a PDF against the currently available `final_app` directory. **Note**: You must run `bind [local | github]` before running `generate_pdf`.
-
-You can specify which pages to include in a PDF using `bin/bookbinder generate_pdf my-pdf.yml`. `my-pdf.yml` contains the configuration for the pdf. It must be formatted as YAML and **requires the keys** `header` and `pages`.
-
-`my-pdf.yml` example:
-
-```yml
----
-copyright_notice: 'Copyright Pivotal Software Inc, 2042-2043'
-header: some-header.html
-pages:
-    - my-book/intro.html
-    - my-book/dramatic-peak.html
-    - my-book/denouement.html
-```
-
-Each path provided under `pages` must match the `directory` of its `repository` in `config.yml`. The header is pulled in from the `layout_repo`, so the file `some-header.html` is expected to exist at the top level in the repo `my-username/my-layout`. The contents of `some-header.html` will be added as a header to each page within the generated pdf.
-
-Example of `some-header.html`:
-
-```html
-<!DOCTYPE html>
-<html>
-  <body>
-    <div class='pdf_header' style="background-color:#ffffff; padding:12px 0px 12px 10px">
-        <img src='images/logo-big.png' style="height:20px">
-    </div>
-  </body>
-</html>
-```
-
-For the above pages to publish to pdf, your `config.yml` must contain the following:
-
-```yml
----
-layout_repo: my-username/my-layout
-sections:
-- repository:
-    name: my-username/my-book
-    directory: my-book
-```
-
-In turn, `my-username/my-layout` must contain `some-header.html`; and `my-username/my-book` must contain the pages `intro.html`, `dramatic-peak.html`, and `denouement.html`.
-
-An optional copyright notice may be provided as shown in the example.
-
-The output PDF file will have the same name as the YAML file used to generate it. In this example, it will be `my-pdf.pdf` since its configuration was specified in `my-pdf.yml`.
 
 ### `update_local_doc_repos` command
 
@@ -333,7 +383,7 @@ You will want a build that executes this shell command:
 
         bundle install --binstubs
         bin/bookbinder run_publish_ci
-    
+
 This will bind a book and push it to staging.
 
 ## <a name="deploying"></a>Deploying

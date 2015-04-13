@@ -4,7 +4,7 @@ module Bookbinder
                            :ditaval_location,
                            :full_name,
                            :target_ref,
-                           :directory,
+                           :directory_name,
                            :output_locations) do
                              def subnav
                                namespace = directory.gsub('/', '_')
@@ -30,6 +30,10 @@ module Bookbinder
 
                              def absolute_path_to_ditaval
                                ditaval_location ? File.join(path_to_local_repo, ditaval_location) : nil
+                             end
+
+                             def directory
+                               directory_name || full_name.split('/').last
                              end
                            end
 end

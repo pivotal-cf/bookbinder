@@ -2,7 +2,6 @@ require 'ansi/code'
 require 'ostruct'
 
 module Bookbinder
-
   class Colorizer
     Colors = OpenStruct.new(red: Proc.new { |msg| ANSI.red {msg} },
                             yellow: Proc.new { |msg| ANSI.yellow {msg} })

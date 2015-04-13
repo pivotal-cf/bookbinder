@@ -1,15 +1,12 @@
 require_relative '../bookbinder/values/dita_section'
 
 module Bookbinder
-  class DitaToHtmlConverter
-    DitaToHtmlLibraryFailure = Class.new(RuntimeError)
-
-    def initialize(sheller, path_to_dita_ot_library)
-      @sheller = sheller
+  class DitaCommandCreator
+    def initialize(path_to_dita_ot_library)
       @path_to_dita_ot_library = path_to_dita_ot_library
     end
 
-    def convert_to_html(dita_section, write_to: nil)
+    def convert_to_html_command(dita_section, write_to: nil)
       classpath = "#{path_to_dita_ot_library}/lib/xercesImpl.jar:" +
                   "#{path_to_dita_ot_library}/lib/xml-apis.jar:" +
                   "#{path_to_dita_ot_library}/lib/resolver.jar:" +
@@ -32,20 +29,11 @@ module Bookbinder
       if dita_section.absolute_path_to_ditaval
         command += "-Dargs.filter=#{dita_section.absolute_path_to_ditaval} "
       end
-
-      begin
-        sheller.run_command(command)
-      rescue Sheller::ShelloutFailure
-        raise DitaToHtmlLibraryFailure.new 'The DITA-to-HTML conversion failed. ' +
-            'Please check that you have specified the path to your DITA-OT library in the ENV, ' +
-            'that your DITA-specific keys/values in config.yml are set, ' +
-            'and that your DITA toolkit is correctly configured.'
-
-      end
+      command
     end
 
     private
 
-    attr_reader :sheller, :path_to_dita_ot_library
+    attr_reader :path_to_dita_ot_library
   end
 end

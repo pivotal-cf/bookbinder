@@ -17,9 +17,5 @@ sections:
 
 public_host: docs.example.com
 
-pdf:
-  filename: TestPdf.pdf
-  header: "dogs/index.html"
-
 template_variables:
   app_domain: example.com

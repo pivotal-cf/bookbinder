@@ -1,10 +1,9 @@
-require_relative 'colorizer'
-require_relative 'command_runner'
-require_relative 'command_validator'
-require_relative 'configuration'
 require_relative 'repositories/command_repository'
+require_relative 'command_validator'
+require_relative 'command_runner'
+require_relative 'configuration'
+require_relative 'colorizer'
 require_relative 'terminal'
-require_relative 'user_message_presenter'
 
 module Bookbinder
   class Cli
@@ -23,17 +22,13 @@ module Bookbinder
       command_name = command_name ? command_name : '--help'
 
       colorizer = Colorizer.new
-      user_message_presenter = UserMessagePresenter.new(colorizer)
-      terminal = Terminal.new
+      terminal = Terminal.new(colorizer)
 
       user_message = command_validator.validate(command_name)
+      terminal.update(user_message)
+
       if user_message.error?
-        error_message = user_message_presenter.get_error(user_message)
-        terminal.update(error_message)
         return 1
-      elsif user_message.warn?
-        warning_message = user_message_presenter.get_warning(user_message)
-        terminal.update(warning_message)
       end
 
       begin

@@ -8,7 +8,6 @@ require 'middleman-core/profiling'
 require 'anemone'
 require 'css_parser'
 require 'vienna'
-require 'popen4'
 require 'puma'
 
 require_relative 'bookbinder/deprecated_logger'
@@ -28,7 +27,6 @@ require_relative 'bookbinder/server_director'
 require_relative 'bookbinder/spider'
 
 require_relative 'bookbinder/archive'
-require_relative 'bookbinder/pdf_generator'
 require_relative 'bookbinder/middleman_runner'
 require_relative 'bookbinder/publisher'
 require_relative 'bookbinder/cf_command_runner'
@@ -44,7 +42,6 @@ require_relative 'bookbinder/commands/push_to_prod'
 require_relative 'bookbinder/commands/run_publish_ci'
 require_relative 'bookbinder/commands/update_local_doc_repos'
 require_relative 'bookbinder/commands/tag'
-require_relative 'bookbinder/commands/generate_pdf'
 
 require_relative 'bookbinder/cli'
 
