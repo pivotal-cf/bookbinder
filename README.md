@@ -302,7 +302,7 @@ Bookbinder allows you to specify a drop-down menu template for use in the navbar
 
 The first key (e.g. v1.3.0.0) is available for use as a title in your navbar. You can configure the structure of the drop-down menu by creating a template in `master_middleman/source/archive_menus/_default.erb`.
 
-Finally, to insert the archive menu, use the `<%= yield_for_archive_menu %>` tag in the appropriate part of the navbar in your layout.erb.
+Finally, to insert the archive menu, use the `<%= yield_for_archive_drop_down_menu %>` tag in the appropriate part of the navbar in your layout.erb. 
 
 ### Including Assets
 
