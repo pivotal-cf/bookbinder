@@ -11,10 +11,6 @@ require_relative 'naming'
 
 module Bookbinder
   module Commands
-    class BindValidator
-      MissingRequiredKeyError = Class.new(RuntimeError)
-    end
-
     class Bind
       include Commands::Naming
 
