@@ -527,36 +527,57 @@ module Bookbinder
 
       context 'when the hostname is a single string' do
         it 'contains the given pages in an XML sitemap' do
-          book_dir = File.absolute_path('.')
-          middleman_source_dir = File.join(book_dir, 'master_middleman', 'source')
-          FileUtils.mkdir_p middleman_source_dir
-          FileUtils.cp File.expand_path('../../../../fixtures/dogs_index.html', __FILE__), File.join(middleman_source_dir, 'index.html.md.erb')
+          book_dir = Pathname(File.absolute_path('.'))
+          middleman_source_dir = book_dir.join('master_middleman', 'source')
 
-          sections = [
-              {'repository' => {'name' => 'org/dogs-repo'}}
-          ]
+          index_page = File.expand_path('../../../fixtures/dogs_index.html', __dir__)
+          FileUtils.cp(index_page, middleman_source_dir.join('index.html.md.erb'))
 
-          config_hash = {
-              'sections' => sections,
-              'book_repo' => book,
-              'cred_repo' => 'my-org/my-creds',
-              'public_host' => 'docs.dogs.com'
-          }
+          command = bind_cmd(
+            config_fetcher: double(
+              'config fetcher',
+              fetch_config: Configuration.new(
+                logger,
+                'sections' => [ {'repository' => {'name' => 'org/dogs-repo'}} ],
+                'book_repo' => 'fantastic/book',
+                'cred_repo' => 'my-org/my-creds',
+                'public_host' => 'docs.dogs.com'
+              )))
 
-          config = Configuration.new(logger, config_hash)
-          config_fetcher = double('config fetcher', fetch_config: config)
-
-          command = bind_cmd(config_fetcher: config_fetcher)
           command.run(['github'])
 
-          final_app_dir = File.absolute_path('final_app')
-          doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
-          expect(doc.css('loc').map &:text).to match_array(%w(
+          sitemap_path = book_dir.join('final_app', 'public', 'sitemap.xml')
+
+          expect(sitemap_path).to have_sitemap_locations %w(
               http://docs.dogs.com/index.html
               http://docs.dogs.com/dogs-repo/index.html
               http://docs.dogs.com/dogs-repo/big_dogs/index.html
               http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
-            ))
+          )
+        end
+
+        matcher :have_sitemap_locations do |links|
+          match do |sitemap_path|
+            @doc = Nokogiri::XML(sitemap_path.open)
+            @doc.css('loc').map(&:text).map(&:to_s).sort == links.sort
+          end
+
+          failure_message do |sitemap_path|
+            <<-MESSAGE
+Expected sitemap to have the following links:
+#{links.sort.join("\n")}
+
+But it actually had these:
+#{@doc.css('loc').map(&:text).sort.join("\n")}
+
+* Sitemap *
+Path:
+#{sitemap_path}
+
+Content:
+#{sitemap_path.read}
+            MESSAGE
+          end
         end
       end
     end
