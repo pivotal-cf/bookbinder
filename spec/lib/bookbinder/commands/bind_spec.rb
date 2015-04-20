@@ -502,30 +502,9 @@ module Bookbinder
     end
 
     describe 'generating a site-map' do
-      context 'when the hostname is not a single string' do
-        it 'raises' do
-          sections = [
-              {'repository' => {'name' => 'org/dogs-repo'}}
-          ]
+      context 'when configured with a single host' do
+        use_fixture_repo 'sitemap_tester'
 
-          config_hash = {
-              'sections' => sections,
-              'book_repo' => book,
-              'cred_repo' => 'my-org/my-creds',
-              'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
-          }
-
-          config = Configuration.new(logger, config_hash)
-          config_fetcher = double('config fetcher', fetch_config: config)
-
-          command = bind_cmd(config_fetcher: config_fetcher)
-
-          expect { command.run(['github']) }.
-              to raise_error "Your public host must be a single String."
-        end
-      end
-
-      context 'when the hostname is a single string' do
         around do |example|
           $debug = true
           example.run
@@ -533,12 +512,6 @@ module Bookbinder
         end
 
         it 'contains the given pages in an XML sitemap' do
-          book_dir = Pathname(File.absolute_path('.'))
-          middleman_source_dir = book_dir.join('master_middleman', 'source')
-
-          index_page = File.expand_path('../../../fixtures/dogs_index.html', __dir__)
-          FileUtils.cp(index_page, middleman_source_dir.join('index.html.md.erb'))
-
           command = bind_cmd(
             config_fetcher: double(
               'config fetcher',
@@ -552,7 +525,7 @@ module Bookbinder
 
           command.run(['github'])
 
-          sitemap_path = book_dir.join('final_app', 'public', 'sitemap.xml')
+          sitemap_path = Pathname('final_app').join('public', 'sitemap.xml')
 
           expect(sitemap_path).to have_sitemap_locations %w(
               http://docs.dogs.com/index.html
@@ -584,6 +557,29 @@ Content:
 #{sitemap_path.read}
             MESSAGE
           end
+        end
+      end
+
+      context 'when configured with more than one host' do
+        it 'raises an exception' do
+          sections = [
+              {'repository' => {'name' => 'org/dogs-repo'}}
+          ]
+
+          config_hash = {
+              'sections' => sections,
+              'book_repo' => book,
+              'cred_repo' => 'my-org/my-creds',
+              'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
+          }
+
+          config = Configuration.new(logger, config_hash)
+          config_fetcher = double('config fetcher', fetch_config: config)
+
+          command = bind_cmd(config_fetcher: config_fetcher)
+
+          expect { command.run(['github']) }.
+              to raise_error "Your public host must be a single String."
         end
       end
     end

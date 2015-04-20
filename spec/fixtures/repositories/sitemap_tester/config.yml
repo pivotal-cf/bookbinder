@@ -1,0 +1,27 @@
+---
+book_repo: fantastic/fixture-book-title
+cred_repo: fantastic/creds-repo
+
+sections:
+- repository:
+    name: fantastic/dogs-repo
+    ref: 'dog-sha'
+  directory: dogs
+  subnav_template: dogs
+
+- repository:
+    name: fantastic/my-docs-repo
+    ref: 'my-docs-sha'
+  directory: foods/sweet
+  subnav_template: fruits
+
+- repository:
+    name: fantastic/my-other-docs-repo
+    ref: 'my-other-sha'
+  directory: foods/savory
+  subnav_template: vegetables
+
+public_host: docs.example.com
+
+template_variables:
+  app_domain: example.com
