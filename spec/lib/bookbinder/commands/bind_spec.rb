@@ -526,6 +526,12 @@ module Bookbinder
       end
 
       context 'when the hostname is a single string' do
+        around do |example|
+          $debug = true
+          example.run
+          $debug = nil
+        end
+
         it 'contains the given pages in an XML sitemap' do
           book_dir = Pathname(File.absolute_path('.'))
           middleman_source_dir = book_dir.join('master_middleman', 'source')
