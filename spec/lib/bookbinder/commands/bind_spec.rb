@@ -562,24 +562,19 @@ Content:
 
       context 'when configured with more than one host' do
         it 'raises an exception' do
-          sections = [
-              {'repository' => {'name' => 'org/dogs-repo'}}
-          ]
-
-          config_hash = {
-              'sections' => sections,
-              'book_repo' => book,
-              'cred_repo' => 'my-org/my-creds',
-              'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
-          }
-
-          config = Configuration.new(logger, config_hash)
-          config_fetcher = double('config fetcher', fetch_config: config)
-
-          command = bind_cmd(config_fetcher: config_fetcher)
+          command = bind_cmd(
+            config_fetcher: double(
+              'config fetcher',
+              fetch_config: Configuration.new(
+                logger,
+                'sections' => [{'repository' => {'name' => 'org/dogs-repo'}}],
+                'book_repo' => 'some/book',
+                'cred_repo' => 'my-org/my-creds',
+                'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
+              )))
 
           expect { command.run(['github']) }.
-              to raise_error "Your public host must be a single String."
+            to raise_error "Your public host must be a single String."
         end
       end
     end
