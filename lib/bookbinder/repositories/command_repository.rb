@@ -1,6 +1,8 @@
 Dir.glob(File.expand_path('../../commands/*.rb', __FILE__)).each do |command_file|
   require command_file
 end
+
+require_relative '../commands/bind/directory_preparer'
 require_relative '../config/bind_config_factory'
 require_relative '../configuration_fetcher'
 require_relative '../configuration_validator'
@@ -15,7 +17,7 @@ require_relative '../post_production/sitemap_writer'
 require_relative '../sheller'
 require_relative '../subnav_formatter'
 require_relative '../yaml_loader'
-require_relative '../commands/bind/directory_preparer'
+require_relative 'section_repository'
 
 module Bookbinder
   module Repositories

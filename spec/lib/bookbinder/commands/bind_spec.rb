@@ -1,4 +1,5 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
+require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
 require_relative '../../../../lib/bookbinder/config/bind_config_factory'
 require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
@@ -7,12 +8,13 @@ require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
+require_relative '../../../../lib/bookbinder/repositories/section_repository'
 require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../../lib/bookbinder/subnav_formatter'
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
-require_relative '../../../helpers/spec_git_accessor'
 require_relative '../../../helpers/redirection'
+require_relative '../../../helpers/spec_git_accessor'
 require_relative '../../../helpers/use_fixture_repo'
 
 require_relative '../../../../lib/bookbinder/spider'
@@ -219,21 +221,6 @@ module Bookbinder
         expect(index_html).to include 'This is a Markdown Page'
       end
 
-      context 'when provided a layout repo' do
-        let(:config_hash) do
-          {'sections' => sections, 'book_repo' => book, 'public_host' => 'example.com', 'layout_repo' => 'such-org/layout-repo'}
-        end
-
-        it 'passes the provided repo as master_middleman_dir' do
-          fake_publisher = double(:publisher)
-          expect(Publisher).to receive(:new).and_return fake_publisher
-          expect(fake_publisher).to receive(:publish) do |sections, cli_options, output_paths, publish_config, git_accessor|
-            expect(output_paths.layout_repo_dir).to match('layout-repo')
-          end
-          command.run(['local'])
-        end
-      end
-
       context 'when code snippets are yielded' do
         let(:non_broken_master_middleman_dir) { generate_middleman_with 'remote_code_snippets_index.html' }
 
@@ -288,21 +275,6 @@ module Bookbinder
 
         third_index_html = File.read File.join(final_app_dir, 'public', 'foods/savory', 'index.html')
         expect(third_index_html).to include 'This is another Markdown Page'
-      end
-
-      context 'when provided a layout repo' do
-        let(:config_hash) do
-          github_config_hash.merge({'layout_repo' => 'such-org/layout-repo'})
-        end
-
-        it 'passes the provided repo as master_middleman_dir' do
-          fake_publisher = double(:publisher)
-          expect(Publisher).to receive(:new).and_return fake_publisher
-          expect(fake_publisher).to receive(:publish) do |sections, cli_options, output_paths, publish_config, git_accessor|
-            expect(output_paths.layout_repo_dir).to match('layout-repo')
-          end
-          command.run(['github'])
-        end
       end
 
       context 'when multiple versions are provided' do
@@ -585,34 +557,6 @@ module Bookbinder
         final_app_dir = File.absolute_path('final_app')
         index_html = File.read(File.join(final_app_dir, 'public', 'a', 'b', 'c', 'index.html'))
         expect(index_html).to include('This is a Markdown Page')
-      end
-    end
-
-    describe 'publication arguments' do
-      let(:fake_publisher) { double('publisher') }
-      let(:git_accessor) { SpecGitAccessor }
-      let(:expected_cli_options) do
-        {
-            verbose: false,
-        }
-      end
-      let(:expected_publish_config) do
-        {
-            sections: sections,
-            host_for_sitemap: 'example.com',
-            template_variables: {},
-            book_repo: 'fantastic/book',
-            archive_menu: archive_menu
-        }
-      end
-
-      before do
-        expect(Publisher).to receive(:new).and_return fake_publisher
-      end
-
-      it 'pass the appropriate arguments to publish from the config' do
-        expect(fake_publisher).to receive(:publish).with anything, expected_cli_options, anything, expected_publish_config
-        command.run(['local'])
       end
     end
 
