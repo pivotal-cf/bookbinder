@@ -167,7 +167,7 @@ module Bookbinder
         generate_site(cli_options, output_paths, publish_config, master_dir, workspace_dir, subnavs, build_directory, public_directory)
         result = generate_sitemap(host_for_sitemap)
 
-        @logger.log "Bookbinder bound your book into #{final_app_dir.to_s.green}"
+        logger.log "Bookbinder bound your book into #{final_app_dir.to_s.green}"
 
         !result.has_broken_links?
       end
@@ -178,14 +178,14 @@ module Bookbinder
       end
 
       def generate_site(cli_options, output_paths, publish_config, middleman_dir, workspace_dir, subnavs, build_dir, public_dir)
-        @static_site_generator.run(middleman_dir,
-                                   workspace_dir,
-                                   publish_config.fetch(:template_variables, {}),
-                                   output_paths.local_repo_dir,
-                                   cli_options[:verbose],
-                                   subnavs,
-                                   publish_config[:host_for_sitemap],
-                                   publish_config[:archive_menu])
+        static_site_generator.run(middleman_dir,
+                                  workspace_dir,
+                                  publish_config.fetch(:template_variables, {}),
+                                  output_paths.local_repo_dir,
+                                  cli_options[:verbose],
+                                  subnavs,
+                                  publish_config[:host_for_sitemap],
+                                  publish_config[:archive_menu])
         file_system_accessor.copy build_dir, public_dir
       end
 
