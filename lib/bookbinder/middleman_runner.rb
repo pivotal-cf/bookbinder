@@ -38,11 +38,13 @@ module Bookbinder
     end
 
     def run(output_locations,
-            template_variables,
+            config,
             verbose = false,
-            subnav_templates_by_directory = {},
-            production_host=nil,
-            archive_menu=nil)
+            subnav_templates_by_directory = {})
+      template_variables = config.fetch(:template_variables, {})
+      production_host = config[:host_for_sitemap]
+      archive_menu = config[:archive_menu]
+
       middleman_dir = output_locations.master_dir
       workspace_dir = output_locations.workspace_dir
       local_repo_dir = output_locations.local_repo_dir

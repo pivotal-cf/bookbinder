@@ -39,7 +39,15 @@ module Bookbinder
 
       target_dir_path.mkpath
 
-      middleman_runner.run(output_locations, template_variables, verbose, subnav_templates, production_host, archive_menu)
+      middleman_runner.run(
+        output_locations,
+        {
+          template_variables: template_variables,
+          host_for_sitemap: production_host,
+          archive_menu: archive_menu
+        },
+        verbose,
+        subnav_templates)
     end
 
     it 'invokes Middleman in the requested directory' do

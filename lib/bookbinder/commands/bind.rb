@@ -158,11 +158,9 @@ module Bookbinder
         host_for_sitemap = publish_config.fetch(:host_for_sitemap)
 
         static_site_generator.run(output_locations,
-                                  publish_config.fetch(:template_variables, {}),
+                                  publish_config,
                                   cli_options[:verbose],
-                                  subnavs,
-                                  publish_config[:host_for_sitemap],
-                                  publish_config[:archive_menu])
+                                  subnavs)
         file_system_accessor.copy output_locations.build_dir, output_locations.public_dir
 
 
