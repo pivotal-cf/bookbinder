@@ -153,21 +153,24 @@ module Bookbinder
                   :directory_preparer
 
       def publish(subnavs, cli_options, output_locations, publish_config)
-        intermediate_directory = output_locations.output_dir
-        final_app_dir = output_locations.final_app_dir
-        master_dir = intermediate_directory.join('master_middleman')
-        workspace_dir = master_dir.join('source')
-        build_directory = master_dir.join('build/.')
-        public_directory = final_app_dir.join('public')
-
-        FileUtils.cp 'redirects.rb', final_app_dir if File.exists?('redirects.rb')
+        FileUtils.cp 'redirects.rb', output_locations.final_app_dir if File.exists?('redirects.rb')
 
         host_for_sitemap = publish_config.fetch(:host_for_sitemap)
 
-        generate_site(cli_options, output_locations, publish_config, master_dir, workspace_dir, subnavs, build_directory, public_directory)
+        static_site_generator.run(output_locations.master_dir,
+                                  output_locations.workspace_dir,
+                                  publish_config.fetch(:template_variables, {}),
+                                  output_locations.local_repo_dir,
+                                  cli_options[:verbose],
+                                  subnavs,
+                                  publish_config[:host_for_sitemap],
+                                  publish_config[:archive_menu])
+        file_system_accessor.copy output_locations.build_dir, output_locations.public_dir
+
+
         result = generate_sitemap(host_for_sitemap)
 
-        logger.log "Bookbinder bound your book into #{final_app_dir.to_s.green}"
+        logger.log "Bookbinder bound your book into #{output_locations.final_app_dir.to_s.green}"
 
         !result.has_broken_links?
       end
@@ -175,18 +178,6 @@ module Bookbinder
       def generate_sitemap(host_for_sitemap)
         raise "Your public host must be a single String." unless host_for_sitemap.is_a?(String)
         sitemap_writer.write(host_for_sitemap)
-      end
-
-      def generate_site(cli_options, output_locations, publish_config, middleman_dir, workspace_dir, subnavs, build_dir, public_dir)
-        static_site_generator.run(middleman_dir,
-                                  workspace_dir,
-                                  publish_config.fetch(:template_variables, {}),
-                                  output_locations.local_repo_dir,
-                                  cli_options[:verbose],
-                                  subnavs,
-                                  publish_config[:host_for_sitemap],
-                                  publish_config[:archive_menu])
-        file_system_accessor.copy build_dir, public_dir
       end
 
       def generate_local_repo_dir(context_dir, bind_source)

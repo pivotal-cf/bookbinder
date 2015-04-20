@@ -20,6 +20,22 @@ module Bookbinder
       Pathname(@final_app_dir)
     end
 
+    def public_dir
+      final_app_dir.join('public')
+    end
+
+    def build_dir
+      master_dir.join('build/.')
+    end
+
+    def workspace_dir
+      master_dir.join('source')
+    end
+
+    def master_dir
+      output_dir.join('master_middleman')
+    end
+
     def output_dir
       context_dir.join(output_dir_name)
     end
