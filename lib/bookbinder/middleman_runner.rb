@@ -37,23 +37,19 @@ module Bookbinder
       @git_accessor = git_accessor
     end
 
-    def run(middleman_dir,
-            workspace_dir,
-            template_variables,
-            local_repo_dir,
+    def run(output_locations,
+            config,
             verbose = false,
-            subnav_templates_by_directory = {},
-            production_host=nil,
-            archive_menu=nil)
+            subnav_templates_by_directory = {})
       @logger.log "\nRunning middleman...\n\n"
 
-      within(middleman_dir) do
-        invoke_against_current_dir(local_repo_dir,
-                                   workspace_dir,
-                                   production_host,
+      within(output_locations.master_dir) do
+        invoke_against_current_dir(output_locations.local_repo_dir,
+                                   output_locations.workspace_dir,
+                                   config[:host_for_sitemap],
                                    subnav_templates_by_directory,
-                                   template_variables,
-                                   archive_menu,
+                                   config.fetch(:template_variables, {}),
+                                   config[:archive_menu],
                                    verbose)
       end
     end
@@ -65,7 +61,7 @@ module Bookbinder
     def within(temp_root, &block)
       Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
       original_mm_root  = ENV['MM_ROOT']
-      ENV['MM_ROOT']    = temp_root
+      ENV['MM_ROOT']    = temp_root.to_s
 
       Dir.chdir(temp_root) { block.call }
 

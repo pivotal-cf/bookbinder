@@ -1,8 +1,9 @@
-require_relative '../../../lib/bookbinder/middleman_runner'
-require_relative '../../../lib/bookbinder/values/section'
 require_relative '../../../lib/bookbinder/book'
-require_relative '../../helpers/nil_logger'
+require_relative '../../../lib/bookbinder/middleman_runner'
+require_relative '../../../lib/bookbinder/values/output_locations'
+require_relative '../../../lib/bookbinder/values/section'
 require_relative '../../helpers/middleman'
+require_relative '../../helpers/nil_logger'
 
 module Bookbinder
   describe MiddlemanRunner do
@@ -13,7 +14,8 @@ module Bookbinder
     let(:logger) { NilLogger.new }
     let(:middleman_runner) { MiddlemanRunner.new(logger, UNEXERCISED_GIT_ACCESSOR) }
 
-    let(:target_dir_path) { Dir.mktmpdir }
+    let(:context_dir) { Pathname(Dir.mktmpdir) }
+    let(:target_dir_path) { context_dir.join('output', 'master_middleman') }
     let(:template_variables) { {'anybody' => 'nobody'} }
     let(:production_host) { double }
     let(:archive_menu) { {} }
@@ -30,7 +32,22 @@ module Bookbinder
           'fraggles_rock' => 'default'
       }
 
-      middleman_runner.run(target_dir_path, 'master_middleman/source/public', template_variables, local_repo_dir, verbose, subnav_templates, production_host, archive_menu)
+      output_locations = OutputLocations.new(
+        context_dir: context_dir,
+        local_repo_dir: local_repo_dir
+      )
+
+      target_dir_path.mkpath
+
+      middleman_runner.run(
+        output_locations,
+        {
+          template_variables: template_variables,
+          host_for_sitemap: production_host,
+          archive_menu: archive_menu
+        },
+        verbose,
+        subnav_templates)
     end
 
     it 'invokes Middleman in the requested directory' do
@@ -84,13 +101,6 @@ module Bookbinder
       expect(middleman_instance.config[:subnav_templates]).to eq(templates)
     end
 
-    it 'tells middleman about local_repo_dir' do
-      run_middleman
-
-      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
-      expect(middleman_instance.config[:local_repo_dir]).to eq local_repo_dir
-    end
-
     it 'builds with middleman and passes the verbose parameter' do
       build_command = expect_to_receive_and_return_real_now(Middleman::Cli::Build, :new, [], {:quiet => !verbose}, {})
       expect(build_command).to receive(:invoke).with(:build, [], {:verbose => verbose})
@@ -112,7 +122,7 @@ module Bookbinder
 
       run_middleman
 
-      expect(invocation_mm_root).to eq(target_dir_path)
+      expect(invocation_mm_root).to eq(target_dir_path.to_s)
     end
 
     it 'resets the MM root in cleanup' do

@@ -2,7 +2,7 @@ require_relative '../directory_helpers'
 
 module Bookbinder
   class OutputLocations
-    attr_reader :final_app_dir, :layout_repo_dir
+    attr_reader :layout_repo_dir
 
     include DirectoryHelperMethods
 
@@ -14,6 +14,26 @@ module Bookbinder
       @layout_repo_dir = layout_repo_dir
       @context_dir = context_dir
       @local_repo_dir = local_repo_dir
+    end
+
+    def final_app_dir
+      Pathname(@final_app_dir)
+    end
+
+    def public_dir
+      final_app_dir.join('public')
+    end
+
+    def build_dir
+      master_dir.join('build/.')
+    end
+
+    def workspace_dir
+      master_dir.join('source')
+    end
+
+    def master_dir
+      output_dir.join('master_middleman')
     end
 
     def output_dir

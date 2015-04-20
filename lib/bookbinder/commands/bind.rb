@@ -1,8 +1,9 @@
+require 'middleman-syntax'
+
 require_relative '../archive_menu_configuration'
 require_relative '../book'
 require_relative '../dita_section_gatherer_factory'
 require_relative '../errors/cli_error'
-require_relative '../publisher'
 require_relative '../streams/switchable_stdout_and_red_stderr'
 require_relative '../values/dita_section'
 require_relative '../values/output_locations'
@@ -69,8 +70,6 @@ module Bookbinder
         bind_source, *options = cli_arguments
         validate(bind_source, options)
 
-        publisher = Publisher.new(logger, sitemap_writer, static_site_generator, file_system_accessor)
-
         bind_config = config_factory.produce(bind_source)
         output_streams = Streams::SwitchableStdoutAndRedStderr.new(options)
 
@@ -119,7 +118,7 @@ module Bookbinder
 
         subnavs = (sections + gathered_dita_sections).map(&:subnav).reduce(&:merge)
 
-        success = publisher.publish(
+        success = publish(
           subnavs,
           {verbose: options.include?('--verbose')},
           output_locations,
@@ -148,6 +147,30 @@ module Bookbinder
                   :command_creator,
                   :sheller,
                   :directory_preparer
+
+      def publish(subnavs, cli_options, output_locations, publish_config)
+        FileUtils.cp 'redirects.rb', output_locations.final_app_dir if File.exists?('redirects.rb')
+
+        host_for_sitemap = publish_config.fetch(:host_for_sitemap)
+
+        static_site_generator.run(output_locations,
+                                  publish_config,
+                                  cli_options[:verbose],
+                                  subnavs)
+        file_system_accessor.copy output_locations.build_dir, output_locations.public_dir
+
+
+        result = generate_sitemap(host_for_sitemap)
+
+        logger.log "Bookbinder bound your book into #{output_locations.final_app_dir.to_s.green}"
+
+        !result.has_broken_links?
+      end
+
+      def generate_sitemap(host_for_sitemap)
+        raise "Your public host must be a single String." unless host_for_sitemap.is_a?(String)
+        sitemap_writer.write(host_for_sitemap)
+      end
 
       def generate_local_repo_dir(context_dir, bind_source)
         File.expand_path('..', context_dir) if bind_source == 'local'
