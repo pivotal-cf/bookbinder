@@ -79,7 +79,7 @@ module Bookbinder
         Anemone.crawl(url) do |anemone|
           dont_visit_fragments(anemone)
           anemone.on_every_page do |page|
-            if $debug
+            if $sitemap_debug
               puts "\n\n********** Visiting page: #{page.url}\n\n#{page.body}"
             end
             broken, working = sieve.links_from Stabilimentum.new(page), is_first_pass

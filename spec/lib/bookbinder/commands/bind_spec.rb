@@ -506,9 +506,9 @@ module Bookbinder
         use_fixture_repo 'sitemap_tester'
 
         around do |example|
-          $debug = true
+          $sitemap_debug = ENV['SITEMAP_DEBUG']
           example.run
-          $debug = nil
+          $sitemap_debug = nil
         end
 
         it 'contains the given pages in an XML sitemap' do
