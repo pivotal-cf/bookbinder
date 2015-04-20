@@ -37,14 +37,16 @@ module Bookbinder
       @git_accessor = git_accessor
     end
 
-    def run(middleman_dir,
-            workspace_dir,
+    def run(output_locations,
             template_variables,
-            local_repo_dir,
             verbose = false,
             subnav_templates_by_directory = {},
             production_host=nil,
             archive_menu=nil)
+      middleman_dir = output_locations.master_dir
+      workspace_dir = output_locations.workspace_dir
+      local_repo_dir = output_locations.local_repo_dir
+
       @logger.log "\nRunning middleman...\n\n"
 
       within(middleman_dir) do
