@@ -135,8 +135,6 @@ module Bookbinder
       end
 
       class Publisher
-        include DirectoryHelperMethods
-
         def initialize(logger, sitemap_writer, static_site_generator, file_system_accessor)
           @logger = logger
           @sitemap_writer = sitemap_writer
