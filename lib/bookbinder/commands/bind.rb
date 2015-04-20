@@ -152,19 +152,19 @@ module Bookbinder
                   :sheller,
                   :directory_preparer
 
-      def publish(subnavs, cli_options, output_paths, publish_config)
-        intermediate_directory = output_paths.output_dir
-        final_app_dir = output_paths.final_app_dir
-        master_dir = File.join intermediate_directory, 'master_middleman'
-        workspace_dir = File.join master_dir, 'source'
-        build_directory = File.join master_dir, 'build/.'
-        public_directory = File.join final_app_dir, 'public'
+      def publish(subnavs, cli_options, output_locations, publish_config)
+        intermediate_directory = output_locations.output_dir
+        final_app_dir = output_locations.final_app_dir
+        master_dir = intermediate_directory.join('master_middleman')
+        workspace_dir = master_dir.join('source')
+        build_directory = master_dir.join('build/.')
+        public_directory = final_app_dir.join('public')
 
         FileUtils.cp 'redirects.rb', final_app_dir if File.exists?('redirects.rb')
 
         host_for_sitemap = publish_config.fetch(:host_for_sitemap)
 
-        generate_site(cli_options, output_paths, publish_config, master_dir, workspace_dir, subnavs, build_directory, public_directory)
+        generate_site(cli_options, output_locations, publish_config, master_dir, workspace_dir, subnavs, build_directory, public_directory)
         result = generate_sitemap(host_for_sitemap)
 
         logger.log "Bookbinder bound your book into #{final_app_dir.to_s.green}"
@@ -177,11 +177,11 @@ module Bookbinder
         sitemap_writer.write(host_for_sitemap)
       end
 
-      def generate_site(cli_options, output_paths, publish_config, middleman_dir, workspace_dir, subnavs, build_dir, public_dir)
+      def generate_site(cli_options, output_locations, publish_config, middleman_dir, workspace_dir, subnavs, build_dir, public_dir)
         static_site_generator.run(middleman_dir,
                                   workspace_dir,
                                   publish_config.fetch(:template_variables, {}),
-                                  output_paths.local_repo_dir,
+                                  output_locations.local_repo_dir,
                                   cli_options[:verbose],
                                   subnavs,
                                   publish_config[:host_for_sitemap],

@@ -65,7 +65,7 @@ module Bookbinder
     def within(temp_root, &block)
       Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
       original_mm_root  = ENV['MM_ROOT']
-      ENV['MM_ROOT']    = temp_root
+      ENV['MM_ROOT']    = temp_root.to_s
 
       Dir.chdir(temp_root) { block.call }
 
