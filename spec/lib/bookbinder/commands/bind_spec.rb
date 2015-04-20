@@ -1,4 +1,5 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
+require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
 require_relative '../../../../lib/bookbinder/config/bind_config_factory'
 require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
@@ -11,8 +12,8 @@ require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../../lib/bookbinder/subnav_formatter'
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
-require_relative '../../../helpers/spec_git_accessor'
 require_relative '../../../helpers/redirection'
+require_relative '../../../helpers/spec_git_accessor'
 require_relative '../../../helpers/use_fixture_repo'
 
 require_relative '../../../../lib/bookbinder/spider'
@@ -501,61 +502,79 @@ module Bookbinder
     end
 
     describe 'generating a site-map' do
-      context 'when the hostname is not a single string' do
-        it 'raises' do
-          sections = [
-              {'repository' => {'name' => 'org/dogs-repo'}}
-          ]
+      context 'when configured with a single host' do
+        use_fixture_repo 'sitemap_tester'
 
-          config_hash = {
-              'sections' => sections,
-              'book_repo' => book,
-              'cred_repo' => 'my-org/my-creds',
-              'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
-          }
-
-          config = Configuration.new(logger, config_hash)
-          config_fetcher = double('config fetcher', fetch_config: config)
-
-          command = bind_cmd(config_fetcher: config_fetcher)
-
-          expect { command.run(['github']) }.
-              to raise_error "Your public host must be a single String."
+        around do |example|
+          $sitemap_debug = ENV['SITEMAP_DEBUG']
+          example.run
+          $sitemap_debug = nil
         end
-      end
 
-      context 'when the hostname is a single string' do
         it 'contains the given pages in an XML sitemap' do
-          book_dir = File.absolute_path('.')
-          middleman_source_dir = File.join(book_dir, 'master_middleman', 'source')
-          FileUtils.mkdir_p middleman_source_dir
-          FileUtils.cp File.expand_path('../../../../fixtures/dogs_index.html', __FILE__), File.join(middleman_source_dir, 'index.html.md.erb')
+          command = bind_cmd(
+            config_fetcher: double(
+              'config fetcher',
+              fetch_config: Configuration.new(
+                logger,
+                'sections' => [ {'repository' => {'name' => 'org/dogs-repo'}} ],
+                'book_repo' => 'fantastic/book',
+                'cred_repo' => 'my-org/my-creds',
+                'public_host' => 'docs.dogs.com'
+              )))
 
-          sections = [
-              {'repository' => {'name' => 'org/dogs-repo'}}
-          ]
-
-          config_hash = {
-              'sections' => sections,
-              'book_repo' => book,
-              'cred_repo' => 'my-org/my-creds',
-              'public_host' => 'docs.dogs.com'
-          }
-
-          config = Configuration.new(logger, config_hash)
-          config_fetcher = double('config fetcher', fetch_config: config)
-
-          command = bind_cmd(config_fetcher: config_fetcher)
           command.run(['github'])
 
-          final_app_dir = File.absolute_path('final_app')
-          doc = Nokogiri::XML(File.open File.join(final_app_dir, 'public', 'sitemap.xml'))
-          expect(doc.css('loc').map &:text).to match_array(%w(
+          sitemap_path = Pathname('final_app').join('public', 'sitemap.xml')
+
+          expect(sitemap_path).to have_sitemap_locations %w(
               http://docs.dogs.com/index.html
               http://docs.dogs.com/dogs-repo/index.html
               http://docs.dogs.com/dogs-repo/big_dogs/index.html
               http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
-            ))
+          )
+        end
+
+        matcher :have_sitemap_locations do |links|
+          match do |sitemap_path|
+            @doc = Nokogiri::XML(sitemap_path.open)
+            @doc.css('loc').map(&:text).map(&:to_s).sort == links.sort
+          end
+
+          failure_message do |sitemap_path|
+            <<-MESSAGE
+Expected sitemap to have the following links:
+#{links.sort.join("\n")}
+
+But it actually had these:
+#{@doc.css('loc').map(&:text).sort.join("\n")}
+
+* Sitemap *
+Path:
+#{sitemap_path}
+
+Content:
+#{sitemap_path.read}
+            MESSAGE
+          end
+        end
+      end
+
+      context 'when configured with more than one host' do
+        it 'raises an exception' do
+          command = bind_cmd(
+            config_fetcher: double(
+              'config fetcher',
+              fetch_config: Configuration.new(
+                logger,
+                'sections' => [{'repository' => {'name' => 'org/dogs-repo'}}],
+                'book_repo' => 'some/book',
+                'cred_repo' => 'my-org/my-creds',
+                'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
+              )))
+
+          expect { command.run(['github']) }.
+            to raise_error "Your public host must be a single String."
         end
       end
     end
