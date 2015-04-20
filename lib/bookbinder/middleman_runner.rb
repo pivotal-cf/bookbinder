@@ -41,23 +41,15 @@ module Bookbinder
             config,
             verbose = false,
             subnav_templates_by_directory = {})
-      template_variables = config.fetch(:template_variables, {})
-      production_host = config[:host_for_sitemap]
-      archive_menu = config[:archive_menu]
-
-      middleman_dir = output_locations.master_dir
-      workspace_dir = output_locations.workspace_dir
-      local_repo_dir = output_locations.local_repo_dir
-
       @logger.log "\nRunning middleman...\n\n"
 
-      within(middleman_dir) do
-        invoke_against_current_dir(local_repo_dir,
-                                   workspace_dir,
-                                   production_host,
+      within(output_locations.master_dir) do
+        invoke_against_current_dir(output_locations.local_repo_dir,
+                                   output_locations.workspace_dir,
+                                   config[:host_for_sitemap],
                                    subnav_templates_by_directory,
-                                   template_variables,
-                                   archive_menu,
+                                   config.fetch(:template_variables, {}),
+                                   config[:archive_menu],
                                    verbose)
       end
     end
