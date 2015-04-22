@@ -33,10 +33,10 @@ module Bookbinder
     end
 
     describe '#head_sha' do
-      let(:latest_commit) { double(:commit, sha: '54ef8f581b3542cbbca4219d7c69bf3d9831cdbe') }
+      let(:latest_commit) { double(:commit, sha: 'b3a132cf23114f8d3dddad675b08718c2faf9969') }
 
       it 'returns the sha of the latest commit' do
-        expect(client.head_sha('Duckburg/scrooge')).to eq latest_commit.sha
+        expect(client.head_sha('camelpunch/repo-that-doesnt-change')).to eq latest_commit.sha
       end
     end
 
