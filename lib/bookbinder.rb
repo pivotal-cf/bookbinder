@@ -28,7 +28,6 @@ require_relative 'bookbinder/spider'
 
 require_relative 'bookbinder/archive'
 require_relative 'bookbinder/middleman_runner'
-require_relative 'bookbinder/publisher'
 require_relative 'bookbinder/cf_command_runner'
 require_relative 'bookbinder/pusher'
 require_relative 'bookbinder/artifact_namer'
