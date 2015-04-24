@@ -185,12 +185,9 @@ If you specify a `layout_repo:` in `config.yml` with the full name of a GitHub r
 
 ### Section Repository Ref
 
-By default, the `bookbinder bind github` command binds the most current versions of the documents in the GitHub repositories specified by the `sections:` of your `config.yml`.
+By default, the `bookbinder bind github` command binds the most current versions (i.e., the `master` branch) of the documents in the GitHub repositories specified by the `sections:` of your `config.yml`.
 
-To use a previous version of a repo:
-
-1. Add a `ref` key for the repository within your `config.yml`.
-2. Specify the SHA of the previous version as the value of the `ref` key.
+Bookbinder supports a `ref` key to enable use of an alternate version of a repo. The value of this key can be the name of a branch (e.g., `develop`), a SHA, or a tag (`v19`).
 
 Example:
 
