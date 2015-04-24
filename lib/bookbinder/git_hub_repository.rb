@@ -23,20 +23,6 @@ module Bookbinder
           git_accessor: git_accessor)
     end
 
-    def self.build_from_local(logger,
-                              section_hash,
-                              local_repo_dir,
-                              git_accessor)
-      full_name = section_hash.fetch('repository').fetch('name')
-      directory = section_hash['directory']
-
-      new(logger: logger,
-          full_name: full_name,
-          directory: directory,
-          local_repo_dir: local_repo_dir,
-          git_accessor: git_accessor)
-    end
-
     def initialize(logger: nil,
                    full_name: nil,
                    github_token: nil,
@@ -87,23 +73,6 @@ module Bookbinder
       end
       @git_base_object.checkout(target_ref) unless target_ref == 'master'
       @copied_to = File.join(destination_dir, directory)
-    end
-
-    def copy_from_local(destination_dir)
-      if File.exist?(path_to_local_repo)
-        @logger.log '  copying '.yellow + path_to_local_repo
-        destination = File.join(destination_dir, directory)
-
-        if !destination.include?(path_to_local_repo) && !File.exists?(destination)
-          FileUtils.mkdir_p(destination)
-
-          FileUtils.cp_r(File.join(path_to_local_repo, '.'), destination)
-        end
-
-        @copied_to = File.join(destination_dir, directory)
-      else
-        announce_skip
-      end
     end
 
     def copied?

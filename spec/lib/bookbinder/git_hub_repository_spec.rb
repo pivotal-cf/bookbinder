@@ -176,67 +176,6 @@ module Bookbinder
       end
     end
 
-    describe '#copy_from_local' do
-      let(:full_name) { 'org/my-docs-repo' }
-      let(:target_ref) { 'some-sha' }
-      let(:local_repo_dir) { tmp_subdir 'local_repo_dir' }
-      let(:repo) { build(logger: logger,
-                         full_name: full_name,
-                         local_repo_dir: local_repo_dir) }
-      let(:destination_dir) { tmp_subdir('destination') }
-      let(:repo_dir) { File.join(local_repo_dir, 'my-docs-repo') }
-      let(:copy_to) { repo.copy_from_local destination_dir }
-
-      context 'and the local repo is there' do
-        before do
-          Dir.mkdir repo_dir
-          FileUtils.touch File.join(repo_dir, 'my_aunties_goat.txt')
-        end
-
-        it 'returns true' do
-          expect(copy_to).to eq(File.join(destination_dir, 'my-docs-repo'))
-        end
-
-        it 'copies the repo' do
-          copy_to
-          expect(File.exist? File.join(destination_dir, 'my-docs-repo', 'my_aunties_goat.txt')).to eq(true)
-        end
-
-        it 'sets copied? to true' do
-          expect { copy_to }.to change { repo.copied? }.to(true)
-        end
-
-        context 'and has already been copied to the destination' do
-          before do
-            copy_to
-          end
-
-          it 'does not attempt to recopy' do
-            duplicate_repo = build(logger: logger,
-                                   full_name: full_name,
-                                   local_repo_dir: local_repo_dir)
-
-            expect(FileUtils).to_not receive(:cp_r)
-            duplicate_repo.copy_from_local destination_dir
-          end
-        end
-      end
-
-      context 'and the local repo is not there' do
-        it 'should not find the directory' do
-          expect(File.exist? repo_dir).to eq(false)
-        end
-
-        it 'returns false' do
-          expect(copy_to).to be_nil
-        end
-
-        it 'does not change copied?' do
-          expect { copy_to }.not_to change { repo.copied? }
-        end
-      end
-    end
-
     describe '#has_tag?' do
       let(:git_accessor) { double('git_accessor') }
       let(:repo) { GitHubRepository.new(full_name: 'my-docs-org/my-docs-repo',
