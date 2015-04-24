@@ -1,4 +1,4 @@
-[![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/cloudfoundry-incubator/bookbinder) [![Build Status](https://travis-ci.org/cloudfoundry-incubator/bookbinder.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/bookbinder)
+[![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/pivotal-cf/bookbinder) [![Build Status](https://travis-ci.org/pivotal-cf/bookbinder.svg?branch=master)](https://travis-ci.org/pivotal-cf/bookbinder)
 # Bookbinder
 
 Bookbinder is a gem that binds together a unified documentation web application
@@ -189,14 +189,25 @@ By default, the `bookbinder bind github` command binds the most current versions
 
 Bookbinder supports a `ref` key to enable use of an alternate version of a repo. The value of this key can be the name of a branch (e.g., `develop`), a SHA, or a tag (`v19`).
 
-Example:
+```
+sections:
+  - repository:
+      name: org-name/bird-repo
+      ref: my-branch
+```
+
+Example SHA:
 
 ```
 sections:
   - repository:
       name: org-name/bird-repo
       ref: 165c28e967d58e6ff23a882689c953954a7b588d
-````
+```
+
+**Note**: Bookbinder only uses the <code>ref</code> key when binding from GitHub. The <code>bookbinder bind local</code> command ignores the <code>ref</code> key.
+
+
 
 ## Supported Formats
 
@@ -250,7 +261,6 @@ Bookbinder provides several helper functions that can be called from within an .
 
 ### Subnavs
 `<%= yield_for_subnav %>` inserts the appropriate template in /subnavs, based on each constituent repositories' `subnav_template:` parameter in `config.yml`. The default template (`\_default.erb`) uses the label `default` and is applied to all sections unless another template is specified with subnav\_template. Template labels are the name of the template file with extensions removed. ("sample" for a template named "sample.erb")
-
 
 If your book includes a dita_section, instead of providing a subnav_template, Bookbinder will look for a file `_dita_subnav_template.erb` from `master_middleman/source/subnavs`.
 
