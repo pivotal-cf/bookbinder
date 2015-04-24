@@ -177,19 +177,19 @@ module Bookbinder
       end
 
       def gather_sections(workspace, cloner, ref_override)
-        config.sections.map do |attributes|
+        config.sections.map do |section_config|
           target_ref = ref_override ||
-            attributes.fetch('repository', {})['ref'] ||
+            section_config.fetch('repository', {})['ref'] ||
             'master'
-          repo_name = attributes.fetch('repository').fetch('name')
-          directory = attributes['directory']
-          vcs_repo = cloner.call(from: repo_name,
-                                 ref: target_ref,
-                                 parent_dir: workspace,
-                                 dir_name: directory)
+          repo_name = section_config.fetch('repository').fetch('name')
+          directory = section_config['directory']
+          working_copy = cloner.call(from: repo_name,
+                                     ref: target_ref,
+                                     parent_dir: workspace,
+                                     dir_name: directory)
           @section_repository.get_instance(
-            attributes,
-            working_copy: vcs_repo,
+            section_config,
+            working_copy: working_copy,
             destination_dir: workspace
           ) { |*args| Section.new(*args) }
         end
