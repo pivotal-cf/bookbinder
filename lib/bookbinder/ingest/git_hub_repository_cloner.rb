@@ -10,12 +10,18 @@ module Bookbinder
                ref: nil,
                parent_dir: nil,
                dir_name: nil)
-        GitHubRepository.
+        repo = GitHubRepository.
           build_from_remote(logger,
                             {'repository' => {'name' => from},
                              'directory' => dir_name},
                              version_control_system).
                              tap { |repo| repo.copy_from_remote(parent_dir, ref) }
+        WorkingCopy.new(
+          copied: repo.copied?,
+          copied_to: repo.copied_to,
+          directory: repo.directory,
+          full_name: repo.full_name,
+        )
       end
 
       private

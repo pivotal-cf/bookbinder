@@ -1,3 +1,5 @@
+require_relative 'working_copy'
+
 module Bookbinder
   module Ingest
     class LocalFilesystemCloner
@@ -11,13 +13,19 @@ module Bookbinder
                ref: nil,
                parent_dir: nil,
                dir_name: nil)
-        GitHubRepository.
+        repo = GitHubRepository.
           build_from_local(logger,
                            {'repository' => {'name' => from},
                             'directory' => dir_name},
                             user_repo_dir,
                             version_control_system).
                             tap { |repo| repo.copy_from_local(parent_dir) }
+        WorkingCopy.new(
+          copied: repo.copied?,
+          copied_to: repo.copied_to,
+          directory: repo.directory,
+          full_name: repo.full_name,
+        )
       end
 
       private
