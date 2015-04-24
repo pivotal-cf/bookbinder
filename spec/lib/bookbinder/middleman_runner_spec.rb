@@ -46,6 +46,7 @@ module Bookbinder
           host_for_sitemap: production_host,
           archive_menu: archive_menu
         },
+        double('cloner'),
         verbose,
         subnav_templates)
     end

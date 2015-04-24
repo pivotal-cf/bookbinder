@@ -1,6 +1,7 @@
 require 'spec_helper'
 require './master_middleman/bookbinder_helpers'
 require 'redcarpet'
+require_relative '../../../lib/bookbinder/ingest/git_hub_repository_cloner'
 
 module Bookbinder
   describe Navigation::HelperMethods do
@@ -117,6 +118,8 @@ module Bookbinder
 
     describe '#yield_for_code_snippet' do
       let(:config) { {} }
+      let(:repo) { 'fantastic/code-example-repo' }
+      let(:excerpt_mark) { 'complicated_function' }
       let(:yielded_snippet) do
         klass.new(config).yield_for_code_snippet(from: repo, at: excerpt_mark)
       end
@@ -137,11 +140,10 @@ p fib.take_while { |n| n <= 4E6 }
 ```
 MARKDOWN
       end
-      let(:repo) { 'fantastic/code-example-repo' }
-      let(:excerpt_mark) { 'complicated_function' }
 
       context 'when not local' do
-        let(:config) { {local_repo_dir: nil, workspace: 'code-example-repo', git_accessor: SpecGitAccessor} }
+        let(:cloner) { Ingest::GitHubRepositoryCloner.new(logger, SpecGitAccessor) }
+        let(:config) { {cloner: cloner, workspace: 'code-example-repo'} }
         use_fixture_repo
 
         it 'returns markdown from github' do
@@ -150,8 +152,8 @@ MARKDOWN
       end
 
       context 'when local' do
-        UNUSED_BUT_TRUTHY_GIT_ACCESSOR = "UNUSED BUT TRUTHY GIT ACCESSOR"
-        let(:config) { {local_repo_dir: '..', workspace: 'code-example-repo', git_accessor: UNUSED_BUT_TRUTHY_GIT_ACCESSOR} }
+        let(:cloner) { Ingest::LocalFilesystemCloner.new(logger, LocalFileSystemAccessor.new, '..') }
+        let(:config) { {cloner: cloner, workspace: 'code-example-repo'} }
         use_fixture_repo
 
         it 'returns markdown from the local repo' do

@@ -39,6 +39,7 @@ module Bookbinder
 
     def run(output_locations,
             config,
+            cloner,
             verbose = false,
             subnav_templates_by_directory = {})
       @logger.log "\nRunning middleman...\n\n"
@@ -50,7 +51,8 @@ module Bookbinder
                                    subnav_templates_by_directory,
                                    config.fetch(:template_variables, {}),
                                    config[:archive_menu],
-                                   verbose)
+                                   verbose,
+                                   cloner)
       end
     end
 
@@ -74,18 +76,20 @@ module Bookbinder
                                    subnav_templates,
                                    template_variables,
                                    archive_menu,
-                                   verbose)
+                                   verbose,
+                                   cloner)
       builder = Middleman::Cli::Build.shared_instance(verbose)
 
       config = {
-          local_repo_dir: local_repo_dir,
-          workspace: workspace_dir,
-          production_host: production_host,
-          git_accessor: git_accessor,
-          template_variables: template_variables,
-          relative_links: false,
-          subnav_templates: subnav_templates,
-          archive_menu: archive_menu
+        archive_menu: archive_menu,
+        cloner: cloner,
+        git_accessor: git_accessor,
+        local_repo_dir: local_repo_dir,
+        production_host: production_host,
+        relative_links: false,
+        subnav_templates: subnav_templates,
+        template_variables: template_variables,
+        workspace: workspace_dir,
       }
 
       config.each { |k, v| builder.config[k] = v }

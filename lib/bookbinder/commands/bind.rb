@@ -122,7 +122,8 @@ module Bookbinder
           subnavs,
           {verbose: options.include?('--verbose')},
           output_locations,
-          archive_menu_config.generate(bind_config, sections)
+          archive_menu_config.generate(bind_config, sections),
+          cloner
         )
 
         success ? 0 : 1
@@ -148,13 +149,14 @@ module Bookbinder
                   :sheller,
                   :directory_preparer
 
-      def publish(subnavs, cli_options, output_locations, publish_config)
+      def publish(subnavs, cli_options, output_locations, publish_config, cloner)
         FileUtils.cp 'redirects.rb', output_locations.final_app_dir if File.exists?('redirects.rb')
 
         host_for_sitemap = publish_config.fetch(:host_for_sitemap)
 
         static_site_generator.run(output_locations,
                                   publish_config,
+                                  cloner,
                                   cli_options[:verbose],
                                   subnavs)
         file_system_accessor.copy output_locations.build_dir, output_locations.public_dir

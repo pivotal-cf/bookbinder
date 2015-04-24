@@ -19,23 +19,12 @@ module Bookbinder
       def yield_for_code_snippet(from: nil, at: nil)
         git_accessor = config[:git_accessor]
         local_repo_dir = config[:local_repo_dir]
+        cloner = config[:cloner]
         attributes = {'repository' => {'name' => from}}
         workspace = config[:workspace]
         code_example_reader = CodeExampleReader.new(bookbinder_logger)
 
-        working_copy =
-          if local_repo_dir
-            GitHubRepository.
-              build_from_local(bookbinder_logger,
-                               attributes,
-                               local_repo_dir,
-                               git_accessor).
-                               tap { |repo| repo.copy_from_local(workspace) }
-          else
-            GitHubRepository.
-              build_from_remote(bookbinder_logger, attributes, git_accessor).
-              tap { |repo| repo.copy_from_remote(workspace, 'master') }
-          end
+        working_copy = cloner.call(from: from, parent_dir: workspace, ref: 'master')
         example = code_example_repo.get_instance(attributes, working_copy: working_copy) {
           |path, name, copied, _, dest, directory|
           CodeExample.new(path, name, copied, dest, directory)
