@@ -23,7 +23,7 @@ module Bookbinder
         workspace = config[:workspace]
         code_example_reader = CodeExampleReader.new(bookbinder_logger)
 
-        vcs_repo =
+        working_copy =
           if local_repo_dir
             GitHubRepository.
               build_from_local(bookbinder_logger,
@@ -36,7 +36,7 @@ module Bookbinder
               build_from_remote(bookbinder_logger, attributes, git_accessor).
               tap { |repo| repo.copy_from_remote(workspace, 'master') }
           end
-        example = code_example_repo.get_instance(attributes, working_copy: vcs_repo) {
+        example = code_example_repo.get_instance(attributes, working_copy: working_copy) {
           |path, name, copied, _, dest, directory|
           CodeExample.new(path, name, copied, dest, directory)
         }
