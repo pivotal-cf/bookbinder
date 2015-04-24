@@ -14,7 +14,7 @@ module Bookbinder
             with(Pathname("/my/repo/dir/myrepo")) { true }
           allow(fs).to receive(:file_exist?).
             with(Pathname("/my/dest/myrepo")) { false }
-          allow(fs).to receive(:copy)
+          allow(fs).to receive(:copy_contents)
 
           expect(logger).to receive(:log).with(%r{ copying.*/my/repo/dir})
 
@@ -31,8 +31,8 @@ module Bookbinder
           allow(fs).to receive(:file_exist?).
             with(Pathname("/destination/dir/myrepo")) { false }
 
-          expect(fs).to receive(:copy).
-            with(Pathname("/my/repo/dir/myrepo/."),
+          expect(fs).to receive(:copy_contents).
+            with(Pathname("/my/repo/dir/myrepo"),
                  Pathname("/destination/dir/myrepo"))
 
           cloner = LocalFilesystemCloner.new(null_logger, fs, "/my/repo/dir")
@@ -47,7 +47,7 @@ module Bookbinder
             with(Pathname("/my/repo/dir/myrepo")) { true }
           allow(fs).to receive(:file_exist?).
             with(Pathname("/destination/dir/myrepo")) { false }
-          allow(fs).to receive(:copy)
+          allow(fs).to receive(:copy_contents)
 
           cloner = LocalFilesystemCloner.new(null_logger, fs, "/my/repo/dir")
           result = cloner.call(from: "myorg/myrepo",

@@ -42,10 +42,7 @@ module Bookbinder
           dest_dir
         elsif source_exists
           announce_copy(source_copy)
-          filesystem.copy(
-            Pathname("#{source_copy.path}/."),
-            dest_dir
-          )
+          filesystem.copy_contents(source_copy.path, dest_dir)
           dest_dir
         else
           logger.log '  skipping (not found) '.magenta + source_copy.path.to_s
