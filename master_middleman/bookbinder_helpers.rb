@@ -18,7 +18,6 @@ module Bookbinder
 
       def yield_for_code_snippet(from: nil, at: nil)
         git_accessor = config[:git_accessor]
-        local_repo_dir = config[:local_repo_dir]
         cloner = config[:cloner]
         attributes = {'repository' => {'name' => from}}
         workspace = config[:workspace]

@@ -102,12 +102,6 @@ module Bookbinder
       expect(middleman_instance.config[:subnav_templates]).to eq(templates)
     end
 
-    it 'tells middleman about local_repo_dir' do
-      run_middleman
-      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
-      expect(middleman_instance.config[:local_repo_dir].to_s).to eq local_repo_dir
-    end
-
     it 'builds with middleman and passes the verbose parameter' do
       build_command = expect_to_receive_and_return_real_now(Middleman::Cli::Build, :new, [], {:quiet => !verbose}, {})
       expect(build_command).to receive(:invoke).with(:build, [], {:verbose => verbose})

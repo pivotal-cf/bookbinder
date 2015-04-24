@@ -45,8 +45,7 @@ module Bookbinder
       @logger.log "\nRunning middleman...\n\n"
 
       within(output_locations.master_dir) do
-        invoke_against_current_dir(output_locations.local_repo_dir,
-                                   output_locations.workspace_dir,
+        invoke_against_current_dir(output_locations.workspace_dir,
                                    config[:host_for_sitemap],
                                    subnav_templates_by_directory,
                                    config.fetch(:template_variables, {}),
@@ -70,8 +69,7 @@ module Bookbinder
       ENV['MM_ROOT']    = original_mm_root
     end
 
-    def invoke_against_current_dir(local_repo_dir,
-                                   workspace_dir,
+    def invoke_against_current_dir(workspace_dir,
                                    production_host,
                                    subnav_templates,
                                    template_variables,
@@ -83,8 +81,6 @@ module Bookbinder
       config = {
         archive_menu: archive_menu,
         cloner: cloner,
-        git_accessor: git_accessor,
-        local_repo_dir: local_repo_dir,
         production_host: production_host,
         relative_links: false,
         subnav_templates: subnav_templates,
