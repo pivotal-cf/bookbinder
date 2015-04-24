@@ -4,14 +4,15 @@ require_relative 'local_filesystem_cloner'
 module Bookbinder
   module Ingest
     class ClonerFactory
-      def initialize(logger, version_control_system)
+      def initialize(logger, filesystem, version_control_system)
         @logger = logger
+        @filesystem = filesystem
         @version_control_system = version_control_system
       end
 
       def produce(source, user_repo_dir)
         if user_repo_dir
-          LocalFilesystemCloner.new(logger, version_control_system, user_repo_dir)
+          LocalFilesystemCloner.new(logger, filesystem, user_repo_dir)
         else
           GitHubRepositoryCloner.new(logger, version_control_system)
         end
@@ -19,7 +20,7 @@ module Bookbinder
 
       private
 
-      attr_reader :logger, :version_control_system
+      attr_reader :logger, :filesystem, :version_control_system
     end
   end
 end

@@ -44,10 +44,7 @@ module Bookbinder
         FileUtils.mkdir_p(dest)
       end
 
-      contents = Dir.glob File.join(src, '**')
-      contents.each do |dir|
-        FileUtils.cp_r dir, dest
-      end
+      FileUtils.cp_r "#{src}/.", dest
     end
 
     def copy_including_intermediate_dirs(file, root, dest)

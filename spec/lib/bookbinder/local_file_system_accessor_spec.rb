@@ -169,13 +169,15 @@ module Bookbinder
           source_dir_path = File.join tmpdir, 'source_dir'
 
           FileUtils.mkdir_p(dest_dir_path)
-          FileUtils.mkdir_p(source_dir_path)
+          nested_source_dir = File.join(source_dir_path, "some", "nested", "dir")
+          FileUtils.mkdir_p(nested_source_dir)
 
-          filepath = File.join source_dir_path, 'file.txt'
+          filepath = File.join nested_source_dir, 'file.txt'
           File.write filepath, 'this is some text'
 
           expect { fs_accessor.copy_contents source_dir_path, dest_dir_path }.
-              to change{ File.exist? File.join(dest_dir_path, 'file.txt') }.from(false).to(true)
+            to change{ File.exist? File.join(dest_dir_path, "some", "nested", "dir", "file.txt") }.
+            from(false).to(true)
         end
       end
 
