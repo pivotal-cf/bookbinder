@@ -1,4 +1,4 @@
-[![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/cloudfoundry-incubator/bookbinder) [![Build Status](https://travis-ci.org/cloudfoundry-incubator/bookbinder.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/bookbinder)
+[![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/cloudfoundry-incubator/bookbinder) [![Build Status](https://travis-ci.org/pivotal-cf/bookbinder.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/bookbinder)
 # Bookbinder
 
 Bookbinder is a gem that binds together a unified documentation web application
