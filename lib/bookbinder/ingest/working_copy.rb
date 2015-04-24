@@ -1,11 +1,11 @@
 module Bookbinder
   module Ingest
     class WorkingCopy
-      def initialize(copied: nil,
+      def initialize(repo_dir: nil,
                      copied_to: nil,
                      directory: nil,
                      full_name: nil)
-        @copied = copied
+        @repo_dir = repo_dir
         @copied_to = copied_to
         @directory = directory
         @full_name = full_name
@@ -13,12 +13,16 @@ module Bookbinder
 
       attr_reader :copied_to, :directory, :full_name
 
+      def copied?
+        ! copied_to.nil?
+      end
+
       def directory
         @directory || short_name
       end
 
-      def copied?
-        @copied
+      def path
+        Pathname(@repo_dir).join(short_name)
       end
 
       private

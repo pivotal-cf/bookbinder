@@ -17,7 +17,6 @@ module Bookbinder
                              version_control_system).
                              tap { |repo| repo.copy_from_remote(parent_dir, ref) }
         WorkingCopy.new(
-          copied: repo.copied?,
           copied_to: repo.copied_to,
           directory: dir_name,
           full_name: from,

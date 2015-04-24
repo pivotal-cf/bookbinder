@@ -80,7 +80,7 @@ module Bookbinder
                          partial_args.fetch(:final_app_directory, final_app_dir),
                          partial_args.fetch(:context_dir, File.absolute_path('.')),
                          partial_args.fetch(:dita_preprocessor, dita_preprocessor),
-                         partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, SpecGitAccessor)),
+                         partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, SpecGitAccessor)),
                          DitaSectionGathererFactory.new(bind_version_control_system, bind_logger),
                          Repositories::SectionRepository.new(logger),
                          partial_args.fetch(:command_creator, command_creator),
