@@ -189,7 +189,7 @@ module Bookbinder
                                  dir_name: directory)
           @section_repository.get_instance(
             attributes,
-            vcs_repo: vcs_repo,
+            working_copy: vcs_repo,
             destination_dir: workspace
           ) { |*args| Section.new(*args) }
         end

@@ -7,20 +7,20 @@ module Bookbinder
         @logger = logger
       end
 
-      def get_instance(attributes,
-                       vcs_repo: nil,
+      def get_instance(section_config,
+                       working_copy: nil,
                        destination_dir: Dir.mktmpdir,
                        &build)
-        repository_config = attributes['repository']
+        repository_config = section_config['repository']
         raise "section repository '#{repository_config}' is not a hash" unless repository_config.is_a?(Hash)
         raise "section repository '#{repository_config}' missing name key" unless repository_config['name']
         logger.log "Gathering #{repository_config['name'].cyan}"
-        build[vcs_repo.copied_to,
-              vcs_repo.full_name,
-              vcs_repo.copied?,
-              attributes['subnav_template'],
+        build[working_copy.copied_to,
+              working_copy.full_name,
+              working_copy.copied?,
+              section_config['subnav_template'],
               destination_dir,
-              vcs_repo.directory]
+              working_copy.directory]
       end
 
       private

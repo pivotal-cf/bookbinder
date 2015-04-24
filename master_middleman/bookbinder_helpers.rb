@@ -36,7 +36,7 @@ module Bookbinder
               build_from_remote(bookbinder_logger, attributes, git_accessor).
               tap { |repo| repo.copy_from_remote(workspace, 'master') }
           end
-        example = code_example_repo.get_instance(attributes, vcs_repo: vcs_repo) {
+        example = code_example_repo.get_instance(attributes, working_copy: vcs_repo) {
           |path, name, copied, _, dest, directory|
           CodeExample.new(path, name, copied, dest, directory)
         }
