@@ -85,6 +85,18 @@ module Bookbinder
           cloner.call(from: "myorg/myrepo",
                       parent_dir: "/some/dest")
         end
+
+        it "returns an object that isn't #copied?" do
+          fs = double('filesystem', file_exist?: false)
+          logger = double('logger')
+
+          allow(logger).to receive(:log) { nil } # #log returns nil, because puts returns nil
+
+          cloner = LocalFilesystemCloner.new(logger, fs, "/my/repo/dir")
+          result = cloner.call(from: "myorg/myrepo",
+                               parent_dir: "/some/dest")
+          expect(result).not_to be_copied
+        end
       end
     end
   end
