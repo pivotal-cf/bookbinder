@@ -19,8 +19,8 @@ module Bookbinder
         WorkingCopy.new(
           copied: repo.copied?,
           copied_to: repo.copied_to,
-          directory: repo.directory,
-          full_name: repo.full_name,
+          directory: dir_name,
+          full_name: from,
         )
       end
 

@@ -13,8 +13,18 @@ module Bookbinder
 
       attr_reader :copied_to, :directory, :full_name
 
+      def directory
+        @directory || short_name
+      end
+
       def copied?
         @copied
+      end
+
+      private
+
+      def short_name
+        full_name.split('/')[1]
       end
     end
   end
