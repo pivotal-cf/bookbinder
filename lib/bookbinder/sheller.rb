@@ -9,9 +9,23 @@ module Bookbinder
       end
     end
 
-    def run_command(command, out: DevNull.new, err: DevNull.new)
+    def run_command(*command)
+      out, err =
+        if Hash === command.last
+          command.last.values_at(:out, :err)
+        else
+          [DevNull.new, DevNull.new]
+        end
+
+      env_vars, executable =
+        if Hash === command.first
+          command[0..1]
+        else
+          [{}, command[0]]
+        end
+
       exit_status = nil
-      Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
+      Open3.popen3(env_vars, executable) do |stdin, stdout, stderr, wait_thr|
         t = Thread.new do
           stdout.each do |line|
             out.puts(line)

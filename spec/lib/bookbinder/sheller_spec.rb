@@ -31,6 +31,16 @@ module Bookbinder
       expect(shared.read).to eq "first\nsecond\nthird\n"
     end
 
+    it 'accepts environment variables as a parameter' do
+      sheller = Sheller.new
+      env_vars = {'KEY_1' => 'VALUE_1', 'KEY_2' => 'VALUE_2'}
+      out = StringIO.new
+      process_env_vars = 'echo "$KEY_1 $KEY_2"'
+      sheller.run_command(env_vars, process_env_vars, out: out)
+      out.rewind
+      expect(out.read).to eq "VALUE_1 VALUE_2\n"
+    end
+
     it 'returns the exit status' do
       sheller = Sheller.new
       result = sheller.run_command("exit 1")
