@@ -5,8 +5,9 @@ require_relative '../../helpers/nil_logger'
 module Bookbinder
   describe CfCommandRunner do
     let(:logger) { NilLogger.new }
+    let(:sheller) { instance_double("Sheller") }
     let(:credentials) { Configuration::CfCredentials.new(config_hash, 'staging') }
-    let(:cf) { CfCommandRunner.new(logger, credentials, trace_file) }
+    let(:cf) { CfCommandRunner.new(logger, sheller, credentials, trace_file) }
     let(:trace_file) { 'path/to/log' }
     let(:binary_path_syscall ) { '/usr/local/bin/cf\n' }
     let(:binary_path) { '/usr/local/bin/cf'}
@@ -162,23 +163,17 @@ OUTPUT
       let(:namespace) { 'namespace' }
       let(:build_number) { 'build-number' }
       let(:cf_push_command_result) { true }
+      let(:process_status) { double('process status', success?: cf_push_command_result) }
 
       before do
-        allow(Kernel).to receive(:system).and_return(cf_push_command_result)
-      end
-
-      it 'sets the trace file environment variable for system calls' do
-        expect(Kernel).to receive(:system) do |variables, command|
-          expect(variables['CF_TRACE']).to eq(trace_file)
-          expect(command).to match(/push/)
-        end
-
-        cf.push('my-app-name')
+        allow(sheller).to receive(:run_command).and_return(process_status)
       end
 
       it 'send the right args' do
-        expect(Kernel).to receive(:system) do |variables, command|
+        expect(sheller).to receive(:run_command) do |variables, command|
+          expect(variables['CF_TRACE']).to eq(trace_file)
           expect(command).to match(/cf push my-app-name --no-route -m 256M -i 3/)
+          process_status
         end
 
         cf.push('my-app-name')

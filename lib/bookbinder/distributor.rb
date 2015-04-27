@@ -13,7 +13,7 @@ module Bookbinder
       namer = ArtifactNamer.new(namespace, options[:build_number], 'log', '/tmp')
 
       archive = Archive.new(logger: logger, key: options[:aws_credentials].access_key, secret: options[:aws_credentials].secret_key)
-      cf_command_runner = CfCommandRunner.new(logger, options[:cf_credentials], namer.full_path)
+      cf_command_runner = CfCommandRunner.new(logger, Sheller.new, options[:cf_credentials], namer.full_path)
       cf_app_fetcher = AppFetcher.new(options[:cf_credentials].flat_routes, cf_command_runner)
 
       pusher = Pusher.new(cf_command_runner, cf_app_fetcher)

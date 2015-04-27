@@ -3,8 +3,9 @@ require_relative 'values/blue_green_app'
 
 module Bookbinder
   class CfCommandRunner
-    def initialize(logger, cf_credentials, trace_file)
+    def initialize(logger, sheller, cf_credentials, trace_file)
       @logger = logger
+      @sheller = sheller
       @creds = cf_credentials
       @trace_file = trace_file
     end
@@ -41,8 +42,11 @@ module Bookbinder
     def push(deploy_target_app)
       # Currently --no-routes is used to blow away all existing routes from a newly deployed app.
       # The routes will then be recreated from the creds repo.
-      success = Kernel.system(environment_variables, "#{cf_binary_path} push #{deploy_target_app} --no-route -m 256M -i 3")
-      raise "Could not deploy app to #{deploy_target_app}" unless success
+      status = sheller.run_command(environment_variables,
+                                   "#{cf_binary_path} push #{deploy_target_app} --no-route -m 256M -i 3",
+                                   out: $stdout,
+                                   err: $stderr)
+      raise "Could not deploy app to #{deploy_target_app}" unless status.success?
     end
 
     def unmap_routes(app)
@@ -78,7 +82,7 @@ module Bookbinder
 
     private
 
-    attr_reader :creds
+    attr_reader :creds, :sheller
 
     def stop(app)
       success = Kernel.system("#{cf_binary_path} stop #{app}")
