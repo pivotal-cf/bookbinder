@@ -1,23 +1,27 @@
+require_relative 'destination_directory'
+require_relative 'working_copy'
+
 module Bookbinder
   module Ingest
     class GitHubRepositoryCloner
-      def initialize(logger, version_control_system)
-        @logger = logger
+      def initialize(version_control_system)
         @version_control_system = version_control_system
       end
 
       def call(from: nil,
-               ref: nil,
+               ref: "master",
                parent_dir: nil,
                dir_name: nil)
-        repo = GitHubRepository.
-          build_from_remote(logger,
-                            {'repository' => {'name' => from},
-                             'directory' => dir_name},
-                             version_control_system).
-                             tap { |repo| repo.copy_from_remote(parent_dir, ref) }
+        dest_dir = DestinationDirectory.new(from, dir_name)
+        copied_to = Pathname(parent_dir).join(dest_dir)
+        version_control_system.clone(
+          "git@github.com:#{from}",
+          dest_dir,
+          path: parent_dir,
+          checkout: ref
+        )
         WorkingCopy.new(
-          copied_to: repo.copied_to,
+          copied_to: copied_to,
           directory: dir_name,
           full_name: from,
         )
@@ -25,7 +29,7 @@ module Bookbinder
 
       private
 
-      attr_reader :logger, :version_control_system
+      attr_reader :version_control_system
     end
   end
 end

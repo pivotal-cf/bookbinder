@@ -14,7 +14,7 @@ module Bookbinder
         if user_repo_dir
           LocalFilesystemCloner.new(logger, filesystem, user_repo_dir)
         else
-          GitHubRepositoryCloner.new(logger, version_control_system)
+          GitHubRepositoryCloner.new(version_control_system)
         end
       end
 

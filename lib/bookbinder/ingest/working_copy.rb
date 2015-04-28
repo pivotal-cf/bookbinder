@@ -1,3 +1,5 @@
+require_relative 'destination_directory'
+
 module Bookbinder
   module Ingest
     class WorkingCopy
@@ -11,24 +13,18 @@ module Bookbinder
         @full_name = full_name
       end
 
-      attr_reader :copied_to, :directory, :full_name
+      attr_reader :copied_to, :full_name
 
       def copied?
         ! copied_to.nil?
       end
 
       def directory
-        @directory || short_name
+        DestinationDirectory.new(full_name, @directory).to_s
       end
 
       def path
-        Pathname(@repo_dir).join(short_name)
-      end
-
-      private
-
-      def short_name
-        full_name.split('/')[1]
+        Pathname(@repo_dir).join(directory)
       end
     end
   end
