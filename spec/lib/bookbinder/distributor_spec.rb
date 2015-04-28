@@ -85,18 +85,18 @@ module Bookbinder
         end
 
         it 'uploads despite push raising' do
-          allow(fake_pusher).to receive(:push).and_raise('Hi there')
+          allow(fake_pusher).to receive(:push).and_raise(SpecialException)
           allow(fake_archive).to receive(:download)
           expect(fake_archive).to receive(:upload_file)
-          distributor.distribute
+          rescued_distribute
         end
 
         context 'when download raises' do
           let(:production) { true }
           it 'uploads despite download raising' do
-            allow(fake_archive).to receive(:download).and_raise('Hi there')
+            allow(fake_archive).to receive(:download).and_raise(SpecialException)
             expect(fake_archive).to receive(:upload_file)
-            distributor.distribute
+            rescued_distribute
           end
         end
 
@@ -138,7 +138,7 @@ module Bookbinder
 
         context 'when an error is thrown from downloading' do
           it 'logs an informative message' do
-            allow(fake_archive).to receive(:download).and_raise("failed to download because of reason.")
+            allow(fake_archive).to receive(:download).and_raise(SpecialException.new("failed to download because of reason."))
             expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
 [ERROR] failed to download because of reason.
 [DEBUG INFO]
@@ -147,22 +147,22 @@ CF space: foooo
 CF account: username
 routes: #{cf_credentials.routes}
             ERROR_MESSAGE
-            distributor.distribute
+rescued_distribute
           end
         end
 
         context 'when an error is thrown from pushing' do
           it 'logs an informative message' do
-            allow(fake_pusher).to receive(:push).and_raise("failed to push because of reason.")
+            allow(fake_pusher).to receive(:push).and_raise(SpecialException.new("foo"))
             expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
-[ERROR] failed to push because of reason.
+[ERROR] foo
 [DEBUG INFO]
 CF organization: foooo
 CF space: foooo
 CF account: username
 routes: #{cf_credentials.routes}
 ERROR_MESSAGE
-            distributor.distribute
+            rescued_distribute
           end
         end
       end
@@ -194,7 +194,7 @@ ERROR_MESSAGE
 
         context 'when an error is thrown from pushing an app' do
           it 'logs an informative message' do
-            allow(fake_pusher).to receive(:push).and_raise("failed to push because of reason.")
+            allow(fake_pusher).to receive(:push).and_raise(SpecialException.new("failed to push because of reason."))
             expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
 [ERROR] failed to push because of reason.
 [DEBUG INFO]
@@ -203,7 +203,13 @@ CF space: foo_stage
 CF account: username
 routes: #{cf_credentials.routes}
             ERROR_MESSAGE
-            distributor.distribute
+            rescued_distribute
+          end
+
+          it 'raises an exception' do
+            error = RuntimeError.new('Failed to push because of reason')
+            allow(fake_pusher).to receive(:push).and_raise(error)
+            expect { distributor.distribute }.to raise_error(error)
           end
         end
       end
@@ -213,6 +219,13 @@ routes: #{cf_credentials.routes}
         expect(fake_pusher).to receive(:push).with(fake_dir)
         distributor.distribute
       end
+    end
+
+    SpecialException = Class.new(RuntimeError)
+
+    def rescued_distribute
+      distributor.distribute
+    rescue SpecialException
     end
   end
 end

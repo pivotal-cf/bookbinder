@@ -31,22 +31,21 @@ module Bookbinder
     end
 
     def distribute
-      begin
-        download if cf_credentials.download_archive_before_push?
-        push_app
-        nil
-      rescue => e
-        @logger.error(<<-ERROR.chomp)
+      download if cf_credentials.download_archive_before_push?
+      push_app
+      nil
+    rescue => e
+      @logger.error(<<-ERROR.chomp)
 [ERROR] #{e.message}
 [DEBUG INFO]
 CF organization: #{cf_credentials.organization}
 CF space: #{cf_credentials.space}
 CF account: #{cf_credentials.username}
 routes: #{cf_credentials.routes}
-        ERROR
-      ensure
-        upload_trace
-      end
+      ERROR
+      raise
+    ensure
+      upload_trace
     end
 
     private
