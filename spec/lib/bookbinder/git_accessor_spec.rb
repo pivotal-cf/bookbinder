@@ -49,5 +49,23 @@ module Bookbinder
         expect(File.read(path.join('destgorepo', 'foo'))).to eq("bar\n")
       end
     end
+
+    it "can checkout different branches of the same cached repo" do
+      Dir.mktmpdir do |dir|
+        path = Pathname(dir)
+        init_repo(at_dir: path.join('srcrepo'),
+                  file: 'Gemfile',
+                  contents: 'gemstuffz',
+                  commit_message: 'new railz plz',
+                  branch: 'newbranch')
+
+        git = GitAccessor.new
+
+        git.clone(path.join('srcrepo'), 'destrepo', path: path, checkout: 'newbranch')
+        expect(path.join('destrepo/Gemfile')).to exist
+        git.clone(path.join('srcrepo'), 'destrepo', path: path, checkout: 'master')
+        expect(path.join('destrepo/Gemfile')).not_to exist
+      end
+    end
   end
 end

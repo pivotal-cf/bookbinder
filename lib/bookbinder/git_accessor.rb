@@ -7,7 +7,7 @@ module Bookbinder
     end
 
     def clone(url, name, path: nil, checkout: 'master')
-      cache[[url, name, path]] ||= Git.clone(url, name, path: path).tap do |git|
+      (cache[[url, name, path]] ||= Git.clone(url, name, path: path)).tap do |git|
         git.checkout(checkout)
       end
     end
