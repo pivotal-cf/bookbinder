@@ -34,5 +34,20 @@ module Bookbinder
           not_to change { File.mtime(path.join('destrepo', 'Gemfile')) }
       end
     end
+
+    it "can clone and checkout in one call" do
+      Dir.mktmpdir do |dir|
+        path = Pathname(dir)
+        init_repo(branch: 'mybranch',
+                  at_dir: path.join('srcgorepo'),
+                  file: 'foo',
+                  contents: 'bar',
+                  commit_message: 'baz')
+        GitAccessor.new.clone(path.join("srcgorepo"), 'destgorepo',
+                              checkout: 'mybranch',
+                              path: path)
+        expect(File.read(path.join('destgorepo', 'foo'))).to eq("bar\n")
+      end
+    end
   end
 end
