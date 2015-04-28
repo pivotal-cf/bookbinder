@@ -85,7 +85,10 @@ module Bookbinder
                          Repositories::SectionRepository.new(logger),
                          partial_args.fetch(:command_creator, command_creator),
                          partial_args.fetch(:sheller, sheller),
-                         Commands::BindComponents::DirectoryPreparer.new(bind_logger, file_system_accessor, bind_version_control_system))
+                         partial_args.fetch(:directory_preparer,
+                                            Commands::BindComponents::DirectoryPreparer.new(bind_logger,
+                                                                                            file_system_accessor,
+                                                                                            bind_version_control_system)))
     end
 
     def random_port
@@ -246,6 +249,57 @@ module Bookbinder
 
         index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
         expect(index_html).to include 'This is a Markdown Page'
+      end
+
+      context 'when configured with a layout repo' do
+        let(:cloner) { double('cloner') }
+        let(:factory) { double('cloner factory') }
+        let(:config) { Configuration.new(logger, 'book_repo' => '', 'public_host' => '', 'layout_repo' => 'my/configuredrepo') }
+        let(:config_fetcher) { double('config fetcher', fetch_config: config) }
+        let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
+        let(:null_site_generator) { double('site gen', run: nil) }
+        let(:null_fs_accessor) { double('fs accessor', copy: nil) }
+
+        it 'clones the repo' do
+          bind = bind_cmd(cloner_factory: factory,
+                          config_fetcher: config_fetcher,
+                          file_system_accessor: null_fs_accessor,
+                          static_site_generator: null_site_generator,
+                          sitemap_writer: null_sitemap_writer,
+                          directory_preparer: double('dir preparer', prepare_directories: nil))
+
+          allow(factory).to receive(:produce).with('github', nil) { cloner }
+
+          expect(cloner).to receive(:call).
+            with(from: "my/configuredrepo", parent_dir: anything) {
+            Ingest::WorkingCopy.new(repo_dir: 'foo', full_name: 'some/repo')
+          }
+
+          bind.run(['github'])
+        end
+
+        it 'sets the repo as the layout repo path when prepping dirs' do
+          received_output_locations = nil
+          directory_preparer = Object.new
+          directory_preparer.define_singleton_method(:prepare_directories) {|_, _, output_locations, _|
+            received_output_locations = output_locations
+          }
+
+          bind = bind_cmd(cloner_factory: factory,
+                          config_fetcher: config_fetcher,
+                          file_system_accessor: null_fs_accessor,
+                          static_site_generator: null_site_generator,
+                          sitemap_writer: null_sitemap_writer,
+                          directory_preparer: directory_preparer)
+
+          allow(factory).to receive(:produce) { cloner }
+          allow(cloner).to receive(:call) { Ingest::WorkingCopy.new(repo_dir: 'foo',
+                                                                    full_name: 'some/repo') }
+
+          bind.run(['github'])
+
+          expect(received_output_locations.layout_repo_dir).to eq(Pathname('foo/repo'))
+        end
       end
 
       it 'creates a directory per repo with the generated html from middleman' do

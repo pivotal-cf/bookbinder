@@ -205,13 +205,10 @@ module Bookbinder
         if local_repo_dir && config.has_option?('layout_repo')
           File.join(local_repo_dir, config.layout_repo.split('/').last)
         elsif config.has_option?('layout_repo')
-          section = {'repository' => {'name' => config.layout_repo}}
-          destination_dir = Dir.mktmpdir
-          repository = GitHubRepository.build_from_remote(logger,
-                                                          section,
-                                                          version_control_system)
-          repository.copy_from_remote(destination_dir, 'master')
-          File.join(destination_dir, repository.directory)
+          cloner = cloner_factory.produce('github', nil)
+          working_copy = cloner.call(from: config.layout_repo,
+                                     parent_dir: Dir.mktmpdir)
+          working_copy.path
         else
           File.absolute_path('master_middleman')
         end

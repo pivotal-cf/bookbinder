@@ -11,6 +11,58 @@ module Bookbinder
     CredentialKeyError = Class.new(RuntimeError)
     ConfigSchemaUnsupportedError = Class.new(RuntimeError)
 
+    attr_reader :schema_version, :schema_major_version, :schema_minor_version, :schema_patch_version
+
+    def initialize(logger, config_hash)
+      @logger = logger
+      @config = config_hash
+    end
+
+    CONFIG_REQUIRED_KEYS = %w(book_repo public_host)
+    CONFIG_OPTIONAL_KEYS = %w(archive_menu layout_repo versions cred_repo)
+
+    CONFIG_REQUIRED_KEYS.each do |method_name|
+      define_method(method_name) do
+        config.fetch(method_name)
+      end
+    end
+
+    CONFIG_OPTIONAL_KEYS.each do |method_name|
+      define_method(method_name) do
+        config[method_name]
+      end
+    end
+
+    def sections
+      config.fetch('sections', [])
+    end
+
+    def dita_sections
+      config.fetch('dita_sections', {})
+    end
+
+    def has_option?(key)
+      @config.has_key?(key)
+    end
+
+    def template_variables
+      config.fetch('template_variables', {})
+    end
+
+    def aws_credentials
+      @aws_creds ||= AwsCredentials.new(credentials.fetch('aws', {}))
+    end
+
+    def cf_credentials(environment)
+      CfCredentials.new(credentials.fetch('cloud_foundry', {}), environment)
+    end
+
+    def ==(o)
+      o.class == self.class && o.instance_variable_get(:@config) == @config
+    end
+
+    alias_method :eql?, :==
+
     class AwsCredentials
       REQUIRED_KEYS = %w(access_key secret_key green_builds_bucket)
 
@@ -112,63 +164,9 @@ module Bookbinder
       end
     end
 
-    attr_reader :schema_version, :schema_major_version, :schema_minor_version, :schema_patch_version
-
-    def initialize(logger, config_hash)
-      @logger = logger
-      @config = config_hash
-    end
-
-    CONFIG_REQUIRED_KEYS = %w(book_repo public_host)
-    CONFIG_OPTIONAL_KEYS = %w(archive_menu layout_repo versions cred_repo)
-
-    CONFIG_REQUIRED_KEYS.each do |method_name|
-      define_method(method_name) do
-        config.fetch(method_name)
-      end
-    end
-
-    CONFIG_OPTIONAL_KEYS.each do |method_name|
-      define_method(method_name) do
-        config[method_name]
-      end
-    end
-
-    def sections
-      config.fetch('sections', [])
-    end
-
-    def dita_sections
-      config.fetch('dita_sections', {})
-    end
-
-    def has_option?(key)
-      @config.has_key?(key)
-    end
-
-    def template_variables
-      config.fetch('template_variables', {})
-    end
-
-    def aws_credentials
-      @aws_creds ||= AwsCredentials.new(credentials.fetch('aws', {}))
-    end
-
-    def cf_credentials(environment)
-      CfCredentials.new(credentials.fetch('cloud_foundry', {}), environment)
-    end
-
-    def ==(o)
-      (o.class == self.class) && (o.config == self.config)
-    end
-
-    alias_method :eql?, :==
-
-    protected
+    private
 
     attr_reader :config
-
-    private
 
     def credentials
       @credentials ||= RemoteYamlCredentialProvider.new(@logger, credentials_repository).credentials

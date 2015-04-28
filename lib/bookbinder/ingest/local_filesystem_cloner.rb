@@ -14,14 +14,9 @@ module Bookbinder
                ref: nil,
                parent_dir: nil,
                dir_name: nil)
-        source = WorkingCopy.new(
-          repo_dir: user_repo_dir,
-          directory: dir_name,
-          full_name: from
-        )
         copied_to = copy!(
-          source,
-          Pathname(parent_dir).join(source.directory)
+          WorkingCopy.new(repo_dir: user_repo_dir, full_name: from),
+          Pathname(parent_dir).join(DestinationDirectory.new(from, dir_name))
         )
         WorkingCopy.new(
           copied_to: copied_to,

@@ -11,18 +11,6 @@ module Bookbinder
 
     attr_reader :full_name, :copied_to
 
-    def self.build_from_remote(logger,
-                               section_hash,
-                               git_accessor)
-      full_name = section_hash.fetch('repository', {}).fetch('name')
-      directory = section_hash['directory']
-      new(logger: logger,
-          full_name: full_name,
-          github_token: ENV['GITHUB_API_TOKEN'],
-          directory: directory,
-          git_accessor: git_accessor)
-    end
-
     def initialize(logger: nil,
                    full_name: nil,
                    github_token: nil,

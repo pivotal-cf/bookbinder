@@ -40,7 +40,27 @@ module Bookbinder
                       parent_dir: "/destination/dir")
         end
 
-        it "returns an object that is #copied?" do
+        context "when destination directory name is set" do
+          it "copies the repo to the custom directory" do
+            fs = double('filesystem')
+
+            allow(fs).to receive(:file_exist?).
+              with(Pathname("/sourceparent/sourcerepo")) { true }
+            allow(fs).to receive(:file_exist?).
+              with(Pathname("/destparent/mycustomdestrepo")) { false }
+
+            expect(fs).to receive(:copy_contents).
+              with(Pathname("/sourceparent/sourcerepo"),
+                   Pathname("/destparent/mycustomdestrepo"))
+
+            cloner = LocalFilesystemCloner.new(null_logger, fs, "/sourceparent")
+            cloner.call(from: "myorg/sourcerepo",
+                        dir_name: 'mycustomdestrepo',
+                        parent_dir: "/destparent")
+          end
+        end
+
+        it "returns an object that is #copied? and has the correct destination" do
           fs = double('filesystem')
 
           allow(fs).to receive(:file_exist?).
@@ -54,6 +74,7 @@ module Bookbinder
                                parent_dir: "/destination/dir")
 
           expect(result).to be_copied
+          expect(result.copied_to).to eq(Pathname("/destination/dir/myrepo"))
         end
 
         context "but it's already been copied" do
