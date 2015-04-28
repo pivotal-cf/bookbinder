@@ -12,7 +12,7 @@ module Bookbinder
       @file_system_accessor = file_system_accessor
     end
 
-    def valid?(config_hash, bookbinder_schema_version, starting_schema_version)
+    def exceptions(config_hash, bookbinder_schema_version, starting_schema_version)
       user_config_schema_version = config_hash['schema_version']
       exceptions = [
         ConfigVersionChecker.new(Version.parse(bookbinder_schema_version),
@@ -29,7 +29,7 @@ module Bookbinder
         checker.check(config_hash)
       end
 
-      exceptions.compact.first
+      exceptions.compact
     end
   end
 end

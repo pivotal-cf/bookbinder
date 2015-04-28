@@ -10,16 +10,16 @@ module Bookbinder
 
     describe 'validating the configuration hash' do
       context 'when there is a minimal valid configuration hash' do
-        it 'returns nil' do
+        it 'returns no exceptions' do
           config_hash = {
             'book_repo' => 'some-repo',
             'public_host' => 'domain',
             'sections' => []
           }
 
-          expect(subject.valid?(config_hash,
-                                bookbinder_schema_version,
-                                starting_schema_version)).to be_nil
+          expect(subject.exceptions(config_hash,
+                                    bookbinder_schema_version,
+                                    starting_schema_version)).to be_empty
         end
       end
     end

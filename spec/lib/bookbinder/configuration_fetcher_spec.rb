@@ -10,7 +10,7 @@ module Bookbinder
 
     it 'can read config from a relative path even when I have changed working directory' do
       config_fetcher.set_config_file_path(path_to_config_file)
-      allow(config_validator).to receive(:valid?).and_return nil
+      allow(config_validator).to receive(:exceptions).and_return []
       allow(loader).to receive(:load).with(File.expand_path(path_to_config_file)) { { foo: 'bar' } }
       Dir.chdir('/tmp') do |tmp|
         expect(config_fetcher.fetch_config).to eq(Configuration.new(logger, {foo: 'bar'}))
@@ -20,7 +20,7 @@ module Bookbinder
     context 'when file path has been set' do
       before do
         config_fetcher.set_config_file_path(path_to_config_file)
-        allow(config_validator).to receive(:valid?) { nil }
+        allow(config_validator).to receive(:exceptions) { [] }
       end
 
       it 'reads a configuration object from the configuration file' do
@@ -77,7 +77,7 @@ module Bookbinder
       it 'raises the error it receives' do
         error = RuntimeError.new
         allow(loader).to receive(:load) { {} }
-        allow(config_validator).to receive(:valid?).and_return(error)
+        allow(config_validator).to receive(:exceptions).and_return([error])
         expect { config_fetcher.fetch_config }.to raise_error(error)
       end
     end
