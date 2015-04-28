@@ -153,7 +153,9 @@ OUTPUT
     describe '#start' do
       let(:config_hash) { {} }
       it 'calls cf start' do
-        expect(Kernel).to receive(:system).with(/cf start my-app-name/)
+        expect(sheller).to receive(:run_command).with("#{binary_path} start my-app-name",
+                                                      out: $stdout,
+                                                      err: $stderr)
         cf.start('my-app-name')
       end
     end

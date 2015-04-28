@@ -36,7 +36,9 @@ module Bookbinder
       # Theoretically we shouldn't need this (and corresponding "stop" below), but we've seen CF pull files from both
       # green and blue when a DNS redirect points to HOST.cfapps.io
       # Also, shutting down the unused app saves $$
-      Kernel.system("#{cf_binary_path} start #{deploy_target_app} ")
+      sheller.run_command("#{cf_binary_path} start #{deploy_target_app}",
+                          out: $stdout,
+                          err: $stderr)
     end
 
     def push(deploy_target_app)
