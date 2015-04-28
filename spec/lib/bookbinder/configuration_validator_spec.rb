@@ -10,7 +10,7 @@ module Bookbinder
 
     describe 'validating the configuration hash' do
       context 'when there is a minimal valid configuration hash' do
-        it 'returns true' do
+        it 'returns nil' do
           config_hash = {
             'book_repo' => 'some-repo',
             'public_host' => 'domain',
