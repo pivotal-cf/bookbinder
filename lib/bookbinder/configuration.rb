@@ -58,7 +58,7 @@ module Bookbinder
     end
 
     def ==(o)
-      (o.class == self.class) && (o.config == self.config)
+      o.class == self.class && o.instance_variable_get(:@config) == @config
     end
 
     alias_method :eql?, :==
@@ -164,11 +164,9 @@ module Bookbinder
       end
     end
 
-    protected
+    private
 
     attr_reader :config
-
-    private
 
     def credentials
       @credentials ||= RemoteYamlCredentialProvider.new(@logger, credentials_repository).credentials
