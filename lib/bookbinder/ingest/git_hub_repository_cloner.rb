@@ -8,22 +8,22 @@ module Bookbinder
         @version_control_system = version_control_system
       end
 
-      def call(from: nil,
-               ref: "master",
-               parent_dir: nil,
-               dir_name: nil)
-        dest_dir = DestinationDirectory.new(from, dir_name)
-        copied_to = Pathname(parent_dir).join(dest_dir)
+      def call(source_repo_name: nil,
+               source_ref: "master",
+               destination_parent_dir: nil,
+               destination_dir_name: nil)
+        dest_dir = DestinationDirectory.new(source_repo_name, destination_dir_name)
+        copied_to = Pathname(destination_parent_dir).join(dest_dir)
         version_control_system.clone(
-          "git@github.com:#{from}",
+          "git@github.com:#{source_repo_name}",
           dest_dir,
-          path: parent_dir,
-          checkout: ref
+          path: destination_parent_dir,
+          checkout: source_ref
         )
         WorkingCopy.new(
           copied_to: copied_to,
-          directory: dir_name,
-          full_name: from,
+          directory: destination_dir_name,
+          full_name: source_repo_name,
         )
       end
 

@@ -185,10 +185,10 @@ module Bookbinder
             'master'
           repo_name = section_config.fetch('repository').fetch('name')
           directory = section_config['directory']
-          working_copy = cloner.call(from: repo_name,
-                                     ref: target_ref,
-                                     parent_dir: workspace,
-                                     dir_name: directory)
+          working_copy = cloner.call(source_repo_name: repo_name,
+                                     source_ref: target_ref,
+                                     destination_parent_dir: workspace,
+                                     destination_dir_name: directory)
           @section_repository.get_instance(
             section_config,
             working_copy: working_copy,
@@ -206,8 +206,8 @@ module Bookbinder
           File.join(local_repo_dir, config.layout_repo.split('/').last)
         elsif config.has_option?('layout_repo')
           cloner = cloner_factory.produce('github', nil)
-          working_copy = cloner.call(from: config.layout_repo,
-                                     parent_dir: Dir.mktmpdir)
+          working_copy = cloner.call(source_repo_name: config.layout_repo,
+                                     destination_parent_dir: Dir.mktmpdir)
           working_copy.path
         else
           File.absolute_path('master_middleman')

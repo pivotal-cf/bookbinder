@@ -23,7 +23,9 @@ module Bookbinder
         workspace = config[:workspace]
         code_example_reader = CodeExampleReader.new(bookbinder_logger)
 
-        working_copy = cloner.call(from: from, parent_dir: workspace, ref: 'master')
+        working_copy = cloner.call(source_repo_name: from,
+                                   source_ref: 'master',
+                                   destination_parent_dir: workspace)
         example = code_example_repo.get_instance(attributes, working_copy: working_copy) {
           |path, name, copied, _, dest, directory|
           CodeExample.new(path, name, copied, dest, directory)

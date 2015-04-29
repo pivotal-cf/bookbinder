@@ -19,8 +19,8 @@ module Bookbinder
           expect(logger).to receive(:log).with(%r{ copying.*/my/repo/dir})
 
           cloner = LocalFilesystemCloner.new(logger, fs, "/my/repo/dir")
-          cloner.call(from: "myorg/myrepo",
-                      parent_dir: "/my/dest")
+          cloner.call(source_repo_name: "myorg/myrepo",
+                      destination_parent_dir: "/my/dest")
         end
 
         it "copies the repo to the destination" do
@@ -36,8 +36,8 @@ module Bookbinder
                  Pathname("/destination/dir/myrepo"))
 
           cloner = LocalFilesystemCloner.new(null_logger, fs, "/my/repo/dir")
-          cloner.call(from: "myorg/myrepo",
-                      parent_dir: "/destination/dir")
+          cloner.call(source_repo_name: "myorg/myrepo",
+                      destination_parent_dir: "/destination/dir")
         end
 
         context "when destination directory name is set" do
@@ -54,9 +54,9 @@ module Bookbinder
                    Pathname("/destparent/mycustomdestrepo"))
 
             cloner = LocalFilesystemCloner.new(null_logger, fs, "/sourceparent")
-            cloner.call(from: "myorg/sourcerepo",
-                        dir_name: 'mycustomdestrepo',
-                        parent_dir: "/destparent")
+            cloner.call(source_repo_name: "myorg/sourcerepo",
+                        destination_dir_name: 'mycustomdestrepo',
+                        destination_parent_dir: "/destparent")
           end
         end
 
@@ -70,8 +70,8 @@ module Bookbinder
           allow(fs).to receive(:copy_contents)
 
           cloner = LocalFilesystemCloner.new(null_logger, fs, "/my/repo/dir")
-          result = cloner.call(from: "myorg/myrepo",
-                               parent_dir: "/destination/dir")
+          result = cloner.call(source_repo_name: "myorg/myrepo",
+                               destination_parent_dir: "/destination/dir")
 
           expect(result).to be_copied
           expect(result.copied_to).to eq(Pathname("/destination/dir/myrepo"))
@@ -87,8 +87,8 @@ module Bookbinder
               with(Pathname("/destination/dir/myrepo")) { true }
 
             cloner = LocalFilesystemCloner.new(null_logger, fs, "/my/repo/dir")
-            result = cloner.call(from: "myorg/myrepo",
-                                 parent_dir: "/destination/dir")
+            result = cloner.call(source_repo_name: "myorg/myrepo",
+                                 destination_parent_dir: "/destination/dir")
 
             expect(result).to be_copied
           end
@@ -103,8 +103,8 @@ module Bookbinder
           expect(logger).to receive(:log).with(%r{ skipping .*/my/repo/dir})
 
           cloner = LocalFilesystemCloner.new(logger, fs, "/my/repo/dir")
-          cloner.call(from: "myorg/myrepo",
-                      parent_dir: "/some/dest")
+          cloner.call(source_repo_name: "myorg/myrepo",
+                      destination_parent_dir: "/some/dest")
         end
 
         it "returns an object that isn't #copied?" do
@@ -114,8 +114,8 @@ module Bookbinder
           allow(logger).to receive(:log) { nil } # #log returns nil, because puts returns nil
 
           cloner = LocalFilesystemCloner.new(logger, fs, "/my/repo/dir")
-          result = cloner.call(from: "myorg/myrepo",
-                               parent_dir: "/some/dest")
+          result = cloner.call(source_repo_name: "myorg/myrepo",
+                               destination_parent_dir: "/some/dest")
           expect(result).not_to be_copied
         end
       end

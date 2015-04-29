@@ -12,8 +12,8 @@ module Bookbinder
                                             path: "/mydestination",
                                             checkout: "master")
 
-        result = cloner.call(from: "myorg/myrepo",
-                             parent_dir: "/mydestination")
+        result = cloner.call(source_repo_name: "myorg/myrepo",
+                             destination_parent_dir: "/mydestination")
         expect(result.directory).to eq("myrepo")
       end
 
@@ -22,13 +22,13 @@ module Bookbinder
 
         allow(vcs).to receive(:clone)
 
-        result = cloner.call(from: "myorg/myrepo",
-                             parent_dir: "/mydestination")
+        result = cloner.call(source_repo_name: "myorg/myrepo",
+                             destination_parent_dir: "/mydestination")
         expect(result).to be_copied
         expect(result.copied_to).to eq(Pathname("/mydestination/myrepo"))
       end
 
-      context "when dir_name is provided" do
+      context "when destination_dir_name is provided" do
         it "uses that name as the target leaf dir name" do
           cloner = GitHubRepositoryCloner.new(vcs)
           expect(vcs).to receive(:clone).with("git@github.com:myorg/myrepo",
@@ -36,9 +36,9 @@ module Bookbinder
                                               path: "/mydestination",
                                               checkout: "master")
 
-          result = cloner.call(from: "myorg/myrepo",
-                               parent_dir: "/mydestination",
-                               dir_name: "myspecialreponame")
+          result = cloner.call(source_repo_name: "myorg/myrepo",
+                               destination_parent_dir: "/mydestination",
+                               destination_dir_name: "myspecialreponame")
 
           expect(result.directory).to eq("myspecialreponame")
         end
@@ -48,15 +48,15 @@ module Bookbinder
 
           allow(vcs).to receive(:clone)
 
-          result = cloner.call(from: "myorg/myrepo",
-                               parent_dir: "/mydestination",
-                               dir_name: "myawesomedir")
+          result = cloner.call(source_repo_name: "myorg/myrepo",
+                               destination_parent_dir: "/mydestination",
+                               destination_dir_name: "myawesomedir")
           expect(result.copied_to).to eq(Pathname("/mydestination/myawesomedir"))
         end
       end
 
-      context "when a ref is specified" do
-        it "uses the particular ref in the clone" do
+      context "when a source ref is specified" do
+        it "uses the particular source ref in the clone" do
           cloner = GitHubRepositoryCloner.new(vcs)
           expect(vcs).to receive(:clone).
             with("git@github.com:myorg/myrepo",
@@ -64,9 +64,9 @@ module Bookbinder
                  path: "/mydestination",
                  checkout: "mysha")
 
-          cloner.call(from: "myorg/myrepo",
-                      parent_dir: "/mydestination",
-                      ref: "mysha")
+          cloner.call(source_repo_name: "myorg/myrepo",
+                      destination_parent_dir: "/mydestination",
+                      source_ref: "mysha")
         end
       end
     end

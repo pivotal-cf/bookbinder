@@ -10,18 +10,18 @@ module Bookbinder
         @filesystem = filesystem
       end
 
-      def call(from: nil,
-               ref: nil,
-               parent_dir: nil,
-               dir_name: nil)
+      def call(source_repo_name: nil,
+               source_ref: nil,
+               destination_parent_dir: nil,
+               destination_dir_name: nil)
         copied_to = copy!(
-          WorkingCopy.new(repo_dir: user_repo_dir, full_name: from),
-          Pathname(parent_dir).join(DestinationDirectory.new(from, dir_name))
+          WorkingCopy.new(repo_dir: user_repo_dir, full_name: source_repo_name),
+          Pathname(destination_parent_dir).join(DestinationDirectory.new(source_repo_name, destination_dir_name))
         )
         WorkingCopy.new(
           copied_to: copied_to,
-          directory: dir_name,
-          full_name: from,
+          directory: destination_dir_name,
+          full_name: source_repo_name,
         )
       end
 

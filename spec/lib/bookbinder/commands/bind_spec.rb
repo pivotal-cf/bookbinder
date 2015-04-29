@@ -271,7 +271,7 @@ module Bookbinder
           allow(factory).to receive(:produce).with('github', nil) { cloner }
 
           expect(cloner).to receive(:call).
-            with(from: "my/configuredrepo", parent_dir: anything) {
+            with(source_repo_name: "my/configuredrepo", destination_parent_dir: anything) {
             Ingest::WorkingCopy.new(repo_dir: 'foo', full_name: 'some/repo')
           }
 
