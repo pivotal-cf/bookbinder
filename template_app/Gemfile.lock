@@ -1,7 +1,7 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    libv8 (3.16.14.3)
+    libv8 (3.16.14.7)
     rack (1.5.2)
     rack-rewrite (1.5.0)
     ref (1.0.5)
