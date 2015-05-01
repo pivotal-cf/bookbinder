@@ -1,16 +1,32 @@
+require_relative 'config/aws_credentials'
+require_relative 'config/cf_credentials'
 require_relative 'configuration'
 require_relative 'yaml_loader'
 
 module Bookbinder
   class ConfigurationFetcher
-    def initialize(logger, configuration_validator, loader)
+    def initialize(logger, configuration_validator, loader, credentials_provider)
       @loader = loader
       @logger = logger
       @configuration_validator = configuration_validator
+      @credentials_provider = credentials_provider
     end
 
     def fetch_config
       @config ||= validate(read_config_file)
+    end
+
+    def fetch_credentials(environment = 'null-environment')
+      @credentials ||= credentials_provider.credentials("git@github.com:#{fetch_config.cred_repo}")
+      {
+        aws: Config::AwsCredentials.new(
+          @credentials.fetch('aws', {})
+        ),
+        cloud_foundry: Config::CfCredentials.new(
+          @credentials.fetch('cloud_foundry', {}),
+          environment
+        )
+      }
     end
 
     def set_config_file_path config_file_path
@@ -19,7 +35,8 @@ module Bookbinder
 
     private
 
-    attr_reader(:loader, :logger, :configuration_validator, :config, :config_file_path)
+    attr_reader(:loader, :logger, :configuration_validator, :config, :config_file_path,
+                :credentials_provider)
 
     def read_config_file
       loader.load(config_file_path)

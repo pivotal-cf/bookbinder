@@ -1,21 +1,20 @@
 require 'yaml'
-require 'tempfile'
+require 'ansi/code'
 
 module Bookbinder
   class RemoteYamlCredentialProvider
-    def initialize(logger, repository)
+    def initialize(logger, version_control_system)
       @logger = logger
-      @repository = repository
+      @version_control_system = version_control_system
     end
 
-    def credentials
-      @logger.log "Processing #{@repository.full_name.cyan}"
-
-      Dir.mktmpdir do |destination_dir|
-        @repository.copy_from_remote(destination_dir, 'master')
-        cred_file_yaml = File.join(destination_dir, @repository.short_name, 'credentials.yml')
-        YAML.load_file(cred_file_yaml)
-      end
+    def credentials(repo_url)
+      logger.log "Processing #{ANSI.cyan{repo_url}}"
+      YAML.load(version_control_system.read_file("credentials.yml", from_repo: repo_url))
     end
+
+    private
+
+    attr_reader :logger, :version_control_system
   end
 end

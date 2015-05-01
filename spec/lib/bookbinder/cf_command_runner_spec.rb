@@ -1,12 +1,12 @@
 require_relative '../../../lib/bookbinder/cf_command_runner'
-require_relative '../../../lib/bookbinder/configuration'
+require_relative '../../../lib/bookbinder/config/cf_credentials'
 require_relative '../../helpers/nil_logger'
 
 module Bookbinder
   describe CfCommandRunner do
     let(:logger) { NilLogger.new }
     let(:sheller) { instance_double("Sheller") }
-    let(:credentials) { Configuration::CfCredentials.new(config_hash, 'staging') }
+    let(:credentials) { Bookbinder::Config::CfCredentials.new(config_hash, 'staging') }
     let(:cf) { CfCommandRunner.new(logger, sheller, credentials, trace_file) }
     let(:trace_file) { 'path/to/log' }
     let(:binary_path_syscall ) { '/usr/local/bin/cf\n' }

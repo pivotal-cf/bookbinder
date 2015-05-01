@@ -14,6 +14,7 @@ require_relative '../ingest/cloner_factory'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../post_production/sitemap_writer'
+require_relative '../remote_yaml_credential_provider'
 require_relative '../sheller'
 require_relative '../subnav_formatter'
 require_relative '../yaml_loader'
@@ -117,7 +118,8 @@ module Bookbinder
         @configuration_fetcher ||= ConfigurationFetcher.new(
           logger,
           ConfigurationValidator.new(logger, local_file_system_accessor),
-          config_loader
+          config_loader,
+          RemoteYamlCredentialProvider.new(logger, version_control_system)
         ).tap do |fetcher|
           fetcher.set_config_file_path './config.yml'
         end

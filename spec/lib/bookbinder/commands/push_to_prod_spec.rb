@@ -16,30 +16,17 @@ module Bookbinder
     let(:fake_dir) { double }
     let(:fake_distributor) { double(Distributor, distribute: nil) }
 
-    let(:options) do
-      {
-          app_dir: fake_dir,
-          build_number: build_number,
-
-          aws_credentials: config.aws_credentials,
-          cf_credentials: config.cf_credentials('production'),
-
-          book_repo: book_repo,
-      }
-    end
-
     let(:logger) { NilLogger.new }
-    let(:configuration_fetcher) { double('configuration_fetcher') }
+    let(:configuration_fetcher) { double('configuration_fetcher',
+                                         fetch_credentials: {aws: {}, cloud_foundry: {}}) }
     let(:config) { Configuration.new(logger, config_hash) }
     let(:command) { described_class.new(logger, configuration_fetcher) }
 
     before do
-      fake_cred_repo = double(RemoteYamlCredentialProvider, credentials: {'aws' => {}, 'cloud_foundry' => {}})
-      allow(RemoteYamlCredentialProvider).to receive(:new).and_return(fake_cred_repo)
+      allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
 
       allow(Distributor).to receive(:build).and_return(fake_distributor)
       allow(Dir).to receive(:mktmpdir).and_return(fake_dir)
-      allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
     end
 
     it 'returns 0' do
@@ -47,7 +34,24 @@ module Bookbinder
     end
 
     it 'builds a distributor with the right options and asks it to distribute' do
-      real_distributor = expect_to_receive_and_return_real_now(Distributor, :build, logger, options)
+      creds = {aws: {'some' => 'aws stuff'}, cloud_foundry: {'some' => 'cf stuff'}}
+      allow(configuration_fetcher).to receive(:fetch_credentials).
+        with('production').
+        and_return(creds)
+
+      expected_options = {
+        app_dir: fake_dir,
+        build_number: build_number,
+
+        aws_credentials: creds[:aws],
+        cf_credentials: creds[:cloud_foundry],
+
+        book_repo: book_repo,
+      }
+
+      real_distributor = expect_to_receive_and_return_real_now(
+        Distributor, :build, logger, expected_options
+      )
       expect(real_distributor).to receive(:distribute)
 
       command.run([build_number])

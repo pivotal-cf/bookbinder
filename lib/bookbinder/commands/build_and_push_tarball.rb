@@ -1,6 +1,7 @@
-require_relative 'naming'
-require_relative 'bookbinder_command'
 require_relative '../archive'
+require_relative '../ingest/destination_directory'
+require_relative 'bookbinder_command'
+require_relative 'naming'
 
 module Bookbinder
   module Commands
@@ -21,10 +22,10 @@ module Bookbinder
       def run(_)
         raise MissingBuildNumber unless ENV['BUILD_NUMBER']
         config = configuration_fetcher.fetch_config
-        aws_credentials = config.aws_credentials
+        aws_credentials = configuration_fetcher.fetch_credentials[:aws]
         archive = Archive.new(logger: @logger, key: aws_credentials.access_key, secret: aws_credentials.secret_key)
         archive.create_and_upload_tarball(build_number: ENV['BUILD_NUMBER'], bucket: aws_credentials.green_builds_bucket,
-                                          namespace: GitHubRepository.new(logger: @logger, full_name: config.book_repo, git_accessor: Git).short_name)
+                                          namespace: Ingest::DestinationDirectory.new(config.book_repo, nil))
         0
       end
     end

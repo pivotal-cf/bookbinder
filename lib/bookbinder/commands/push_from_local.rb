@@ -1,5 +1,4 @@
 require_relative '../distributor'
-require_relative '../configuration'
 require_relative 'bookbinder_command'
 require_relative 'naming'
 
@@ -42,12 +41,13 @@ module Bookbinder
       end
 
       def options
+        credentials = configuration_fetcher.fetch_credentials(environment)
         {
             app_dir: './final_app',
             build_number: ENV['BUILD_NUMBER'],
 
-            aws_credentials: config.aws_credentials,
-            cf_credentials: config.cf_credentials(environment),
+            aws_credentials: credentials[:aws],
+            cf_credentials: credentials[:cloud_foundry],
 
             book_repo: config.book_repo,
         }
@@ -83,8 +83,9 @@ cloud_foundry:
       def validate
         missing_keys = []
 
-        aws_creds = config.aws_credentials
-        cf_creds = config.cf_credentials(environment)
+        creds = configuration_fetcher.fetch_credentials(environment)
+        aws_creds = creds[:aws]
+        cf_creds = creds[:cloud_foundry]
 
         missing_keys << 'aws' unless aws_creds
         missing_keys << 'cloud_foundry' unless cf_creds

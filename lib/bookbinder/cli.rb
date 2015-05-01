@@ -1,6 +1,7 @@
 require_relative 'repositories/command_repository'
 require_relative 'command_validator'
 require_relative 'command_runner'
+require_relative 'config/cf_credentials'
 require_relative 'configuration'
 require_relative 'colorizer'
 require_relative 'terminal'
@@ -37,7 +38,7 @@ module Bookbinder
       rescue Config::RemoteBindConfiguration::VersionUnsupportedError => e
         logger.error "config.yml at version '#{e.message}' has an unsupported API."
         1
-      rescue Configuration::CredentialKeyError => e
+      rescue Config::CfCredentials::CredentialKeyError => e
         logger.error "#{e.message}, in credentials.yml"
         1
       rescue KeyError => e

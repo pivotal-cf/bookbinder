@@ -37,11 +37,15 @@ module Bookbinder
           app_dir: Dir.mktmpdir,
           build_number: arguments[0],
 
-          aws_credentials: config.aws_credentials,
-          cf_credentials: config.cf_credentials('production'),
+          aws_credentials: credentials[:aws],
+          cf_credentials: credentials[:cloud_foundry],
 
           book_repo: config.book_repo,
         }
+      end
+
+      def credentials
+        configuration_fetcher.fetch_credentials('production')
       end
 
       def config

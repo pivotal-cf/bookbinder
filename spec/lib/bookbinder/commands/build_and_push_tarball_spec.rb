@@ -1,4 +1,5 @@
 require_relative '../../../../lib/bookbinder/commands/build_and_push_tarball'
+require_relative '../../../../lib/bookbinder/config/aws_credentials'
 require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/tmp_dirs'
@@ -14,29 +15,25 @@ module Bookbinder
     let(:build_number) { '17' }
     let(:book_repo) { 'org/fixture-book-title' }
 
-    let(:aws_hash) do
-      {
-          'aws' => {
-              'green_builds_bucket' => bucket,
-              'access_key' => access_key,
-              'secret_key' => secret_key,
-          }
-      }
+    let(:aws_credentials) do
+      Bookbinder::Config::AwsCredentials.new(
+        'green_builds_bucket' => bucket,
+        'access_key' => access_key,
+        'secret_key' => secret_key,
+      )
     end
     let(:config_hash) do
       {
-          'book_repo' => book_repo,
-          'cred_repo' => 'some/repo'
+        'book_repo' => book_repo,
+        'cred_repo' => 'some/repo'
       }
     end
 
     before do
       allow(ENV).to receive(:[])
       allow(ENV).to receive(:[]).with('BUILD_NUMBER').and_return(build_number)
-      fake_creds = double
-      allow(fake_creds).to receive(:credentials).and_return(aws_hash)
-      allow(RemoteYamlCredentialProvider).to receive(:new).and_return(fake_creds)
       allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
+      allow(configuration_fetcher).to receive(:fetch_credentials).and_return(aws: aws_credentials)
     end
 
     let(:access_key) { 'access-key' }

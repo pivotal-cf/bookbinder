@@ -1,3 +1,5 @@
+require_relative '../../../lib/bookbinder/config/aws_credentials'
+require_relative '../../../lib/bookbinder/config/cf_credentials'
 require_relative '../../../lib/bookbinder/configuration'
 require_relative '../../../lib/bookbinder/distributor'
 require_relative '../../helpers/nil_logger'
@@ -12,15 +14,15 @@ module Bookbinder
     let(:secret) { 'something-else' }
     let(:bucket) { 'bucket-name-in-fixture-config' }
     let(:aws_credentials) do
-      Configuration::AwsCredentials.new({
-                                            'access_key' => key,
-                                            'secret_key' => secret,
-                                            'green_builds_bucket' => bucket
-                                        })
+      Bookbinder::Config::AwsCredentials.new(
+        'access_key' => key,
+        'secret_key' => secret,
+        'green_builds_bucket' => bucket
+      )
     end
 
     let(:cf_credentials) do
-      Configuration::CfCredentials.new({
+      Bookbinder::Config::CfCredentials.new({
         'api_endpoint' => 'http://get.your.apis.here.io',
         'production_host' => {
           'get.your.apis.here.io' => ['a_production_host']
@@ -170,7 +172,7 @@ ERROR_MESSAGE
       context 'when not in production' do
         let(:production) { false }
         let(:cf_credentials) do
-          Configuration::CfCredentials.new({
+          Bookbinder::Config::CfCredentials.new({
           'api_endpoint' => 'http://get.your.apis.here.io',
           'staging_host' => {
               'http://get.your.apis.for.staging.here.io' => ['a_staging_host']

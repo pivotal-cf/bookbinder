@@ -58,9 +58,9 @@ module Bookbinder
         end
       end
 
-      context 'a Configuration::CredentialKeyError' do
+      context 'when any credentials are missing' do
         before do
-          allow_any_instance_of(Commands::Bind).to receive(:run).and_raise Configuration::CredentialKeyError.new 'I broke'
+          allow_any_instance_of(Commands::Bind).to receive(:run).and_raise Config::CfCredentials::CredentialKeyError.new 'I broke'
         end
 
         let(:arguments) { ['bind', 'local'] }

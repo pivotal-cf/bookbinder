@@ -1,31 +1,37 @@
-require 'spec_helper'
 require_relative '../../../lib/bookbinder/remote_yaml_credential_provider'
 
 module Bookbinder
   describe RemoteYamlCredentialProvider do
-    describe '#credentials' do
-      subject(:credentials) do
-        RemoteYamlCredentialProvider.new logger, credentials_repository
-      end
+    it 'returns a hash of the credentials in credentials.yml' do
+      version_control_system = double('vcs')
 
-      let(:logger) { double(Logger).as_null_object }
-      let(:fixture_creds) do
-        {'secure_site' => {'pass' => 'secret', 'handle' => 'agent'}}
-      end
-      let(:full_name) { 'org-name/creds-repo' }
-      let(:credentials_repository) do
-        GitHubRepository.new(logger: logger, full_name: 'org-name/creds-repo',
-                             git_accessor: SpecGitAccessor)
-      end
+      provider = RemoteYamlCredentialProvider.new(
+        double('logger').as_null_object,
+        version_control_system
+      )
 
-      it 'returns a hash of the credentials in credentials.yml' do
-        expect(credentials.credentials).to eq(fixture_creds)
-      end
+      credentials = {'secure_site' => {'pass' => 'secret', 'handle' => 'agent'}}
 
-      it 'logs a processing message' do
-        expect(logger).to receive(:log).with("Processing #{full_name.cyan}")
-        credentials.credentials
-      end
+      allow(version_control_system).
+        to receive(:read_file).
+        with("credentials.yml", from_repo: "git@foobar.org:org-name/creds-repo") {
+          credentials.to_yaml
+        }
+
+      expect(provider.credentials('git@foobar.org:org-name/creds-repo')).to eq(credentials)
+    end
+
+    it 'logs a processing message' do
+      version_control_system = double('vcs', read_file: "")
+      logger = double('logger')
+
+      provider = RemoteYamlCredentialProvider.new(
+        logger,
+        version_control_system
+      )
+
+      expect(logger).to receive(:log).with("Processing #{ANSI.cyan { "git@ugly.url:who/cares" }}")
+      provider.credentials("git@ugly.url:who/cares")
     end
   end
 end

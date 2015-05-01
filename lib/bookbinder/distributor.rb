@@ -2,6 +2,7 @@ require_relative 'app_fetcher'
 require_relative 'archive'
 require_relative 'artifact_namer'
 require_relative 'cf_command_runner'
+require_relative 'ingest/destination_directory'
 require_relative 'pusher'
 require_relative 'sheller'
 
@@ -10,7 +11,7 @@ module Bookbinder
     EXPIRATION_HOURS = 2
 
     def self.build(logger, options)
-      namespace = GitHubRepository.new(logger: logger, full_name: options[:book_repo], git_accessor: Git).short_name
+      namespace = Ingest::DestinationDirectory.new(options[:book_repo], nil)
       namer = ArtifactNamer.new(namespace, options[:build_number], 'log', '/tmp')
 
       archive = Archive.new(logger: logger, key: options[:aws_credentials].access_key, secret: options[:aws_credentials].secret_key)

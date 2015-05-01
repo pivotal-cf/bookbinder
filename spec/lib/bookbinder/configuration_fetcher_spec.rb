@@ -2,11 +2,15 @@ require_relative '../../../lib/bookbinder/configuration_fetcher'
 
 module Bookbinder
   describe ConfigurationFetcher do
-    let(:path_to_config_file) { './config.yml' }
-    let(:config_validator)    { double('validator') }
-    let(:logger)              { double('logger') }
-    let(:loader)              { double('loader') }
-    let(:config_fetcher)      { ConfigurationFetcher.new(logger, config_validator, loader) }
+    let(:path_to_config_file)   { './config.yml' }
+    let(:config_validator)      { double('validator') }
+    let(:logger)                { double('logger') }
+    let(:loader)                { double('loader') }
+    let(:credentials_provider)  { double('creds provider') }
+    let(:config_fetcher)        { ConfigurationFetcher.new(logger,
+                                                           config_validator,
+                                                           loader,
+                                                           credentials_provider) }
 
     it 'can read config from a relative path even when I have changed working directory' do
       config_fetcher.set_config_file_path(path_to_config_file)
@@ -15,6 +19,37 @@ module Bookbinder
       Dir.chdir('/tmp') do |tmp|
         expect(config_fetcher.fetch_config).to eq(Configuration.new(logger, {foo: 'bar'}))
       end
+    end
+
+    it "fetches credentials when requested" do
+      creds = { 'aws' => {'access_key' => 'foobar'},
+                'cloud_foundry' => {'cloud' => 'config'} }
+
+      allow(loader).to receive(:load).with(File.expand_path('./some/path')) {
+        { 'cred_repo' => 'org/repo' }
+      }
+      config_fetcher.set_config_file_path('./some/path')
+
+      allow(credentials_provider).
+        to receive(:credentials).
+        with('git@github.com:org/repo') { creds }
+      allow(config_validator).to receive(:exceptions) { [] }
+      expect(config_fetcher.fetch_credentials('acceptance')[:aws].access_key).to eq('foobar')
+    end
+
+    it "caches fetched credentials, even across environments (same raw config being fetched)" do
+      creds = { 'some' => 'creds' }
+
+      allow(loader).to receive(:load) { { 'cred_repo' => 'org/repo' } }
+      allow(config_validator).to receive(:exceptions) { [] }
+
+      allow(credentials_provider).to receive(:credentials) { creds }
+      creds = config_fetcher.fetch_credentials('production')
+      expect(creds[:cloud_foundry].download_archive_before_push?).to be_truthy
+
+      allow(credentials_provider).to receive(:credentials) { raise "shouldn't get here" }
+      creds = config_fetcher.fetch_credentials('acceptance')
+      expect(creds[:cloud_foundry].download_archive_before_push?).to be_falsy
     end
 
     context 'when file path has been set' do
