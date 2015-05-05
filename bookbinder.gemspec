@@ -9,11 +9,12 @@ Gem::Specification.new do |s|
   s.email       = Base64.decode64('Z21vcmdhbkBnb3Bpdm90YWwuY29t') # Gavin's
 
   s.files       = Dir['lib/**/*'] + Dir['template_app/**/*'] + Dir['master_middleman/**/*'] + Dir['install_bin/**/*']
-  s.homepage    = 'https://github.com/cloudfoundry-incubator/bookbinder'
+  s.homepage    = 'https://github.com/pivotal-cf/bookbinder'
   s.license     = 'MIT'
   s.bindir      = 'install_bin'
   s.executable  = 'bookbinder'
 
+  s.required_ruby_version = '~> 2.0'
   s.add_runtime_dependency 'fog-aws', ['~> 0.0.6']
   s.add_runtime_dependency 'octokit', ['2.7.0']
   s.add_runtime_dependency 'ansi', ['~> 1.4']
