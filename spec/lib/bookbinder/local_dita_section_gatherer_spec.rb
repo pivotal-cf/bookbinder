@@ -4,7 +4,7 @@ require_relative '../../../lib/bookbinder/values/output_locations'
 
 module Bookbinder
   describe LocalDitaSectionGatherer do
-    it 'creates DitaSections which specify where the sections are on the local file system' do
+    it 'creates DitaSections which specify where the section source lives on the local file system' do
       output_locations = OutputLocations.new(local_repo_dir: 'local')
       local_dita_section_gatherer = LocalDitaSectionGatherer.new(output_locations)
 
@@ -12,7 +12,7 @@ module Bookbinder
           {'repository' => {
               'name' => 'fantastic/dogs-repo',
               'ref' => 'dog-sha'},
-           'directory' => 'dogs',
+           'directory' => 'dogs-destination-dir',
            'ditamap_location' => 'dita-section.ditamap',
            'ditaval_location' => 'dita-val.ditaval'},
           {'repository' => {
@@ -23,14 +23,14 @@ module Bookbinder
 
       actual_sections = local_dita_section_gatherer.gather(dita_section_from_config)
       expected_sections = [
-          DitaSection.new(Pathname('local/dogs'),
+          DitaSection.new(Pathname('local/dogs-repo'),
                           'dita-section.ditamap',
                           'dita-val.ditaval',
                           'fantastic/dogs-repo',
                           'dog-sha',
-                          'dogs',
+                          'dogs-destination-dir',
                           output_locations),
-          DitaSection.new(Pathname('local/foods/sweet'),
+          DitaSection.new(Pathname('local/my-docs-repo'),
                           nil,
                           nil,
                           'fantastic/my-docs-repo',

@@ -1,12 +1,15 @@
+require_relative '../../lib/bookbinder/local_file_system_accessor'
+
 module Bookbinder
   class GithubStub
     def initialize
       @git_urls = []
     end
 
-    def clone(url, name, path: nil)
-      FileUtils.mkdir_p(path)
-      FileUtils.cp_r File.join(Bookbinder::RepoFixture.repos_dir, name), path
+    def clone(url, desired_name, path: nil)
+      source_dir = url.split('/').last
+      source_location = File.join(Bookbinder::RepoFixture.repos_dir, source_dir)
+      LocalFileSystemAccessor.new.copy_contents(source_location, File.join(path, desired_name))
 
       @git_urls << url
     end

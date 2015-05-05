@@ -10,15 +10,16 @@ module Bookbinder
         relative_path_to_dita_val = dita_section_config['ditaval_location']
         full_name = dita_section_config.fetch('repository', {}).fetch('name')
         target_ref = dita_section_config.fetch('repository', {})['ref']
-        directory = dita_section_config['directory']
-        path_to_local_copy = output_locations.local_repo_dir.join(directory)
+        desired_destination_directory_name = dita_section_config['directory']
+        local_source_directory_name = full_name.split('/').last
+        path_to_local_copy = output_locations.local_repo_dir.join(local_source_directory_name)
 
         DitaSection.new(path_to_local_copy,
                         relative_path_to_dita_map,
                         relative_path_to_dita_val,
                         full_name,
                         target_ref,
-                        directory,
+                        desired_destination_directory_name,
                         output_locations)
       end
     end

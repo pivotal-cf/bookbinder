@@ -5,8 +5,8 @@ cred_repo: my/cred-repo
 dita_sections:
 
 - repository:
-    name: my-org/my-dita-section-one
-  directory: dita-section-one
+    name: my-org/dita-section-one
+  directory: my-renamed-dita-section-one
   ditamap_location: example.ditamap
   ditaval_location: dita-filter.ditaval
 

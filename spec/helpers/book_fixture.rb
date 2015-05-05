@@ -18,7 +18,7 @@ module Bookbinder
       topics(dita_section).all? { |topic| has_applied_layout? topic }
     end
 
-    def uses_dita_filterd_values(dita_section, included_text, excluded_text)
+    def uses_dita_filtered_values(dita_section, included_text, excluded_text)
       topics(dita_section).all? { |topic| contains_text? topic, included_text } &&
       topics(dita_section).all? { |topic| !contains_text? topic, excluded_text }
     end
@@ -28,7 +28,8 @@ module Bookbinder
     end
 
     def final_images_for(dita_section)
-      dirpath = Pathname("./final_app/public/#{dita_section}")
+      final_dirname = dita_section.dir || dita_section.repo_name
+      dirpath = Pathname("./final_app/public/#{final_dirname}")
 
       png_images = Dir.glob(File.join dirpath, "**/*.png")
       jpeg_images = Dir.glob(File.join dirpath, "**/*.jpeg")
@@ -51,21 +52,24 @@ module Bookbinder
     private
 
     def topics(dita_section)
+      repo_name = dita_section.repo_name
+      dir = dita_section.dir
+
       if section_source == SectionSource.local
-        section_location = Pathname("../#{dita_section}")
+        section_location = Pathname("../#{repo_name}")
       else
-        section_location = Pathname("./output/dita/dita_sections/#{dita_section}")
+        section_location = Pathname("./output/dita/dita_sections/#{dir}")
       end
 
       path_to_ditamap = Pathname("#{section_location}/example.ditamap")
       dita_doc = Nokogiri::XML(path_to_ditamap)
       dita_doc.xpath('//topicref').map do |topic|
-      topicname = topic.attr('href').split('.xml').first
+        topicname = topic.attr('href').split('.xml').first
 
-      Topic.new(Pathname("./final_app/public/#{dita_section}/#{topicname}.html"),
-                Pathname("./output/dita/site_generator_ready/#{dita_section}/#{topicname}.html.erb"),
-                Pathname("#{section_location}/#{topicname}.xml"),
-                topicname)
+        Topic.new(Pathname("./final_app/public/#{dir}/#{topicname}.html"),
+                  Pathname("./output/dita/site_generator_ready/#{dir}/#{topicname}.html.erb"),
+                  Pathname("#{section_location}/#{topicname}.xml"),
+                  topicname)
       end
     end
 
