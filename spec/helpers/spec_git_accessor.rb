@@ -5,7 +5,14 @@ class SpecGitAccessor
 
     FileUtils.mkdir_p(destination)
     FileUtils.cp_r(File.join(local_repo_dir, File.basename(repository), '.'), destination)
-    new(repository, destination)
+
+    if options[:checkout] && options[:checkout] != 'master'
+      new(repository, destination).tap do |g|
+        g.checkout(options[:checkout])
+      end
+    else
+      new(repository, destination)
+    end
   end
 
   def initialize(repository, path)

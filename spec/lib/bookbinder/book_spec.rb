@@ -106,47 +106,5 @@ module Bookbinder
         expect(book.copy_from_remote(destination_dir)).to eq(destination_dir)
       end
     end
-
-    describe '.from_remote' do
-      let(:temp_workspace) { tmp_subdir('workspace') }
-      let(:ref) { 'this-is-a-tag' }
-      let(:full_name) { 'foo/book' }
-      let(:destination_dir) { 'some-path' }
-      let(:new_book) { double(Book) }
-
-      it 'creates a new Book' do
-        expect(Book).to receive(:new).with(logger: logger, full_name: full_name, target_ref: ref, git_accessor: git_accessor)
-                        .and_return(new_book)
-        allow(new_book).to receive(:copy_from_remote)
-        Book.from_remote(logger: logger, full_name: full_name, destination_dir: destination_dir, ref: ref, git_accessor: git_accessor)
-      end
-
-      context 'when the destination dir is set' do
-        it 'copies the book from remote' do
-          allow(Book).to receive(:new).with(logger: logger, full_name: full_name, target_ref: ref, git_accessor: git_accessor)
-                         .and_return(new_book)
-          expect(new_book).to receive(:copy_from_remote).with(destination_dir)
-          Book.from_remote(
-              logger: logger, full_name: full_name, destination_dir: destination_dir, ref: ref, git_accessor: git_accessor)
-        end
-      end
-
-      context 'when the destination dir is not set' do
-        it 'copies the book from remote' do
-          allow(Book).to receive(:new).with(logger: logger, full_name: full_name, target_ref: ref, git_accessor: git_accessor)
-                         .and_return(new_book)
-          expect(new_book).to_not receive(:copy_from_remote)
-          Book.from_remote(
-              logger: logger, full_name: full_name, ref: ref, git_accessor: git_accessor)
-        end
-      end
-
-      it 'returns the book' do
-        allow(Book).to receive(:new).with(logger: logger, full_name: full_name, target_ref: ref, git_accessor: git_accessor)
-                        .and_return(new_book)
-        allow(new_book).to receive(:copy_from_remote)
-        expect(Book.from_remote(logger: logger, full_name: full_name, destination_dir: destination_dir, ref: ref, git_accessor: git_accessor)).to eq(new_book)
-      end
-    end
   end
 end
