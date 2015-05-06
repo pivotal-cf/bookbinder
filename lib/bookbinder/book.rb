@@ -1,5 +1,4 @@
 require_relative 'git_hub_repository'
-require_relative 'ingest/destination_directory'
 
 module Bookbinder
   class Book
@@ -17,10 +16,6 @@ module Bookbinder
         GitHubRepository.new(logger: logger,
                              full_name: section['repository']['name'])
       end
-    end
-
-    def directory
-      Ingest::DestinationDirectory.new(full_name)
     end
 
     def tag_self_and_sections_with(tag)

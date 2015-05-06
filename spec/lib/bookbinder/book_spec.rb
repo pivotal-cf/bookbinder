@@ -25,10 +25,6 @@ module Bookbinder
       expect(book.full_name).to eq('myorg/test')
     end
 
-    it "has a directory, which is the right-hand-side of the full repo name" do
-      expect(book.directory).to eq('test')
-    end
-
     describe '#tag_self_and_sections_with' do
       let(:desired_tag) { 12.times.map { (65 + rand(26)).chr }.join }
 
