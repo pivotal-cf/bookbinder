@@ -21,7 +21,7 @@ module Bookbinder
       def repo_for(section_config)
         local_repo_dir = File.absolute_path('../')
         GitHubRepository.new(logger: @logger, full_name: section_config['repository']['name'],
-                             local_repo_dir: local_repo_dir, git_accessor: Git)
+                             local_repo_dir: local_repo_dir)
       end
     end
   end

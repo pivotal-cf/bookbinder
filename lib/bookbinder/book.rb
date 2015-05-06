@@ -27,12 +27,10 @@ module Bookbinder
       @git_accessor = git_accessor
       @repository = GitHubRepository.new(logger: logger,
                                          full_name: full_name,
-                                         github_token: github_token,
-                                         git_accessor: git_accessor)
+                                         github_token: github_token)
       @section_vcs_repos = sections.map do |section|
         GitHubRepository.new(logger: logger,
-                             full_name: section['repository']['name'],
-                             git_accessor: git_accessor)
+                             full_name: section['repository']['name'])
       end
     end
 

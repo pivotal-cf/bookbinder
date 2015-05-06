@@ -40,7 +40,6 @@ module Bookbinder
           expect(GitHubRepository).to receive(:new).with(
             logger: logger,
             full_name: s['repository']['name'],
-            git_accessor: git_accessor
           ).and_return(doc_repo)
           expect(doc_repo).to receive(:tag_with).with(desired_tag)
         end
@@ -50,7 +49,6 @@ module Bookbinder
           logger: logger,
           full_name: book_name,
           github_token: nil,
-          git_accessor: git_accessor
         ).and_return(self_repo)
         expect(self_repo).to receive(:tag_with).with(desired_tag)
 
