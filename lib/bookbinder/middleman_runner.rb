@@ -1,3 +1,4 @@
+require 'git/lib'
 require 'middleman-core'
 require 'middleman-core/cli'
 require 'middleman-core/profiling'
