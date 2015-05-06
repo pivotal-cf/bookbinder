@@ -25,7 +25,7 @@ module Bookbinder
         aws_credentials = configuration_fetcher.fetch_credentials[:aws]
         archive = Archive.new(logger: @logger, key: aws_credentials.access_key, secret: aws_credentials.secret_key)
         archive.create_and_upload_tarball(build_number: ENV['BUILD_NUMBER'], bucket: aws_credentials.green_builds_bucket,
-                                          namespace: Ingest::DestinationDirectory.new(config.book_repo, nil))
+                                          namespace: Ingest::DestinationDirectory.new(config.book_repo))
         0
       end
     end

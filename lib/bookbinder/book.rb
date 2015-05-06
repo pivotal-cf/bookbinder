@@ -8,7 +8,7 @@ module Bookbinder
 
     def self.from_remote(logger: nil, full_name: nil, destination_dir: nil, ref: nil, git_accessor: nil)
       git_accessor.clone("git@github.com:#{full_name}",
-                         Ingest::DestinationDirectory.new(full_name, nil),
+                         Ingest::DestinationDirectory.new(full_name),
                          path: destination_dir,
                          checkout: ref)
       new(logger: logger,
