@@ -1,4 +1,5 @@
 require_relative '../../directory_helpers'
+require_relative '../../ingest/destination_directory'
 
 module Bookbinder
   module Commands
@@ -31,17 +32,17 @@ module Bookbinder
         attr_reader :logger, :file_system_accessor, :version_control_system
 
         def copy_index_file_from_version_to_master_middleman(version, dest_dir, book_repo)
+          clone_dir_name = Ingest::DestinationDirectory.new(book_repo)
           Dir.mktmpdir(version) do |tmpdir|
-            book = Book.from_remote(logger: logger,
-                                    full_name: book_repo,
-                                    destination_dir: tmpdir,
-                                    ref: version,
-                                    git_accessor: version_control_system)
-            index_source_dir = File.join(tmpdir, book.directory, 'master_middleman', source_dir_name)
+            version_control_system.clone("git@github.com:#{book_repo}",
+                                         clone_dir_name,
+                                         path: tmpdir,
+                                         checkout: version)
+            index_source_dir = Pathname(tmpdir).join(clone_dir_name, 'master_middleman', source_dir_name)
             index_dest_dir = File.join(dest_dir, version)
             file_system_accessor.make_directory(index_dest_dir)
 
-            Dir.glob(File.join(index_source_dir, 'index.*')) do |f|
+            Dir.glob(index_source_dir.join('index.*')) do |f|
               file_system_accessor.copy(File.expand_path(f), index_dest_dir)
             end
           end

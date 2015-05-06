@@ -1,10 +1,12 @@
+require 'yaml'
+require_relative '../ingest/destination_directory'
+
 module Bookbinder
   module Config
     class RemoteBindConfiguration
       VersionUnsupportedError = Class.new(RuntimeError)
 
-      def initialize(logger, version_control_system, base_config)
-        @logger = logger
+      def initialize(version_control_system, base_config)
         @version_control_system = version_control_system
         @base_config = base_config
       end
@@ -25,26 +27,22 @@ module Bookbinder
 
       private
 
-      attr_reader :logger, :version_control_system, :base_config
+      attr_reader :version_control_system, :base_config
 
       def sections_from(version)
-        Dir.mktmpdir('book_checkout') do |temp_workspace|
-          book = Book.from_remote(logger: logger,
-                                  full_name: base_config.book_repo,
-                                  destination_dir: temp_workspace,
-                                  ref: version,
-                                  git_accessor: version_control_system)
+        attrs = YAML.load(
+          version_control_system.read_file(
+            'config.yml',
+            from_repo: "git@github.com:#{base_config.book_repo}",
+            checkout: version
+          )
+        )['sections']
+        raise VersionUnsupportedError.new(version) if attrs.nil?
 
-          book_checkout_value = File.join temp_workspace, book.directory
-          config_file = File.join book_checkout_value, 'config.yml'
-          attrs = YAML.load(File.read(config_file))['sections']
-          raise VersionUnsupportedError.new(version) if attrs.nil?
-
-          attrs.map do |section_hash|
-            section_hash['repository']['ref'] = version
-            section_hash['directory'] = File.join(version, section_hash['directory'])
-            section_hash
-          end
+        attrs.map do |section_hash|
+          section_hash['repository']['ref'] = version
+          section_hash['directory'] = File.join(version, section_hash['directory'])
+          section_hash
         end
       end
     end

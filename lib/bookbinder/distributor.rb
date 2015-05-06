@@ -11,7 +11,7 @@ module Bookbinder
     EXPIRATION_HOURS = 2
 
     def self.build(logger, options)
-      namespace = Ingest::DestinationDirectory.new(options[:book_repo], nil)
+      namespace = Ingest::DestinationDirectory.new(options[:book_repo])
       namer = ArtifactNamer.new(namespace, options[:build_number], 'log', '/tmp')
 
       archive = Archive.new(logger: logger, key: options[:aws_credentials].access_key, secret: options[:aws_credentials].secret_key)

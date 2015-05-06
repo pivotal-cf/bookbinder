@@ -350,55 +350,16 @@ module Bookbinder
 
         it 'binds previous versions of the book down paths named for the version tag' do
           command.run(cli_args)
-
-          index_html = File.read File.join('final_app', 'public', 'dogs', 'index.html')
-          expect(index_html).to include 'images/breeds.png'
-
-          index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
-          expect(index_html).to include 'This is a Markdown Page'
-
-          index_html = File.read File.join('final_app', 'public', 'foods', 'savory', 'index.html')
-          expect(index_html).to include 'This is another Markdown Page'
-
-          v1_dir = File.join('final_app', 'public', 'v1')
-          index_html = File.read File.join(v1_dir, 'dogs', 'index.html')
-          expect(index_html).to include 'images/breeds.png'
-
-          index_html = File.read File.join(v1_dir, 'foods', 'sweet', 'index.html')
-          expect(index_html).to include 'This is a Markdown Page'
-          expect(File.exist? File.join(v1_dir, 'foods', 'savory', 'index.html')).to eq false
-
-          v2_dir = File.join('final_app', 'public', 'v2')
-          index_html = File.read File.join(v2_dir, 'dogs', 'index.html')
-          expect(index_html).to include 'images/breeds.png'
-
-          index_html = File.read File.join(v2_dir, 'foods', 'sweet', 'index.html')
-          expect(index_html).to include 'This is a Markdown Page'
-
-          index_html = File.read File.join(v2_dir, 'foods', 'savory', 'index.html')
-          expect(index_html).to include 'This is another Markdown Page'
-        end
-
-        context 'when a tag is at an API version that does not have sections' do
-          let(:versions) { %w(v1) }
-          it 'raises a VersionUnsupportedError' do
-            book = double('Book')
-
-            allow(Book).to receive(:from_remote).with(
-                               logger: logger,
-                               full_name: 'fantastic/book',
-                               destination_dir: anything,
-                               ref: 'v1',
-                               git_accessor: SpecGitAccessor
-                           ).and_return(book)
-            allow(book).to receive(:directory).and_return('test-directory')
-            allow(File).to receive(:read).with(%r{/test-directory/config.yml$}).and_return(
-                               "---\nsections: ")
-
-            expect {
-              command.run ['github']
-            }.to raise_error(Config::RemoteBindConfiguration::VersionUnsupportedError)
-          end
+          pub = Pathname('final_app').join('public')
+          expect(pub.join('dogs/index.html').read).to include 'images/breeds.png'
+          expect(pub.join('foods/sweet/index.html').read).to include 'This is a Markdown Page'
+          expect(pub.join('foods/savory/index.html').read).to include 'This is another Markdown Page'
+          expect(pub.join('v1/dogs/index.html').read).to include 'images/breeds.png'
+          expect(pub.join('v1/foods/sweet/index.html').read).to include 'This is a Markdown Page'
+          expect(pub.join('v1/foods/savory/index.html')).not_to exist
+          expect(pub.join('v2/dogs/index.html').read).to include('images/breeds.png')
+          expect(pub.join('v2/foods/sweet/index.html').read).to include 'This is a Markdown Page'
+          expect(pub.join('v2/foods/savory/index.html').read).to include 'This is another Markdown Page'
         end
       end
     end

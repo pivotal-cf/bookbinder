@@ -12,7 +12,7 @@ module Bookbinder
 
       def produce(bind_source)
         if bind_source == 'github' && config.has_option?('versions')
-          RemoteBindConfiguration.new(logger, version_control_system, config).to_h
+          RemoteBindConfiguration.new(version_control_system, config).to_h
         else
           LocalBindConfiguration.new(config).to_h
         end
