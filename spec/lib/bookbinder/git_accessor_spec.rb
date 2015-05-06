@@ -88,5 +88,54 @@ module Bookbinder
         ).to eq("gemstuffz\n")
       end
     end
+
+    it "can tag and push in one step" do
+      Dir.mktmpdir do |dir|
+        path = Pathname(dir)
+        init_repo(branch: 'branchiwanttotag',
+                  at_dir: path.join('srcrepo'),
+                  file: 'foo',
+                  contents: 'bar',
+                  commit_message: 'baz')
+        git = GitAccessor.new
+        git.tag(path.join("srcrepo"), 'mytagname', 'branchiwanttotag')
+        git.clone(path.join("srcrepo"), "destrepo", path: path)
+
+        tags = `cd #{path.join('destrepo')}; git tag`.split("\n")
+
+        expect(tags).to eq(["mytagname"])
+      end
+    end
+
+    it "raises an exception if tag exists" do
+      Dir.mktmpdir do |dir|
+        path = Pathname(dir)
+        init_repo(branch: 'branchiwanttotag',
+                  at_dir: path.join('srcrepo'),
+                  file: 'foo',
+                  contents: 'bar',
+                  commit_message: 'baz')
+        git = GitAccessor.new
+        git.tag(path.join("srcrepo"), 'mytagname', 'branchiwanttotag')
+
+        expect { git.tag(path.join("srcrepo"), 'mytagname', 'branchiwanttotag') }.
+          to raise_error(GitAccessor::TagExists)
+      end
+    end
+
+    it "raises an exception if tag ref is invalid" do
+      Dir.mktmpdir do |dir|
+        path = Pathname(dir)
+        init_repo(branch: 'branchiwanttotag',
+                  at_dir: path.join('srcrepo'),
+                  file: 'foo',
+                  contents: 'bar',
+                  commit_message: 'baz')
+        git = GitAccessor.new
+
+        expect { git.tag(path.join("srcrepo"), 'mytagname', 'non-existent') }.
+          to raise_error(GitAccessor::InvalidTagRef)
+      end
+    end
   end
 end

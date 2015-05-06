@@ -2,6 +2,9 @@ require 'git'
 
 module Bookbinder
   class GitAccessor
+    TagExists = Class.new(RuntimeError)
+    InvalidTagRef = Class.new(RuntimeError)
+
     def initialize
       @cache = {}
     end
@@ -15,15 +18,42 @@ module Bookbinder
     def read_file(filename, from_repo: nil, checkout: 'master')
       Dir.mktmpdir do |dir|
         path = Pathname(dir)
-        git = _clone(from_repo, "read-file", path)
+        git = _clone(from_repo, temp_name("read-file"), path)
         git.checkout(checkout)
-        path.join("read-file", filename).read
+        path.join(temp_name("read-file"), filename).read
+      end
+    end
+
+    def tag(url, tagname, commit_or_object)
+      Dir.mktmpdir do |dir|
+        path = Pathname(dir)
+        git = _clone(url, temp_name("tag"), path)
+        git.config('user.name', 'Bookbinder')
+        git.config('user.email', 'bookbinder@cloudfoundry.org')
+        begin
+          git.add_tag(tagname, "origin/#{commit_or_object}",
+                      message: 'Tagged by Bookbinder')
+        rescue Git::GitExecuteError => e
+          case e.message
+          when /already exists/
+            raise TagExists
+          when /as a valid ref/
+            raise InvalidTagRef
+          else
+            raise
+          end
+        end
+        git.push("origin", "master", tags: true)
       end
     end
 
     private
 
     attr_reader :cache
+
+    def temp_name(purpose)
+      "bookbinder-git-accessor-#{purpose}"
+    end
 
     def cached_clone(url, name, path)
       cache[[url, name, path]] ||= _clone(url, name, path)
