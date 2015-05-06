@@ -142,7 +142,7 @@ MARKDOWN
       end
 
       context 'when not local' do
-        let(:cloner) { Ingest::GitHubRepositoryCloner.new(SpecGitAccessor) }
+        let(:cloner) { Ingest::GitHubRepositoryCloner.new(Bookbinder::GitFake.new) }
         let(:config) { {cloner: cloner, workspace: 'code-example-repo'} }
         use_fixture_repo
 

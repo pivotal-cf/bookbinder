@@ -2,7 +2,6 @@ require 'fileutils'
 require_relative '../lib/bookbinder'
 require_relative '../template_app/app.rb'
 require_relative 'fixtures/repo_fixture'
-require_relative 'fixtures/git_object_fixture'
 
 include Bookbinder::DirectoryHelperMethods
 

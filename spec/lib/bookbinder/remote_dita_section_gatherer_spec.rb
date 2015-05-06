@@ -13,8 +13,7 @@ module Bookbinder
              'ditamap_location' => 'dita-section.ditamap',
              'ditaval_location' => 'dita-val.ditaval' },
             {'repository' => {
-                'name' => 'cool/dita-repo',
-                'ref' => 'some-sha'},
+                'name' => 'cool/dita-repo'},
              'directory' => 'foods/sweet'},
         ]
 
@@ -31,12 +30,14 @@ module Bookbinder
         expect(version_control_system).to receive(:clone)
                                           .with('git@github.com:fantastic/dita-repo',
                                                 'dogs',
-                                                path: path)
+                                                path: path,
+                                                checkout: 'dog-sha')
 
         expect(version_control_system).to receive(:clone)
                                           .with('git@github.com:cool/dita-repo',
                                                 'foods/sweet',
-                                                path: path)
+                                                path: path,
+                                                checkout: 'master')
 
         dita_section_gatherer.gather(dita_section_from_config)
       end
@@ -50,8 +51,7 @@ module Bookbinder
              'ditamap_location' => 'dita-section.ditamap',
              'ditaval_location' => 'dita-val.ditaval' },
             {'repository' => {
-                'name' => 'cool/dogs-repo',
-                'ref' => 'some-sha'},
+                'name' => 'cool/dogs-repo'},
              'directory' => 'foods/sweet'},
         ]
 
@@ -73,7 +73,7 @@ module Bookbinder
                             nil,
                             nil,
                             'cool/dogs-repo',
-                            'some-sha',
+                            'master',
                             'foods/sweet',
                             output_locations)
         ]

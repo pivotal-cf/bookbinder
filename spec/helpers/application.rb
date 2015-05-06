@@ -1,7 +1,7 @@
 require_relative '../helpers/redirection'
 require_relative '../../lib/bookbinder/cli'
 require_relative '../helpers/use_fixture_repo'
-require_relative '../helpers/github_stub'
+require_relative '../helpers/git_fake'
 require 'pathname'
 require 'tmpdir'
 
@@ -9,7 +9,7 @@ module Bookbinder
   class Application
     include Redirection
 
-    def initialize(github = GithubStub.new)
+    def initialize(github = GitFake.new)
       @github = github
       @cli_client = Cli.new(github)
     end

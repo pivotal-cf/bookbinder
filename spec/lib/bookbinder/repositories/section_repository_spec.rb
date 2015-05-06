@@ -1,7 +1,6 @@
 require_relative '../../../../lib/bookbinder/repositories/section_repository'
 require_relative '../../../../lib/bookbinder/deprecated_logger'
 require_relative '../../../../lib/bookbinder/values/section'
-require_relative '../../../../spec/helpers/spec_git_accessor'
 require_relative '../../../../spec/helpers/nil_logger'
 
 module Bookbinder

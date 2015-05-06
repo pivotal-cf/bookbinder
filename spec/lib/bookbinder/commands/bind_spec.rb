@@ -14,7 +14,7 @@ require_relative '../../../../lib/bookbinder/subnav_formatter'
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/redirection'
-require_relative '../../../helpers/spec_git_accessor'
+require_relative '../../../helpers/git_fake'
 require_relative '../../../helpers/use_fixture_repo'
 
 require_relative '../../../../lib/bookbinder/spider'
@@ -66,7 +66,7 @@ module Bookbinder
     end
 
     def bind_cmd(partial_args = {})
-      bind_version_control_system = partial_args.fetch(:version_control_system, SpecGitAccessor)
+      bind_version_control_system = partial_args.fetch(:version_control_system, Bookbinder::GitFake.new)
       bind_logger = partial_args.fetch(:logger, logger)
       bind_config_fetcher = partial_args.fetch(:config_fetcher, config_fetcher)
       Commands::Bind.new(bind_logger,
@@ -80,7 +80,7 @@ module Bookbinder
                          partial_args.fetch(:final_app_directory, final_app_dir),
                          partial_args.fetch(:context_dir, File.absolute_path('.')),
                          partial_args.fetch(:dita_preprocessor, dita_preprocessor),
-                         partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, SpecGitAccessor)),
+                         partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, GitFake.new)),
                          DitaSectionGathererFactory.new(bind_version_control_system, bind_logger),
                          Repositories::SectionRepository.new(logger),
                          partial_args.fetch(:command_creator, command_creator),
@@ -107,7 +107,7 @@ module Bookbinder
     let(:final_app_dir) { File.absolute_path('final_app') }
     let(:git_client) { GitClient.new }
     let(:logger) { NilLogger.new }
-    let(:middleman_runner) { MiddlemanRunner.new(logger, SpecGitAccessor) }
+    let(:middleman_runner) { MiddlemanRunner.new(logger, GitFake.new) }
     let(:sheller) { double('sheller', run_command: double('status', success?: true)) }
     let(:sitemap_writer) { PostProduction::SitemapWriter.build(logger, final_app_dir, random_port) }
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
@@ -229,7 +229,7 @@ module Bookbinder
 
         context 'and the code repo is present' do
           it 'can find code example repos locally rather than going to github' do
-            expect(SpecGitAccessor).to_not receive(:clone)
+            expect(GitFake.new).to_not receive(:clone)
 
             command.run(['local'])
           end
@@ -303,18 +303,6 @@ module Bookbinder
       end
 
       it 'creates a directory per repo with the generated html from middleman' do
-        expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{'fantastic/dogs-repo'}",
-                                                        "dogs",
-                                                        anything).and_call_original
-
-        expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{'fantastic/my-docs-repo'}",
-                                                        "foods/sweet",
-                                                        anything).and_call_original
-
-        expect(SpecGitAccessor).to receive(:clone).with("git@github.com:#{'fantastic/my-other-docs-repo'}",
-                                                        "foods/savory",
-                                                        anything).and_call_original
-
         silence_io_streams do
           command.run(['github'])
         end
@@ -423,21 +411,6 @@ module Bookbinder
       it 'applies the syntax highlighting CSS' do
         section_repo_name = 'org/my-repo-with-code-snippets'
         code_repo = 'cloudfoundry/code-example-repo'
-
-        expect(SpecGitAccessor).
-            to receive(:clone).
-                   with("git@github.com:#{section_repo_name}",
-                        'my-code-snippet-repo',
-                        anything).
-                   at_least(1).times.
-                   and_call_original
-        expect(SpecGitAccessor).
-            to receive(:clone).
-                   with("git@github.com:#{code_repo}",
-                        'code-example-repo',
-                        anything).
-                   at_least(1).times.
-                   and_call_original
 
         sections = [
             {'repository' => {
@@ -676,7 +649,7 @@ Content:
                                    'cred_repo' => 'my-org/my-creds',
                                    'public_host' => 'docs.dogs.com')
         config_fetcher = double('config fetcher', fetch_config: config)
-        middleman_runner = MiddlemanRunner.new(logger, SpecGitAccessor)
+        middleman_runner = MiddlemanRunner.new(logger, GitFake.new)
         final_app_dir = File.absolute_path('final_app')
         spider = Spider.new(logger, app_dir: final_app_dir)
         server_director = ServerDirector.new(logger, directory: final_app_dir)
