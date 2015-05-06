@@ -1,30 +1,15 @@
 require_relative 'git_hub_repository'
-require_relative 'directory_helpers'
 require_relative 'ingest/destination_directory'
 
 module Bookbinder
   class Book
-    include DirectoryHelperMethods
-
-    def self.from_remote(logger: nil, full_name: nil, destination_dir: nil, ref: nil, git_accessor: nil)
-      git_accessor.clone("git@github.com:#{full_name}",
-                         Ingest::DestinationDirectory.new(full_name),
-                         path: destination_dir,
-                         checkout: ref)
-      new(logger: logger,
-          full_name: full_name,
-          git_accessor: git_accessor)
-    end
-
     attr_reader :full_name
 
     def initialize(logger: nil,
                    full_name: nil,
                    github_token: nil,
-                   sections: [],
-                   git_accessor: Git)
+                   sections: [])
       @full_name = full_name
-      @git_accessor = git_accessor
       @repository = GitHubRepository.new(logger: logger,
                                          full_name: full_name,
                                          github_token: github_token)

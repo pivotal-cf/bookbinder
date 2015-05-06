@@ -4,7 +4,6 @@ require_relative '../../helpers/tmp_dirs'
 require_relative '../../helpers/nil_logger'
 
 module Bookbinder
-  include Bookbinder::DirectoryHelperMethods
   describe Book do
     include_context 'tmp_dirs'
 
@@ -19,8 +18,7 @@ module Bookbinder
     end
 
     let(:book_name) { 'wow-org/such-book' }
-    let(:git_accessor) { double('git_accessor') }
-    let(:book) { Book.new(full_name: 'myorg/test', git_accessor: git_accessor) }
+    let(:book) { Book.new(full_name: 'myorg/test') }
     let(:repo) { double(GitHubRepository) }
 
     it "has a full name" do
@@ -52,7 +50,7 @@ module Bookbinder
         ).and_return(self_repo)
         expect(self_repo).to receive(:tag_with).with(desired_tag)
 
-        book = Book.new(logger: logger, full_name: book_name, sections: sections, git_accessor: git_accessor)
+        book = Book.new(logger: logger, full_name: book_name, sections: sections)
         book.tag_self_and_sections_with(desired_tag)
       end
     end

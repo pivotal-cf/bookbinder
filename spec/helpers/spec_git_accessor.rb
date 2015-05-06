@@ -15,6 +15,15 @@ class SpecGitAccessor
     end
   end
 
+  def self.read_file(filename, from_repo: nil, checkout: 'master')
+    Dir.mktmpdir do |dir|
+      path = Pathname(dir)
+      git = clone(from_repo, "read-file", path: path)
+      git.checkout(checkout)
+      path.join("read-file", filename).read
+    end
+  end
+
   def initialize(repository, path)
     @repository = repository
     @path = path

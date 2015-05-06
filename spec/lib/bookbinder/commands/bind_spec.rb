@@ -361,28 +361,6 @@ module Bookbinder
           expect(pub.join('v2/foods/sweet/index.html').read).to include 'This is a Markdown Page'
           expect(pub.join('v2/foods/savory/index.html').read).to include 'This is another Markdown Page'
         end
-
-        context 'when a tag is at an API version that does not have sections' do
-          let(:versions) { %w(v1) }
-          it 'raises a VersionUnsupportedError' do
-            book = double('Book')
-
-            allow(Book).to receive(:from_remote).with(
-                               logger: logger,
-                               full_name: 'fantastic/book',
-                               destination_dir: anything,
-                               ref: 'v1',
-                               git_accessor: SpecGitAccessor
-                           ).and_return(book)
-            allow(book).to receive(:directory).and_return('test-directory')
-            allow(File).to receive(:read).with(%r{/test-directory/config.yml$}).and_return(
-                               "---\nsections: ")
-
-            expect {
-              command.run ['github']
-            }.to raise_error(Config::RemoteBindConfiguration::VersionUnsupportedError)
-          end
-        end
       end
     end
 
