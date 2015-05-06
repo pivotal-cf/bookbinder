@@ -6,8 +6,7 @@ module Bookbinder
     class RemoteBindConfiguration
       VersionUnsupportedError = Class.new(RuntimeError)
 
-      def initialize(logger, version_control_system, base_config)
-        @logger = logger
+      def initialize(version_control_system, base_config)
         @version_control_system = version_control_system
         @base_config = base_config
       end
@@ -28,7 +27,7 @@ module Bookbinder
 
       private
 
-      attr_reader :logger, :version_control_system, :base_config
+      attr_reader :version_control_system, :base_config
 
       def sections_from(version)
         attrs = YAML.load(

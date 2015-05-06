@@ -10,7 +10,7 @@ module Bookbinder
         null_logger = nil
         vcs = double('version control system')
         base_config = Configuration.new(null_logger, 'book_repo' => 'foo', 'public_host' => 'bar', 'versions' => ['v1'])
-        remote_config = RemoteBindConfiguration.new(null_logger, vcs, base_config)
+        remote_config = RemoteBindConfiguration.new(vcs, base_config)
         allow(vcs).to receive(:read_file) { "---\nsections: " }
         expect { remote_config.to_h }.to raise_error(RemoteBindConfiguration::VersionUnsupportedError)
       end
