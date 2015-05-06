@@ -42,16 +42,8 @@ module Bookbinder
       @repository.full_name
     end
 
-    def head_sha
-      @repository.head_sha
-    end
-
     def directory
-      @repository.directory
-    end
-
-    def copy_from_remote(destination_dir)
-      @repository.copy_from_remote(destination_dir, target_ref)
+      Ingest::DestinationDirectory.new(full_name)
     end
 
     def tag_self_and_sections_with(tag)
