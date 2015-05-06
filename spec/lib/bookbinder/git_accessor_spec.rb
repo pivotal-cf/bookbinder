@@ -15,7 +15,7 @@ module Bookbinder
                   contents: 'bar',
                   commit_message: 'baz')
         GitAccessor.new.clone(path.join("srcgorepo"), 'destgorepo', path: path)
-        expect(File.read(path.join('destgorepo', 'foo'))).to eq("bar\n")
+        expect(path.join('destgorepo', 'foo').read).to eq("bar\n")
       end
     end
 
@@ -31,7 +31,7 @@ module Bookbinder
 
         git.clone(path.join('srcrepo'), 'destrepo', path: path)
         expect { git.clone(path.join('srcrepo'), 'destrepo', path: path) }.
-          not_to change { File.mtime(path.join('destrepo', 'Gemfile')) }
+          not_to change { path.join('destrepo', 'Gemfile').mtime }
       end
     end
 
@@ -46,7 +46,7 @@ module Bookbinder
         GitAccessor.new.clone(path.join("srcgorepo"), 'destgorepo',
                               checkout: 'mybranch',
                               path: path)
-        expect(File.read(path.join('destgorepo', 'foo'))).to eq("bar\n")
+        expect(path.join('destgorepo', 'foo').read).to eq("bar\n")
       end
     end
 
