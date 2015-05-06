@@ -13,33 +13,27 @@ module Bookbinder
                          checkout: ref)
       new(logger: logger,
           full_name: full_name,
-          target_ref: ref,
           git_accessor: git_accessor)
     end
 
+    attr_reader :full_name
+
     def initialize(logger: nil,
                    full_name: nil,
-                   target_ref: nil,
                    github_token: nil,
                    sections: [],
                    git_accessor: Git)
+      @full_name = full_name
+      @git_accessor = git_accessor
+      @repository = GitHubRepository.new(logger: logger,
+                                         full_name: full_name,
+                                         github_token: github_token,
+                                         git_accessor: git_accessor)
       @section_vcs_repos = sections.map do |section|
         GitHubRepository.new(logger: logger,
                              full_name: section['repository']['name'],
                              git_accessor: git_accessor)
       end
-
-      @target_ref = target_ref || 'master'
-
-      @repository = GitHubRepository.new(logger: logger,
-                                         full_name: full_name,
-                                         github_token: github_token,
-                                         git_accessor: git_accessor)
-      @git_accessor = git_accessor
-    end
-
-    def full_name
-      @repository.full_name
     end
 
     def directory
@@ -49,9 +43,5 @@ module Bookbinder
     def tag_self_and_sections_with(tag)
       (@section_vcs_repos + [@repository]).each { |repo| repo.tag_with tag }
     end
-
-    private
-
-    attr_reader :target_ref
   end
 end
