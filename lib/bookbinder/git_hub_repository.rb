@@ -32,11 +32,11 @@ module Bookbinder
       end
     end
 
+    private
+
     def announce_skip
       @logger.log '  skipping (not found) '.magenta + path_to_local_repo
     end
-
-    private
 
     def head_sha
       @head_sha ||= @github.head_sha(full_name)
