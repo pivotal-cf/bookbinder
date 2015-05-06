@@ -5,7 +5,7 @@ module Bookbinder
   class Book
     include DirectoryHelperMethods
 
-    def self.from_remote(logger: nil, full_name: nil, destination_dir: nil, ref: nil, git_accessor: Git)
+    def self.from_remote(logger: nil, full_name: nil, destination_dir: nil, ref: nil, git_accessor: nil)
       book = new(logger: logger, full_name: full_name, target_ref: ref, git_accessor: git_accessor)
       book.copy_from_remote(destination_dir) if destination_dir
       book
