@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="something">
+  <title>my topic 1 version 2</title>
+  <conbody>
+    <image href="image_one.png" />
+    <image href="images/image_two.jpeg" />
+    <p><ph otherprops="test-phrase-included">Include-me!</ph></p>
+    <p><ph otherprops="test-phrase-excluded">Exclude-me!</ph></p>
+  </conbody>
+</concept>

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE bookmap PUBLIC "-//OASIS//DTD DITA BookMap//EN" "bookmap.dtd">
+
+<bookmap id="xxx.example.my.1">
+  <booktitle>
+    <booklibrary id="product_name" otherprops="pdf">my library</booklibrary>
+    <mainbooktitle otherprops="pdf">Version 0.0.1</mainbooktitle>
+    <booktitlealt otherprops="eclipsehelp">this is mine yo</booktitlealt>
+    <booktitlealt id="pdf_title" otherprops="pdf">another title</booktitlealt>
+    <booktitlealt id="pdf_revision_number" otherprops="pdf">Rev: 01</booktitlealt>
+    <booktitlealt id="copyright_date" otherprops="pdf">Some date</booktitlealt>
+  </booktitle>
+  <bookmeta>
+    <author/>
+    <keywords/>
+    <prodinfo><prodname>my product</prodname><vrmlist><vrm version="" release="" modification=""></vrm></vrmlist><component/></prodinfo>
+  </bookmeta>
+  <frontmatter>
+    <topicref format="dita" href="some-guide-v-two.xml"
+      navtitle="Some guide" print="yes" scope="local" toc="yes"
+      type="concept"/>
+  </frontmatter>
+  <part>
+    <topicref href="../dita-section-dependency/some-guide-1.xml" />
+  </part>
+</bookmap>

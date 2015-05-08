@@ -37,6 +37,19 @@ module Bookbinder
       end
     end
 
+    context 'when binding different refs of the same dita section' do
+      context 'and the section contains a ditamap' do
+        it 'should create a subdirectory for each dita section' do
+          application = Application.new
+          dita_book = BookFixture.new('dita-book-with-multiple-refs-of-the-same-section', SectionSource.remote)
+
+          application.bind_book_from_github(dita_book, silent: true) do
+            it_correctly_binds_multiple_ditamaps_from(dita_book)
+          end
+        end
+      end
+    end
+
     context 'when passing DITA options at the command line' do
       context 'such as args.copycss' do
         it 'it invokes DITA-OT with that option' do
@@ -55,6 +68,19 @@ module Bookbinder
           end
         end
       end
+    end
+
+    def it_correctly_binds_multiple_ditamaps_from(dita_book)
+      dita_section_at_ref_one = DitaSectionData.new('dita-section-one',
+                                                    'my-dita-section-at-v-one')
+      dita_section_at_ref_two = DitaSectionData.new('dita-section-one',
+                                                    'my-dita-section-at-v-two')
+
+      expect(dita_book.html_files_for_dita_section(dita_section_at_ref_one)).
+          to match_array ['some-guide-v-one', '../dita-section-dependency/some-guide-1']
+
+      expect(dita_book.html_files_for_dita_section(dita_section_at_ref_two)).
+          to match_array ['some-guide-v-two', '../dita-section-dependency/some-guide-1']
     end
 
     def it_correctly_binds_sections_in(dita_book)
