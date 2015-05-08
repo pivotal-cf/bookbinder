@@ -12,8 +12,8 @@ module Bookbinder
         end
       end
 
-      if !dita_sections.empty? && (sum < 1 || sum > 1)
-        DitamapLocationError.new "You must have exactly one 'ditamap_location' key in dita_sections."
+      if !dita_sections.empty? && (sum < 1)
+        DitamapLocationError.new "You must have at least one 'ditamap_location' key in dita_sections."
       end
     end
   end

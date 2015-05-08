@@ -2,7 +2,7 @@ require_relative '../../../../lib/bookbinder/validation_checkers/dita_section_ch
 
 module Bookbinder
   describe DitaSectionChecker do
-    context 'when there is ditamap_location' do
+    context 'when there is at least one ditamap_location' do
       it 'should return nil' do
         config = {
             'dita_sections' =>
