@@ -24,6 +24,11 @@ module Bookbinder
       execute_in_book(book, command, silent, expectation)
     end
 
+    def bind_book_with_dita_options(book, silent: true, dita_options: '', &expectation)
+      command = Proc.new { cli_client.run(%W(bind local --verbose --dita-flags=#{dita_options})) }
+      execute_in_book(book, command, silent, expectation)
+    end
+
     private
 
     attr_reader :cli_client, :github

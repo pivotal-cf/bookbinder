@@ -37,6 +37,26 @@ module Bookbinder
       end
     end
 
+    context 'when passing DITA options at the command line' do
+      context 'such as args.copycss' do
+        it 'it invokes DITA-OT with that option' do
+          application = Application.new
+          dita_book = BookFixture.new('dita-book', SectionSource.local)
+          dita_options = "args.copycss='yes' " +
+                         "args.css='master.css' " +
+                         "args.cssroot='/Users/pivotal/workspace/pubtools/bookbinder/spec/fixtures/repositories/dita-book/master_middleman/source/stylesheets/' " +
+                         "args.csspath='./copied_stylesheets/' "
+          application.bind_book_with_dita_options(dita_book,
+                                                  silent: true,
+                                                  dita_options: dita_options,
+                                                  ) do
+            it_correctly_binds_sections_in(dita_book)
+            it_correctly_invokes_dita_options(dita_book, dita_options)
+          end
+        end
+      end
+    end
+
     def it_correctly_binds_sections_in(dita_book)
       dita_section_one = DitaSectionData.new('dita-section-one',
                                              'my-renamed-dita-section-one')
@@ -65,6 +85,13 @@ module Bookbinder
       expect(dita_book.has_dita_subnav(dita_section_one)).to be_truthy
 
       expect(dita_book.exposes_subnav_links_for_js).to be_truthy
+    end
+
+    def it_correctly_invokes_dita_options(dita_book, dita_options)
+      dita_section_one = DitaSectionData.new('dita-section-one',
+                                             'my-renamed-dita-section-one')
+
+      expect(dita_book.invokes_dita_option_for_css_path(dita_section_one, dita_options)).to be_truthy
     end
 
     DitaSectionData = Struct.new(:repo_name, :dir)

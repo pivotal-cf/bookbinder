@@ -95,6 +95,7 @@ module Bookbinder
                                      output_locations.dita_subnav_template_path) do |dita_section|
           command = command_creator.convert_to_html_command(
             dita_section,
+            dita_flags: dita_flags(options),
             write_to: dita_section.html_from_dita_section_dir
           )
           status = sheller.run_command(command, output_streams.to_h)
@@ -219,8 +220,21 @@ module Bookbinder
       end
 
       def arguments_are_valid?(bind_source, options)
-        valid_options = %w(--verbose --ignore-section-refs).to_set
-        %w(local github).include?(bind_source) && options.to_set.subset?(valid_options)
+        valid_options = %w(--verbose --ignore-section-refs --dita-flags).to_set
+        %w(local github).include?(bind_source) && flag_names(options).to_set.subset?(valid_options)
+      end
+
+      def flag_names(opts)
+        opts.map {|o| o.split('=').first}
+      end
+
+      def dita_flags(opts)
+        matching_flags = opts.map {|o| o[flag_value_regex("dita-flags"), 1] }
+        matching_flags.compact.first
+      end
+
+      def flag_value_regex(flag_name)
+        Regexp.new(/--#{flag_name}=(.+)/)
       end
     end
   end

@@ -49,6 +49,14 @@ module Bookbinder
           (props == "dita-subnav-props.json")
     end
 
+    def invokes_dita_option_for_css_path(dita_section, options)
+      flags = dita_flags_from(options)
+      copied_css_file_location = Pathname("./output/dita/html_from_dita/#{dita_section.dir}/" +
+                                          flags['args.csspath'] +
+                                          flags['args.css'])
+      File.exist? copied_css_file_location
+    end
+
     private
 
     def topics(dita_section)
@@ -102,6 +110,16 @@ module Bookbinder
 
     def contains_text?(topic, text)
       File.read(topic.final_path).include?(text)
+    end
+
+    def dita_flags_from(dita_options)
+      opts = dita_options.split(' ')
+
+      opts.inject({}) do |res, o|
+        flag, val = o.split('=')
+        res[flag] = val.gsub(/['|"]/, '')
+        res
+      end
     end
   end
 

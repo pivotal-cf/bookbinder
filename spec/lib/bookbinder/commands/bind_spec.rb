@@ -1,25 +1,26 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
 require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
 require_relative '../../../../lib/bookbinder/config/bind_config_factory'
-require_relative '../../../../lib/bookbinder/configuration'
-require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
-require_relative '../../../../lib/bookbinder/dita_preprocessor'
-require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
-require_relative '../../../../lib/bookbinder/local_file_system_accessor'
-require_relative '../../../../lib/bookbinder/middleman_runner'
+require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
 require_relative '../../../../lib/bookbinder/repositories/section_repository'
-require_relative '../../../../lib/bookbinder/sheller'
-require_relative '../../../../lib/bookbinder/subnav_formatter'
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/redirection'
 require_relative '../../../helpers/git_fake'
 require_relative '../../../helpers/use_fixture_repo'
 
+require_relative '../../../../lib/bookbinder/configuration'
+require_relative '../../../../lib/bookbinder/dita_command_creator'
+require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
+require_relative '../../../../lib/bookbinder/dita_preprocessor'
+require_relative '../../../../lib/bookbinder/html_document_manipulator'
+require_relative '../../../../lib/bookbinder/local_file_system_accessor'
+require_relative '../../../../lib/bookbinder/middleman_runner'
+require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../../lib/bookbinder/spider'
 require_relative '../../../../lib/bookbinder/server_director'
-require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
+require_relative '../../../../lib/bookbinder/subnav_formatter'
 
 module Bookbinder
   describe Commands::Bind do
@@ -174,6 +175,54 @@ module Bookbinder
         )
         stderr = capture_stderr { swallow_stdout { command.run(['local']) } }
         expect(stderr).to eq("\e[31mbar\n\e[0m")
+      end
+    end
+
+    describe "when DITA flags are passed at the command line" do
+      it 'the DITA conversion command includes the same flags' do
+        preprocessor = double('preprocessor')
+        sheller = double('sheller')
+        command = bind_cmd(dita_preprocessor: preprocessor,
+                           sheller: sheller,
+                           command_creator: DitaCommandCreator.new('path/to/dita/ot/library'))
+        output_locations = OutputLocations.new(context_dir: Pathname('foo'))
+        expected_classpath = 'path/to/dita/ot/library/lib/xercesImpl.jar:' +
+                             'path/to/dita/ot/library/lib/xml-apis.jar:' +
+                             'path/to/dita/ot/library/lib/resolver.jar:' +
+                             'path/to/dita/ot/library/lib/commons-codec-1.4.jar:' +
+                             'path/to/dita/ot/library/lib/icu4j.jar:' +
+                             'path/to/dita/ot/library/lib/saxon/saxon9-dom.jar:' +
+                             'path/to/dita/ot/library/lib/saxon/saxon9.jar:target/classes:' +
+                             'path/to/dita/ot/library:' +
+                             'path/to/dita/ot/library/lib/:' +
+                             'path/to/dita/ot/library/lib/dost.jar'
+        successful_exit = instance_double(Process::Status, success?: true)
+
+        allow(preprocessor).to receive(:preprocess).and_yield(
+                                   DitaSection.new('path/to/local/repo',
+                                                   'path/to/map.ditamap',
+                                                   nil,
+                                                   'foo',
+                                                   nil,
+                                                   nil,
+                                                   output_locations)
+                               )
+        expect(sheller).to receive(:run_command).with("export CLASSPATH=#{expected_classpath}; " +
+                                                      "ant -f path/to/dita/ot/library " +
+                                                      "-Doutput.dir='foo/output/dita/html_from_dita/foo' " +
+                                                      "-Dargs.input='path/to/local/repo/path/to/map.ditamap' " +
+                                                      "-Dargs.filter='' " +
+                                                      "-Dbasedir='/' " +
+                                                      "-Dtranstype='tocjs' " +
+                                                      "-Ddita.temp.dir='/tmp/bookbinder_dita' " +
+                                                      "-Dgenerate.copy.outer='2' " +
+                                                      "-Douter.control='warn' " +
+                                                      "-Dclean.temp='no' ",
+                                                    anything)
+                                                  .and_return(successful_exit)
+        silence_io_streams do
+          command.run(['local', '--verbose', "--dita-flags=clean.temp='no'"])
+        end
       end
     end
 
