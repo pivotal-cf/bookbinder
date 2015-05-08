@@ -9,9 +9,9 @@ module Bookbinder
   class Application
     include Redirection
 
-    def initialize(github = GitFake.new)
-      @github = github
-      @cli_client = Cli.new(github)
+    def initialize(git_client = GitFake.new)
+      @git_client = git_client
+      @cli_client = Cli.new(git_client)
     end
 
     def bind_book_from_github(book, silent: true, &expectation)
@@ -31,7 +31,7 @@ module Bookbinder
 
     private
 
-    attr_reader :cli_client, :github
+    attr_reader :cli_client, :git_client
 
     def execute_in_book(book, command, silent, block)
       repo_name = book.name
