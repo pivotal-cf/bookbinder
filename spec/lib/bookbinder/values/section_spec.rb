@@ -19,8 +19,9 @@ module Bookbinder
       let(:repo) { Section.new('directory',
                                'full name',
                                copied = true,
-                               subnav_template_name,
-                               'path/to/repository') }
+                               'path/to/repository',
+                               dir_name = nil,
+                               subnav_template_name) }
 
       context 'when the incoming template does not look like a partial file' do
         let(:subnav_template_name) { 'my_template' }

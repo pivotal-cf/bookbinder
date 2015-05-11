@@ -187,7 +187,7 @@ module Bookbinder
                                      source_ref: target_ref,
                                      destination_parent_dir: workspace,
                                      destination_dir_name: directory)
-          @section_repository.get_instance(
+          section_repository.get_instance(
             section_config,
             working_copy: working_copy,
             destination_dir: workspace
