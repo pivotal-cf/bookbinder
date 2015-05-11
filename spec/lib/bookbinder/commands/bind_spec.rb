@@ -325,7 +325,7 @@ module Bookbinder
         it 'sets the repo as the layout repo path when prepping dirs' do
           received_output_locations = nil
           directory_preparer = Object.new
-          directory_preparer.define_singleton_method(:prepare_directories) {|_, _, output_locations, _|
+          directory_preparer.define_singleton_method(:prepare_directories) {|_, _, output_locations|
             received_output_locations = output_locations
           }
 

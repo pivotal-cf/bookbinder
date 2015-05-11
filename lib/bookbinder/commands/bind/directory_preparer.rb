@@ -13,7 +13,7 @@ module Bookbinder
           @version_control_system = version_control_system
         end
 
-        def prepare_directories(gem_root, versions, locations, book_repo)
+        def prepare_directories(config, gem_root, locations)
           forget_sections(locations.output_dir)
           file_system_accessor.remove_directory(File.join(locations.final_app_dir, '.'))
           file_system_accessor.remove_directory(locations.dita_home_dir)
@@ -22,8 +22,8 @@ module Bookbinder
           copy_directory_from_gem(gem_root, 'master_middleman', locations.site_generator_home)
           file_system_accessor.copy(File.join(locations.layout_repo_dir, '.'), locations.site_generator_home)
 
-          versions.each do |version|
-            copy_index_file_from_version_to_master_middleman(version, locations.source_for_site_generator, book_repo)
+          config.versions.each do |version|
+            copy_index_file_from_version_to_master_middleman(version, locations.source_for_site_generator, config.book_repo_url)
           end
         end
 
@@ -31,10 +31,10 @@ module Bookbinder
 
         attr_reader :logger, :file_system_accessor, :version_control_system
 
-        def copy_index_file_from_version_to_master_middleman(version, dest_dir, book_repo)
-          clone_dir_name = Ingest::DestinationDirectory.new(book_repo)
+        def copy_index_file_from_version_to_master_middleman(version, dest_dir, url)
+          clone_dir_name = Ingest::DestinationDirectory.new(url)
           Dir.mktmpdir(version) do |tmpdir|
-            version_control_system.clone("git@github.com:#{book_repo}",
+            version_control_system.clone(url,
                                          clone_dir_name,
                                          path: tmpdir,
                                          checkout: version)

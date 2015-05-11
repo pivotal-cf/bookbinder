@@ -81,10 +81,9 @@ module Bookbinder
         )
 
         directory_preparer.prepare_directories(
+          bind_config,
           File.expand_path('../../../../', __FILE__),
-          bind_config.versions,
-          output_locations,
-          bind_config.book_repo
+          output_locations
         )
 
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
