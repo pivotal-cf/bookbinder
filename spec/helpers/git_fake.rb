@@ -53,14 +53,6 @@ module Bookbinder
         FileUtils.rm_rf(Dir.glob("#{@path}/*"))
         FileUtils.cp_r(File.join(local_repo_dir, "#{File.basename(@repository)}-ref-#{ref}", '.'), @path)
       end
-
-      def log
-        SpecGitLog.new(self.clone, @ref)
-      end
-
-      def gtree(ref)
-        SpecGitGtree.new
-      end
     end
   end
 end
