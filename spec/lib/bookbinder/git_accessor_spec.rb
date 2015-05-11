@@ -98,7 +98,7 @@ module Bookbinder
                   contents: 'bar',
                   commit_message: 'baz')
         git = GitAccessor.new
-        git.tag(path.join("srcrepo"), 'mytagname', 'branchiwanttotag')
+        git.remote_tag(path.join("srcrepo"), 'mytagname', 'branchiwanttotag')
         git.clone(path.join("srcrepo"), "destrepo", path: path)
 
         tags = `cd #{path.join('destrepo')}; git tag`.split("\n")
@@ -116,9 +116,9 @@ module Bookbinder
                   contents: 'bar',
                   commit_message: 'baz')
         git = GitAccessor.new
-        git.tag(path.join("srcrepo"), 'mytagname', 'branchiwanttotag')
+        git.remote_tag(path.join("srcrepo"), 'mytagname', 'branchiwanttotag')
 
-        expect { git.tag(path.join("srcrepo"), 'mytagname', 'branchiwanttotag') }.
+        expect { git.remote_tag(path.join("srcrepo"), 'mytagname', 'branchiwanttotag') }.
           to raise_error(GitAccessor::TagExists)
       end
     end
@@ -133,7 +133,7 @@ module Bookbinder
                   commit_message: 'baz')
         git = GitAccessor.new
 
-        expect { git.tag(path.join("srcrepo"), 'mytagname', 'non-existent') }.
+        expect { git.remote_tag(path.join("srcrepo"), 'mytagname', 'non-existent') }.
           to raise_error(GitAccessor::InvalidTagRef)
       end
     end
