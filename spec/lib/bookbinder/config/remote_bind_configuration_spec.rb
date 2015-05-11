@@ -7,14 +7,14 @@ module Bookbinder
       it "merges versioned sections into the config" do
         vcs = double('version control system')
 
-        base_config = Configuration.new('book_repo' => 'foo/bar',
+        base_config = Configuration.new('book_repo' => 'git@myplace.com:foo/bar',
                                         'public_host' => 'baz',
                                         'sections' => [{'repository' => {'name' => 'first/masterrepo'}}],
                                         'versions' => ['v1', 'v0.9'])
 
         remote_config = RemoteBindConfiguration.new(vcs, base_config)
 
-        allow(vcs).to receive(:read_file).with('config.yml', from_repo: "git@github.com:foo/bar", checkout: 'v1') {
+        allow(vcs).to receive(:read_file).with('config.yml', from_repo: "git@myplace.com:foo/bar", checkout: 'v1') {
           YAML.dump(
             'sections' => [
               {'repository' => {'name' => 'first/v1repo'}, 'directory' => 'foo'},
@@ -23,7 +23,7 @@ module Bookbinder
           )
         }
 
-        allow(vcs).to receive(:read_file).with('config.yml', from_repo: "git@github.com:foo/bar", checkout: 'v0.9') {
+        allow(vcs).to receive(:read_file).with('config.yml', from_repo: "git@myplace.com:foo/bar", checkout: 'v0.9') {
           YAML.dump(
             'sections' => [
               {'repository' => {'name' => 'first/v0.9repo'}, 'directory' => 'foo'},
