@@ -8,9 +8,8 @@ module Bookbinder
 
     attr_reader :schema_version, :schema_major_version, :schema_minor_version, :schema_patch_version
 
-    def initialize(logger, config_hash)
-      @logger = logger
-      @config = config_hash
+    def initialize(config)
+      @config = config
     end
 
     CONFIG_REQUIRED_KEYS = %w(book_repo public_host)

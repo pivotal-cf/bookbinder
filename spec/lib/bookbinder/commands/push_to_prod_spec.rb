@@ -19,7 +19,7 @@ module Bookbinder
     let(:logger) { NilLogger.new }
     let(:configuration_fetcher) { double('configuration_fetcher',
                                          fetch_credentials: {aws: {}, cloud_foundry: {}}) }
-    let(:config) { Configuration.new(logger, config_hash) }
+    let(:config) { Configuration.new(config_hash) }
     let(:command) { described_class.new(logger, configuration_fetcher) }
 
     before do
@@ -83,7 +83,7 @@ module Bookbinder
             'sections' => [section1, section2]
         }
       end
-      let(:config) { Configuration.new(logger, invalid_push_to_prod_config_hash) }
+      let(:config) { Configuration.new(invalid_push_to_prod_config_hash) }
 
       it 'raises missing credential key error' do
         expect { command.run([build_number]) }.to raise_error PushToProdValidator::MissingRequiredKeyError, /Your config.yml is missing required key\(s\). The require keys for this commands are /

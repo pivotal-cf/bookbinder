@@ -7,9 +7,8 @@ module Bookbinder
       it "merges versioned sections into the config"
 
       it "raises an exception when there's an empty 'sections' specified in the remote config" do
-        null_logger = nil
         vcs = double('version control system')
-        base_config = Configuration.new(null_logger, 'book_repo' => 'foo', 'public_host' => 'bar', 'versions' => ['v1'])
+        base_config = Configuration.new('book_repo' => 'foo', 'public_host' => 'bar', 'versions' => ['v1'])
         remote_config = RemoteBindConfiguration.new(vcs, base_config)
         allow(vcs).to receive(:read_file) { "---\nsections: " }
         expect { remote_config.to_h }.to raise_error(RemoteBindConfiguration::VersionUnsupportedError)

@@ -17,7 +17,7 @@ module Bookbinder
       allow(config_validator).to receive(:exceptions).and_return []
       allow(loader).to receive(:load).with(File.expand_path(path_to_config_file)) { { foo: 'bar' } }
       Dir.chdir('/tmp') do |tmp|
-        expect(config_fetcher.fetch_config).to eq(Configuration.new(logger, {foo: 'bar'}))
+        expect(config_fetcher.fetch_config).to eq(Configuration.new(foo: 'bar'))
       end
     end
 
@@ -74,7 +74,7 @@ module Bookbinder
           'public_host' => 'http://example.com',
         }
         allow(loader).to receive(:load).with(File.expand_path(path_to_config_file)) { config_hash_in_file }
-        expect(config_fetcher.fetch_config).to eq(Configuration.new(logger, expected_config_hash))
+        expect(config_fetcher.fetch_config).to eq(Configuration.new(expected_config_hash))
       end
 
       it 'caches configuration loads' do
