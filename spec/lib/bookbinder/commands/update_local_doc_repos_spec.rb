@@ -11,7 +11,7 @@ module Bookbinder
       ] }
       let(:config_hash) { { 'sections' => sections } }
       let(:logger) { NilLogger.new }
-      let(:config) { Configuration.new(logger, config_hash) }
+      let(:config) { Configuration.new(config_hash) }
       let(:configuration_fetcher) { double('configuration_fetcher') }
 
       before do

@@ -22,7 +22,7 @@ module Bookbinder
           'sections' => []
       }
     end
-    let(:config) { Configuration.new(logger, config_hash) }
+    let(:config) { Configuration.new(config_hash) }
     let(:git_client) { GitClient.new }
     let(:configuration_fetcher) { double('configuration_fetcher') }
 

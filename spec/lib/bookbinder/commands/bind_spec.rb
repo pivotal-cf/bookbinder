@@ -99,7 +99,7 @@ module Bookbinder
     let(:book) { 'fantastic/book' }
     let(:command) { bind_cmd }
     let(:command_creator) { double('command creator', convert_to_html_command: 'stubbed command') }
-    let(:config) { Configuration.new(logger, config_hash) }
+    let(:config) { Configuration.new(config_hash) }
     let(:config_fetcher) { double('config fetcher', fetch_config: config) }
     let(:config_hash) { base_config_hash }
     let(:dita_preprocessor) { DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor) }
@@ -303,7 +303,7 @@ module Bookbinder
       context 'when configured with a layout repo' do
         let(:cloner) { double('cloner') }
         let(:factory) { double('cloner factory') }
-        let(:config) { Configuration.new(logger, 'book_repo' => '', 'public_host' => '', 'layout_repo' => 'my/configuredrepo') }
+        let(:config) { Configuration.new('book_repo' => '', 'public_host' => '', 'layout_repo' => 'my/configuredrepo') }
         let(:config_fetcher) { double('config fetcher', fetch_config: config) }
         let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
         let(:null_site_generator) { double('site gen', run: nil) }
@@ -445,7 +445,7 @@ module Bookbinder
               'template_variables' => {'name' => 'Spartacus'}
           }
 
-        config = Configuration.new(logger, config_hash)
+        config = Configuration.new(config_hash)
         config_fetcher = double('config fetcher', fetch_config: config)
 
         bind_cmd(config_fetcher: config_fetcher).run(['github'])
@@ -476,7 +476,7 @@ module Bookbinder
             'public_host' => 'example.com',
         }
 
-        config = Configuration.new(logger, config_hash)
+        config = Configuration.new(config_hash)
         config_fetcher = double('config fetcher', fetch_config: config)
 
         command = bind_cmd(config_fetcher: config_fetcher)
@@ -524,7 +524,6 @@ module Bookbinder
             config_fetcher: double(
               'config fetcher',
               fetch_config: Configuration.new(
-                logger,
                 'sections' => [ {'repository' => {'name' => 'org/dogs-repo'}} ],
                 'book_repo' => 'fantastic/book',
                 'cred_repo' => 'my-org/my-creds',
@@ -574,7 +573,6 @@ Content:
             config_fetcher: double(
               'config fetcher',
               fetch_config: Configuration.new(
-                logger,
                 'sections' => [{'repository' => {'name' => 'org/dogs-repo'}}],
                 'book_repo' => 'some/book',
                 'cred_repo' => 'my-org/my-creds',
@@ -603,7 +601,7 @@ Content:
             'public_host' => 'docs.dogs.com'
         }
 
-        config = Configuration.new(logger, config_hash)
+        config = Configuration.new(config_hash)
         config_fetcher = double('config fetcher', fetch_config: config)
 
         command = bind_cmd(config_fetcher: config_fetcher)
@@ -630,7 +628,7 @@ Content:
               'public_host' => 'docs.dogs.com'
           }
 
-          config = Configuration.new(logger, config_hash)
+          config = Configuration.new(config_hash)
           config_fetcher = double('config fetcher', fetch_config: config)
 
           command = bind_cmd(config_fetcher: config_fetcher)
@@ -667,7 +665,7 @@ Content:
             'public_host' => 'docs.dogs.com'
         }
 
-        config = Configuration.new(logger, config_hash)
+        config = Configuration.new(config_hash)
         config_fetcher = double('config fetcher', fetch_config: config)
 
         command = bind_cmd(config_fetcher: config_fetcher)
@@ -692,8 +690,7 @@ Content:
 
     describe 'creating necessary directories' do
       def create_command
-        config = Configuration.new(logger,
-                                   'sections' => [],
+        config = Configuration.new('sections' => [],
                                    'book_repo' => book,
                                    'cred_repo' => 'my-org/my-creds',
                                    'public_host' => 'docs.dogs.com')

@@ -21,7 +21,7 @@ module Bookbinder
       }
     end
 
-    let(:config) { Configuration.new(logger, config_hash) }
+    let(:config) { Configuration.new(config_hash) }
 
     describe 'accessing configuration values' do
       it 'exposes some of these keys' do
@@ -54,16 +54,16 @@ module Bookbinder
       end
 
       it 'is true for identical configurations' do
-        expect(Configuration.new(logger, config_hash_1)).to eq(Configuration.new(logger, config_hash_1))
+        expect(Configuration.new(config_hash_1)).to eq(Configuration.new(config_hash_1))
       end
 
       it 'is false for different configurations' do
-        expect(Configuration.new(logger, config_hash_1)).not_to eq(Configuration.new(logger, config_hash_2))
+        expect(Configuration.new(config_hash_1)).not_to eq(Configuration.new(config_hash_2))
       end
     end
 
     describe '#has_option?' do
-      let(:config) { Configuration.new(logger, {'foo' => 'bar'}) }
+      let(:config) { Configuration.new('foo' => 'bar') }
 
       context 'when the configuration has the option' do
         it 'should return true' do
