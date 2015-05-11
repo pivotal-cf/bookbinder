@@ -256,7 +256,7 @@ module Bookbinder
         }.from(Net::HTTPSuccess).to(Net::HTTPMovedPermanently)
       end
 
-      it 'it can find repos locally rather than going to github' do
+      it 'it can find repos locally rather than going to git' do
         final_app_dir = File.absolute_path('final_app')
         command.run(['local'])
 
@@ -268,7 +268,7 @@ module Bookbinder
         let(:non_broken_master_middleman_dir) { generate_middleman_with 'remote_code_snippets_index.html' }
 
         context 'and the code repo is present' do
-          it 'can find code example repos locally rather than going to github' do
+          it 'can find code example repos locally rather than going to git' do
             expect(GitFake.new).to_not receive(:clone)
 
             command.run(['local'])
@@ -277,7 +277,7 @@ module Bookbinder
       end
     end
 
-    describe 'github' do
+    describe 'remote' do
       let(:github_config_hash) do
         base_config_hash.merge({'cred_repo' => 'my-org/my-creds'})
       end
@@ -285,7 +285,7 @@ module Bookbinder
       let(:config_hash) { github_config_hash }
 
       it 'creates some static HTML' do
-        command.run(['github'])
+        command.run(['remote'])
 
         index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
         expect(index_html).to include 'This is a Markdown Page'
@@ -306,14 +306,14 @@ module Bookbinder
                           sitemap_writer: null_sitemap_writer,
                           directory_preparer: double('dir preparer', prepare_directories: nil))
 
-          allow(factory).to receive(:produce).with('github', nil) { cloner }
+          allow(factory).to receive(:produce).with('remote', nil) { cloner }
 
           expect(cloner).to receive(:call).
             with(source_repo_name: "my/configuredrepo", destination_parent_dir: anything) {
             Ingest::WorkingCopy.new(repo_dir: 'foo', full_name: 'some/repo')
           }
 
-          bind.run(['github'])
+          bind.run(['remote'])
         end
 
         it 'sets the repo as the layout repo path when prepping dirs' do
@@ -333,7 +333,7 @@ module Bookbinder
           allow(cloner).to receive(:call) { Ingest::WorkingCopy.new(repo_dir: 'foo',
                                                                     full_name: 'some/repo') }
 
-          bind.run(['github'])
+          bind.run(['remote'])
 
           expect(received_output_locations.layout_repo_dir).to eq(Pathname('foo/repo'))
         end
@@ -341,7 +341,7 @@ module Bookbinder
 
       it 'creates a directory per repo with the generated html from middleman' do
         silence_io_streams do
-          command.run(['github'])
+          command.run(['remote'])
         end
 
         final_app_dir = File.absolute_path('final_app')
@@ -379,7 +379,7 @@ module Bookbinder
       let(:config_hash) { github_config_hash }
 
       it 'succeeds when all links are functional' do
-        exit_code = command.run(['github'])
+        exit_code = command.run(['remote'])
         expect(exit_code).to eq 0
       end
     end
@@ -404,7 +404,7 @@ module Bookbinder
         config = Configuration.new(config_hash)
         config_factory = double('config factory', produce: config)
 
-        bind_cmd(bind_config_factory: config_factory).run(['github'])
+        bind_cmd(bind_config_factory: config_factory).run(['remote'])
 
         final_app_dir = File.absolute_path('final_app')
         index_html = File.read File.join(final_app_dir, 'public', 'var-repo', 'variable_index.html')
@@ -439,7 +439,7 @@ module Bookbinder
 
         command = bind_cmd(bind_config_factory: config_factory)
         swallow_stdout do
-          command.run(['github', '--verbose'])
+          command.run(['remote', '--verbose'])
         end
 
         final_app_dir = File.absolute_path('final_app')
@@ -488,7 +488,7 @@ module Bookbinder
                 'public_host' => 'docs.dogs.com'
               )))
 
-          command.run(['github'])
+          command.run(['remote'])
 
           sitemap_path = Pathname('final_app').join('public', 'sitemap.xml')
 
@@ -537,7 +537,7 @@ Content:
                 'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
               )))
 
-          expect { command.run(['github']) }.
+          expect { command.run(['remote']) }.
             to raise_error "Your public host must be a single String."
         end
       end
@@ -563,7 +563,7 @@ Content:
         config_factory = double('config factory', produce: config)
 
         command = bind_cmd(bind_config_factory: config_factory)
-        command.run(['github'])
+        command.run(['remote'])
 
         final_app_dir = File.absolute_path('final_app')
         index_html = File.read(File.join(final_app_dir, 'public', 'a', 'b', 'c', 'index.html'))
@@ -595,7 +595,7 @@ Content:
             $stdout = StringIO.new
 
             expect do
-              command.run(['github'])
+              command.run(['remote'])
             end.to raise_error
 
             $stdout.rewind
@@ -632,7 +632,7 @@ Content:
           $stdout = StringIO.new
 
           expect do
-            command.run(['github', '--verbose'])
+            command.run(['remote', '--verbose'])
           end.to raise_error
 
           $stdout.rewind
@@ -672,7 +672,7 @@ Content:
 
         expect(File.exists?(output_dir)).to eq false
 
-        command.run(['github'])
+        command.run(['remote'])
 
         expect(File.exists?(output_dir)).to eq true
       end
@@ -687,7 +687,7 @@ Content:
 
         expect(File.exists?(pre_existing_file)).to eq true
 
-        command.run(['github'])
+        command.run(['remote'])
 
         expect(File.exists?(pre_existing_file)).to eq false
       end
@@ -699,7 +699,7 @@ Content:
         FileUtils.touch pre_existing_file
 
         command = create_command
-        command.run(['github'])
+        command.run(['remote'])
 
         expect(File.exists?(pre_existing_file)).to eq false
         copied_manifest = File.read File.join(final_app_dir, 'app.rb')
