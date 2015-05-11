@@ -18,11 +18,6 @@ module Bookbinder
       @github = GitClient.new(access_token: github_token || ENV['GITHUB_API_TOKEN'])
     end
 
-    def tag_with(tagname)
-      @logger.log 'Tagging ' + full_name.cyan
-      @github.create_tag! full_name, tagname, head_sha
-    end
-
     def update_local_copy
       if File.exist?(path_to_local_repo)
         @logger.log 'Updating ' + path_to_local_repo.cyan

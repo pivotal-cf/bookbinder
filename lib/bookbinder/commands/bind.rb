@@ -1,7 +1,6 @@
 require 'middleman-syntax'
 
 require_relative '../archive_menu_configuration'
-require_relative '../book'
 require_relative '../dita_section_gatherer_factory'
 require_relative '../errors/cli_error'
 require_relative '../streams/switchable_stdout_and_red_stderr'

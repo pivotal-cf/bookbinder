@@ -1,4 +1,3 @@
-require_relative '../../../lib/bookbinder/book'
 require_relative '../../../lib/bookbinder/configuration'
 require_relative '../../../lib/bookbinder/middleman_runner'
 require_relative '../../../lib/bookbinder/values/output_locations'

@@ -25,6 +25,12 @@ module Bookbinder
         to_str == other
       end
 
+      alias :eql? :==
+
+      def hash
+        to_str.hash
+      end
+
       private
 
       attr_reader :input_identifier

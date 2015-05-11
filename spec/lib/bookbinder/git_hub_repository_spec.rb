@@ -35,39 +35,6 @@ module Bookbinder
       }.to raise_error(/full_name/)
     end
 
-    describe '#tag_with' do
-      let(:head_sha) { 'ha7f'*10 }
-
-      it 'calls #create_tag! on the github instance variable' do
-        expect(git_client).to receive(:head_sha).with('org/repo').and_return head_sha
-        expect(git_client).to receive(:create_tag!).with('org/repo', 'the_tag_name', head_sha)
-
-        build(logger: logger, github_token: github_token, full_name: 'org/repo').tag_with('the_tag_name')
-      end
-    end
-
-    describe '#tag_with' do
-      let(:repo_sha) { 'some-sha' }
-      let(:repo) { build(logger: logger,
-                         github_token: github_token,
-                         full_name: 'my-docs-org/my-docs-repo',
-                         local_repo_dir: '') }
-      let(:my_tag) { '#hashtag' }
-
-      before do
-        allow(git_client).to receive(:validate_authorization)
-        allow(git_client).to receive(:commits).with(repo.full_name)
-                             .and_return([double(sha: repo_sha)])
-      end
-
-      it 'should apply a tag' do
-        expect(git_client).to receive(:create_tag!)
-                              .with(repo.full_name, my_tag, repo_sha)
-
-        repo.tag_with(my_tag)
-      end
-    end
-
     describe '#update_local_copy' do
       let(:local_repo_dir) { tmpdir }
       let(:full_name) { 'org/repo-name' }
