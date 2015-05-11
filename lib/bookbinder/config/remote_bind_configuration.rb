@@ -25,7 +25,7 @@ module Bookbinder
         attrs = YAML.load(
           version_control_system.read_file(
             'config.yml',
-            from_repo: "git@github.com:#{base_config.book_repo}",
+            from_repo: base_config.book_repo_url,
             checkout: version
           )
         )['sections']
