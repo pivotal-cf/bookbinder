@@ -7,12 +7,12 @@ module Bookbinder
 
       it "copies the repo to the destination, defaulting to master" do
         cloner = GitHubRepositoryCloner.new(vcs)
-        expect(vcs).to receive(:clone).with("git@github.com:myorg/myrepo",
+        expect(vcs).to receive(:clone).with("me@mygitplace.com:myorg/myrepo",
                                             "myrepo",
                                             path: "/mydestination",
                                             checkout: "master")
 
-        result = cloner.call(source_repo_name: "myorg/myrepo",
+        result = cloner.call(source_repo_name: "me@mygitplace.com:myorg/myrepo",
                              destination_parent_dir: "/mydestination")
         expect(result.directory).to eq("myrepo")
       end
