@@ -43,6 +43,10 @@ module Bookbinder
       vcs_url(cred_repo)
     end
 
+    def layout_repo_url
+      vcs_url(layout_repo)
+    end
+
     def sections
       config.fetch('sections', []).map {|section|
         section.merge('repo_url' => vcs_url(section['repository']['name']))

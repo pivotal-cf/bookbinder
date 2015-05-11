@@ -6,6 +6,7 @@ module Bookbinder
       config = Configuration.new(
         'book_repo' => 'some-org/some-repo',
         'cred_repo' => 'git@bitbucket.org:my/private-cred-repo',
+        'layout_repo' => 'git@bitbucket.org:my/private-layout-repo',
         'sections' => [
           {'repository' => {'name' => 'must/be-github'}},
           {'repository' => {'name' => 'git@bitbucket.org:another/bitbucket-repo'}},
@@ -14,6 +15,7 @@ module Bookbinder
       )
       expect(config.book_repo_url).to eq("git@github.com:some-org/some-repo")
       expect(config.cred_repo_url).to eq("git@bitbucket.org:my/private-cred-repo")
+      expect(config.layout_repo_url).to eq("git@bitbucket.org:my/private-layout-repo")
       expect(config.sections[0].fetch('repo_url')).to eq('git@github.com:must/be-github')
       expect(config.sections[1].fetch('repo_url')).to eq('git@bitbucket.org:another/bitbucket-repo')
       expect(config.sections[2].fetch('repo_url')).to eq('https://github.com/over/https')
