@@ -24,7 +24,7 @@ module Bookbinder
       end
     end
 
-    def tag(url, tagname, commit_or_object)
+    def remote_tag(url, tagname, commit_or_object)
       Dir.mktmpdir do |dir|
         path = Pathname(dir)
         git = _clone(url, temp_name("tag"), path)
