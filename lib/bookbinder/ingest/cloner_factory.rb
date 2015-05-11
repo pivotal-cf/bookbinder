@@ -1,4 +1,4 @@
-require_relative 'git_hub_repository_cloner'
+require_relative 'git_cloner'
 require_relative 'local_filesystem_cloner'
 
 module Bookbinder
@@ -14,7 +14,7 @@ module Bookbinder
         if user_repo_dir
           LocalFilesystemCloner.new(logger, filesystem, user_repo_dir)
         else
-          GitHubRepositoryCloner.new(version_control_system)
+          GitCloner.new(version_control_system)
         end
       end
 

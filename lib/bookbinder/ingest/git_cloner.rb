@@ -4,7 +4,7 @@ require_relative 'working_copy'
 
 module Bookbinder
   module Ingest
-    class GitHubRepositoryCloner
+    class GitCloner
       def initialize(version_control_system)
         @version_control_system = version_control_system
       end
