@@ -32,7 +32,7 @@ module Bookbinder
           )
         }
 
-        expect(remote_config.to_h[:sections]).to eq(
+        expect(remote_config.fetch.sections).to eq(
           [
             {'repository' => {'name' => 'first/masterrepo'}},
             {'repository' => {'name' => 'first/v1repo', 'ref' => 'v1'}, 'directory' => 'v1/foo'},
@@ -48,7 +48,7 @@ module Bookbinder
         base_config = Configuration.new('book_repo' => 'foo', 'public_host' => 'bar', 'versions' => ['v1'])
         remote_config = RemoteBindConfiguration.new(vcs, base_config)
         allow(vcs).to receive(:read_file) { "---\nsections: " }
-        expect { remote_config.to_h }.to raise_error(RemoteBindConfiguration::VersionUnsupportedError)
+        expect { remote_config.fetch }.to raise_error(RemoteBindConfiguration::VersionUnsupportedError)
       end
     end
   end

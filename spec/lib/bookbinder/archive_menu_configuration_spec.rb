@@ -1,11 +1,12 @@
 require 'tmpdir'
 require_relative '../../../lib/bookbinder/archive_menu_configuration'
+require_relative '../../../lib/bookbinder/configuration'
 require_relative '../../../lib/bookbinder/values/section'
 
 module Bookbinder
   describe ArchiveMenuConfiguration do
     let(:loader) { double('config loader') }
-    let(:base_config) { { archive_menu: ['v2', {'v1' => 'some/place'}] } }
+    let(:base_config) { Configuration.new('archive_menu' => ['v2', {'v1' => 'some/place'}]) }
 
     context "when a section has its own menu config" do
       it "generates configuration for that section" do
@@ -23,11 +24,11 @@ module Bookbinder
           }
 
         expect(archive_config.generate(base_config, sections)).to eq(
-          archive_menu: {
-            '.' => base_config[:archive_menu],
-            'my/dir' => ['v1', {'v0.9' => 'section/place'}]
-          }
-        )
+          Configuration.new(
+            'archive_menu' => {
+              '.' => base_config.archive_menu,
+              'my/dir' => ['v1', {'v0.9' => 'section/place'}]
+            }))
       end
     end
 
@@ -42,10 +43,10 @@ module Bookbinder
         allow(loader).to receive(:load_key) { nil }
 
         expect(archive_config.generate(base_config, sections)).to eq(
-          archive_menu: {
-            '.' => base_config[:archive_menu]
-          }
-        )
+          Configuration.new(
+          'archive_menu' => {
+            '.' => base_config.archive_menu
+          }))
       end
     end
   end

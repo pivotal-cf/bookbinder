@@ -11,18 +11,15 @@ module Bookbinder
         @base_config = base_config
       end
 
-      def to_h
-        sections = base_config.sections
-        base = {
-          sections: sections,
-          book_repo: base_config.book_repo,
-          host_for_sitemap: base_config.public_host,
-          archive_menu: base_config.archive_menu,
-          versions: base_config.versions,
-          template_variables: base_config.template_variables
-        }
-        base_config.versions.each { |version| sections.concat(sections_from(version)) }
-        base
+      def fetch
+        base_config.merge(
+          'sections' => base_config.sections + base_config.versions.flat_map { |version| sections_from(version) },
+          'book_repo' => base_config.book_repo,
+          'public_host' => base_config.public_host,
+          'archive_menu' => base_config.archive_menu,
+          'versions' => base_config.versions,
+          'template_variables' => base_config.template_variables
+        )
       end
 
       private
@@ -40,9 +37,10 @@ module Bookbinder
         raise VersionUnsupportedError.new(version) if attrs.nil?
 
         attrs.map do |section_hash|
-          section_hash['repository']['ref'] = version
-          section_hash['directory'] = File.join(version, section_hash['directory'])
-          section_hash
+          section_hash.merge(
+            'repository' => section_hash['repository'].merge('ref' => version),
+            'directory' => File.join(version, section_hash['directory'])
+          )
         end
       end
     end

@@ -24,55 +24,22 @@ require_relative '../../../../lib/bookbinder/subnav_formatter'
 
 module Bookbinder
   describe Commands::Bind do
-
     class FakeArchiveMenuConfig
       def generate(base_config, *)
         base_config
       end
     end
 
-    let(:archive_menu_config) { FakeArchiveMenuConfig.new }
-
     include SpecHelperMethods
 
     use_fixture_repo
 
-    let(:sections) do
-      [
-          {'repository' => {
-              'name' => 'fantastic/dogs-repo',
-              'ref' => 'dog-sha'},
-           'directory' => 'dogs',
-           'subnav_template' => 'dogs'},
-          {'repository' => {
-              'name' => 'fantastic/my-docs-repo',
-              'ref' => 'some-sha'},
-           'directory' => 'foods/sweet',
-           'subnav_template' => 'fruits'},
-          {'repository' => {
-              'name' => 'fantastic/my-other-docs-repo',
-              'ref' => 'some-other-sha'},
-           'directory' => 'foods/savory',
-           'subnav_template' => 'vegetables'}
-      ]
-    end
-    let(:archive_menu) { [] }
-
-    let(:base_config_hash) do
-      {'sections' => sections,
-       'book_repo' => book,
-       'public_host' => 'example.com',
-       'archive_menu' => archive_menu
-      }
-    end
-
     def bind_cmd(partial_args = {})
       bind_version_control_system = partial_args.fetch(:version_control_system, Bookbinder::GitFake.new)
       bind_logger = partial_args.fetch(:logger, logger)
-      bind_config_fetcher = partial_args.fetch(:config_fetcher, config_fetcher)
       Commands::Bind.new(bind_logger,
-                         bind_config_fetcher,
-                         partial_args.fetch(:bind_config_factory, Config::BindConfigFactory.new(bind_logger, bind_version_control_system, bind_config_fetcher)),
+                         double('deprecated config fetcher'),
+                         partial_args.fetch(:bind_config_factory, double('config factory', produce: config)),
                          partial_args.fetch(:archive_menu_config, archive_menu_config),
                          bind_version_control_system,
                          partial_args.fetch(:file_system_accessor, file_system_accessor),
@@ -96,11 +63,39 @@ module Bookbinder
       rand(49152..65535)
     end
 
+    let(:archive_menu_config) { FakeArchiveMenuConfig.new }
+    let(:sections) do
+      [
+          {'repository' => {
+              'name' => 'fantastic/dogs-repo',
+              'ref' => 'dog-sha'},
+           'directory' => 'dogs',
+           'subnav_template' => 'dogs'},
+          {'repository' => {
+              'name' => 'fantastic/my-docs-repo',
+              'ref' => 'some-sha'},
+           'directory' => 'foods/sweet',
+           'subnav_template' => 'fruits'},
+          {'repository' => {
+              'name' => 'fantastic/my-other-docs-repo',
+              'ref' => 'some-other-sha'},
+           'directory' => 'foods/savory',
+           'subnav_template' => 'vegetables'}
+      ]
+    end
+    let(:archive_menu) { [] }
+    let(:base_config_hash) do
+      {'sections' => sections,
+       'book_repo' => book,
+       'public_host' => 'example.com',
+       'archive_menu' => archive_menu
+      }
+    end
     let(:book) { 'fantastic/book' }
     let(:command) { bind_cmd }
     let(:command_creator) { double('command creator', convert_to_html_command: 'stubbed command') }
     let(:config) { Configuration.new(config_hash) }
-    let(:config_fetcher) { double('config fetcher', fetch_config: config) }
+    let(:config_fetcher) { raise "using config fetcher!" }
     let(:config_hash) { base_config_hash }
     let(:dita_preprocessor) { DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor) }
     let(:document_parser) { HtmlDocumentManipulator.new }
@@ -367,38 +362,6 @@ module Bookbinder
         third_index_html = File.read File.join(final_app_dir, 'public', 'foods/savory', 'index.html')
         expect(third_index_html).to include 'This is another Markdown Page'
       end
-
-      context 'when multiple versions are provided' do
-        let(:book_without_third_section) do
-          RepoFixture.tarball('book', 'v1') do |dir|
-            config_file = File.join(dir, 'config.yml')
-            config = YAML.load(File.read(config_file))
-            config['sections'].pop
-            File.write(config_file, config.to_yaml)
-          end
-        end
-
-        let(:cli_args) { ['github'] }
-        let(:versions) { %w(v1 v2) }
-        let(:book) { 'fantastic/book' }
-        let(:config_hash) do
-          github_config_hash.merge({'versions' => versions})
-        end
-
-        it 'binds previous versions of the book down paths named for the version tag' do
-          command.run(cli_args)
-          pub = Pathname('final_app').join('public')
-          expect(pub.join('dogs/index.html').read).to include 'images/breeds.png'
-          expect(pub.join('foods/sweet/index.html').read).to include 'This is a Markdown Page'
-          expect(pub.join('foods/savory/index.html').read).to include 'This is another Markdown Page'
-          expect(pub.join('v1/dogs/index.html').read).to include 'images/breeds.png'
-          expect(pub.join('v1/foods/sweet/index.html').read).to include 'This is a Markdown Page'
-          expect(pub.join('v1/foods/savory/index.html')).not_to exist
-          expect(pub.join('v2/dogs/index.html').read).to include('images/breeds.png')
-          expect(pub.join('v2/foods/sweet/index.html').read).to include 'This is a Markdown Page'
-          expect(pub.join('v2/foods/savory/index.html').read).to include 'This is another Markdown Page'
-        end
-      end
     end
 
     describe 'validating' do
@@ -446,9 +409,9 @@ module Bookbinder
           }
 
         config = Configuration.new(config_hash)
-        config_fetcher = double('config fetcher', fetch_config: config)
+        config_factory = double('config factory', produce: config)
 
-        bind_cmd(config_fetcher: config_fetcher).run(['github'])
+        bind_cmd(bind_config_factory: config_factory).run(['github'])
 
         final_app_dir = File.absolute_path('final_app')
         index_html = File.read File.join(final_app_dir, 'public', 'var-repo', 'variable_index.html')
@@ -477,9 +440,9 @@ module Bookbinder
         }
 
         config = Configuration.new(config_hash)
-        config_fetcher = double('config fetcher', fetch_config: config)
+        config_factory = double('config factory', produce: config)
 
-        command = bind_cmd(config_fetcher: config_fetcher)
+        command = bind_cmd(bind_config_factory: config_factory)
         silence_io_streams do
           command.run(['github'])
         end
@@ -521,9 +484,9 @@ module Bookbinder
 
         it 'contains the given pages in an XML sitemap' do
           command = bind_cmd(
-            config_fetcher: double(
-              'config fetcher',
-              fetch_config: Configuration.new(
+            bind_config_factory: double(
+              'config factory',
+              produce: Configuration.new(
                 'sections' => [ {'repository' => {'name' => 'org/dogs-repo'}} ],
                 'book_repo' => 'fantastic/book',
                 'cred_repo' => 'my-org/my-creds',
@@ -570,9 +533,9 @@ Content:
       context 'when configured with more than one host' do
         it 'raises an exception' do
           command = bind_cmd(
-            config_fetcher: double(
-              'config fetcher',
-              fetch_config: Configuration.new(
+            bind_config_factory: double(
+              'config factory',
+              produce: Configuration.new(
                 'sections' => [{'repository' => {'name' => 'org/dogs-repo'}}],
                 'book_repo' => 'some/book',
                 'cred_repo' => 'my-org/my-creds',
@@ -602,9 +565,9 @@ Content:
         }
 
         config = Configuration.new(config_hash)
-        config_fetcher = double('config fetcher', fetch_config: config)
+        config_factory = double('config factory', produce: config)
 
-        command = bind_cmd(config_fetcher: config_fetcher)
+        command = bind_cmd(bind_config_factory: config_factory)
         command.run(['github'])
 
         final_app_dir = File.absolute_path('final_app')
@@ -629,9 +592,9 @@ Content:
           }
 
           config = Configuration.new(config_hash)
-          config_fetcher = double('config fetcher', fetch_config: config)
+          config_factory = double('config factory', produce: config)
 
-          command = bind_cmd(config_fetcher: config_fetcher)
+          command = bind_cmd(bind_config_factory: config_factory)
           begin
             real_stdout = $stdout
             $stdout = StringIO.new
@@ -666,9 +629,9 @@ Content:
         }
 
         config = Configuration.new(config_hash)
-        config_fetcher = double('config fetcher', fetch_config: config)
+        config_factory = double('config factory', produce: config)
 
-        command = bind_cmd(config_fetcher: config_fetcher)
+        command = bind_cmd(bind_config_factory: config_factory)
         begin
           real_stdout = $stdout
           $stdout = StringIO.new
@@ -694,13 +657,13 @@ Content:
                                    'book_repo' => book,
                                    'cred_repo' => 'my-org/my-creds',
                                    'public_host' => 'docs.dogs.com')
-        config_fetcher = double('config fetcher', fetch_config: config)
+        config_factory = double('config factory', produce: config)
         middleman_runner = MiddlemanRunner.new(logger, GitFake.new)
         final_app_dir = File.absolute_path('final_app')
         spider = Spider.new(logger, app_dir: final_app_dir)
         server_director = ServerDirector.new(logger, directory: final_app_dir)
 
-        bind_cmd(config_fetcher: config_fetcher,
+        bind_cmd(bind_config_factory: config_factory,
                  static_site_generator: middleman_runner,
                  final_app_directory: final_app_dir,
                  spider: spider,

@@ -47,10 +47,10 @@ module Bookbinder
 
       within(output_locations.master_dir) do
         invoke_against_current_dir(output_locations.workspace_dir,
-                                   config[:host_for_sitemap],
+                                   config.public_host,
                                    subnav_templates_by_directory,
-                                   config.fetch(:template_variables, {}),
-                                   config[:archive_menu],
+                                   config.template_variables,
+                                   config.archive_menu,
                                    verbose,
                                    cloner)
       end
