@@ -73,7 +73,6 @@ module Bookbinder
       def bind
         @bind ||= Commands::Bind.new(
           logger,
-          configuration_fetcher,
           bind_config_factory,
           ArchiveMenuConfiguration.new(
             loader: config_loader,

@@ -1,26 +1,24 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
 require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
-require_relative '../../../../lib/bookbinder/config/bind_config_factory'
-require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
-require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
-require_relative '../../../../lib/bookbinder/repositories/section_repository'
-require_relative '../../../helpers/middleman'
-require_relative '../../../helpers/nil_logger'
-require_relative '../../../helpers/redirection'
-require_relative '../../../helpers/git_fake'
-require_relative '../../../helpers/use_fixture_repo'
-
 require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/dita_command_creator'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
 require_relative '../../../../lib/bookbinder/dita_preprocessor'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
+require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
+require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
+require_relative '../../../../lib/bookbinder/repositories/section_repository'
+require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../../lib/bookbinder/spider'
-require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/subnav_formatter'
+require_relative '../../../helpers/git_fake'
+require_relative '../../../helpers/middleman'
+require_relative '../../../helpers/nil_logger'
+require_relative '../../../helpers/redirection'
+require_relative '../../../helpers/use_fixture_repo'
 
 module Bookbinder
   describe Commands::Bind do
@@ -38,7 +36,6 @@ module Bookbinder
       bind_version_control_system = partial_args.fetch(:version_control_system, Bookbinder::GitFake.new)
       bind_logger = partial_args.fetch(:logger, logger)
       Commands::Bind.new(bind_logger,
-                         double('deprecated config fetcher'),
                          partial_args.fetch(:bind_config_factory, double('config factory', produce: config)),
                          partial_args.fetch(:archive_menu_config, archive_menu_config),
                          bind_version_control_system,
@@ -95,7 +92,6 @@ module Bookbinder
     let(:command) { bind_cmd }
     let(:command_creator) { double('command creator', convert_to_html_command: 'stubbed command') }
     let(:config) { Configuration.new(config_hash) }
-    let(:config_fetcher) { raise "using config fetcher!" }
     let(:config_hash) { base_config_hash }
     let(:dita_preprocessor) { DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor) }
     let(:document_parser) { HtmlDocumentManipulator.new }
@@ -299,14 +295,12 @@ module Bookbinder
         let(:cloner) { double('cloner') }
         let(:factory) { double('cloner factory') }
         let(:config) { Configuration.new('book_repo' => '', 'public_host' => '', 'layout_repo' => 'my/configuredrepo') }
-        let(:config_fetcher) { double('config fetcher', fetch_config: config) }
         let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
         let(:null_site_generator) { double('site gen', run: nil) }
         let(:null_fs_accessor) { double('fs accessor', copy: nil) }
 
         it 'clones the repo' do
           bind = bind_cmd(cloner_factory: factory,
-                          config_fetcher: config_fetcher,
                           file_system_accessor: null_fs_accessor,
                           static_site_generator: null_site_generator,
                           sitemap_writer: null_sitemap_writer,
@@ -330,7 +324,6 @@ module Bookbinder
           }
 
           bind = bind_cmd(cloner_factory: factory,
-                          config_fetcher: config_fetcher,
                           file_system_accessor: null_fs_accessor,
                           static_site_generator: null_site_generator,
                           sitemap_writer: null_sitemap_writer,

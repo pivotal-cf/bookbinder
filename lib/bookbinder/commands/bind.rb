@@ -18,7 +18,6 @@ module Bookbinder
       DitaToHtmlLibraryFailure = Class.new(RuntimeError)
 
       def initialize(logger,
-                     config_fetcher,
                      config_factory,
                      archive_menu_config,
                      version_control_system,
@@ -35,7 +34,6 @@ module Bookbinder
                      sheller,
                      directory_preparer)
         @logger = logger
-        @config_fetcher = config_fetcher
         @config_factory = config_factory
         @archive_menu_config = archive_menu_config
         @version_control_system = version_control_system
@@ -133,7 +131,6 @@ module Bookbinder
       private
 
       attr_reader :version_control_system,
-                  :config_fetcher,
                   :config_factory,
                   :archive_menu_config,
                   :logger,
