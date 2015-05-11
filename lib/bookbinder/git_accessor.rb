@@ -15,6 +15,10 @@ module Bookbinder
       end
     end
 
+    def update(cloned_path)
+      Git.open(cloned_path).pull
+    end
+
     def read_file(filename, from_repo: nil, checkout: 'master')
       Dir.mktmpdir do |dir|
         path = Pathname(dir)

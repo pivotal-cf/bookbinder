@@ -1,11 +1,13 @@
 require 'pathname'
 require 'tmpdir'
 require_relative '../../helpers/git_repo'
+require_relative '../../helpers/redirection'
 require_relative '../../../lib/bookbinder/git_accessor'
 
 module Bookbinder
   describe GitAccessor do
     include GitRepo
+    include Redirection
 
     it "clones to a given dir" do
       Dir.mktmpdir do |dir|
@@ -104,6 +106,23 @@ module Bookbinder
         tags = `cd #{path.join('destrepo')}; git tag`.split("\n")
 
         expect(tags).to eq(["mytagname"])
+      end
+    end
+
+    it "can update a previous clone" do
+      Dir.mktmpdir do |dir|
+        path = Pathname(dir)
+        init_repo(at_dir: path.join('srcrepo'),
+                  file: 'foo',
+                  contents: 'bar',
+                  commit_message: 'baz')
+        git = GitAccessor.new
+        git.clone(path.join("srcrepo"), 'destrepo', path: path)
+        swallow_stderr do
+          system("cd #{path.join('srcrepo')}; touch newfile; git add .; git commit -q -m foo")
+        end
+        git.update(path.join('destrepo'))
+        expect(path.join('destrepo', 'newfile')).to exist
       end
     end
 
