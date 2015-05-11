@@ -18,9 +18,9 @@ module Bookbinder
         build[working_copy.copied_to,
               working_copy.full_name,
               working_copy.copied?,
-              section_config['subnav_template'],
               destination_dir,
-              working_copy.directory]
+              working_copy.directory,
+              section_config['subnav_template']]
       end
 
       private

@@ -15,7 +15,7 @@ module Bookbinder
           config_filename: 'iampresent.yml'
         )
         dir = 'some/path'
-        sections = [Section.new(dir, nil, nil, nil, nil, 'my/dir')]
+        sections = [Section.new(dir, nil, nil, nil, 'my/dir')]
 
         allow(loader).
           to receive(:load_key).
@@ -38,7 +38,7 @@ module Bookbinder
           loader: loader,
           config_filename: 'uncheckedfn.yml'
         )
-        sections = [Section.new('not/tested', nil, nil, nil, nil, 'wont/appear')]
+        sections = [Section.new('not/tested', nil, nil, nil, 'wont/appear')]
 
         allow(loader).to receive(:load_key) { nil }
 

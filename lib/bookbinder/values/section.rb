@@ -2,9 +2,9 @@ module Bookbinder
   Section = Struct.new(:path_to_repository,
                        :full_name,
                        :copied,
-                       :subnav_templ,
                        :destination_dir,
-                       :directory_name) do
+                       :directory_name,
+                       :subnav_templ) do
     def path_to_repository
       Pathname(self[:path_to_repository].to_s)
     end
