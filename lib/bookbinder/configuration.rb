@@ -13,7 +13,7 @@ module Bookbinder
     end
 
     CONFIG_REQUIRED_KEYS = %w(book_repo public_host)
-    CONFIG_OPTIONAL_KEYS = %w(archive_menu layout_repo versions cred_repo)
+    CONFIG_OPTIONAL_KEYS = %w(archive_menu layout_repo cred_repo)
 
     CONFIG_REQUIRED_KEYS.each do |method_name|
       define_method(method_name) do
@@ -24,6 +24,14 @@ module Bookbinder
     CONFIG_OPTIONAL_KEYS.each do |method_name|
       define_method(method_name) do
         config[method_name]
+      end
+    end
+
+    def merge(other)
+      if Configuration === other
+        Configuration.new(config.merge(other.instance_variable_get(:@config)))
+      else
+        Configuration.new(config.merge(other))
       end
     end
 
@@ -41,6 +49,10 @@ module Bookbinder
 
     def template_variables
       config.fetch('template_variables', {})
+    end
+
+    def versions
+      config.fetch('versions', [])
     end
 
     def ==(o)

@@ -7,8 +7,8 @@ module Bookbinder
 
     def generate(base_config, sections)
       base_config.merge(
-        archive_menu: root_config(base_config).merge(section_config(sections))
-      )
+        Configuration.new(
+          'archive_menu' => root_config(base_config).merge(section_config(sections))))
     end
 
     private
@@ -16,7 +16,7 @@ module Bookbinder
     attr_reader :loader, :config_filename
 
     def root_config(base_config)
-      { '.' => base_config[:archive_menu] }
+      { '.' => base_config.archive_menu }
     end
 
     def section_config(sections)

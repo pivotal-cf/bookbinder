@@ -23,6 +23,26 @@ module Bookbinder
 
     let(:config) { Configuration.new(config_hash) }
 
+    it "returns an empty collection of versions if none are provided" do
+      expect(Configuration.new({}).versions).to be_empty
+    end
+
+    it "can merge another config object" do
+      expect(Configuration.new('book_repo' => 'foo/bar',
+                               'cred_repo' => 'cred/repo').
+             merge(Configuration.new('book_repo' => 'baz/qux'))).
+        to eq(Configuration.new('book_repo' => 'baz/qux',
+                                'cred_repo' => 'cred/repo'))
+    end
+
+    it "can merge hashes" do
+      expect(Configuration.new('book_repo' => 'foo/bar',
+                               'cred_repo' => 'cred/repo').
+             merge('book_repo' => 'baz/qux')).
+        to eq(Configuration.new('book_repo' => 'baz/qux',
+                                'cred_repo' => 'cred/repo'))
+    end
+
     describe 'accessing configuration values' do
       it 'exposes some of these keys' do
         config_hash.delete('schema_version')
