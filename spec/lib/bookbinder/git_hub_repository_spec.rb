@@ -8,7 +8,6 @@ module Bookbinder
 
     let(:logger) { NilLogger.new }
     let(:github_token) { 'blahblah' }
-    let(:git_client) { GitClient.new(access_token: github_token) }
     let(:repo_name) { 'great_org/dogs-repo' }
     let(:section_hash) { {'repository' => {'name' => repo_name}} }
     let(:destination_dir) { tmp_subdir('output') }
@@ -19,19 +18,14 @@ module Bookbinder
       GitHubRepository.new(args)
     end
 
-    before do
-      allow(GitClient).to receive(:new).and_call_original
-      allow(GitClient).to receive(:new).with(access_token: github_token).and_return(git_client)
-    end
-
     it 'requires a full_name' do
       expect(
-        build(logger: logger, github_token: github_token, full_name: '').
+        build(logger: logger, full_name: '').
         full_name
       ).to eq('')
 
       expect {
-        build(logger: logger, github_token: github_token)
+        build(logger: logger)
       }.to raise_error(/full_name/)
     end
 
@@ -39,7 +33,7 @@ module Bookbinder
       let(:local_repo_dir) { tmpdir }
       let(:full_name) { 'org/repo-name' }
       let(:repo_dir) { File.join(local_repo_dir, 'repo-name') }
-      let(:repository) { build(logger: logger, github_token: github_token, full_name: full_name, local_repo_dir: local_repo_dir) }
+      let(:repository) { build(logger: logger, full_name: full_name, local_repo_dir: local_repo_dir) }
 
       context 'when the repo dirs are there' do
         before do
