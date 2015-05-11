@@ -1,5 +1,6 @@
 require_relative '../../../../lib/bookbinder/commands/update_local_doc_repos'
 require_relative '../../../../lib/bookbinder/configuration'
+require_relative '../../../../lib/bookbinder/git_hub_repository'
 require_relative '../../../helpers/nil_logger'
 
 module Bookbinder
