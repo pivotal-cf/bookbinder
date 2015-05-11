@@ -36,7 +36,7 @@ module Bookbinder
     context 'when a command is deprecated' do
       let(:arguments) { ['publish'] }
       subject { capture_stdout { run } }
-      it { should have_output(Regexp.escape('bind <local|github>')).in_yellow }
+      it { should have_output(Regexp.escape('bind <local|remote>')).in_yellow }
     end
 
     context 'when run raises' do
@@ -85,7 +85,7 @@ module Bookbinder
 
         it 'shows the command usage' do
           expect(capture_stdout { run }).
-            to have_output(Regexp.escape('bind <local|github>'))
+            to have_output(Regexp.escape('bind <local|remote>'))
         end
 
         it 'should return 1' do

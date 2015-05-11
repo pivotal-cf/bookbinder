@@ -51,8 +51,8 @@ module Bookbinder
       end
 
       def usage
-        ["bind <local|github> [--verbose] [--dita-flags='<dita-option>=<value>']",
-         "Bind the sections specified in config.yml from <local> or <github> into the final_app directory"]
+        ["bind <local|remote> [--verbose] [--dita-flags='<dita-option>=<value>']",
+         "Bind the sections specified in config.yml from <local> or <remote> into the final_app directory"]
       end
 
       def command_for?(test_command_name)
@@ -198,7 +198,7 @@ module Bookbinder
         if local_repo_dir && config.has_option?('layout_repo')
           File.join(local_repo_dir, config.layout_repo.split('/').last)
         elsif config.has_option?('layout_repo')
-          cloner = cloner_factory.produce('github', nil)
+          cloner = cloner_factory.produce('remote', nil)
           working_copy = cloner.call(source_repo_name: config.layout_repo,
                                      destination_parent_dir: Dir.mktmpdir)
           working_copy.path
@@ -213,7 +213,7 @@ module Bookbinder
 
       def arguments_are_valid?(bind_source, options)
         valid_options = %w(--verbose --ignore-section-refs --dita-flags).to_set
-        %w(local github).include?(bind_source) && flag_names(options).to_set.subset?(valid_options)
+        %w(local remote).include?(bind_source) && flag_names(options).to_set.subset?(valid_options)
       end
 
       def flag_names(opts)

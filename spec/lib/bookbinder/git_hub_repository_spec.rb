@@ -7,7 +7,6 @@ module Bookbinder
     include_context 'tmp_dirs'
 
     let(:logger) { NilLogger.new }
-    let(:github_token) { 'blahblah' }
     let(:repo_name) { 'great_org/dogs-repo' }
     let(:section_hash) { {'repository' => {'name' => repo_name}} }
     let(:destination_dir) { tmp_subdir('output') }

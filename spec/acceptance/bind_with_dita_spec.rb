@@ -19,14 +19,14 @@ module Bookbinder
       end
     end
 
-    context 'from Github' do
-      it 'clones the dita sections from github, converts them into html, including .ditaval variables' do
-        github = GitFake.new
-        application = Application.new(github)
+    context 'from remote' do
+      it 'clones the dita sections from remote, converts them into html, including .ditaval variables' do
+        git = GitFake.new
+        application = Application.new(git)
         dita_book = BookFixture.new('dita-book', SectionSource.remote)
 
-        application.bind_book_from_github(dita_book, silent: true) do
-          expect(github.received_clone_with_urls(
+        application.bind_book_from_remote(dita_book, silent: true) do
+          expect(git.received_clone_with_urls(
                      %w(git@github.com:my-org/dita-section-one
                         git@github.com:my-org/dita-section-dependency)
                  )
@@ -43,7 +43,7 @@ module Bookbinder
           application = Application.new
           dita_book = BookFixture.new('dita-book-with-multiple-refs-of-the-same-section', SectionSource.remote)
 
-          application.bind_book_from_github(dita_book, silent: true) do
+          application.bind_book_from_remote(dita_book, silent: true) do
             it_correctly_binds_multiple_ditamaps_from(dita_book)
           end
         end

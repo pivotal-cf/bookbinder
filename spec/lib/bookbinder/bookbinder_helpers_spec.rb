@@ -146,7 +146,7 @@ MARKDOWN
         let(:config) { {cloner: cloner, workspace: 'code-example-repo'} }
         use_fixture_repo
 
-        it 'returns markdown from github' do
+        it 'returns markdown from git' do
           expect(yielded_snippet).to eq(markdown_snippet.chomp)
         end
       end

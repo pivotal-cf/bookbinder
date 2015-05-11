@@ -25,7 +25,7 @@ module Bookbinder
         raise BuildAndPushTarball::MissingBuildNumber unless ENV['BUILD_NUMBER']
 
         command_chain(
-          ->{publish_command.run(['github'] + cli_args)},
+          ->{publish_command.run(['remote'] + cli_args)},
           ->{push_local_to_staging_command.run([])},
           ->{build_and_push_tarball_command.run([])}
         )
