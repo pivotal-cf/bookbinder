@@ -32,15 +32,15 @@ module Bookbinder
           )
         }
 
-        expect(remote_config.fetch.sections).to eq(
-          [
-            {'repository' => {'name' => 'first/masterrepo'}},
+        expect(remote_config.fetch).to eq(base_config.merge(
+          'sections' => [
+            {'repository' => {'name' => 'first/masterrepo'}, 'repo_url' => 'git@github.com:first/masterrepo'},
             {'repository' => {'name' => 'first/v1repo', 'ref' => 'v1'}, 'directory' => 'v1/foo'},
             {'repository' => {'name' => 'second/v1repo', 'ref' => 'v1'}, 'directory' => 'v1/bar'},
             {'repository' => {'name' => 'first/v0.9repo', 'ref' => 'v0.9'}, 'directory' => 'v0.9/foo'},
             {'repository' => {'name' => 'second/v0.9repo', 'ref' => 'v0.9'}, 'directory' => 'v0.9/bar'},
           ]
-        )
+        ))
       end
 
       it "raises an exception when there's an empty 'sections' specified in the remote config" do
