@@ -1,8 +1,9 @@
+require_relative 'ingest/repo_identifier'
+
 module Bookbinder
   class Configuration
     CURRENT_SCHEMA_VERSION = '1.0.0'
     STARTING_SCHEMA_VERSION = '1.0.0'
-    DEFAULT_VCS_PREFIX = 'git@github.com:'
 
     ConfigSchemaUnsupportedError = Class.new(RuntimeError)
 
@@ -80,11 +81,7 @@ module Bookbinder
     attr_reader :config
 
     def vcs_url(repo_identifier)
-      if repo_identifier.include?(':')
-        repo_identifier
-      else
-        "#{DEFAULT_VCS_PREFIX}#{repo_identifier}"
-      end
+      Ingest::RepoIdentifier.new(repo_identifier)
     end
   end
 end

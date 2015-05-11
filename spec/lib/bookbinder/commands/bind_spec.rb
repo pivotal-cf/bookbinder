@@ -413,6 +413,8 @@ module Bookbinder
     end
 
     describe 'including code snippets' do
+      include Redirection
+
       it 'applies the syntax highlighting CSS' do
         section_repo_name = 'org/my-repo-with-code-snippets'
         code_repo = 'cloudfoundry/code-example-repo'
@@ -436,8 +438,8 @@ module Bookbinder
         config_factory = double('config factory', produce: config)
 
         command = bind_cmd(bind_config_factory: config_factory)
-        silence_io_streams do
-          command.run(['github'])
+        swallow_stdout do
+          command.run(['github', '--verbose'])
         end
 
         final_app_dir = File.absolute_path('final_app')
