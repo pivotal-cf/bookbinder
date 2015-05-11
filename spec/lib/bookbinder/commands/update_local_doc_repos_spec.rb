@@ -1,39 +1,63 @@
 require_relative '../../../../lib/bookbinder/commands/update_local_doc_repos'
 require_relative '../../../../lib/bookbinder/configuration'
-require_relative '../../../../lib/bookbinder/git_hub_repository'
 require_relative '../../../helpers/nil_logger'
+require_relative '../../../helpers/git_fake'
 
 module Bookbinder
   describe Commands::UpdateLocalDocRepos do
-    describe '#run' do
-      let(:sections) { [
-          {'repository' => {'name' => 'org/repo-name'}},
-          {'repository' => {'name' => 'org/repo-name-2'}},
-      ] }
-      let(:config_hash) { { 'sections' => sections } }
-      let(:logger) { NilLogger.new }
-      let(:config) { Configuration.new(config_hash) }
-      let(:configuration_fetcher) { double('configuration_fetcher') }
+    let(:config) {
+      Configuration.new('sections' => [
+        {'repository' => {'name' => 'org/repo-name'}},
+        {'repository' => {'name' => 'git@otherplace.com:org/repo-name-2'}},
+      ])
+    }
+    let(:configuration_fetcher) { double('configuration_fetcher', fetch_config: config) }
 
-      before do
-        allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
-      end
+    it 'updates each repo that exists on filesystem' do
+      vcs = double('vcs')
+      fs = double('fs')
 
-      it 'returns 0' do
-        expect(Commands::UpdateLocalDocRepos.new(logger, configuration_fetcher).run(nil)).to eq(0)
-      end
+      path_1 = File.absolute_path('../repo-name')
+      path_2 = File.absolute_path('../repo-name-2')
 
-      it 'calls #update_local_copy on an instance of each GitHubRepository' do
-        parent_directory = File.absolute_path('../')
+      update = Commands::UpdateLocalDocRepos.new(double('logger').as_null_object,
+                                                 configuration_fetcher,
+                                                 vcs,
+                                                 fs)
 
-        sections.each do |section_config|
-          repository = double
-          allow(GitHubRepository).to receive(:new).with(logger: logger, full_name: section_config['repository']['name'], local_repo_dir: parent_directory).and_return(repository)
-          expect(repository).to receive(:update_local_copy)
-        end
+      allow(fs).to receive(:file_exist?).with(path_1) { false }
+      allow(fs).to receive(:file_exist?).with(path_2) { true }
+      expect(vcs).to receive(:update).with(path_2)
 
-        Commands::UpdateLocalDocRepos.new(logger, configuration_fetcher).run(nil)
-      end
+      update.run(nil)
+    end
+
+    it 'logs each pull of an existing dir, and each skip of a non-existent dir' do
+      fs = double('fs')
+      logger = double('deprecated logger')
+
+      path_1 = File.absolute_path('../repo-name')
+      path_2 = File.absolute_path('../repo-name-2')
+
+      update = Commands::UpdateLocalDocRepos.new(logger,
+                                                 configuration_fetcher,
+                                                 double('vcs', update: nil),
+                                                 fs)
+
+      allow(fs).to receive(:file_exist?).with(path_1) { true }
+      allow(fs).to receive(:file_exist?).with(path_2) { false }
+      expect(logger).to receive(:log).with(/Updating.*#{path_1}/)
+      expect(logger).to receive(:log).with(/skipping.*not found.*#{path_2}/)
+
+      update.run(nil)
+    end
+
+    it 'returns 0' do
+      update = Commands::UpdateLocalDocRepos.new(double('logger').as_null_object,
+                                                 configuration_fetcher,
+                                                 GitFake.new,
+                                                 double('fs').as_null_object)
+      expect(update.run(nil)).to eq(0)
     end
   end
 end

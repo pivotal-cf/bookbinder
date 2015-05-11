@@ -1,5 +1,3 @@
-require_relative '../../lib/bookbinder/local_file_system_accessor'
-
 module Bookbinder
   class GitFake
     def initialize
@@ -22,6 +20,10 @@ module Bookbinder
       else
         Repo.new(url, destination)
       end
+    end
+
+    def update(url)
+      # no-op
     end
 
     def read_file(filename, from_repo: nil, checkout: 'master')

@@ -10,6 +10,7 @@ cd #{at_dir};
 git init;
 git config user.email "you@example.com"
 git config user.name "Your name"
+git config receive.denyCurrentBranch "ignore"
 echo foo > bar
 git add .
 git commit -m "root master commit"
