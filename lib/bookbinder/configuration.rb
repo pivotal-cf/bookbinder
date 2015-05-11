@@ -1,8 +1,8 @@
 module Bookbinder
   class Configuration
-
     CURRENT_SCHEMA_VERSION = '1.0.0'
     STARTING_SCHEMA_VERSION = '1.0.0'
+    DEFAULT_VCS_PREFIX = 'git@github.com:'
 
     ConfigSchemaUnsupportedError = Class.new(RuntimeError)
 
@@ -35,8 +35,18 @@ module Bookbinder
       end
     end
 
+    def book_repo_url
+      vcs_url(book_repo)
+    end
+
+    def cred_repo_url
+      vcs_url(cred_repo)
+    end
+
     def sections
-      config.fetch('sections', [])
+      config.fetch('sections', []).map {|section|
+        section.merge('repo_url' => vcs_url(section['repository']['name']))
+      }
     end
 
     def dita_sections
@@ -44,7 +54,7 @@ module Bookbinder
     end
 
     def has_option?(key)
-      @config.has_key?(key)
+      config.has_key?(key)
     end
 
     def template_variables
@@ -64,5 +74,13 @@ module Bookbinder
     private
 
     attr_reader :config
+
+    def vcs_url(repo_identifier)
+      if repo_identifier.include?(':')
+        repo_identifier
+      else
+        "#{DEFAULT_VCS_PREFIX}#{repo_identifier}"
+      end
+    end
   end
 end

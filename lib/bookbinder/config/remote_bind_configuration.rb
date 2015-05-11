@@ -14,11 +14,6 @@ module Bookbinder
       def fetch
         base_config.merge(
           'sections' => base_config.sections + base_config.versions.flat_map { |version| sections_from(version) },
-          'book_repo' => base_config.book_repo,
-          'public_host' => base_config.public_host,
-          'archive_menu' => base_config.archive_menu,
-          'versions' => base_config.versions,
-          'template_variables' => base_config.template_variables
         )
       end
 
