@@ -2,13 +2,11 @@ require 'git/lib'
 require 'middleman-core'
 require 'middleman-core/cli'
 require 'middleman-core/profiling'
-require_relative 'values/code_example'
 require_relative 'code_example_reader'
 
 class Middleman::Cli::BuildAction
   def handle_error(file_name, response, e=Thor::Error.new(response))
-    our_errors = [Bookbinder::GitClient::TokenException,
-                  Bookbinder::CodeExampleReader::InvalidSnippet,
+    our_errors = [Bookbinder::CodeExampleReader::InvalidSnippet,
                   QuicklinksRenderer::BadHeadingLevelError,
                   Git::GitExecuteError]
     raise e if our_errors.include?(e.class)
@@ -47,10 +45,10 @@ module Bookbinder
 
       within(output_locations.master_dir) do
         invoke_against_current_dir(output_locations.workspace_dir,
-                                   config[:host_for_sitemap],
+                                   config.public_host,
                                    subnav_templates_by_directory,
-                                   config.fetch(:template_variables, {}),
-                                   config[:archive_menu],
+                                   config.template_variables,
+                                   config.archive_menu,
                                    verbose,
                                    cloner)
       end

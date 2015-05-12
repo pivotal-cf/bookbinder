@@ -14,8 +14,8 @@ module Bookbinder
       @cli_client = Cli.new(git_client)
     end
 
-    def bind_book_from_github(book, silent: true, &expectation)
-      command = Proc.new { cli_client.run(%w(bind github --verbose)) }
+    def bind_book_from_remote(book, silent: true, &expectation)
+      command = Proc.new { cli_client.run(%w(bind remote --verbose)) }
       execute_in_book(book, command, silent, expectation)
     end
 

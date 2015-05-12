@@ -1,4 +1,3 @@
-require_relative 'local_bind_configuration'
 require_relative 'remote_bind_configuration'
 
 module Bookbinder
@@ -11,10 +10,10 @@ module Bookbinder
       end
 
       def produce(bind_source)
-        if bind_source == 'github' && config.has_option?('versions')
-          RemoteBindConfiguration.new(version_control_system, config).to_h
+        if bind_source == 'remote' && config.has_option?('versions')
+          RemoteBindConfiguration.new(version_control_system, config).fetch
         else
-          LocalBindConfiguration.new(config).to_h
+          config
         end
       end
 

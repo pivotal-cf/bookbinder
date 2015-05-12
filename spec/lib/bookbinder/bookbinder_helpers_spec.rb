@@ -1,7 +1,7 @@
 require 'spec_helper'
 require './master_middleman/bookbinder_helpers'
 require 'redcarpet'
-require_relative '../../../lib/bookbinder/ingest/git_hub_repository_cloner'
+require_relative '../../../lib/bookbinder/ingest/git_cloner'
 
 module Bookbinder
   describe Navigation::HelperMethods do
@@ -142,11 +142,11 @@ MARKDOWN
       end
 
       context 'when not local' do
-        let(:cloner) { Ingest::GitHubRepositoryCloner.new(Bookbinder::GitFake.new) }
+        let(:cloner) { Ingest::GitCloner.new(Bookbinder::GitFake.new) }
         let(:config) { {cloner: cloner, workspace: 'code-example-repo'} }
         use_fixture_repo
 
-        it 'returns markdown from github' do
+        it 'returns markdown from git' do
           expect(yielded_snippet).to eq(markdown_snippet.chomp)
         end
       end

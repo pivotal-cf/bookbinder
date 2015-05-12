@@ -61,8 +61,8 @@ module Bookbinder
           push_local_to_staging,
           Commands::PushToProd.new(logger, configuration_fetcher),
           Commands::RunPublishCI.new(bind, push_local_to_staging, build_and_push_tarball),
-          Commands::Tag.new(logger, configuration_fetcher),
-          Commands::UpdateLocalDocRepos.new(logger, configuration_fetcher),
+          Commands::Tag.new(logger, configuration_fetcher, version_control_system),
+          Commands::UpdateLocalDocRepos.new(logger, configuration_fetcher, version_control_system, local_file_system_accessor),
         ]
       end
 
@@ -73,7 +73,6 @@ module Bookbinder
       def bind
         @bind ||= Commands::Bind.new(
           logger,
-          configuration_fetcher,
           bind_config_factory,
           ArchiveMenuConfiguration.new(
             loader: config_loader,

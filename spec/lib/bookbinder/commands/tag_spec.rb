@@ -1,46 +1,33 @@
 require_relative '../../../../lib/bookbinder/commands/tag'
-require_relative '../../../../lib/bookbinder/git_client'
 require_relative '../../../../lib/bookbinder/configuration'
-
-require_relative '../../../helpers/middleman'
-require_relative '../../../helpers/nil_logger'
-require_relative '../../../helpers/tmp_dirs'
+require_relative '../../../../lib/bookbinder/git_accessor'
 
 module Bookbinder
   describe Commands::Tag do
-    include SpecHelperMethods
-
-    include_context 'tmp_dirs'
-
-    let(:book_sha) { 26.times.map { (65 + rand(26)).chr }.join  }
-    let(:desired_tag) { 12.times.map { (65 + rand(26)).chr }.join  }
-    let(:book_title) { 'fantastic/red-mars' }
-    let(:logger) { NilLogger.new }
-    let(:config_hash) do
-      {
-          'book_repo' => book_title,
-          'sections' => []
-      }
-    end
-    let(:config) { Configuration.new(logger, config_hash) }
-    let(:git_client) { GitClient.new }
-    let(:configuration_fetcher) { double('configuration_fetcher') }
-
-    before do
-      allow(git_client).to receive(:create_tag!)
-      allow(GitClient).to receive(:new).and_return(git_client)
-      allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
-    end
-
     it 'should tag the book and its sections' do
-      @book = expect_to_receive_and_return_real_now(Book, :new, {logger: logger, full_name: book_title, sections: []})
-      expect(@book).to receive(:tag_self_and_sections_with).with(desired_tag)
-      Commands::Tag.new(logger, configuration_fetcher).run [desired_tag]
+      config = Configuration.new(
+        'book_repo' => 'myorg/bookrepo',
+        'sections' => [
+          {'repository' => {'name' => 'myotherorg/section1repo'}},
+          {'repository' => {'name' => 'myotherorg/section1repo'}, 'directory' => 'duped-repo'},
+          {'repository' => {'name' => 'yetanotherorg/section2repo'}}
+        ]
+      )
+      config_fetcher = double('config fetcher', fetch_config: config)
+      git = instance_double('Bookbinder::GitAccessor')
+
+      expect(git).to receive(:remote_tag).with('git@github.com:myorg/bookrepo', "my-new-tag", "HEAD")
+      expect(git).to receive(:remote_tag).with('git@github.com:myotherorg/section1repo', "my-new-tag", "HEAD")
+      expect(git).to receive(:remote_tag).with('git@github.com:yetanotherorg/section2repo', "my-new-tag", "HEAD")
+
+      tag = Commands::Tag.new(double('logger').as_null_object, config_fetcher, git)
+      tag.run ["my-new-tag"]
     end
 
     context 'when no tag is supplied' do
-      it 'raises a Cli::InvalidArguments error' do
-        expect { Commands::Tag.new(logger, configuration_fetcher).run [] }.to raise_error(CliError::InvalidArguments)
+      it 'raises an error' do
+        tag = Commands::Tag.new(nil, nil, nil)
+        expect { tag.run [] }.to raise_error(CliError::InvalidArguments)
       end
     end
   end

@@ -16,9 +16,6 @@ RSpec.configure do |config|
   config.before do
     # awful hack to prevent tests that invoke middleman directly from polluting code that shells out to call it
     ENV['MM_ROOT'] = nil
-
-    #the Github API token must be in the ENV or tests will fail.
-    ENV['GITHUB_API_TOKEN'] = 'foo'
   end
 
   config.before do
@@ -30,25 +27,3 @@ RSpec.configure do |config|
   end
 end
 
-class SpecGitLog
-  def initialize(base, ref, count = 5)
-    @base = base
-    @count = count
-    @ref = ref
-  end
-
-  def map
-    ["#{@ref}"]
-  end
-end
-
-class SpecGitGtree
-
-  def blobs
-    {}
-  end
-
-  def subtrees
-    []
-  end
-end

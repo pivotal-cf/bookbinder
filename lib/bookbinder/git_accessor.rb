@@ -15,6 +15,10 @@ module Bookbinder
       end
     end
 
+    def update(cloned_path)
+      Git.open(cloned_path).pull
+    end
+
     def read_file(filename, from_repo: nil, checkout: 'master')
       Dir.mktmpdir do |dir|
         path = Pathname(dir)
@@ -24,7 +28,7 @@ module Bookbinder
       end
     end
 
-    def tag(url, tagname, commit_or_object)
+    def remote_tag(url, tagname, commit_or_object)
       Dir.mktmpdir do |dir|
         path = Pathname(dir)
         git = _clone(url, temp_name("tag"), path)

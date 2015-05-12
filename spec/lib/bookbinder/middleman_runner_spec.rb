@@ -1,4 +1,4 @@
-require_relative '../../../lib/bookbinder/book'
+require_relative '../../../lib/bookbinder/configuration'
 require_relative '../../../lib/bookbinder/middleman_runner'
 require_relative '../../../lib/bookbinder/values/output_locations'
 require_relative '../../../lib/bookbinder/values/section'
@@ -21,8 +21,8 @@ module Bookbinder
     let(:archive_menu) { {} }
     let(:verbose) { false }
     let(:sections) { [
-        Section.new('path/to/repo', '', true, 'my_subnav_template', 'path/to', 'my/place/rocks'),
-        Section.new('path/to/repo', '', true, nil, 'path/to', 'fraggles/rock')
+        Section.new('path/to/repo', '', true, 'path/to', 'my/place/rocks', 'my_subnav_template'),
+        Section.new('path/to/repo', '', true, 'path/to', 'fraggles/rock')
     ] }
     let(:local_repo_dir) { '/dev/null' }
 
@@ -41,11 +41,11 @@ module Bookbinder
 
       middleman_runner.run(
         output_locations,
-        {
-          template_variables: template_variables,
-          host_for_sitemap: production_host,
-          archive_menu: archive_menu
-        },
+        Configuration.new(
+          'template_variables' => template_variables,
+          'public_host' => production_host,
+          'archive_menu' => archive_menu
+        ),
         double('cloner'),
         verbose,
         subnav_templates)

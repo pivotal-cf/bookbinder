@@ -1,81 +1,73 @@
 require_relative '../../../lib/bookbinder/configuration'
-require_relative '../../helpers/nil_logger'
 
 module Bookbinder
   describe Configuration do
-    let(:bookbinder_schema_version) { '1.0.0' }
-    let(:logger) { NilLogger.new }
-    let(:user_schema_version) { '1.0.0' }
-    let(:archive_menu) { [] }
-    let(:config_hash) do
-      {
-          'book_repo' => 'some-org/some-repo',
-          'versions' => %w(v1.7.1.9 redacted v3),
-          'cred_repo' => 'some-org/cred-repo',
-          'layout_repo' => 'some-org/some-repo',
-          'sections' => ['section1', 'section2'],
-          'public_host' => 'http://www.example.com',
-          'template_variables' => {'some-var' => 'some-value'},
-          'schema_version' => user_schema_version,
-          'archive_menu' => archive_menu
-      }
+    it "can return fully formed git URLs, defaulting to GitHub" do
+      config = Configuration.new(
+        'book_repo' => 'some-org/some-repo',
+        'cred_repo' => 'git@bitbucket.org:my/private-cred-repo',
+        'layout_repo' => 'git@bitbucket.org:my/private-layout-repo',
+        'sections' => [
+          {'repository' => {'name' => 'must/be-github'}},
+          {'repository' => {'name' => 'git@bitbucket.org:another/bitbucket-repo'}},
+          {'repository' => {'name' => 'https://github.com/over/https'}},
+        ],
+      )
+      expect(config.book_repo_url).to eq("git@github.com:some-org/some-repo")
+      expect(config.cred_repo_url).to eq("git@bitbucket.org:my/private-cred-repo")
+      expect(config.layout_repo_url).to eq("git@bitbucket.org:my/private-layout-repo")
+      expect(config.sections[0].fetch('repo_url')).to eq('git@github.com:must/be-github')
+      expect(config.sections[1].fetch('repo_url')).to eq('git@bitbucket.org:another/bitbucket-repo')
+      expect(config.sections[2].fetch('repo_url')).to eq('https://github.com/over/https')
+
+      expect(Configuration.new('book_repo' => 'git@amazon.place:some-org/some-repo').book_repo_url).
+        to eq('git@amazon.place:some-org/some-repo')
     end
 
-    let(:config) { Configuration.new(logger, config_hash) }
+    it "returns an empty collection of versions if none are provided" do
+      expect(Configuration.new({}).versions).to be_empty
+    end
 
-    describe 'accessing configuration values' do
-      it 'exposes some of these keys' do
-        config_hash.delete('schema_version')
-        config_hash.each do |key, value|
-          expect(config.public_send(key)).to eq value
-        end
-      end
+    it "can merge another config object" do
+      expect(Configuration.new('book_repo' => 'foo/bar',
+                               'cred_repo' => 'cred/repo').
+             merge(Configuration.new('book_repo' => 'baz/qux'))).
+        to eq(Configuration.new('book_repo' => 'baz/qux',
+                                'cred_repo' => 'cred/repo'))
+    end
 
-      context 'when optional keys do not exist' do
-        it 'returns nil' do
-          config_hash.delete('archive_menu')
-          expect(config.public_send('archive_menu')).to be_nil
-        end
-      end
+    it "can merge hashes" do
+      expect(Configuration.new('book_repo' => 'foo/bar',
+                               'cred_repo' => 'cred/repo').
+             merge('book_repo' => 'baz/qux')).
+        to eq(Configuration.new('book_repo' => 'baz/qux',
+                                'cred_repo' => 'cred/repo'))
+    end
 
-      it 'returns an empty hash when template_variables is not provided' do
-        config_hash.delete('template_variables')
-        expect(config.template_variables).to eq({})
-      end
+    it 'returns nil when optional keys do not exist' do
+      config = Configuration.new({})
+      expect(config.archive_menu).to be_nil
+    end
+
+    it 'returns an empty hash when template_variables is not provided' do
+      config = Configuration.new({})
+      expect(config.template_variables).to eq({})
     end
 
     describe 'equality' do
-      let(:config_hash_1) do
-        {'a' => 'b', c: 'd'}
-      end
-
-      let(:config_hash_2) do
-        {'a' => 'b', c: 'e'}
-      end
-
       it 'is true for identical configurations' do
-        expect(Configuration.new(logger, config_hash_1)).to eq(Configuration.new(logger, config_hash_1))
+        expect(Configuration.new('a' => 'b', c: 'd')).to eq(Configuration.new('a' => 'b', c: 'd'))
       end
 
       it 'is false for different configurations' do
-        expect(Configuration.new(logger, config_hash_1)).not_to eq(Configuration.new(logger, config_hash_2))
+        expect(Configuration.new('a' => 'b', c: 'd')).not_to eq(Configuration.new('a' => 'b', c: 'e'))
       end
     end
 
-    describe '#has_option?' do
-      let(:config) { Configuration.new(logger, {'foo' => 'bar'}) }
-
-      context 'when the configuration has the option' do
-        it 'should return true' do
-          expect(config.has_option?('foo')).to eq(true)
-        end
-      end
-
-      context 'when the configuration does not have the option' do
-        it 'should return false' do
-          expect(config.has_option?('bar')).to eq(false)
-        end
-      end
+    it 'can report on whether options are available' do
+      config = Configuration.new('foo' => 'bar')
+      expect(config).to have_option('foo')
+      expect(config).not_to have_option('bar')
     end
   end
 end
