@@ -44,7 +44,7 @@ module Bookbinder
       end
 
       def chars_for_usage_definition
-        33
+        72
       end
 
       def flags
