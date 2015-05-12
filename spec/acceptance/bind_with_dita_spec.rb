@@ -9,7 +9,7 @@ module Bookbinder
     around_in_dita_ot_env(ENV)
 
     context 'from local' do
-      it 'processes the DITA into HTML in the output dir"' do
+      it 'processes the DITA into HTML in the output dir' do
         application = Application.new
         dita_book = BookFixture.new('dita-book', SectionSource.local)
 
