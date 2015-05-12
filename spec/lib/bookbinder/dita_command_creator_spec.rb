@@ -48,6 +48,25 @@ module Bookbinder
     end
 
     context 'when optional DITA flags are passed in' do
+      context 'and the flag value is missing' do
+        it 'raises an informative error' do
+          command_creator = DitaCommandCreator.new(path_to_dita_ot_library)
+          processed_dita_location = '/path/to/processed/dita/boo'
+          dita_section = DitaSection.new('/local/path/to/repo',
+                                         'path/to/map.ditamap',
+                                         nil,
+                                         'org/foo',
+                                         nil,
+                                         'boo')
+
+          expect{command_creator.convert_to_html_command(
+                     dita_section,
+                     dita_flags: "args.debug",
+                     write_to: processed_dita_location)
+          }.to raise_error DitaCommandCreator::MissingDitaOTFlagValue
+        end
+      end
+
       it 'adds those flags to the default flags' do
         command_creator = DitaCommandCreator.new(path_to_dita_ot_library)
         processed_dita_location = '/path/to/processed/dita/boo'

@@ -2,6 +2,8 @@ require_relative '../bookbinder/values/dita_section'
 
 module Bookbinder
   class DitaCommandCreator
+    MissingDitaOTFlagValue = Class.new(RuntimeError)
+
     def initialize(path_to_dita_ot_library)
       @path_to_dita_ot_library = path_to_dita_ot_library
     end
@@ -54,6 +56,7 @@ module Bookbinder
       flags.inject({}) do |h, f|
         k,v = f.split('=')
         h[k] = v
+        raise MissingDitaOTFlagValue.new("The DITA-flag '#{k}' that you passed is missing a value. Please pass a valid value for each DITA option.") unless v
         h
       end
     end
