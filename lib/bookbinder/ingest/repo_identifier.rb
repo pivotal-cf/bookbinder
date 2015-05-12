@@ -1,11 +1,11 @@
 module Bookbinder
   module Ingest
     class RepoIdentifier
+      DEFAULT_VCS_PREFIX = 'git@github.com:'
+
       def initialize(input_identifier)
         @input_identifier = input_identifier
       end
-
-      DEFAULT_VCS_PREFIX = 'git@github.com:'
 
       def to_str
         if input_identifier.include?(':')
@@ -15,21 +15,21 @@ module Bookbinder
         end
       end
 
+      alias :to_s :to_str
+
       def split(*args)
         input_identifier.split(*args)
       end
 
-      alias :to_s :to_str
+      def hash
+        to_str.hash
+      end
 
       def ==(other)
         to_str == other
       end
 
       alias :eql? :==
-
-      def hash
-        to_str.hash
-      end
 
       private
 
