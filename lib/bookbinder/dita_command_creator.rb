@@ -56,7 +56,7 @@ module Bookbinder
       flags.inject({}) do |h, f|
         k,v = f.split('=')
         h[k] = v
-        raise MissingDitaOTFlagValue.new("The DITA-flag '#{k}' that you passed is missing a value. Please pass a valid value for each DITA option.") unless v
+        raise MissingDitaOTFlagValue.new("The DITA-flag '#{k}' that you passed is missing a value. Please pass your DITA option in the format '#{k}=<value>'.") unless v
         h
       end
     end
