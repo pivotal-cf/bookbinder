@@ -79,10 +79,10 @@ module Bookbinder
 
         expect(command_creator.convert_to_html_command(
                    dita_section,
-                   dita_flags: "clean.temp=obv",
+                   dita_flags: "args.debug=yes",
                    write_to: processed_dita_location)
         ).to eq(default_command +
-                "-Dclean.temp='obv' "
+                "-Dargs.debug='yes' "
              )
       end
 

@@ -217,11 +217,11 @@ module Bookbinder
                                                       "-Ddita.temp.dir='/tmp/bookbinder_dita' " +
                                                       "-Dgenerate.copy.outer='2' " +
                                                       "-Douter.control='warn' " +
-                                                      "-Dclean.temp='no' ",
+                                                      "-Dargs.debug='yes' ",
                                                     anything)
                                                   .and_return(successful_exit)
         silence_io_streams do
-          command.run(['local', '--verbose', "--dita-flags=clean.temp='no'"])
+          command.run(['local', '--verbose', "--dita-flags=args.debug='yes'"])
         end
       end
     end
