@@ -99,19 +99,18 @@ module Bookbinder
 
           expect(command_creator.convert_to_html_command(
                      dita_section,
-                     dita_flags: "clean.temp=obv dita.temp.dir=hey/some/new/dir",
+                     dita_flags: "dita.temp.dir=hey/some/new/dir",
                      write_to: processed_dita_location)
           ).to eq("export CLASSPATH=#{classpath}; " +
-                      'ant -f /path/to/dita/ot ' +
-                      "-Doutput.dir='/path/to/processed/dita/boo' " +
-                      "-Dargs.input='/local/path/to/repo/path/to/map.ditamap' " +
-                      "-Dargs.filter='' " +
-                      "-Dbasedir='/' " +
-                      "-Dtranstype='tocjs' " +
-                      "-Ddita.temp.dir='hey/some/new/dir' " +
-                      "-Dgenerate.copy.outer='2' " +
-                      "-Douter.control='warn' " +
-                      "-Dclean.temp='obv' "
+                  'ant -f /path/to/dita/ot ' +
+                  "-Doutput.dir='/path/to/processed/dita/boo' " +
+                  "-Dargs.input='/local/path/to/repo/path/to/map.ditamap' " +
+                  "-Dargs.filter='' " +
+                  "-Dbasedir='/' " +
+                  "-Dtranstype='tocjs' " +
+                  "-Ddita.temp.dir='hey/some/new/dir' " +
+                  "-Dgenerate.copy.outer='2' " +
+                  "-Douter.control='warn' "
                )
         end
       end
