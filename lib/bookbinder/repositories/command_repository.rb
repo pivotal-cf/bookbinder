@@ -161,7 +161,7 @@ module Bookbinder
       end
 
       def bind_config_factory
-        @bind_config_factory  ||= Config::BindConfigFactory.new(logger, version_control_system, configuration_fetcher)
+        @bind_config_factory  ||= Config::BindConfigFactory.new(version_control_system, configuration_fetcher)
       end
 
       def sitemap_port
