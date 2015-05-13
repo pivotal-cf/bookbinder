@@ -57,7 +57,7 @@ module Bookbinder
           dita_book = BookFixture.new('dita-book', SectionSource.local)
           dita_options = "args.copycss='yes' " +
                          "args.css='master.css' " +
-                         "args.cssroot='/Users/pivotal/workspace/pubtools/bookbinder/spec/fixtures/repositories/dita-book/master_middleman/source/stylesheets/' " +
+                         "args.cssroot='#{File.absolute_path '../fixtures/repositories/dita-book/master_middleman/source/stylesheets/', __dir__} " +
                          "args.csspath='./copied_stylesheets/' "
           application.bind_book_with_dita_options(dita_book,
                                                   silent: true,
