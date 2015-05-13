@@ -1,10 +1,18 @@
-require_relative 'bookbinder_command'
+require_relative '../deprecated_logger'
+require_relative '../ingest/destination_directory'
 require_relative 'naming'
 
 module Bookbinder
   module Commands
-    class UpdateLocalDocRepos < BookbinderCommand
+    class UpdateLocalDocRepos
       include Commands::Naming
+
+      def initialize(logger, configuration_fetcher, version_control_system, filesystem)
+        @logger = logger
+        @configuration_fetcher = configuration_fetcher
+        @version_control_system = version_control_system
+        @filesystem = filesystem
+      end
 
       def usage
         [command_name,
@@ -12,16 +20,24 @@ module Bookbinder
       end
 
       def run(_)
-        config.sections.map { |conf| repo_for(conf) }.each(&:update_local_copy)
+        urls = configuration_fetcher.fetch_config.sections.map {|section| section['repo_url']}
+        paths(urls).each do |path|
+          if filesystem.file_exist?(path)
+            logger.log 'Updating ' + path.cyan
+            version_control_system.update(path)
+          else
+            logger.log '  skipping (not found) '.magenta + path
+          end
+        end
         0
       end
 
       private
 
-      def repo_for(section_config)
-        local_repo_dir = File.absolute_path('../')
-        GitHubRepository.new(logger: @logger, full_name: section_config['repository']['name'],
-                             local_repo_dir: local_repo_dir)
+      attr_reader :logger, :configuration_fetcher, :version_control_system, :filesystem
+
+      def paths(urls)
+        urls.map {|url| File.absolute_path("../#{Ingest::DestinationDirectory.new(url)}")}
       end
     end
   end

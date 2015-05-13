@@ -9,7 +9,7 @@ module Bookbinder
     end
 
     def produce(source_location, output_locations)
-      if source_location == 'github'
+      if source_location == 'remote'
         RemoteDitaSectionGatherer.new(version_control_system, view_updater, output_locations)
       else
         LocalDitaSectionGatherer.new(output_locations)

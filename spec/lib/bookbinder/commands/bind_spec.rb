@@ -1,78 +1,42 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
 require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
-require_relative '../../../../lib/bookbinder/config/bind_config_factory'
-require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
-require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
-require_relative '../../../../lib/bookbinder/repositories/section_repository'
-require_relative '../../../helpers/middleman'
-require_relative '../../../helpers/nil_logger'
-require_relative '../../../helpers/redirection'
-require_relative '../../../helpers/git_fake'
-require_relative '../../../helpers/use_fixture_repo'
-
 require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/dita_command_creator'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
 require_relative '../../../../lib/bookbinder/dita_preprocessor'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
+require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
+require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
+require_relative '../../../../lib/bookbinder/repositories/section_repository'
+require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../../lib/bookbinder/spider'
-require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/subnav_formatter'
+require_relative '../../../helpers/git_fake'
+require_relative '../../../helpers/middleman'
+require_relative '../../../helpers/nil_logger'
+require_relative '../../../helpers/redirection'
+require_relative '../../../helpers/use_fixture_repo'
 
 module Bookbinder
   describe Commands::Bind do
-
     class FakeArchiveMenuConfig
       def generate(base_config, *)
         base_config
       end
     end
 
-    let(:archive_menu_config) { FakeArchiveMenuConfig.new }
-
     include SpecHelperMethods
 
     use_fixture_repo
 
-    let(:sections) do
-      [
-          {'repository' => {
-              'name' => 'fantastic/dogs-repo',
-              'ref' => 'dog-sha'},
-           'directory' => 'dogs',
-           'subnav_template' => 'dogs'},
-          {'repository' => {
-              'name' => 'fantastic/my-docs-repo',
-              'ref' => 'some-sha'},
-           'directory' => 'foods/sweet',
-           'subnav_template' => 'fruits'},
-          {'repository' => {
-              'name' => 'fantastic/my-other-docs-repo',
-              'ref' => 'some-other-sha'},
-           'directory' => 'foods/savory',
-           'subnav_template' => 'vegetables'}
-      ]
-    end
-    let(:archive_menu) { [] }
-
-    let(:base_config_hash) do
-      {'sections' => sections,
-       'book_repo' => book,
-       'public_host' => 'example.com',
-       'archive_menu' => archive_menu
-      }
-    end
-
     def bind_cmd(partial_args = {})
       bind_version_control_system = partial_args.fetch(:version_control_system, Bookbinder::GitFake.new)
       bind_logger = partial_args.fetch(:logger, logger)
-      bind_config_fetcher = partial_args.fetch(:config_fetcher, config_fetcher)
       Commands::Bind.new(bind_logger,
-                         bind_config_fetcher,
-                         partial_args.fetch(:bind_config_factory, Config::BindConfigFactory.new(bind_logger, bind_version_control_system, bind_config_fetcher)),
+                         partial_args.fetch(:bind_config_factory, double('config factory', produce: config)),
                          partial_args.fetch(:archive_menu_config, archive_menu_config),
                          bind_version_control_system,
                          partial_args.fetch(:file_system_accessor, file_system_accessor),
@@ -96,11 +60,38 @@ module Bookbinder
       rand(49152..65535)
     end
 
+    let(:archive_menu_config) { FakeArchiveMenuConfig.new }
+    let(:sections) do
+      [
+          {'repository' => {
+              'name' => 'fantastic/dogs-repo',
+              'ref' => 'dog-sha'},
+           'directory' => 'dogs',
+           'subnav_template' => 'dogs'},
+          {'repository' => {
+              'name' => 'fantastic/my-docs-repo',
+              'ref' => 'some-sha'},
+           'directory' => 'foods/sweet',
+           'subnav_template' => 'fruits'},
+          {'repository' => {
+              'name' => 'fantastic/my-other-docs-repo',
+              'ref' => 'some-other-sha'},
+           'directory' => 'foods/savory',
+           'subnav_template' => 'vegetables'}
+      ]
+    end
+    let(:archive_menu) { [] }
+    let(:base_config_hash) do
+      {'sections' => sections,
+       'book_repo' => book,
+       'public_host' => 'example.com',
+       'archive_menu' => archive_menu
+      }
+    end
     let(:book) { 'fantastic/book' }
     let(:command) { bind_cmd }
     let(:command_creator) { double('command creator', convert_to_html_command: 'stubbed command') }
-    let(:config) { Configuration.new(logger, config_hash) }
-    let(:config_fetcher) { double('config fetcher', fetch_config: config) }
+    let(:config) { Configuration.new(config_hash) }
     let(:config_hash) { base_config_hash }
     let(:dita_preprocessor) { DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor) }
     let(:document_parser) { HtmlDocumentManipulator.new }
@@ -265,7 +256,7 @@ module Bookbinder
         }.from(Net::HTTPSuccess).to(Net::HTTPMovedPermanently)
       end
 
-      it 'it can find repos locally rather than going to github' do
+      it 'it can find repos locally rather than going to git' do
         final_app_dir = File.absolute_path('final_app')
         command.run(['local'])
 
@@ -277,7 +268,7 @@ module Bookbinder
         let(:non_broken_master_middleman_dir) { generate_middleman_with 'remote_code_snippets_index.html' }
 
         context 'and the code repo is present' do
-          it 'can find code example repos locally rather than going to github' do
+          it 'can find code example repos locally rather than going to git' do
             expect(GitFake.new).to_not receive(:clone)
 
             command.run(['local'])
@@ -286,7 +277,7 @@ module Bookbinder
       end
     end
 
-    describe 'github' do
+    describe 'remote' do
       let(:github_config_hash) do
         base_config_hash.merge({'cred_repo' => 'my-org/my-creds'})
       end
@@ -294,7 +285,7 @@ module Bookbinder
       let(:config_hash) { github_config_hash }
 
       it 'creates some static HTML' do
-        command.run(['github'])
+        command.run(['remote'])
 
         index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
         expect(index_html).to include 'This is a Markdown Page'
@@ -303,39 +294,36 @@ module Bookbinder
       context 'when configured with a layout repo' do
         let(:cloner) { double('cloner') }
         let(:factory) { double('cloner factory') }
-        let(:config) { Configuration.new(logger, 'book_repo' => '', 'public_host' => '', 'layout_repo' => 'my/configuredrepo') }
-        let(:config_fetcher) { double('config fetcher', fetch_config: config) }
+        let(:config) { Configuration.new('book_repo' => '', 'public_host' => '', 'layout_repo' => 'my/configuredrepo') }
         let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
         let(:null_site_generator) { double('site gen', run: nil) }
         let(:null_fs_accessor) { double('fs accessor', copy: nil) }
 
         it 'clones the repo' do
           bind = bind_cmd(cloner_factory: factory,
-                          config_fetcher: config_fetcher,
                           file_system_accessor: null_fs_accessor,
                           static_site_generator: null_site_generator,
                           sitemap_writer: null_sitemap_writer,
                           directory_preparer: double('dir preparer', prepare_directories: nil))
 
-          allow(factory).to receive(:produce).with('github', nil) { cloner }
+          allow(factory).to receive(:produce).with('remote', nil) { cloner }
 
           expect(cloner).to receive(:call).
             with(source_repo_name: "my/configuredrepo", destination_parent_dir: anything) {
             Ingest::WorkingCopy.new(repo_dir: 'foo', full_name: 'some/repo')
           }
 
-          bind.run(['github'])
+          bind.run(['remote'])
         end
 
         it 'sets the repo as the layout repo path when prepping dirs' do
           received_output_locations = nil
           directory_preparer = Object.new
-          directory_preparer.define_singleton_method(:prepare_directories) {|_, _, output_locations, _|
+          directory_preparer.define_singleton_method(:prepare_directories) {|_, _, output_locations|
             received_output_locations = output_locations
           }
 
           bind = bind_cmd(cloner_factory: factory,
-                          config_fetcher: config_fetcher,
                           file_system_accessor: null_fs_accessor,
                           static_site_generator: null_site_generator,
                           sitemap_writer: null_sitemap_writer,
@@ -345,7 +333,7 @@ module Bookbinder
           allow(cloner).to receive(:call) { Ingest::WorkingCopy.new(repo_dir: 'foo',
                                                                     full_name: 'some/repo') }
 
-          bind.run(['github'])
+          bind.run(['remote'])
 
           expect(received_output_locations.layout_repo_dir).to eq(Pathname('foo/repo'))
         end
@@ -353,7 +341,7 @@ module Bookbinder
 
       it 'creates a directory per repo with the generated html from middleman' do
         silence_io_streams do
-          command.run(['github'])
+          command.run(['remote'])
         end
 
         final_app_dir = File.absolute_path('final_app')
@@ -366,38 +354,6 @@ module Bookbinder
 
         third_index_html = File.read File.join(final_app_dir, 'public', 'foods/savory', 'index.html')
         expect(third_index_html).to include 'This is another Markdown Page'
-      end
-
-      context 'when multiple versions are provided' do
-        let(:book_without_third_section) do
-          RepoFixture.tarball('book', 'v1') do |dir|
-            config_file = File.join(dir, 'config.yml')
-            config = YAML.load(File.read(config_file))
-            config['sections'].pop
-            File.write(config_file, config.to_yaml)
-          end
-        end
-
-        let(:cli_args) { ['github'] }
-        let(:versions) { %w(v1 v2) }
-        let(:book) { 'fantastic/book' }
-        let(:config_hash) do
-          github_config_hash.merge({'versions' => versions})
-        end
-
-        it 'binds previous versions of the book down paths named for the version tag' do
-          command.run(cli_args)
-          pub = Pathname('final_app').join('public')
-          expect(pub.join('dogs/index.html').read).to include 'images/breeds.png'
-          expect(pub.join('foods/sweet/index.html').read).to include 'This is a Markdown Page'
-          expect(pub.join('foods/savory/index.html').read).to include 'This is another Markdown Page'
-          expect(pub.join('v1/dogs/index.html').read).to include 'images/breeds.png'
-          expect(pub.join('v1/foods/sweet/index.html').read).to include 'This is a Markdown Page'
-          expect(pub.join('v1/foods/savory/index.html')).not_to exist
-          expect(pub.join('v2/dogs/index.html').read).to include('images/breeds.png')
-          expect(pub.join('v2/foods/sweet/index.html').read).to include 'This is a Markdown Page'
-          expect(pub.join('v2/foods/savory/index.html').read).to include 'This is another Markdown Page'
-        end
       end
     end
 
@@ -445,10 +401,10 @@ module Bookbinder
               'template_variables' => {'name' => 'Spartacus'}
           }
 
-        config = Configuration.new(logger, config_hash)
-        config_fetcher = double('config fetcher', fetch_config: config)
+        config = Configuration.new(config_hash)
+        config_factory = double('config factory', produce: config)
 
-        bind_cmd(config_fetcher: config_fetcher).run(['github'])
+        bind_cmd(bind_config_factory: config_factory).run(['remote'])
 
         final_app_dir = File.absolute_path('final_app')
         index_html = File.read File.join(final_app_dir, 'public', 'var-repo', 'variable_index.html')
@@ -457,6 +413,8 @@ module Bookbinder
     end
 
     describe 'including code snippets' do
+      include Redirection
+
       it 'applies the syntax highlighting CSS' do
         section_repo_name = 'org/my-repo-with-code-snippets'
         code_repo = 'cloudfoundry/code-example-repo'
@@ -476,12 +434,12 @@ module Bookbinder
             'public_host' => 'example.com',
         }
 
-        config = Configuration.new(logger, config_hash)
-        config_fetcher = double('config fetcher', fetch_config: config)
+        config = Configuration.new(config_hash)
+        config_factory = double('config factory', produce: config)
 
-        command = bind_cmd(config_fetcher: config_fetcher)
-        silence_io_streams do
-          command.run(['github'])
+        command = bind_cmd(bind_config_factory: config_factory)
+        swallow_stdout do
+          command.run(['remote', '--verbose'])
         end
 
         final_app_dir = File.absolute_path('final_app')
@@ -521,17 +479,16 @@ module Bookbinder
 
         it 'contains the given pages in an XML sitemap' do
           command = bind_cmd(
-            config_fetcher: double(
-              'config fetcher',
-              fetch_config: Configuration.new(
-                logger,
+            bind_config_factory: double(
+              'config factory',
+              produce: Configuration.new(
                 'sections' => [ {'repository' => {'name' => 'org/dogs-repo'}} ],
                 'book_repo' => 'fantastic/book',
                 'cred_repo' => 'my-org/my-creds',
                 'public_host' => 'docs.dogs.com'
               )))
 
-          command.run(['github'])
+          command.run(['remote'])
 
           sitemap_path = Pathname('final_app').join('public', 'sitemap.xml')
 
@@ -571,17 +528,16 @@ Content:
       context 'when configured with more than one host' do
         it 'raises an exception' do
           command = bind_cmd(
-            config_fetcher: double(
-              'config fetcher',
-              fetch_config: Configuration.new(
-                logger,
+            bind_config_factory: double(
+              'config factory',
+              produce: Configuration.new(
                 'sections' => [{'repository' => {'name' => 'org/dogs-repo'}}],
                 'book_repo' => 'some/book',
                 'cred_repo' => 'my-org/my-creds',
                 'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
               )))
 
-          expect { command.run(['github']) }.
+          expect { command.run(['remote']) }.
             to raise_error "Your public host must be a single String."
         end
       end
@@ -603,11 +559,11 @@ Content:
             'public_host' => 'docs.dogs.com'
         }
 
-        config = Configuration.new(logger, config_hash)
-        config_fetcher = double('config fetcher', fetch_config: config)
+        config = Configuration.new(config_hash)
+        config_factory = double('config factory', produce: config)
 
-        command = bind_cmd(config_fetcher: config_fetcher)
-        command.run(['github'])
+        command = bind_cmd(bind_config_factory: config_factory)
+        command.run(['remote'])
 
         final_app_dir = File.absolute_path('final_app')
         index_html = File.read(File.join(final_app_dir, 'public', 'a', 'b', 'c', 'index.html'))
@@ -630,16 +586,16 @@ Content:
               'public_host' => 'docs.dogs.com'
           }
 
-          config = Configuration.new(logger, config_hash)
-          config_fetcher = double('config fetcher', fetch_config: config)
+          config = Configuration.new(config_hash)
+          config_factory = double('config factory', produce: config)
 
-          command = bind_cmd(config_fetcher: config_fetcher)
+          command = bind_cmd(bind_config_factory: config_factory)
           begin
             real_stdout = $stdout
             $stdout = StringIO.new
 
             expect do
-              command.run(['github'])
+              command.run(['remote'])
             end.to raise_error
 
             $stdout.rewind
@@ -667,16 +623,16 @@ Content:
             'public_host' => 'docs.dogs.com'
         }
 
-        config = Configuration.new(logger, config_hash)
-        config_fetcher = double('config fetcher', fetch_config: config)
+        config = Configuration.new(config_hash)
+        config_factory = double('config factory', produce: config)
 
-        command = bind_cmd(config_fetcher: config_fetcher)
+        command = bind_cmd(bind_config_factory: config_factory)
         begin
           real_stdout = $stdout
           $stdout = StringIO.new
 
           expect do
-            command.run(['github', '--verbose'])
+            command.run(['remote', '--verbose'])
           end.to raise_error
 
           $stdout.rewind
@@ -692,18 +648,17 @@ Content:
 
     describe 'creating necessary directories' do
       def create_command
-        config = Configuration.new(logger,
-                                   'sections' => [],
+        config = Configuration.new('sections' => [],
                                    'book_repo' => book,
                                    'cred_repo' => 'my-org/my-creds',
                                    'public_host' => 'docs.dogs.com')
-        config_fetcher = double('config fetcher', fetch_config: config)
+        config_factory = double('config factory', produce: config)
         middleman_runner = MiddlemanRunner.new(logger, GitFake.new)
         final_app_dir = File.absolute_path('final_app')
         spider = Spider.new(logger, app_dir: final_app_dir)
         server_director = ServerDirector.new(logger, directory: final_app_dir)
 
-        bind_cmd(config_fetcher: config_fetcher,
+        bind_cmd(bind_config_factory: config_factory,
                  static_site_generator: middleman_runner,
                  final_app_directory: final_app_dir,
                  spider: spider,
@@ -717,7 +672,7 @@ Content:
 
         expect(File.exists?(output_dir)).to eq false
 
-        command.run(['github'])
+        command.run(['remote'])
 
         expect(File.exists?(output_dir)).to eq true
       end
@@ -732,7 +687,7 @@ Content:
 
         expect(File.exists?(pre_existing_file)).to eq true
 
-        command.run(['github'])
+        command.run(['remote'])
 
         expect(File.exists?(pre_existing_file)).to eq false
       end
@@ -744,7 +699,7 @@ Content:
         FileUtils.touch pre_existing_file
 
         command = create_command
-        command.run(['github'])
+        command.run(['remote'])
 
         expect(File.exists?(pre_existing_file)).to eq false
         copied_manifest = File.read File.join(final_app_dir, 'app.rb')

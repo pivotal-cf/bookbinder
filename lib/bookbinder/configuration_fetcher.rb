@@ -17,7 +17,7 @@ module Bookbinder
     end
 
     def fetch_credentials(environment = 'null-environment')
-      @credentials ||= credentials_provider.credentials("git@github.com:#{fetch_config.cred_repo}")
+      @credentials ||= credentials_provider.credentials(fetch_config.cred_repo_url)
       {
         aws: Config::AwsCredentials.new(
           @credentials.fetch('aws', {})
@@ -55,7 +55,7 @@ module Bookbinder
                                                   Configuration::STARTING_SCHEMA_VERSION)
       raise errors.first if errors.any?
 
-      Configuration.new(logger, config_hash)
+      Configuration.new(config_hash)
     end
   end
 end

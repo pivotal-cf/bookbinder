@@ -12,7 +12,7 @@ module Bookbinder
         commands = [
           double(usage: ['--version', 'You can probably guess'], flag?: true),
           double(usage: ['--anotherflag', 'Something wild'], flag?: true),
-          double(usage: ["bind <local|github> [--verbose] [--dita-flags='<dita-option>=<value>']", 'Bind a booky wooky'], flag?: false),
+          double(usage: ["bind <local|remote> [--verbose] [--dita-flags='<dita-option>=<value>']", 'Bind a booky wooky'], flag?: false),
         ]
         help = Help.new(unused_logger = nil, commands)
 
@@ -26,7 +26,7 @@ module Bookbinder
     --version                                                               You can probably guess
     --anotherflag                                                           Something wild
     --help                                                                  Print this message
-    bind <local|github> [--verbose] [--dita-flags='<dita-option>=<value>']  Bind a booky wooky
+    bind <local|remote> [--verbose] [--dita-flags='<dita-option>=<value>']  Bind a booky wooky
         MSG
       end
     end

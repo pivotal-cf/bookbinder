@@ -1,7 +1,6 @@
 require 'middleman-syntax'
 
 require_relative '../archive_menu_configuration'
-require_relative '../book'
 require_relative '../dita_section_gatherer_factory'
 require_relative '../errors/cli_error'
 require_relative '../streams/switchable_stdout_and_red_stderr'
@@ -18,7 +17,6 @@ module Bookbinder
       DitaToHtmlLibraryFailure = Class.new(RuntimeError)
 
       def initialize(logger,
-                     config_fetcher,
                      config_factory,
                      archive_menu_config,
                      version_control_system,
@@ -35,7 +33,6 @@ module Bookbinder
                      sheller,
                      directory_preparer)
         @logger = logger
-        @config_fetcher = config_fetcher
         @config_factory = config_factory
         @archive_menu_config = archive_menu_config
         @version_control_system = version_control_system
@@ -54,8 +51,8 @@ module Bookbinder
       end
 
       def usage
-        ["bind <local|github> [--verbose] [--dita-flags='<dita-option>=<value>']",
-         "Bind the sections specified in config.yml from <local> or <github> into the final_app directory"]
+        ["bind <local|remote> [--verbose] [--dita-flags='<dita-option>=<value>']",
+         "Bind the sections specified in config.yml from <local> or <remote> into the final_app directory"]
       end
 
       def command_for?(test_command_name)
@@ -76,19 +73,18 @@ module Bookbinder
         output_locations = OutputLocations.new(
           context_dir: context_dir,
           final_app_dir: final_app_directory,
-          layout_repo_dir: layout_repo_path(generate_local_repo_dir(context_dir, bind_source)),
+          layout_repo_dir: layout_repo_path(bind_config, generate_local_repo_dir(context_dir, bind_source)),
           local_repo_dir: generate_local_repo_dir(context_dir, bind_source)
         )
 
         directory_preparer.prepare_directories(
+          bind_config,
           File.expand_path('../../../../', __FILE__),
-          bind_config.fetch(:versions, []),
-          output_locations,
-          bind_config[:book_repo]
+          output_locations
         )
 
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
-        gathered_dita_sections = dita_gatherer.gather(config.dita_sections)
+        gathered_dita_sections = dita_gatherer.gather(bind_config.dita_sections)
 
         dita_preprocessor.preprocess(gathered_dita_sections,
                                      output_locations.subnavs_for_layout_dir,
@@ -112,6 +108,7 @@ module Bookbinder
           output_locations.local_repo_dir
         )
         sections = gather_sections(
+          bind_config,
           output_locations.source_for_site_generator,
           cloner,
           ('master' if options.include?('--ignore-section-refs'))
@@ -133,7 +130,6 @@ module Bookbinder
       private
 
       attr_reader :version_control_system,
-                  :config_fetcher,
                   :config_factory,
                   :archive_menu_config,
                   :logger,
@@ -153,7 +149,7 @@ module Bookbinder
       def publish(subnavs, cli_options, output_locations, publish_config, cloner)
         FileUtils.cp 'redirects.rb', output_locations.final_app_dir if File.exists?('redirects.rb')
 
-        host_for_sitemap = publish_config.fetch(:host_for_sitemap)
+        host_for_sitemap = publish_config.public_host
 
         static_site_generator.run(output_locations,
                                   publish_config,
@@ -179,7 +175,7 @@ module Bookbinder
         File.expand_path('..', context_dir) if bind_source == 'local'
       end
 
-      def gather_sections(workspace, cloner, ref_override)
+      def gather_sections(config, workspace, cloner, ref_override)
         config.sections.map do |section_config|
           target_ref = ref_override ||
             section_config.fetch('repository', {})['ref'] ||
@@ -190,7 +186,7 @@ module Bookbinder
                                      source_ref: target_ref,
                                      destination_parent_dir: workspace,
                                      destination_dir_name: directory)
-          @section_repository.get_instance(
+          section_repository.get_instance(
             section_config,
             working_copy: working_copy,
             destination_dir: workspace
@@ -198,15 +194,11 @@ module Bookbinder
         end
       end
 
-      def config
-        config_fetcher.fetch_config
-      end
-
-      def layout_repo_path(local_repo_dir)
+      def layout_repo_path(config, local_repo_dir)
         if local_repo_dir && config.has_option?('layout_repo')
           File.join(local_repo_dir, config.layout_repo.split('/').last)
         elsif config.has_option?('layout_repo')
-          cloner = cloner_factory.produce('github', nil)
+          cloner = cloner_factory.produce('remote', nil)
           working_copy = cloner.call(source_repo_name: config.layout_repo,
                                      destination_parent_dir: Dir.mktmpdir)
           working_copy.path
@@ -221,7 +213,7 @@ module Bookbinder
 
       def arguments_are_valid?(bind_source, options)
         valid_options = %w(--verbose --ignore-section-refs --dita-flags).to_set
-        %w(local github).include?(bind_source) && flag_names(options).to_set.subset?(valid_options)
+        %w(local remote github).include?(bind_source) && flag_names(options).to_set.subset?(valid_options)
       end
 
       def flag_names(opts)
