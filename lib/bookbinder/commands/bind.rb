@@ -213,7 +213,7 @@ module Bookbinder
 
       def arguments_are_valid?(bind_source, options)
         valid_options = %w(--verbose --ignore-section-refs --dita-flags).to_set
-        %w(local remote).include?(bind_source) && flag_names(options).to_set.subset?(valid_options)
+        %w(local remote github).include?(bind_source) && flag_names(options).to_set.subset?(valid_options)
       end
 
       def flag_names(opts)

@@ -379,7 +379,7 @@ module Bookbinder
       let(:config_hash) { github_config_hash }
 
       it 'succeeds when all links are functional' do
-        exit_code = command.run(['remote'])
+        exit_code = command.run(['github'])
         expect(exit_code).to eq 0
       end
     end
