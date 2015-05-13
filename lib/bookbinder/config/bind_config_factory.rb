@@ -9,7 +9,7 @@ module Bookbinder
       end
 
       def produce(bind_source)
-        if bind_source == 'remote' && config.has_option?('versions')
+        if %w(remote github).include?(bind_source) && config.has_option?('versions')
           RemoteBindConfiguration.new(version_control_system, config).fetch
         else
           config
