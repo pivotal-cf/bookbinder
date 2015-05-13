@@ -185,7 +185,7 @@ If you specify a `layout_repo:` in `config.yml` with the full name of a git repo
 
 ### Section Repository Ref
 
-By default, the `bookbinder bind remote` command binds the most current versions (i.e., the `master` branch) of the documents in the GitHub repositories specified by the `sections:` of your `config.yml`.
+By default, the `bookbinder bind remote` command binds the most current versions (i.e., the `master` branch) of the documents in the git repositories specified by the `sections:` of your `config.yml`.
 
 Bookbinder supports a `ref` key to enable use of an alternate version of a repo. The value of this key can be the name of a branch (e.g., `develop`), a SHA, or a tag (`v19`).
 
