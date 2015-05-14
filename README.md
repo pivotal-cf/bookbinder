@@ -1,6 +1,8 @@
 [![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/pivotal-cf/bookbinder) [![Build Status](https://travis-ci.org/pivotal-cf/bookbinder.svg?branch=master)](https://travis-ci.org/pivotal-cf/bookbinder)
 # Bookbinder
 
+You can find detailed topics in the [wiki](https://github.com/pivotal-cf/bookbinder/wiki), such as [how to configure credentials for multiple git services](https://github.com/pivotal-cf/bookbinder/wiki/Credentials-for-multiple-git-services).
+
 Bookbinder is a gem that binds together a unified documentation web application
 from disparate source material.
 Source material can be in markdown, HTML, or
