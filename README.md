@@ -12,17 +12,6 @@ that you can deploy to Cloud Foundry.
 **Note**: The Bookbinder gem is now known as `bookbindery`.
 Please update your Gemfiles accordingly.
 
-## Usage
-
-Bookbinder is meant to be used from within a project called a **book**.
-The book includes a configuration file that describes which documentation
-repositories to use as source materials.
-The bookbindery gem provides a set of scripts to aggregate those repositories
-and publish them to various locations.
-Bookbinder also provides scripts for running on a Continuous Integration system
-that can detect when a documentation repository has been updated with new
-content, and that can verify a composed book is free of any dead links.
-
 ## Installation
 
 **Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
@@ -44,6 +33,17 @@ We recommend that you use the full_easy_install type for the DITA-OT library.
 
 **Note**: Ensure that the version of the DITA-OT library that you install
 supports the DITA version in which your documents are written.
+
+## Usage
+
+Bookbinder is meant to be used from within a project called a **book**.
+The book includes a configuration file that describes which documentation
+repositories to use as source materials.
+The bookbindery gem provides a set of scripts to aggregate those repositories
+and publish them to various locations.
+Bookbinder also provides scripts for running on a Continuous Integration system
+that can detect when a documentation repository has been updated with new
+content, and that can verify a composed book is free of any dead links.
 
 ### Creating a book from scratch using local sections
 
