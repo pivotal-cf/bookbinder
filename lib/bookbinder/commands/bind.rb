@@ -83,6 +83,15 @@ module Bookbinder
           output_locations
         )
 
+        cloner = cloner_factory.produce(bind_source, output_locations.local_repo_dir)
+
+        sections = gather_sections(
+          bind_config,
+          output_locations.source_for_site_generator,
+          cloner,
+          ('master' if options.include?('--ignore-section-refs'))
+        )
+
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
         gathered_dita_sections = dita_gatherer.gather(bind_config.dita_sections)
 
@@ -102,17 +111,6 @@ module Bookbinder
               'and that your DITA toolkit is correctly configured.'
           end
         end
-
-        cloner = cloner_factory.produce(
-          bind_source,
-          output_locations.local_repo_dir
-        )
-        sections = gather_sections(
-          bind_config,
-          output_locations.source_for_site_generator,
-          cloner,
-          ('master' if options.include?('--ignore-section-refs'))
-        )
 
         subnavs = (sections + gathered_dita_sections).map(&:subnav).reduce(&:merge)
 
