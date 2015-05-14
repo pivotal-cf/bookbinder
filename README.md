@@ -1,7 +1,8 @@
 [![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/pivotal-cf/bookbinder) [![Build Status](https://travis-ci.org/pivotal-cf/bookbinder.svg?branch=master)](https://travis-ci.org/pivotal-cf/bookbinder)
 # Bookbinder
 
-You can find detailed topics in the [wiki](https://github.com/pivotal-cf/bookbinder/wiki), such as [how to configure credentials for multiple git services](https://github.com/pivotal-cf/bookbinder/wiki/Credentials-for-multiple-git-services).
+**Note**: The Bookbinder gem is now named `bookbindery`.
+Please update your Gemfiles accordingly.
 
 Bookbinder is a gem that binds together a unified documentation web application
 from disparate source material.
@@ -11,8 +12,7 @@ in git repositories.
 Bookbinder runs [middleman](http://middlemanapp.com/) to produce a Rack app
 that you can deploy to Cloud Foundry.
 
-**Note**: The Bookbinder gem is now known as `bookbindery`.
-Please update your Gemfiles accordingly.
+See the [Bookbinder wiki](https://github.com/pivotal-cf/bookbinder/wiki) for detailed information and instructions, such as how to configure [credentials for multiple git services](https://github.com/pivotal-cf/bookbinder/wiki/Credentials-for-multiple-git-services).
 
 ## Installation
 
