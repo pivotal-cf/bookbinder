@@ -83,7 +83,7 @@ module Bookbinder
           output_locations
         )
 
-        cloner = cloner_factory.produce(bind_source, output_locations.local_repo_dir)
+        cloner = cloner_factory.produce(output_locations.local_repo_dir)
 
         sections = gather_sections(
           bind_config,
@@ -196,7 +196,7 @@ module Bookbinder
         if local_repo_dir && config.has_option?('layout_repo')
           File.join(local_repo_dir, config.layout_repo.split('/').last)
         elsif config.has_option?('layout_repo')
-          cloner = cloner_factory.produce('remote', nil)
+          cloner = cloner_factory.produce(nil)
           working_copy = cloner.call(source_repo_name: config.layout_repo,
                                      destination_parent_dir: Dir.mktmpdir)
           working_copy.path
