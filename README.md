@@ -31,7 +31,7 @@ To install the Bookbinder gem, add `gem "bookbindery"` to your Gemfile.
 Creating a book is more involved process, but we plan to automate this process
 in the near future.
 
-### <a id='dita-ot'></a>DITA-OT
+### DITA-OT
 
 Bookbinder uses the [DITA Open Toolkit](http://www.dita-ot.org/) (DITA-OT) to
 process documents written in DITA.
@@ -211,13 +211,13 @@ sections:
 
 ## Supported Formats
 
-* [Markdown](#markdown)
-* [DITA](#dita)
+* [Markdown](#user-content-markdown)
+* [DITA](#user-content-dita)
 
-### <a id='markdown'></a>Markdown
+### Markdown
 All markdown sections must be specified within the section key of the `config.yml`.
 
-### <a id='dita'></a>DITA
+### DITA
 
 Specify the following in the `config.yml`:
 
@@ -245,7 +245,7 @@ dita_sections:
 
 ```
 
-**Note**: You'll need to have properly installed and specified the [DITA-OT](#dita-ot) library.
+**Note**: You'll need to have properly installed and specified the [DITA-OT](#user-content-dita-ot) library.
 
 ## Middleman Templating Helpers
 
@@ -394,7 +394,7 @@ You will want a build that executes this shell command:
 
 This will bind a book and push it to staging.
 
-## <a name="deploying"></a>Deploying
+## Deploying
 
 Bookbinder has the ability to deploy the finished product to either staging or production. The deployment scripts use the gem's pre-packaged CloudFoundry Go CLI binary (separate versions for darwin-amd64 and linux-amd64 are included); any pre-installed version of the CLI on your system will **not** be used.
 
