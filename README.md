@@ -398,7 +398,9 @@ This will bind a book and push it to staging.
 
 ## Deploying
 
-Bookbinder has the ability to deploy the finished product to either staging or production. The deployment scripts use the gem's pre-packaged CloudFoundry Go CLI binary (separate versions for darwin-amd64 and linux-amd64 are included); any pre-installed version of the CLI on your system will **not** be used.
+Bookbinder has the ability to deploy the finished product to either staging or production. The deployment scripts requires the Cloud Foundry command line interface (cf CLI). 
+
+Download the cf CLI from [https://github.com/cloudfoundry/cli/releases](https://github.com/cloudfoundry/cli/releases). For more information and instructions, see the [cf CLI documentation](http://docs.cloudfoundry.org/devguide/installcf/index.html).
 
 ### Setting up CF Apps
 
