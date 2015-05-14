@@ -6,22 +6,11 @@ from disparate source material.
 Source material can be in markdown, HTML, or
 [DITA](http://dita.xml.org/standard), and must be stored in local directories or
 in git repositories.
-Bookbinder runs [middleman](http://middlemanapp.com/) to produce a Rackup app
+Bookbinder runs [middleman](http://middlemanapp.com/) to produce a Rack app
 that you can deploy to Cloud Foundry.
 
 **Note**: The Bookbinder gem is now known as `bookbindery`.
 Please update your Gemfiles accordingly.
-
-## Usage
-
-Bookbinder is meant to be used from within a project called a **book**.
-The book includes a configuration file that describes which documentation
-repositories to use as source materials.
-The bookbindery gem provides a set of scripts to aggregate those repositories
-and publish them to various locations.
-Bookbinder also provides scripts for running on a Continuous Integration system
-that can detect when a documentation repository has been updated with new
-content, and that can verify a composed book is free of any dead links.
 
 ## Installation
 
@@ -31,7 +20,7 @@ To install the Bookbinder gem, add `gem "bookbindery"` to your Gemfile.
 Creating a book is more involved process, but we plan to automate this process
 in the near future.
 
-### <a id='dita-ot'></a>DITA-OT
+### DITA-OT
 
 Bookbinder uses the [DITA Open Toolkit](http://www.dita-ot.org/) (DITA-OT) to
 process documents written in DITA.
@@ -44,6 +33,17 @@ We recommend that you use the full_easy_install type for the DITA-OT library.
 
 **Note**: Ensure that the version of the DITA-OT library that you install
 supports the DITA version in which your documents are written.
+
+## Usage
+
+Bookbinder is meant to be used from within a project called a **book**.
+The book includes a configuration file that describes which documentation
+repositories to use as source materials.
+The bookbindery gem provides a set of scripts to aggregate those repositories
+and publish them to various locations.
+Bookbinder also provides scripts for running on a Continuous Integration system
+that can detect when a documentation repository has been updated with new
+content, and that can verify a composed book is free of any dead links.
 
 ### Creating a book from scratch using local sections
 
@@ -211,13 +211,13 @@ sections:
 
 ## Supported Formats
 
-* [Markdown](#markdown)
-* [DITA](#dita)
+* [Markdown](#user-content-markdown)
+* [DITA](#user-content-dita)
 
-### <a id='markdown'></a>Markdown
+### Markdown
 All markdown sections must be specified within the section key of the `config.yml`.
 
-### <a id='dita'></a>DITA
+### DITA
 
 Specify the following in the `config.yml`:
 
@@ -245,7 +245,7 @@ dita_sections:
 
 ```
 
-**Note**: You'll need to have properly installed and specified the [DITA-OT](#dita-ot) library.
+**Note**: You'll need to have properly installed and specified the [DITA-OT](#user-content-dita-ot) library.
 
 ## Middleman Templating Helpers
 
@@ -394,7 +394,7 @@ You will want a build that executes this shell command:
 
 This will bind a book and push it to staging.
 
-## <a name="deploying"></a>Deploying
+## Deploying
 
 Bookbinder has the ability to deploy the finished product to either staging or production. The deployment scripts use the gem's pre-packaged CloudFoundry Go CLI binary (separate versions for darwin-amd64 and linux-amd64 are included); any pre-installed version of the CLI on your system will **not** be used.
 
