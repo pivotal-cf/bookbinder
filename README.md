@@ -6,7 +6,7 @@ from disparate source material.
 Source material can be in markdown, HTML, or
 [DITA](http://dita.xml.org/standard), and must be stored in local directories or
 in git repositories.
-Bookbinder runs [middleman](http://middlemanapp.com/) to produce a Rackup app
+Bookbinder runs [middleman](http://middlemanapp.com/) to produce a Rack app
 that you can deploy to Cloud Foundry.
 
 **Note**: The Bookbinder gem is now known as `bookbindery`.
