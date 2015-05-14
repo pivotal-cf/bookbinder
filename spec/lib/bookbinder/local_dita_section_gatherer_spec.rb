@@ -5,6 +5,7 @@ require_relative '../../../lib/bookbinder/values/output_locations'
 module Bookbinder
   describe LocalDitaSectionGatherer do
     it 'creates DitaSections which specify where the section source lives on the local file system' do
+      pending "Re-implementing using 'normal' section code path"
       output_locations = OutputLocations.new(local_repo_dir: 'local')
       local_dita_section_gatherer = LocalDitaSectionGatherer.new(output_locations)
 
