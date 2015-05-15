@@ -62,20 +62,22 @@ module Bookbinder
                                                               view_updater,
                                                               output_locations)
         expected_dita_sections = [
-            DitaSection.new(Pathname('context_dir/output/dita/dita_sections/dogs'),
-                            'dita-section.ditamap',
-                            'dita-val.ditaval',
-                            'fantastic/dogs-repo',
-                            'dog-sha',
-                            'dogs',
-                            output_locations),
-            DitaSection.new(Pathname('context_dir/output/dita/dita_sections/foods/sweet'),
-                            nil,
-                            nil,
-                            'cool/dogs-repo',
-                            'master',
-                            'foods/sweet',
-                            output_locations)
+          Section.new(Pathname('context_dir/output/dita/dita_sections/dogs'),
+                      'fantastic/dogs-repo',
+                      copied = true,
+                      output_locations.cloned_dita_dir,
+                      dir_name = 'dogs',
+                      'dita_subnav',
+                      'ditamap_location' => 'dita-section.ditamap',
+                      'ditaval_location' => 'dita-val.ditaval'),
+          Section.new(Pathname('context_dir/output/dita/dita_sections/foods/sweet'),
+                      'cool/dogs-repo',
+                      copied = true,
+                      output_locations.cloned_dita_dir,
+                      'foods/sweet',
+                      'dita_subnav',
+                      'ditamap_location' => nil,
+                      'ditaval_location' => nil)
         ]
 
         allow(view_updater).to receive(:log)

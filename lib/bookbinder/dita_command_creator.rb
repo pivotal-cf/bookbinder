@@ -20,13 +20,14 @@ module Bookbinder
                   "#{path_to_dita_ot_library}/lib/:" +
                   "#{path_to_dita_ot_library}/lib/dost.jar"
 
-      command = "export CLASSPATH=#{classpath}; " +
-                "ant -f #{path_to_dita_ot_library} " +
-                unduplicated_flags(write_to: write_to,
-                                   dita_flags: dita_flags,
-                                   ditamap_path: dita_section.absolute_path_to_ditamap,
-                                   ditaval_path: dita_section.absolute_path_to_ditaval)
-      command
+      "export CLASSPATH=#{classpath}; " +
+      "ant -f #{path_to_dita_ot_library} " +
+        unduplicated_flags(
+          write_to: write_to,
+          dita_flags: dita_flags,
+          ditamap_path: dita_section.path_to_preprocessor_attribute('ditamap_location'),
+          ditaval_path: dita_section.path_to_preprocessor_attribute('ditaval_location'),
+      )
     end
 
     private
@@ -69,7 +70,7 @@ module Bookbinder
     end
 
     def stripped_flag_value(v)
-      v.gsub(/['|"]/, "")
+      v.to_s.gsub(/['|"]/, "")
     end
 
     attr_reader :path_to_dita_ot_library

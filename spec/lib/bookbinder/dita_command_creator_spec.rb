@@ -1,5 +1,6 @@
 require_relative '../../../lib/bookbinder/configuration'
 require_relative '../../../lib/bookbinder/values/dita_section'
+require_relative '../../../lib/bookbinder/values/section'
 require_relative '../../../lib/bookbinder/dita_command_creator'
 
 module Bookbinder
@@ -8,12 +9,14 @@ module Bookbinder
 
     it 'includes default flags in the command that will run the dita-processing library' do
       processed_dita_location = '/path/to/processed/dita/boo'
-      dita_section = DitaSection.new('/local/path/to/repo',
-                                     'path/to/map.ditamap',
-                                     'path/to/val.ditaval',
-                                     'org/foo',
-                                     nil,
-                                     'boo')
+      dita_section = Section.new('/local/path/to/repo',
+                                 'org/foo',
+                                 copied = true,
+                                 'some/dest/dir',
+                                 'boo',
+                                 'dita_subnav',
+                                 'ditamap_location' => 'path/to/map.ditamap',
+                                 'ditaval_location' => 'path/to/val.ditaval')
 
       command_creator = DitaCommandCreator.new(path_to_dita_ot_library)
 
@@ -34,12 +37,14 @@ module Bookbinder
     context 'when no ditaval file is provided' do
       it 'does not apply the filters' do
         processed_dita_location = '/path/to/processed/dita/boo'
-        dita_section = DitaSection.new('/local/path/to/repo',
-                                       'path/to/map.ditamap',
-                                       nil,
-                                       'org/foo',
-                                       nil,
-                                       'boo')
+        dita_section = Section.new('/local/path/to/repo',
+                                   'org/foo',
+                                   copied = true,
+                                   'some/dest/dir',
+                                   'boo',
+                                   'dita_subnav',
+                                   'ditamap_location' => 'path/to/map.ditamap',
+                                   'ditaval_location' => nil)
 
         command_creator = DitaCommandCreator.new(path_to_dita_ot_library)
         expect(command_creator.convert_to_html_command(dita_section, write_to: processed_dita_location)).
@@ -52,12 +57,14 @@ module Bookbinder
         it 'raises an informative error' do
           command_creator = DitaCommandCreator.new(path_to_dita_ot_library)
           processed_dita_location = '/path/to/processed/dita/boo'
-          dita_section = DitaSection.new('/local/path/to/repo',
-                                         'path/to/map.ditamap',
-                                         nil,
-                                         'org/foo',
-                                         nil,
-                                         'boo')
+          dita_section = Section.new('/local/path/to/repo',
+                                     'org/foo',
+                                     copied = true,
+                                     'some/dest/dir',
+                                     'boo',
+                                     'dita_subnav',
+                                     'ditamap_location' => 'path/to/map.ditamap',
+                                     'ditaval_location' => nil)
 
           expect{command_creator.convert_to_html_command(
                      dita_section,
@@ -70,12 +77,14 @@ module Bookbinder
       it 'adds those flags to the default flags' do
         command_creator = DitaCommandCreator.new(path_to_dita_ot_library)
         processed_dita_location = '/path/to/processed/dita/boo'
-        dita_section = DitaSection.new('/local/path/to/repo',
-                                       'path/to/map.ditamap',
-                                       nil,
-                                       'org/foo',
-                                       nil,
-                                       'boo')
+        dita_section = Section.new('/local/path/to/repo',
+                                   'org/foo',
+                                   copied = true,
+                                   'some/dest/dir',
+                                   'boo',
+                                   'dita_subnav',
+                                   'ditamap_location' => 'path/to/map.ditamap',
+                                   'ditaval_location' => nil)
 
         expect(command_creator.convert_to_html_command(
                    dita_section,
@@ -90,12 +99,14 @@ module Bookbinder
         it 'prefers the passed flag' do
           command_creator = DitaCommandCreator.new(path_to_dita_ot_library)
           processed_dita_location = '/path/to/processed/dita/boo'
-          dita_section = DitaSection.new('/local/path/to/repo',
-                                         'path/to/map.ditamap',
-                                         nil,
-                                         'org/foo',
-                                         nil,
-                                         'boo')
+          dita_section = Section.new('/local/path/to/repo',
+                                     'org/foo',
+                                     copied = true,
+                                     'some/dest/dir',
+                                     'boo',
+                                     'dita_subnav',
+                                     'ditamap_location' => 'path/to/map.ditamap',
+                                     'ditaval_location' => nil)
 
           expect(command_creator.convert_to_html_command(
                      dita_section,

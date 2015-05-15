@@ -4,7 +4,6 @@ require_relative '../archive_menu_configuration'
 require_relative '../dita_section_gatherer_factory'
 require_relative '../errors/cli_error'
 require_relative '../streams/switchable_stdout_and_red_stderr'
-require_relative '../values/dita_section'
 require_relative '../values/output_locations'
 require_relative '../values/section'
 require_relative 'naming'
@@ -96,12 +95,13 @@ module Bookbinder
         gathered_dita_sections = dita_gatherer.gather(bind_config.dita_sections)
 
         dita_preprocessor.preprocess(gathered_dita_sections,
+                                     output_locations,
                                      output_locations.subnavs_for_layout_dir,
                                      output_locations.dita_subnav_template_path) do |dita_section|
           command = command_creator.convert_to_html_command(
             dita_section,
             dita_flags: dita_flags(options),
-            write_to: dita_section.html_from_dita_section_dir
+            write_to: output_locations.html_from_dita_dir.join(dita_section.directory)
           )
           status = sheller.run_command(command, output_streams.to_h)
           unless status.success?
