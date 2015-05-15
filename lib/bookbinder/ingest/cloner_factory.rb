@@ -10,7 +10,7 @@ module Bookbinder
         @version_control_system = version_control_system
       end
 
-      def produce(source, user_repo_dir)
+      def produce(user_repo_dir)
         if user_repo_dir
           LocalFilesystemCloner.new(logger, filesystem, user_repo_dir)
         else

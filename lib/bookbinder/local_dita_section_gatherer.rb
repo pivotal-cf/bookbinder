@@ -1,3 +1,6 @@
+require_relative 'ingest/local_filesystem_cloner'
+require_relative 'local_file_system_accessor'
+
 module Bookbinder
   class LocalDitaSectionGatherer
     def initialize(output_locations)
@@ -14,7 +17,14 @@ module Bookbinder
         local_source_directory_name = full_name.split('/').last
         path_to_local_copy = output_locations.local_repo_dir.join(local_source_directory_name)
 
-        DitaSection.new(path_to_local_copy,
+        cloner = Ingest::LocalFilesystemCloner.new(DeprecatedLogger.new,
+                                                   LocalFileSystemAccessor.new,
+                                                   output_locations.local_repo_dir)
+        working_copy = cloner.call(source_repo_name: full_name,
+                                   destination_parent_dir: output_locations.source_for_site_generator,
+                                   destination_dir_name: desired_destination_directory_name)
+
+        DitaSection.new(working_copy.copied_to,
                         relative_path_to_dita_map,
                         relative_path_to_dita_val,
                         full_name,

@@ -1,4 +1,5 @@
 require_relative '../directory_helpers'
+require_relative '../errors/programmer_mistake'
 
 module Bookbinder
   class OutputLocations
@@ -79,7 +80,11 @@ module Bookbinder
     private
 
     def context_dir
-      Pathname(@context_dir)
+      if @context_dir.nil?
+        raise Errors::ProgrammerMistake.new("You must provide a context_dir to OutputLocations")
+      else
+        Pathname(@context_dir)
+      end
     end
   end
 end

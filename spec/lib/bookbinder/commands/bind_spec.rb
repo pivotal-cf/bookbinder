@@ -306,7 +306,7 @@ module Bookbinder
                           sitemap_writer: null_sitemap_writer,
                           directory_preparer: double('dir preparer', prepare_directories: nil))
 
-          allow(factory).to receive(:produce).with('remote', nil) { cloner }
+          allow(factory).to receive(:produce).with(nil) { cloner }
 
           expect(cloner).to receive(:call).
             with(source_repo_name: "my/configuredrepo", destination_parent_dir: anything) {
