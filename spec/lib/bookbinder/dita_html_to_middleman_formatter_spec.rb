@@ -56,26 +56,21 @@ module Bookbinder
         doc_manipulator = double('doc_manipulator')
         dita_formatter = DitaHtmlToMiddlemanFormatter.new(nil, subnav_formatter, doc_manipulator)
 
-        dita_section = DitaSection.new('path/to/local/repo',
-                                       'relative/path/to/ditamap',
-                                       nil,
-                                       'org/my_dita_section',
-                                       nil,
-                                       'my_dita_section')
+        path_to_dita_section_dir = 'path/to/my/dita/section'
 
+        expect(subnav_formatter).to receive(:get_links_as_json)
+                                    .with('unformatted_subnav_text',
+                                          'path/to/my/dita/section')
+                                    .and_return(['this is some json'])
 
+        expect(doc_manipulator).to receive(:set_attribute)
+                                   .with(document:'<div class=nav-content></div>',
+                                         selector: 'div.nav-content',
+                                         attribute: 'data-props-location',
+                                         value: '/json/props/location')
+                                   .and_return('<div class=nav-content>this is formatted</div>')
 
-        expect(subnav_formatter).to receive(:get_links_as_json).with('unformatted_subnav_text',
-                                                                     'my_dita_section').
-                                        and_return(['this is some json'])
-
-        expect(doc_manipulator).to receive(:set_attribute).with(document:'<div class=nav-content></div>',
-                                                                selector: 'div.nav-content',
-                                                                attribute: 'data-props-location',
-                                                                value: '/json/props/location').
-                                       and_return('<div class=nav-content>this is formatted</div>')
-
-        subnav = dita_formatter.format_subnav(dita_section,
+        subnav = dita_formatter.format_subnav(path_to_dita_section_dir ,
                                               '<div class=nav-content></div>',
                                               '/json/props/location',
                                               'unformatted_subnav_text')

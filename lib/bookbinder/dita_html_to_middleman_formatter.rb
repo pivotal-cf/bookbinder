@@ -29,11 +29,12 @@ module Bookbinder
       end
     end
 
-    def format_subnav(dita_section,
+    def format_subnav(path_to_dita_section,
                       subnav_template_text,
                       json_props_location,
                       unformatted_subnav_text)
-      formatted_json_links = subnav_formatter.get_links_as_json(unformatted_subnav_text, dita_section.directory)
+      formatted_json_links = subnav_formatter.get_links_as_json(unformatted_subnav_text,
+                                                                path_to_dita_section)
 
       nav_text = html_document_manipulator.set_attribute(document: subnav_template_text,
                                                          selector: 'div.nav-content',
