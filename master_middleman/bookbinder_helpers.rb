@@ -26,11 +26,11 @@ module Bookbinder
         working_copy = cloner.call(source_repo_name: from,
                                    source_ref: 'master',
                                    destination_parent_dir: workspace)
-        example = code_example_repo.get_instance(attributes, working_copy: working_copy) { |*args| Section.new(*args) }
+
         snippet, language = code_example_reader.get_snippet_and_language_at(at,
-                                                                            example.path_to_repository,
-                                                                            example.copied,
-                                                                            example.full_name)
+                                                                            working_copy.copied_to,
+                                                                            working_copy.copied?,
+                                                                            working_copy.full_name)
 
         delimiter = '```'
 
@@ -79,10 +79,6 @@ module Bookbinder
       end
 
       private
-
-      def code_example_repo
-        @code_example_repo ||= Repositories::SectionRepository.new(bookbinder_logger)
-      end
 
       def index_subnav
         return true if current_page.data.index_subnav
