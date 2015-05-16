@@ -1,8 +1,12 @@
 [![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/pivotal-cf/bookbinder) [![Build Status](https://travis-ci.org/pivotal-cf/bookbinder.svg?branch=master)](https://travis-ci.org/pivotal-cf/bookbinder)
 # Bookbinder
 
-**Note**: The Bookbinder gem is now named `bookbindery`.
-Please update your Gemfiles accordingly.
+**Note**: The Bookbinder gem is now named `bookbindery`, and this GitHub repository is no longer a supported gem source for the gem. To use the Bookbinder gem, include the following in your book's Gemfile:
+
+~~~bash
+source 'https://rubygems.org'
+gem 'bookbindery', '~> 3.0.1'
+~~~
 
 Bookbinder is a gem that binds together a unified documentation web application
 from disparate source material.
