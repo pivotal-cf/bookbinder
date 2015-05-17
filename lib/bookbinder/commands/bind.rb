@@ -175,15 +175,10 @@ module Bookbinder
 
       def gather_sections(config, workspace, cloner, ref_override)
         config.sections.map do |section_config|
-          target_ref = ref_override ||
-            section_config.fetch('repository', {})['ref'] ||
-            'master'
-          repo_name = section_config.fetch('repository').fetch('name')
-          directory = section_config['directory']
-          working_copy = cloner.call(source_repo_name: repo_name,
-                                     source_ref: target_ref,
+          working_copy = cloner.call(source_repo_name: section_config.repo_name,
+                                     source_ref: ref_override || section_config.repo_ref,
                                      destination_parent_dir: workspace,
-                                     destination_dir_name: directory)
+                                     destination_dir_name: section_config.desired_directory_name)
           section_repository.get_instance(
             section_config,
             working_copy: working_copy,

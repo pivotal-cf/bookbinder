@@ -34,7 +34,7 @@ module Bookbinder
       attr_reader :configuration_fetcher, :version_control_system
 
       def urls(config)
-        [config.book_repo_url] + config.sections.map {|section| section['repo_url']}.uniq
+        [config.book_repo_url] + config.sections.map(&:repo_url).uniq
       end
 
       def config

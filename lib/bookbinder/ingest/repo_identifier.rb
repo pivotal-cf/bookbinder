@@ -17,6 +17,10 @@ module Bookbinder
 
       alias :to_s :to_str
 
+      def inspect
+        %Q("#{to_s}")
+      end
+
       def split(*args)
         input_identifier.split(*args)
       end

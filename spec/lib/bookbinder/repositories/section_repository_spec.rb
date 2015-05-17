@@ -1,3 +1,4 @@
+require_relative '../../../../lib/bookbinder/config/section_config'
 require_relative '../../../../lib/bookbinder/ingest/working_copy'
 require_relative '../../../../lib/bookbinder/repositories/section_repository'
 
@@ -11,7 +12,7 @@ module Bookbinder
         expect(logger).to receive(:log).with(%r{foo/book})
 
         SectionRepository.new(logger).get_instance(
-          {'repository' => {'name' => 'foo/book'}},
+          Config::SectionConfig.new('repository' => {'name' => 'foo/book'}),
           working_copy: Ingest::WorkingCopy.new(repo_dir: 'some/repo/dir',
                                                 full_name: 'org/repo',
                                                 copied_to: 'path/to/repo',

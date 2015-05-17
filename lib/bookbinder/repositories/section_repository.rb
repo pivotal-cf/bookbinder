@@ -13,15 +13,14 @@ module Bookbinder
                        working_copy: nil,
                        destination_dir: nil,
                        &build)
-        repository_config = section_config['repository']
-        logger.log "Gathering #{repository_config.fetch('name').cyan}"
+        logger.log "Gathering #{section_config.repo_name.cyan}"
         Section.new(
           working_copy.copied_to,
           working_copy.full_name,
           working_copy.copied?,
           destination_dir,
           working_copy.directory,
-          section_config['subnav_template']
+          section_config.subnav_template
         )
       end
 

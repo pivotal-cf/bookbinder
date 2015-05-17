@@ -12,9 +12,7 @@ module Bookbinder
       end
 
       def fetch
-        base_config.merge(
-          'sections' => base_config.sections + base_config.versions.flat_map { |version| sections_from(version) },
-        )
+        base_config.merge_sections(base_config.versions.flat_map { |version| sections_from(version) })
       end
 
       private

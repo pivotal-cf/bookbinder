@@ -1,4 +1,5 @@
 require_relative 'ingest/repo_identifier'
+require_relative 'config/section_config'
 
 module Bookbinder
   class Configuration
@@ -50,8 +51,14 @@ module Bookbinder
 
     def sections
       config.fetch('sections', []).map {|section|
-        section.merge('repo_url' => vcs_url(section['repository']['name']))
+        Config::SectionConfig.new(
+          section.merge('repo_url' => vcs_url(section['repository']['name']))
+        )
       }
+    end
+
+    def merge_sections(raw_sections)
+      Configuration.new(config.merge('sections' => config.fetch('sections', []) + raw_sections))
     end
 
     def dita_sections
