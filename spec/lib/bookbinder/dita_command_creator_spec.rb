@@ -1,5 +1,4 @@
 require_relative '../../../lib/bookbinder/configuration'
-require_relative '../../../lib/bookbinder/values/dita_section'
 require_relative '../../../lib/bookbinder/values/section'
 require_relative '../../../lib/bookbinder/dita_command_creator'
 

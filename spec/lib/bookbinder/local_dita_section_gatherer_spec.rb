@@ -1,5 +1,4 @@
 require_relative '../../../lib/bookbinder/local_dita_section_gatherer'
-require_relative '../../../lib/bookbinder/values/dita_section'
 require_relative '../../../lib/bookbinder/values/output_locations'
 
 module Bookbinder

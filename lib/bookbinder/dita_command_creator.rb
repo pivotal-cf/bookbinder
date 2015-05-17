@@ -1,5 +1,3 @@
-require_relative '../bookbinder/values/dita_section'
-
 module Bookbinder
   class DitaCommandCreator
     MissingDitaOTFlagValue = Class.new(RuntimeError)

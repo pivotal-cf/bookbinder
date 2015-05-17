@@ -1,7 +1,6 @@
 require_relative '../../../lib/bookbinder/dita_html_to_middleman_formatter'
 require_relative '../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../lib/bookbinder/html_document_manipulator'
-require_relative '../../../lib/bookbinder/values/dita_section'
 require_relative '../../helpers/use_fixture_repo'
 
 module Bookbinder
