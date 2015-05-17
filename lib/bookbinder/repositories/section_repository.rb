@@ -1,4 +1,5 @@
 require 'tmpdir'
+require_relative '../deprecated_logger'
 
 module Bookbinder
   module Repositories
@@ -9,7 +10,7 @@ module Bookbinder
 
       def get_instance(section_config,
                        working_copy: nil,
-                       destination_dir: Dir.mktmpdir,
+                       destination_dir: nil,
                        &build)
         repository_config = section_config['repository']
         raise "section repository '#{repository_config}' is not a hash" unless repository_config.is_a?(Hash)
