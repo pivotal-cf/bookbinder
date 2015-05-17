@@ -14,9 +14,7 @@ module Bookbinder
                        destination_dir: nil,
                        &build)
         repository_config = section_config['repository']
-        raise "section repository '#{repository_config}' is not a hash" unless repository_config.is_a?(Hash)
-        raise "section repository '#{repository_config}' missing name key" unless repository_config['name']
-        logger.log "Gathering #{repository_config['name'].cyan}"
+        logger.log "Gathering #{repository_config.fetch('name').cyan}"
         Section.new(
           working_copy.copied_to,
           working_copy.full_name,
