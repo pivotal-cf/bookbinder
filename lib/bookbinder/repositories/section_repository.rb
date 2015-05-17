@@ -1,5 +1,6 @@
 require 'tmpdir'
 require_relative '../deprecated_logger'
+require_relative '../values/section'
 
 module Bookbinder
   module Repositories
@@ -16,12 +17,14 @@ module Bookbinder
         raise "section repository '#{repository_config}' is not a hash" unless repository_config.is_a?(Hash)
         raise "section repository '#{repository_config}' missing name key" unless repository_config['name']
         logger.log "Gathering #{repository_config['name'].cyan}"
-        build[working_copy.copied_to,
-              working_copy.full_name,
-              working_copy.copied?,
-              destination_dir,
-              working_copy.directory,
-              section_config['subnav_template']]
+        Section.new(
+          working_copy.copied_to,
+          working_copy.full_name,
+          working_copy.copied?,
+          destination_dir,
+          working_copy.directory,
+          section_config['subnav_template']
+        )
       end
 
       private

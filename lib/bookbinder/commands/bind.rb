@@ -188,7 +188,7 @@ module Bookbinder
             section_config,
             working_copy: working_copy,
             destination_dir: workspace
-          ) { |*args| Section.new(*args) }
+          )
         end
       end
 

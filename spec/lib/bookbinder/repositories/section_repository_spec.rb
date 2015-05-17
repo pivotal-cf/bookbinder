@@ -1,6 +1,5 @@
 require_relative '../../../../lib/bookbinder/ingest/working_copy'
 require_relative '../../../../lib/bookbinder/repositories/section_repository'
-require_relative '../../../../lib/bookbinder/values/section'
 
 module Bookbinder
   module Repositories
@@ -18,7 +17,7 @@ module Bookbinder
                                                   full_name: 'org/repo',
                                                   copied_to: 'path/to/repo',
                                                   directory: 'repo')
-          ) { |*args| Section.new(*args) }
+          )
         end
 
         context 'if the repo is not a hash' do
@@ -27,7 +26,7 @@ module Bookbinder
             expect {
               repository.get_instance({ 'repository' => 'foo/definitely-not-around' },
                                       working_copy: Ingest::WorkingCopy.new(copied_to: 'path/to/repo'),
-                                      destination_dir: local_repo_dir) { |*args| Section.new(*args) }
+                                      destination_dir: local_repo_dir)
             }.to raise_error(RuntimeError,
                              "section repository 'foo/definitely-not-around' is not a hash")
           end
@@ -39,7 +38,7 @@ module Bookbinder
             expect {
               repository.get_instance({ 'repository' => { some_key: 'test' }},
                                       working_copy: Ingest::WorkingCopy.new(copied_to: 'path/to/repo'),
-                                      destination_dir: local_repo_dir) { |*args| Section.new(*args) }
+                                      destination_dir: local_repo_dir)
             }.to raise_error(RuntimeError,
                              "section repository '{:some_key=>\"test\"}' missing name key")
           end
