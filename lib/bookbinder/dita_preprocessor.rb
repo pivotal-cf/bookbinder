@@ -10,6 +10,10 @@ module Bookbinder
       @local_fs_accessor = local_fs_accessor
     end
 
+    def applicable_to?(section)
+      section.subnav_template == 'dita_subnav'
+    end
+
     def preprocess(dita_sections,
                    output_locations,
                    subnavs_dir,
