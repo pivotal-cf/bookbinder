@@ -94,9 +94,7 @@ module Bookbinder
         gathered_dita_sections = dita_gatherer.gather(bind_config.dita_sections)
 
         dita_preprocessor.preprocess(gathered_dita_sections,
-                                     output_locations,
-                                     output_locations.subnavs_for_layout_dir,
-                                     output_locations.dita_subnav_template_path) do |dita_section|
+                                     output_locations) do |dita_section|
           command = command_creator.convert_to_html_command(
             dita_section,
             dita_flags: dita_flags(options),

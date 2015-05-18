@@ -16,13 +16,13 @@ module Bookbinder
 
     def preprocess(dita_sections,
                    output_locations,
-                   subnavs_dir,
-                   dita_subnav_template_path,
                    &block)
-      ditamap_location_sections = dita_sections.select { |dita_section| dita_section.path_to_preprocessor_attribute('ditamap_location') }
-      ditamap_location_sections.each do |dita_section|
+      dita_sections.select { |dita_section| dita_section.path_to_preprocessor_attribute('ditamap_location') }.each do |dita_section|
         block.call(dita_section)
-        generate_subnav(dita_section.directory, output_locations, dita_subnav_template_path, subnavs_dir)
+        generate_subnav(dita_section.directory,
+                        output_locations,
+                        output_locations.dita_subnav_template_path,
+                        output_locations.subnavs_for_layout_dir)
       end
 
       dita_sections.each do |dita_section|
