@@ -1,3 +1,4 @@
+require_relative '../errors/programmer_mistake'
 require_relative '../ingest/destination_directory'
 
 module Bookbinder
@@ -32,6 +33,11 @@ module Bookbinder
 
     def path_to_preprocessor_attribute(attr)
       path_to_repository.join(preprocessor_config[attr]) if preprocessor_config[attr]
+    rescue NoMethodError => e
+      raise Errors::ProgrammerMistake.new(
+        "path_to_preprocessor_attribute assumes preprocessor_config is available, got nil.\n" +
+        "Original exception:\n\n#{e.inspect}\n\n#{e.backtrace.join("\n")}"
+      )
     end
   end
 end
