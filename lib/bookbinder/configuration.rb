@@ -50,11 +50,7 @@ module Bookbinder
     end
 
     def sections
-      config.fetch('sections', []).map {|section|
-        Config::SectionConfig.new(
-          section.merge('repo_url' => vcs_url(section['repository']['name']))
-        )
-      }
+      config.fetch('sections', []).map { |section| Config::SectionConfig.new(section) }
     end
 
     def merge_sections(raw_sections)
