@@ -3,6 +3,15 @@ require_relative '../../../../lib/bookbinder/config/section_config'
 module Bookbinder
   module Config
     describe SectionConfig do
+      it "can return the preprocessor config" do
+        expect(
+          SectionConfig.new('preprocessor_config' => {
+            'some' => 'data',
+            '4' => 'u'
+          }).preprocessor_config
+        ).to eq('some' => 'data', '4' => 'u')
+      end
+
       it "can return the provided subnav template" do
         expect(SectionConfig.new('subnav_template' => 'mysubnav').subnav_template).
           to eq('mysubnav')

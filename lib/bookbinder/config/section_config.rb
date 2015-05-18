@@ -27,6 +27,10 @@ module Bookbinder
         repo['ref'] || 'master'
       end
 
+      def preprocessor_config
+        config['preprocessor_config']
+      end
+
       def ==(other)
         config == other.instance_variable_get(:@config)
       end
