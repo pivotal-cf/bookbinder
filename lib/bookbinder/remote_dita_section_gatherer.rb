@@ -24,7 +24,7 @@ module Bookbinder
         ).tap do |section|
           version_control_system.clone(
             "git@github.com:#{section.full_name}",
-            section.directory_name,
+            section.desired_directory_name,
             path: output_locations.cloned_preprocessing_dir,
             checkout: dita_section_config.fetch('repository').fetch('ref', 'master'),
           )

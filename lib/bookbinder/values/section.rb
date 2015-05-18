@@ -6,7 +6,7 @@ module Bookbinder
                        :full_name,
                        :copied,
                        :destination_dir,
-                       :directory_name,
+                       :desired_directory_name,
                        :subnav_templ,
                        :preprocessor_config) do
     def requires_preprocessing?
@@ -22,7 +22,7 @@ module Bookbinder
     end
 
     def directory
-      Ingest::DestinationDirectory.new(full_name, directory_name)
+      Ingest::DestinationDirectory.new(full_name, desired_directory_name)
     end
 
     def subnav

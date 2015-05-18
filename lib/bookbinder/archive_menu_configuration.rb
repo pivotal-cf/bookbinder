@@ -24,7 +24,7 @@ module Bookbinder
         config_path = section.path_to_repository.join(config_filename)
         archive_config = loader.load_key(config_path, 'archive_menu')
         if archive_config
-          config.merge(section.directory_name => archive_config)
+          config.merge(section.desired_directory_name => archive_config)
         else
           config
         end
