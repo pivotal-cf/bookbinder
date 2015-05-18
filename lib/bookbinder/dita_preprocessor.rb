@@ -21,7 +21,7 @@ module Bookbinder
         block.call(dita_section)
         generate_subnav(dita_section.directory,
                         output_locations,
-                        output_locations.dita_subnav_template_path,
+                        output_locations.source_for_site_generator.join('subnavs', '_dita_subnav_template.erb'),
                         output_locations.subnavs_for_layout_dir)
       end
 

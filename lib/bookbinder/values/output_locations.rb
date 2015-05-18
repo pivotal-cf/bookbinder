@@ -73,10 +73,6 @@ module Bookbinder
       source_for_site_generator.join('subnavs')
     end
 
-    def dita_subnav_template_path
-      source_for_site_generator.join('subnavs', '_dita_subnav_template.erb')
-    end
-
     private
 
     def context_dir
