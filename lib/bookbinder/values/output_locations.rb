@@ -45,20 +45,20 @@ module Bookbinder
       Pathname(@local_repo_dir) if @local_repo_dir
     end
 
-    def dita_home_dir
+    def preprocessing_home_dir
       output_dir.join('preprocessing')
     end
 
     def cloned_dita_dir
-      dita_home_dir.join('dita_sections')
+      preprocessing_home_dir.join('dita_sections')
     end
 
     def html_from_dita_dir
-      dita_home_dir.join('html_from_dita')
+      preprocessing_home_dir.join('html_from_dita')
     end
 
     def formatted_dir
-      dita_home_dir.join('site_generator_ready')
+      preprocessing_home_dir.join('site_generator_ready')
     end
 
     def site_generator_home

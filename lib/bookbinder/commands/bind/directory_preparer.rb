@@ -16,7 +16,7 @@ module Bookbinder
         def prepare_directories(config, gem_root, locations)
           forget_sections(locations.output_dir)
           file_system_accessor.remove_directory(File.join(locations.final_app_dir, '.'))
-          file_system_accessor.remove_directory(locations.dita_home_dir)
+          file_system_accessor.remove_directory(locations.preprocessing_home_dir)
 
           copy_directory_from_gem(gem_root, 'template_app', locations.final_app_dir)
           copy_directory_from_gem(gem_root, 'master_middleman', locations.site_generator_home)
