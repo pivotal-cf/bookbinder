@@ -9,7 +9,7 @@ require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
-require_relative '../../../../lib/bookbinder/repositories/section_repository'
+require_relative '../../../../lib/bookbinder/repositories/section_repository_factory'
 require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../../lib/bookbinder/spider'
@@ -47,7 +47,7 @@ module Bookbinder
                          partial_args.fetch(:dita_preprocessor, dita_preprocessor),
                          partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, GitFake.new)),
                          DitaSectionGathererFactory.new(bind_version_control_system, bind_logger),
-                         Repositories::SectionRepository.new(logger),
+                         Repositories::SectionRepositoryFactory.new(logger),
                          partial_args.fetch(:command_creator, command_creator),
                          partial_args.fetch(:sheller, sheller),
                          partial_args.fetch(:directory_preparer,

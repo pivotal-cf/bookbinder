@@ -18,7 +18,7 @@ require_relative '../remote_yaml_credential_provider'
 require_relative '../sheller'
 require_relative '../subnav_formatter'
 require_relative '../yaml_loader'
-require_relative 'section_repository'
+require_relative 'section_repository_factory'
 
 module Bookbinder
   module Repositories
@@ -87,7 +87,7 @@ module Bookbinder
           dita_preprocessor,
           Ingest::ClonerFactory.new(logger, local_file_system_accessor, version_control_system),
           DitaSectionGathererFactory.new(version_control_system, logger),
-          Repositories::SectionRepository.new(logger),
+          Repositories::SectionRepositoryFactory.new(logger),
           dita_command_creator,
           Sheller.new,
           Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)

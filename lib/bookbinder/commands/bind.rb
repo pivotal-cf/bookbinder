@@ -27,7 +27,7 @@ module Bookbinder
                      dita_preprocessor,
                      cloner_factory,
                      dita_section_gatherer_factory,
-                     section_repository,
+                     section_repository_factory,
                      command_creator,
                      sheller,
                      directory_preparer)
@@ -43,7 +43,7 @@ module Bookbinder
         @dita_preprocessor = dita_preprocessor
         @cloner_factory = cloner_factory
         @dita_section_gatherer_factory = dita_section_gatherer_factory
-        @section_repository = section_repository
+        @section_repository_factory = section_repository_factory
         @command_creator = command_creator
         @sheller = sheller
         @directory_preparer = directory_preparer
@@ -65,9 +65,7 @@ module Bookbinder
       def run(cli_arguments)
         bind_source, *options = cli_arguments
         validate(bind_source, options)
-
         bind_config = config_factory.produce(bind_source)
-        output_streams = Streams::SwitchableStdoutAndRedStderr.new(options)
 
         output_locations = OutputLocations.new(
           context_dir: context_dir,
@@ -75,6 +73,10 @@ module Bookbinder
           layout_repo_dir: layout_repo_path(bind_config, generate_local_repo_dir(context_dir, bind_source)),
           local_repo_dir: generate_local_repo_dir(context_dir, bind_source)
         )
+        cloner = cloner_factory.produce(output_locations.local_repo_dir)
+        section_repository = section_repository_factory.produce(cloner)
+
+        output_streams = Streams::SwitchableStdoutAndRedStderr.new(options)
 
         directory_preparer.prepare_directories(
           bind_config,
@@ -82,13 +84,10 @@ module Bookbinder
           output_locations
         )
 
-        cloner = cloner_factory.produce(output_locations.local_repo_dir)
-
-        sections = gather_sections(
-          bind_config,
-          output_locations.source_for_site_generator,
-          cloner,
-          ('master' if options.include?('--ignore-section-refs'))
+        sections = section_repository.fetch(
+          configured_sections: bind_config.sections,
+          destination_dir: output_locations.source_for_site_generator,
+          ref_override: ('master' if options.include?('--ignore-section-refs'))
         )
 
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
@@ -139,7 +138,7 @@ module Bookbinder
                   :dita_preprocessor,
                   :cloner_factory,
                   :dita_section_gatherer_factory,
-                  :section_repository,
+                  :section_repository_factory,
                   :command_creator,
                   :sheller,
                   :directory_preparer
@@ -171,20 +170,6 @@ module Bookbinder
 
       def generate_local_repo_dir(context_dir, bind_source)
         File.expand_path('..', context_dir) if bind_source == 'local'
-      end
-
-      def gather_sections(config, workspace, cloner, ref_override)
-        config.sections.map do |section_config|
-          working_copy = cloner.call(source_repo_name: section_config.repo_name,
-                                     source_ref: ref_override || section_config.repo_ref,
-                                     destination_parent_dir: workspace,
-                                     destination_dir_name: section_config.desired_directory_name)
-          section_repository.get_instance(
-            section_config,
-            working_copy: working_copy,
-            destination_dir: workspace
-          )
-        end
       end
 
       def layout_repo_path(config, local_repo_dir)

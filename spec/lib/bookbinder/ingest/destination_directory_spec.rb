@@ -3,6 +3,10 @@ require_relative '../../../../lib/bookbinder/ingest/destination_directory'
 module Bookbinder
   module Ingest
     describe DestinationDirectory do
+      it "is empty if instantiated with nils" do
+        expect(DestinationDirectory.new).to eq("")
+      end
+
       context "when not given a desired destination name" do
         it "returns the repo part of an org/repo type name" do
           expect(DestinationDirectory.new("myorg/myrepo")).to eq("myrepo")
