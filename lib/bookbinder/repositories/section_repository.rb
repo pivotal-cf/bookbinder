@@ -25,7 +25,8 @@ module Bookbinder
             working_copy.copied?,
             destination_dir,
             working_copy.directory,
-            section_config.subnav_template
+            section_config.subnav_template,
+            section_config.preprocessor_config
           )
         end
       end

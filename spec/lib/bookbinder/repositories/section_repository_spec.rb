@@ -73,7 +73,8 @@ module Bookbinder
         sections = SectionRepository.new(null_logger, cloner).fetch(
           configured_sections: [
             Config::SectionConfig.new('repository' => { 'name' => 'myorg/myrepo',
-                                                        'ref' => 'mydesiredref' }),
+                                                        'ref' => 'mydesiredref' },
+                                      'preprocessor_config' => {'my' => 'stuff', 'to' => 'preprocess'}),
             Config::SectionConfig.new('repository' => { 'name' => 'myorg/myotherrepo' },
                                       'subnav_template' => 'specified_a_template'),
           ],
@@ -83,7 +84,7 @@ module Bookbinder
 
         expect(sections).to eq(
           [
-            Section.new('bar', 'qux', copied = true, 'anywhere/really', 'baz'),
+            Section.new('bar', 'qux', copied = true, 'anywhere/really', 'baz', nil, 'my' => 'stuff', 'to' => 'preprocess'),
             Section.new('b', 'd', copied = true, 'anywhere/really', 'c', 'specified_a_template'),
           ]
         )
