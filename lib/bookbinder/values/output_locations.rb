@@ -46,7 +46,7 @@ module Bookbinder
     end
 
     def dita_home_dir
-      output_dir.join('dita')
+      output_dir.join('preprocessing')
     end
 
     def cloned_dita_dir

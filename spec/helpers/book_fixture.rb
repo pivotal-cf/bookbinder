@@ -53,7 +53,7 @@ module Bookbinder
 
     def invokes_dita_option_for_css_path(dita_section, options)
       flags = dita_flags_from(options)
-      copied_css_file_location = Pathname("./output/dita/html_from_dita/#{dita_section.dir}/" +
+      copied_css_file_location = Pathname("./output/preprocessing/html_from_dita/#{dita_section.dir}/" +
                                           flags['args.csspath'] +
                                           flags['args.css'])
       File.exist? copied_css_file_location
@@ -68,7 +68,7 @@ module Bookbinder
       if section_source == SectionSource.local
         section_location = Pathname("../#{repo_name}")
       else
-        section_location = Pathname("./output/dita/dita_sections/#{dir}")
+        section_location = Pathname("./output/preprocessing/dita_sections/#{dir}")
       end
 
       path_to_ditamap = Pathname("#{section_location}/example.ditamap")
@@ -77,7 +77,7 @@ module Bookbinder
         topicname = topic.attr('href').split('.xml').first
 
         Topic.new(Pathname("./final_app/public/#{dir}/#{topicname}.html"),
-                  Pathname("./output/dita/site_generator_ready/#{dir}/#{topicname}.html.erb"),
+                  Pathname("./output/preprocessing/site_generator_ready/#{dir}/#{topicname}.html.erb"),
                   Pathname("#{section_location}/#{topicname}.xml"),
                   topicname)
       end

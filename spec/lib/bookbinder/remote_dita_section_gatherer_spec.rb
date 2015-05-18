@@ -26,7 +26,7 @@ module Bookbinder
         )
 
         allow(view_updater).to receive(:log)
-        path = Pathname('context_dir/output/dita/dita_sections')
+        path = Pathname('context_dir/output/preprocessing/dita_sections')
         expect(version_control_system).to receive(:clone)
                                           .with('git@github.com:fantastic/dita-repo',
                                                 'dogs',
@@ -62,7 +62,7 @@ module Bookbinder
                                                               view_updater,
                                                               output_locations)
         expected_dita_sections = [
-          Section.new(Pathname('context_dir/output/dita/dita_sections/dogs'),
+          Section.new(Pathname('context_dir/output/preprocessing/dita_sections/dogs'),
                       'fantastic/dogs-repo',
                       copied = true,
                       output_locations.cloned_dita_dir,
@@ -70,7 +70,7 @@ module Bookbinder
                       'dita_subnav',
                       'ditamap_location' => 'dita-section.ditamap',
                       'ditaval_location' => 'dita-val.ditaval'),
-          Section.new(Pathname('context_dir/output/dita/dita_sections/foods/sweet'),
+          Section.new(Pathname('context_dir/output/preprocessing/dita_sections/foods/sweet'),
                       'cool/dogs-repo',
                       copied = true,
                       output_locations.cloned_dita_dir,
