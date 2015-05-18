@@ -332,7 +332,7 @@ When you then bind your book, Bookbinder replaces the key with the value defined
     ...
     template_variables:
       app_domain: example.com
-      my-app: <a href="http://my-app.example.org">this link</a>
+      my-app: < a href="http://my-app.example.org" >this link</a>
     </pre> 
 
 * To use a template variable, add the key (in <%=vars.MY-KEY%> form) to a source file.
@@ -342,6 +342,16 @@ When you then bind your book, Bookbinder replaces the key with the value defined
     <pre>
     I deployed my app to <%=vars.app_domain%>. You can see it by clicking <%=vars.my-app%>.
     </pre> 
+
+
+### Partials
+
+Bookbinder supports **partials**, reusable blocks of source material. 
+
+Create a partial by adding a file containing source material to a repo. 
+The name of the file must start with an underscore.
+
+To use the partial, use the name of the file without the starting underscore in the following code, and add this code to the source file where you want the partial to appear: <%= partial 'FILENAME' %>
 
 ### Including Assets
 
