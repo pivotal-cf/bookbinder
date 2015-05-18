@@ -53,8 +53,8 @@ module Bookbinder
       preprocessing_home_dir.join('sections')
     end
 
-    def html_from_dita_dir
-      preprocessing_home_dir.join('html_from_dita')
+    def html_from_preprocessing_dir
+      preprocessing_home_dir.join('html_from_preprocessing')
     end
 
     def formatted_dir

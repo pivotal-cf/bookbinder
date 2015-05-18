@@ -26,7 +26,7 @@ module Bookbinder
       end
 
       dita_sections.each do |dita_section|
-        html_dir = output_locations.html_from_dita_dir.join(dita_section.directory)
+        html_dir = output_locations.html_from_preprocessing_dir.join(dita_section.directory)
         formatted_dir = output_locations.formatted_dir.join(dita_section.directory)
         source_for_site_gen_dir = output_locations.source_for_site_generator.join(dita_section.directory)
 
@@ -47,7 +47,7 @@ module Bookbinder
 
       tocjs_text = local_fs_accessor.read(
         File.join(
-          output_locations.html_from_dita_dir.join(dita_section_dir),
+          output_locations.html_from_preprocessing_dir.join(dita_section_dir),
           'index.html')
       )
       json_props_location = File.join('dita-subnav-props.json')

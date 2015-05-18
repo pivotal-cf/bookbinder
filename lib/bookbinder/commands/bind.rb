@@ -98,7 +98,7 @@ module Bookbinder
           command = command_creator.convert_to_html_command(
             dita_section,
             dita_flags: dita_flags(options),
-            write_to: output_locations.html_from_dita_dir.join(dita_section.directory)
+            write_to: output_locations.html_from_preprocessing_dir.join(dita_section.directory)
           )
           status = sheller.run_command(command, output_streams.to_h)
           unless status.success?

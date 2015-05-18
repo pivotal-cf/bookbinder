@@ -53,7 +53,7 @@ module Bookbinder
 
     def invokes_dita_option_for_css_path(dita_section, options)
       flags = dita_flags_from(options)
-      copied_css_file_location = Pathname("./output/preprocessing/html_from_dita/#{dita_section.dir}/" +
+      copied_css_file_location = Pathname("./output/preprocessing/html_from_preprocessing/#{dita_section.dir}/" +
                                           flags['args.csspath'] +
                                           flags['args.css'])
       File.exist? copied_css_file_location

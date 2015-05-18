@@ -207,7 +207,7 @@ module Bookbinder
         executable, *options = command_received.split('-D')
         expect(executable).to eq("export CLASSPATH=#{expected_classpath}; " +
                                  "ant -f path/to/dita/ot/library ")
-        expect(options[0]).to match(%r{output.dir='.*/output/preprocessing/html_from_dita/foo'})
+        expect(options[0]).to match(%r{output.dir='.*/output/preprocessing/html_from_preprocessing/foo'})
         expect(options[1..-1]).to eq(["args.input='path/to/local/repo/path/to/map.ditamap' ",
                                       "args.filter='' ",
                                       "basedir='/' ",

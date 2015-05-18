@@ -27,7 +27,7 @@ module Bookbinder
         Section.new(working_copy.copied_to,
                     full_name,
                     working_copy.copied?,
-                    output_locations.html_from_dita_dir,
+                    output_locations.html_from_preprocessing_dir,
                     desired_destination_directory_name,
                     'dita_subnav',
                     'ditamap_location' => relative_path_to_dita_map,
