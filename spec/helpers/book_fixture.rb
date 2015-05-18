@@ -68,7 +68,7 @@ module Bookbinder
       if section_source == SectionSource.local
         section_location = Pathname("../#{repo_name}")
       else
-        section_location = Pathname("./output/preprocessing/dita_sections/#{dir}")
+        section_location = Pathname("./output/preprocessing/sections/#{dir}")
       end
 
       path_to_ditamap = Pathname("#{section_location}/example.ditamap")

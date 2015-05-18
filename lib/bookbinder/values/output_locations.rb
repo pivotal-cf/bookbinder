@@ -50,7 +50,7 @@ module Bookbinder
     end
 
     def cloned_dita_dir
-      preprocessing_home_dir.join('dita_sections')
+      preprocessing_home_dir.join('sections')
     end
 
     def html_from_dita_dir
