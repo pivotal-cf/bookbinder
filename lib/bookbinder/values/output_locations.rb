@@ -49,7 +49,7 @@ module Bookbinder
       output_dir.join('preprocessing')
     end
 
-    def cloned_dita_dir
+    def cloned_preprocessing_dir
       preprocessing_home_dir.join('sections')
     end
 

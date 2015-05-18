@@ -13,10 +13,10 @@ module Bookbinder
       dita_section_config_hash.map do |dita_section_config|
         view_updater.log "Gathering " + "#{dita_section_config.fetch('repository').fetch('name')}".cyan
         Section.new(
-          output_locations.cloned_dita_dir.join(dita_section_config['directory']),
+          output_locations.cloned_preprocessing_dir.join(dita_section_config['directory']),
           dita_section_config.fetch('repository').fetch('name'),
           copied = true,
-          output_locations.cloned_dita_dir,
+          output_locations.cloned_preprocessing_dir,
           dita_section_config['directory'],
           'dita_subnav',
           'ditamap_location' => dita_section_config['ditamap_location'],
@@ -25,7 +25,7 @@ module Bookbinder
           version_control_system.clone(
             "git@github.com:#{section.full_name}",
             section.directory_name,
-            path: output_locations.cloned_dita_dir,
+            path: output_locations.cloned_preprocessing_dir,
             checkout: dita_section_config.fetch('repository').fetch('ref', 'master'),
           )
         end
