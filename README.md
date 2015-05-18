@@ -317,6 +317,32 @@ The first key (e.g. v1.3.0.0) is available for use as a title in your navbar. Yo
 
 Finally, to insert the archive menu, use the `<%= yield_for_archive_drop_down_menu %>` tag in the appropriate part of the navbar in your layout.erb. 
 
+### Template Variables
+
+Bookbinder allows you to define **template variables** by adding key-value pairs to the `config.yml` file for your book. 
+
+To use a template variable, add the key to a source file. 
+When you then bind your book, Bookbinder replaces the key with the value defined in the `config.yml` file.
+
+* To define a new template variable, add the key-value pair to the **template_variables** section of the  `config.yml` file.
+
+    Example `config.yml` file excerpt:
+
+    <pre> 
+    ...
+    template_variables:
+      app_domain: example.com
+      my-app: <a href="http://my-app.example.org">this link</a>
+    </pre> 
+
+* To use a template variable, add the key (in <%=vars.MY-KEY%> form) to a source file.
+
+    Example source file excerpt:
+
+    <pre>
+    I deployed my app to <%=vars.app_domain%>. You can see it by clicking <%=vars.my-app%>.
+    </pre> 
+
 ### Including Assets
 
 Bookbinder also includes helper code to correctly find image, stylesheet, and javascript assets. When using `<% image_tag ...`, `<% stylesheet_link_tag ...`, or `<% javascript_include_tag ...` to include assets, Bookbinder will search the entire directory structure starting at the top-level until it finds an asset with the provided name. For example, when resolving `<% image_tag 'great_dane.png' %>` called from the page `dogs/big_dogs/index.html.md.erb`, Middleman will first look in `images/great_dane.png.` If that file does not exist, it will try `dogs/images/great_dane.png`, then `dogs/big_dogs/images/great_dane.png`.
