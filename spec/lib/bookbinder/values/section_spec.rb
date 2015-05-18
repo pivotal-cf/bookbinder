@@ -47,5 +47,10 @@ module Bookbinder
         end
       end
     end
+
+    it "is a mistake to ask for a path to a preprocessor attribute when Section not applicable to preprocessor" do
+      expect { Section.new.path_to_preprocessor_attribute('foo') }.
+        to raise_error(Errors::ProgrammerMistake)
+    end
   end
 end

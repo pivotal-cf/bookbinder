@@ -20,7 +20,7 @@ module Bookbinder
       end
 
       def run(_)
-        urls = configuration_fetcher.fetch_config.sections.map {|section| section['repo_url']}
+        urls = configuration_fetcher.fetch_config.sections.map(&:repo_url)
         paths(urls).each do |path|
           if filesystem.file_exist?(path)
             logger.log 'Updating ' + path.cyan

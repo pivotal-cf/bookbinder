@@ -24,13 +24,14 @@ module Bookbinder
                                    destination_parent_dir: output_locations.source_for_site_generator,
                                    destination_dir_name: desired_destination_directory_name)
 
-        DitaSection.new(working_copy.copied_to,
-                        relative_path_to_dita_map,
-                        relative_path_to_dita_val,
-                        full_name,
-                        target_ref,
-                        desired_destination_directory_name,
-                        output_locations)
+        Section.new(working_copy.copied_to,
+                    full_name,
+                    working_copy.copied?,
+                    output_locations.html_from_dita_dir,
+                    desired_destination_directory_name,
+                    'dita_subnav',
+                    'ditamap_location' => relative_path_to_dita_map,
+                    'ditaval_location' => relative_path_to_dita_val)
       end
     end
 

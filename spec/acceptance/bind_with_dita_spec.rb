@@ -15,6 +15,7 @@ module Bookbinder
 
         application.bind_book_from_local(dita_book, silent: true) do
           it_correctly_binds_sections_in(dita_book)
+          it_correctly_creates_a_dita_subnav_for(dita_book)
         end
       end
     end
@@ -33,6 +34,7 @@ module Bookbinder
           ).to be_truthy
 
           it_correctly_binds_sections_in(dita_book)
+          it_correctly_creates_a_dita_subnav_for(dita_book)
         end
       end
     end
@@ -64,6 +66,7 @@ module Bookbinder
                                                   dita_options: dita_options,
                                                   ) do
             it_correctly_binds_sections_in(dita_book)
+            it_correctly_creates_a_dita_subnav_for(dita_book)
             it_correctly_invokes_dita_options(dita_book, dita_options)
           end
         end
@@ -107,10 +110,14 @@ module Bookbinder
       expect(dita_book.final_images_for(dita_section_dependency))
       .to match_array %w(./final_app/public/dita-section-dependency/image_one_dependency.jpeg
                          ./final_app/public/dita-section-dependency/images/image_two_dependency.png)
+    end
+
+    def it_correctly_creates_a_dita_subnav_for(dita_book)
+      dita_section_one = DitaSectionData.new('dita-section-one',
+                                             'my-renamed-dita-section-one')
 
       expect(dita_book.has_dita_subnav(dita_section_one)).to be_truthy
-
-      expect(dita_book.exposes_subnav_links_for_js).to be_truthy
+      expect(dita_book.exposes_subnav_links_for(dita_section_one)).to be_truthy
     end
 
     def it_correctly_invokes_dita_options(dita_book, dita_options)

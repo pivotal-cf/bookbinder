@@ -2,7 +2,13 @@ module Bookbinder
   module Ingest
     DestinationDirectory = Struct.new(:full_repo_name, :desired_destination_dir_name) do
       def to_str
-        desired_destination_dir_name || full_repo_name.split('/').last
+        if desired_destination_dir_name
+          desired_destination_dir_name
+        elsif full_repo_name
+          full_repo_name.split('/').last
+        else
+          ""
+        end
       end
 
       alias :to_s :to_str

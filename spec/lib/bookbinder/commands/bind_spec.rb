@@ -9,7 +9,7 @@ require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
-require_relative '../../../../lib/bookbinder/repositories/section_repository'
+require_relative '../../../../lib/bookbinder/repositories/section_repository_factory'
 require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../../lib/bookbinder/spider'
@@ -47,7 +47,7 @@ module Bookbinder
                          partial_args.fetch(:dita_preprocessor, dita_preprocessor),
                          partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, GitFake.new)),
                          DitaSectionGathererFactory.new(bind_version_control_system, bind_logger),
-                         Repositories::SectionRepository.new(logger),
+                         Repositories::SectionRepositoryFactory.new(logger),
                          partial_args.fetch(:command_creator, command_creator),
                          partial_args.fetch(:sheller, sheller),
                          partial_args.fetch(:directory_preparer,
@@ -113,9 +113,7 @@ module Bookbinder
                            command_creator: double('command creator',
                                                    convert_to_html_command: 'false'))
         output_locations = OutputLocations.new(context_dir: Pathname('foo'))
-        allow(preprocessor).to receive(:preprocess).and_yield(
-          DitaSection.new(nil, nil, nil, 'foo', nil, nil, output_locations)
-        )
+        allow(preprocessor).to receive(:preprocess).and_yield(Section.new('foo', 'bar'))
         expect { command.run(['local']) }.to raise_exception(Commands::Bind::DitaToHtmlLibraryFailure)
       end
     end
@@ -131,9 +129,7 @@ module Bookbinder
                            command_creator: double('command creator',
                                                    convert_to_html_command: stdout_and_stderr_producer))
         output_locations = OutputLocations.new(context_dir: Pathname('foo'))
-        allow(preprocessor).to receive(:preprocess).and_yield(
-          DitaSection.new(nil, nil, nil, 'foo', nil, nil, output_locations)
-        )
+        allow(preprocessor).to receive(:preprocess).and_yield(Section.new('foo', 'bar'))
         stdout = capture_stdout { swallow_stderr { command.run(['local', '--verbose']) } }
         expect(stdout.lines.first).to eq("foo\n")
       end
@@ -146,9 +142,7 @@ module Bookbinder
                            command_creator: double('command creator',
                                                    convert_to_html_command: stdout_and_stderr_producer))
         output_locations = OutputLocations.new(context_dir: Pathname('foo'))
-        allow(preprocessor).to receive(:preprocess).and_yield(
-          DitaSection.new(nil, nil, nil, 'foo', nil, nil, output_locations)
-        )
+        allow(preprocessor).to receive(:preprocess).and_yield(Section.new('foo', 'bar'))
         stdout = capture_stdout { swallow_stderr { command.run(['local']) } }
         expect(stdout).to eq("")
       end
@@ -161,22 +155,21 @@ module Bookbinder
                            command_creator: double('command creator',
                                                    convert_to_html_command: stdout_and_stderr_producer))
         output_locations = OutputLocations.new(context_dir: Pathname('foo'))
-        allow(preprocessor).to receive(:preprocess).and_yield(
-          DitaSection.new(nil, nil, nil, 'foo', nil, nil, output_locations)
-        )
+        allow(preprocessor).to receive(:preprocess).and_yield(Section.new('foo', 'bar'))
         stderr = capture_stderr { swallow_stdout { command.run(['local']) } }
         expect(stderr).to eq("\e[31mbar\n\e[0m")
       end
     end
 
     describe "when DITA flags are passed at the command line" do
-      it 'the DITA conversion command includes the same flags' do
+      include Redirection
+
+      example 'the DITA conversion command includes the same flags' do
         preprocessor = double('preprocessor')
         sheller = double('sheller')
         command = bind_cmd(dita_preprocessor: preprocessor,
                            sheller: sheller,
                            command_creator: DitaCommandCreator.new('path/to/dita/ot/library'))
-        output_locations = OutputLocations.new(context_dir: Pathname('foo'))
         expected_classpath = 'path/to/dita/ot/library/lib/xercesImpl.jar:' +
                              'path/to/dita/ot/library/lib/xml-apis.jar:' +
                              'path/to/dita/ot/library/lib/resolver.jar:' +
@@ -190,30 +183,39 @@ module Bookbinder
         successful_exit = instance_double(Process::Status, success?: true)
 
         allow(preprocessor).to receive(:preprocess).and_yield(
-                                   DitaSection.new('path/to/local/repo',
-                                                   'path/to/map.ditamap',
-                                                   nil,
-                                                   'foo',
-                                                   nil,
-                                                   nil,
-                                                   output_locations)
-                               )
-        expect(sheller).to receive(:run_command).with("export CLASSPATH=#{expected_classpath}; " +
-                                                      "ant -f path/to/dita/ot/library " +
-                                                      "-Doutput.dir='foo/output/dita/html_from_dita/foo' " +
-                                                      "-Dargs.input='path/to/local/repo/path/to/map.ditamap' " +
-                                                      "-Dargs.filter='' " +
-                                                      "-Dbasedir='/' " +
-                                                      "-Dtranstype='tocjs' " +
-                                                      "-Ddita.temp.dir='/tmp/bookbinder_dita' " +
-                                                      "-Dgenerate.copy.outer='2' " +
-                                                      "-Douter.control='warn' " +
-                                                      "-Dargs.debug='yes' ",
-                                                    anything)
-                                                  .and_return(successful_exit)
-        silence_io_streams do
+          Section.new(
+            'path/to/local/repo',
+            'foo',
+            copied = true,
+            dest_dir = 'some/dest/dir',
+            desired_dir_name = nil,
+            'dita_subnav',
+            'ditamap_location' => 'path/to/map.ditamap',
+            'ditaval_location' => nil
+          )
+        )
+        command_received = nil
+        sheller.define_singleton_method(:run_command) do |given_command, _|
+          command_received = given_command
+          successful_exit
+        end
+
+        swallow_stdout do
           command.run(['local', '--verbose', "--dita-flags=args.debug='yes'"])
         end
+
+        executable, *options = command_received.split('-D')
+        expect(executable).to eq("export CLASSPATH=#{expected_classpath}; " +
+                                 "ant -f path/to/dita/ot/library ")
+        expect(options[0]).to match(%r{output.dir='.*/output/dita/html_from_dita/foo'})
+        expect(options[1..-1]).to eq(["args.input='path/to/local/repo/path/to/map.ditamap' ",
+                                      "args.filter='' ",
+                                      "basedir='/' ",
+                                      "transtype='tocjs' ",
+                                      "dita.temp.dir='/tmp/bookbinder_dita' ",
+                                      "generate.copy.outer='2' ",
+                                      "outer.control='warn' ",
+                                      "args.debug='yes' "])
       end
     end
 

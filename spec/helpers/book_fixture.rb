@@ -40,13 +40,15 @@ module Bookbinder
       topics(dita_section).all? { |topic| has_dita_subnav? topic }
     end
 
-    def exposes_subnav_links_for_js
-      text = File.read("./output/master_middleman/source/subnavs/dita_subnav.erb")
-      doc = Nokogiri::XML(text)
-      props = doc.css('.nav-content').first.attr('data-props-location')
+    def exposes_subnav_links_for(dita_section)
+      props_location = "./output/master_middleman/source/subnavs/dita-subnav-props.json"
 
-      !File.zero?("./output/master_middleman/source/subnavs/dita-subnav-props.json") &&
-          (props == "dita-subnav-props.json")
+      File.exist?(props_location) && (
+        props_text = File.read(props_location)
+        props_hash = JSON.load(props_text)
+        links = props_hash['links']
+        links[0]['url'] == "/#{dita_section.dir}/some-guide.html"
+      )
     end
 
     def invokes_dita_option_for_css_path(dita_section, options)

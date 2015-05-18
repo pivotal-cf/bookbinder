@@ -1,10 +1,18 @@
+require_relative '../errors/programmer_mistake'
+require_relative '../ingest/destination_directory'
+
 module Bookbinder
   Section = Struct.new(:path_to_repository,
                        :full_name,
                        :copied,
                        :destination_dir,
                        :directory_name,
-                       :subnav_templ) do
+                       :subnav_templ,
+                       :preprocessor_config) do
+    def requires_preprocessing?
+      !preprocessor_config.nil?
+    end
+
     def path_to_repository
       Pathname(self[:path_to_repository].to_s)
     end
@@ -14,13 +22,22 @@ module Bookbinder
     end
 
     def directory
-      directory_name
+      Ingest::DestinationDirectory.new(full_name, directory_name)
     end
 
     def subnav
-      namespace = directory.gsub('/', '_')
+      namespace = directory.to_s.gsub('/', '_')
       template = subnav_template || 'default'
       {namespace => template}
+    end
+
+    def path_to_preprocessor_attribute(attr)
+      path_to_repository.join(preprocessor_config[attr]) if preprocessor_config[attr]
+    rescue NoMethodError => e
+      raise Errors::ProgrammerMistake.new(
+        "path_to_preprocessor_attribute assumes preprocessor_config is available, got nil.\n" +
+        "Original exception:\n\n#{e.inspect}\n\n#{e.backtrace.join("\n")}"
+      )
     end
   end
 end
