@@ -19,16 +19,16 @@ module Bookbinder
                    &block)
       dita_sections.select { |dita_section| dita_section.path_to_preprocessor_attribute('ditamap_location') }.each do |dita_section|
         block.call(dita_section)
-        generate_subnav(dita_section.directory,
+        generate_subnav(dita_section.desired_directory,
                         output_locations,
                         output_locations.source_for_site_generator.join('subnavs', '_dita_subnav_template.erb'),
                         output_locations.subnavs_for_layout_dir)
       end
 
       dita_sections.each do |dita_section|
-        html_dir = output_locations.html_from_preprocessing_dir.join(dita_section.directory)
-        formatted_dir = output_locations.formatted_dir.join(dita_section.directory)
-        source_for_site_gen_dir = output_locations.source_for_site_generator.join(dita_section.directory)
+        html_dir = output_locations.html_from_preprocessing_dir.join(dita_section.desired_directory)
+        formatted_dir = output_locations.formatted_dir.join(dita_section.desired_directory)
+        source_for_site_gen_dir = output_locations.source_for_site_generator.join(dita_section.desired_directory)
 
         dita_formatter.format_html html_dir, formatted_dir
 

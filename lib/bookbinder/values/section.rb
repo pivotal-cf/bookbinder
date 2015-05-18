@@ -21,12 +21,12 @@ module Bookbinder
       subnav_templ.sub(/^_/, '').sub(/\.erb$/, '') if subnav_templ
     end
 
-    def directory
+    def desired_directory
       Ingest::DestinationDirectory.new(full_name, desired_directory_name)
     end
 
     def subnav
-      namespace = directory.to_s.gsub('/', '_')
+      namespace = desired_directory.to_s.gsub('/', '_')
       template = subnav_template || 'default'
       {namespace => template}
     end
