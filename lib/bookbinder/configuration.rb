@@ -50,15 +50,11 @@ module Bookbinder
     end
 
     def sections
-      config.fetch('sections', []).map { |section| Config::SectionConfig.new(section) }
+      all_sections.map { |section| Config::SectionConfig.new(section) }
     end
 
     def merge_sections(raw_sections)
       Configuration.new(config.merge('sections' => config.fetch('sections', []) + raw_sections))
-    end
-
-    def dita_sections
-      config.fetch('dita_sections', {})
     end
 
     def has_option?(key)
@@ -82,6 +78,16 @@ module Bookbinder
     private
 
     attr_reader :config
+
+    def all_sections
+      config.fetch('sections', []) + config.fetch('dita_sections', []).map { |dita_section|
+        dita_section.
+          merge('preprocessor_config' => { 'ditamap_location' => dita_section['ditamap_location'],
+                                           'ditaval_location' => dita_section['ditaval_location'] },
+                'subnav_template' => 'dita_subnav').
+          reject { |k, v| %w(ditamap_location ditaval_location).include?(k) }
+      }
+    end
 
     def vcs_url(repo_identifier)
       Ingest::RepoIdentifier.new(repo_identifier)

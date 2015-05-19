@@ -96,7 +96,6 @@ module Bookbinder
             default: Preprocessing::CopyToSiteGenDir.new(local_file_system_accessor),
           ),
           Ingest::ClonerFactory.new(logger, local_file_system_accessor, version_control_system),
-          DitaSectionGathererFactory.new(version_control_system, logger),
           Repositories::SectionRepositoryFactory.new(logger),
           Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
         )

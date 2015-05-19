@@ -1,7 +1,6 @@
 require 'middleman-syntax'
 
 require_relative '../archive_menu_configuration'
-require_relative '../dita_section_gatherer_factory'
 require_relative '../errors/cli_error'
 require_relative '../streams/switchable_stdout_and_red_stderr'
 require_relative '../values/output_locations'
@@ -12,8 +11,6 @@ module Bookbinder
   module Commands
     class Bind
       include Commands::Naming
-
-      DitaToHtmlLibraryFailure = Class.new(RuntimeError)
 
       def initialize(logger,
                      config_factory,
@@ -26,7 +23,6 @@ module Bookbinder
                      context_dir,
                      preprocessor,
                      cloner_factory,
-                     dita_section_gatherer_factory,
                      section_repository_factory,
                      directory_preparer)
         @logger = logger
@@ -40,7 +36,6 @@ module Bookbinder
         @context_dir = context_dir
         @preprocessor = preprocessor
         @cloner_factory = cloner_factory
-        @dita_section_gatherer_factory = dita_section_gatherer_factory
         @section_repository_factory = section_repository_factory
         @directory_preparer = directory_preparer
       end
@@ -85,18 +80,14 @@ module Bookbinder
           destination_dir: output_locations.cloned_preprocessing_dir,
           ref_override: ('master' if options.include?('--ignore-section-refs'))
         )
-        dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
-        gathered_dita_sections = dita_gatherer.gather(bind_config.dita_sections)
 
-        preprocessor.preprocess(sections + gathered_dita_sections,
+        preprocessor.preprocess(sections,
                                 output_locations,
                                 options: options,
                                 output_streams: output_streams)
 
-        subnavs = (sections + gathered_dita_sections).map(&:subnav).reduce(&:merge)
-
         success = publish(
-          subnavs,
+          sections.map(&:subnav).reduce(&:merge),
           {verbose: options.include?('--verbose')},
           output_locations,
           archive_menu_config.generate(bind_config, sections),
@@ -119,7 +110,6 @@ module Bookbinder
                   :context_dir,
                   :preprocessor,
                   :cloner_factory,
-                  :dita_section_gatherer_factory,
                   :section_repository_factory,
                   :directory_preparer
 

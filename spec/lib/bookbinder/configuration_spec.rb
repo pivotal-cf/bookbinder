@@ -44,6 +44,32 @@ module Bookbinder
                                 'cred_repo' => 'cred/repo'))
     end
 
+    it "combines dita sections and regular sections, setting dita-specific config" do
+      config = Configuration.new(
+        'sections' => [
+          {'repository' => {'name' => 'must/be-github'}},
+        ],
+        'dita_sections' => [
+          {'repository' => {'name' => 'must/be-github'},
+           'directory' => 'my-renamed-dita-section-one',
+           'ditamap_location' => 'example.ditamap',
+           'ditaval_location' => 'dita-filter.ditaval',},
+        ]
+      )
+      expect(config.sections.size).to eq(2)
+      expect(config.sections[1]).to eq(
+        Config::SectionConfig.new(
+          'repository' => {'name' => 'must/be-github'},
+          'directory' => 'my-renamed-dita-section-one',
+          'preprocessor_config' => {
+            'ditamap_location' => 'example.ditamap',
+            'ditaval_location' => 'dita-filter.ditaval'
+          },
+          'subnav_template' => 'dita_subnav',
+        )
+      )
+    end
+
     it 'returns nil when optional keys do not exist' do
       config = Configuration.new({})
       expect(config.archive_menu).to be_nil

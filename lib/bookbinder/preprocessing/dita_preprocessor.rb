@@ -3,6 +3,7 @@ require_relative '../values/subnav'
 module Bookbinder
   module Preprocessing
     class DitaPreprocessor
+      DitaToHtmlLibraryFailure = Class.new(RuntimeError)
 
       ACCEPTED_IMAGE_FORMATS = %w(png jpeg jpg svg gif bmp tif tiff eps)
 

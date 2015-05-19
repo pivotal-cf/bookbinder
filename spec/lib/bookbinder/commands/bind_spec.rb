@@ -48,7 +48,6 @@ module Bookbinder
                          partial_args.fetch(:context_dir, File.absolute_path('.')),
                          partial_args.fetch(:preprocessor, preprocessor),
                          partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, GitFake.new)),
-                         DitaSectionGathererFactory.new(bind_version_control_system, bind_logger),
                          Repositories::SectionRepositoryFactory.new(logger),
                          partial_args.fetch(:directory_preparer,
                                             Commands::BindComponents::DirectoryPreparer.new(bind_logger,
