@@ -29,8 +29,6 @@ module Bookbinder
                      cloner_factory,
                      dita_section_gatherer_factory,
                      section_repository_factory,
-                     command_creator,
-                     sheller,
                      directory_preparer)
         @logger = logger
         @config_factory = config_factory
@@ -45,8 +43,6 @@ module Bookbinder
         @cloner_factory = cloner_factory
         @dita_section_gatherer_factory = dita_section_gatherer_factory
         @section_repository_factory = section_repository_factory
-        @command_creator = command_creator
-        @sheller = sheller
         @directory_preparer = directory_preparer
       end
 
@@ -126,8 +122,6 @@ module Bookbinder
                   :cloner_factory,
                   :dita_section_gatherer_factory,
                   :section_repository_factory,
-                  :command_creator,
-                  :sheller,
                   :directory_preparer
 
       def publish(subnavs, cli_options, output_locations, publish_config, cloner)

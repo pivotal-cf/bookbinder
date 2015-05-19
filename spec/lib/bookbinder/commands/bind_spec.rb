@@ -50,8 +50,6 @@ module Bookbinder
                          partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, GitFake.new)),
                          DitaSectionGathererFactory.new(bind_version_control_system, bind_logger),
                          Repositories::SectionRepositoryFactory.new(logger),
-                         partial_args.fetch(:command_creator, command_creator),
-                         partial_args.fetch(:sheller, sheller),
                          partial_args.fetch(:directory_preparer,
                                             Commands::BindComponents::DirectoryPreparer.new(bind_logger,
                                                                                             file_system_accessor,

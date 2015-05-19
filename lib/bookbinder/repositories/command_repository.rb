@@ -89,7 +89,7 @@ module Bookbinder
             DitaPreprocessor.new(
               dita_html_to_middleman_formatter,
               local_file_system_accessor,
-              dita_command_creator,
+              DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY']),
               Sheller.new
             ),
             default: Preprocessing::CopyToSiteGenDir.new(local_file_system_accessor),
@@ -97,8 +97,6 @@ module Bookbinder
           Ingest::ClonerFactory.new(logger, local_file_system_accessor, version_control_system),
           DitaSectionGathererFactory.new(version_control_system, logger),
           Repositories::SectionRepositoryFactory.new(logger),
-          dita_command_creator,
-          Sheller.new,
           Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
         )
       end
@@ -139,10 +137,6 @@ module Bookbinder
 
       def final_app_directory
         @final_app_directory ||= File.absolute_path('final_app')
-      end
-
-      def dita_command_creator
-        @dita_command_creator ||= DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY'])
       end
 
       def dita_html_to_middleman_formatter
