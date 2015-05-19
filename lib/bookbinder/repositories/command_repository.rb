@@ -8,12 +8,13 @@ require_relative '../configuration_fetcher'
 require_relative '../configuration_validator'
 require_relative '../dita_command_creator'
 require_relative '../dita_html_to_middleman_formatter'
-require_relative '../dita_preprocessor'
 require_relative '../html_document_manipulator'
 require_relative '../ingest/cloner_factory'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../post_production/sitemap_writer'
+require_relative '../preprocessing/copy_to_site_gen_dir'
+require_relative '../preprocessing/dita_preprocessor'
 require_relative '../preprocessing/preprocessor'
 require_relative '../remote_yaml_credential_provider'
 require_relative '../sheller'
@@ -86,7 +87,7 @@ module Bookbinder
           final_app_directory,
           File.absolute_path('.'),
           Preprocessing::Preprocessor.new(
-            DitaPreprocessor.new(
+            Preprocessing::DitaPreprocessor.new(
               dita_html_to_middleman_formatter,
               local_file_system_accessor,
               DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY']),

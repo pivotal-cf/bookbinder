@@ -3,14 +3,14 @@ require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
 require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/dita_command_creator'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
-require_relative '../../../../lib/bookbinder/dita_preprocessor'
-require_relative '../../../../lib/bookbinder/preprocessing/preprocessor'
-require_relative '../../../../lib/bookbinder/preprocessing/copy_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
+require_relative '../../../../lib/bookbinder/preprocessing/copy_to_site_gen_dir'
+require_relative '../../../../lib/bookbinder/preprocessing/dita_preprocessor'
+require_relative '../../../../lib/bookbinder/preprocessing/preprocessor'
 require_relative '../../../../lib/bookbinder/repositories/section_repository_factory'
 require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
@@ -95,7 +95,7 @@ module Bookbinder
     let(:config_hash) { base_config_hash }
     let(:preprocessor) {
       Preprocessing::Preprocessor.new(
-         DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor, command_creator, sheller),
+         Preprocessing::DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor, command_creator, sheller),
          default: Preprocessing::CopyToSiteGenDir.new(file_system_accessor),
       )
     }
