@@ -5,20 +5,32 @@ module Bookbinder
 
     ACCEPTED_IMAGE_FORMATS = %w(png jpeg jpg svg gif bmp tif tiff eps)
 
-    def initialize(dita_formatter, local_fs_accessor)
+    def initialize(dita_formatter, local_fs_accessor, command_creator, sheller)
       @dita_formatter = dita_formatter
       @local_fs_accessor = local_fs_accessor
+      @command_creator = command_creator
+      @sheller = sheller
     end
 
     def applicable_to?(section)
       section.subnav_template == 'dita_subnav'
     end
 
-    def preprocess(dita_sections,
-                   output_locations,
-                   &block)
+    def preprocess(dita_sections, output_locations, options: nil, output_streams: nil)
       dita_sections.select { |dita_section| dita_section.path_to_preprocessor_attribute('ditamap_location') }.each do |dita_section|
-        block.call(dita_section)
+        command = command_creator.convert_to_html_command(
+          dita_section,
+          dita_flags: dita_flags(options),
+          write_to: output_locations.html_from_preprocessing_dir.join(dita_section.desired_directory)
+        )
+        status = sheller.run_command(command, output_streams.to_h)
+        unless status.success?
+          raise DitaToHtmlLibraryFailure.new 'The DITA-to-HTML conversion failed. ' +
+            'Please check that you have specified the path to your DITA-OT library in the ENV, ' +
+            'that your DITA-specific keys/values in config.yml are set, ' +
+            'and that your DITA toolkit is correctly configured.'
+        end
+
         generate_subnav(dita_section.desired_directory,
                         output_locations,
                         output_locations.source_for_site_generator.join('subnavs', '_dita_subnav_template.erb'),
@@ -40,7 +52,7 @@ module Bookbinder
 
     private
 
-    attr_reader :dita_formatter, :local_fs_accessor
+    attr_reader :dita_formatter, :local_fs_accessor, :command_creator, :sheller
 
     def generate_subnav(dita_section_dir, output_locations, dita_subnav_template_path, subnavs_dir)
       dita_subnav_template_text = local_fs_accessor.read(dita_subnav_template_path)
@@ -76,5 +88,13 @@ module Bookbinder
       end
     end
 
+    def dita_flags(opts)
+      matching_flags = opts.map {|o| o[flag_value_regex("dita-flags"), 1] }
+      matching_flags.compact.first
+    end
+
+    def flag_value_regex(flag_name)
+      Regexp.new(/--#{flag_name}=(.+)/)
+    end
   end
 end

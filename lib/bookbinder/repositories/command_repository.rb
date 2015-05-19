@@ -135,7 +135,9 @@ module Bookbinder
       def dita_preprocessor
         @dita_preprocessor ||=
             DitaPreprocessor.new(dita_html_to_middleman_formatter,
-                                 local_file_system_accessor)
+                                 local_file_system_accessor,
+                                 dita_command_creator,
+                                 Sheller.new)
       end
 
       def dita_command_creator

@@ -95,21 +95,9 @@ module Bookbinder
 
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
         gathered_dita_sections = dita_gatherer.gather(bind_config.dita_sections)
-        dita_preprocessor.preprocess(gathered_dita_sections,
-                                     output_locations) do |dita_section|
-          command = command_creator.convert_to_html_command(
-            dita_section,
-            dita_flags: dita_flags(options),
-            write_to: output_locations.html_from_preprocessing_dir.join(dita_section.desired_directory)
-          )
-          status = sheller.run_command(command, output_streams.to_h)
-          unless status.success?
-            raise DitaToHtmlLibraryFailure.new 'The DITA-to-HTML conversion failed. ' +
-              'Please check that you have specified the path to your DITA-OT library in the ENV, ' +
-              'that your DITA-specific keys/values in config.yml are set, ' +
-              'and that your DITA toolkit is correctly configured.'
-          end
-        end
+        dita_preprocessor.preprocess(gathered_dita_sections, output_locations,
+                                     options: options,
+                                     output_streams: output_streams)
 
         subnavs = (sections + gathered_dita_sections).map(&:subnav).reduce(&:merge)
 
@@ -196,15 +184,6 @@ module Bookbinder
 
       def flag_names(opts)
         opts.map {|o| o.split('=').first}
-      end
-
-      def dita_flags(opts)
-        matching_flags = opts.map {|o| o[flag_value_regex("dita-flags"), 1] }
-        matching_flags.compact.first
-      end
-
-      def flag_value_regex(flag_name)
-        Regexp.new(/--#{flag_name}=(.+)/)
       end
     end
   end
