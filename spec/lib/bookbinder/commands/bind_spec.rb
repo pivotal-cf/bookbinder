@@ -3,12 +3,14 @@ require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
 require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/dita_command_creator'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
-require_relative '../../../../lib/bookbinder/dita_preprocessor'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
+require_relative '../../../../lib/bookbinder/preprocessing/copy_to_site_gen_dir'
+require_relative '../../../../lib/bookbinder/preprocessing/dita_preprocessor'
+require_relative '../../../../lib/bookbinder/preprocessing/preprocessor'
 require_relative '../../../../lib/bookbinder/repositories/section_repository_factory'
 require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
@@ -44,12 +46,9 @@ module Bookbinder
                          partial_args.fetch(:sitemap_writer, sitemap_writer),
                          partial_args.fetch(:final_app_directory, final_app_dir),
                          partial_args.fetch(:context_dir, File.absolute_path('.')),
-                         partial_args.fetch(:dita_preprocessor, dita_preprocessor),
+                         partial_args.fetch(:preprocessor, preprocessor),
                          partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, GitFake.new)),
-                         DitaSectionGathererFactory.new(bind_version_control_system, bind_logger),
                          Repositories::SectionRepositoryFactory.new(logger),
-                         partial_args.fetch(:command_creator, command_creator),
-                         partial_args.fetch(:sheller, sheller),
                          partial_args.fetch(:directory_preparer,
                                             Commands::BindComponents::DirectoryPreparer.new(bind_logger,
                                                                                             file_system_accessor,
@@ -93,7 +92,12 @@ module Bookbinder
     let(:command_creator) { double('command creator', convert_to_html_command: 'stubbed command') }
     let(:config) { Configuration.new(config_hash) }
     let(:config_hash) { base_config_hash }
-    let(:dita_preprocessor) { DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor) }
+    let(:preprocessor) {
+      Preprocessing::Preprocessor.new(
+         Preprocessing::DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor, command_creator, sheller),
+         default: Preprocessing::CopyToSiteGenDir.new(file_system_accessor),
+      )
+    }
     let(:document_parser) { HtmlDocumentManipulator.new }
     let(:file_system_accessor) { LocalFileSystemAccessor.new }
     let(:final_app_dir) { File.absolute_path('final_app') }
@@ -104,120 +108,6 @@ module Bookbinder
     let(:sitemap_writer) { PostProduction::SitemapWriter.build(logger, final_app_dir, random_port) }
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
     let(:subnav_formatter) { SubnavFormatter.new }
-
-    describe "when the DITA processor fails" do
-      it "raises an exception" do
-        preprocessor = double('preprocessor')
-        command = bind_cmd(dita_preprocessor: preprocessor,
-                           sheller: Sheller.new,
-                           command_creator: double('command creator',
-                                                   convert_to_html_command: 'false'))
-        output_locations = OutputLocations.new(context_dir: Pathname('foo'))
-        allow(preprocessor).to receive(:preprocess).and_yield(Section.new('foo', 'bar'))
-        expect { command.run(['local']) }.to raise_exception(Commands::Bind::DitaToHtmlLibraryFailure)
-      end
-    end
-
-    describe "DITA command output" do
-      include Redirection
-
-      it "sends to stdout when --verbose" do
-        preprocessor = double('preprocessor')
-        stdout_and_stderr_producer = 'echo foo; >&2 echo bar'
-        command = bind_cmd(dita_preprocessor: preprocessor,
-                           sheller: Sheller.new,
-                           command_creator: double('command creator',
-                                                   convert_to_html_command: stdout_and_stderr_producer))
-        output_locations = OutputLocations.new(context_dir: Pathname('foo'))
-        allow(preprocessor).to receive(:preprocess).and_yield(Section.new('foo', 'bar'))
-        stdout = capture_stdout { swallow_stderr { command.run(['local', '--verbose']) } }
-        expect(stdout.lines.first).to eq("foo\n")
-      end
-
-      it "doesn't send to stdout when not --verbose" do
-        preprocessor = double('preprocessor')
-        stdout_and_stderr_producer = 'echo foo; >&2 echo bar'
-        command = bind_cmd(dita_preprocessor: preprocessor,
-                           sheller: Sheller.new,
-                           command_creator: double('command creator',
-                                                   convert_to_html_command: stdout_and_stderr_producer))
-        output_locations = OutputLocations.new(context_dir: Pathname('foo'))
-        allow(preprocessor).to receive(:preprocess).and_yield(Section.new('foo', 'bar'))
-        stdout = capture_stdout { swallow_stderr { command.run(['local']) } }
-        expect(stdout).to eq("")
-      end
-
-      it "sends to stderr in red even when not --verbose" do
-        preprocessor = double('preprocessor')
-        stdout_and_stderr_producer = 'echo foo; >&2 echo bar'
-        command = bind_cmd(dita_preprocessor: preprocessor,
-                           sheller: Sheller.new,
-                           command_creator: double('command creator',
-                                                   convert_to_html_command: stdout_and_stderr_producer))
-        output_locations = OutputLocations.new(context_dir: Pathname('foo'))
-        allow(preprocessor).to receive(:preprocess).and_yield(Section.new('foo', 'bar'))
-        stderr = capture_stderr { swallow_stdout { command.run(['local']) } }
-        expect(stderr).to eq("\e[31mbar\n\e[0m")
-      end
-    end
-
-    describe "when DITA flags are passed at the command line" do
-      include Redirection
-
-      example 'the DITA conversion command includes the same flags' do
-        preprocessor = double('preprocessor')
-        sheller = double('sheller')
-        command = bind_cmd(dita_preprocessor: preprocessor,
-                           sheller: sheller,
-                           command_creator: DitaCommandCreator.new('path/to/dita/ot/library'))
-        expected_classpath = 'path/to/dita/ot/library/lib/xercesImpl.jar:' +
-                             'path/to/dita/ot/library/lib/xml-apis.jar:' +
-                             'path/to/dita/ot/library/lib/resolver.jar:' +
-                             'path/to/dita/ot/library/lib/commons-codec-1.4.jar:' +
-                             'path/to/dita/ot/library/lib/icu4j.jar:' +
-                             'path/to/dita/ot/library/lib/saxon/saxon9-dom.jar:' +
-                             'path/to/dita/ot/library/lib/saxon/saxon9.jar:target/classes:' +
-                             'path/to/dita/ot/library:' +
-                             'path/to/dita/ot/library/lib/:' +
-                             'path/to/dita/ot/library/lib/dost.jar'
-        successful_exit = instance_double(Process::Status, success?: true)
-
-        allow(preprocessor).to receive(:preprocess).and_yield(
-          Section.new(
-            'path/to/local/repo',
-            'foo',
-            copied = true,
-            dest_dir = 'some/dest/dir',
-            desired_dir_name = nil,
-            'dita_subnav',
-            'ditamap_location' => 'path/to/map.ditamap',
-            'ditaval_location' => nil
-          )
-        )
-        command_received = nil
-        sheller.define_singleton_method(:run_command) do |given_command, _|
-          command_received = given_command
-          successful_exit
-        end
-
-        swallow_stdout do
-          command.run(['local', '--verbose', "--dita-flags=args.debug='yes'"])
-        end
-
-        executable, *options = command_received.split('-D')
-        expect(executable).to eq("export CLASSPATH=#{expected_classpath}; " +
-                                 "ant -f path/to/dita/ot/library ")
-        expect(options[0]).to match(%r{output.dir='.*/output/preprocessing/html_from_preprocessing/foo'})
-        expect(options[1..-1]).to eq(["args.input='path/to/local/repo/path/to/map.ditamap' ",
-                                      "args.filter='' ",
-                                      "basedir='/' ",
-                                      "transtype='tocjs' ",
-                                      "dita.temp.dir='/tmp/bookbinder_dita' ",
-                                      "generate.copy.outer='2' ",
-                                      "outer.control='warn' ",
-                                      "args.debug='yes' "])
-      end
-    end
 
     describe 'local' do
       let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }

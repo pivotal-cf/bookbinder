@@ -8,12 +8,14 @@ require_relative '../configuration_fetcher'
 require_relative '../configuration_validator'
 require_relative '../dita_command_creator'
 require_relative '../dita_html_to_middleman_formatter'
-require_relative '../dita_preprocessor'
 require_relative '../html_document_manipulator'
 require_relative '../ingest/cloner_factory'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../post_production/sitemap_writer'
+require_relative '../preprocessing/copy_to_site_gen_dir'
+require_relative '../preprocessing/dita_preprocessor'
+require_relative '../preprocessing/preprocessor'
 require_relative '../remote_yaml_credential_provider'
 require_relative '../sheller'
 require_relative '../subnav_formatter'
@@ -84,12 +86,17 @@ module Bookbinder
           PostProduction::SitemapWriter.build(logger, final_app_directory, sitemap_port),
           final_app_directory,
           File.absolute_path('.'),
-          dita_preprocessor,
+          Preprocessing::Preprocessor.new(
+            Preprocessing::DitaPreprocessor.new(
+              dita_html_to_middleman_formatter,
+              local_file_system_accessor,
+              DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY']),
+              Sheller.new
+            ),
+            default: Preprocessing::CopyToSiteGenDir.new(local_file_system_accessor),
+          ),
           Ingest::ClonerFactory.new(logger, local_file_system_accessor, version_control_system),
-          DitaSectionGathererFactory.new(version_control_system, logger),
           Repositories::SectionRepositoryFactory.new(logger),
-          dita_command_creator,
-          Sheller.new,
           Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
         )
       end
@@ -130,16 +137,6 @@ module Bookbinder
 
       def final_app_directory
         @final_app_directory ||= File.absolute_path('final_app')
-      end
-
-      def dita_preprocessor
-        @dita_preprocessor ||=
-            DitaPreprocessor.new(dita_html_to_middleman_formatter,
-                                 local_file_system_accessor)
-      end
-
-      def dita_command_creator
-        @dita_command_creator ||= DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY'])
       end
 
       def dita_html_to_middleman_formatter

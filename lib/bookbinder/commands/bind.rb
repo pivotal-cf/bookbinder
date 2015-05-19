@@ -1,19 +1,16 @@
 require 'middleman-syntax'
 
 require_relative '../archive_menu_configuration'
-require_relative '../dita_section_gatherer_factory'
 require_relative '../errors/cli_error'
-require_relative '../streams/switchable_stdout_and_red_stderr'
 require_relative '../values/output_locations'
 require_relative '../values/section'
+require_relative 'bind/bind_options'
 require_relative 'naming'
 
 module Bookbinder
   module Commands
     class Bind
       include Commands::Naming
-
-      DitaToHtmlLibraryFailure = Class.new(RuntimeError)
 
       def initialize(logger,
                      config_factory,
@@ -24,12 +21,9 @@ module Bookbinder
                      sitemap_writer,
                      final_app_directory,
                      context_dir,
-                     dita_preprocessor,
+                     preprocessor,
                      cloner_factory,
-                     dita_section_gatherer_factory,
                      section_repository_factory,
-                     command_creator,
-                     sheller,
                      directory_preparer)
         @logger = logger
         @config_factory = config_factory
@@ -40,12 +34,9 @@ module Bookbinder
         @sitemap_writer = sitemap_writer
         @final_app_directory = final_app_directory
         @context_dir = context_dir
-        @dita_preprocessor = dita_preprocessor
+        @preprocessor = preprocessor
         @cloner_factory = cloner_factory
-        @dita_section_gatherer_factory = dita_section_gatherer_factory
         @section_repository_factory = section_repository_factory
-        @command_creator = command_creator
-        @sheller = sheller
         @directory_preparer = directory_preparer
       end
 
@@ -63,8 +54,10 @@ module Bookbinder
       end
 
       def run(cli_arguments)
+        bind_options = BindComponents::BindOptions.new(cli_arguments)
+        bind_options.validate!
+
         bind_source, *options = cli_arguments
-        validate(bind_source, options)
         bind_config = config_factory.produce(bind_source)
 
         output_locations = OutputLocations.new(
@@ -76,8 +69,6 @@ module Bookbinder
         cloner = cloner_factory.produce(output_locations.local_repo_dir)
         section_repository = section_repository_factory.produce(cloner)
 
-        output_streams = Streams::SwitchableStdoutAndRedStderr.new(options)
-
         directory_preparer.prepare_directories(
           bind_config,
           File.expand_path('../../../../', __FILE__),
@@ -86,33 +77,17 @@ module Bookbinder
 
         sections = section_repository.fetch(
           configured_sections: bind_config.sections,
-          destination_dir: output_locations.source_for_site_generator,
-          ref_override: ('master' if options.include?('--ignore-section-refs'))
+          destination_dir: output_locations.cloned_preprocessing_dir,
+          ref_override: bind_options.ref_override
         )
 
-        dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
-        gathered_dita_sections = dita_gatherer.gather(bind_config.dita_sections)
-
-        dita_preprocessor.preprocess(gathered_dita_sections,
-                                     output_locations) do |dita_section|
-          command = command_creator.convert_to_html_command(
-            dita_section,
-            dita_flags: dita_flags(options),
-            write_to: output_locations.html_from_preprocessing_dir.join(dita_section.desired_directory)
-          )
-          status = sheller.run_command(command, output_streams.to_h)
-          unless status.success?
-            raise DitaToHtmlLibraryFailure.new 'The DITA-to-HTML conversion failed. ' +
-              'Please check that you have specified the path to your DITA-OT library in the ENV, ' +
-              'that your DITA-specific keys/values in config.yml are set, ' +
-              'and that your DITA toolkit is correctly configured.'
-          end
-        end
-
-        subnavs = (sections + gathered_dita_sections).map(&:subnav).reduce(&:merge)
+        preprocessor.preprocess(sections,
+                                output_locations,
+                                options: options,
+                                output_streams: bind_options.streams)
 
         success = publish(
-          subnavs,
+          sections.map(&:subnav).reduce(&:merge),
           {verbose: options.include?('--verbose')},
           output_locations,
           archive_menu_config.generate(bind_config, sections),
@@ -133,12 +108,9 @@ module Bookbinder
                   :final_app_directory,
                   :sitemap_writer,
                   :context_dir,
-                  :dita_preprocessor,
+                  :preprocessor,
                   :cloner_factory,
-                  :dita_section_gatherer_factory,
                   :section_repository_factory,
-                  :command_creator,
-                  :sheller,
                   :directory_preparer
 
       def publish(subnavs, cli_options, output_locations, publish_config, cloner)
@@ -181,28 +153,6 @@ module Bookbinder
         else
           File.absolute_path('master_middleman')
         end
-      end
-
-      def validate(bind_source, options)
-        raise CliError::InvalidArguments unless arguments_are_valid?(bind_source, options)
-      end
-
-      def arguments_are_valid?(bind_source, options)
-        valid_options = %w(--verbose --ignore-section-refs --dita-flags).to_set
-        %w(local remote github).include?(bind_source) && flag_names(options).to_set.subset?(valid_options)
-      end
-
-      def flag_names(opts)
-        opts.map {|o| o.split('=').first}
-      end
-
-      def dita_flags(opts)
-        matching_flags = opts.map {|o| o[flag_value_regex("dita-flags"), 1] }
-        matching_flags.compact.first
-      end
-
-      def flag_value_regex(flag_name)
-        Regexp.new(/--#{flag_name}=(.+)/)
       end
     end
   end
