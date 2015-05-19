@@ -2,9 +2,9 @@ require 'middleman-syntax'
 
 require_relative '../archive_menu_configuration'
 require_relative '../errors/cli_error'
-require_relative '../streams/switchable_stdout_and_red_stderr'
 require_relative '../values/output_locations'
 require_relative '../values/section'
+require_relative 'bind/bind_options'
 require_relative 'naming'
 
 module Bookbinder
@@ -54,8 +54,10 @@ module Bookbinder
       end
 
       def run(cli_arguments)
+        bind_options = BindComponents::BindOptions.new(cli_arguments)
+        bind_options.validate!
+
         bind_source, *options = cli_arguments
-        validate(bind_source, options)
         bind_config = config_factory.produce(bind_source)
 
         output_locations = OutputLocations.new(
@@ -67,8 +69,6 @@ module Bookbinder
         cloner = cloner_factory.produce(output_locations.local_repo_dir)
         section_repository = section_repository_factory.produce(cloner)
 
-        output_streams = Streams::SwitchableStdoutAndRedStderr.new(options)
-
         directory_preparer.prepare_directories(
           bind_config,
           File.expand_path('../../../../', __FILE__),
@@ -78,13 +78,13 @@ module Bookbinder
         sections = section_repository.fetch(
           configured_sections: bind_config.sections,
           destination_dir: output_locations.cloned_preprocessing_dir,
-          ref_override: ('master' if options.include?('--ignore-section-refs'))
+          ref_override: bind_options.ref_override
         )
 
         preprocessor.preprocess(sections,
                                 output_locations,
                                 options: options,
-                                output_streams: output_streams)
+                                output_streams: bind_options.streams)
 
         success = publish(
           sections.map(&:subnav).reduce(&:merge),
@@ -153,19 +153,6 @@ module Bookbinder
         else
           File.absolute_path('master_middleman')
         end
-      end
-
-      def validate(bind_source, options)
-        raise CliError::InvalidArguments unless arguments_are_valid?(bind_source, options)
-      end
-
-      def arguments_are_valid?(bind_source, options)
-        valid_options = %w(--verbose --ignore-section-refs --dita-flags).to_set
-        %w(local remote github).include?(bind_source) && flag_names(options).to_set.subset?(valid_options)
-      end
-
-      def flag_names(opts)
-        opts.map {|o| o.split('=').first}
       end
     end
   end
