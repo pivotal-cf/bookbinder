@@ -181,6 +181,17 @@ module Bookbinder
         end
       end
 
+      context 'when the source directory does not exist' do
+        it 'returns' do
+          Dir.mktmpdir do |tmpdir|
+            dest_dir_path = File.join(tmpdir, 'dest_dir')
+            source_dir_path = ""
+
+            expect { fs_accessor.copy_contents source_dir_path, dest_dir_path }.to raise_error(Errors::ProgrammerMistake)
+          end
+        end
+      end
+
       context 'when the destination directory does not exist' do
         it 'creates the directory and copies the contents to a specified location' do
           Dir.mktmpdir do |tmpdir|

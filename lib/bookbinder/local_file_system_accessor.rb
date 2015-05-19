@@ -1,6 +1,7 @@
 require 'find'
 require 'pathname'
 require 'nokogiri'
+require_relative 'errors/programmer_mistake'
 
 module Bookbinder
 
@@ -40,10 +41,10 @@ module Bookbinder
     end
 
     def copy_contents(src, dest)
+      raise Errors::ProgrammerMistake.new("The method copy_contents cannot copy the contents of the directory '#{src}' because it was not found.") unless Dir.exists?(src)
       unless File.directory?(dest)
         FileUtils.mkdir_p(dest)
       end
-
       FileUtils.cp_r "#{src}/.", dest
     end
 

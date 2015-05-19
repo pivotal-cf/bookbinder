@@ -11,9 +11,9 @@ module Bookbinder
 
       def preprocess(sections, output_locations, *_)
         sections.each do |section|
-          filesystem.copy_contents(
-            section.path_to_repository,
-            output_locations.source_for_site_generator.join(section.desired_directory)
+          section.path_to_repository.exist? && filesystem.copy_contents(
+              section.path_to_repository,
+              output_locations.source_for_site_generator.join(section.desired_directory)
           )
         end
       end
