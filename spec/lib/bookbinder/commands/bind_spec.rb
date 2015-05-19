@@ -4,6 +4,8 @@ require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/dita_command_creator'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
 require_relative '../../../../lib/bookbinder/dita_preprocessor'
+require_relative '../../../../lib/bookbinder/preprocessing/preprocessor'
+require_relative '../../../../lib/bookbinder/preprocessing/copy_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
@@ -44,7 +46,7 @@ module Bookbinder
                          partial_args.fetch(:sitemap_writer, sitemap_writer),
                          partial_args.fetch(:final_app_directory, final_app_dir),
                          partial_args.fetch(:context_dir, File.absolute_path('.')),
-                         partial_args.fetch(:dita_preprocessor, dita_preprocessor),
+                         partial_args.fetch(:preprocessor, preprocessor),
                          partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, GitFake.new)),
                          DitaSectionGathererFactory.new(bind_version_control_system, bind_logger),
                          Repositories::SectionRepositoryFactory.new(logger),
@@ -93,7 +95,12 @@ module Bookbinder
     let(:command_creator) { double('command creator', convert_to_html_command: 'stubbed command') }
     let(:config) { Configuration.new(config_hash) }
     let(:config_hash) { base_config_hash }
-    let(:dita_preprocessor) { DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor, command_creator, sheller) }
+    let(:preprocessor) {
+      Preprocessing::Preprocessor.new(
+        Preprocessing::CopyToSiteGenDir.new(file_system_accessor),
+         DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor, command_creator, sheller)
+      )
+    }
     let(:document_parser) { HtmlDocumentManipulator.new }
     let(:file_system_accessor) { LocalFileSystemAccessor.new }
     let(:final_app_dir) { File.absolute_path('final_app') }

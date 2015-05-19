@@ -5,7 +5,11 @@ module Bookbinder
         @filesystem = filesystem
       end
 
-      def preprocess(sections, output_locations)
+      def applicable_to?(section)
+        section.subnav_template != 'dita_subnav'
+      end
+
+      def preprocess(sections, output_locations, *_)
         sections.each do |section|
           filesystem.copy_contents(
             section.path_to_repository,

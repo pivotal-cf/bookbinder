@@ -25,7 +25,7 @@ module Bookbinder
                      sitemap_writer,
                      final_app_directory,
                      context_dir,
-                     dita_preprocessor,
+                     preprocessor,
                      cloner_factory,
                      dita_section_gatherer_factory,
                      section_repository_factory,
@@ -41,7 +41,7 @@ module Bookbinder
         @sitemap_writer = sitemap_writer
         @final_app_directory = final_app_directory
         @context_dir = context_dir
-        @dita_preprocessor = dita_preprocessor
+        @preprocessor = preprocessor
         @cloner_factory = cloner_factory
         @dita_section_gatherer_factory = dita_section_gatherer_factory
         @section_repository_factory = section_repository_factory
@@ -90,14 +90,13 @@ module Bookbinder
           destination_dir: output_locations.cloned_preprocessing_dir,
           ref_override: ('master' if options.include?('--ignore-section-refs'))
         )
-        copy_to_site_gen_dir = Preprocessing::CopyToSiteGenDir.new(LocalFileSystemAccessor.new)
-        copy_to_site_gen_dir.preprocess(sections, output_locations)
-
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
         gathered_dita_sections = dita_gatherer.gather(bind_config.dita_sections)
-        dita_preprocessor.preprocess(gathered_dita_sections, output_locations,
-                                     options: options,
-                                     output_streams: output_streams)
+
+        preprocessor.preprocess(sections + gathered_dita_sections,
+                                output_locations,
+                                options: options,
+                                output_streams: output_streams)
 
         subnavs = (sections + gathered_dita_sections).map(&:subnav).reduce(&:merge)
 
@@ -123,7 +122,7 @@ module Bookbinder
                   :final_app_directory,
                   :sitemap_writer,
                   :context_dir,
-                  :dita_preprocessor,
+                  :preprocessor,
                   :cloner_factory,
                   :dita_section_gatherer_factory,
                   :section_repository_factory,

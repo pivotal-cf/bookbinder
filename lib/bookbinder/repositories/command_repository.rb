@@ -14,6 +14,7 @@ require_relative '../ingest/cloner_factory'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../post_production/sitemap_writer'
+require_relative '../preprocessing/preprocessor'
 require_relative '../remote_yaml_credential_provider'
 require_relative '../sheller'
 require_relative '../subnav_formatter'
@@ -84,7 +85,15 @@ module Bookbinder
           PostProduction::SitemapWriter.build(logger, final_app_directory, sitemap_port),
           final_app_directory,
           File.absolute_path('.'),
-          dita_preprocessor,
+          Preprocessing::Preprocessor.new(
+            DitaPreprocessor.new(
+              dita_html_to_middleman_formatter,
+              local_file_system_accessor,
+              dita_command_creator,
+              Sheller.new
+            ),
+            default: Preprocessing::CopyToSiteGenDir.new(local_file_system_accessor),
+          ),
           Ingest::ClonerFactory.new(logger, local_file_system_accessor, version_control_system),
           DitaSectionGathererFactory.new(version_control_system, logger),
           Repositories::SectionRepositoryFactory.new(logger),
@@ -130,14 +139,6 @@ module Bookbinder
 
       def final_app_directory
         @final_app_directory ||= File.absolute_path('final_app')
-      end
-
-      def dita_preprocessor
-        @dita_preprocessor ||=
-            DitaPreprocessor.new(dita_html_to_middleman_formatter,
-                                 local_file_system_accessor,
-                                 dita_command_creator,
-                                 Sheller.new)
       end
 
       def dita_command_creator

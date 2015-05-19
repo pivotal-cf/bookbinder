@@ -5,9 +5,21 @@ require_relative '../../../../lib/bookbinder/values/section'
 module Bookbinder
   module Preprocessing
     describe CopyToSiteGenDir do
+      it 'is applicable to sections without dita subnavs' do
+        regular_section = Section.new
+        preprocessor = CopyToSiteGenDir.new(double('filesystem'))
+        expect(preprocessor).to be_applicable_to(regular_section)
+      end
+
+      it 'is not applicable to sections with dita subnavs' do
+        dita_subnav_section = Section.new(nil, nil, nil, nil, nil, 'dita_subnav')
+        preprocessor = CopyToSiteGenDir.new(double('filesystem'))
+        expect(preprocessor).not_to be_applicable_to(dita_subnav_section)
+      end
+
       it 'just copies sections from their cloned dir to the dir ready for site generation' do
         fs = double('filesystem')
-        null_preprocessor = CopyToSiteGenDir.new(fs)
+        preprocessor = CopyToSiteGenDir.new(fs)
         output_locations = OutputLocations.new(context_dir: 'mycontextdir')
         sections = [
           Section.new(
@@ -35,7 +47,7 @@ module Bookbinder
           output_locations.source_for_site_generator.join('myrepo2')
         )
 
-        null_preprocessor.preprocess(sections, output_locations)
+        preprocessor.preprocess(sections, output_locations, 'unused', 'args')
       end
     end
   end
