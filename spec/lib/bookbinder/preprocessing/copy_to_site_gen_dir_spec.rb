@@ -5,16 +5,9 @@ require_relative '../../../../lib/bookbinder/values/section'
 module Bookbinder
   module Preprocessing
     describe CopyToSiteGenDir do
-      it 'is applicable to sections without dita subnavs' do
-        regular_section = Section.new
+      it "isn't 'applicable' to anything: designed to be used as a default" do
         preprocessor = CopyToSiteGenDir.new(double('filesystem'))
-        expect(preprocessor).to be_applicable_to(regular_section)
-      end
-
-      it 'is not applicable to sections with dita subnavs' do
-        dita_subnav_section = Section.new(nil, nil, nil, nil, nil, 'dita_subnav')
-        preprocessor = CopyToSiteGenDir.new(double('filesystem'))
-        expect(preprocessor).not_to be_applicable_to(dita_subnav_section)
+        expect(preprocessor).not_to be_applicable_to(Section.new)
       end
 
       it 'just copies sections from their cloned dir to the dir ready for site generation' do

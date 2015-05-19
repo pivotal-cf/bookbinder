@@ -95,8 +95,8 @@ module Bookbinder
     let(:config_hash) { base_config_hash }
     let(:preprocessor) {
       Preprocessing::Preprocessor.new(
-        Preprocessing::CopyToSiteGenDir.new(file_system_accessor),
-         DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor, command_creator, sheller)
+         DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor, command_creator, sheller),
+         default: Preprocessing::CopyToSiteGenDir.new(file_system_accessor),
       )
     }
     let(:document_parser) { HtmlDocumentManipulator.new }

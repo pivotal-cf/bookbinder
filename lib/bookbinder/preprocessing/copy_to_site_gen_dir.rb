@@ -5,8 +5,8 @@ module Bookbinder
         @filesystem = filesystem
       end
 
-      def applicable_to?(section)
-        section.subnav_template != 'dita_subnav'
+      def applicable_to?(*)
+        false
       end
 
       def preprocess(sections, output_locations, *_)
