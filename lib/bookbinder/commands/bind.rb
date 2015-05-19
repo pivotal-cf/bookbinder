@@ -3,6 +3,7 @@ require 'middleman-syntax'
 require_relative '../archive_menu_configuration'
 require_relative '../dita_section_gatherer_factory'
 require_relative '../errors/cli_error'
+require_relative '../preprocessing/copy_to_site_gen_dir'
 require_relative '../streams/switchable_stdout_and_red_stderr'
 require_relative '../values/output_locations'
 require_relative '../values/section'
@@ -86,13 +87,14 @@ module Bookbinder
 
         sections = section_repository.fetch(
           configured_sections: bind_config.sections,
-          destination_dir: output_locations.source_for_site_generator,
+          destination_dir: output_locations.cloned_preprocessing_dir,
           ref_override: ('master' if options.include?('--ignore-section-refs'))
         )
+        copy_to_site_gen_dir = Preprocessing::CopyToSiteGenDir.new(LocalFileSystemAccessor.new)
+        copy_to_site_gen_dir.preprocess(sections, output_locations)
 
         dita_gatherer = dita_section_gatherer_factory.produce(bind_source, output_locations)
         gathered_dita_sections = dita_gatherer.gather(bind_config.dita_sections)
-
         dita_preprocessor.preprocess(gathered_dita_sections,
                                      output_locations) do |dita_section|
           command = command_creator.convert_to_html_command(
