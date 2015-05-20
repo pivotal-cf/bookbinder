@@ -50,9 +50,7 @@ module Bookbinder
     def validate(config_hash)
       raise 'Your config.yml appears to be empty. Please check and try again.' unless config_hash
 
-      errors = configuration_validator.exceptions(config_hash,
-                                                  Configuration::CURRENT_SCHEMA_VERSION,
-                                                  Configuration::STARTING_SCHEMA_VERSION)
+      errors = configuration_validator.exceptions(config_hash)
       raise errors.first if errors.any?
 
       Configuration.parse(config_hash)
