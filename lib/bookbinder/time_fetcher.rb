@@ -1,6 +1,6 @@
 module Bookbinder
   class TimeFetcher
-    def fetch
+    def current_time
       Time.now.strftime("%Y%m%d_%H%M")
     end
   end
