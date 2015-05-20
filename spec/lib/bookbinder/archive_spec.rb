@@ -65,6 +65,26 @@ module Bookbinder
           expect(directory.files.get("#{namespace}-#{build_number}.tgz")).not_to be_nil
         end
 
+        context 'when the build number is not available' do
+          let(:build_number) { nil }
+
+          it 'uses the current time to version the tarball file' do
+            time_fetcher = double('time fetcher', current_time: '20150520_1033')
+            archive = Archive.new(logger: logger,
+                                  time_fetcher: time_fetcher,
+                                  key: aws_access_key_id,
+                                  secret: aws_secret_access_key)
+
+            archive.create_and_upload_tarball build_number: build_number,
+                                              namespace: namespace,
+                                              app_dir: final_app_dir,
+                                              bucket: bucket_key
+
+            directory = fog_connection.directories.get(bucket_key)
+            expect(directory.files.get("#{namespace}-20150520_1033.tgz")).not_to be_nil
+          end
+        end
+
         it 'uploads a tarball with the contents of the given app directory' do
           create
           s3_file = fog_connection.directories.get(bucket_key).
@@ -124,29 +144,46 @@ module Bookbinder
         let(:build_number) { nil }
         let(:namespace) { 'a-name' }
 
-        context 'and there is more than one file in the bucket that follows the naming pattern' do
-          before do
-            create_s3_file namespace, '17'
-            create_s3_file namespace, '3'
+        context 'and there is more than one file in the bucket that matches the naming pattern' do
+          context 'and the files all follow the build-number naming convention' do
+            it 'downloads the last modified green build' do
+              create_s3_file namespace, '17'
 
-            if ENV['REAL_S3']
-              sleep 1
-            else
-              allow(Time).to receive(:now).and_return(Time.now + 30)
+              if ENV['REAL_S3']
+                sleep 1
+              else
+                allow(Time).to receive(:now).and_return(Time.now + 30)
+              end
+
+              create_s3_file namespace, '1'
+
+              download
+              untarred_file = app_dir.join('stuff.txt')
+              contents = File.read(untarred_file)
+              expect(contents).to eq("contents of #{namespace}-1")
             end
-
-            create_s3_file namespace, '1'
           end
 
-          it 'downloads the last modified green build' do
-            download
-            untarred_file = app_dir.join('stuff.txt')
-            contents = File.read(untarred_file)
-            expect(contents).to eq("contents of #{namespace}-1")
+          context 'and the files in the bucket follow both the build-number and timestamp naming conventions' do
+            it 'downloads the last modified green build' do
+              create_s3_file namespace, '17'
+              create_s3_file namespace, '20160606_0606'
+              if ENV['REAL_S3']
+                sleep 1
+              else
+                allow(Time).to receive(:now).and_return(Time.now + 30)
+              end
+              create_s3_file namespace, '20150520_1051'
+
+              download
+              untarred_file = app_dir.join('stuff.txt')
+              contents = File.read(untarred_file)
+              expect(contents).to eq("contents of #{namespace}-20150520_1051")
+            end
           end
         end
 
-        context 'and there is only one file in the bucket that conforms to the naming pattern' do
+        context 'and there is only one file in the bucket that matches the naming pattern' do
           before do
             create_s3_file namespace, '1'
           end
@@ -246,6 +283,22 @@ module Bookbinder
         uploaded_file = archive.upload_file(bucket_key, 'filename', tmpdir.join('filename'))
         expect(uploaded_file.url(0)).
           to match(%r(^https://#{bucket_key}\.s3\.amazonaws\.com/filename))
+      end
+    end
+
+    describe 'matching tarball names' do
+      context 'using a regex' do
+        it 'matches tarballs that follow the build number versioning convention' do
+          filename = 'i-am-a-tarball-1.tgz'
+          filename2 = 'i-am-a-tarball-1099.tgz'
+          expect(filename).to match archive.tarball_name_regex('i-am-a-tarball')
+          expect(filename2).to match archive.tarball_name_regex('i-am-a-tarball')
+        end
+
+        it 'matches tarballs that follow the timestamp versioning convention' do
+          filename = 'i-am-a-tarball-20150520_1128.tgz'
+          expect(filename).to match archive.tarball_name_regex('i-am-a-tarball')
+        end
       end
     end
   end

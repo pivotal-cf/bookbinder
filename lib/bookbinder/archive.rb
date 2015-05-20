@@ -2,20 +2,22 @@ require 'fog/aws'
 require 'tmpdir'
 require_relative 'artifact_namer'
 require_relative 'deprecated_logger'
+require_relative 'time_fetcher'
 
 module Bookbinder
   class Archive
     class FileDoesNotExist < StandardError; end
     class NoNamespaceGiven < StandardError; end
 
-    def initialize(logger: nil, key: '', secret: '')
+    def initialize(logger: nil, time_fetcher: TimeFetcher.new, key: '', secret: '')
       @logger = logger
+      @time_fetcher = time_fetcher
       @aws_key = key
       @aws_secret_key = secret
     end
 
     def create_and_upload_tarball(build_number: nil, app_dir: 'final_app', bucket: '', namespace: nil)
-      raise 'You must provide a build_number to push an identifiable build.' unless build_number
+      build_number ||= time_fetcher.current_time
       raise 'You must provide a namespace to push an identifiable build.' unless namespace
 
       tarball_filename, tarball_path = create_tarball(app_dir, build_number, namespace)
@@ -48,7 +50,13 @@ module Bookbinder
       @logger.log "Green build ##{build_number.to_s.green} has been downloaded from S3 and untarred into #{download_dir.to_s.cyan}"
     end
 
+    def tarball_name_regex(namespace)
+      /^#{namespace}-(\d+_?\d*)\.tgz/
+    end
+
     private
+
+    attr_reader :time_fetcher
 
     def find_or_create_directory(name)
       connection.directories.create(key: name)
@@ -69,15 +77,14 @@ module Bookbinder
 
       all_files_with_namespace = all_files.map do |file|
         filename = file.key
-        matches = /^#{namespace}-([\d]+)\.tgz/.match(filename)
-        file if matches
+        file if filename[tarball_name_regex(namespace)]
       end.compact
 
       return nil if all_files_with_namespace.empty?
       most_recent_file = all_files_with_namespace.sort_by { |file| file.last_modified }.last
 
       most_recent_filename = most_recent_file.key
-      most_recent_build_number = /^#{namespace}-([\d]+)\.tgz/.match(most_recent_filename)[1]
+      most_recent_filename[tarball_name_regex(namespace), 1]
     end
 
     def connection
