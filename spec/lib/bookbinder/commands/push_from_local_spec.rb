@@ -18,7 +18,7 @@ module Bookbinder
 
       let(:logger) { NilLogger.new }
       let(:configuration_fetcher) { double('configuration_fetcher') }
-      let(:config) { Configuration.new(config_hash) }
+      let(:config) { Configuration.parse(config_hash) }
       let(:command) { PushFromLocal.new(logger, configuration_fetcher, 'foobar_env') }
       let(:credentials) {
         {

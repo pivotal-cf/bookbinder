@@ -41,7 +41,7 @@ module Bookbinder
 
       middleman_runner.run(
         output_locations,
-        Configuration.new(
+        Configuration.parse(
           'template_variables' => template_variables,
           'public_host' => production_host,
           'archive_menu' => archive_menu

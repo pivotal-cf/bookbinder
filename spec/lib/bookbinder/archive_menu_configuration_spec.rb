@@ -6,7 +6,7 @@ require_relative '../../../lib/bookbinder/values/section'
 module Bookbinder
   describe ArchiveMenuConfiguration do
     let(:loader) { double('config loader') }
-    let(:base_config) { Configuration.new('archive_menu' => ['v2', {'v1' => 'some/place'}]) }
+    let(:base_config) { Configuration.parse('archive_menu' => ['v2', {'v1' => 'some/place'}]) }
 
     context "when a section has its own menu config" do
       it "generates configuration for that section" do
@@ -24,7 +24,7 @@ module Bookbinder
           }
 
         expect(archive_config.generate(base_config, sections)).to eq(
-          Configuration.new(
+          Configuration.parse(
             'archive_menu' => {
               '.' => base_config.archive_menu,
               'my/dir' => ['v1', {'v0.9' => 'section/place'}]
@@ -43,7 +43,7 @@ module Bookbinder
         allow(loader).to receive(:load_key) { nil }
 
         expect(archive_config.generate(base_config, sections)).to eq(
-          Configuration.new(
+          Configuration.parse(
           'archive_menu' => {
             '.' => base_config.archive_menu
           }))

@@ -20,19 +20,22 @@ module Bookbinder
       attr_reader :version_control_system, :base_config
 
       def sections_from(version)
-        attrs = YAML.load(
+        sections = Configuration.parse(
+          YAML.load(
           version_control_system.read_file(
             'config.yml',
             from_repo: base_config.book_repo_url,
             checkout: version
           )
-        )['sections']
-        raise VersionUnsupportedError.new(version) if attrs.nil?
+        )).sections
+        raise VersionUnsupportedError.new(version) if sections.empty?
 
-        attrs.map do |section_hash|
-          section_hash.merge(
-            'repository' => section_hash['repository'].merge('ref' => version),
-            'directory' => File.join(version, section_hash['directory'])
+        sections.map do |section|
+          section.merge(
+            Config::SectionConfig.new(
+              'repository' => { 'name' => section.repo_name, 'ref' => version },
+              'directory' => File.join(version, section.desired_directory_name)
+            )
           )
         end
       end

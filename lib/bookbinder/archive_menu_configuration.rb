@@ -7,7 +7,7 @@ module Bookbinder
 
     def generate(base_config, sections)
       base_config.merge(
-        Configuration.new(
+        Configuration.parse(
           'archive_menu' => root_config(base_config).merge(section_config(sections))))
     end
 

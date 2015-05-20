@@ -35,6 +35,14 @@ module Bookbinder
         config == other.instance_variable_get(:@config)
       end
 
+      def merge(other_section_config)
+        SectionConfig.new(config.merge(other_section_config.instance_variable_get(:@config)))
+      end
+
+      def inspect
+        config.inspect
+      end
+
       private
 
       def repo

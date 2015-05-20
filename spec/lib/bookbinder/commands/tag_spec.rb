@@ -5,7 +5,7 @@ require_relative '../../../../lib/bookbinder/git_accessor'
 module Bookbinder
   describe Commands::Tag do
     it 'should tag the book and its sections' do
-      config = Configuration.new(
+      config = Configuration.parse(
         'book_repo' => 'myorg/bookrepo',
         'sections' => [
           {'repository' => {'name' => 'myotherorg/section1repo'}},

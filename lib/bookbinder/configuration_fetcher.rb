@@ -55,7 +55,7 @@ module Bookbinder
                                                   Configuration::STARTING_SCHEMA_VERSION)
       raise errors.first if errors.any?
 
-      Configuration.new(config_hash)
+      Configuration.parse(config_hash)
     end
   end
 end

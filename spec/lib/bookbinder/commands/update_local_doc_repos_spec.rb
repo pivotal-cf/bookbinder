@@ -6,7 +6,7 @@ require_relative '../../../helpers/git_fake'
 module Bookbinder
   describe Commands::UpdateLocalDocRepos do
     let(:config) {
-      Configuration.new('sections' => [
+      Configuration.parse('sections' => [
         {'repository' => {'name' => 'org/repo-name'}},
         {'repository' => {'name' => 'git@otherplace.com:org/repo-name-2'}},
       ])
