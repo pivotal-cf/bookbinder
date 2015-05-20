@@ -182,7 +182,7 @@ module Bookbinder
       end
 
       context 'when the source directory does not exist' do
-        it 'returns' do
+        it 'is a mistake to call copy contents' do
           Dir.mktmpdir do |tmpdir|
             dest_dir_path = File.join(tmpdir, 'dest_dir')
             source_dir_path = ""
