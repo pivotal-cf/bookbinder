@@ -33,19 +33,13 @@ module Bookbinder
     end
 
     def copy(src, dest)
-      unless File.directory?(dest)
-        FileUtils.mkdir_p(dest)
-      end
-
+      make_directory(dest)
       FileUtils.cp_r src, dest
     end
 
     def copy_contents(src, dest)
       raise Errors::ProgrammerMistake.new("The method copy_contents cannot copy the contents of the directory '#{src}' because it was not found.") unless Dir.exists?(src)
-      unless File.directory?(dest)
-        FileUtils.mkdir_p(dest)
-      end
-      FileUtils.cp_r "#{src}/.", dest
+      copy "#{src}/.", dest
     end
 
     def copy_including_intermediate_dirs(file, root, dest)
