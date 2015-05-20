@@ -53,7 +53,6 @@ module Bookbinder
       context 'if the source directory does not exist locally' do
         it 'does not copy the contents of that directory' do
           fs = double('filesystem')
-
           preprocessor = CopyToSiteGenDir.new(fs)
           output_locations = OutputLocations.new(context_dir: 'mycontextdir')
           sections = [
