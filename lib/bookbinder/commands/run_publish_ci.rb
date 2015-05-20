@@ -22,8 +22,6 @@ module Bookbinder
       end
 
       def run(cli_args)
-        raise BuildAndPushTarball::MissingBuildNumber unless ENV['BUILD_NUMBER']
-
         command_chain(
           ->{publish_command.run(['remote'] + cli_args)},
           ->{push_local_to_staging_command.run([])},

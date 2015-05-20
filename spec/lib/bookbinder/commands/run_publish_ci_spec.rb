@@ -45,11 +45,5 @@ module Bookbinder
         command.run ['--verbose']
       end
     end
-
-    it 'raises MissingBuildNumber if ENV["BUILD_NUMBER"] is not set' do
-      expect {
-        command.run([])
-      }.to raise_error(Commands::BuildAndPushTarball::MissingBuildNumber)
-    end
   end
 end

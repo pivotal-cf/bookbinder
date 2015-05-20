@@ -8,19 +8,12 @@ module Bookbinder
     class BuildAndPushTarball < BookbinderCommand
       include Commands::Naming
 
-      class MissingBuildNumber < StandardError
-        def initialize
-          super 'You must set $BUILD_NUMBER to push an identifiable build.'
-        end
-      end
-
       def usage
         [command_name,
          "Create a tarball from the final_app directory and push to the S3 bucket specified in your credentials.yml"]
       end
 
       def run(_)
-        raise MissingBuildNumber unless ENV['BUILD_NUMBER']
         config = configuration_fetcher.fetch_config
         aws_credentials = configuration_fetcher.fetch_credentials[:aws]
         archive = Archive.new(logger: @logger, key: aws_credentials.access_key, secret: aws_credentials.secret_key)
