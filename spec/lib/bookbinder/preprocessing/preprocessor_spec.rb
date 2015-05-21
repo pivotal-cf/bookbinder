@@ -25,7 +25,7 @@ module Bookbinder
         preprocessor.preprocess(objs, 'extra', 'args')
       end
 
-      it "applies the default process to objects that aren't applicable to any process" do
+      it "does nothing to objects that aren't applicable to any process" do
         objs = [
           Object.new,
           Object.new,
@@ -33,18 +33,15 @@ module Bookbinder
           Object.new,
         ]
 
-        process_1 = double('default process')
-        process_2 = double('some other process')
+        process_1 = double('some other process')
+        process_2 = double('second process')
 
-        preprocessor = Preprocessor.new(process_2, default: process_1)
+        preprocessor = Preprocessor.new(process_1, process_2)
 
-        block = ->(*){}
+        allow(process_1).to receive(:applicable_to?) { |obj| objs[2..3].include?(obj) }
+        allow(process_2).to receive(:applicable_to?) { false }
 
-        allow(process_1).to receive(:applicable_to?) { false }
-        allow(process_2).to receive(:applicable_to?) { |obj| objs[2..3].include?(obj) }
-
-        expect(process_1).to receive(:preprocess).with(objs[0..1], 'extra', 'args')
-        expect(process_2).to receive(:preprocess).with(objs[2..3], 'extra', 'args')
+        expect(process_1).to receive(:preprocess).with(objs[2..3], 'extra', 'args')
 
         preprocessor.preprocess(objs, 'extra', 'args')
       end
