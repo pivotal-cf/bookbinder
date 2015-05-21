@@ -5,15 +5,16 @@ module Bookbinder
         @filesystem = filesystem
       end
 
-      def applicable_to?(*)
-        false
+      def applicable_to?(section)
+        section.subnav_template != 'dita_subnav' &&
+          filesystem.file_exist?(section.path_to_repository)
       end
 
       def preprocess(sections, output_locations, *_)
         sections.each do |section|
-          section.path_to_repository.exist? && filesystem.copy_contents(
-              section.path_to_repository,
-              output_locations.source_for_site_generator.join(section.desired_directory)
+          filesystem.copy_contents(
+            section.path_to_repository,
+            output_locations.source_for_site_generator.join(section.desired_directory)
           )
         end
       end

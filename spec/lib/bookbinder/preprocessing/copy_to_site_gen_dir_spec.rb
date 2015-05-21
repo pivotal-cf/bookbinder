@@ -6,103 +6,65 @@ require_relative '../../../../spec/helpers/nil_logger'
 module Bookbinder
   module Preprocessing
     describe CopyToSiteGenDir do
-      it "isn't 'applicable' to anything: designed to be used as a default" do
-        preprocessor = CopyToSiteGenDir.new(double('filesystem'))
-        expect(preprocessor).not_to be_applicable_to(Section.new)
-      end
-
       it 'just copies sections from their cloned dir to the dir ready for site generation' do
         fs = double('filesystem')
         preprocessor = CopyToSiteGenDir.new(fs)
         output_locations = OutputLocations.new(context_dir: 'mycontextdir')
 
-        Dir.mktmpdir do |tmpdir|
-          Dir.mkdir(File.join(tmpdir, 'path1'))
-          Dir.mkdir(File.join(tmpdir, 'path2'))
+        sections = [
+          Section.new(
+            'path1',
+            'myorg/myrepo',
+            copied = true,
+            'irrelevant/dest/dir',
+            'my/desired/dir'
+          ),
+          Section.new(
+            'path2',
+            'myorg/myrepo2',
+            copied = true,
+            'irrelevant/other/dest/dir',
+            desired_dir = nil
+          )
+        ]
 
-          sections = [
-              Section.new(
-                  File.join(tmpdir, 'path1'),
-                  'myorg/myrepo',
-                  copied = true,
-                  'irrelevant/dest/dir',
-                  'my/desired/dir'
-              ),
-              Section.new(
-                  File.join(tmpdir, 'path2'),
-                  'myorg/myrepo2',
-                  copied = true,
-                  'irrelevant/other/dest/dir',
-                  desired_dir = nil
-              )
-          ]
+        expect(fs).to receive(:copy_contents).with(
+          sections[0].path_to_repository,
+          output_locations.source_for_site_generator.join('my/desired/dir')
+        )
+        expect(fs).to receive(:copy_contents).with(
+          sections[1].path_to_repository,
+          output_locations.source_for_site_generator.join('myrepo2')
+        )
 
-          expect(fs).to receive(:copy_contents).with(
-                            sections[0].path_to_repository,
-                            output_locations.source_for_site_generator.join('my/desired/dir')
-                        )
-          expect(fs).to receive(:copy_contents).with(
-                            sections[1].path_to_repository,
-                            output_locations.source_for_site_generator.join('myrepo2')
-                        )
-
-          preprocessor.preprocess(sections, output_locations, 'unused', 'args')
-        end
+        preprocessor.preprocess(sections, output_locations, 'unused', 'args')
       end
 
-      context 'if the source directory does not exist locally' do
-        it 'does not copy the contents of that directory' do
-          fs = double('filesystem')
-          preprocessor = CopyToSiteGenDir.new(fs)
-          output_locations = OutputLocations.new(context_dir: 'mycontextdir')
-          sections = [
-              Section.new(
-                  '',
-                  'myorg/myrepo',
-                  copied = true,
-                  'irrelevant/dest/dir',
-                  'my/desired/dir'
-              )
-          ]
+      it "is applicable to sections whose source dir exists" do
+        fs = double('fs')
 
-          expect(fs).to_not receive(:copy_contents)
+        allow(fs).to receive(:file_exist?).with(Pathname('foo')) { true }
 
-          preprocessor.preprocess(sections, output_locations, 'unused', 'args')
-        end
+        preprocessor = CopyToSiteGenDir.new(fs)
+        expect(preprocessor).to be_applicable_to(Section.new('foo'))
+      end
 
-        it 'does not halt execution' do
-          fs = double('filesystem')
-          preprocessor = CopyToSiteGenDir.new(fs)
-          output_locations = OutputLocations.new(context_dir: 'mycontextdir')
+      it "isn't applicable to sections whose source dir doesn't exist" do
+        fs = double('fs')
 
-          Dir.mktmpdir do |tmpdir|
-            Dir.mkdir(File.join(tmpdir, 'path2'))
+        allow(fs).to receive(:file_exist?).with(Pathname('foo')) { false }
 
-            sections = [
-                Section.new(
-                    '',
-                    'myorg/myrepo',
-                    copied = true,
-                    'irrelevant/dest/dir',
-                    'my/desired/dir'
-                ),
-                Section.new(
-                    File.join(tmpdir, 'path2'),
-                    'myorg/myrepo2',
-                    copied = true,
-                    'irrelevant/other/dest/dir',
-                    desired_dir = nil
-                )
-            ]
+        preprocessor = CopyToSiteGenDir.new(fs)
+        expect(preprocessor).not_to be_applicable_to(Section.new('foo'))
+      end
 
-            expect(fs).to receive(:copy_contents).with(
-                              sections[1].path_to_repository,
-                              output_locations.source_for_site_generator.join('myrepo2')
-                          )
+      it "isn't applicable to DITA sections" do
+        fs = double('fs')
 
-            preprocessor.preprocess(sections, output_locations, 'unused', 'args')
-          end
-        end
+        allow(fs).to receive(:file_exist?).with(Pathname('foo')) { true }
+
+        preprocessor = CopyToSiteGenDir.new(fs)
+        expect(preprocessor).not_to be_applicable_to(Section.new('foo', nil, nil, nil, nil, 'dita_subnav'))
       end
     end
   end

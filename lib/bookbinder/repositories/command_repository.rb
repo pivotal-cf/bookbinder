@@ -93,7 +93,7 @@ module Bookbinder
               DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY']),
               Sheller.new
             ),
-            default: Preprocessing::CopyToSiteGenDir.new(local_file_system_accessor),
+            Preprocessing::CopyToSiteGenDir.new(local_file_system_accessor),
           ),
           Ingest::ClonerFactory.new(logger, local_file_system_accessor, version_control_system),
           Repositories::SectionRepositoryFactory.new(logger),
