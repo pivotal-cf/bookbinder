@@ -12,44 +12,42 @@ module Bookbinder
 
     class << self
       def parse(input_config)
-        new(symbolize_keys(input_config).merge(
-          input_config.reduce({}) {|acc_config, (k, v)|
-            new_key, transform = transforms(input_config)[k]
-            if new_key
-              acc_config.merge(new_key => transform[v])
-            else
-              acc_config
-            end
-          }.merge(
-            sections: all_sections(input_config).map { |section| Config::SectionConfig.new(section) },
-          )))
+        new(symbolize_keys(input_config).
+            merge(expand_repo_identifiers(input_config)).
+            merge(sections: combined_sections(input_config)))
       end
 
       private
 
       def symbolize_keys(h)
-        h.reduce({}) {|acc, (k, v)|
-          acc.merge(k.to_sym => v)
-        }
+        h.reduce({}) {|acc, (k, v)| acc.merge(k.to_sym => v) }
       end
 
-      def transforms(input_config)
-        {
-          'book_repo' => [:book_repo_url, ->(v) { Ingest::RepoIdentifier.new(v) }],
-          'cred_repo' => [:cred_repo_url, ->(v) { Ingest::RepoIdentifier.new(v) }],
-          'layout_repo' => [:layout_repo_url, ->(v) { Ingest::RepoIdentifier.new(v) }],
-          'template_variables' => [:template_variables, ->(_) { input_config.fetch('template_variables', {}) }],
-          'versions' => [:versions, ->(_) { input_config.fetch('versions', []) }]
-        }
+      def expand_repo_identifiers(input_config)
+        input_config.select {|k, _| k.match(/_repo$/)}.
+          reduce({}) {|h, (k, v)| h.merge(:"#{k}_url" => Ingest::RepoIdentifier.new(v))}
       end
 
-      def all_sections(input_config)
-        (input_config['sections'] || []) + (input_config['dita_sections'] || []).map { |dita_section|
-          dita_section.
-            merge('preprocessor_config' => { 'ditamap_location' => dita_section['ditamap_location'],
-                                             'ditaval_location' => dita_section['ditaval_location'] },
-            'subnav_template' => 'dita_subnav').
-            reject { |k, v| %w(ditamap_location ditaval_location).include?(k) }
+      def combined_sections(input_config)
+        (regular_sections(input_config) + dita_sections(input_config)).
+          map { |section| Config::SectionConfig.new(section) }
+      end
+
+      def regular_sections(input_config)
+        input_config['sections'] || []
+      end
+
+      def dita_sections(input_config)
+        (input_config['dita_sections'] || []).map { |dita_section|
+          dita_section.merge(
+            'preprocessor_config' => {
+              'ditamap_location' => dita_section['ditamap_location'],
+              'ditaval_location' => dita_section['ditaval_location']
+            },
+            'subnav_template' => 'dita_subnav'
+          ).reject { |k, _|
+            %w(ditamap_location ditaval_location).include?(k)
+          }
         }
       end
     end
