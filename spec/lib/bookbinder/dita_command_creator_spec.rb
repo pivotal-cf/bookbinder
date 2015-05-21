@@ -115,7 +115,6 @@ module Bookbinder
                   'ant -f /path/to/dita/ot ' +
                   "-Doutput.dir='/path/to/processed/dita/boo' " +
                   "-Dargs.input='/local/path/to/repo/path/to/map.ditamap' " +
-                  "-Dargs.filter='' " +
                   "-Dbasedir='/' " +
                   "-Dtranstype='tocjs' " +
                   "-Ddita.temp.dir='hey/some/new/dir' " +
@@ -144,7 +143,6 @@ module Bookbinder
       'ant -f /path/to/dita/ot ' +
       "-Doutput.dir='/path/to/processed/dita/boo' " +
       "-Dargs.input='/local/path/to/repo/path/to/map.ditamap' " +
-      "-Dargs.filter='' " +
       "-Dbasedir='/' " +
       "-Dtranstype='tocjs' " +
       "-Ddita.temp.dir='/tmp/bookbinder_dita' " +

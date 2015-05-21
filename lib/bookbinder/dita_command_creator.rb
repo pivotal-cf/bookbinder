@@ -34,10 +34,17 @@ module Bookbinder
       arg_flags = {
           'output.dir' => write_to,
           'args.input' => ditamap_path,
-          'args.filter' => ditaval_path || ""
-      }
+      }.merge(filter(ditaval_path))
       all_flags = arg_flags.merge(base_flags.merge(optional_flags dita_flags))
       format(all_flags)
+    end
+
+    def filter(ditaval_path)
+      if ditaval_path
+        { 'args.filter' => ditaval_path }
+      else
+        {}
+      end
     end
 
     def base_flags
