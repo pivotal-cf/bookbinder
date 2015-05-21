@@ -17,9 +17,7 @@ module Bookbinder
             'sections' => []
           }
 
-          expect(subject.exceptions(config_hash,
-                                    bookbinder_schema_version,
-                                    starting_schema_version)).to be_empty
+          expect(subject.exceptions(config_hash)).to be_empty
         end
       end
     end

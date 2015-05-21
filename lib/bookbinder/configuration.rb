@@ -3,13 +3,6 @@ require_relative 'config/section_config'
 
 module Bookbinder
   class Configuration
-    CURRENT_SCHEMA_VERSION = '1.0.0'
-    STARTING_SCHEMA_VERSION = '1.0.0'
-
-    ConfigSchemaUnsupportedError = Class.new(RuntimeError)
-
-    attr_reader :schema_version, :schema_major_version, :schema_minor_version, :schema_patch_version
-
     class << self
       def parse(input_config)
         new(symbolize_keys(input_config).
