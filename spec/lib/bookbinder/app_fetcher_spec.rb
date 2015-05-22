@@ -8,15 +8,15 @@ module Bookbinder
         <<OUTPUT
 Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
 
-host                    domain                apps
-no-cat-pictures         cfapps.io
-less-cat-pictures       cfapps.io             cats #{eol_space}
-cat-pictures            cfapps.io             cats #{eol_space}
-docsmisleading          cfapps.io
-docs                    cfapps.io             docs-green #{eol_space}
-docs-testmisleading     cfapps.io
-docs-test               cfapps.io             docs-green,docs-blue #{eol_space}
-more-cat-pictures       cfapps.io             many-cats, too-many-cats #{eol_space}
+space       host                    domain                apps
+my-space    no-cat-pictures         cfapps.io
+my-space    less-cat-pictures       cfapps.io             cats #{eol_space}
+my-space    cat-pictures            cfapps.io             cats #{eol_space}
+my-space    docsmisleading          cfapps.io
+my-space    docs                    cfapps.io             docs-green #{eol_space}
+my-space    docs-testmisleading     cfapps.io
+my-space    docs-test               cfapps.io             docs-green,docs-blue #{eol_space}
+my-space    more-cat-pictures       cfapps.io             many-cats, too-many-cats #{eol_space}
 OUTPUT
       end
 
@@ -43,8 +43,8 @@ OUTPUT
           <<OUTPUT
   Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
 
-host                    domain                apps
-docs                    cfapps.io             #{eol_space}
+space         host                    domain                apps
+cool-space    docs                    cfapps.io             #{eol_space}
 OUTPUT
         end
 
@@ -59,8 +59,8 @@ OUTPUT
           <<OUTPUT
   Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
 
-host                    domain                apps
-foo                     cfapps.io             fantastic-app #{eol_space}
+space           host                    domain                apps
+cool-space      foo                     cfapps.io             fantastic-app #{eol_space}
 OUTPUT
         end
 
