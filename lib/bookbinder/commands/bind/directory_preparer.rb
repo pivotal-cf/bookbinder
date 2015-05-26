@@ -14,13 +14,12 @@ module Bookbinder
         end
 
         def prepare_directories(config, gem_root, locations)
-          forget_sections(locations.output_dir)
-          file_system_accessor.remove_directory(File.join(locations.final_app_dir, '.'))
-          file_system_accessor.remove_directory(locations.preprocessing_home_dir)
+          file_system_accessor.remove_directory(locations.output_dir)
+          file_system_accessor.remove_directory(locations.final_app_dir)
 
           copy_directory_from_gem(gem_root, 'template_app', locations.final_app_dir)
           copy_directory_from_gem(gem_root, 'master_middleman', locations.site_generator_home)
-          file_system_accessor.copy(File.join(locations.layout_repo_dir, '.'), locations.site_generator_home)
+          file_system_accessor.copy_contents(locations.layout_repo_dir, locations.site_generator_home)
 
           config.versions.each do |version|
             copy_index_file_from_version_to_master_middleman(version, locations.source_for_site_generator, config.book_repo_url)
@@ -49,7 +48,6 @@ module Bookbinder
         end
 
         def forget_sections(middleman_scratch)
-          file_system_accessor.remove_directory File.join middleman_scratch, '.'
         end
 
         def copy_directory_from_gem(gem_root, dir, output_dir)
