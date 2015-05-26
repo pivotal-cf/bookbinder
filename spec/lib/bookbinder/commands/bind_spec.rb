@@ -541,9 +541,9 @@ Content:
     describe 'creating necessary directories' do
       def create_command
         config = Configuration.parse('sections' => [],
-                                   'book_repo' => book,
-                                   'cred_repo' => 'my-org/my-creds',
-                                   'public_host' => 'docs.dogs.com')
+                                     'book_repo' => book,
+                                     'cred_repo' => 'my-org/my-creds',
+                                     'public_host' => 'docs.dogs.com')
         config_factory = double('config factory', produce: config)
         middleman_runner = MiddlemanRunner.new(logger, GitFake.new)
         final_app_dir = File.absolute_path('final_app')

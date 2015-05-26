@@ -38,15 +38,7 @@ module Bookbinder
       end
 
       def yield_for_subnav
-        if index_subnav
-          template = current_page.data.index_subnav
-        else
-          namespaces = decreasingly_specific_namespaces
-          template = namespaces.map do |namespace|
-            config[:subnav_templates][namespace]
-          end.compact.pop || 'default'
-        end
-        partial "subnavs/#{template}"
+        partial "subnavs/#{subnav_template_name}"
       end
 
       def yield_for_archive_drop_down_menu
@@ -80,12 +72,24 @@ module Bookbinder
 
       private
 
-      def index_subnav
-        return true if current_page.data.index_subnav
+      def subnav_template_name
+        if current_page.data.index_subnav
+          current_page.data.index_subnav
+        else
+          template_key = decreasingly_specific_namespaces.detect { |ns|
+            config[:subnav_templates].has_key?(ns)
+          }
+          config[:subnav_templates][template_key] || 'default'
+        end
       end
 
       def decreasingly_specific_namespaces
-        page_classes.split(' ')[0...-1].reverse
+        page_classes(numeric_prefix: numeric_class_prefix).
+          split(' ')[0...-1].reverse.map {|ns| ns.sub(/^#{numeric_class_prefix}/, '')}
+      end
+
+      def numeric_class_prefix
+        'NUMERIC_CLASS_PREFIX'
       end
 
       def add_ancestors_of(page, ancestors)

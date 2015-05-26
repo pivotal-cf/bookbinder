@@ -87,7 +87,7 @@ module Bookbinder
                                 output_streams: bind_options.streams)
 
         success = publish(
-          sections.map(&:subnav).reduce(&:merge),
+          sections.map(&:subnav).reduce({}, :merge),
           {verbose: options.include?('--verbose')},
           output_locations,
           archive_menu_config.generate(bind_config, sections),

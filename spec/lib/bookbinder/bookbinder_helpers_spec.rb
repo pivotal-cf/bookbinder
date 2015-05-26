@@ -39,7 +39,7 @@ module Bookbinder
         Middleman::Cli::Build.shared_instance(false).config[:template_variables] = template_variables
         Middleman::Cli::Build.shared_instance(false).config[:subnav_templates] = subnav_templates
         Middleman::Cli::Build.shared_instance(false).config[:archive_menu] = archive_menu
-        build_command.invoke :build, [], {:verbose => false}
+        build_command.invoke :build, [], {:verbose => true}
       end
 
       ENV['MM_ROOT'] = original_mm_root
@@ -209,7 +209,7 @@ MARKDOWN
       end
 
       context 'when the page is a section page' do
-        let(:section_directory) { 'some-dir' }
+        let(:section_directory) { '1some-dir' }
         let(:source_file_under_test) { "#{section_directory}/some-section.erb" }
         let(:output) { File.read File.join(tmpdir, 'build', section_directory, 'some-section.html' ) }
         let(:subnav) { 'section-subnav' }
