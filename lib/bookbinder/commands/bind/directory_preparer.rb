@@ -47,9 +47,6 @@ module Bookbinder
           end
         end
 
-        def forget_sections(middleman_scratch)
-        end
-
         def copy_directory_from_gem(gem_root, dir, output_dir)
           file_system_accessor.copy File.join(gem_root, "#{dir}/."), output_dir
         end
