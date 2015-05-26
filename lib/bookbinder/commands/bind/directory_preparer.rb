@@ -48,7 +48,7 @@ module Bookbinder
         end
 
         def copy_directory_from_gem(gem_root, dir, output_dir)
-          file_system_accessor.copy File.join(gem_root, "#{dir}/."), output_dir
+          file_system_accessor.copy_contents(File.join(gem_root, dir), output_dir)
         end
       end
     end
