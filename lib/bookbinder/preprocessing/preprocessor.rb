@@ -10,7 +10,7 @@ module Bookbinder
         @processes = processes
       end
 
-      def preprocess(objs, *args, &block)
+      def preprocess(objs, *args)
         objs.group_by { |obj|
           processes.detect ->{ NullProcess.new } { |process| process.applicable_to?(obj) }
         }.each do |process, objs|
