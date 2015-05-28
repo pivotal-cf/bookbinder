@@ -57,15 +57,6 @@ module Bookbinder
         preprocessor = CopyToSiteGenDir.new(fs)
         expect(preprocessor).not_to be_applicable_to(Section.new('foo'))
       end
-
-      it "isn't applicable to DITA sections" do
-        fs = double('fs')
-
-        allow(fs).to receive(:file_exist?).with(Pathname('foo')) { true }
-
-        preprocessor = CopyToSiteGenDir.new(fs)
-        expect(preprocessor).not_to be_applicable_to(Section.new('foo', nil, nil, nil, nil, 'dita_subnav'))
-      end
     end
   end
 end

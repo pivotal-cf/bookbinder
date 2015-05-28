@@ -9,10 +9,6 @@ module Bookbinder
                        :desired_directory_name,
                        :subnav_templ,
                        :preprocessor_config) do
-    def requires_preprocessing?
-      !preprocessor_config.nil?
-    end
-
     def path_to_repository
       Pathname(self[:path_to_repository].to_s)
     end
