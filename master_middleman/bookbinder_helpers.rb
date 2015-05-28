@@ -85,7 +85,8 @@ module Bookbinder
 
       def decreasingly_specific_namespaces
         page_classes(numeric_prefix: numeric_class_prefix).
-          split(' ')[0...-1].reverse.map {|ns| ns.sub(/^#{numeric_class_prefix}/, '')}
+          split(' ').reverse.drop(1).
+          map {|ns| ns.sub(/^#{numeric_class_prefix}/, '')}
       end
 
       def numeric_class_prefix
@@ -93,8 +94,11 @@ module Bookbinder
       end
 
       def add_ancestors_of(page, ancestors)
-        return ancestors if !page
-        add_ancestors_of(page.parent, ancestors << page)
+        if page
+          add_ancestors_of(page.parent, ancestors + [page])
+        else
+          ancestors
+        end
       end
 
       def make_breadcrumb(page, is_current_page)
