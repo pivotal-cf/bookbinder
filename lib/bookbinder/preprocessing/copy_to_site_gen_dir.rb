@@ -6,8 +6,7 @@ module Bookbinder
       end
 
       def applicable_to?(section)
-        section.subnav_template != 'dita_subnav' &&
-          filesystem.file_exist?(section.path_to_repository)
+        filesystem.file_exist?(section.path_to_repository)
       end
 
       def preprocess(sections, output_locations, *_)
