@@ -174,7 +174,7 @@ OUTPUT
       it 'send the right args' do
         expect(sheller).to receive(:run_command) do |variables, command|
           expect(variables['CF_TRACE']).to eq(trace_file)
-          expect(command).to match(/cf push my-app-name --no-route -m 256M -i 3/)
+          expect(command).to match(/cf push my-app-name -s cflinuxfs2 --no-route -m 256M -i 3/)
           process_status
         end
 

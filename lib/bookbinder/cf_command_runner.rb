@@ -45,7 +45,7 @@ module Bookbinder
       # Currently --no-routes is used to blow away all existing routes from a newly deployed app.
       # The routes will then be recreated from the creds repo.
       status = sheller.run_command(environment_variables,
-                                   "#{cf_binary_path} push #{deploy_target_app} --no-route -m 256M -i 3",
+                                   "#{cf_binary_path} push #{deploy_target_app} -s cflinuxfs2 --no-route -m 256M -i 3",
                                    out: $stdout,
                                    err: $stderr)
       raise "Could not deploy app to #{deploy_target_app}" unless status.success?
