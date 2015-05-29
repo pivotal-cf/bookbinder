@@ -9,12 +9,10 @@ module Bookbinder
 
     def initialize(final_app_dir: nil,
                    layout_repo_dir: nil,
-                   context_dir: nil,
-                   local_repo_dir: nil)
+                   context_dir: nil)
       @final_app_dir = final_app_dir
       @layout_repo_dir = layout_repo_dir
       @context_dir = context_dir
-      @local_repo_dir = local_repo_dir
     end
 
     def final_app_dir
@@ -39,10 +37,6 @@ module Bookbinder
 
     def output_dir
       context_dir.join(output_dir_name)
-    end
-
-    def local_repo_dir
-      Pathname(@local_repo_dir) if @local_repo_dir
     end
 
     def preprocessing_home_dir

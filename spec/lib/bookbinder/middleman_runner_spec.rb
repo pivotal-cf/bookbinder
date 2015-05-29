@@ -24,7 +24,6 @@ module Bookbinder
         Section.new('path/to/repo', '', true, 'path/to', 'my/place/rocks', 'my_subnav_template'),
         Section.new('path/to/repo', '', true, 'path/to', 'fraggles/rock')
     ] }
-    let(:local_repo_dir) { '/dev/null' }
 
     def run_middleman
       subnav_templates = {
@@ -33,8 +32,7 @@ module Bookbinder
       }
 
       output_locations = OutputLocations.new(
-        context_dir: context_dir,
-        local_repo_dir: local_repo_dir
+        context_dir: context_dir
       )
 
       target_dir_path.mkpath

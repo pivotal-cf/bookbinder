@@ -60,13 +60,13 @@ module Bookbinder
         bind_source, *options = cli_arguments
         bind_config = config_factory.produce(bind_source)
 
+        local_repo_dir = generate_local_repo_dir(context_dir, bind_source)
         output_locations = OutputLocations.new(
           context_dir: context_dir,
           final_app_dir: final_app_directory,
-          layout_repo_dir: layout_repo_path(bind_config, generate_local_repo_dir(context_dir, bind_source)),
-          local_repo_dir: generate_local_repo_dir(context_dir, bind_source)
+          layout_repo_dir: layout_repo_path(bind_config, local_repo_dir),
         )
-        cloner = cloner_factory.produce(output_locations.local_repo_dir)
+        cloner = cloner_factory.produce(local_repo_dir)
         section_repository = section_repository_factory.produce(cloner)
 
         directory_preparer.prepare_directories(
