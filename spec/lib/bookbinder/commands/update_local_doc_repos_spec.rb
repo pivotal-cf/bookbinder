@@ -1,12 +1,12 @@
 require_relative '../../../../lib/bookbinder/commands/update_local_doc_repos'
-require_relative '../../../../lib/bookbinder/configuration'
+require_relative '../../../../lib/bookbinder/config/configuration'
 require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/git_fake'
 
 module Bookbinder
   describe Commands::UpdateLocalDocRepos do
     let(:config) {
-      Configuration.parse('sections' => [
+      Config::Configuration.parse('sections' => [
         {'repository' => {'name' => 'org/repo-name'}},
         {'repository' => {'name' => 'git@otherplace.com:org/repo-name-2'}},
       ])

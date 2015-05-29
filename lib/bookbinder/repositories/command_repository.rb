@@ -4,8 +4,10 @@ end
 
 require_relative '../commands/bind/directory_preparer'
 require_relative '../config/bind_config_factory'
-require_relative '../configuration_fetcher'
-require_relative '../configuration_validator'
+require_relative '../config/fetcher'
+require_relative '../config/remote_yaml_credential_provider'
+require_relative '../config/validator'
+require_relative '../config/yaml_loader'
 require_relative '../dita_command_creator'
 require_relative '../dita_html_to_middleman_formatter'
 require_relative '../html_document_manipulator'
@@ -16,10 +18,8 @@ require_relative '../post_production/sitemap_writer'
 require_relative '../preprocessing/copy_to_site_gen_dir'
 require_relative '../preprocessing/dita_preprocessor'
 require_relative '../preprocessing/preprocessor'
-require_relative '../remote_yaml_credential_provider'
 require_relative '../sheller'
 require_relative '../subnav_formatter'
-require_relative '../yaml_loader'
 require_relative 'section_repository_factory'
 
 module Bookbinder
@@ -76,7 +76,7 @@ module Bookbinder
         @bind ||= Commands::Bind.new(
           logger,
           bind_config_factory,
-          ArchiveMenuConfiguration.new(
+          Config::ArchiveMenuConfiguration.new(
             loader: config_loader,
             config_filename: 'bookbinder.yml'
           ),
@@ -121,18 +121,18 @@ module Bookbinder
       end
 
       def configuration_fetcher
-        @configuration_fetcher ||= ConfigurationFetcher.new(
+        @configuration_fetcher ||= Config::Fetcher.new(
           logger,
-          ConfigurationValidator.new(logger, local_file_system_accessor),
+          Config::Validator.new(logger, local_file_system_accessor),
           config_loader,
-          RemoteYamlCredentialProvider.new(logger, version_control_system)
+          Config::RemoteYamlCredentialProvider.new(logger, version_control_system)
         ).tap do |fetcher|
           fetcher.set_config_file_path './config.yml'
         end
       end
 
       def config_loader
-        @config_loader ||= YAMLLoader.new
+        @config_loader ||= Config::YAMLLoader.new
       end
 
       def final_app_directory

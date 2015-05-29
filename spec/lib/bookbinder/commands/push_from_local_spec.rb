@@ -3,8 +3,7 @@ require_relative '../../../helpers/nil_logger'
 require_relative '../../../../lib/bookbinder/commands/push_from_local'
 require_relative '../../../../lib/bookbinder/config/aws_credentials'
 require_relative '../../../../lib/bookbinder/config/cf_credentials'
-require_relative '../../../../lib/bookbinder/configuration'
-require_relative '../../../../lib/bookbinder/remote_yaml_credential_provider'
+require_relative '../../../../lib/bookbinder/config/configuration'
 
 module Bookbinder
   module Commands
@@ -18,7 +17,7 @@ module Bookbinder
 
       let(:logger) { NilLogger.new }
       let(:configuration_fetcher) { double('configuration_fetcher') }
-      let(:config) { Configuration.parse(config_hash) }
+      let(:config) { Config::Configuration.parse(config_hash) }
       let(:command) { PushFromLocal.new(logger, configuration_fetcher, 'foobar_env') }
       let(:credentials) {
         {

@@ -1,6 +1,6 @@
-require_relative '../../../lib/bookbinder/configuration'
-require_relative '../../../lib/bookbinder/values/section'
+require_relative '../../../lib/bookbinder/config/configuration'
 require_relative '../../../lib/bookbinder/dita_command_creator'
+require_relative '../../../lib/bookbinder/values/section'
 
 module Bookbinder
   describe DitaCommandCreator do

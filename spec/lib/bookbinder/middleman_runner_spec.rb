@@ -1,4 +1,4 @@
-require_relative '../../../lib/bookbinder/configuration'
+require_relative '../../../lib/bookbinder/config/configuration'
 require_relative '../../../lib/bookbinder/middleman_runner'
 require_relative '../../../lib/bookbinder/values/output_locations'
 require_relative '../../../lib/bookbinder/values/section'
@@ -41,7 +41,7 @@ module Bookbinder
 
       middleman_runner.run(
         output_locations,
-        Configuration.parse(
+        Config::Configuration.parse(
           'template_variables' => template_variables,
           'public_host' => production_host,
           'archive_menu' => archive_menu

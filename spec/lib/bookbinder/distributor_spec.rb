@@ -1,6 +1,6 @@
 require_relative '../../../lib/bookbinder/config/aws_credentials'
 require_relative '../../../lib/bookbinder/config/cf_credentials'
-require_relative '../../../lib/bookbinder/configuration'
+require_relative '../../../lib/bookbinder/config/configuration'
 require_relative '../../../lib/bookbinder/distributor'
 require_relative '../../helpers/nil_logger'
 require_relative '../../helpers/tmp_dirs'

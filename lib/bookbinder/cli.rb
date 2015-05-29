@@ -2,7 +2,7 @@ require_relative 'repositories/command_repository'
 require_relative 'command_validator'
 require_relative 'command_runner'
 require_relative 'config/cf_credentials'
-require_relative 'configuration'
+require_relative 'config/configuration'
 require_relative 'colorizer'
 require_relative 'terminal'
 
