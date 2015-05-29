@@ -5,7 +5,7 @@ end
 require_relative '../commands/bind/directory_preparer'
 require_relative '../config/bind_config_factory'
 require_relative '../config/configuration_fetcher'
-require_relative '../configuration_validator'
+require_relative '../config/validator'
 require_relative '../dita_command_creator'
 require_relative '../dita_html_to_middleman_formatter'
 require_relative '../html_document_manipulator'
@@ -123,7 +123,7 @@ module Bookbinder
       def configuration_fetcher
         @configuration_fetcher ||= Config::ConfigurationFetcher.new(
           logger,
-          ConfigurationValidator.new(logger, local_file_system_accessor),
+          Config::Validator.new(logger, local_file_system_accessor),
           config_loader,
           RemoteYamlCredentialProvider.new(logger, version_control_system)
         ).tap do |fetcher|
