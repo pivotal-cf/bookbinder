@@ -1,6 +1,5 @@
 require_relative '../../../../lib/bookbinder/commands/push_to_prod'
 require_relative '../../../../lib/bookbinder/config/configuration'
-require_relative '../../../../lib/bookbinder/remote_yaml_credential_provider'
 
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'

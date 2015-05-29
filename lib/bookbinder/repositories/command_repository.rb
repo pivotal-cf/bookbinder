@@ -5,6 +5,7 @@ end
 require_relative '../commands/bind/directory_preparer'
 require_relative '../config/bind_config_factory'
 require_relative '../config/configuration_fetcher'
+require_relative '../config/remote_yaml_credential_provider'
 require_relative '../config/validator'
 require_relative '../dita_command_creator'
 require_relative '../dita_html_to_middleman_formatter'
@@ -16,7 +17,6 @@ require_relative '../post_production/sitemap_writer'
 require_relative '../preprocessing/copy_to_site_gen_dir'
 require_relative '../preprocessing/dita_preprocessor'
 require_relative '../preprocessing/preprocessor'
-require_relative '../remote_yaml_credential_provider'
 require_relative '../sheller'
 require_relative '../subnav_formatter'
 require_relative '../yaml_loader'
@@ -125,7 +125,7 @@ module Bookbinder
           logger,
           Config::Validator.new(logger, local_file_system_accessor),
           config_loader,
-          RemoteYamlCredentialProvider.new(logger, version_control_system)
+          Config::RemoteYamlCredentialProvider.new(logger, version_control_system)
         ).tap do |fetcher|
           fetcher.set_config_file_path './config.yml'
         end

@@ -11,7 +11,7 @@ require 'puma'
 
 require_relative 'bookbinder/deprecated_logger'
 require_relative 'bookbinder/values/section'
-require_relative 'bookbinder/remote_yaml_credential_provider'
+require_relative 'bookbinder/config/remote_yaml_credential_provider'
 require_relative 'bookbinder/config/configuration'
 require_relative 'bookbinder/config/configuration_fetcher'
 require_relative 'bookbinder/config/validator'

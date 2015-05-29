@@ -4,7 +4,6 @@ require_relative '../../../../lib/bookbinder/commands/push_from_local'
 require_relative '../../../../lib/bookbinder/config/aws_credentials'
 require_relative '../../../../lib/bookbinder/config/cf_credentials'
 require_relative '../../../../lib/bookbinder/config/configuration'
-require_relative '../../../../lib/bookbinder/remote_yaml_credential_provider'
 
 module Bookbinder
   module Commands
