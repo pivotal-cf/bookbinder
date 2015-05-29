@@ -5,7 +5,7 @@ require_relative '../yaml_loader'
 
 module Bookbinder
   module Config
-    class ConfigurationFetcher
+    class Fetcher
       def initialize(logger, configuration_validator, loader, credentials_provider)
         @loader = loader
         @logger = logger

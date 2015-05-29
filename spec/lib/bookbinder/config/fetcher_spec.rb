@@ -1,17 +1,17 @@
-require_relative '../../../../lib/bookbinder/config/configuration_fetcher'
+require_relative '../../../../lib/bookbinder/config/fetcher'
 
 module Bookbinder
   module Config
-    describe ConfigurationFetcher do
+    describe Fetcher do
       let(:path_to_config_file)   { './config.yml' }
       let(:config_validator)      { double('validator') }
       let(:logger)                { double('logger') }
       let(:loader)                { double('loader') }
       let(:credentials_provider)  { double('creds provider') }
-      let(:config_fetcher)        { ConfigurationFetcher.new(logger,
-                                                             config_validator,
-                                                             loader,
-                                                             credentials_provider) }
+      let(:config_fetcher)        { Fetcher.new(logger,
+                                                config_validator,
+                                                loader,
+                                                credentials_provider) }
 
       it 'can read config from a relative path even when I have changed working directory' do
         config_fetcher.set_config_file_path(path_to_config_file)
