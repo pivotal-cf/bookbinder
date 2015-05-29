@@ -23,7 +23,7 @@ module Bookbinder
           command = command_creator.convert_to_html_command(
             dita_section,
             dita_flags: dita_flags(options),
-            write_to: output_locations.html_from_preprocessing_dir.join(dita_section.desired_directory)
+            write_to: output_locations.html_from_preprocessing_dir.join(dita_section.destination_directory)
           )
           status = sheller.run_command(command, output_streams.to_h)
           unless status.success?
@@ -33,16 +33,16 @@ module Bookbinder
               'and that your DITA toolkit is correctly configured.'
           end
 
-          generate_subnav(dita_section.desired_directory,
+          generate_subnav(dita_section.destination_directory,
                           output_locations,
                           output_locations.source_for_site_generator.join('subnavs', '_dita_subnav_template.erb'),
                           output_locations.subnavs_for_layout_dir)
         end
 
         dita_sections.each do |dita_section|
-          html_dir = output_locations.html_from_preprocessing_dir.join(dita_section.desired_directory)
-          formatted_dir = output_locations.formatted_dir.join(dita_section.desired_directory)
-          source_for_site_gen_dir = output_locations.source_for_site_generator.join(dita_section.desired_directory)
+          html_dir = output_locations.html_from_preprocessing_dir.join(dita_section.destination_directory)
+          formatted_dir = output_locations.formatted_dir.join(dita_section.destination_directory)
+          source_for_site_gen_dir = output_locations.source_for_site_generator.join(dita_section.destination_directory)
 
           dita_formatter.format_html html_dir, formatted_dir
 

@@ -13,7 +13,7 @@ module Bookbinder
         sections.each do |section|
           filesystem.copy_contents(
             section.path_to_repository,
-            output_locations.source_for_site_generator.join(section.desired_directory)
+            output_locations.source_for_site_generator.join(section.destination_directory)
           )
         end
       end
