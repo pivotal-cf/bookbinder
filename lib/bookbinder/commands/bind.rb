@@ -1,6 +1,6 @@
 require 'middleman-syntax'
 
-require_relative '../archive_menu_configuration'
+require_relative '../config/archive_menu_configuration'
 require_relative '../errors/cli_error'
 require_relative '../values/output_locations'
 require_relative '../values/section'

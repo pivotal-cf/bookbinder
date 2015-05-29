@@ -1,6 +1,5 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
 require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
-require_relative '../../../../lib/bookbinder/configuration'
 require_relative '../../../../lib/bookbinder/dita_command_creator'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
@@ -90,7 +89,7 @@ module Bookbinder
     let(:book) { 'fantastic/book' }
     let(:command) { bind_cmd }
     let(:command_creator) { double('command creator', convert_to_html_command: 'stubbed command') }
-    let(:config) { Configuration.parse(config_hash) }
+    let(:config) { Config::Configuration.parse(config_hash) }
     let(:config_hash) { base_config_hash }
     let(:preprocessor) {
       Preprocessing::Preprocessor.new(
@@ -186,7 +185,7 @@ module Bookbinder
       context 'when configured with a layout repo' do
         let(:cloner) { double('cloner') }
         let(:factory) { double('cloner factory') }
-        let(:config) { Configuration.parse('book_repo' => '', 'public_host' => '', 'layout_repo' => 'my/configuredrepo') }
+        let(:config) { Config::Configuration.parse('book_repo' => '', 'public_host' => '', 'layout_repo' => 'my/configuredrepo') }
         let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
         let(:null_site_generator) { double('site gen', run: nil) }
         let(:null_fs_accessor) { double('fs accessor', copy: nil) }
@@ -293,7 +292,7 @@ module Bookbinder
               'template_variables' => {'name' => 'Spartacus'}
           }
 
-        config = Configuration.parse(config_hash)
+        config = Config::Configuration.parse(config_hash)
         config_factory = double('config factory', produce: config)
 
         bind_cmd(bind_config_factory: config_factory).run(['remote'])
@@ -326,7 +325,7 @@ module Bookbinder
             'public_host' => 'example.com',
         }
 
-        config = Configuration.parse(config_hash)
+        config = Config::Configuration.parse(config_hash)
         config_factory = double('config factory', produce: config)
 
         command = bind_cmd(bind_config_factory: config_factory)
@@ -373,7 +372,7 @@ module Bookbinder
           command = bind_cmd(
             bind_config_factory: double(
               'config factory',
-              produce: Configuration.parse(
+              produce: Config::Configuration.parse(
                 'sections' => [ {'repository' => {'name' => 'org/dogs-repo'}} ],
                 'book_repo' => 'fantastic/book',
                 'cred_repo' => 'my-org/my-creds',
@@ -422,7 +421,7 @@ Content:
           command = bind_cmd(
             bind_config_factory: double(
               'config factory',
-              produce: Configuration.parse(
+              produce: Config::Configuration.parse(
                 'sections' => [{'repository' => {'name' => 'org/dogs-repo'}}],
                 'book_repo' => 'some/book',
                 'cred_repo' => 'my-org/my-creds',
@@ -451,7 +450,7 @@ Content:
             'public_host' => 'docs.dogs.com'
         }
 
-        config = Configuration.parse(config_hash)
+        config = Config::Configuration.parse(config_hash)
         config_factory = double('config factory', produce: config)
 
         command = bind_cmd(bind_config_factory: config_factory)
@@ -478,7 +477,7 @@ Content:
               'public_host' => 'docs.dogs.com'
           }
 
-          config = Configuration.parse(config_hash)
+          config = Config::Configuration.parse(config_hash)
           config_factory = double('config factory', produce: config)
 
           command = bind_cmd(bind_config_factory: config_factory)
@@ -515,7 +514,7 @@ Content:
             'public_host' => 'docs.dogs.com'
         }
 
-        config = Configuration.parse(config_hash)
+        config = Config::Configuration.parse(config_hash)
         config_factory = double('config factory', produce: config)
 
         command = bind_cmd(bind_config_factory: config_factory)
@@ -540,10 +539,10 @@ Content:
 
     describe 'creating necessary directories' do
       def create_command
-        config = Configuration.parse('sections' => [],
-                                     'book_repo' => book,
-                                     'cred_repo' => 'my-org/my-creds',
-                                     'public_host' => 'docs.dogs.com')
+        config = Config::Configuration.parse('sections' => [],
+                                             'book_repo' => book,
+                                             'cred_repo' => 'my-org/my-creds',
+                                             'public_host' => 'docs.dogs.com')
         config_factory = double('config factory', produce: config)
         middleman_runner = MiddlemanRunner.new(logger, GitFake.new)
         final_app_dir = File.absolute_path('final_app')

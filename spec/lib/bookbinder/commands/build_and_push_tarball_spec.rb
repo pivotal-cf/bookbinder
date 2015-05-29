@@ -1,6 +1,6 @@
 require_relative '../../../../lib/bookbinder/commands/build_and_push_tarball'
 require_relative '../../../../lib/bookbinder/config/aws_credentials'
-require_relative '../../../../lib/bookbinder/configuration'
+require_relative '../../../../lib/bookbinder/config/configuration'
 require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/tmp_dirs'
 
@@ -10,13 +10,13 @@ module Bookbinder
 
     let(:logger) { NilLogger.new }
     let(:configuration_fetcher) { double('configuration_fetcher') }
-    let(:config) { Configuration.parse(config_hash) }
+    let(:config) { Config::Configuration.parse(config_hash) }
     let(:build_and_push_tarball_command) { Commands::BuildAndPushTarball.new(logger, configuration_fetcher) }
     let(:build_number) { '17' }
     let(:book_repo) { 'org/fixture-book-title' }
 
     let(:aws_credentials) do
-      Bookbinder::Config::AwsCredentials.new(
+      Config::AwsCredentials.new(
         'green_builds_bucket' => bucket,
         'access_key' => access_key,
         'secret_key' => secret_key,

@@ -1,4 +1,4 @@
-require_relative '../configuration'
+require_relative '../config/configuration'
 
 module Bookbinder
   class RequiredKeysChecker
@@ -8,7 +8,7 @@ module Bookbinder
     def check(config)
       missing_keys = []
 
-      Configuration::CONFIG_REQUIRED_KEYS.map do |required_key|
+      Config::Configuration::CONFIG_REQUIRED_KEYS.map do |required_key|
         config_keys = config.keys
         unless config_keys.include?(required_key)
           missing_keys.push(required_key)

@@ -4,7 +4,7 @@ end
 
 require_relative '../commands/bind/directory_preparer'
 require_relative '../config/bind_config_factory'
-require_relative '../configuration_fetcher'
+require_relative '../config/configuration_fetcher'
 require_relative '../configuration_validator'
 require_relative '../dita_command_creator'
 require_relative '../dita_html_to_middleman_formatter'
@@ -76,7 +76,7 @@ module Bookbinder
         @bind ||= Commands::Bind.new(
           logger,
           bind_config_factory,
-          ArchiveMenuConfiguration.new(
+          Config::ArchiveMenuConfiguration.new(
             loader: config_loader,
             config_filename: 'bookbinder.yml'
           ),
@@ -121,7 +121,7 @@ module Bookbinder
       end
 
       def configuration_fetcher
-        @configuration_fetcher ||= ConfigurationFetcher.new(
+        @configuration_fetcher ||= Config::ConfigurationFetcher.new(
           logger,
           ConfigurationValidator.new(logger, local_file_system_accessor),
           config_loader,

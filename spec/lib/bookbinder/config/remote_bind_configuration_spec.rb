@@ -1,6 +1,6 @@
 require_relative '../../../../lib/bookbinder/config/bind_config_factory'
+require_relative '../../../../lib/bookbinder/config/configuration'
 require_relative '../../../../lib/bookbinder/config/remote_bind_configuration'
-require_relative '../../../../lib/bookbinder/configuration'
 
 module Bookbinder
   module Config

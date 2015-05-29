@@ -1,11 +1,11 @@
 require_relative '../../../../lib/bookbinder/commands/tag'
-require_relative '../../../../lib/bookbinder/configuration'
+require_relative '../../../../lib/bookbinder/config/configuration'
 require_relative '../../../../lib/bookbinder/git_accessor'
 
 module Bookbinder
   describe Commands::Tag do
     it 'should tag the book and its sections' do
-      config = Configuration.parse(
+      config = Config::Configuration.parse(
         'book_repo' => 'myorg/bookrepo',
         'sections' => [
           {'repository' => {'name' => 'myotherorg/section1repo'}},
