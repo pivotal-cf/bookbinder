@@ -1,7 +1,7 @@
 require_relative 'aws_credentials'
 require_relative 'cf_credentials'
 require_relative 'configuration'
-require_relative '../yaml_loader'
+require_relative 'yaml_loader'
 
 module Bookbinder
   module Config

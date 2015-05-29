@@ -7,6 +7,7 @@ require_relative '../config/bind_config_factory'
 require_relative '../config/fetcher'
 require_relative '../config/remote_yaml_credential_provider'
 require_relative '../config/validator'
+require_relative '../config/yaml_loader'
 require_relative '../dita_command_creator'
 require_relative '../dita_html_to_middleman_formatter'
 require_relative '../html_document_manipulator'
@@ -19,7 +20,6 @@ require_relative '../preprocessing/dita_preprocessor'
 require_relative '../preprocessing/preprocessor'
 require_relative '../sheller'
 require_relative '../subnav_formatter'
-require_relative '../yaml_loader'
 require_relative 'section_repository_factory'
 
 module Bookbinder
@@ -132,7 +132,7 @@ module Bookbinder
       end
 
       def config_loader
-        @config_loader ||= YAMLLoader.new
+        @config_loader ||= Config::YAMLLoader.new
       end
 
       def final_app_directory
