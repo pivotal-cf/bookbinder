@@ -27,10 +27,7 @@ module Bookbinder
                                    source_ref: 'master',
                                    destination_parent_dir: workspace)
 
-        snippet, language = code_example_reader.get_snippet_and_language_at(at,
-                                                                            working_copy.copied_to,
-                                                                            working_copy.copied?,
-                                                                            working_copy.full_name)
+        snippet, language = code_example_reader.get_snippet_and_language_at(at, working_copy)
 
         delimiter = '```'
 
