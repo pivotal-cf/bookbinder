@@ -1,14 +1,14 @@
-require_relative '../ingest/section_repository'
+require_relative 'section_repository'
 
 module Bookbinder
-  module Repositories
+  module Ingest
     class SectionRepositoryFactory
       def initialize(logger)
         @logger = logger
       end
 
       def produce(cloner)
-        Ingest::SectionRepository.new(logger, cloner)
+        SectionRepository.new(logger, cloner)
       end
 
       private

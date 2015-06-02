@@ -12,6 +12,7 @@ require_relative '../dita_command_creator'
 require_relative '../dita_html_to_middleman_formatter'
 require_relative '../html_document_manipulator'
 require_relative '../ingest/cloner_factory'
+require_relative '../ingest/section_repository_factory'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../post_production/sitemap_writer'
@@ -20,7 +21,6 @@ require_relative '../preprocessing/dita_preprocessor'
 require_relative '../preprocessing/preprocessor'
 require_relative '../sheller'
 require_relative '../subnav_formatter'
-require_relative 'section_repository_factory'
 
 module Bookbinder
   module Repositories
@@ -95,7 +95,7 @@ module Bookbinder
             Preprocessing::CopyToSiteGenDir.new(local_file_system_accessor),
           ),
           Ingest::ClonerFactory.new(logger, local_file_system_accessor, version_control_system),
-          Repositories::SectionRepositoryFactory.new(logger),
+          Ingest::SectionRepositoryFactory.new(logger),
           Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
         )
       end

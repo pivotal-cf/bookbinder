@@ -4,13 +4,13 @@ require_relative '../../../../lib/bookbinder/dita_command_creator'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
+require_relative '../../../../lib/bookbinder/ingest/section_repository_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
 require_relative '../../../../lib/bookbinder/preprocessing/copy_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/preprocessing/dita_preprocessor'
 require_relative '../../../../lib/bookbinder/preprocessing/preprocessor'
-require_relative '../../../../lib/bookbinder/repositories/section_repository_factory'
 require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../../lib/bookbinder/spider'
@@ -46,7 +46,7 @@ module Bookbinder
                          partial_args.fetch(:context_dir, File.absolute_path('.')),
                          partial_args.fetch(:preprocessor, preprocessor),
                          partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, GitFake.new)),
-                         Repositories::SectionRepositoryFactory.new(logger),
+                         Ingest::SectionRepositoryFactory.new(logger),
                          partial_args.fetch(:directory_preparer,
                                             Commands::BindComponents::DirectoryPreparer.new(bind_logger,
                                                                                             file_system_accessor,
