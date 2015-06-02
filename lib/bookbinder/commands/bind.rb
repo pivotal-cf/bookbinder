@@ -61,12 +61,12 @@ module Bookbinder
         bind_config = config_factory.produce(bind_source)
 
         local_repo_dir = generate_local_repo_dir(context_dir, bind_source)
+        cloner = cloner_factory.produce(local_repo_dir)
         output_locations = OutputLocations.new(
           context_dir: context_dir,
           final_app_dir: final_app_directory,
-          layout_repo_dir: layout_repo_path(bind_config, local_repo_dir),
+          layout_repo_dir: layout_repo_path(bind_config, cloner),
         )
-        cloner = cloner_factory.produce(local_repo_dir)
         section_repository = section_repository_factory.produce(cloner)
 
         directory_preparer.prepare_directories(
@@ -142,11 +142,8 @@ module Bookbinder
         File.expand_path('..', context_dir) if bind_source == 'local'
       end
 
-      def layout_repo_path(config, local_repo_dir)
-        if local_repo_dir && config.has_option?('layout_repo')
-          File.join(local_repo_dir, config.layout_repo.split('/').last)
-        elsif config.has_option?('layout_repo')
-          cloner = cloner_factory.produce(nil)
+      def layout_repo_path(config, cloner)
+        if config.has_option?('layout_repo')
           working_copy = cloner.call(source_repo_name: config.layout_repo,
                                      destination_parent_dir: Dir.mktmpdir)
           working_copy.path
