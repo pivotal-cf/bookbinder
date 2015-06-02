@@ -21,6 +21,7 @@ require_relative '../preprocessing/dita_preprocessor'
 require_relative '../preprocessing/preprocessor'
 require_relative '../sheller'
 require_relative '../subnav_formatter'
+require_relative '../values/output_locations'
 
 module Bookbinder
   module Repositories
@@ -75,6 +76,7 @@ module Bookbinder
       def bind
         @bind ||= Commands::Bind.new(
           {out: $stdout, err: $stderr},
+          OutputLocations.new(final_app_dir: final_app_directory, context_dir: File.absolute_path('.')),
           bind_config_factory,
           Config::ArchiveMenuConfiguration.new(
             loader: config_loader,
@@ -83,8 +85,6 @@ module Bookbinder
           local_file_system_accessor,
           middleman_runner,
           PostProduction::SitemapWriter.build(logger, final_app_directory, sitemap_port),
-          final_app_directory,
-          File.absolute_path('.'),
           Preprocessing::Preprocessor.new(
             Preprocessing::DitaPreprocessor.new(
               dita_html_to_middleman_formatter,

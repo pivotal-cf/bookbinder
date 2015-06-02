@@ -2,8 +2,6 @@ require 'middleman-syntax'
 
 require_relative '../config/archive_menu_configuration'
 require_relative '../errors/cli_error'
-require_relative '../values/output_locations'
-require_relative '../values/section'
 require_relative 'bind/bind_options'
 require_relative 'naming'
 
@@ -13,25 +11,23 @@ module Bookbinder
       include Commands::Naming
 
       def initialize(base_streams,
+                     output_locations,
                      config_factory,
                      archive_menu_config,
                      file_system_accessor,
                      static_site_generator,
                      sitemap_writer,
-                     final_app_directory,
-                     context_dir,
                      preprocessor,
                      cloner_factory,
                      section_repository_factory,
                      directory_preparer)
         @base_streams = base_streams
+        @output_locations = output_locations
         @config_factory = config_factory
         @archive_menu_config = archive_menu_config
         @file_system_accessor = file_system_accessor
         @static_site_generator = static_site_generator
         @sitemap_writer = sitemap_writer
-        @final_app_directory = final_app_directory
-        @context_dir = context_dir
         @preprocessor = preprocessor
         @cloner_factory = cloner_factory
         @section_repository_factory = section_repository_factory
@@ -60,10 +56,6 @@ module Bookbinder
 
         local_repo_dir = generate_local_repo_dir(context_dir, bind_source)
         cloner = cloner_factory.produce(local_repo_dir)
-        output_locations = OutputLocations.new(
-          context_dir: context_dir,
-          final_app_dir: final_app_directory,
-        )
         section_repository = section_repository_factory.produce(cloner)
 
         directory_preparer.prepare_directories(
@@ -98,18 +90,21 @@ module Bookbinder
 
       private
 
-      attr_reader :base_streams,
-                  :config_factory,
-                  :archive_menu_config,
-                  :file_system_accessor,
-                  :static_site_generator,
-                  :final_app_directory,
-                  :sitemap_writer,
-                  :context_dir,
-                  :preprocessor,
-                  :cloner_factory,
-                  :section_repository_factory,
-                  :directory_preparer
+      attr_reader(
+        :archive_menu_config,
+        :base_streams,
+        :cloner_factory,
+        :config_factory,
+        :context_dir,
+        :directory_preparer,
+        :file_system_accessor,
+        :final_app_directory,
+        :output_locations,
+        :preprocessor,
+        :section_repository_factory,
+        :sitemap_writer,
+        :static_site_generator,
+      )
 
       def publish(subnavs, cli_options, streams, output_locations, publish_config, cloner)
         FileUtils.cp 'redirects.rb', output_locations.final_app_dir if File.exists?('redirects.rb')

@@ -15,6 +15,7 @@ require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../../lib/bookbinder/spider'
 require_relative '../../../../lib/bookbinder/subnav_formatter'
+require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../helpers/git_fake'
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
@@ -36,21 +37,24 @@ module Bookbinder
     def bind_cmd(partial_args = {})
       bind_version_control_system = partial_args.fetch(:version_control_system, Bookbinder::GitFake.new)
       bind_logger = partial_args.fetch(:logger, logger)
-      Commands::Bind.new({out: Sheller::DevNull.new, err: Sheller::DevNull.new},
-                         partial_args.fetch(:bind_config_factory, double('config factory', produce: config)),
-                         partial_args.fetch(:archive_menu_config, archive_menu_config),
-                         partial_args.fetch(:file_system_accessor, file_system_accessor),
-                         partial_args.fetch(:static_site_generator, middleman_runner),
-                         partial_args.fetch(:sitemap_writer, sitemap_writer),
-                         partial_args.fetch(:final_app_directory, final_app_dir),
-                         partial_args.fetch(:context_dir, File.absolute_path('.')),
-                         partial_args.fetch(:preprocessor, preprocessor),
-                         partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, GitFake.new)),
-                         Ingest::SectionRepositoryFactory.new(logger),
-                         partial_args.fetch(:directory_preparer,
-                                            Commands::BindComponents::DirectoryPreparer.new(bind_logger,
-                                                                                            file_system_accessor,
-                                                                                            bind_version_control_system)))
+      Commands::Bind.new(
+        {out: Sheller::DevNull.new, err: Sheller::DevNull.new},
+        OutputLocations.new(
+          final_app_dir: partial_args.fetch(:final_app_directory, final_app_dir),
+          context_dir: partial_args.fetch(:context_dir, File.absolute_path('.'))
+        ),
+        partial_args.fetch(:bind_config_factory, double('config factory', produce: config)),
+        partial_args.fetch(:archive_menu_config, archive_menu_config),
+        partial_args.fetch(:file_system_accessor, file_system_accessor),
+        partial_args.fetch(:static_site_generator, middleman_runner),
+        partial_args.fetch(:sitemap_writer, sitemap_writer),
+        partial_args.fetch(:preprocessor, preprocessor),
+        partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, GitFake.new)),
+        Ingest::SectionRepositoryFactory.new(logger),
+        partial_args.fetch(:directory_preparer,
+                           Commands::BindComponents::DirectoryPreparer.new(bind_logger,
+                                                                           file_system_accessor,
+                                                                           bind_version_control_system)))
     end
 
     def random_port
