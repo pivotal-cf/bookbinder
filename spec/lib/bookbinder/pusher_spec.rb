@@ -1,4 +1,5 @@
-require 'spec_helper'
+require_relative '../../../lib/bookbinder/pusher'
+require_relative '../../helpers/tmp_dirs'
 
 module Bookbinder
   describe Pusher, enable_pusher: true do
