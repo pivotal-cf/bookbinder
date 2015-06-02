@@ -1,3 +1,5 @@
+require 'rack'
+
 class Rack::Static
   def route_file(path)
     @urls.kind_of?(Array) && @urls.any? { |url| url.index(path) == 0 }

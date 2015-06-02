@@ -1,4 +1,4 @@
-require 'spec_helper'
+require_relative '../../../template_app/lib/rack_static'
 
 describe Rack::Static do
   let(:index) { 'index.html' }
