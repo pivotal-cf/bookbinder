@@ -1,3 +1,5 @@
+require 'vienna'
+
 class Vienna::Application
   def initialize(root = 'public')
     @app = Rack::Builder.new do
