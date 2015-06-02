@@ -1,4 +1,4 @@
-require_relative '../../lib/bookbinder'
+require 'ostruct'
 require_relative '../../master_middleman/quicklinks_renderer'
 
 describe QuicklinksRenderer do
