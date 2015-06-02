@@ -1,3 +1,4 @@
+require 'nokogiri'
 require 'redcarpet'
 
 class QuicklinksRenderer < Redcarpet::Render::Base

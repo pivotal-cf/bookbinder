@@ -1,13 +1,27 @@
-require 'spec_helper'
-require './master_middleman/bookbinder_helpers'
+require 'i18n'
+require 'middleman'
+require 'middleman-core/cli'
+require 'middleman-core/profiling'
+require 'ostruct'
 require 'redcarpet'
+require_relative '../../../lib/bookbinder/deprecated_logger'
 require_relative '../../../lib/bookbinder/ingest/git_cloner'
+require_relative '../../../lib/bookbinder/ingest/local_filesystem_cloner'
+require_relative '../../../lib/bookbinder/local_file_system_accessor'
+require_relative '../../../lib/bookbinder/middleman_runner'
+require_relative '../../helpers/git_fake'
+require_relative '../../helpers/middleman'
+require_relative '../../helpers/tmp_dirs'
+require_relative '../../helpers/use_fixture_repo'
+
+require './master_middleman/bookbinder_helpers'
 
 module Bookbinder
   describe Navigation::HelperMethods do
+    include Bookbinder::SpecHelperMethods
     include_context 'tmp_dirs'
 
-    let(:logger) { NilLogger.new }
+    let(:logger) { double('logger').as_null_object }
     let(:klass) do
       Class.new do
         include Navigation::HelperMethods
