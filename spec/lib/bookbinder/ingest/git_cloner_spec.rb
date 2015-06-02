@@ -14,7 +14,7 @@ module Bookbinder
 
         result = cloner.call(source_repo_name: "me@mygitplace.com:myorg/myrepo",
                              destination_parent_dir: "/mydestination")
-        expect(result.directory).to eq("myrepo")
+        expect(result.path).to eq(Pathname("/mydestination/myrepo"))
       end
 
       it "returns an object that has the correct destination" do
@@ -24,7 +24,7 @@ module Bookbinder
 
         result = cloner.call(source_repo_name: "myorg/myrepo",
                              destination_parent_dir: "/mydestination")
-        expect(result.copied_to).to eq(Pathname("/mydestination/myrepo"))
+        expect(result.path).to eq(Pathname("/mydestination/myrepo"))
       end
 
       context "when destination_dir_name is provided" do
@@ -39,7 +39,7 @@ module Bookbinder
                                destination_parent_dir: "/mydestination",
                                destination_dir_name: "myspecialreponame")
 
-          expect(result.directory).to eq("myspecialreponame")
+          expect(result.path).to eq(Pathname("/mydestination/myspecialreponame"))
         end
 
         it "returns an object that has the correct destination" do
@@ -50,7 +50,7 @@ module Bookbinder
           result = cloner.call(source_repo_name: "myorg/myrepo",
                                destination_parent_dir: "/mydestination",
                                destination_dir_name: "myawesomedir")
-          expect(result.copied_to).to eq(Pathname("/mydestination/myawesomedir"))
+          expect(result.path).to eq(Pathname("/mydestination/myawesomedir"))
         end
       end
 

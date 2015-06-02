@@ -20,10 +20,10 @@ module Bookbinder
                                      destination_parent_dir: destination_dir,
                                      destination_dir_name: section_config.desired_directory_name)
           Section.new(
-            working_copy.copied_to,
+            working_copy.path,
             working_copy.full_name,
             destination_dir,
-            working_copy.directory,
+            section_config.desired_directory_name,
             section_config.subnav_template,
             section_config.preprocessor_config
           )

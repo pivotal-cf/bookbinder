@@ -73,7 +73,7 @@ module Bookbinder
           result = cloner.call(source_repo_name: "myorg/myrepo",
                                destination_parent_dir: "/destination/dir")
 
-          expect(result.copied_to).to eq(Pathname("/destination/dir/myrepo"))
+          expect(result.path).to eq(Pathname("/destination/dir/myrepo"))
         end
       end
 

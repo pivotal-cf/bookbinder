@@ -201,7 +201,7 @@ module Bookbinder
 
           expect(cloner).to receive(:call).
             with(source_repo_name: "my/configuredrepo", destination_parent_dir: anything) {
-            Ingest::WorkingCopy.new(repo_dir: 'foo', full_name: 'some/repo')
+            Ingest::WorkingCopy.new(copied_to: 'some/place')
           }
 
           bind.run(['remote'])
@@ -221,8 +221,7 @@ module Bookbinder
                           directory_preparer: directory_preparer)
 
           allow(factory).to receive(:produce) { cloner }
-          allow(cloner).to receive(:call) { Ingest::WorkingCopy.new(repo_dir: 'foo',
-                                                                    full_name: 'some/repo') }
+          allow(cloner).to receive(:call) { Ingest::WorkingCopy.new(copied_to: 'foo/repo') }
 
           bind.run(['remote'])
 

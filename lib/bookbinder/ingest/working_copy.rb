@@ -1,30 +1,26 @@
-require_relative 'destination_directory'
+require_relative '../errors/programmer_mistake'
 
 module Bookbinder
   module Ingest
     class WorkingCopy
-      def initialize(repo_dir: nil,
-                     copied_to: nil,
-                     directory: nil,
+      def initialize(copied_to: nil,
                      full_name: nil)
-        @repo_dir = repo_dir
-        @copied_to = copied_to
-        @directory = directory
-        @full_name = full_name
+        if [copied_to, full_name].none?
+          raise Errors::ProgrammerMistake.new("Must provide copied_to and/or full_name to WorkingCopy.new")
+        else
+          @copied_to = copied_to
+          @full_name = full_name
+        end
       end
 
-      attr_reader :copied_to, :full_name
+      attr_reader :full_name
 
       def available?
-        !! copied_to
-      end
-
-      def directory
-        DestinationDirectory.new(full_name, @directory).to_s
+        !! @copied_to
       end
 
       def path
-        Pathname(@repo_dir).join(directory)
+        Pathname(@copied_to)
       end
     end
   end

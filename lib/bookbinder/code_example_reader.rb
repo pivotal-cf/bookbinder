@@ -57,7 +57,7 @@ module Bookbinder
         @snippet ||=
           begin
             snippet = ''
-            FileUtils.cd(working_copy.copied_to) {
+            FileUtils.cd(working_copy.path) {
               locale = 'LC_CTYPE=C LANG=C' # Quiets 'sed: RE error: illegal byte sequence'
               result = `#{locale} find . -exec sed -ne '/code_snippet #{marker} start/,/code_snippet #{marker} end/ p' {} \\; 2> /dev/null`
               snippet = if result.lines.last && result.lines.last.match(/code_snippet #{marker} end/)

@@ -6,7 +6,7 @@ module Bookbinder
   module Repositories
     describe SectionRepository do
       let(:null_logger) { double('deprecated logger').as_null_object }
-      let(:null_cloner) { ->(*) { Ingest::WorkingCopy.new } }
+      let(:null_cloner) { ->(*) { Ingest::WorkingCopy.new(copied_to: 'some/place') } }
       let(:spy_cloner) {
         Class.new {
           attr_reader :clones
@@ -17,7 +17,7 @@ module Bookbinder
 
           def call(args)
             @clones << args
-            Ingest::WorkingCopy.new
+            Ingest::WorkingCopy.new(copied_to: 'some/place')
           end
         }.new
       }
@@ -63,8 +63,8 @@ module Bookbinder
 
       it "returns section representations" do
         working_copies = [
-          Ingest::WorkingCopy.new(repo_dir: 'foo', copied_to: 'bar', directory: 'baz', full_name: 'qux'),
-          Ingest::WorkingCopy.new(repo_dir: 'a', copied_to: 'b', directory: 'c', full_name: 'd'),
+          Ingest::WorkingCopy.new(copied_to: 'bar', full_name: 'qux'),
+          Ingest::WorkingCopy.new(copied_to: 'b', full_name: 'd'),
         ]
 
         n = -1
@@ -72,11 +72,15 @@ module Bookbinder
 
         sections = SectionRepository.new(null_logger, cloner).fetch(
           configured_sections: [
-            Config::SectionConfig.new('repository' => { 'name' => 'myorg/myrepo',
-                                                        'ref' => 'mydesiredref' },
-                                      'preprocessor_config' => {'my' => 'stuff', 'to' => 'preprocess'}),
-            Config::SectionConfig.new('repository' => { 'name' => 'myorg/myotherrepo' },
-                                      'subnav_template' => 'specified_a_template'),
+            Config::SectionConfig.new(
+              'directory' => 'my-desired-dir-name',
+              'preprocessor_config' => {'my' => 'stuff', 'to' => 'preprocess'},
+              'repository' => { 'name' => 'myorg/myrepo', 'ref' => 'mydesiredref' }
+            ),
+            Config::SectionConfig.new(
+              'repository' => { 'name' => 'myorg/myotherrepo' },
+              'subnav_template' => 'specified_a_template'
+            ),
           ],
           destination_dir: 'anywhere/really',
           ref_override: 'actuallythisversionplz'
@@ -84,8 +88,8 @@ module Bookbinder
 
         expect(sections).to eq(
           [
-            Section.new('bar', 'qux', 'anywhere/really', 'baz', nil, 'my' => 'stuff', 'to' => 'preprocess'),
-            Section.new('b', 'd', 'anywhere/really', 'c', 'specified_a_template'),
+            Section.new(Pathname('bar'), 'qux', 'anywhere/really', 'my-desired-dir-name', nil, 'my' => 'stuff', 'to' => 'preprocess'),
+            Section.new(Pathname('b'), 'd', 'anywhere/really', nil, 'specified_a_template'),
           ]
         )
       end

@@ -23,7 +23,6 @@ module Bookbinder
         )
         WorkingCopy.new(
           copied_to: copied_to,
-          directory: destination_dir_name,
           full_name: source_repo_name,
         )
       end
