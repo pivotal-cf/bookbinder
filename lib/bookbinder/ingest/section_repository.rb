@@ -3,7 +3,7 @@ require_relative '../deprecated_logger'
 require_relative '../values/section'
 
 module Bookbinder
-  module Repositories
+  module Ingest
     class SectionRepository
       def initialize(logger, cloner)
         @logger = logger

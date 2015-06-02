@@ -1,9 +1,9 @@
 require_relative '../../../../lib/bookbinder/config/section_config'
+require_relative '../../../../lib/bookbinder/ingest/section_repository'
 require_relative '../../../../lib/bookbinder/ingest/working_copy'
-require_relative '../../../../lib/bookbinder/repositories/section_repository'
 
 module Bookbinder
-  module Repositories
+  module Ingest
     describe SectionRepository do
       let(:null_logger) { double('deprecated logger').as_null_object }
       let(:null_cloner) { ->(*) { Ingest::WorkingCopy.new(copied_to: 'some/place') } }
