@@ -80,7 +80,6 @@ module Bookbinder
             loader: config_loader,
             config_filename: 'bookbinder.yml'
           ),
-          version_control_system,
           local_file_system_accessor,
           middleman_runner,
           PostProduction::SitemapWriter.build(logger, final_app_directory, sitemap_port),

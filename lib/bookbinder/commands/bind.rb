@@ -15,7 +15,6 @@ module Bookbinder
       def initialize(logger,
                      config_factory,
                      archive_menu_config,
-                     version_control_system,
                      file_system_accessor,
                      static_site_generator,
                      sitemap_writer,
@@ -28,7 +27,6 @@ module Bookbinder
         @logger = logger
         @config_factory = config_factory
         @archive_menu_config = archive_menu_config
-        @version_control_system = version_control_system
         @file_system_accessor = file_system_accessor
         @static_site_generator = static_site_generator
         @sitemap_writer = sitemap_writer
@@ -99,8 +97,7 @@ module Bookbinder
 
       private
 
-      attr_reader :version_control_system,
-                  :config_factory,
+      attr_reader :config_factory,
                   :archive_menu_config,
                   :logger,
                   :file_system_accessor,

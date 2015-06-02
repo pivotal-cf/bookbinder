@@ -39,7 +39,6 @@ module Bookbinder
       Commands::Bind.new(bind_logger,
                          partial_args.fetch(:bind_config_factory, double('config factory', produce: config)),
                          partial_args.fetch(:archive_menu_config, archive_menu_config),
-                         bind_version_control_system,
                          partial_args.fetch(:file_system_accessor, file_system_accessor),
                          partial_args.fetch(:static_site_generator, middleman_runner),
                          partial_args.fetch(:sitemap_writer, sitemap_writer),
