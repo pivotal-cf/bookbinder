@@ -45,7 +45,7 @@ module Bookbinder
           )
         else
           logger.log '  skipping (not found) '.magenta + source_dir.to_s
-          MissingWorkingCopy.new
+          MissingWorkingCopy.new(source_repo_name)
         end
       end
 

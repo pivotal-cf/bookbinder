@@ -89,6 +89,7 @@ module Bookbinder
                                destination_parent_dir: "/some/dest")
           expect(result.path).not_to exist
           expect(result).not_to be_available
+          expect(result.full_name).to eq('myorg/myrepo')
         end
       end
     end
