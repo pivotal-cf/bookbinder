@@ -31,7 +31,7 @@ module Bookbinder
       end
 
       def available?
-        working_copy.copied?
+        working_copy.available?
       end
 
       def valid?

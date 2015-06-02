@@ -10,7 +10,6 @@ module Bookbinder
       processed_dita_location = '/path/to/processed/dita/boo'
       dita_section = Section.new('/local/path/to/repo',
                                  'org/foo',
-                                 copied = true,
                                  'some/dest/dir',
                                  'boo',
                                  'dita_subnav',
@@ -38,7 +37,6 @@ module Bookbinder
         processed_dita_location = '/path/to/processed/dita/boo'
         dita_section = Section.new('/local/path/to/repo',
                                    'org/foo',
-                                   copied = true,
                                    'some/dest/dir',
                                    'boo',
                                    'dita_subnav',
@@ -58,7 +56,6 @@ module Bookbinder
           processed_dita_location = '/path/to/processed/dita/boo'
           dita_section = Section.new('/local/path/to/repo',
                                      'org/foo',
-                                     copied = true,
                                      'some/dest/dir',
                                      'boo',
                                      'dita_subnav',
@@ -78,7 +75,6 @@ module Bookbinder
         processed_dita_location = '/path/to/processed/dita/boo'
         dita_section = Section.new('/local/path/to/repo',
                                    'org/foo',
-                                   copied = true,
                                    'some/dest/dir',
                                    'boo',
                                    'dita_subnav',
@@ -100,7 +96,6 @@ module Bookbinder
           processed_dita_location = '/path/to/processed/dita/boo'
           dita_section = Section.new('/local/path/to/repo',
                                      'org/foo',
-                                     copied = true,
                                      'some/dest/dir',
                                      'boo',
                                      'dita_subnav',

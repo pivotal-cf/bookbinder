@@ -18,7 +18,6 @@ module Bookbinder
     describe '#subnav_template' do
       let(:repo) { Section.new('directory',
                                'full name',
-                               copied = true,
                                'path/to/repository',
                                dir_name = nil,
                                subnav_template_name) }

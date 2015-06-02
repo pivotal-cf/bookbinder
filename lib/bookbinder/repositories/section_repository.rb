@@ -22,7 +22,6 @@ module Bookbinder
           Section.new(
             working_copy.copied_to,
             working_copy.full_name,
-            working_copy.copied?,
             destination_dir,
             working_copy.directory,
             section_config.subnav_template,

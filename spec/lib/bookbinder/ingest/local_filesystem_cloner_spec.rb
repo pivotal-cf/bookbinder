@@ -60,7 +60,7 @@ module Bookbinder
           end
         end
 
-        it "returns an object that is #copied? and has the correct destination" do
+        it "returns an object that is has the correct destination" do
           fs = double('filesystem')
 
           allow(fs).to receive(:file_exist?).
@@ -73,25 +73,7 @@ module Bookbinder
           result = cloner.call(source_repo_name: "myorg/myrepo",
                                destination_parent_dir: "/destination/dir")
 
-          expect(result).to be_copied
           expect(result.copied_to).to eq(Pathname("/destination/dir/myrepo"))
-        end
-
-        context "but it's already been copied" do
-          it "returns an object that is #copied?, but doesn't perform the copy" do
-            fs = double('filesystem')
-
-            allow(fs).to receive(:file_exist?).
-              with(Pathname("/my/repo/dir/myrepo")) { true }
-            allow(fs).to receive(:file_exist?).
-              with(Pathname("/destination/dir/myrepo")) { true }
-
-            cloner = LocalFilesystemCloner.new(null_logger, fs, "/my/repo/dir")
-            result = cloner.call(source_repo_name: "myorg/myrepo",
-                                 destination_parent_dir: "/destination/dir")
-
-            expect(result).to be_copied
-          end
         end
       end
 
@@ -105,18 +87,6 @@ module Bookbinder
           cloner = LocalFilesystemCloner.new(logger, fs, "/my/repo/dir")
           cloner.call(source_repo_name: "myorg/myrepo",
                       destination_parent_dir: "/some/dest")
-        end
-
-        it "returns an object that isn't #copied?" do
-          fs = double('filesystem', file_exist?: false)
-          logger = double('logger')
-
-          allow(logger).to receive(:log) { nil } # #log returns nil, because puts returns nil
-
-          cloner = LocalFilesystemCloner.new(logger, fs, "/my/repo/dir")
-          result = cloner.call(source_repo_name: "myorg/myrepo",
-                               destination_parent_dir: "/some/dest")
-          expect(result).not_to be_copied
         end
       end
     end

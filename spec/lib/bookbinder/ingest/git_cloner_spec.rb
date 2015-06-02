@@ -17,14 +17,13 @@ module Bookbinder
         expect(result.directory).to eq("myrepo")
       end
 
-      it "returns an object that is #copied? and has the correct destination" do
+      it "returns an object that has the correct destination" do
         cloner = GitCloner.new(vcs)
 
         allow(vcs).to receive(:clone)
 
         result = cloner.call(source_repo_name: "myorg/myrepo",
                              destination_parent_dir: "/mydestination")
-        expect(result).to be_copied
         expect(result.copied_to).to eq(Pathname("/mydestination/myrepo"))
       end
 

@@ -84,8 +84,8 @@ module Bookbinder
 
         expect(sections).to eq(
           [
-            Section.new('bar', 'qux', copied = true, 'anywhere/really', 'baz', nil, 'my' => 'stuff', 'to' => 'preprocess'),
-            Section.new('b', 'd', copied = true, 'anywhere/really', 'c', 'specified_a_template'),
+            Section.new('bar', 'qux', 'anywhere/really', 'baz', nil, 'my' => 'stuff', 'to' => 'preprocess'),
+            Section.new('b', 'd', 'anywhere/really', 'c', 'specified_a_template'),
           ]
         )
       end

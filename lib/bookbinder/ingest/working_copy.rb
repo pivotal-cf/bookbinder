@@ -15,8 +15,8 @@ module Bookbinder
 
       attr_reader :copied_to, :full_name
 
-      def copied?
-        ! copied_to.nil?
+      def available?
+        !! copied_to
       end
 
       def directory
