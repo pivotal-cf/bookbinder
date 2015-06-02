@@ -12,7 +12,7 @@ module Bookbinder
     class Bind
       include Commands::Naming
 
-      def initialize(logger,
+      def initialize(base_streams,
                      config_factory,
                      archive_menu_config,
                      file_system_accessor,
@@ -24,7 +24,7 @@ module Bookbinder
                      cloner_factory,
                      section_repository_factory,
                      directory_preparer)
-        @logger = logger
+        @base_streams = base_streams
         @config_factory = config_factory
         @archive_menu_config = archive_menu_config
         @file_system_accessor = file_system_accessor
@@ -52,7 +52,7 @@ module Bookbinder
       end
 
       def run(cli_arguments)
-        bind_options = BindComponents::BindOptions.new(cli_arguments)
+        bind_options = BindComponents::BindOptions.new(cli_arguments, base_streams)
         bind_options.validate!
 
         bind_source, *options = cli_arguments
@@ -87,6 +87,7 @@ module Bookbinder
         success = publish(
           sections.map(&:subnav).reduce({}, :merge),
           {verbose: options.include?('--verbose')},
+          bind_options.streams,
           output_locations,
           archive_menu_config.generate(bind_config, sections),
           cloner
@@ -97,9 +98,9 @@ module Bookbinder
 
       private
 
-      attr_reader :config_factory,
+      attr_reader :base_streams,
+                  :config_factory,
                   :archive_menu_config,
-                  :logger,
                   :file_system_accessor,
                   :static_site_generator,
                   :final_app_directory,
@@ -110,7 +111,7 @@ module Bookbinder
                   :section_repository_factory,
                   :directory_preparer
 
-      def publish(subnavs, cli_options, output_locations, publish_config, cloner)
+      def publish(subnavs, cli_options, streams, output_locations, publish_config, cloner)
         FileUtils.cp 'redirects.rb', output_locations.final_app_dir if File.exists?('redirects.rb')
 
         host_for_sitemap = publish_config.public_host
@@ -125,7 +126,7 @@ module Bookbinder
 
         result = generate_sitemap(host_for_sitemap)
 
-        logger.log "Bookbinder bound your book into #{output_locations.final_app_dir.to_s.green}"
+        streams[:success].puts "Bookbinder bound your book into #{output_locations.final_app_dir}"
 
         !result.has_broken_links?
       end

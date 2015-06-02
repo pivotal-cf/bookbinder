@@ -36,7 +36,7 @@ module Bookbinder
     def bind_cmd(partial_args = {})
       bind_version_control_system = partial_args.fetch(:version_control_system, Bookbinder::GitFake.new)
       bind_logger = partial_args.fetch(:logger, logger)
-      Commands::Bind.new(bind_logger,
+      Commands::Bind.new({out: Sheller::DevNull.new, err: Sheller::DevNull.new},
                          partial_args.fetch(:bind_config_factory, double('config factory', produce: config)),
                          partial_args.fetch(:archive_menu_config, archive_menu_config),
                          partial_args.fetch(:file_system_accessor, file_system_accessor),

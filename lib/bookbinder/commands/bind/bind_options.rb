@@ -5,8 +5,9 @@ module Bookbinder
   module Commands
     module BindComponents
       class BindOptions
-        def initialize(opts)
+        def initialize(opts, base_streams)
           @opts = opts
+          @base_streams = base_streams
         end
 
         def validate!
@@ -19,14 +20,15 @@ module Bookbinder
 
         def streams
           {
-            out: opts.include?('--verbose') ? $stdout : Sheller::DevNull.new,
-            err: Streams::ColorizedStream.new(Colorizer::Colors.red, $stderr)
+            out: opts.include?('--verbose') ? base_streams[:out] : Sheller::DevNull.new,
+            success: Streams::ColorizedStream.new(Colorizer::Colors.green, base_streams[:out]),
+            err: Streams::ColorizedStream.new(Colorizer::Colors.red, base_streams[:err]),
           }
         end
 
         private
 
-        attr_accessor :opts
+        attr_accessor :base_streams, :opts
 
         def arguments_are_valid?
           valid_options = %w(--verbose --ignore-section-refs --dita-flags).to_set

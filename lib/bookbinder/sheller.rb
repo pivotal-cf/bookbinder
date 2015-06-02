@@ -7,6 +7,9 @@ module Bookbinder
     class DevNull
       def puts(_)
       end
+
+      def <<(_)
+      end
     end
 
     def run_command(*command)

@@ -74,7 +74,7 @@ module Bookbinder
 
       def bind
         @bind ||= Commands::Bind.new(
-          logger,
+          {out: $stdout, err: $stderr},
           bind_config_factory,
           Config::ArchiveMenuConfiguration.new(
             loader: config_loader,

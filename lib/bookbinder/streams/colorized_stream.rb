@@ -10,7 +10,7 @@ module Bookbinder
       end
 
       def puts(line)
-        stream << colorizer.colorize(line, color)
+        stream.puts(colorizer.colorize(line, color))
       end
 
       private
