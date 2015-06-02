@@ -208,10 +208,8 @@ module Bookbinder
 
         it 'sets the repo as the layout repo path when prepping dirs' do
           received_output_locations = nil
-          directory_preparer = Object.new
-          directory_preparer.define_singleton_method(:prepare_directories) {|_, _, output_locations|
-            received_output_locations = output_locations
-          }
+          directory_preparer = double('dir preparer')
+          allow(directory_preparer).to receive(:prepare_directories)
 
           bind = bind_cmd(cloner_factory: factory,
                           file_system_accessor: null_fs_accessor,
@@ -224,7 +222,8 @@ module Bookbinder
 
           bind.run(['remote'])
 
-          expect(received_output_locations.layout_repo_dir).to eq(Pathname('foo/repo'))
+          expect(directory_preparer).to have_received(:prepare_directories).
+            with(anything, anything, anything, Pathname('foo/repo'))
         end
       end
 

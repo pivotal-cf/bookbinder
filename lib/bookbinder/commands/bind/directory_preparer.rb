@@ -13,13 +13,13 @@ module Bookbinder
           @version_control_system = version_control_system
         end
 
-        def prepare_directories(config, gem_root, output_locations)
+        def prepare_directories(config, gem_root, output_locations, layout_repo_dir)
           file_system_accessor.remove_directory(output_locations.output_dir)
           file_system_accessor.remove_directory(output_locations.final_app_dir)
 
           copy_directory_from_gem(gem_root, 'template_app', output_locations.final_app_dir)
           copy_directory_from_gem(gem_root, 'master_middleman', output_locations.site_generator_home)
-          file_system_accessor.copy_contents(output_locations.layout_repo_dir, output_locations.site_generator_home)
+          file_system_accessor.copy_contents(layout_repo_dir, output_locations.site_generator_home)
 
           config.versions.each do |version|
             copy_index_file_from_version_to_master_middleman(version, output_locations.source_for_site_generator, config.book_repo_url)

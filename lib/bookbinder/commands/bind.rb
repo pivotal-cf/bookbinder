@@ -63,14 +63,14 @@ module Bookbinder
         output_locations = OutputLocations.new(
           context_dir: context_dir,
           final_app_dir: final_app_directory,
-          layout_repo_dir: layout_repo_path(bind_config, cloner),
         )
         section_repository = section_repository_factory.produce(cloner)
 
         directory_preparer.prepare_directories(
           bind_config,
           File.expand_path('../../../../', __FILE__),
-          output_locations
+          output_locations,
+          layout_repo_path(bind_config, cloner)
         )
 
         sections = section_repository.fetch(

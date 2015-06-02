@@ -3,15 +3,10 @@ require_relative '../errors/programmer_mistake'
 
 module Bookbinder
   class OutputLocations
-    attr_reader :layout_repo_dir
-
     include DirectoryHelperMethods
 
-    def initialize(final_app_dir: nil,
-                   layout_repo_dir: nil,
-                   context_dir: nil)
+    def initialize(final_app_dir: nil, context_dir: nil)
       @final_app_dir = final_app_dir
-      @layout_repo_dir = layout_repo_dir
       @context_dir = context_dir
     end
 
