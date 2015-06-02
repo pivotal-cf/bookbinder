@@ -85,8 +85,10 @@ module Bookbinder
           expect(logger).to receive(:log).with(%r{ skipping .*/my/repo/dir})
 
           cloner = LocalFilesystemCloner.new(logger, fs, "/my/repo/dir")
-          cloner.call(source_repo_name: "myorg/myrepo",
-                      destination_parent_dir: "/some/dest")
+          result = cloner.call(source_repo_name: "myorg/myrepo",
+                               destination_parent_dir: "/some/dest")
+          expect(result.path).not_to exist
+          expect(result).not_to be_available
         end
       end
     end
