@@ -77,17 +77,14 @@ module Bookbinder
         @bind ||= Commands::Bind.new(
           {out: $stdout, err: $stderr},
           OutputLocations.new(final_app_dir: final_app_directory, context_dir: File.absolute_path('.')),
-          bind_config_factory,
-          Config::ArchiveMenuConfiguration.new(
-            loader: config_loader,
-            config_filename: 'bookbinder.yml'
-          ),
+          Config::BindConfigFactory.new(version_control_system, configuration_fetcher),
+          Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           local_file_system_accessor,
-          middleman_runner,
+          MiddlemanRunner.new(logger, version_control_system),
           PostProduction::SitemapWriter.build(logger, final_app_directory, sitemap_port),
           Preprocessing::Preprocessor.new(
             Preprocessing::DitaPreprocessor.new(
-              dita_html_to_middleman_formatter,
+              DitaHtmlToMiddlemanFormatter.new(local_file_system_accessor, subnav_formatter, html_document_manipulator),
               local_file_system_accessor,
               DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY']),
               Sheller.new
@@ -115,10 +112,6 @@ module Bookbinder
         )
       end
 
-      def middleman_runner
-        @middleman_runner ||= MiddlemanRunner.new(logger, version_control_system)
-      end
-
       def configuration_fetcher
         @configuration_fetcher ||= Config::Fetcher.new(
           logger,
@@ -138,12 +131,6 @@ module Bookbinder
         @final_app_directory ||= File.absolute_path('final_app')
       end
 
-      def dita_html_to_middleman_formatter
-        @dita_html_to_middleman_formatter ||= DitaHtmlToMiddlemanFormatter.new(local_file_system_accessor,
-                                                                               subnav_formatter,
-                                                                               html_document_manipulator)
-      end
-
       def subnav_formatter
         @subnav_formatter ||= SubnavFormatter.new
       end
@@ -154,10 +141,6 @@ module Bookbinder
 
       def local_file_system_accessor
         @local_file_system_accessor ||= LocalFileSystemAccessor.new
-      end
-
-      def bind_config_factory
-        @bind_config_factory  ||= Config::BindConfigFactory.new(version_control_system, configuration_fetcher)
       end
 
       def sitemap_port
