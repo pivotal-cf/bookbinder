@@ -188,7 +188,10 @@ module Bookbinder
       context 'when configured with a layout repo' do
         let(:cloner) { double('cloner') }
         let(:factory) { double('cloner factory') }
-        let(:config) { Config::Configuration.parse('book_repo' => '', 'public_host' => '', 'layout_repo' => 'my/configuredrepo') }
+        let(:config) { Config::Configuration.new(sections: [],
+                                                 book_repo: '',
+                                                 public_host: '',
+                                                 layout_repo: 'my/configuredrepo') }
         let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
         let(:null_site_generator) { double('site gen', run: nil) }
         let(:null_fs_accessor) { double('fs accessor', copy: nil) }
@@ -277,26 +280,18 @@ module Bookbinder
     end
 
     describe 'using template variables' do
-      it 'includes them into middleman' do
-        sections = [
-            {'repository' => {
-                'name' => 'fantastic/my-variable-repo'},
-             'directory' => 'var-repo'
-            }
-        ]
-
-          config_hash = {
-              'sections' => sections,
-              'book_repo' => book,
-              'cred_repo' => 'my-org/my-creds',
-              'public_host' => 'example.com',
-              'template_variables' => {'name' => 'Spartacus'}
-          }
-
-        config = Config::Configuration.parse(config_hash)
-        config_factory = double('config factory', produce: config)
-
-        bind_cmd(bind_config_factory: config_factory).run(['remote'])
+      it 'includes them in the final site' do
+        bind_cmd(bind_config_factory: double('config factory', produce: Config::Configuration.new(
+          sections: [
+            Config::SectionConfig.new(
+              'repository' => {'name' => 'fantastic/my-variable-repo'},
+              'directory' => 'var-repo')
+          ],
+          book_repo: book,
+          cred_repo: 'my-org/my-creds',
+          public_host: 'example.com',
+          template_variables: {'name' => 'Spartacus'}
+        ))).run(['remote'])
 
         final_app_dir = File.absolute_path('final_app')
         index_html = File.read File.join(final_app_dir, 'public', 'var-repo', 'variable_index.html')
