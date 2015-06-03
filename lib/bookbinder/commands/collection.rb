@@ -25,7 +25,7 @@ require_relative '../values/output_locations'
 
 module Bookbinder
   module Commands
-    class CommandRepository
+    class Collection
       include Enumerable
 
       def initialize(logger, version_control_system)
