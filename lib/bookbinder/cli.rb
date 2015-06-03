@@ -1,4 +1,4 @@
-require_relative 'repositories/command_repository'
+require_relative 'commands/command_repository'
 require_relative 'command_validator'
 require_relative 'command_runner'
 require_relative 'config/cf_credentials'
@@ -16,7 +16,7 @@ module Bookbinder
       command_name, *command_arguments = args
 
       logger = DeprecatedLogger.new
-      commands = Repositories::CommandRepository.new(logger, version_control_system)
+      commands = Commands::CommandRepository.new(logger, version_control_system)
 
       command_validator = CommandValidator.new(commands, commands.help.usage_message)
       command_runner = CommandRunner.new(logger, commands)

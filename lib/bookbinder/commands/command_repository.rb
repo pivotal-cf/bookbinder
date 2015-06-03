@@ -24,7 +24,7 @@ require_relative '../subnav_formatter'
 require_relative '../values/output_locations'
 
 module Bookbinder
-  module Repositories
+  module Commands
     class CommandRepository
       include Enumerable
 
