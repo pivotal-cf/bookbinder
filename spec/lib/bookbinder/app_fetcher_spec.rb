@@ -27,7 +27,20 @@ OUTPUT
       end
 
       context 'without a space column in the cf routes output' do
-        xit 'returns the correct app' do
+        it 'returns the correct app' do
+          allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
+Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
+
+host                    domain                apps
+no-cat-pictures         cfapps.io
+less-cat-pictures       cfapps.io             cats #{eol_space}
+cat-pictures            cfapps.io             cats #{eol_space}
+docsmisleading          cfapps.io
+docs                    cfapps.io             docs-green #{eol_space}
+docs-testmisleading     cfapps.io
+docs-test               cfapps.io             docs-green,docs-blue #{eol_space}
+more-cat-pictures       cfapps.io             many-cats, too-many-cats #{eol_space}
+OUTPUT
           expect(AppFetcher.new([['cfapps.io', 'docs']], cf_command_runner).fetch_current_app).
             to eq(BlueGreenApp.new('docs-green'))
         end
