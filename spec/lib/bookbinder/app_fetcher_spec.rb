@@ -85,14 +85,6 @@ OUTPUT
       end
 
       context 'when a route in the creds is not yet mapped in the app' do
-        let(:config_hash) do
-          {
-              'staging_host' => {
-                  'cfapps.io' => %w(docs docs-test docs-new-route)
-              }
-          }
-        end
-
         it "returns the apps for the mapped routes" do
           allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
 Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
