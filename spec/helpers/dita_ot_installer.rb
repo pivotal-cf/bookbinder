@@ -1,5 +1,7 @@
 module Bookbinder
   class DitaOTInstaller
+    UnpackingError = Class.new(RuntimeError)
+
     def install_dita
       tar('-jxf', download(AntDownload.new))
       dita_ot = DitaOTDownload.new
@@ -15,7 +17,11 @@ module Bookbinder
     end
 
     def tar(opts, path)
-      `cd #{File.dirname(path)}; tar #{opts} #{path}; cd -`
+      Dir.chdir(File.dirname(path)) do
+        unless system("tar #{opts} #{path}")
+          raise UnpackingError.new("Failed to unpack #{path} with the command `tar #{opts} #{path}`")
+        end
+      end
     end
 
     def java_home
@@ -33,7 +39,7 @@ module Bookbinder
 
   class AntDownload
     def tarball_url
-      "http://mirror.ox.ac.uk/sites/rsync.apache.org//ant/binaries/#{tarball_filename}"
+      "http://archive.apache.org/dist/ant/binaries/#{tarball_filename}"
     end
 
     def tarball_filename
