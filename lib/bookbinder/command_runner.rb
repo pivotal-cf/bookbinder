@@ -11,7 +11,7 @@ module Bookbinder
       command = commands.detect { |known_command| known_command.command_for?(command_name) }
       command.run(command_arguments)
     rescue CliError::InvalidArguments
-      logger.log command.usage
+      logger.log ["bookbinder #{command.usage[0]}", command.usage[1]]
       1
     end
 

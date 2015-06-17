@@ -39,7 +39,7 @@ module Bookbinder
         commands = [double('deprecated_command',
                            command_for?: true,
                            deprecated_command_for?: true,
-                           usage: true
+                           usage: []
                     )]
         command_validator = CommandValidator.new(commands, UNTESTED_USAGE)
         validation_result = command_validator.validate('deprecated_command')
@@ -50,7 +50,7 @@ module Bookbinder
       it 'returns a user message of deprecation' do
         deprecated_command = double('deprecated_command',
                                      command_for?: true,
-                                     usage: true)
+                                     usage: [])
         commands = [deprecated_command]
 
         allow(deprecated_command).to receive(:deprecated_command_for?).with('deprecated_command').and_return true
@@ -63,16 +63,18 @@ module Bookbinder
 
       it 'returns a user message containing the preferred usage' do
         deprecated_command = double('deprecated_command',
-                                    command_for?: true)
+                                    command_for?: true,
+                                    usage: ['this is what you type', 'this is the description'])
         commands = [deprecated_command]
 
-        allow(deprecated_command).to receive(:deprecated_command_for?).with('deprecated_command').and_return true
-        allow(deprecated_command).to receive(:usage).and_return('this is the preferred usage')
+        allow(deprecated_command).to receive(:deprecated_command_for?).
+          with('deprecated_command').
+          and_return true
 
         command_validator = CommandValidator.new(commands, UNTESTED_USAGE)
         validation_result = command_validator.validate('deprecated_command')
 
-        expect(validation_result.message).to match(/this is the preferred usage/)
+        expect(validation_result.message).to match(/this is what you type/)
       end
     end
 

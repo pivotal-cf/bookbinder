@@ -20,7 +20,7 @@ module Bookbinder
       elsif candidate.deprecated_match
         UserMessage.new(
           "Use of #{command_name} is deprecated. " +
-          "The preferred usage is below: \n#{candidate.deprecated_match.usage}",
+          "The preferred usage is below: \nbookbinder #{candidate.deprecated_match.usage[0]}",
           EscalationType.warn
         )
       else
