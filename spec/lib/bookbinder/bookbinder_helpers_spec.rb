@@ -190,30 +190,20 @@ MARKDOWN
         FileUtils.cp_r 'master_middleman/.', tmpdir
         FileUtils.mkdir_p source_dir
         squelch_middleman_output
-        write_markdown_source_file source_file_under_test, source_file_title, source_file_content, breadcrumb_title, index_subnav
+        write_markdown_source_file source_file_under_test, source_file_title, source_file_content, breadcrumb_title
         write_subnav_content "subnavs/default.erb", ''
       end
 
       context 'when invoked in the top-level index file' do
         context 'and a subnav specified in the index markdown' do
-          let(:index_subnav) { 'index-subnav' }
           let(:subnav_code) do
             '<div id="sub-nav" class="js-sidenav" collapsible nav-container" role="navigation" data-behavior="Collapsible">
   <a class="sidenav-title"" data-behavior="SubMenuMobile">Index Subnav</a>
 </div>'
           end
-
-          it 'populates with the specified index subnav' do
-            write_subnav_content "subnavs/#{index_subnav}.erb", subnav_code
-            run_middleman
-            doc = Nokogiri::HTML(output)
-            expect(doc.css('div')[0].first[1]).to eq('sub-nav')
-            expect(doc.css('a').text).to eq('Index Subnav')
-          end
         end
 
         context 'and a subnav is not specified in the index markdown' do
-          let(:index_subnav) { nil }
           let(:subnav_code) { '' }
           it 'yields the empty "default" subnav' do
             run_middleman
@@ -227,7 +217,6 @@ MARKDOWN
         let(:source_file_under_test) { "#{section_directory}/some-section.erb" }
         let(:output) { File.read File.join(tmpdir, 'build', section_directory, 'some-section.html' ) }
         let(:subnav) { 'section-subnav' }
-        let(:index_subnav) { nil }
         let(:subnav_code) do
           '<div id="sub-nav" class="js-sidenav" collapsible nav-container" role="navigation" data-behavior="Collapsible">
   <a class="sidenav-title"" data-behavior="SubMenuMobile">Section Subnav</a>
