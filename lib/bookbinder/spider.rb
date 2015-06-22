@@ -27,6 +27,10 @@ module Bookbinder
       end
     end
 
+    def self.prepend_location(location, url)
+      "#{URI(location).path} => #{url}"
+    end
+
     def initialize(app_dir: nil, broken_link_exclusions: /(?!.*)/)
       @app_dir = app_dir || raise('Spiders must be initialized with an app directory.')
       @broken_links = []
@@ -46,10 +50,6 @@ module Bookbinder
         public_broken_links,
         SitemapGenerator.new.generate(sitemap_links), app_dir
       )
-    end
-
-    def self.prepend_location(location, url)
-      "#{URI(location).path} => #{url}"
     end
 
     private
