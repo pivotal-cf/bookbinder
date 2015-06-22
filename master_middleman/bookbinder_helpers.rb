@@ -70,14 +70,10 @@ module Bookbinder
       private
 
       def subnav_template_name
-        if current_page.data.index_subnav
-          current_page.data.index_subnav
-        else
-          template_key = decreasingly_specific_namespaces.detect { |ns|
-            config[:subnav_templates].has_key?(ns)
-          }
-          config[:subnav_templates][template_key] || 'default'
-        end
+        template_key = decreasingly_specific_namespaces.detect { |ns|
+          config[:subnav_templates].has_key?(ns)
+        }
+        config[:subnav_templates][template_key] || 'default'
       end
 
       def decreasingly_specific_namespaces
