@@ -15,7 +15,7 @@ module Bookbinder
       end
 
       def has_broken_links?
-        @broken_links.any? { |link| !link.include?('#') }
+        @broken_links.any?
       end
 
       def to_xml

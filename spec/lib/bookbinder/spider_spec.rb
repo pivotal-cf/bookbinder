@@ -40,7 +40,7 @@ module Bookbinder
       end
     end
 
-    context 'when there are no broken links, except for local-page ones' do
+    context 'when there are no broken links' do
       let(:output_dir) { tmp_subdir 'output' }
       let(:log_file) { File.join(output_dir, 'wget.log') }
       let(:logger) { NilLogger.new }
