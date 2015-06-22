@@ -118,17 +118,12 @@ module Bookbinder
                                   subnavs)
         file_system_accessor.copy output_locations.build_dir, output_locations.public_dir
 
-
-        result = generate_sitemap(host_for_sitemap)
+        raise "Your public host must be a single String." unless host_for_sitemap.is_a?(String)
+        result = sitemap_writer.write(host_for_sitemap, streams)
 
         streams[:success].puts "Bookbinder bound your book into #{output_locations.final_app_dir}"
 
         !result.has_broken_links?
-      end
-
-      def generate_sitemap(host_for_sitemap)
-        raise "Your public host must be a single String." unless host_for_sitemap.is_a?(String)
-        sitemap_writer.write(host_for_sitemap)
       end
 
       def generate_local_repo_dir(context_dir, bind_source)

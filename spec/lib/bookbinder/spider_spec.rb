@@ -19,7 +19,7 @@ module Bookbinder
     let(:public_directory) { File.join(final_app_dir, 'public') }
     let(:logger) { NilLogger.new }
     let(:final_app_dir) { tmp_subdir 'final_app' }
-    let(:spider) { Spider.new logger, app_dir: final_app_dir }
+    let(:spider) { Spider.new(app_dir: final_app_dir) }
 
     around do |spec|
       FileUtils.mkdir_p public_directory
@@ -43,7 +43,6 @@ module Bookbinder
     context 'when there are no broken links' do
       let(:output_dir) { tmp_subdir 'output' }
       let(:log_file) { File.join(output_dir, 'wget.log') }
-      let(:logger) { NilLogger.new }
       let(:portal_page) { File.join('spec', 'fixtures', 'non_broken_index.html') }
       let(:other_page) { File.join('spec', 'fixtures', 'page_with_no_links.html') }
 
@@ -52,18 +51,18 @@ module Bookbinder
       end
 
       it 'creates a valid-looking sitemap' do
-        result = spider.generate_sitemap('example.com', port)
+        result = spider.generate_sitemap('example.com', port, out: StringIO.new)
         expect(Nokogiri::XML(result.to_xml).css('url loc').first.text).
           to eq('http://example.com/index.html')
       end
 
       it 'suggests a path for the sitemap, based on the app dir' do
-        result = spider.generate_sitemap('example.com', port)
+        result = spider.generate_sitemap('example.com', port, out: StringIO.new)
         expect(result.to_path).to eq(Pathname(final_app_dir).join('public/sitemap.xml'))
       end
 
       it 'reports no broken links' do
-        result = spider.generate_sitemap 'example.com', port
+        result = spider.generate_sitemap 'example.com', port, out: StringIO.new
         expect(result).not_to have_broken_links
       end
     end
@@ -96,29 +95,41 @@ module Bookbinder
       end
 
       it 'reports that they are present' do
-        result = spider.generate_sitemap host, port
+        result = spider.generate_sitemap host, port, err: StringIO.new
         expect(result).to have_broken_links
       end
 
-      it 'logs them' do
-        broken_links.each do |l|
-          expect(logger).to receive(:notify).with(/#{Regexp.escape(l)}/)
-        end
+      it 'logs them as errors' do
+        errors = StringIO.new
+        streams = { err: errors }
 
-        broken_anchor_links.each do |l|
-          expect(logger).to receive(:warn).with(/#{Regexp.escape(l)}/)
-        end
+        spider.generate_sitemap(host, port, streams)
 
-        spider.generate_sitemap host, port
-      end
+        errors.rewind
+        expect(errors.read).to eq(<<-MESSAGE)
 
-      it 'logs a count of them' do
-        expect(logger).to receive(:error).with("\nFound #{broken_links.count + broken_anchor_links.count} broken links!").twice
-        spider.generate_sitemap host, port
+Found 13 broken links!
+
+/index.html => #ill-formed.anchor
+/index.html => #missing
+/index.html => #missing-anchor
+/index.html => #missing.and.bad
+/index.html => #still-bad=anchor
+/index.html => http://localhost:4354/also_non_existent/index.html
+/index.html => http://localhost:4354/non_existent.yml
+/index.html => http://localhost:4354/non_existent/index.html
+/other_page.html => #another"bad"anchor
+/other_page.html => #this-doesnt
+public/stylesheets/stylesheet.css => /absent-absolute.gif
+public/stylesheets/stylesheet.css => absent-relative.gif
+public/stylesheets/stylesheet.css => http://something-nonexistent.com/absent-remote.gif
+
+Found 13 broken links!
+        MESSAGE
       end
 
       it 'excludes them from the sitemap' do
-        result = spider.generate_sitemap host, port
+        result = spider.generate_sitemap host, port, err: StringIO.new
         broken_link_targets = broken_links.map {|link| link.split(" => ").last.gsub("localhost:#{port}", host) }
         expect(result.to_xml).not_to include(*broken_link_targets)
       end

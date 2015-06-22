@@ -542,7 +542,7 @@ Content:
         config_factory = double('config factory', produce: config)
         middleman_runner = MiddlemanRunner.new(logger, GitFake.new)
         final_app_dir = File.absolute_path('final_app')
-        spider = Spider.new(logger, app_dir: final_app_dir)
+        spider = Spider.new(app_dir: final_app_dir)
         server_director = ServerDirector.new(logger, directory: final_app_dir)
 
         bind_cmd(bind_config_factory: config_factory,

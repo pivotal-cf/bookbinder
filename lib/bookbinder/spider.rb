@@ -27,20 +27,19 @@ module Bookbinder
       end
     end
 
-    def initialize(logger, app_dir: nil)
-      @logger = logger
+    def initialize(app_dir: nil)
       @app_dir = app_dir || raise('Spiders must be initialized with an app directory.')
       @broken_links = []
     end
 
-    def generate_sitemap(target_host, port)
+    def generate_sitemap(target_host, port, streams)
       temp_host = "localhost:#{port}"
 
       sieve = Sieve.new domain: "http://#{temp_host}"
       links = crawl_from "http://#{temp_host}/index.html", sieve
       broken_links, working_links = links
 
-      announce_broken_links broken_links
+      announce_broken_links(broken_links, streams)
 
       sitemap_links = substitute_hostname(temp_host, target_host, working_links)
       Result.new(broken_links, SitemapGenerator.new.generate(sitemap_links), @app_dir)
@@ -52,21 +51,18 @@ module Bookbinder
 
     private
 
-    def announce_broken_links(broken_links)
+    def announce_broken_links(broken_links, streams)
       if broken_links.any?
-        @logger.error "\nFound #{broken_links.count} broken links!"
+        streams[:err].puts(<<-MESSAGE)
 
-        broken_links.each do |link|
-          if link.include?('#')
-            @logger.warn(link)
-          else
-            @logger.notify(link)
-          end
-        end
+Found #{broken_links.count} broken links!
 
-        @logger.error "\nFound #{broken_links.count} broken links!"
+#{broken_links.sort.join("\n")}
+
+Found #{broken_links.count} broken links!
+        MESSAGE
       else
-        @logger.success "\nNo broken links!"
+        streams[:out].puts "\nNo broken links!"
       end
     end
 
