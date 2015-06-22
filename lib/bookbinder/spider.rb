@@ -33,8 +33,6 @@ module Bookbinder
 
     def initialize(app_dir: nil)
       @app_dir = app_dir || raise('Spiders must be initialized with an app directory.')
-      @broken_links = []
-      @broken_link_exclusions = broken_link_exclusions
     end
 
     def generate_sitemap(target_host, port, streams,
@@ -55,7 +53,7 @@ module Bookbinder
 
     private
 
-    attr_reader :app_dir, :broken_link_exclusions
+    attr_reader :app_dir
 
     def announce_broken_links(broken_links, streams)
       if broken_links.none?
