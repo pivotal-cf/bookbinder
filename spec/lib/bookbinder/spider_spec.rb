@@ -99,6 +99,14 @@ module Bookbinder
         expect(result).to have_broken_links
       end
 
+      context 'and a whitelist has been provided' do
+        let(:spider) { Spider.new(app_dir: final_app_dir, broken_link_exclusions: /./) }
+        it 'does not report them when they are on the whitelist' do
+          result = spider.generate_sitemap host, port, out: StringIO.new
+          expect(result).not_to have_broken_links
+        end
+      end
+
       it 'logs them as errors' do
         errors = StringIO.new
         streams = { err: errors }

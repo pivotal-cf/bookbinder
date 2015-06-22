@@ -27,9 +27,10 @@ module Bookbinder
       end
     end
 
-    def initialize(app_dir: nil)
+    def initialize(app_dir: nil, broken_link_exclusions: /(?!.*)/)
       @app_dir = app_dir || raise('Spiders must be initialized with an app directory.')
       @broken_links = []
+      @broken_link_exclusions = broken_link_exclusions
     end
 
     def generate_sitemap(target_host, port, streams)
@@ -38,11 +39,13 @@ module Bookbinder
       sieve = Sieve.new domain: "http://#{temp_host}"
       links = crawl_from "http://#{temp_host}/index.html", sieve
       broken_links, working_links = links
-
-      announce_broken_links(broken_links, streams)
-
       sitemap_links = substitute_hostname(temp_host, target_host, working_links)
-      Result.new(broken_links, SitemapGenerator.new.generate(sitemap_links), @app_dir)
+      public_broken_links = broken_links.reject {|l| l.match(broken_link_exclusions)}
+      announce_broken_links(public_broken_links, streams)
+      Result.new(
+        public_broken_links,
+        SitemapGenerator.new.generate(sitemap_links), app_dir
+      )
     end
 
     def self.prepend_location(location, url)
@@ -51,8 +54,12 @@ module Bookbinder
 
     private
 
+    attr_reader :app_dir, :broken_link_exclusions
+
     def announce_broken_links(broken_links, streams)
-      if broken_links.any?
+      if broken_links.none?
+        streams[:out].puts "\nNo broken links!"
+      else
         streams[:err].puts(<<-MESSAGE)
 
 Found #{broken_links.count} broken links!
@@ -61,8 +68,6 @@ Found #{broken_links.count} broken links!
 
 Found #{broken_links.count} broken links!
         MESSAGE
-      else
-        streams[:out].puts "\nNo broken links!"
       end
     end
 
