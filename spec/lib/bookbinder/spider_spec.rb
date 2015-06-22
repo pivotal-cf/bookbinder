@@ -33,7 +33,7 @@ module Bookbinder
       FileUtils.cp other_page, File.join(public_directory, 'other_page.html')
       write_arbitrary_yaml_to(public_directory)
 
-      server_director = ServerDirector.new(logger, directory: final_app_dir, port: port)
+      server_director = ServerDirector.new(directory: final_app_dir, port: port)
 
       server_director.use_server do
         Dir.chdir(final_app_dir) { spec.run }

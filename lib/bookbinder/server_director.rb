@@ -4,8 +4,7 @@ require 'vienna'
 
 module Bookbinder
   class ServerDirector
-    def initialize(logger, directory: nil, port: 41722)
-      @logger = logger
+    def initialize(directory: nil, port: 41722)
       @directory = directory
       @port = port
     end

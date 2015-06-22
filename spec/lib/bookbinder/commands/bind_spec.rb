@@ -118,7 +118,7 @@ module Bookbinder
         command.run(['local'])
 
         response = nil
-        ServerDirector.new(logger, directory: 'final_app').use_server do |port|
+        ServerDirector.new(directory: 'final_app').use_server do |port|
           uri = URI "http://localhost:#{port}/#{page}"
           req = Net::HTTP::Get.new(uri.path)
           response = Net::HTTP.start(uri.host, uri.port) { |http| http.request(req) }
@@ -543,7 +543,7 @@ Content:
         middleman_runner = MiddlemanRunner.new(logger, GitFake.new)
         final_app_dir = File.absolute_path('final_app')
         spider = Spider.new(app_dir: final_app_dir)
-        server_director = ServerDirector.new(logger, directory: final_app_dir)
+        server_director = ServerDirector.new(directory: final_app_dir)
 
         bind_cmd(bind_config_factory: config_factory,
                  static_site_generator: middleman_runner,

@@ -7,7 +7,7 @@ module Bookbinder
       def self.build(logger, final_app_directory, port)
         new(
           Spider.new(app_dir: final_app_directory),
-          ServerDirector.new(logger, directory: final_app_directory, port: port)
+          ServerDirector.new(directory: final_app_directory, port: port)
         )
       end
 
