@@ -65,6 +65,10 @@ module Bookbinder
         end
       end
 
+      def broken_link_exclusions
+        config.fetch(:broken_link_exclusions, /(?!.*)/)
+      end
+
       def template_variables
         config.fetch(:template_variables, {})
       end

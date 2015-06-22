@@ -95,15 +95,17 @@ module Bookbinder
       end
 
       it 'reports that they are present' do
-        result = spider.generate_sitemap host, port, err: StringIO.new
-        expect(result).to have_broken_links
+        expect(spider.generate_sitemap host, port, err: StringIO.new).
+          to have_broken_links
       end
 
       context 'and a whitelist has been provided' do
-        let(:spider) { Spider.new(app_dir: final_app_dir, broken_link_exclusions: /./) }
-        it 'does not report them when they are on the whitelist' do
-          result = spider.generate_sitemap host, port, out: StringIO.new
-          expect(result).not_to have_broken_links
+        it 'does not report them if they are on the whitelist' do
+          expect(spider.generate_sitemap(
+            host, port,
+            { out: StringIO.new },
+            broken_link_exclusions: /./
+          )).not_to have_broken_links
         end
       end
 

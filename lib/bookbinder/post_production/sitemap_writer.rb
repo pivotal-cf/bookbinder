@@ -16,9 +16,14 @@ module Bookbinder
         @server_director = server_director
       end
 
-      def write(host_for_sitemap, streams)
+      def write(host_for_sitemap, streams, broken_link_exclusions)
         server_director.use_server { |port|
-          spider.generate_sitemap(host_for_sitemap, port, streams)
+          spider.generate_sitemap(
+            host_for_sitemap,
+            port,
+            streams,
+            broken_link_exclusions: broken_link_exclusions
+          )
         }.tap do |sitemap|
           File.write(sitemap.to_path, sitemap.to_xml)
         end

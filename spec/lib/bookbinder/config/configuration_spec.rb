@@ -25,6 +25,20 @@ module Bookbinder
           to eq('git@amazon.place:some-org/some-repo')
       end
 
+      it "parses broken link exclusions into a usable regexp" do
+        config = Configuration.parse(
+          'broken_link_exclusions' => '[a-c]'
+        )
+        expect('a').to match(config.broken_link_exclusions)
+        expect('d').not_to match(config.broken_link_exclusions)
+      end
+
+      it "can match a string against undefined broken link exclusions" do
+        config = Configuration.parse({})
+        expect('a').not_to match(config.broken_link_exclusions)
+        expect('d').not_to match(config.broken_link_exclusions)
+      end
+
       it "returns an empty collection of versions if none are provided" do
         expect(Configuration.parse({}).versions).to be_empty
       end

@@ -31,13 +31,14 @@ module Bookbinder
       "#{URI(location).path} => #{url}"
     end
 
-    def initialize(app_dir: nil, broken_link_exclusions: /(?!.*)/)
+    def initialize(app_dir: nil)
       @app_dir = app_dir || raise('Spiders must be initialized with an app directory.')
       @broken_links = []
       @broken_link_exclusions = broken_link_exclusions
     end
 
-    def generate_sitemap(target_host, port, streams)
+    def generate_sitemap(target_host, port, streams,
+                         broken_link_exclusions: /(?!.*)/)
       temp_host = "localhost:#{port}"
 
       sieve = Sieve.new domain: "http://#{temp_host}"

@@ -119,7 +119,11 @@ module Bookbinder
         file_system_accessor.copy output_locations.build_dir, output_locations.public_dir
 
         raise "Your public host must be a single String." unless host_for_sitemap.is_a?(String)
-        result = sitemap_writer.write(host_for_sitemap, streams)
+        result = sitemap_writer.write(
+          host_for_sitemap,
+          streams,
+          publish_config.broken_link_exclusions
+        )
 
         streams[:success].puts "Bookbinder bound your book into #{output_locations.final_app_dir}"
 
