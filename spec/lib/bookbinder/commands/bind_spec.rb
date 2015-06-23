@@ -461,6 +461,8 @@ Content:
     end
 
     describe 'verbose mode' do
+      include Redirection
+
       context 'when the verbose flag is not set' do
         it 'suppresses detailed output' do
           sections = [
@@ -479,22 +481,12 @@ Content:
           config_factory = double('config factory', produce: config)
 
           command = bind_cmd(bind_config_factory: config_factory)
-          begin
-            real_stdout = $stdout
-            $stdout = StringIO.new
+          collected_output = capture_stdout {
+            expect { command.run(['remote']) }.to raise_error
+          }
 
-            expect do
-              command.run(['remote'])
-            end.to raise_error
-
-            $stdout.rewind
-            collected_output = $stdout.read
-
-            expect(collected_output).to_not match(/error.*build\/index.html/)
-            expect(collected_output).to_not match(/undefined local variable or method `function_that_does_not_exist'/)
-          ensure
-            $stdout = real_stdout
-          end
+          expect(collected_output).not_to match(/error.*build\/index.html/)
+          expect(collected_output).not_to match(/undefined local variable or method `function_that_does_not_exist'/)
         end
       end
 
@@ -516,22 +508,12 @@ Content:
         config_factory = double('config factory', produce: config)
 
         command = bind_cmd(bind_config_factory: config_factory)
-        begin
-          real_stdout = $stdout
-          $stdout = StringIO.new
+        collected_output = capture_stdout {
+          expect { command.run(['remote', '--verbose']) }.to raise_error
+        }
 
-          expect do
-            command.run(['remote', '--verbose'])
-          end.to raise_error
-
-          $stdout.rewind
-          collected_output = $stdout.read
-
-          expect(collected_output).to match(/error.*build/)
-          expect(collected_output).to match(/undefined local variable or method `function_that_does_not_exist'/)
-        ensure
-          $stdout = real_stdout
-        end
+        expect(collected_output).to match(/error.*build/)
+        expect(collected_output).to match(/undefined local variable or method `function_that_does_not_exist'/)
       end
     end
 
