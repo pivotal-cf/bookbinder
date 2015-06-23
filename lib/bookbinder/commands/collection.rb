@@ -65,7 +65,12 @@ module Bookbinder
           Commands::PushToProd.new(logger, configuration_fetcher),
           Commands::RunPublishCI.new(bind, push_local_to_staging, build_and_push_tarball),
           Commands::Tag.new(logger, configuration_fetcher, version_control_system),
-          Commands::UpdateLocalDocRepos.new(logger, configuration_fetcher, version_control_system, local_file_system_accessor),
+          Commands::UpdateLocalDocRepos.new(
+            colored_streams,
+            configuration_fetcher,
+            version_control_system,
+            local_file_system_accessor
+          ),
         ]
       end
 
@@ -75,7 +80,7 @@ module Bookbinder
 
       def bind
         @bind ||= Commands::Bind.new(
-          {out: $stdout, err: $stderr},
+          colored_streams,
           OutputLocations.new(final_app_dir: final_app_directory, context_dir: File.absolute_path('.')),
           Config::BindConfigFactory.new(version_control_system, configuration_fetcher),
           Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
@@ -110,6 +115,12 @@ module Bookbinder
           logger,
           configuration_fetcher
         )
+      end
+
+      def colored_streams
+        { out: $stdout,
+          success: Streams::ColorizedStream.new(Colorizer::Colors.green, $stdout),
+          err: Streams::ColorizedStream.new(Colorizer::Colors.red, $stderr) }
       end
 
       def configuration_fetcher

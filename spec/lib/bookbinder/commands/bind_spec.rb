@@ -38,7 +38,9 @@ module Bookbinder
       bind_version_control_system = partial_args.fetch(:version_control_system, Bookbinder::GitFake.new)
       bind_logger = partial_args.fetch(:logger, logger)
       Commands::Bind.new(
-        {out: Sheller::DevNull.new, err: Sheller::DevNull.new},
+        {success: Sheller::DevNull.new,
+         out: Sheller::DevNull.new,
+         err: Sheller::DevNull.new},
         OutputLocations.new(
           final_app_dir: partial_args.fetch(:final_app_directory, final_app_dir),
           context_dir: partial_args.fetch(:context_dir, File.absolute_path('.'))

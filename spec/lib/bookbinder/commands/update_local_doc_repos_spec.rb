@@ -1,6 +1,5 @@
 require_relative '../../../../lib/bookbinder/commands/update_local_doc_repos'
 require_relative '../../../../lib/bookbinder/config/configuration'
-require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/git_fake'
 
 module Bookbinder
@@ -20,10 +19,12 @@ module Bookbinder
       path_1 = File.absolute_path('../repo-name')
       path_2 = File.absolute_path('../repo-name-2')
 
-      update = Commands::UpdateLocalDocRepos.new(double('logger').as_null_object,
-                                                 configuration_fetcher,
-                                                 vcs,
-                                                 fs)
+      update = Commands::UpdateLocalDocRepos.new(
+        {success: StringIO.new, out: StringIO.new},
+         configuration_fetcher,
+         vcs,
+         fs
+      )
 
       allow(fs).to receive(:file_exist?).with(path_1) { false }
       allow(fs).to receive(:file_exist?).with(path_2) { true }
@@ -34,26 +35,36 @@ module Bookbinder
 
     it 'logs each pull of an existing dir, and each skip of a non-existent dir' do
       fs = double('fs')
-      logger = double('deprecated logger')
 
       path_1 = File.absolute_path('../repo-name')
       path_2 = File.absolute_path('../repo-name-2')
 
-      update = Commands::UpdateLocalDocRepos.new(logger,
-                                                 configuration_fetcher,
-                                                 double('vcs', update: nil),
-                                                 fs)
+      success = StringIO.new
+      out = StringIO.new
+
+      update = Commands::UpdateLocalDocRepos.new(
+        {success: success, out: out},
+        configuration_fetcher,
+        double('vcs', update: nil),
+        fs
+      )
 
       allow(fs).to receive(:file_exist?).with(path_1) { true }
       allow(fs).to receive(:file_exist?).with(path_2) { false }
-      expect(logger).to receive(:log).with(/Updating.*#{path_1}/)
-      expect(logger).to receive(:log).with(/skipping.*not found.*#{path_2}/)
 
       update.run(nil)
+
+      expect(success.tap(&:rewind).read).to eq(<<-MESSAGE)
+Updating #{path_1}
+      MESSAGE
+
+      expect(out.tap(&:rewind).read).to eq(<<-MESSAGE)
+  skipping (not found) #{path_2}
+      MESSAGE
     end
 
     it 'returns 0' do
-      update = Commands::UpdateLocalDocRepos.new(double('logger').as_null_object,
+      update = Commands::UpdateLocalDocRepos.new({success: StringIO.new},
                                                  configuration_fetcher,
                                                  GitFake.new,
                                                  double('fs').as_null_object)

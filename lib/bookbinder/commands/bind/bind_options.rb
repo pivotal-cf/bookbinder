@@ -19,11 +19,9 @@ module Bookbinder
         end
 
         def streams
-          {
+          base_streams.merge(
             out: opts.include?('--verbose') ? base_streams[:out] : Sheller::DevNull.new,
-            success: Streams::ColorizedStream.new(Colorizer::Colors.green, base_streams[:out]),
-            err: Streams::ColorizedStream.new(Colorizer::Colors.red, base_streams[:err]),
-          }
+          )
         end
 
         private

@@ -7,8 +7,8 @@ module Bookbinder
     class UpdateLocalDocRepos
       include Commands::Naming
 
-      def initialize(logger, configuration_fetcher, version_control_system, filesystem)
-        @logger = logger
+      def initialize(streams, configuration_fetcher, version_control_system, filesystem)
+        @streams = streams
         @configuration_fetcher = configuration_fetcher
         @version_control_system = version_control_system
         @filesystem = filesystem
@@ -23,10 +23,10 @@ module Bookbinder
         urls = configuration_fetcher.fetch_config.sections.map(&:repo_url)
         paths(urls).each do |path|
           if filesystem.file_exist?(path)
-            logger.log 'Updating ' + path.cyan
+            streams[:success].puts "Updating #{path}"
             version_control_system.update(path)
           else
-            logger.log '  skipping (not found) '.magenta + path
+            streams[:out].puts "  skipping (not found) #{path}"
           end
         end
         0
@@ -34,7 +34,10 @@ module Bookbinder
 
       private
 
-      attr_reader :logger, :configuration_fetcher, :version_control_system, :filesystem
+      attr_reader(:streams,
+                  :configuration_fetcher,
+                  :version_control_system,
+                  :filesystem)
 
       def paths(urls)
         urls.map {|url| File.absolute_path("../#{Ingest::DestinationDirectory.new(url)}")}
