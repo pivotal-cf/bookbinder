@@ -134,7 +134,24 @@ module Bookbinder
         expect(update.reason).to match(/not found/)
       end
 
-      it "raises an exception if update causes merge overwrite error"
+      it "returns an error if update causes merge overwrite error" do
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+          init_repo(at_dir: path.join('srcrepo'),
+                    file: 'foo',
+                    contents: 'bar',
+                    commit_message: 'baz')
+          git = GitAccessor.new
+          git.clone(path.join("srcrepo"), 'destrepo', path: path)
+          swallow_stderr do
+            system("cd #{path.join('srcrepo')}; touch newfile; git add .; git commit -q -m foo")
+          end
+          system("cd #{path.join('destrepo')}; touch newfile")
+          result = git.update(path.join('destrepo'))
+          expect(result).not_to be_success
+          expect(result.reason).to match(/merge error/)
+        end
+      end
 
       it "raises an exception if tag exists" do
         Dir.mktmpdir do |dir|

@@ -21,8 +21,10 @@ module Bookbinder
       def update(cloned_path)
         Git.open(cloned_path).pull
         Ingest::UpdateSuccess.new
-      rescue ArgumentError => e
+      rescue ArgumentError, Git::GitExecuteError => e
         case e.message
+        when /overwritten by merge/
+          Ingest::UpdateFailure.new('merge error')
         when /path does not exist/
           Ingest::UpdateFailure.new('not found')
         else
