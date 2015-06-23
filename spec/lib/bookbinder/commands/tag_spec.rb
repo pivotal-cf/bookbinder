@@ -1,6 +1,6 @@
 require_relative '../../../../lib/bookbinder/commands/tag'
 require_relative '../../../../lib/bookbinder/config/configuration'
-require_relative '../../../../lib/bookbinder/git_accessor'
+require_relative '../../../../lib/bookbinder/ingest/git_accessor'
 
 module Bookbinder
   describe Commands::Tag do

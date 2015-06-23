@@ -1,7 +1,7 @@
 require_relative '../../lib/bookbinder/cli'
-require_relative '../../lib/bookbinder/git_accessor'
-require_relative '../helpers/use_fixture_repo'
+require_relative '../../lib/bookbinder/ingest/git_accessor'
 require_relative '../helpers/middleman'
+require_relative '../helpers/use_fixture_repo'
 
 module Bookbinder
   describe "a book with archive menus" do
@@ -11,7 +11,7 @@ module Bookbinder
 
     before_all_in_fixture_repo('archive-menu-book') do
       silence_io_streams do
-        Cli.new(GitAccessor.new).run(%w(bind local --verbose))
+        Cli.new(Ingest::GitAccessor.new).run(%w(bind local --verbose))
       end
     end
 

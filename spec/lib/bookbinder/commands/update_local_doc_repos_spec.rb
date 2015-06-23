@@ -1,5 +1,7 @@
 require_relative '../../../../lib/bookbinder/commands/update_local_doc_repos'
 require_relative '../../../../lib/bookbinder/config/configuration'
+require_relative '../../../../lib/bookbinder/ingest/update_failure'
+require_relative '../../../../lib/bookbinder/ingest/update_success'
 require_relative '../../../helpers/git_fake'
 
 module Bookbinder
@@ -12,7 +14,7 @@ module Bookbinder
     }
     let(:configuration_fetcher) { double('configuration_fetcher', fetch_config: config) }
 
-    it 'updates each repo that exists on filesystem' do
+    it 'updates each repo' do
       vcs = double('vcs')
       fs = double('fs')
 
@@ -26,47 +28,48 @@ module Bookbinder
          fs
       )
 
-      allow(fs).to receive(:file_exist?).with(path_1) { false }
-      allow(fs).to receive(:file_exist?).with(path_2) { true }
-      expect(vcs).to receive(:update).with(path_2)
+      expect(vcs).to receive(:update).with(path_1) { Ingest::UpdateSuccess.new }
+      expect(vcs).to receive(:update).with(path_2) { Ingest::UpdateSuccess.new }
 
       update.run(nil)
     end
 
-    it 'logs each pull of an existing dir, and each skip of a non-existent dir' do
+    it 'logs each successful pull, and each skip of an unsuccessful pull' do
       fs = double('fs')
 
       path_1 = File.absolute_path('../repo-name')
       path_2 = File.absolute_path('../repo-name-2')
 
-      success = StringIO.new
       out = StringIO.new
+      success = StringIO.new
+      vcs = double('vcs')
 
       update = Commands::UpdateLocalDocRepos.new(
         {success: success, out: out},
         configuration_fetcher,
-        double('vcs', update: nil),
-        fs
+        vcs, fs
       )
 
-      allow(fs).to receive(:file_exist?).with(path_1) { true }
-      allow(fs).to receive(:file_exist?).with(path_2) { false }
+      not_found = Ingest::UpdateFailure.new('potatoes')
+      allow(vcs).to receive(:update).with(path_1) { Ingest::UpdateSuccess.new }
+      allow(vcs).to receive(:update).with(path_2) { not_found }
 
       update.run(nil)
 
-      expect(success.tap(&:rewind).read).to eq(<<-MESSAGE)
-Updating #{path_1}
+      expect(out.tap(&:rewind).read).to eq(<<-MESSAGE)
+
+Updating #{path_1}:
+Updating #{path_2}: skipping (potatoes)
       MESSAGE
 
-      expect(out.tap(&:rewind).read).to eq(<<-MESSAGE)
-  skipping (not found) #{path_2}
-      MESSAGE
+      expect(success.tap(&:rewind).read).to eq(' updated')
     end
 
     it 'returns 0' do
-      update = Commands::UpdateLocalDocRepos.new({success: StringIO.new},
+      update = Commands::UpdateLocalDocRepos.new({out: StringIO.new,
+                                                  success: StringIO.new},
                                                  configuration_fetcher,
-                                                 GitFake.new,
+                                                 double('vcs', update: Ingest::UpdateSuccess.new),
                                                  double('fs').as_null_object)
       expect(update.run(nil)).to eq(0)
     end

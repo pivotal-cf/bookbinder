@@ -22,13 +22,10 @@ module Bookbinder
       def run(_)
         urls = configuration_fetcher.fetch_config.sections.map(&:repo_url)
         paths(urls).each do |path|
-          if filesystem.file_exist?(path)
-            streams[:success].puts "Updating #{path}"
-            version_control_system.update(path)
-          else
-            streams[:out].puts "  skipping (not found) #{path}"
-          end
+          streams[:out] << "\nUpdating #{path}:"
+          report(version_control_system.update(path))
         end
+        streams[:out].puts
         0
       end
 
@@ -38,6 +35,15 @@ module Bookbinder
                   :configuration_fetcher,
                   :version_control_system,
                   :filesystem)
+
+      def report(result)
+        messages = { true => "updated", false => "skipping (#{result.reason})" }
+        streams[stream_types[result.success?]] << " #{messages[result.success?]}"
+      end
+
+      def stream_types
+        { true => :success, false => :out }
+      end
 
       def paths(urls)
         urls.map {|url| File.absolute_path("../#{Ingest::DestinationDirectory.new(url)}")}

@@ -1,14 +1,14 @@
-require_relative '../../../lib/bookbinder/git_accessor'
-require_relative '../../helpers/use_fixture_repo'
 require_relative '../../../lib/bookbinder/cli'
-require_relative '../../helpers/redirection'
+require_relative '../../../lib/bookbinder/ingest/git_accessor'
 require_relative '../../helpers/matchers'
+require_relative '../../helpers/redirection'
+require_relative '../../helpers/use_fixture_repo'
 
 module Bookbinder
   describe Cli do
     include Redirection
 
-    let(:cli) { Cli.new(GitAccessor.new) }
+    let(:cli) { Cli.new(Ingest::GitAccessor.new) }
 
     def run
       cli.run arguments

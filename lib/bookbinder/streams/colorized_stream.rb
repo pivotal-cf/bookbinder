@@ -13,6 +13,10 @@ module Bookbinder
         stream.puts(colorizer.colorize(line, color))
       end
 
+      def <<(text)
+        stream << colorizer.colorize(text, color)
+      end
+
       private
 
       attr_reader :color, :colorizer, :stream
