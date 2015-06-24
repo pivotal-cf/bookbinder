@@ -71,10 +71,12 @@ module Bookbinder
           ref_override: bind_options.ref_override
         )
 
-        preprocessor.preprocess(sections,
-                                output_locations,
-                                options: options,
-                                output_streams: bind_options.streams)
+        preprocessor.preprocess(
+          sections,
+          output_locations,
+          options: options,
+          output_streams: bind_options.streams
+        )
 
         success = publish(
           sections.map(&:subnav).reduce({}, :merge),
