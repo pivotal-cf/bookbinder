@@ -125,8 +125,7 @@ module Bookbinder
 
       def configuration_fetcher
         @configuration_fetcher ||= Config::Fetcher.new(
-          logger,
-          Config::Validator.new(logger, local_file_system_accessor),
+          Config::Validator.new(local_file_system_accessor),
           config_loader,
           Config::RemoteYamlCredentialProvider.new(logger, version_control_system)
         ).tap do |fetcher|

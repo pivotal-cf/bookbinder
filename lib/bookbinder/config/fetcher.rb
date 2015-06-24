@@ -6,9 +6,8 @@ require_relative 'yaml_loader'
 module Bookbinder
   module Config
     class Fetcher
-      def initialize(logger, configuration_validator, loader, credentials_provider)
+      def initialize(configuration_validator, loader, credentials_provider)
         @loader = loader
-        @logger = logger
         @configuration_validator = configuration_validator
         @credentials_provider = credentials_provider
       end
@@ -36,7 +35,7 @@ module Bookbinder
 
       private
 
-      attr_reader(:loader, :logger, :configuration_validator, :config, :config_file_path,
+      attr_reader(:loader, :configuration_validator, :config, :config_file_path,
                   :credentials_provider)
 
       def read_config_file

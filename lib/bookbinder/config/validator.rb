@@ -7,8 +7,7 @@ require_relative 'checkers/dita_section_checker'
 module Bookbinder
   module Config
     class Validator
-      def initialize(logger, file_system_accessor)
-        @logger = logger
+      def initialize(file_system_accessor)
         @file_system_accessor = file_system_accessor
       end
 

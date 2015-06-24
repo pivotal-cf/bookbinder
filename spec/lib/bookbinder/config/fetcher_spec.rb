@@ -5,11 +5,9 @@ module Bookbinder
     describe Fetcher do
       let(:path_to_config_file)   { './config.yml' }
       let(:config_validator)      { double('validator') }
-      let(:logger)                { double('logger') }
       let(:loader)                { double('loader') }
       let(:credentials_provider)  { double('creds provider') }
-      let(:config_fetcher)        { Fetcher.new(logger,
-                                                config_validator,
+      let(:config_fetcher)        { Fetcher.new(config_validator,
                                                 loader,
                                                 credentials_provider) }
 
