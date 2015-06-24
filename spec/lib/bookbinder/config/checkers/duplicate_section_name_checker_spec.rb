@@ -24,7 +24,6 @@ module Bookbinder
                 'repository' => {
                     'name' => 'cloudfoundry/docs-cloudfoundry-baz'
                 },
-                'directory' => 'baz',
                 'ditamap_location' => 'something-else.ditamap'
             }
 
@@ -32,7 +31,6 @@ module Bookbinder
                 'repository' => {
                     'name' => 'cloudfoundry/docs-cloudfoundry-bar'
                 },
-                'directory' => 'bar',
                 'ditamap_location' => 'something.ditamap'
             }
 
