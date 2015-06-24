@@ -5,18 +5,25 @@ module Bookbinder
         DitamapLocationError = Class.new(RuntimeError)
 
         def check(config)
-          dita_sections = config['dita_sections'].to_a
-
-          sum = 0
-          dita_sections.each do |section|
-            if section['ditamap_location']
-              sum += 1
-            end
+          if none_with_pred?(dita_sections(config)) { |s|
+            s.preprocessor_config['ditamap_location']
+          }
+            DitamapLocationError.new(
+              "You must have at least one 'ditamap_location' key in dita_sections."
+            )
           end
+        end
 
-          if !dita_sections.empty? && (sum < 1)
-            DitamapLocationError.new "You must have at least one 'ditamap_location' key in dita_sections."
-          end
+        private
+
+        def none_with_pred?(coll, &block)
+          coll.any? && coll.none?(&block)
+        end
+
+        def dita_sections(config)
+          config.sections.select {|s|
+            s.preprocessor_config.has_key?('ditamap_location')
+          }
         end
       end
     end

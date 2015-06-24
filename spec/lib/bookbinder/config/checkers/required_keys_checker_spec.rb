@@ -1,4 +1,5 @@
 require_relative '../../../../../lib/bookbinder/config/checkers/required_keys_checker'
+require_relative '../../../../../lib/bookbinder/config/configuration'
 
 module Bookbinder
   module Config
@@ -7,12 +8,12 @@ module Bookbinder
         context 'when the required keys are present' do
           it 'returns nil' do
             config = {
-                  'book_repo' => %w(v1.7.1.9 redacted v3),
-                  'public_host' => 'special/host',
-                  'sections' => []
-              }
+              'book_repo' => %w(v1.7.1.9 redacted v3),
+              'public_host' => 'special/host',
+              'sections' => []
+            }
 
-            expect(RequiredKeysChecker.new.check(config)).to be_nil
+            expect(RequiredKeysChecker.new.check(Configuration.parse(config))).to be_nil
           end
         end
 
@@ -20,21 +21,8 @@ module Bookbinder
           it 'raises missing key error' do
             config = { 'versions' => %w(v1.7.1.9 redacted v3) }
 
-            expect(RequiredKeysChecker.new.check(config).class).
-                to eq RequiredKeysChecker::MissingRequiredKeyError
-          end
-
-          context 'when there are no sections or dita sections' do
-            it 'should return the correct error' do
-              config_hash = {
-                  'book_repo' => 'fantastic/fixture-book-title',
-                  'cred_repo' => 'fantastic/creds-repo',
-                  'public_host' => 'docs.example.com',
-              }
-
-              expect(RequiredKeysChecker.new.check(config_hash).class).
-                  to eq RequiredKeysChecker::SectionAbsenceError
-            end
+            expect(RequiredKeysChecker.new.check(Configuration.parse(config)).class).
+              to eq RequiredKeysChecker::MissingRequiredKeyError
           end
         end
       end

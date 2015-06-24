@@ -1,4 +1,5 @@
 require_relative '../../../../../lib/bookbinder/config/checkers/duplicate_section_name_checker'
+require_relative '../../../../../lib/bookbinder/config/configuration'
 
 module Bookbinder
   module Config
@@ -39,7 +40,7 @@ module Bookbinder
                 'dita_sections' => [section3, section4]
             }
 
-            expect(DuplicateSectionNameChecker.new.check(valid_config_hash)).to be_nil
+            expect(DuplicateSectionNameChecker.new.check(Configuration.parse(valid_config_hash))).to be_nil
           end
 
           context 'when there are only sections' do
@@ -55,7 +56,7 @@ module Bookbinder
                   'sections' => [section1, section1]
               }
 
-               expect(DuplicateSectionNameChecker.new.check(invalid_config_hash).class).
+               expect(DuplicateSectionNameChecker.new.check(Configuration.parse(invalid_config_hash)).class).
                   to eq DuplicateSectionNameChecker::DuplicateSectionNameError
             end
           end
@@ -73,7 +74,7 @@ module Bookbinder
                   'dita_sections' => [section1, section1]
               }
 
-              expect(DuplicateSectionNameChecker.new.check(invalid_config_hash).class).
+              expect(DuplicateSectionNameChecker.new.check(Configuration.parse(invalid_config_hash)).class).
                   to eq DuplicateSectionNameChecker::DuplicateSectionNameError
             end
           end
@@ -92,7 +93,7 @@ module Bookbinder
                   'dita_sections' => [section1]
               }
 
-              expect(DuplicateSectionNameChecker.new.check(invalid_config_hash).class).
+              expect(DuplicateSectionNameChecker.new.check(Configuration.parse(invalid_config_hash)).class).
                   to eq DuplicateSectionNameChecker::DuplicateSectionNameError
             end
           end

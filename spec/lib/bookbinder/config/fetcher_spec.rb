@@ -76,6 +76,14 @@ module Bookbinder
           expect(config_fetcher.fetch_config).to eq(Configuration.parse(expected_config_hash))
         end
 
+        it 'passes the configuration object to the validator' do
+          input_hash = {'book_repo' => 'foo/baz', 'public_host' => 'foo.camels.io' }
+          allow(loader).to receive(:load) { input_hash }
+          expect(config_validator).to receive(:exceptions).with(Configuration.parse(input_hash))
+
+          config_fetcher.fetch_config
+        end
+
         it 'caches configuration loads' do
           expect(loader).to receive(:load) { {} }
           config_fetcher.fetch_config

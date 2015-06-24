@@ -12,6 +12,10 @@ module Bookbinder
         ).to eq('some' => 'data', '4' => 'u')
       end
 
+      it "returns an empty preprocessor config if not defined" do
+        expect(SectionConfig.new({}).preprocessor_config).to eq({})
+      end
+
       it "can return the provided subnav template" do
         expect(SectionConfig.new('subnav_template' => 'mysubnav').subnav_template).
           to eq('mysubnav')

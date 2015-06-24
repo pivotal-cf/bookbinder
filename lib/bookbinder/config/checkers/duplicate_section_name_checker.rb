@@ -15,10 +15,9 @@ module Bookbinder
         private
 
         def duplicate_section_names?(config)
-          sections = config['sections'].to_a + config['dita_sections'].to_a
-          directory_names = sections.map {|section|
-            Ingest::DestinationDirectory.new(section['repository']['name'],
-                                             section['directory'])
+          directory_names = config.sections.map {|section|
+            Ingest::DestinationDirectory.new(section.repo_name,
+                                             section.desired_directory_name)
           }
           directory_names.length != directory_names.uniq.length
         end

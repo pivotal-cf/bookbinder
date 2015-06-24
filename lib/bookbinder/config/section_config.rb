@@ -28,7 +28,7 @@ module Bookbinder
       end
 
       def preprocessor_config
-        config['preprocessor_config']
+        config.fetch('preprocessor_config', {})
       end
 
       def ==(other)
@@ -46,7 +46,7 @@ module Bookbinder
       private
 
       def repo
-        config['repository']
+        config.fetch('repository', {})
       end
 
       attr_reader :config

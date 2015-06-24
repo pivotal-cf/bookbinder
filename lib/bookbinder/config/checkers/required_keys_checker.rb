@@ -5,41 +5,21 @@ module Bookbinder
     module Checkers
       class RequiredKeysChecker
         MissingRequiredKeyError = Class.new(RuntimeError)
-        SectionAbsenceError = Class.new(RuntimeError)
 
         def check(config)
           missing_keys = []
 
-          Config::Configuration::CONFIG_REQUIRED_KEYS.map do |required_key|
-            config_keys = config.keys
-            unless config_keys.include?(required_key)
+          Config::Configuration::CONFIG_REQUIRED_KEYS.each do |required_key|
+            begin
+              config.public_send(required_key)
+            rescue KeyError
               missing_keys.push(required_key)
             end
           end
 
           if missing_keys.length > 0
             MissingRequiredKeyError.new("Your config.yml is missing required key(s). Required keys are #{missing_keys.join(", ")}.")
-          elsif !config['sections'] && !config['dita_sections']
-            SectionAbsenceError.new error_message
           end
-        end
-
-        private
-
-        def error_message
-          <<-ERROR
-    Cannot locate your sections.
-    Must specify at least one of 'sections' and/or 'dita_sections' in config.yml:
-
-    sections:
-      - repository:
-          name: 'your-org/your-repo'
-
-    dita_sections:
-      - repository:
-          name: 'dita-org/dita-repo'
-        ditamap_location: 'example.ditamap'
-          ERROR
         end
       end
     end

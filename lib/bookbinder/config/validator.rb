@@ -11,7 +11,7 @@ module Bookbinder
         @file_system_accessor = file_system_accessor
       end
 
-      def exceptions(config_hash)
+      def exceptions(config)
         exceptions = [
           Checkers::RequiredKeysChecker.new,
           Checkers::DuplicateSectionNameChecker.new,
@@ -19,7 +19,7 @@ module Bookbinder
           Checkers::DitaSectionChecker.new,
           Checkers::ArchiveMenuChecker.new(@file_system_accessor)
         ].map do |checker|
-          checker.check(config_hash)
+          checker.check(config)
         end
 
         exceptions.compact

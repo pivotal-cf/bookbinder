@@ -1,4 +1,5 @@
 require_relative '../../../../../lib/bookbinder/config/checkers/repository_name_presence_checker'
+require_relative '../../../../../lib/bookbinder/config/configuration'
 
 module Bookbinder
   module Config
@@ -8,18 +9,17 @@ module Bookbinder
           context 'and there are repositories with names' do
             it 'returns nil' do
               config = {
-                  'sections' =>
-                      [
-                          {
-                              'directory' => 'some-cool-name',
-                              'repository' => {
-                                  'name' => 'an-awesome-name'
-                              }
-                          }
-                      ]
+                'sections' => [
+                  {
+                    'directory' => 'some-cool-name',
+                    'repository' => {
+                      'name' => 'an-awesome-name'
+                    }
+                  }
+                ]
               }
 
-              expect(RepositoryNamePresenceChecker.new.check(config)).
+              expect(RepositoryNamePresenceChecker.new.check(Configuration.parse(config))).
                   to be_nil
             end
           end
@@ -27,25 +27,41 @@ module Bookbinder
           context 'and there are repositories but no names' do
             it 'returns the correct error' do
               config = {
-                  'sections' =>
-                      [
-                          {
-                              'directory' => 'some-cool-name',
-                              'repository' => {}
-                          },
-                          {
-                              'directory' => 'some-cool-name',
-                              'repository' => {
-                                  'name' => 'an-awesome-name'
-                              }
-                          }
-                      ]
+                'sections' => [
+                  {
+                    'directory' => 'some-cool-name',
+                    'repository' => {}
+                  },
+                  {
+                    'directory' => 'some-cool-name',
+                    'repository' => {
+                      'name' => 'an-awesome-name'
+                    }
+                  }
+                ]
               }
 
-              expect(RepositoryNamePresenceChecker.new.check(config).class).
-                  to eq RepositoryNamePresenceChecker::MissingRepositoryNameError
-              end
+              expect(RepositoryNamePresenceChecker.new.check(Configuration.parse(config)).class).
+                to eq RepositoryNamePresenceChecker::MissingRepositoryNameError
             end
+          end
+
+          context 'and there are repositories and names, but no directories' do
+            it 'returns nil, sadly' do
+              config = {
+                'sections' => [
+                  {
+                    'repository' => {
+                      'name' => 'an-awesome-name'
+                    }
+                  }
+                ]
+              }
+
+              expect(RepositoryNamePresenceChecker.new.check(Configuration.parse(config))).
+                to be_nil
+            end
+          end
 
           context 'and there are no repositories' do
             it 'returns the correct error' do
@@ -58,7 +74,7 @@ module Bookbinder
                       ]
               }
 
-              expect(RepositoryNamePresenceChecker.new.check(config).class).
+              expect(RepositoryNamePresenceChecker.new.check(Configuration.parse(config)).class).
                   to eq RepositoryNamePresenceChecker::MissingRepositoryNameError
             end
           end
@@ -67,33 +83,31 @@ module Bookbinder
         context 'when there are dita sections' do
           context 'and there are repositories but no names' do
             it 'returns the correct error' do
-            config = {
-                'dita_sections' =>
-                    [
-                        {
-                            'directory' => 'some-cool-name',
-                            'repository' => {}
-                        }
-                    ]
-            }
+              config = {
+                'dita_sections' => [
+                  {
+                    'directory' => 'some-cool-name',
+                    'repository' => {}
+                  }
+                ]
+              }
 
-            expect(RepositoryNamePresenceChecker.new.check(config).class).
+              expect(RepositoryNamePresenceChecker.new.check(Configuration.parse(config)).class).
                 to eq RepositoryNamePresenceChecker::MissingRepositoryNameError
             end
           end
 
           context 'and there are no repositories' do
             it 'returns the correct error' do
-            config = {
-                'dita_sections' =>
-                    [
-                        {
-                            'directory' => 'some-cool-name',
-                        }
-                    ]
-            }
+              config = {
+                'dita_sections' => [
+                  {
+                    'directory' => 'some-cool-name',
+                  }
+                ]
+              }
 
-            expect(RepositoryNamePresenceChecker.new.check(config).class).
+              expect(RepositoryNamePresenceChecker.new.check(Configuration.parse(config)).class).
                 to eq RepositoryNamePresenceChecker::MissingRepositoryNameError
             end
           end

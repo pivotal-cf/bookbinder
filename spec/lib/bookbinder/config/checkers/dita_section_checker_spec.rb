@@ -1,4 +1,5 @@
 require_relative '../../../../../lib/bookbinder/config/checkers/dita_section_checker'
+require_relative '../../../../../lib/bookbinder/config/configuration'
 
 module Bookbinder
   module Config
@@ -12,11 +13,14 @@ module Bookbinder
                         {'repository' => {
                             'name' => 'fantastic/dogs-repo'},
                          'ditamap_location' => 'my-special-location'
+                        },
+                        {'repository' => {
+                            'name' => 'fobtastic/keyringrepo'}
                         }
                     ]
 
             }
-            expect(DitaSectionChecker.new.check(config)).to be_nil
+            expect(DitaSectionChecker.new.check(Configuration.parse(config))).to be_nil
           end
         end
 
@@ -31,7 +35,7 @@ module Bookbinder
                     ]
 
             }
-            expect(DitaSectionChecker.new.check(config).class).
+            expect(DitaSectionChecker.new.check(Configuration.parse(config)).class).
                 to eq DitaSectionChecker::DitamapLocationError
           end
         end
@@ -39,7 +43,7 @@ module Bookbinder
         context 'when there are no dita_sections' do
           it 'returns nil' do
             config = {}
-            expect(DitaSectionChecker.new.check(config)).to be_nil
+            expect(DitaSectionChecker.new.check(Configuration.parse(config))).to be_nil
           end
         end
       end

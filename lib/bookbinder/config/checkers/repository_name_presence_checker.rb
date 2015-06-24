@@ -5,14 +5,11 @@ module Bookbinder
         MissingRepositoryNameError = Class.new(RuntimeError)
 
         def check(config)
-          all_sections = config['sections'].to_a + config['dita_sections'].to_a
-          failures = all_sections.map do |section|
-            if !section['repository'] || !section['repository']['name']
-              true
-            end
+          failures = config.sections.reject do |section|
+            section.repo_name
           end
 
-          if failures.compact.empty?
+          if failures.empty?
             nil
           else
             MissingRepositoryNameError.new error_message
