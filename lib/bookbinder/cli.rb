@@ -3,7 +3,6 @@ require_relative 'command_runner'
 require_relative 'command_validator'
 require_relative 'commands/collection'
 require_relative 'config/cf_credentials'
-require_relative 'config/configuration'
 require_relative 'terminal'
 
 module Bookbinder
@@ -16,7 +15,11 @@ module Bookbinder
       command_name, *command_arguments = args
 
       logger = DeprecatedLogger.new
-      commands = Commands::Collection.new(logger, version_control_system)
+      commands = Commands::Collection.new(
+        logger,
+        {out: $stdout, err: $stderr},
+        version_control_system
+      )
 
       command_validator = CommandValidator.new(commands, commands.help.usage_message)
       command_runner = CommandRunner.new(logger, commands)

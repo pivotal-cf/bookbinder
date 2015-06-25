@@ -28,8 +28,9 @@ module Bookbinder
     class Collection
       include Enumerable
 
-      def initialize(logger, version_control_system)
+      def initialize(logger, base_streams, version_control_system)
         @logger = logger
+        @base_streams = base_streams
         @version_control_system = version_control_system
       end
 
@@ -46,7 +47,7 @@ module Bookbinder
 
       private
 
-      attr_reader :logger, :version_control_system
+      attr_reader :logger, :base_streams, :version_control_system
 
       def list
         standard_commands + flags
@@ -58,6 +59,12 @@ module Bookbinder
 
       def standard_commands
         @standard_commands ||= [
+          Commands::Generate.new(
+            local_file_system_accessor,
+            Sheller.new,
+            Dir.pwd,
+            colored_streams
+          ),
           build_and_push_tarball,
           bind,
           Commands::PushFromLocal.new(logger, configuration_fetcher, 'acceptance'),
@@ -118,9 +125,9 @@ module Bookbinder
       end
 
       def colored_streams
-        { out: $stdout,
-          success: Streams::ColorizedStream.new(Colorizer::Colors.green, $stdout),
-          err: Streams::ColorizedStream.new(Colorizer::Colors.red, $stderr) }
+        { out: base_streams[:out],
+          success: Streams::ColorizedStream.new(Colorizer::Colors.green, base_streams[:out]),
+          err: Streams::ColorizedStream.new(Colorizer::Colors.red, base_streams[:err]) }
       end
 
       def configuration_fetcher
