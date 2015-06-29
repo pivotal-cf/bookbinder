@@ -120,7 +120,6 @@ module Bookbinder
                                   subnavs)
         file_system_accessor.copy output_locations.build_dir, output_locations.public_dir
 
-        raise "Your public host must be a single String." unless host_for_sitemap.is_a?(String)
         result = sitemap_writer.write(
           host_for_sitemap,
           streams,

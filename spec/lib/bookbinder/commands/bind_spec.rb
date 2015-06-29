@@ -413,23 +413,6 @@ Content:
           end
         end
       end
-
-      context 'when configured with more than one host' do
-        it 'raises an exception' do
-          command = bind_cmd(
-            bind_config_factory: double(
-              'config factory',
-              produce: Config::Configuration.parse(
-                'sections' => [{'repository' => {'name' => 'org/dogs-repo'}}],
-                'book_repo' => 'some/book',
-                'cred_repo' => 'my-org/my-creds',
-                'public_host' => ['host1.runpivotal.com', 'host2.pivotal.io'],
-              )))
-
-          expect { command.run(['remote']) }.
-            to raise_error "Your public host must be a single String."
-        end
-      end
     end
 
     describe 'creating subdirectories for a section with a multileveled output directory' do
