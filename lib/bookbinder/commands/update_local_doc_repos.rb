@@ -7,11 +7,10 @@ module Bookbinder
     class UpdateLocalDocRepos
       include Commands::Naming
 
-      def initialize(streams, configuration_fetcher, version_control_system, filesystem)
+      def initialize(streams, configuration_fetcher, version_control_system)
         @streams = streams
         @configuration_fetcher = configuration_fetcher
         @version_control_system = version_control_system
-        @filesystem = filesystem
       end
 
       def usage
@@ -33,8 +32,7 @@ module Bookbinder
 
       attr_reader(:streams,
                   :configuration_fetcher,
-                  :version_control_system,
-                  :filesystem)
+                  :version_control_system)
 
       def report(result)
         messages = { true => "updated", false => "skipping (#{result.reason})" }

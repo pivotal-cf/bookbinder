@@ -75,8 +75,7 @@ module Bookbinder
           Commands::UpdateLocalDocRepos.new(
             colored_streams,
             configuration_fetcher,
-            version_control_system,
-            local_file_system_accessor
+            version_control_system
           ),
         ]
       end

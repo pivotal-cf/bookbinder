@@ -23,9 +23,8 @@ module Bookbinder
 
       update = Commands::UpdateLocalDocRepos.new(
         {success: StringIO.new, out: StringIO.new},
-         configuration_fetcher,
-         vcs,
-         fs
+        configuration_fetcher,
+        vcs
       )
 
       expect(vcs).to receive(:update).with(path_1) { Ingest::UpdateSuccess.new }
@@ -35,8 +34,6 @@ module Bookbinder
     end
 
     it 'logs each successful pull, and each skip of an unsuccessful pull' do
-      fs = double('fs')
-
       path_1 = File.absolute_path('../repo-name')
       path_2 = File.absolute_path('../repo-name-2')
 
@@ -47,7 +44,7 @@ module Bookbinder
       update = Commands::UpdateLocalDocRepos.new(
         {success: success, out: out},
         configuration_fetcher,
-        vcs, fs
+        vcs
       )
 
       not_found = Ingest::UpdateFailure.new('potatoes')
@@ -68,9 +65,8 @@ Updating #{path_2}: skipping (potatoes)
     it 'returns 0' do
       update = Commands::UpdateLocalDocRepos.new({out: StringIO.new,
                                                   success: StringIO.new},
-                                                 configuration_fetcher,
-                                                 double('vcs', update: Ingest::UpdateSuccess.new),
-                                                 double('fs').as_null_object)
+                                                  configuration_fetcher,
+                                                  double('vcs', update: Ingest::UpdateSuccess.new))
       expect(update.run(nil)).to eq(0)
     end
   end
