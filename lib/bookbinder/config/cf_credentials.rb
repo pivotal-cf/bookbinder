@@ -26,12 +26,6 @@ module Bookbinder
         production?
       end
 
-      def push_warning
-        if production?
-          'Warning: You are pushing to CF Docs production. Be careful.'
-        end
-      end
-
       def routes
         fetch(host_key) if correctly_formatted_domain_and_routes?(host_key)
       end

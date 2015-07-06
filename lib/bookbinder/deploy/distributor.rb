@@ -62,7 +62,6 @@ module Bookbinder
       end
 
       def push_app
-        @logger.warn(cf_credentials.push_warning) if cf_credentials.push_warning
         pusher.push(options[:app_dir])
       end
 

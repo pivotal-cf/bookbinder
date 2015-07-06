@@ -134,11 +134,6 @@ module Bookbinder
             distributor.distribute
           end
 
-          it 'warns' do
-            expect(logger).to receive(:warn).with(/Warning.*production/)
-            distributor.distribute
-          end
-
           context 'when an error is thrown from downloading' do
             it 'logs an informative message' do
               allow(fake_archive).to receive(:download).and_raise(SpecialException.new("failed to download because of reason."))

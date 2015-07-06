@@ -69,7 +69,7 @@ module Bookbinder
           bind,
           Commands::PushFromLocal.new(logger, configuration_fetcher, 'acceptance'),
           push_local_to_staging,
-          Commands::PushToProd.new(logger, configuration_fetcher),
+          Commands::PushToProd.new(colored_streams, logger, configuration_fetcher),
           Commands::RunPublishCI.new(bind, push_local_to_staging, build_and_push_tarball),
           Commands::Tag.new(colored_streams, configuration_fetcher, version_control_system),
           Commands::UpdateLocalDocRepos.new(
@@ -124,9 +124,12 @@ module Bookbinder
       end
 
       def colored_streams
-        { out: base_streams[:out],
+        {
+          err: Streams::ColorizedStream.new(Colorizer::Colors.red, base_streams[:err]),
+          out: base_streams[:out],
           success: Streams::ColorizedStream.new(Colorizer::Colors.green, base_streams[:out]),
-          err: Streams::ColorizedStream.new(Colorizer::Colors.red, base_streams[:err]) }
+          warn: Streams::ColorizedStream.new(Colorizer::Colors.yellow, base_streams[:out]),
+        }
       end
 
       def configuration_fetcher

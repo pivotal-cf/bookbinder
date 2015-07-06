@@ -11,7 +11,8 @@ module Bookbinder
       include Commands::Naming
       CONFIG_REQUIRED_KEYS = %w(cred_repo)
 
-      def initialize(logger, configuration_fetcher)
+      def initialize(streams, logger, configuration_fetcher)
+        @streams = streams
         @logger = logger
         @configuration_fetcher = configuration_fetcher
       end
@@ -22,6 +23,7 @@ module Bookbinder
       end
 
       def run(arguments)
+        streams[:warn].puts "Warning: You are pushing to production."
         validate
         Deploy::Distributor.build(@logger, options(arguments)).distribute
         0
@@ -29,7 +31,7 @@ module Bookbinder
 
       private
 
-      attr_reader :configuration_fetcher
+      attr_reader :configuration_fetcher, :streams
 
       def options(arguments)
         {
