@@ -32,10 +32,6 @@ module Bookbinder
       private
 
       attr_reader :configuration_fetcher
-
-      def config
-        @config ||= configuration_fetcher.fetch_config
-      end
     end
   end
 end
