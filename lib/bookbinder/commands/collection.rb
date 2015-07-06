@@ -118,7 +118,7 @@ module Bookbinder
 
       def build_and_push_tarball
         @build_and_push_tarball ||= Commands::BuildAndPushTarball.new(
-          logger,
+          colored_streams,
           configuration_fetcher
         )
       end

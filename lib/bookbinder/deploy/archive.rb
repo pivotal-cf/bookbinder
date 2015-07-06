@@ -2,6 +2,7 @@ require 'fog/aws'
 require 'tmpdir'
 require_relative '../deprecated_logger'
 require_relative 'artifact_namer'
+require_relative 'success'
 
 module Bookbinder
   module Deploy
@@ -23,7 +24,7 @@ module Bookbinder
       )
         tarball_filename, tarball_path = create_tarball(app_dir, build_number, namespace)
         upload_file(bucket, tarball_filename, tarball_path)
-        @logger.log "Green build ##{build_number.to_s.green} has been uploaded to S3 for #{namespace.to_s.cyan}"
+        Success.new("Green build ##{build_number} has been uploaded to S3 for #{namespace}")
       end
 
       def upload_file(bucket, name, source_path)

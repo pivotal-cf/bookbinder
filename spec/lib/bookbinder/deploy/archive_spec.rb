@@ -43,7 +43,7 @@ module Bookbinder
         delete
       end
 
-      describe '#create' do
+      describe 'archiving and uploading in one step (splitting in #95544310)' do
         let(:build_number) { 42 }
         let(:namespace) { 'pcf' }
         let(:final_app_dir) { tmp_subdir 'final_app' }
@@ -60,6 +60,10 @@ module Bookbinder
         end
 
         shared_examples_for 'an archive' do
+          it "is successful" do
+            expect(create).to be_success
+          end
+
           it 'uploads a file with the build number in the key' do
             create
             directory = fog_connection.directories.get(bucket_key)
@@ -85,7 +89,7 @@ module Bookbinder
           it_behaves_like 'an archive'
         end
 
-        context 'when the bucket is already there' do
+        context 'when the bucket exists' do
           before do
             fog_connection.directories.create key: bucket_key
           end
