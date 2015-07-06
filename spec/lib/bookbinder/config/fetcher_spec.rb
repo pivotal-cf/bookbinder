@@ -37,18 +37,16 @@ module Bookbinder
       end
 
       it "caches fetched credentials, even across environments (same raw config being fetched)" do
-        creds = { 'some' => 'creds' }
-
         allow(loader).to receive(:load) { { 'cred_repo' => 'org/repo' } }
         allow(config_validator).to receive(:exceptions) { [] }
 
-        allow(credentials_provider).to receive(:credentials) { creds }
-        creds = config_fetcher.fetch_credentials('production')
-        expect(creds[:cloud_foundry].download_archive_before_push?).to be_truthy
+        allow(credentials_provider).to receive(:credentials) { { 'some' => 'creds' } }
+        prod_creds = config_fetcher.fetch_credentials('production')
+        expect(prod_creds[:cloud_foundry].download_archive_before_push?).to be_truthy
 
         allow(credentials_provider).to receive(:credentials) { raise "shouldn't get here" }
-        creds = config_fetcher.fetch_credentials('acceptance')
-        expect(creds[:cloud_foundry].download_archive_before_push?).to be_falsy
+        acceptance_creds = config_fetcher.fetch_credentials('acceptance')
+        expect(acceptance_creds[:cloud_foundry].download_archive_before_push?).to be_falsy
       end
 
       context 'when file path has been set' do
