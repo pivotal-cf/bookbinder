@@ -11,10 +11,11 @@ module Bookbinder
       include Commands::Naming
       CONFIG_REQUIRED_KEYS = %w(cred_repo)
 
-      def initialize(streams, logger, configuration_fetcher)
+      def initialize(streams, logger, configuration_fetcher, app_dir)
         @streams = streams
         @logger = logger
         @configuration_fetcher = configuration_fetcher
+        @app_dir = app_dir
       end
 
       def usage
@@ -31,11 +32,11 @@ module Bookbinder
 
       private
 
-      attr_reader :configuration_fetcher, :streams
+      attr_reader :app_dir, :configuration_fetcher, :streams
 
       def options(arguments)
         {
-          app_dir: Dir.mktmpdir,
+          app_dir: app_dir,
           build_number: arguments[0],
 
           aws_credentials: credentials[:aws],

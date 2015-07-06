@@ -69,7 +69,7 @@ module Bookbinder
           bind,
           Commands::PushFromLocal.new(logger, configuration_fetcher, 'acceptance'),
           push_local_to_staging,
-          Commands::PushToProd.new(colored_streams, logger, configuration_fetcher),
+          Commands::PushToProd.new(colored_streams, logger, configuration_fetcher, Dir.mktmpdir),
           Commands::RunPublishCI.new(bind, push_local_to_staging, build_and_push_tarball),
           Commands::Tag.new(colored_streams, configuration_fetcher, version_control_system),
           Commands::UpdateLocalDocRepos.new(

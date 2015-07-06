@@ -24,18 +24,18 @@ module Bookbinder
         allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
 
         allow(Deploy::Distributor).to receive(:build).and_return(fake_distributor)
-        allow(Dir).to receive(:mktmpdir).and_return(fake_dir)
       end
 
       it "warns the user" do
         warn = StringIO.new
-        push = PushToProd.new({warn: warn}, logger = nil, configuration_fetcher)
+        push = PushToProd.new({warn: warn}, logger = nil, configuration_fetcher, fake_dir)
         push.run ["my-build-number"]
         expect(warn.tap(&:rewind).read).to eq("Warning: You are pushing to production.\n")
       end
 
       it 'returns 0' do
-        expect(PushToProd.new({warn: StringIO.new}, logger, configuration_fetcher).run([build_number])).to eq(0)
+        expect(PushToProd.new({warn: StringIO.new}, logger, configuration_fetcher, fake_dir).
+               run([build_number])).to eq(0)
       end
 
       it 'builds a distributor with the right options and asks it to distribute' do
@@ -59,7 +59,8 @@ module Bookbinder
         )
         expect(real_distributor).to receive(:distribute)
 
-        PushToProd.new({warn: StringIO.new}, logger, configuration_fetcher).run([build_number])
+        PushToProd.new({warn: StringIO.new}, logger, configuration_fetcher, fake_dir).
+          run([build_number])
       end
 
       context 'when missing credential repo' do
@@ -91,7 +92,8 @@ module Bookbinder
         let(:config) { Config::Configuration.parse(invalid_push_to_prod_config_hash) }
 
         it 'raises missing credential key error' do
-          expect { PushToProd.new({warn: StringIO.new}, logger, configuration_fetcher).run([build_number]) }.to raise_error PushToProdValidator::MissingRequiredKeyError, /Your config.yml is missing required key\(s\). The require keys for this commands are /
+          expect { PushToProd.new({warn: StringIO.new}, logger, configuration_fetcher, fake_dir).
+                   run([build_number]) }.to raise_error PushToProdValidator::MissingRequiredKeyError, /Your config.yml is missing required key\(s\). The require keys for this commands are /
         end
       end
     end
