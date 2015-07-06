@@ -21,7 +21,7 @@ module Bookbinder
         cloner = config[:cloner]
         attributes = {'repository' => {'name' => from}}
         workspace = config[:workspace]
-        code_example_reader = CodeExampleReader.new(bookbinder_logger)
+        code_example_reader = CodeExampleReader.new(out: $stdout)
 
         working_copy = cloner.call(source_repo_name: from,
                                    source_ref: 'master',
@@ -103,10 +103,6 @@ module Bookbinder
           link = link_to(text, '/' + page.path)
         end
         content_tag :li, link, :class => css_class
-      end
-
-      def bookbinder_logger
-        DeprecatedLogger.new
       end
     end
   end

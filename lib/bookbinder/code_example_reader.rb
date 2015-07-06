@@ -1,15 +1,13 @@
-require_relative '../../lib/bookbinder/deprecated_logger'
-
 module Bookbinder
   class CodeExampleReader
     class InvalidSnippet < StandardError
       def initialize(repo, marker)
-        super "Error with marker #{marker.cyan} #{'in'.red} #{repo.cyan}#{'.'.red}"
+        super "Error with marker #{marker} in #{repo}."
       end
     end
 
-    def initialize(logger)
-      @logger = logger
+    def initialize(out: out)
+      @out = out
     end
 
     def get_snippet_and_language_at(marker, working_copy)
@@ -19,7 +17,7 @@ module Bookbinder
       elsif snippet.available?
         [snippet.content, snippet.language]
       else
-        logger.log '  skipping (not found) '.magenta + working_copy.full_name
+        out << "  skipping (not found) #{working_copy.full_name}"
         ''
       end
     end
@@ -73,6 +71,6 @@ module Bookbinder
 
     private
 
-    attr_reader :logger
+    attr_reader :out
   end
 end
