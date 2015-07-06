@@ -66,26 +66,6 @@ module Bookbinder
             expect(directory.files.get("#{namespace}-#{build_number}.tgz")).not_to be_nil
           end
 
-          context 'when the build number is not available' do
-            let(:build_number) { nil }
-
-            it 'uses the current time to version the tarball file' do
-              time_fetcher = double('time fetcher', current_time: '20150520_1033')
-              archive = Archive.new(logger: logger,
-                                    time_fetcher: time_fetcher,
-                                    key: aws_access_key_id,
-                                    secret: aws_secret_access_key)
-
-              archive.create_and_upload_tarball build_number: build_number,
-                                                namespace: namespace,
-                                                app_dir: final_app_dir,
-                                                bucket: bucket_key
-
-              directory = fog_connection.directories.get(bucket_key)
-              expect(directory.files.get("#{namespace}-20150520_1033.tgz")).not_to be_nil
-            end
-          end
-
           it 'uploads a tarball with the contents of the given app directory' do
             create
             s3_file = fog_connection.directories.get(bucket_key).

@@ -1,7 +1,6 @@
 require 'fog/aws'
 require 'tmpdir'
 require_relative '../deprecated_logger'
-require_relative '../time_fetcher'
 require_relative 'artifact_namer'
 
 module Bookbinder
@@ -10,19 +9,19 @@ module Bookbinder
       class FileDoesNotExist < StandardError; end
       class NoNamespaceGiven < StandardError; end
 
-      def initialize(logger: nil, time_fetcher: TimeFetcher.new, key: '', secret: '')
+      def initialize(logger: nil, key: '', secret: '')
         @logger = logger
-        @time_fetcher = time_fetcher
         @aws_key = key
         @aws_secret_key = secret
       end
 
-      def create_and_upload_tarball(build_number: nil, app_dir: 'final_app', bucket: '', namespace: nil)
-        build_number ||= time_fetcher.current_time
-        raise 'You must provide a namespace to push an identifiable build.' unless namespace
-
+      def create_and_upload_tarball(
+        app_dir: 'final_app',
+        bucket: '',
+        build_number: nil,
+        namespace: nil
+      )
         tarball_filename, tarball_path = create_tarball(app_dir, build_number, namespace)
-
         upload_file(bucket, tarball_filename, tarball_path)
         @logger.log "Green build ##{build_number.to_s.green} has been uploaded to S3 for #{namespace.to_s.cyan}"
       end
@@ -56,8 +55,6 @@ module Bookbinder
       end
 
       private
-
-      attr_reader :time_fetcher
 
       def find_or_create_directory(name)
         connection.directories.create(key: name)

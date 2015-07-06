@@ -17,8 +17,11 @@ module Bookbinder
         config = configuration_fetcher.fetch_config
         aws_credentials = configuration_fetcher.fetch_credentials[:aws]
         archive = Deploy::Archive.new(logger: @logger, key: aws_credentials.access_key, secret: aws_credentials.secret_key)
-        archive.create_and_upload_tarball(build_number: ENV['BUILD_NUMBER'], bucket: aws_credentials.green_builds_bucket,
-                                          namespace: Ingest::DestinationDirectory.new(config.book_repo))
+        archive.create_and_upload_tarball(
+          build_number: ENV.fetch('BUILD_NUMBER', Time.now.strftime("%Y%m%d_%H%M")),
+          bucket: aws_credentials.green_builds_bucket,
+          namespace: Ingest::DestinationDirectory.new(config.book_repo)
+        )
         0
       end
     end
