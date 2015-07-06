@@ -1,14 +1,15 @@
-require_relative '../../../lib/bookbinder/app_fetcher'
+require_relative '../../../../lib/bookbinder/deploy/app_fetcher'
 
 module Bookbinder
-  describe AppFetcher do
-    describe 'retrieving apps' do
-      let(:cf_command_runner) { double 'cf_command_runner' }
-      let(:eol_space) { ' ' }
+  module Deploy
+    describe AppFetcher do
+      describe 'retrieving apps' do
+        let(:cf_command_runner) { double 'cf_command_runner' }
+        let(:eol_space) { ' ' }
 
-      context 'with a space column in the cf routes output' do
-        it 'returns the correct app' do
-          allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
+        context 'with a space column in the cf routes output' do
+          it 'returns the correct app' do
+            allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
 Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
 
 space       host                    domain                apps
@@ -21,14 +22,14 @@ my-space    docs-testmisleading     cfapps.io
 my-space    docs-test               cfapps.io             docs-green,docs-blue #{eol_space}
 my-space    more-cat-pictures       cfapps.io             many-cats, too-many-cats #{eol_space}
 OUTPUT
-          expect(AppFetcher.new([['cfapps.io', 'docs']], cf_command_runner).fetch_current_app).
-            to eq(BlueGreenApp.new('docs-green'))
+            expect(AppFetcher.new([['cfapps.io', 'docs']], cf_command_runner).fetch_current_app).
+              to eq(BlueGreenApp.new('docs-green'))
+          end
         end
-      end
 
-      context 'without a space column in the cf routes output' do
-        it 'returns the correct app' do
-          allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
+        context 'without a space column in the cf routes output' do
+          it 'returns the correct app' do
+            allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
 Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
 
 host                    domain                apps
@@ -41,60 +42,61 @@ docs-testmisleading     cfapps.io
 docs-test               cfapps.io             docs-green,docs-blue #{eol_space}
 more-cat-pictures       cfapps.io             many-cats, too-many-cats #{eol_space}
 OUTPUT
-          expect(AppFetcher.new([['cfapps.io', 'docs']], cf_command_runner).fetch_current_app).
-            to eq(BlueGreenApp.new('docs-green'))
+            expect(AppFetcher.new([['cfapps.io', 'docs']], cf_command_runner).fetch_current_app).
+              to eq(BlueGreenApp.new('docs-green'))
+          end
         end
-      end
 
-      context 'when there are no apps' do
-        it 'returns nil' do
-          allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
+        context 'when there are no apps' do
+          it 'returns nil' do
+            allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
   Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
 
 space         host                    domain                apps
 cool-space    docs                    cfapps.io             #{eol_space}
 OUTPUT
-          expect(AppFetcher.new([['cfapps.io', 'docs']], cf_command_runner).fetch_current_app).to be_nil
+            expect(AppFetcher.new([['cfapps.io', 'docs']], cf_command_runner).fetch_current_app).to be_nil
+          end
         end
-      end
 
-      context 'when the host is not found' do
-        it 'returns nil' do
-          allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
+        context 'when the host is not found' do
+          it 'returns nil' do
+            allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
   Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
 
 space           host                    domain                apps
 cool-space      foo                     cfapps.io             fantastic-app #{eol_space}
 OUTPUT
-          expect(AppFetcher.new([['cfapps.io', 'docs']], cf_command_runner).fetch_current_app).to be_nil
+            expect(AppFetcher.new([['cfapps.io', 'docs']], cf_command_runner).fetch_current_app).to be_nil
+          end
         end
-      end
 
-      context "when there are spaces in between app names" do
+        context "when there are spaces in between app names" do
 
-        it "returns app names with stripped spaces" do
-          allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
+          it "returns app names with stripped spaces" do
+            allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
 Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
 
 space       host                    domain                apps
 my-space    more-cat-pictures       cfapps.io             many-cats, too-many-cats #{eol_space}
 OUTPUT
-          expect(AppFetcher.new([['cfapps.io', 'more-cat-pictures']], cf_command_runner).fetch_current_app).
-            to eq(BlueGreenApp.new('many-cats'))
+            expect(AppFetcher.new([['cfapps.io', 'more-cat-pictures']], cf_command_runner).fetch_current_app).
+              to eq(BlueGreenApp.new('many-cats'))
+          end
         end
-      end
 
-      context 'when a route in the creds is not yet mapped in the app' do
-        it "returns the apps for the mapped routes" do
-          allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
+        context 'when a route in the creds is not yet mapped in the app' do
+          it "returns the apps for the mapped routes" do
+            allow(cf_command_runner).to receive(:cf_routes_output).and_return(<<OUTPUT)
 Getting routes as cfaccounts+cfdocs@pivotallabs.com ...
 
 space       host                    domain                apps
 my-space    docs                    cfapps.io             docs-green #{eol_space}
 my-space    docs-test               cfapps.io             docs-green,docs-blue #{eol_space}
 OUTPUT
-          expect(AppFetcher.new([['cfapps.io', 'docs']], cf_command_runner).fetch_current_app).
-            to eq(BlueGreenApp.new('docs-green'))
+            expect(AppFetcher.new([['cfapps.io', 'docs']], cf_command_runner).fetch_current_app).
+              to eq(BlueGreenApp.new('docs-green'))
+          end
         end
       end
     end

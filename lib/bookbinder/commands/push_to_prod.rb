@@ -1,4 +1,4 @@
-require_relative '../distributor'
+require_relative '../deploy/distributor'
 require_relative 'bookbinder_command'
 require_relative 'naming'
 
@@ -24,7 +24,7 @@ module Bookbinder
 
       def run(arguments)
         validate
-        Distributor.build(@logger, options(arguments)).distribute
+        Deploy::Distributor.build(@logger, options(arguments)).distribute
         0
       end
 

@@ -13,7 +13,7 @@ module Bookbinder
     let(:config_hash) { {'book_repo' => book_repo, 'cred_repo' => 'whatever'} }
 
     let(:fake_dir) { double }
-    let(:fake_distributor) { double(Distributor, distribute: nil) }
+    let(:fake_distributor) { double(Deploy::Distributor, distribute: nil) }
 
     let(:logger) { NilLogger.new }
     let(:configuration_fetcher) { double('configuration_fetcher',
@@ -24,7 +24,7 @@ module Bookbinder
     before do
       allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
 
-      allow(Distributor).to receive(:build).and_return(fake_distributor)
+      allow(Deploy::Distributor).to receive(:build).and_return(fake_distributor)
       allow(Dir).to receive(:mktmpdir).and_return(fake_dir)
     end
 
@@ -49,7 +49,7 @@ module Bookbinder
       }
 
       real_distributor = expect_to_receive_and_return_real_now(
-        Distributor, :build, logger, expected_options
+        Deploy::Distributor, :build, logger, expected_options
       )
       expect(real_distributor).to receive(:distribute)
 

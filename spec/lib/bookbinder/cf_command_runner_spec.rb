@@ -21,7 +21,7 @@ module Bookbinder
       let(:config_hash) { { 'app_name' => 'mygreatapp' } }
 
       it "uses the app name from the credentials, and makes it blue" do
-        expect(cf.new_app).to eq(BlueGreenApp.new('mygreatapp-blue'))
+        expect(cf.new_app).to eq(Deploy::BlueGreenApp.new('mygreatapp-blue'))
       end
     end
 

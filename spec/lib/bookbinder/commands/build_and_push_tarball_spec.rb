@@ -41,8 +41,8 @@ module Bookbinder
     let(:bucket) { 'bucket-name-in-fixture-config' }
 
     it 'should call GreenBuildRepository#create with correct parameters' do
-      expect(Archive).to receive(:new).with(logger: logger, key: access_key, secret: secret_key).and_call_original
-      expect_any_instance_of(Archive).to receive(:create_and_upload_tarball) do |archive, args|
+      expect(Deploy::Archive).to receive(:new).with(logger: logger, key: access_key, secret: secret_key).and_call_original
+      expect_any_instance_of(Deploy::Archive).to receive(:create_and_upload_tarball) do |archive, args|
         expect(args).to have_key(:build_number)
         expect(args).to have_key(:bucket)
         expect(args).to have_key(:namespace)

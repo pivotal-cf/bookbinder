@@ -1,5 +1,5 @@
 require 'open3'
-require_relative 'values/blue_green_app'
+require_relative 'deploy/blue_green_app'
 
 module Bookbinder
   class CfCommandRunner
@@ -29,7 +29,7 @@ module Bookbinder
     end
 
     def new_app
-      BlueGreenApp.new([creds.app_name, 'blue'].join('-'))
+      Deploy::BlueGreenApp.new([creds.app_name, 'blue'].join('-'))
     end
 
     def start(deploy_target_app)

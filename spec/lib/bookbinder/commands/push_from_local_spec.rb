@@ -13,7 +13,7 @@ module Bookbinder
       let(:book_repo) { 'my-user/fixture-book-title' }
       let(:config_hash) { {'book_repo' => book_repo, 'cred_repo' => 'whatever'} }
 
-      let(:fake_distributor) { double(Distributor, distribute: nil) }
+      let(:fake_distributor) { double(Deploy::Distributor, distribute: nil) }
 
       let(:logger) { NilLogger.new }
       let(:configuration_fetcher) { double('configuration_fetcher') }
@@ -37,7 +37,7 @@ module Bookbinder
       }
 
       it 'returns 0' do
-        allow(Distributor).to receive(:build).and_return(fake_distributor)
+        allow(Deploy::Distributor).to receive(:build).and_return(fake_distributor)
         allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
         allow(configuration_fetcher).to receive(:fetch_credentials).
           with('foobar_env').
@@ -81,7 +81,7 @@ module Bookbinder
             and_return(credentials)
 
           real_distributor = expect_to_receive_and_return_real_now(
-            Distributor, :build, logger, expected_options
+            Deploy::Distributor, :build, logger, expected_options
           )
           expect(real_distributor).to receive(:distribute)
 
