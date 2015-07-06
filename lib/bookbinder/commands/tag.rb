@@ -1,4 +1,3 @@
-require_relative '../deprecated_logger'
 require_relative '../errors/cli_error'
 require_relative 'naming'
 
