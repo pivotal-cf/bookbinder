@@ -1,5 +1,4 @@
 require_relative '../deploy/distributor'
-require_relative 'bookbinder_command'
 require_relative 'naming'
 
 module Bookbinder

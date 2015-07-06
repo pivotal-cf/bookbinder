@@ -1,11 +1,15 @@
 require_relative '../deploy/archive'
 require_relative '../ingest/destination_directory'
-require_relative 'bookbinder_command'
 require_relative 'naming'
 
 module Bookbinder
   module Commands
-    class BuildAndPushTarball < BookbinderCommand
+    class BuildAndPushTarball
+      def initialize(logger, configuration_fetcher)
+        @logger = logger
+        @configuration_fetcher = configuration_fetcher
+      end
+
       include Commands::Naming
 
       def usage
@@ -23,6 +27,14 @@ module Bookbinder
           namespace: Ingest::DestinationDirectory.new(config.book_repo)
         )
         0
+      end
+
+      private
+
+      attr_reader :configuration_fetcher
+
+      def config
+        @config ||= configuration_fetcher.fetch_config
       end
     end
   end
