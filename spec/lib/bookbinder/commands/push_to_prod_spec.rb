@@ -19,7 +19,6 @@ module Bookbinder
       let(:configuration_fetcher) { double('configuration_fetcher',
                                            fetch_credentials: {aws: {}, cloud_foundry: {}}) }
       let(:config) { Config::Configuration.parse(config_hash) }
-      let(:command) { described_class.new(logger, configuration_fetcher) }
 
       before do
         allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
@@ -29,7 +28,7 @@ module Bookbinder
       end
 
       it 'returns 0' do
-        expect(command.run([build_number])).to eq(0)
+        expect(PushToProd.new(logger, configuration_fetcher).run([build_number])).to eq(0)
       end
 
       it 'builds a distributor with the right options and asks it to distribute' do
@@ -53,7 +52,7 @@ module Bookbinder
         )
         expect(real_distributor).to receive(:distribute)
 
-        command.run([build_number])
+        PushToProd.new(logger, configuration_fetcher).run([build_number])
       end
 
       context 'when missing credential repo' do
@@ -85,7 +84,7 @@ module Bookbinder
         let(:config) { Config::Configuration.parse(invalid_push_to_prod_config_hash) }
 
         it 'raises missing credential key error' do
-          expect { command.run([build_number]) }.to raise_error PushToProdValidator::MissingRequiredKeyError, /Your config.yml is missing required key\(s\). The require keys for this commands are /
+          expect { PushToProd.new(logger, configuration_fetcher).run([build_number]) }.to raise_error PushToProdValidator::MissingRequiredKeyError, /Your config.yml is missing required key\(s\). The require keys for this commands are /
         end
       end
     end
