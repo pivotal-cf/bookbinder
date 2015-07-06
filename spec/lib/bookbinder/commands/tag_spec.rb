@@ -24,6 +24,29 @@ module Bookbinder
       tag.run ["my-new-tag"]
     end
 
+    it "logs success" do
+      success = StringIO.new
+      out = StringIO.new
+      tag = Commands::Tag.new(
+        {success: success, out: out},
+        double(
+          'config fetcher',
+          fetch_config: Config::Configuration.new(
+            book_repo: 'loggity/book',
+            sections: []
+          )
+        ),
+        double('git').as_null_object
+      )
+
+      tag.run ["mygreattag"]
+
+      expect(success.tap(&:rewind).read).to eq("Success!\n")
+      expect(out.tap(&:rewind).read).to eq(
+        "loggity/book and its sections were tagged with mygreattag\n"
+      )
+    end
+
     context 'when no tag is supplied' do
       it 'raises an error' do
         tag = Commands::Tag.new(nil, nil, nil)

@@ -71,7 +71,7 @@ module Bookbinder
           push_local_to_staging,
           Commands::PushToProd.new(logger, configuration_fetcher),
           Commands::RunPublishCI.new(bind, push_local_to_staging, build_and_push_tarball),
-          Commands::Tag.new(logger, configuration_fetcher, version_control_system),
+          Commands::Tag.new(colored_streams, configuration_fetcher, version_control_system),
           Commands::UpdateLocalDocRepos.new(
             colored_streams,
             configuration_fetcher,

@@ -7,8 +7,8 @@ module Bookbinder
     class Tag
       include Commands::Naming
 
-      def initialize(logger, configuration_fetcher, version_control_system)
-        @logger = logger
+      def initialize(streams, configuration_fetcher, version_control_system)
+        @streams = streams
         @configuration_fetcher = configuration_fetcher
         @version_control_system = version_control_system
       end
@@ -24,14 +24,14 @@ module Bookbinder
           version_control_system.remote_tag(url, tag, 'HEAD')
         end
 
-        @logger.log 'Success!'.green
-        @logger.log " #{config.book_repo.yellow} and its sections were tagged with #{tag.blue}"
+        streams[:success].puts 'Success!'
+        streams[:out].puts "#{config.book_repo} and its sections were tagged with #{tag}"
         0
       end
 
       private
 
-      attr_reader :configuration_fetcher, :version_control_system
+      attr_reader :streams, :configuration_fetcher, :version_control_system
 
       def urls(config)
         [config.book_repo_url] + config.sections.map(&:repo_url).uniq
