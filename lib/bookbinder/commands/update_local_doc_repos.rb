@@ -1,4 +1,3 @@
-require_relative '../deprecated_logger'
 require_relative '../ingest/destination_directory'
 require_relative 'naming'
 
