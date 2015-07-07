@@ -37,23 +37,22 @@ module Bookbinder
 
       let(:book_repo_short_name) { 'fixture-book-title' }
       let(:book_repo_name) { "owner/#{book_repo_short_name}" }
-      let(:namer_filename) { "#{book_repo_short_name}-#{build_number}.log" }
-      let(:namer_full_path) { "/tmp/#{namer_filename}" }
+      let(:expected_artifact_filename) { "#{book_repo_short_name}-#{build_number}.log" }
+      let(:expected_artifact_full_path) { "/tmp/#{expected_artifact_filename}" }
       let(:artifact) { Artifact.new(book_repo_short_name, build_number, 'log', '/tmp') }
       let(:logger) { NilLogger.new }
 
       let(:distributor) do
-        described_class.new(
-            logger,
-            fake_archive,
-            fake_pusher,
-            book_repo_short_name,
-            artifact,
-            app_dir: fake_dir,
-            aws_credentials: aws_credentials,
-            cf_credentials: cf_credentials,
-            production: production,
-            build_number: build_number
+        Distributor.new(
+          logger,
+          fake_archive,
+          fake_pusher,
+          artifact,
+          app_dir: fake_dir,
+          aws_credentials: aws_credentials,
+          cf_credentials: cf_credentials,
+          production: production,
+          build_number: build_number
         )
       end
 
@@ -75,7 +74,7 @@ module Bookbinder
           it 'uploads the tracefile to the archive after pushing' do
             allow(fake_archive).to receive(:download)
             expect(fake_pusher).to receive(:push).ordered
-            expect(fake_archive).to receive(:upload_file).with(bucket, namer_filename, namer_full_path).ordered
+            expect(fake_archive).to receive(:upload_file).with(bucket, expected_artifact_filename, expected_artifact_full_path).ordered
             distributor.distribute
           end
 
@@ -110,7 +109,7 @@ module Bookbinder
             end
 
             it 'logs a message' do
-              expect(logger).to receive(:error).with(/Could not find CF trace file: #{namer_full_path}/)
+              expect(logger).to receive(:error).with(/Could not find CF trace file: #{expected_artifact_full_path}/)
               distributor.distribute
             end
           end

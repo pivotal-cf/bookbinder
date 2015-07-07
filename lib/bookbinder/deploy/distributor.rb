@@ -20,14 +20,13 @@ module Bookbinder
         cf_app_fetcher = AppFetcher.new(options[:cf_credentials].flat_routes, cf_command_runner)
 
         pusher = Pusher.new(cf_command_runner, cf_app_fetcher)
-        new(logger, archive, pusher, namespace, artifact, options)
+        new(logger, archive, pusher, artifact, options)
       end
 
-      def initialize(logger, archive, pusher, namespace, artifact, options)
+      def initialize(logger, archive, pusher, artifact, options)
         @logger = logger
         @archive = archive
         @pusher = pusher
-        @namespace = namespace
         @artifact = artifact
         @options = options
       end
@@ -52,13 +51,13 @@ module Bookbinder
 
       private
 
-      attr_reader :options, :archive, :artifact, :namespace, :pusher
+      attr_reader :options, :archive, :artifact, :pusher
 
       def download
         archive.download(download_dir: options[:app_dir],
                          bucket: options[:aws_credentials].green_builds_bucket,
                          build_number: options[:build_number],
-                         namespace: namespace)
+                         namespace: artifact.namespace)
       end
 
       def push_app

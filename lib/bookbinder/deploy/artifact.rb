@@ -1,6 +1,8 @@
 module Bookbinder
   module Deploy
     class Artifact
+      attr_reader :namespace
+
       def initialize(namespace, build_number, extension, path = '.')
         @namespace = namespace
         @build_number = build_number
@@ -18,7 +20,7 @@ module Bookbinder
 
       private
 
-      attr_reader :namespace, :build_number, :path, :extension
+      attr_reader :build_number, :path, :extension
     end
   end
 end
