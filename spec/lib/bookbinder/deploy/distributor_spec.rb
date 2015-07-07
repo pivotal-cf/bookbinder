@@ -39,7 +39,7 @@ module Bookbinder
       let(:book_repo_name) { "owner/#{book_repo_short_name}" }
       let(:namer_filename) { "#{book_repo_short_name}-#{build_number}.log" }
       let(:namer_full_path) { "/tmp/#{namer_filename}" }
-      let(:fake_namer) { double(Artifact, filename: namer_filename, full_path: namer_full_path) }
+      let(:artifact) { Artifact.new(book_repo_short_name, build_number, 'log', '/tmp') }
       let(:logger) { NilLogger.new }
 
       let(:distributor) do
@@ -48,7 +48,7 @@ module Bookbinder
             fake_archive,
             fake_pusher,
             book_repo_short_name,
-            fake_namer,
+            artifact,
             app_dir: fake_dir,
             aws_credentials: aws_credentials,
             cf_credentials: cf_credentials,
