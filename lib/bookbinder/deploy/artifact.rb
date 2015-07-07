@@ -1,6 +1,6 @@
 module Bookbinder
   module Deploy
-    class ArtifactNamer
+    class Artifact
       def initialize(namespace, build_number, extension, path = '.')
         @namespace = namespace
         @build_number = build_number

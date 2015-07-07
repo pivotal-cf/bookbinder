@@ -1,7 +1,7 @@
 require 'fog/aws'
 require 'tmpdir'
 require_relative '../deprecated_logger'
-require_relative 'artifact_namer'
+require_relative 'artifact'
 require_relative 'success'
 
 module Bookbinder
@@ -39,7 +39,7 @@ module Bookbinder
 
         directory = connection.directories.get bucket
         build_number ||= latest_build_number_for_namespace(directory, namespace)
-        filename = ArtifactNamer.new(namespace, build_number, 'tgz').filename
+        filename = Artifact.new(namespace, build_number, 'tgz').filename
 
         s3_file = directory.files.get(filename)
         raise FileDoesNotExist, "Unable to find tarball on AWS for book '#{namespace}', build number: #{build_number}" unless s3_file
@@ -64,7 +64,7 @@ module Bookbinder
       end
 
       def create_tarball(app_dir, build_number, namespace)
-        tarball_filename = ArtifactNamer.new(namespace, build_number, 'tgz').filename
+        tarball_filename = Artifact.new(namespace, build_number, 'tgz').filename
         tarball_path = File.join(Dir.mktmpdir, tarball_filename)
 
         Dir.chdir(app_dir) { `tar czf #{tarball_path} *` }
