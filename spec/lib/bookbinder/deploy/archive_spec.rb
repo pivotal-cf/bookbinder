@@ -219,7 +219,7 @@ module Bookbinder
 
           before { bucket }
 
-          it 'prints an error message and returns nil' do
+          it 'raises an exception' do
             expect{ download }.to raise_error(Archive::FileDoesNotExist)
           end
         end
@@ -230,7 +230,7 @@ module Bookbinder
 
           context 'such as nil' do
             let(:namespace) { nil }
-            it 'prints an error message and returns nil' do
+            it 'raises an exception' do
               expect{ download }.to raise_error(Archive::NoNamespaceGiven)
             end
           end
@@ -238,7 +238,7 @@ module Bookbinder
           context "which doesn't exist" do
             let(:namespace) { 'my-renamed-book-repo' }
 
-            it 'prints an error message and returns nil' do
+            it 'raises an exception' do
               expect{ download }.to raise_error(Archive::FileDoesNotExist)
             end
           end
