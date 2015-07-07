@@ -31,8 +31,7 @@ module Bookbinder
       end
 
       def flat_routes
-        routes.reduce([]) do |all_routes, domain_apps|
-          domain, apps = domain_apps
+        routes.reduce([]) do |all_routes, (domain, apps)|
           all_routes + apps.map { |app| [domain, app] }
         end
       end
