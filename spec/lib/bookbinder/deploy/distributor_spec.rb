@@ -39,7 +39,6 @@ module Bookbinder
       let(:book_repo_name) { "owner/#{book_repo_short_name}" }
       let(:expected_artifact_filename) { "#{book_repo_short_name}-#{build_number}.log" }
       let(:expected_artifact_full_path) { "/tmp/#{expected_artifact_filename}" }
-      let(:artifact) { Artifact.new(book_repo_short_name, build_number, 'log', '/tmp') }
       let(:logger) { NilLogger.new }
 
       let(:distributor) do
@@ -47,12 +46,11 @@ module Bookbinder
           logger,
           fake_archive,
           fake_pusher,
-          artifact,
-          app_dir: fake_dir,
-          aws_credentials: aws_credentials,
-          cf_credentials: cf_credentials,
-          production: production,
-          build_number: build_number
+          Deployment.new(app_dir: fake_dir,
+                         aws_credentials: aws_credentials,
+                         book_repo: book_repo_name,
+                         build_number: build_number,
+                         cf_credentials: cf_credentials)
         )
       end
 
@@ -62,7 +60,6 @@ module Bookbinder
       let(:fake_pusher) { double }
       let(:fake_uploaded_file) { double(url: fake_url) }
       let(:fake_url) { 'http://example.com/trace_log_file' }
-      let(:production) { false }
 
       before do
         allow(fake_pusher).to receive(:push)
@@ -94,7 +91,6 @@ module Bookbinder
           end
 
           context 'when download raises' do
-            let(:production) { true }
             it 'uploads despite download raising' do
               allow(fake_archive).to receive(:download).and_raise(SpecialException)
               expect(fake_archive).to receive(:upload_file)
@@ -116,20 +112,17 @@ module Bookbinder
         end
 
         context 'when in production' do
-          let(:production) { true }
-
           before do
             allow(fake_archive).to receive(:download)
           end
 
           it 'downloads the repo' do
-            download_args = {
-                download_dir: fake_dir,
-                bucket: bucket,
-                build_number: build_number,
-                namespace: book_repo_short_name
-            }
-            expect(fake_archive).to receive(:download).with(download_args)
+            expect(fake_archive).to receive(:download).with(
+              download_dir: fake_dir,
+              bucket: bucket,
+              build_number: build_number,
+              namespace: book_repo_short_name
+            )
             distributor.distribute
           end
 
@@ -165,27 +158,21 @@ module Bookbinder
         end
 
         context 'when not in production' do
-          let(:production) { false }
           let(:cf_credentials) do
             Bookbinder::Config::CfCredentials.new({
-            'api_endpoint' => 'http://get.your.apis.here.io',
-            'staging_host' => {
+              'api_endpoint' => 'http://get.your.apis.here.io',
+              'staging_host' => {
                 'http://get.your.apis.for.staging.here.io' => ['a_staging_host']
-            },
-            'organization' => 'foooo',
-            'staging_space' => 'foo_stage',
-            'app_name' => 'foooo',
-            'username' => 'username'
+              },
+              'organization' => 'foooo',
+              'staging_space' => 'foo_stage',
+              'app_name' => 'foooo',
+              'username' => 'username'
             }, 'staging')
           end
 
           it 'does not download the repo' do
             expect(fake_archive).to_not receive(:download)
-            distributor.distribute
-          end
-
-          it 'does not warn' do
-            expect(logger).not_to receive(:log).with(/Warning.*production/)
             distributor.distribute
           end
 
