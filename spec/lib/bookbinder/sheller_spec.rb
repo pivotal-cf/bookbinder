@@ -52,5 +52,10 @@ module Bookbinder
       result = sheller.run_command("echo first; >&2 echo second")
       expect(result).to be_success
     end
+
+    it 'has a simple way to get stdout from a command' do
+      sheller = Sheller.new
+      expect(sheller.get_stdout("which ls")).to eq("/bin/ls")
+    end
   end
 end

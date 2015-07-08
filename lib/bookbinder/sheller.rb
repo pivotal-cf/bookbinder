@@ -42,5 +42,11 @@ module Bookbinder
       end
       exit_status
     end
+
+    def get_stdout(command)
+      out = StringIO.new
+      run_command(command, out: out)
+      out.tap(&:rewind).read.chomp
+    end
   end
 end
