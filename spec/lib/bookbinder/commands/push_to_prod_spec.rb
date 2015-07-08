@@ -93,7 +93,7 @@ module Bookbinder
 
         it 'raises missing credential key error' do
           expect { PushToProd.new({warn: StringIO.new}, logger, configuration_fetcher, fake_dir).
-                   run([build_number]) }.to raise_error PushToProdValidator::MissingRequiredKeyError, /Your config.yml is missing required key\(s\). The require keys for this commands are /
+                   run([build_number]) }.to raise_error PushToProd::MissingRequiredKeyError, /Your config.yml is missing required key\(s\). The require keys for this commands are /
         end
       end
     end
