@@ -12,9 +12,6 @@ module Bookbinder
 
       let(:book_repo) { 'my-user/fixture-book-title' }
       let(:config_hash) { {'book_repo' => book_repo, 'cred_repo' => 'whatever'} }
-
-      let(:fake_distributor) { double(Deploy::Distributor, distribute: nil) }
-
       let(:logger) { NilLogger.new }
       let(:configuration_fetcher) { double('configuration_fetcher') }
       let(:config) { Config::Configuration.parse(config_hash) }
@@ -35,59 +32,6 @@ module Bookbinder
           }, 'foobar_env')
         }
       }
-
-      it 'returns 0' do
-        allow(Deploy::Distributor).to receive(:build).and_return(fake_distributor)
-        allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
-        allow(configuration_fetcher).to receive(:fetch_credentials).
-          with('foobar_env').
-          and_return(credentials)
-
-        expect(command.run([])).to eq(0)
-      end
-
-      context 'happy path' do
-        let(:credentials) {
-          {
-            aws: Config::AwsCredentials.new(
-              'access_key' => 'your_aws_access_key',
-              'secret_key' => 'your_aws_secret_key',
-              'green_builds_bucket' => 'your_aws_bucket'
-            ),
-            cloud_foundry: Config::CfCredentials.new({
-              'username' => 'your_CF_account',
-              'password' => 'your_CF_password',
-              'app_name' => 'your_app_name',
-              'api_endpoint' => 'your_api_endpoint',
-              'organization' => 'your_organization',
-              'foobar_env_host' => { 'domain-one.io' => ['docs'] }
-            }, 'foobar_env')
-          }
-        }
-        it 'builds a distributor with the right options and asks it to distribute' do
-          expected_options = {
-            app_dir: './final_app',
-            build_number: nil,
-
-            aws_credentials: credentials[:aws],
-            cf_credentials: credentials[:cloud_foundry],
-
-            book_repo: book_repo,
-          }
-
-          allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
-          allow(configuration_fetcher).to receive(:fetch_credentials).
-            with('foobar_env').
-            and_return(credentials)
-
-          real_distributor = expect_to_receive_and_return_real_now(
-            Deploy::Distributor, :build, logger, expected_options
-          )
-          expect(real_distributor).to receive(:distribute)
-
-          command.run([])
-        end
-      end
 
       describe 'missing keys in the config' do
         context 'when required platform names are missing' do

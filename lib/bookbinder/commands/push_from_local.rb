@@ -1,3 +1,4 @@
+require_relative '../deploy/deployment'
 require_relative '../deploy/distributor'
 require_relative 'naming'
 
@@ -23,7 +24,16 @@ module Bookbinder
 
       def run(_)
         validate
-        Deploy::Distributor.build(@logger, options).distribute
+        Deploy::Distributor.build(
+          @logger,
+          Deploy::Deployment.new(
+            app_dir: './final_app',
+            aws_credentials: credentials[:aws],
+            book_repo: config.book_repo,
+            build_number: ENV['BUILD_NUMBER'],
+            cf_credentials: credentials[:cloud_foundry]
+          )
+        ).distribute
         0
       end
 
@@ -32,24 +42,15 @@ module Bookbinder
       attr_reader :configuration_fetcher, :environment
 
       def config
-        @config ||= configuration_fetcher.fetch_config
+        configuration_fetcher.fetch_config
+      end
+
+      def credentials
+        configuration_fetcher.fetch_credentials(environment)
       end
 
       def command_name
         "push_local_to_#{environment}"
-      end
-
-      def options
-        credentials = configuration_fetcher.fetch_credentials(environment)
-        {
-            app_dir: './final_app',
-            build_number: ENV['BUILD_NUMBER'],
-
-            aws_credentials: credentials[:aws],
-            cf_credentials: credentials[:cloud_foundry],
-
-            book_repo: config.book_repo,
-        }
       end
 
       def error_message

@@ -4,7 +4,6 @@ require_relative '../sheller'
 require_relative 'app_fetcher'
 require_relative 'archive'
 require_relative 'artifact'
-require_relative 'deployment'
 require_relative 'pusher'
 
 module Bookbinder
@@ -12,9 +11,7 @@ module Bookbinder
     class Distributor
       EXPIRATION_HOURS = 2
 
-      def self.build(logger, options)
-        deployment = Deployment.new(options)
-
+      def self.build(logger, deployment)
         archive = Archive.new(
           logger: logger,
           key: deployment.aws_access_key,

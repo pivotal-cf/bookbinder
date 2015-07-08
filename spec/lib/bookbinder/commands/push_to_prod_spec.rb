@@ -1,99 +1,28 @@
 require_relative '../../../../lib/bookbinder/commands/push_to_prod'
+require_relative '../../../../lib/bookbinder/config/aws_credentials'
+require_relative '../../../../lib/bookbinder/config/cf_credentials'
 require_relative '../../../../lib/bookbinder/config/configuration'
-require_relative '../../../helpers/middleman'
-require_relative '../../../helpers/nil_logger'
 
 module Bookbinder
   module Commands
     describe PushToProd do
-      include SpecHelperMethods
-
-      let(:book_repo) { 'my-user/fixture-book-title' }
-      let(:build_number) { '17' }
-      let(:config_hash) { {'book_repo' => book_repo, 'cred_repo' => 'whatever'} }
-
-      let(:fake_dir) { double }
-      let(:fake_distributor) { double(Deploy::Distributor, distribute: nil) }
-
-      let(:logger) { NilLogger.new }
-      let(:configuration_fetcher) { double('configuration_fetcher',
-                                           fetch_credentials: {aws: {}, cloud_foundry: {}}) }
-      let(:config) { Config::Configuration.parse(config_hash) }
-
-      before do
-        allow(configuration_fetcher).to receive(:fetch_config).and_return(config)
-
-        allow(Deploy::Distributor).to receive(:build).and_return(fake_distributor)
-      end
-
-      it "warns the user" do
-        warn = StringIO.new
-        push = PushToProd.new({warn: warn}, logger = nil, configuration_fetcher, fake_dir)
-        push.run ["my-build-number"]
-        expect(warn.tap(&:rewind).read).to eq("Warning: You are pushing to production.\n")
-      end
-
-      it 'returns 0' do
-        expect(PushToProd.new({warn: StringIO.new}, logger, configuration_fetcher, fake_dir).
-               run([build_number])).to eq(0)
-      end
-
-      it 'builds a distributor with the right options and asks it to distribute' do
-        creds = {aws: {'some' => 'aws stuff'}, cloud_foundry: {'some' => 'cf stuff'}}
-        allow(configuration_fetcher).to receive(:fetch_credentials).
-          with('production').
-          and_return(creds)
-
-        expected_options = {
-          app_dir: fake_dir,
-          build_number: build_number,
-
-          aws_credentials: creds[:aws],
-          cf_credentials: creds[:cloud_foundry],
-
-          book_repo: book_repo,
-        }
-
-        real_distributor = expect_to_receive_and_return_real_now(
-          Deploy::Distributor, :build, logger, expected_options
+      let(:configuration_fetcher) {
+        double(
+          'configuration_fetcher',
+          fetch_credentials: {
+            aws: Config::AwsCredentials.new({}),
+            cloud_foundry: Config::CfCredentials.new({}, 'production')
+          }
         )
-        expect(real_distributor).to receive(:distribute)
-
-        PushToProd.new({warn: StringIO.new}, logger, configuration_fetcher, fake_dir).
-          run([build_number])
-      end
+      }
 
       context 'when missing credential repo' do
-        let (:section1) do
-          {
-              'repository'=> {
-                  'name'=> 'cloudfoundry/docs-cloudfoundry-concepts'
-              },
-              'directory'=> 'concepts'
-          }
-        end
-
-        let(:section2) do
-          {
-              'repository' => {
-                  'name' => 'cloudfoundry/docs-cloudfoundry-foo'
-              },
-              'directory' => 'foo'
-          }
-        end
-
-        let(:invalid_push_to_prod_config_hash) do
-          {
-              'book_repo' => 'my_book',
-              'public_host' => 'public_host',
-              'sections' => [section1, section2]
-          }
-        end
-        let(:config) { Config::Configuration.parse(invalid_push_to_prod_config_hash) }
-
         it 'raises missing credential key error' do
-          expect { PushToProd.new({warn: StringIO.new}, logger, configuration_fetcher, fake_dir).
-                   run([build_number]) }.to raise_error PushToProd::MissingRequiredKeyError, /Your config.yml is missing required key\(s\). The require keys for this commands are /
+          allow(configuration_fetcher).to receive(:fetch_config) {
+            Config::Configuration.new(book_repo: 'my_book', public_host: 'public_host', sections: [])
+          }
+          expect { PushToProd.new({warn: StringIO.new}, logger = nil, configuration_fetcher, 'missing/key/app/dir').
+                   run(['321']) }.to raise_error PushToProd::MissingRequiredKeyError, /Your config.yml is missing required key\(s\). The require keys for this commands are /
         end
       end
     end

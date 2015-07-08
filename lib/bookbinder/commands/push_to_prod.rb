@@ -1,3 +1,4 @@
+require_relative '../deploy/deployment'
 require_relative '../deploy/distributor'
 require_relative 'naming'
 
@@ -19,10 +20,19 @@ module Bookbinder
          "Push latest or <build_#> from your S3 bucket to the production host specified in credentials.yml"]
       end
 
-      def run(arguments)
+      def run((build_number))
         streams[:warn].puts "Warning: You are pushing to production."
         validate
-        Deploy::Distributor.build(@logger, options(arguments)).distribute
+        Deploy::Distributor.build(
+          @logger,
+          Deploy::Deployment.new(
+            app_dir: app_dir,
+            build_number: build_number,
+            aws_credentials: credentials[:aws],
+            cf_credentials: credentials[:cloud_foundry],
+            book_repo: config.book_repo,
+          )
+        ).distribute
         0
       end
 
@@ -30,24 +40,12 @@ module Bookbinder
 
       attr_reader :app_dir, :configuration_fetcher, :streams
 
-      def options(arguments)
-        {
-          app_dir: app_dir,
-          build_number: arguments[0],
-
-          aws_credentials: credentials[:aws],
-          cf_credentials: credentials[:cloud_foundry],
-
-          book_repo: config.book_repo,
-        }
-      end
-
       def credentials
         configuration_fetcher.fetch_credentials('production')
       end
 
       def config
-        @config ||= configuration_fetcher.fetch_config
+        configuration_fetcher.fetch_config
       end
 
       def validate
