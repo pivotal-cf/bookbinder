@@ -42,7 +42,5 @@ module Bookbinder
       end
       exit_status
     end
-
-    attr_reader :view_updater
   end
 end
