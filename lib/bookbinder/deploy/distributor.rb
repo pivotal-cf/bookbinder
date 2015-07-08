@@ -11,12 +11,7 @@ module Bookbinder
     class Distributor
       EXPIRATION_HOURS = 2
 
-      def self.build(logger, deployment)
-        archive = Archive.new(
-          logger: logger,
-          key: deployment.aws_access_key,
-          secret: deployment.aws_secret_key
-        )
+      def self.build(logger, archive, deployment)
         cf_command_runner = CfCommandRunner.new(logger, Sheller.new, deployment.cf_credentials, deployment.artifact_full_path)
         cf_app_fetcher = AppFetcher.new(deployment.flat_routes, cf_command_runner)
 
@@ -32,7 +27,6 @@ module Bookbinder
       end
 
       def distribute
-        download if cf_credentials.download_archive_before_push?
         push_app
         nil
       rescue => e
@@ -52,13 +46,6 @@ module Bookbinder
       private
 
       attr_reader :archive, :deployment, :pusher
-
-      def download
-        archive.download(download_dir: deployment.app_dir,
-                         bucket: deployment.green_builds_bucket,
-                         build_number: deployment.build_number,
-                         namespace: deployment.namespace)
-      end
 
       def push_app
         pusher.push(deployment.app_dir)

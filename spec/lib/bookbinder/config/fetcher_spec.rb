@@ -42,11 +42,10 @@ module Bookbinder
 
         allow(credentials_provider).to receive(:credentials) { { 'some' => 'creds' } }
         prod_creds = config_fetcher.fetch_credentials('production')
-        expect(prod_creds[:cloud_foundry].download_archive_before_push?).to be_truthy
 
         allow(credentials_provider).to receive(:credentials) { raise "shouldn't get here" }
         acceptance_creds = config_fetcher.fetch_credentials('acceptance')
-        expect(acceptance_creds[:cloud_foundry].download_archive_before_push?).to be_falsy
+        expect(acceptance_creds[:cloud_foundry]).not_to eq(prod_creds)
       end
 
       context 'when file path has been set' do

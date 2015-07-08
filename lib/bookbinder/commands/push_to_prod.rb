@@ -1,3 +1,4 @@
+require_relative '../deploy/archive'
 require_relative '../deploy/deployment'
 require_relative '../deploy/distributor'
 require_relative 'naming'
@@ -23,16 +24,23 @@ module Bookbinder
       def run((build_number))
         streams[:warn].puts "Warning: You are pushing to production."
         validate
-        Deploy::Distributor.build(
-          @logger,
-          Deploy::Deployment.new(
-            app_dir: app_dir,
-            build_number: build_number,
-            aws_credentials: credentials[:aws],
-            cf_credentials: credentials[:cloud_foundry],
-            book_repo: config.book_repo,
-          )
-        ).distribute
+        deployment = Deploy::Deployment.new(
+          app_dir: app_dir,
+          build_number: build_number,
+          aws_credentials: credentials[:aws],
+          cf_credentials: credentials[:cloud_foundry],
+          book_repo: config.book_repo,
+        )
+        archive = Deploy::Archive.new(
+          logger: @logger,
+          key: deployment.aws_access_key,
+          secret: deployment.aws_secret_key
+        )
+        archive.download(download_dir: deployment.app_dir,
+                         bucket: deployment.green_builds_bucket,
+                         build_number: deployment.build_number,
+                         namespace: deployment.namespace)
+        Deploy::Distributor.build(@logger, archive, deployment).distribute
         0
       end
 

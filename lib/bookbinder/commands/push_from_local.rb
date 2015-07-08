@@ -24,15 +24,22 @@ module Bookbinder
 
       def run(_)
         validate
+        deployment = Deploy::Deployment.new(
+          app_dir: './final_app',
+          aws_credentials: credentials[:aws],
+          book_repo: config.book_repo,
+          build_number: ENV['BUILD_NUMBER'],
+          cf_credentials: credentials[:cloud_foundry]
+        )
+        archive = Deploy::Archive.new(
+          logger: @logger,
+          key: deployment.aws_access_key,
+          secret: deployment.aws_secret_key
+        )
         Deploy::Distributor.build(
           @logger,
-          Deploy::Deployment.new(
-            app_dir: './final_app',
-            aws_credentials: credentials[:aws],
-            book_repo: config.book_repo,
-            build_number: ENV['BUILD_NUMBER'],
-            cf_credentials: credentials[:cloud_foundry]
-          )
+          archive,
+          deployment
         ).distribute
         0
       end

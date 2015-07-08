@@ -1,3 +1,4 @@
+require_relative '../../../../lib/bookbinder/deploy/deployment'
 require_relative '../../../../lib/bookbinder/deploy/distributor'
 require_relative '../../../../lib/bookbinder/config/aws_credentials'
 require_relative '../../../../lib/bookbinder/config/cf_credentials'
@@ -25,14 +26,14 @@ module Bookbinder
       let(:cf_credentials) do
         Bookbinder::Config::CfCredentials.new({
           'api_endpoint' => 'http://get.your.apis.here.io',
-          'production_host' => {
-            'get.your.apis.here.io' => ['a_production_host']
+          'staging_host' => {
+            'http://get.your.apis.for.staging.here.io' => ['a_staging_host']
           },
           'organization' => 'foooo',
-          'production_space' => 'foooo',
+          'staging_space' => 'foo_stage',
           'app_name' => 'foooo',
           'username' => 'username'
-        }, 'production')
+        }, 'staging')
       end
 
       let(:book_repo_short_name) { 'fixture-book-title' }
@@ -111,98 +112,32 @@ module Bookbinder
           end
         end
 
-        context 'when in production' do
-          before do
-            allow(fake_archive).to receive(:download)
-          end
-
-          it 'downloads the repo' do
-            expect(fake_archive).to receive(:download).with(
-              download_dir: fake_dir,
-              bucket: bucket,
-              build_number: build_number,
-              namespace: book_repo_short_name
-            )
-            distributor.distribute
-          end
-
-          context 'when an error is thrown from downloading' do
-            it 'logs an informative message' do
-              allow(fake_archive).to receive(:download).and_raise(SpecialException.new("failed to download because of reason."))
-              expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
-  [ERROR] failed to download because of reason.
-  [DEBUG INFO]
-  CF organization: foooo
-  CF space: foooo
-  CF account: username
-  routes: #{cf_credentials.routes}
-              ERROR_MESSAGE
-  rescued_distribute
-            end
-          end
-
-          context 'when an error is thrown from pushing' do
-            it 'logs an informative message' do
-              allow(fake_pusher).to receive(:push).and_raise(SpecialException.new("foo"))
-              expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
-  [ERROR] foo
-  [DEBUG INFO]
-  CF organization: foooo
-  CF space: foooo
-  CF account: username
-  routes: #{cf_credentials.routes}
-  ERROR_MESSAGE
-              rescued_distribute
-            end
-          end
-        end
-
-        context 'when not in production' do
-          let(:cf_credentials) do
-            Bookbinder::Config::CfCredentials.new({
-              'api_endpoint' => 'http://get.your.apis.here.io',
-              'staging_host' => {
-                'http://get.your.apis.for.staging.here.io' => ['a_staging_host']
-              },
-              'organization' => 'foooo',
-              'staging_space' => 'foo_stage',
-              'app_name' => 'foooo',
-              'username' => 'username'
-            }, 'staging')
-          end
-
-          it 'does not download the repo' do
-            expect(fake_archive).to_not receive(:download)
-            distributor.distribute
-          end
-
-          context 'when an error is thrown from pushing an app' do
-            it 'logs an informative message' do
-              allow(fake_pusher).to receive(:push).and_raise(SpecialException.new("failed to push because of reason."))
-              expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
+        context 'when an error is thrown from pushing an app' do
+          it 'logs an informative message' do
+            allow(fake_pusher).to receive(:push).and_raise(SpecialException.new("failed to push because of reason."))
+            expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
   [ERROR] failed to push because of reason.
   [DEBUG INFO]
   CF organization: foooo
   CF space: foo_stage
   CF account: username
   routes: #{cf_credentials.routes}
-              ERROR_MESSAGE
-              rescued_distribute
-            end
+  ERROR_MESSAGE
+  rescued_distribute
+          end
 
-            it 'raises an exception' do
-              error = RuntimeError.new('Failed to push because of reason')
-              allow(fake_pusher).to receive(:push).and_raise(error)
-              expect { distributor.distribute }.to raise_error(error)
-            end
+          it 'raises an exception' do
+            error = RuntimeError.new('Failed to push because of reason')
+            allow(fake_pusher).to receive(:push).and_raise(error)
+            expect { distributor.distribute }.to raise_error(error)
           end
         end
+      end
 
-        it 'pushes the repo' do
-          allow(fake_archive).to receive(:download)
-          expect(fake_pusher).to receive(:push).with(fake_dir)
-          distributor.distribute
-        end
+      it 'pushes the repo' do
+        allow(fake_archive).to receive(:download)
+        expect(fake_pusher).to receive(:push).with(fake_dir)
+        distributor.distribute
       end
 
       SpecialException = Class.new(RuntimeError)

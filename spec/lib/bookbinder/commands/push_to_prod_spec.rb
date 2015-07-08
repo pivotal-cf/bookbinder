@@ -6,15 +6,43 @@ require_relative '../../../../lib/bookbinder/config/configuration'
 module Bookbinder
   module Commands
     describe PushToProd do
+      around do |example|
+        Fog.mock!
+        Fog::Mock.reset
+        example.run
+        Fog.unmock!
+      end
+
+      before do
+        fog_connection = Fog::Storage.new(provider: 'AWS',
+                                          aws_access_key_id: 'access_key',
+                                          aws_secret_access_key: 'secret_key',
+                                          region: 'us-east-1')
+        fog_connection.directories.create key: 'green_bucket_name'
+      end
+
       let(:configuration_fetcher) {
         double(
           'configuration_fetcher',
           fetch_credentials: {
-            aws: Config::AwsCredentials.new({}),
+            aws: Config::AwsCredentials.new({'access_key' => 'access_key',
+                                             'secret_key' => 'secret_key',
+                                             'green_builds_bucket' => 'green_bucket_name'}),
             cloud_foundry: Config::CfCredentials.new({}, 'production')
           }
         )
       }
+
+      it "tries to download an existing tarball" do
+        allow(configuration_fetcher).to receive(:fetch_config) {
+          Config::Configuration.new(book_repo: 'my_book', cred_repo: 'my_cred_repo', public_host: 'public_host', sections: [])
+        }
+        push = PushToProd.new({warn: StringIO.new},
+                              logger = nil,
+                              configuration_fetcher,
+                              'integrationy/test')
+        expect { push.run(['123']) }.to raise_error(Deploy::Archive::FileDoesNotExist)
+      end
 
       context 'when missing credential repo' do
         it 'raises missing credential key error' do
