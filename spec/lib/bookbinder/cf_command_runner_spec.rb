@@ -1,23 +1,18 @@
 require_relative '../../../lib/bookbinder/cf_command_runner'
 require_relative '../../../lib/bookbinder/config/cf_credentials'
 require_relative '../../../lib/bookbinder/sheller'
-require_relative '../../helpers/nil_logger'
 
 module Bookbinder
   describe CfCommandRunner do
-    let(:logger) { NilLogger.new }
+    let(:streams) { { out: StringIO.new, err: StringIO.new } }
     let(:sheller) { instance_double("Bookbinder::Sheller") }
     let(:credentials) { Bookbinder::Config::CfCredentials.new(config_hash, 'staging') }
-    let(:cf) { CfCommandRunner.new(logger, sheller, credentials, trace_file) }
+    let(:cf) { CfCommandRunner.new(streams, sheller, credentials, trace_file) }
     let(:trace_file) { 'path/to/log' }
     let(:binary_path) { '/usr/local/bin/cf'}
 
     before do
       allow(sheller).to receive(:get_stdout).with("which cf") { binary_path }
-    end
-
-    def expected_streams
-      { out: $stdout, err: $stderr }
     end
 
     def success
@@ -29,19 +24,19 @@ module Bookbinder
     end
 
     def succeeds(cmd)
-      allow(sheller).to receive(:run_command).with(cmd, expected_streams) { success }
+      allow(sheller).to receive(:run_command).with(cmd, streams) { success }
     end
 
     def fails(cmd)
-      allow(sheller).to receive(:run_command).with(cmd, expected_streams) { failure }
+      allow(sheller).to receive(:run_command).with(cmd, streams) { failure }
     end
 
     def expect_with_success(cmd)
-      expect(sheller).to receive(:run_command).with(cmd, expected_streams) { success }
+      expect(sheller).to receive(:run_command).with(cmd, streams) { success }
     end
 
     def expect_with_failure(cmd)
-      expect(sheller).to receive(:run_command).with(cmd, expected_streams) { failure }
+      expect(sheller).to receive(:run_command).with(cmd, streams) { failure }
     end
 
     describe "obtaining a new app for a fresh deploy" do

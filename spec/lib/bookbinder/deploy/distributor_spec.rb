@@ -3,7 +3,6 @@ require_relative '../../../../lib/bookbinder/deploy/distributor'
 require_relative '../../../../lib/bookbinder/config/aws_credentials'
 require_relative '../../../../lib/bookbinder/config/cf_credentials'
 require_relative '../../../../lib/bookbinder/config/configuration'
-require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/tmp_dirs'
 
 module Bookbinder
@@ -40,18 +39,21 @@ module Bookbinder
       let(:book_repo_name) { "owner/#{book_repo_short_name}" }
       let(:expected_artifact_filename) { "#{book_repo_short_name}-#{build_number}.log" }
       let(:expected_artifact_full_path) { "/tmp/#{expected_artifact_filename}" }
-      let(:logger) { NilLogger.new }
+
+      let(:deployment) {
+        Deployment.new(app_dir: fake_dir,
+                       aws_credentials: aws_credentials,
+                       book_repo: book_repo_name,
+                       build_number: build_number,
+                       cf_credentials: cf_credentials)
+      }
 
       let(:distributor) do
         Distributor.new(
-          logger,
+          {success: StringIO.new, out: StringIO.new, err: StringIO.new},
           fake_archive,
           fake_pusher,
-          Deployment.new(app_dir: fake_dir,
-                         aws_credentials: aws_credentials,
-                         book_repo: book_repo_name,
-                         build_number: build_number,
-                         cf_credentials: cf_credentials)
+          deployment
         )
       end
 
@@ -79,9 +81,16 @@ module Bookbinder
           it 'logs the tracefile URL' do
             expect(fake_archive).to receive(:upload_file).and_return(fake_uploaded_file)
             allow(fake_archive).to receive(:download)
-            allow(logger).to receive(:log)
-            expect(logger).to receive(:log).with(/#{Regexp.escape(fake_url)}/)
+
+            success = StringIO.new
+            distributor = Distributor.new(
+              {success: success, out: StringIO.new, err: StringIO.new},
+              fake_archive,
+              fake_pusher,
+              deployment
+            )
             distributor.distribute
+            expect(success.tap(&:rewind).read).to match(/#{Regexp.escape(fake_url)}/)
           end
 
           it 'uploads despite push raising' do
@@ -99,15 +108,22 @@ module Bookbinder
             end
           end
 
-          context 'fails' do
+          context "when file isn't available to upload" do
             before do
               allow(fake_archive).to receive(:download)
               allow(fake_archive).to receive(:upload_file).and_raise(Errno::ENOENT.new)
             end
 
             it 'logs a message' do
-              expect(logger).to receive(:error).with(/Could not find CF trace file: #{expected_artifact_full_path}/)
+              err = StringIO.new
+              distributor = Distributor.new(
+                {success: StringIO.new, out: StringIO.new, err: err},
+                fake_archive,
+                fake_pusher,
+                deployment
+              )
               distributor.distribute
+              expect(err.tap(&:rewind).read).to eq("Could not find CF trace file: #{expected_artifact_full_path}\n")
             end
           end
         end
@@ -115,7 +131,18 @@ module Bookbinder
         context 'when an error is thrown from pushing an app' do
           it 'logs an informative message' do
             allow(fake_pusher).to receive(:push).and_raise(SpecialException.new("failed to push because of reason."))
-            expect(logger).to receive(:error).with(<<-ERROR_MESSAGE.chomp)
+            err = StringIO.new
+            distributor = Distributor.new(
+              {success: StringIO.new, out: StringIO.new, err: err},
+              fake_archive,
+              fake_pusher,
+              deployment
+            )
+            begin
+              distributor.distribute
+            rescue SpecialException
+            end
+            expect(err.tap(&:rewind).read).to eq(<<-ERROR_MESSAGE)
   [ERROR] failed to push because of reason.
   [DEBUG INFO]
   CF organization: foooo
@@ -123,7 +150,6 @@ module Bookbinder
   CF account: username
   routes: #{cf_credentials.routes}
   ERROR_MESSAGE
-  rescued_distribute
           end
 
           it 'raises an exception' do

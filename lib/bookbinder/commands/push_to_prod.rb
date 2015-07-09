@@ -40,7 +40,7 @@ module Bookbinder
                          bucket: deployment.green_builds_bucket,
                          build_number: deployment.build_number,
                          namespace: deployment.namespace)
-        Deploy::Distributor.build(@logger, archive, deployment).distribute
+        Deploy::Distributor.build(streams, archive, deployment).distribute
         0
       end
 

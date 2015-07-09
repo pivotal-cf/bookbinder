@@ -1,14 +1,12 @@
-require 'open3'
 require_relative 'deploy/blue_green_app'
 
 module Bookbinder
   class CfCommandRunner
-    def initialize(logger, sheller, cf_credentials, trace_file)
-      @logger = logger
+    def initialize(streams, sheller, cf_credentials, trace_file)
+      @streams = streams
       @sheller = sheller
       @creds = cf_credentials
       @trace_file = trace_file
-      @streams = { out: $stdout, err: $stderr }
     end
 
     def login
@@ -46,12 +44,12 @@ module Bookbinder
     def push(deploy_target_app)
       # Currently --no-routes is used to blow away all existing routes from a newly deployed app.
       # The routes will then be recreated from the creds repo.
-      status = sheller.run_command(
+      result = sheller.run_command(
         environment_variables,
         "#{cf_binary_path} push #{deploy_target_app} -s cflinuxfs2 --no-route -m 256M -i 3",
         streams
       )
-      raise "Could not deploy app to #{deploy_target_app}" unless status.success?
+      raise "Could not deploy app to #{deploy_target_app}" unless result.success?
     end
 
     def unmap_routes(app)
@@ -76,9 +74,9 @@ module Bookbinder
 
     def takedown_old_target_app(app)
       # Routers flush every 10 seconds (but not guaranteed), so wait a bit longer than that.
-      @logger.log "waiting 15 seconds for routes to remap...\n\n"
+      streams[:out].puts "waiting 15 seconds for routes to remap...\n\n"
       (1..15).to_a.reverse.each do |seconds|
-        @logger.log_print "\r\r#{seconds}...    "
+        streams[:out] << "\r\r#{seconds}...    "
         Kernel.sleep 1
       end
       stop(app)

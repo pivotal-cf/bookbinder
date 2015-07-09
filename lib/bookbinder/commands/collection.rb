@@ -67,7 +67,7 @@ module Bookbinder
           ),
           build_and_push_tarball,
           bind,
-          Commands::PushFromLocal.new(logger, configuration_fetcher, 'acceptance'),
+          Commands::PushFromLocal.new(colored_streams, logger, configuration_fetcher, 'acceptance'),
           push_local_to_staging,
           Commands::PushToProd.new(colored_streams, logger, configuration_fetcher, Dir.mktmpdir),
           Commands::RunPublishCI.new(bind, push_local_to_staging, build_and_push_tarball),
@@ -110,6 +110,7 @@ module Bookbinder
 
       def push_local_to_staging
         @push_local_to_staging ||= Commands::PushFromLocal.new(
+          colored_streams,
           logger,
           configuration_fetcher,
           'staging'

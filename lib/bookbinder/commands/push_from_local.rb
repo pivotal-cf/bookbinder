@@ -11,7 +11,8 @@ module Bookbinder
       REQUIRED_AWS_KEYS = %w(access_key secret_key green_builds_bucket)
       REQUIRED_CF_KEYS = %w(username password api_endpoint organization app_name)
 
-      def initialize(logger, configuration_fetcher, environment)
+      def initialize(streams, logger, configuration_fetcher, environment)
+        @streams = streams
         @logger = logger
         @configuration_fetcher = configuration_fetcher
         @environment = environment
@@ -37,7 +38,7 @@ module Bookbinder
           secret: deployment.aws_secret_key
         )
         Deploy::Distributor.build(
-          @logger,
+          streams,
           archive,
           deployment
         ).distribute
@@ -46,7 +47,7 @@ module Bookbinder
 
       private
 
-      attr_reader :configuration_fetcher, :environment
+      attr_reader :configuration_fetcher, :environment, :streams
 
       def config
         configuration_fetcher.fetch_config
