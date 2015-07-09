@@ -37,10 +37,9 @@ module Bookbinder
     def bind_cmd(partial_args = {})
       bind_version_control_system = partial_args.fetch(:version_control_system, Bookbinder::GitFake.new)
       bind_logger = partial_args.fetch(:logger, logger)
+      null_streams = {success: Sheller::DevNull.new, out: Sheller::DevNull.new, err: Sheller::DevNull.new}
       Commands::Bind.new(
-        {success: Sheller::DevNull.new,
-         out: Sheller::DevNull.new,
-         err: Sheller::DevNull.new},
+        null_streams,
         OutputLocations.new(
           final_app_dir: partial_args.fetch(:final_app_directory, final_app_dir),
           context_dir: partial_args.fetch(:context_dir, File.absolute_path('.'))
@@ -51,7 +50,7 @@ module Bookbinder
         partial_args.fetch(:static_site_generator, middleman_runner),
         partial_args.fetch(:sitemap_writer, sitemap_writer),
         partial_args.fetch(:preprocessor, preprocessor),
-        partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(logger, file_system_accessor, GitFake.new)),
+        partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(null_streams, file_system_accessor, GitFake.new)),
         Ingest::SectionRepositoryFactory.new(logger),
         partial_args.fetch(:directory_preparer,
                            Commands::BindComponents::DirectoryPreparer.new(bind_logger,

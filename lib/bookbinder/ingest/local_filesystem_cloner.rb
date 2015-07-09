@@ -1,4 +1,3 @@
-require_relative '../deprecated_logger'
 require_relative 'destination_directory'
 require_relative 'working_copy'
 require_relative 'missing_working_copy'
@@ -6,8 +5,8 @@ require_relative 'missing_working_copy'
 module Bookbinder
   module Ingest
     class LocalFilesystemCloner
-      def initialize(logger, filesystem, user_repo_dir)
-        @logger = logger
+      def initialize(streams, filesystem, user_repo_dir)
+        @streams = streams
         @user_repo_dir = user_repo_dir
         @filesystem = filesystem
       end
@@ -25,7 +24,7 @@ module Bookbinder
 
       private
 
-      attr_reader :logger, :filesystem, :user_repo_dir
+      attr_reader :streams, :filesystem, :user_repo_dir
 
       def copy!(source_repo_name, source_dir, dest_dir)
         source_exists = filesystem.file_exist?(source_dir)
@@ -44,13 +43,13 @@ module Bookbinder
             full_name: source_repo_name,
           )
         else
-          logger.log '  skipping (not found) '.magenta + source_dir.to_s
+          streams[:out].puts "  skipping (not found) #{source_dir}"
           MissingWorkingCopy.new(source_repo_name)
         end
       end
 
       def announce_copy(source_dir)
-        logger.log '  copying '.yellow + source_dir.to_s
+        streams[:out].puts "  copying #{source_dir}"
       end
     end
   end

@@ -102,7 +102,7 @@ module Bookbinder
             ),
             Preprocessing::CopyToSiteGenDir.new(local_file_system_accessor),
           ),
-          Ingest::ClonerFactory.new(logger, local_file_system_accessor, version_control_system),
+          Ingest::ClonerFactory.new(colored_streams, local_file_system_accessor, version_control_system),
           Ingest::SectionRepositoryFactory.new(logger),
           Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
         )

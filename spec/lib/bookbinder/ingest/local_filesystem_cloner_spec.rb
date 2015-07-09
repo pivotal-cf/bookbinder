@@ -4,11 +4,9 @@ module Bookbinder
   module Ingest
     describe LocalFilesystemCloner do
       context "when the local repo is present" do
-        let(:null_logger) { double('null logger').as_null_object }
-
         it "logs the fact that it's copying" do
           fs = double('filesystem')
-          logger = double('logger')
+          out = StringIO.new
 
           allow(fs).to receive(:file_exist?).
             with(Pathname("/my/repo/dir/myrepo")) { true }
@@ -16,11 +14,10 @@ module Bookbinder
             with(Pathname("/my/dest/myrepo")) { false }
           allow(fs).to receive(:copy_contents)
 
-          expect(logger).to receive(:log).with(%r{ copying.*/my/repo/dir})
-
-          cloner = LocalFilesystemCloner.new(logger, fs, "/my/repo/dir")
+          cloner = LocalFilesystemCloner.new({out: out}, fs, "/my/repo/dir")
           cloner.call(source_repo_name: "myorg/myrepo",
                       destination_parent_dir: "/my/dest")
+          expect(out.tap(&:rewind).read).to match(%r{ copying.*/my/repo/dir})
         end
 
         it "copies the repo to the destination" do
@@ -35,7 +32,7 @@ module Bookbinder
             with(Pathname("/my/repo/dir/myrepo"),
                  Pathname("/destination/dir/myrepo"))
 
-          cloner = LocalFilesystemCloner.new(null_logger, fs, "/my/repo/dir")
+          cloner = LocalFilesystemCloner.new({out: StringIO.new}, fs, "/my/repo/dir")
           cloner.call(source_repo_name: "myorg/myrepo",
                       destination_parent_dir: "/destination/dir")
         end
@@ -53,7 +50,7 @@ module Bookbinder
               with(Pathname("/sourceparent/sourcerepo"),
                    Pathname("/destparent/mycustomdestrepo"))
 
-            cloner = LocalFilesystemCloner.new(null_logger, fs, "/sourceparent")
+            cloner = LocalFilesystemCloner.new({out: StringIO.new}, fs, "/sourceparent")
             cloner.call(source_repo_name: "myorg/sourcerepo",
                         destination_dir_name: 'mycustomdestrepo',
                         destination_parent_dir: "/destparent")
@@ -69,7 +66,7 @@ module Bookbinder
             with(Pathname("/destination/dir/myrepo")) { false }
           allow(fs).to receive(:copy_contents)
 
-          cloner = LocalFilesystemCloner.new(null_logger, fs, "/my/repo/dir")
+          cloner = LocalFilesystemCloner.new({out: StringIO.new}, fs, "/my/repo/dir")
           result = cloner.call(source_repo_name: "myorg/myrepo",
                                destination_parent_dir: "/destination/dir")
 
@@ -80,16 +77,14 @@ module Bookbinder
       context "when the local repo isn't present" do
         it "logs the fact that it isn't copying anything, and doesn't copy" do
           fs = double('filesystem', file_exist?: false)
-          logger = double('logger')
-
-          expect(logger).to receive(:log).with(%r{ skipping .*/my/repo/dir})
-
-          cloner = LocalFilesystemCloner.new(logger, fs, "/my/repo/dir")
+          out = StringIO.new
+          cloner = LocalFilesystemCloner.new({out: out}, fs, "/my/repo/dir")
           result = cloner.call(source_repo_name: "myorg/myrepo",
                                destination_parent_dir: "/some/dest")
           expect(result.path).not_to exist
           expect(result).not_to be_available
           expect(result.full_name).to eq('myorg/myrepo')
+          expect(out.tap(&:rewind).read).to match(%r{ skipping .*/my/repo/dir})
         end
       end
     end

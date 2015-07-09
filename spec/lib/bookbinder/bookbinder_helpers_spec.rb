@@ -4,7 +4,6 @@ require 'middleman-core/cli'
 require 'middleman-core/profiling'
 require 'ostruct'
 require 'redcarpet'
-require_relative '../../../lib/bookbinder/deprecated_logger'
 require_relative '../../../lib/bookbinder/ingest/git_cloner'
 require_relative '../../../lib/bookbinder/ingest/local_filesystem_cloner'
 require_relative '../../../lib/bookbinder/local_file_system_accessor'
@@ -21,7 +20,6 @@ module Bookbinder
     include Bookbinder::SpecHelperMethods
     include_context 'tmp_dirs'
 
-    let(:logger) { double('logger').as_null_object }
     let(:klass) do
       Class.new do
         include Navigation::HelperMethods
@@ -37,10 +35,6 @@ module Bookbinder
           @partial_options = options
         end
       end
-    end
-
-    before do
-      allow(DeprecatedLogger).to receive(:new).and_return(logger)
     end
 
     def run_middleman(template_variables: {}, subnav_templates: {}, archive_menu: {})
@@ -166,7 +160,7 @@ MARKDOWN
       end
 
       context 'when local' do
-        let(:cloner) { Ingest::LocalFilesystemCloner.new(logger, LocalFileSystemAccessor.new, '..') }
+        let(:cloner) { Ingest::LocalFilesystemCloner.new({out: StringIO.new}, LocalFileSystemAccessor.new, '..') }
         let(:config) { {cloner: cloner, workspace: 'code-example-repo'} }
         use_fixture_repo
 
