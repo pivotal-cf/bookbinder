@@ -1,4 +1,3 @@
-require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/nil_logger'
 require_relative '../../../../lib/bookbinder/commands/push_from_local'
 require_relative '../../../../lib/bookbinder/config/aws_credentials'
@@ -8,8 +7,6 @@ require_relative '../../../../lib/bookbinder/config/configuration'
 module Bookbinder
   module Commands
     describe PushFromLocal do
-      include SpecHelperMethods
-
       let(:book_repo) { 'my-user/fixture-book-title' }
       let(:config_hash) { {'book_repo' => book_repo, 'cred_repo' => 'whatever'} }
       let(:logger) { NilLogger.new }
