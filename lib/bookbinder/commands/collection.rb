@@ -28,9 +28,9 @@ module Bookbinder
     class Collection
       include Enumerable
 
-      def initialize(logger, base_streams, version_control_system)
+      def initialize(logger, streams, version_control_system)
         @logger = logger
-        @base_streams = base_streams
+        @streams = streams
         @version_control_system = version_control_system
       end
 
@@ -47,7 +47,7 @@ module Bookbinder
 
       private
 
-      attr_reader :logger, :base_streams, :version_control_system
+      attr_reader :logger, :streams, :version_control_system
 
       def list
         standard_commands + flags
@@ -63,17 +63,17 @@ module Bookbinder
             local_file_system_accessor,
             Sheller.new,
             Dir.pwd,
-            colored_streams
+            streams
           ),
           build_and_push_tarball,
           bind,
-          Commands::PushFromLocal.new(colored_streams, logger, configuration_fetcher, 'acceptance'),
+          Commands::PushFromLocal.new(streams, logger, configuration_fetcher, 'acceptance'),
           push_local_to_staging,
-          Commands::PushToProd.new(colored_streams, logger, configuration_fetcher, Dir.mktmpdir),
+          Commands::PushToProd.new(streams, logger, configuration_fetcher, Dir.mktmpdir),
           Commands::RunPublishCI.new(bind, push_local_to_staging, build_and_push_tarball),
-          Commands::Tag.new(colored_streams, configuration_fetcher, version_control_system),
+          Commands::Tag.new(streams, configuration_fetcher, version_control_system),
           Commands::UpdateLocalDocRepos.new(
-            colored_streams,
+            streams,
             configuration_fetcher,
             version_control_system
           ),
@@ -86,7 +86,7 @@ module Bookbinder
 
       def bind
         @bind ||= Commands::Bind.new(
-          colored_streams,
+          streams,
           OutputLocations.new(final_app_dir: final_app_directory, context_dir: File.absolute_path('.')),
           Config::BindConfigFactory.new(version_control_system, configuration_fetcher),
           Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
@@ -102,7 +102,7 @@ module Bookbinder
             ),
             Preprocessing::CopyToSiteGenDir.new(local_file_system_accessor),
           ),
-          Ingest::ClonerFactory.new(colored_streams, local_file_system_accessor, version_control_system),
+          Ingest::ClonerFactory.new(streams, local_file_system_accessor, version_control_system),
           Ingest::SectionRepositoryFactory.new(logger),
           Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
         )
@@ -110,7 +110,7 @@ module Bookbinder
 
       def push_local_to_staging
         @push_local_to_staging ||= Commands::PushFromLocal.new(
-          colored_streams,
+          streams,
           logger,
           configuration_fetcher,
           'staging'
@@ -119,18 +119,9 @@ module Bookbinder
 
       def build_and_push_tarball
         @build_and_push_tarball ||= Commands::BuildAndPushTarball.new(
-          colored_streams,
+          streams,
           configuration_fetcher
         )
-      end
-
-      def colored_streams
-        {
-          err: Streams::ColorizedStream.new(Colorizer::Colors.red, base_streams[:err]),
-          out: base_streams[:out],
-          success: Streams::ColorizedStream.new(Colorizer::Colors.green, base_streams[:out]),
-          warn: Streams::ColorizedStream.new(Colorizer::Colors.yellow, base_streams[:out]),
-        }
       end
 
       def configuration_fetcher

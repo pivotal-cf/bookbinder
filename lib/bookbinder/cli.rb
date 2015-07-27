@@ -1,8 +1,8 @@
-require_relative 'colorizer'
 require_relative 'command_runner'
 require_relative 'command_validator'
 require_relative 'commands/collection'
 require_relative 'config/cf_credentials'
+require_relative 'streams/colorized_stream'
 require_relative 'terminal'
 
 module Bookbinder
@@ -17,7 +17,7 @@ module Bookbinder
       logger = DeprecatedLogger.new
       commands = Commands::Collection.new(
         logger,
-        {out: $stdout, err: $stderr},
+        colorized_streams,
         version_control_system
       )
 
@@ -39,19 +39,19 @@ module Bookbinder
         command_runner.run command_name, command_arguments
 
       rescue Config::RemoteBindConfiguration::VersionUnsupportedError => e
-        logger.error "config.yml at version '#{e.message}' has an unsupported API."
+        colorized_streams[:err].puts "config.yml at version '#{e.message}' has an unsupported API."
         1
       rescue Config::CfCredentials::CredentialKeyError => e
-        logger.error "#{e.message}, in credentials.yml"
+        colorized_streams[:err].puts "#{e.message}, in credentials.yml"
         1
       rescue KeyError => e
-        logger.error "#{e.message} from your configuration."
+        colorized_streams[:err].puts "#{e.message} from your configuration."
         1
       rescue CliError::UnknownCommand => e
-        logger.log e.message
+        colorized_streams[:out].puts e.message
         1
       rescue RuntimeError => e
-        logger.error e.message
+        colorized_streams[:err].puts e.message
         1
       end
     end
@@ -60,5 +60,13 @@ module Bookbinder
 
     attr_reader :version_control_system
 
+    def colorized_streams
+      {
+        err: Streams::ColorizedStream.new(Colorizer::Colors.red, $stderr),
+        out: $stdout,
+        success: Streams::ColorizedStream.new(Colorizer::Colors.green, $stdout),
+        warn: Streams::ColorizedStream.new(Colorizer::Colors.yellow, $stdout),
+      }
+    end
   end
 end
