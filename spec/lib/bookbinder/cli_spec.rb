@@ -17,7 +17,7 @@ module Bookbinder
     context 'when config fails validation' do
       use_fixture_repo('invalid_config')
       let(:arguments) { ['bind', 'local'] }
-      subject { capture_stdout { run } }
+      subject { capture_stderr { run } }
       it { should have_output('required keys').in_red }
     end
 
@@ -48,13 +48,13 @@ module Bookbinder
         let(:arguments) { ['bind', 'local'] }
 
         it 'logs the error with the config file name' do
-          expect(capture_stdout { run }).
+          expect(capture_stderr { run }).
             to have_output(/I broke.*your configuration/).
             in_red
         end
 
         it 'should return 1' do
-          expect(swallow_stdout { run }).to eq 1
+          expect(swallow_stderr { run }).to eq 1
         end
       end
 
@@ -66,13 +66,13 @@ module Bookbinder
         let(:arguments) { ['bind', 'local'] }
 
         it 'logs the error with the credentials file name' do
-          expect(capture_stdout { run }).
+          expect(capture_stderr { run }).
             to have_output(/I broke.*in credentials\.yml/).
             in_red
         end
 
         it 'should return 1' do
-          expect(swallow_stdout { run }).to eq 1
+          expect(swallow_stderr { run }).to eq 1
         end
       end
 
@@ -101,11 +101,11 @@ module Bookbinder
         let(:arguments) { ['bind', 'local'] }
 
         it 'logs the error message' do
-          expect(capture_stdout { run }).to have_output('i broke').in_red
+          expect(capture_stderr { run }).to have_output('i broke').in_red
         end
 
         it 'should return 1' do
-          expect(swallow_stdout { run }).to eq 1
+          expect(swallow_stderr { run }).to eq 1
         end
       end
     end
