@@ -3,3 +3,4 @@ rvm:
   - 2.0.0
 script: "bundle exec rspec"
 env: SITEMAP_DEBUG=true
+sudo: false
