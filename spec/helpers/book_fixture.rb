@@ -11,7 +11,7 @@ module Bookbinder
     end
 
     def html_files_for_dita_section(dita_section)
-      topics(dita_section).map { |topic| has_html_file_for? topic }
+      topics(dita_section).map { |topic| html_filename_for topic }
     end
 
     def has_applied_layout(dita_section)
@@ -83,7 +83,7 @@ module Bookbinder
       end
     end
 
-    def has_html_file_for?(topic)
+    def html_filename_for(topic)
       frag = Nokogiri::HTML.fragment(topic.final_path.read)
       topic.name if frag.css("div.body.conbody").present?
     end
