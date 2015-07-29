@@ -195,6 +195,14 @@ MARKDOWN
   <a class="sidenav-title"" data-behavior="SubMenuMobile">Index Subnav</a>
 </div>'
           end
+
+          it 'populates with the specified index subnav' do
+            write_subnav_content "subnavs/default.erb", subnav_code
+            run_middleman
+            doc = Nokogiri::HTML(output)
+            expect(doc.css('div')[0].first[1]).to eq('sub-nav')
+            expect(doc.css('a').text).to eq('Index Subnav')
+          end
         end
 
         context 'and a subnav is not specified in the index markdown' do
