@@ -1,6 +1,6 @@
 module Bookbinder
   module Preprocessing
-    class CopyToSiteGenDir
+    class LinkToSiteGenDir
       def initialize(filesystem)
         @filesystem = filesystem
       end
@@ -11,7 +11,7 @@ module Bookbinder
 
       def preprocess(sections, output_locations, *_)
         sections.each do |section|
-          filesystem.copy_contents(
+          filesystem.link_creating_intermediate_dirs(
             section.path_to_repository,
             output_locations.source_for_site_generator.join(section.destination_directory)
           )

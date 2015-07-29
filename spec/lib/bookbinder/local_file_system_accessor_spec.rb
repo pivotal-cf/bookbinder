@@ -245,6 +245,18 @@ module Bookbinder
       end
     end
 
+    describe 'linking a directory' do
+      it 'links and creates intermediate dirs' do
+        Dir.mktmpdir do |tmpdir|
+          src = Pathname(tmpdir).join('foo').tap(&:mkpath)
+          dst = Pathname(tmpdir).join('bar/baz')
+          fs_accessor.link_creating_intermediate_dirs(src.to_s, dst.to_s)
+          expect(dst).to exist
+          expect(dst).to be_symlink
+        end
+      end
+    end
+
     describe 'renaming a file' do
       it 'renames a file in the same location' do
         Dir.mktmpdir do |tmpdir|

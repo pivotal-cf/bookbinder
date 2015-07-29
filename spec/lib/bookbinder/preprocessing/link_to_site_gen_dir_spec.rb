@@ -1,14 +1,15 @@
-require_relative '../../../../lib/bookbinder/preprocessing/copy_to_site_gen_dir'
+require_relative '../../../../lib/bookbinder/local_file_system_accessor'
+require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/values/section'
 require_relative '../../../../spec/helpers/nil_logger'
 
 module Bookbinder
   module Preprocessing
-    describe CopyToSiteGenDir do
-      it 'just copies sections from their cloned dir to the dir ready for site generation' do
-        fs = double('filesystem')
-        preprocessor = CopyToSiteGenDir.new(fs)
+    describe LinkToSiteGenDir do
+      it 'links sections from their cloned dir to the dir ready for site generation' do
+        fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+        preprocessor = LinkToSiteGenDir.new(fs)
         output_locations = OutputLocations.new(context_dir: 'mycontextdir')
 
         sections = [
@@ -26,11 +27,11 @@ module Bookbinder
           )
         ]
 
-        expect(fs).to receive(:copy_contents).with(
+        expect(fs).to receive(:link_creating_intermediate_dirs).with(
           sections[0].path_to_repository,
           output_locations.source_for_site_generator.join('my/desired/dir')
         )
-        expect(fs).to receive(:copy_contents).with(
+        expect(fs).to receive(:link_creating_intermediate_dirs).with(
           sections[1].path_to_repository,
           output_locations.source_for_site_generator.join('myrepo2')
         )
@@ -43,7 +44,7 @@ module Bookbinder
 
         allow(fs).to receive(:file_exist?).with(Pathname('foo')) { true }
 
-        preprocessor = CopyToSiteGenDir.new(fs)
+        preprocessor = LinkToSiteGenDir.new(fs)
         expect(preprocessor).to be_applicable_to(Section.new('foo'))
       end
 
@@ -52,7 +53,7 @@ module Bookbinder
 
         allow(fs).to receive(:file_exist?).with(Pathname('foo')) { false }
 
-        preprocessor = CopyToSiteGenDir.new(fs)
+        preprocessor = LinkToSiteGenDir.new(fs)
         expect(preprocessor).not_to be_applicable_to(Section.new('foo'))
       end
     end

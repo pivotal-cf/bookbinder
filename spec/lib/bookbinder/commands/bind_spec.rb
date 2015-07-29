@@ -8,8 +8,8 @@ require_relative '../../../../lib/bookbinder/ingest/section_repository_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
-require_relative '../../../../lib/bookbinder/preprocessing/copy_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/preprocessing/dita_preprocessor'
+require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/preprocessing/preprocessor'
 require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
@@ -98,7 +98,7 @@ module Bookbinder
     let(:preprocessor) {
       Preprocessing::Preprocessor.new(
          Preprocessing::DitaPreprocessor.new(static_site_generator_formatter, file_system_accessor, command_creator, sheller),
-         Preprocessing::CopyToSiteGenDir.new(file_system_accessor),
+         Preprocessing::LinkToSiteGenDir.new(file_system_accessor),
       )
     }
     let(:document_parser) { HtmlDocumentManipulator.new }

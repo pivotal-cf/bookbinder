@@ -16,8 +16,8 @@ require_relative '../ingest/section_repository_factory'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../post_production/sitemap_writer'
-require_relative '../preprocessing/copy_to_site_gen_dir'
 require_relative '../preprocessing/dita_preprocessor'
+require_relative '../preprocessing/link_to_site_gen_dir'
 require_relative '../preprocessing/preprocessor'
 require_relative '../sheller'
 require_relative '../subnav_formatter'
@@ -100,7 +100,7 @@ module Bookbinder
               DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY']),
               Sheller.new
             ),
-            Preprocessing::CopyToSiteGenDir.new(local_file_system_accessor),
+            Preprocessing::LinkToSiteGenDir.new(local_file_system_accessor),
           ),
           Ingest::ClonerFactory.new(streams, local_file_system_accessor, version_control_system),
           Ingest::SectionRepositoryFactory.new(logger),

@@ -52,6 +52,11 @@ module Bookbinder
       copy file, extended_dest
     end
 
+    def link_creating_intermediate_dirs(src, dst)
+      FileUtils.mkdir_p(File.dirname(dst))
+      File.symlink(src, dst)
+    end
+
     def rename_file(path, new_name)
       new_path = File.expand_path File.join path, '..', new_name
       File.rename(path, new_path)
