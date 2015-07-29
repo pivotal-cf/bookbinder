@@ -115,18 +115,6 @@ module Bookbinder
     describe 'local' do
       let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
 
-      def response_for(page)
-        command.run(['local'])
-
-        response = nil
-        ServerDirector.new(directory: 'final_app').use_server do |port|
-          uri = URI "http://localhost:#{port}/#{page}"
-          req = Net::HTTP::Get.new(uri.path)
-          response = Net::HTTP.start(uri.host, uri.port) { |http| http.request(req) }
-        end
-        response
-      end
-
       it 'runs idempotently' do
         silence_io_streams do
           command.run(['local']) # Run Once
@@ -141,14 +129,6 @@ module Bookbinder
 
         index_html = File.read dogs_index
         expect(index_html).to include 'Woof'
-      end
-
-      it 'respects a redirects file' do
-        redirect_rules = "r301 '/index.html', '/dogs/index.html'"
-
-        expect { File.write('redirects.rb', redirect_rules) }.to change {
-          response_for('index.html')
-        }.from(Net::HTTPSuccess).to(Net::HTTPMovedPermanently)
       end
 
       it 'it can find repos locally rather than going to git' do

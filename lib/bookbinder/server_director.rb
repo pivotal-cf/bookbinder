@@ -1,10 +1,9 @@
 require 'puma'
-require 'rack/rewrite'
-require 'vienna'
 
 module Bookbinder
   class ServerDirector
-    def initialize(directory: nil, port: 41722)
+    def initialize(app: app, directory: nil, port: 41722)
+      @app = app
       @directory = directory
       @port = port
     end
@@ -26,12 +25,6 @@ module Bookbinder
 
     private
 
-    def app
-      if File.exists?('redirects.rb')
-        Rack::Rewrite.new(Vienna) { eval(File.read('redirects.rb')) }
-      else
-        Vienna
-      end
-    end
+    attr_reader :app
   end
 end

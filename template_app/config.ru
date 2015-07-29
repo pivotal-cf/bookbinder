@@ -1,9 +1,5 @@
+require 'pathname'
 require 'vienna'
-
-if File.exists?('redirects.rb')
-  require 'rack/rewrite'
-  use(Rack::Rewrite) { eval File.read('redirects.rb') }
-end
-
+require './rack_app'
 require './app'
-run Vienna
+run Bookbinder::RackApp.new(Pathname('redirects.rb')).app

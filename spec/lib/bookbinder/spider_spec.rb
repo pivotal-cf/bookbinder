@@ -2,6 +2,7 @@ require 'yaml'
 require_relative '../../../lib/bookbinder/server_director'
 require_relative '../../../lib/bookbinder/spider'
 require_relative '../../../lib/bookbinder/stabilimentum'
+require_relative '../../../template_app/rack_app'
 require_relative '../../helpers/nil_logger'
 require_relative '../../helpers/tmp_dirs'
 
@@ -33,7 +34,9 @@ module Bookbinder
       FileUtils.cp other_page, File.join(public_directory, 'other_page.html')
       write_arbitrary_yaml_to(public_directory)
 
-      server_director = ServerDirector.new(directory: final_app_dir, port: port)
+      server_director = ServerDirector.new(app: RackApp.new(Pathname('redirects.rb')).app,
+                                           directory: final_app_dir,
+                                           port: port)
 
       server_director.use_server do
         Dir.chdir(final_app_dir) { spec.run }

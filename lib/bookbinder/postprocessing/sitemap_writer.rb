@@ -1,5 +1,6 @@
 require_relative '../server_director'
 require_relative '../spider'
+require_relative '../../../template_app/rack_app'
 
 module Bookbinder
   module Postprocessing
@@ -7,7 +8,11 @@ module Bookbinder
       def self.build(logger, final_app_directory, port)
         new(
           Spider.new(app_dir: final_app_directory),
-          ServerDirector.new(directory: final_app_directory, port: port)
+          ServerDirector.new(
+            app: RackApp.new(Pathname('redirects.rb')).app,
+            directory: final_app_directory,
+            port: port
+          )
         )
       end
 
