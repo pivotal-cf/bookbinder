@@ -48,7 +48,7 @@ module Bookbinder
     end
 
     describe 'removing a directory' do
-      it 'remove the specified directory from the filesystem' do
+      it 'removes the specified directory from the filesystem' do
         Dir.mktmpdir do |tmpdir|
           dirpath = File.join tmpdir, 'target_dir'
           Dir.mkdir dirpath
