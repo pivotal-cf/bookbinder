@@ -17,15 +17,11 @@ module Bookbinder
     module HelperMethods
 
       def yield_for_code_snippet(from: nil, at: nil)
-        git_accessor = config[:git_accessor]
-        cloner = config[:cloner]
-        attributes = {'repository' => {'name' => from}}
-        workspace = config[:workspace]
         code_example_reader = CodeExampleReader.new(out: $stdout)
 
-        working_copy = cloner.call(source_repo_name: from,
-                                   source_ref: 'master',
-                                   destination_parent_dir: workspace)
+        working_copy = config[:cloner].call(source_repo_name: from,
+                                            source_ref: 'master',
+                                            destination_parent_dir: config[:workspace])
 
         snippet, language = code_example_reader.get_snippet_and_language_at(at, working_copy)
 
