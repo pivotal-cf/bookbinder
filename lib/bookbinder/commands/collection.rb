@@ -15,7 +15,7 @@ require_relative '../ingest/cloner_factory'
 require_relative '../ingest/section_repository_factory'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
-require_relative '../post_production/sitemap_writer'
+require_relative '../postprocessing/sitemap_writer'
 require_relative '../preprocessing/dita_preprocessor'
 require_relative '../preprocessing/link_to_site_gen_dir'
 require_relative '../preprocessing/preprocessor'
@@ -92,7 +92,7 @@ module Bookbinder
           Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           local_file_system_accessor,
           MiddlemanRunner.new(logger, version_control_system),
-          PostProduction::SitemapWriter.build(logger, final_app_directory, sitemap_port),
+          Postprocessing::SitemapWriter.build(logger, final_app_directory, sitemap_port),
           Preprocessing::Preprocessor.new(
             Preprocessing::DitaPreprocessor.new(
               DitaHtmlToMiddlemanFormatter.new(local_file_system_accessor, subnav_formatter, html_document_manipulator),

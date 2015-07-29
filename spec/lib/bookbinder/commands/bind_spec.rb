@@ -7,7 +7,7 @@ require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/ingest/section_repository_factory'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
-require_relative '../../../../lib/bookbinder/post_production/sitemap_writer'
+require_relative '../../../../lib/bookbinder/postprocessing/sitemap_writer'
 require_relative '../../../../lib/bookbinder/preprocessing/dita_preprocessor'
 require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/preprocessing/preprocessor'
@@ -108,7 +108,7 @@ module Bookbinder
     let(:logger) { NilLogger.new }
     let(:middleman_runner) { MiddlemanRunner.new(logger, GitFake.new) }
     let(:sheller) { double('sheller', run_command: double('status', success?: true)) }
-    let(:sitemap_writer) { PostProduction::SitemapWriter.build(logger, final_app_dir, random_port) }
+    let(:sitemap_writer) { Postprocessing::SitemapWriter.build(logger, final_app_dir, random_port) }
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
     let(:subnav_formatter) { SubnavFormatter.new }
 

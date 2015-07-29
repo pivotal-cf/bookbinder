@@ -2,7 +2,7 @@ require_relative '../server_director'
 require_relative '../spider'
 
 module Bookbinder
-  module PostProduction
+  module Postprocessing
     class SitemapWriter
       def self.build(logger, final_app_directory, port)
         new(
