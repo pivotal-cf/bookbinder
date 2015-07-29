@@ -83,6 +83,21 @@ module Bookbinder
       end
     end
 
+    describe 'emptying a directory' do
+      it 'removes contents of the dir, but not the dir itself' do
+        Dir.mktmpdir do |tmpdir|
+          base = Pathname(tmpdir).join(*%w(a b))
+          base.join('c').mkpath
+          base.join('d').mkpath
+
+          fs_accessor.empty_directory(base)
+          expect(base.join('c')).not_to exist
+          expect(base.join('d')).not_to exist
+          expect(base).to exist
+        end
+      end
+    end
+
     describe 'making a directory' do
       it 'creates the directory' do
         Dir.mktmpdir do |tmpdir|

@@ -15,7 +15,7 @@ module Bookbinder
 
         def prepare_directories(config, gem_root, output_locations, layout_repo_dir)
           file_system_accessor.remove_directory(output_locations.output_dir)
-          file_system_accessor.remove_directory(output_locations.final_app_dir)
+          file_system_accessor.empty_directory(output_locations.final_app_dir)
 
           copy_directory_from_gem(gem_root, 'template_app', output_locations.final_app_dir)
           copy_directory_from_gem(gem_root, 'master_middleman', output_locations.site_generator_home)

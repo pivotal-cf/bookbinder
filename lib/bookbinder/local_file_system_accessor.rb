@@ -24,6 +24,10 @@ module Bookbinder
       File.read(path)
     end
 
+    def empty_directory(path)
+      FileUtils.rm_rf(File.join(path, '.'))
+    end
+
     def remove_directory(path)
       FileUtils.rm_rf(path)
     end
