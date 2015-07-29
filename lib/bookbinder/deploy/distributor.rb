@@ -52,14 +52,24 @@ module Bookbinder
 
       def upload_trace
         uploaded_file = archive.upload_file(deployment.green_builds_bucket, deployment.artifact_filename, deployment.artifact_full_path)
-        streams[:success].puts("Your cf trace file is available at: #{uploaded_file.url(Time.now.to_i + EXPIRATION_HOURS*60*60)}")
-        streams[:success].puts("This URL will expire in #{EXPIRATION_HOURS} hours, so if you need to share it, make sure to save a copy now.")
+        log_success(
+          ["Your cf trace file is available at: #{uploaded_file.url(Time.now.to_i + EXPIRATION_HOURS*60*60)}",
+           "This URL will expire in #{EXPIRATION_HOURS} hours, so if you need to share it, make sure to save a copy now."]
+        )
       rescue Errno::ENOENT
-        streams[:err].puts("Could not find CF trace file: #{deployment.artifact_full_path}")
+        log_error("Could not find CF trace file: #{deployment.artifact_full_path}")
       end
 
       def cf_credentials
         deployment.cf_credentials
+      end
+
+      def log_success(message)
+        streams[:success].puts(message)
+      end
+
+      def log_error(message)
+        streams[:err].puts(message)
       end
     end
   end
