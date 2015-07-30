@@ -69,11 +69,11 @@ p fib.take_while { |n| n <= 4E6 }
 
     context 'when there is no language specified' do
       it 'returns a nil language :(' do
-      destination_dir = File.expand_path('../../../fixtures/repositories/code-example-repo', __FILE__)
-      working_copy = Ingest::WorkingCopy.new(copied_to: destination_dir, full_name: 'code-example-repo')
-      snippet_from_repo, language =
-        CodeExampleReader.new({}).get_snippet_and_language_at('typeless_stuff', working_copy)
-      expect(language).to be_nil
+        destination_dir = File.expand_path('../../../fixtures/repositories/code-example-repo', __FILE__)
+        working_copy = Ingest::WorkingCopy.new(copied_to: destination_dir, full_name: 'code-example-repo')
+        snippet_from_repo, language =
+          CodeExampleReader.new({}).get_snippet_and_language_at('typeless_stuff', working_copy)
+        expect(language).to be_nil
       end
     end
   end
