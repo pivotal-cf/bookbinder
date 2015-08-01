@@ -126,12 +126,7 @@ module Bookbinder
     end
 
     describe '#yield_for_code_snippet' do
-      let(:config) { {} }
       let(:repo) { 'fantastic/code-example-repo' }
-      let(:excerpt_mark) { 'complicated_function' }
-      let(:yielded_snippet) do
-        klass.new(config).yield_for_code_snippet(from: repo, at: excerpt_mark)
-      end
       let(:markdown_snippet) do
 <<-MARKDOWN
 ```ruby
@@ -149,20 +144,23 @@ p fib.take_while { |n| n <= 4E6 }
 ```
 MARKDOWN
       end
-      let(:cloner) { Ingest::LocalFilesystemCloner.new({out: StringIO.new}, LocalFileSystemAccessor.new, '..') }
-      let(:code_example_reader) { instance_double('Bookbinder::CodeExampleReader') }
-      let(:config) { {code_example_reader: code_example_reader, cloner: cloner, workspace: 'code-example-repo'} }
+      let(:excerpt_mark) { 'complicated_function' }
+      let(:cloner) { Ingest::LocalFilesystemCloner.new({out: StringIO.new},
+                                                       LocalFileSystemAccessor.new,
+                                                       File.absolute_path('..')) }
+      let(:code_example_reader) { CodeExampleReader.new({}, LocalFileSystemAccessor.new) }
+      let(:config) { {cloner: cloner,
+                      code_example_reader: code_example_reader,
+                      workspace: File.absolute_path('../my-special-workspace')} }
 
       use_fixture_repo
 
+      let(:yielded_snippet) do
+        klass.new(config).yield_for_code_snippet(from: repo, at: excerpt_mark)
+      end
+
       it 'returns markdown from the cloned repo' do
-        allow(code_example_reader).to receive(:get_snippet_and_language_at).with(
-          'complicated_function', Ingest::WorkingCopy.new(copied_to: Pathname('code-example-repo/code-example-repo'),
-                                                          full_name: 'fantastic/code-example-repo')
-        ) {
-          markdown_snippet
-        }
-        expect(yielded_snippet).to eq(markdown_snippet)
+        expect(yielded_snippet).to eq(markdown_snippet.chomp)
       end
     end
 
