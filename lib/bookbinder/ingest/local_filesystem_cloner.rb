@@ -15,7 +15,7 @@ module Bookbinder
                source_ref: nil,
                destination_parent_dir: nil,
                destination_dir_name: nil)
-        copy!(
+        link!(
           source_repo_name,
           Pathname(user_repo_dir).join(source_repo_name.split('/').last),
           Pathname(destination_parent_dir).join(DestinationDirectory.new(source_repo_name, destination_dir_name))
@@ -26,18 +26,18 @@ module Bookbinder
 
       attr_reader :streams, :filesystem, :user_repo_dir
 
-      def copy!(source_repo_name, source_dir, dest_dir)
+      def link!(source_repo_name, source_dir, dest_dir)
         source_exists = filesystem.file_exist?(source_dir)
 
         if source_exists && filesystem.file_exist?(dest_dir)
-          announce_copy(source_dir)
+          announce(source_dir)
           WorkingCopy.new(
             copied_to: dest_dir,
             full_name: source_repo_name,
           )
         elsif source_exists
-          announce_copy(source_dir)
-          filesystem.copy_contents(source_dir, dest_dir)
+          announce(source_dir)
+          filesystem.link_creating_intermediate_dirs(source_dir, dest_dir)
           WorkingCopy.new(
             copied_to: dest_dir,
             full_name: source_repo_name,
@@ -48,7 +48,7 @@ module Bookbinder
         end
       end
 
-      def announce_copy(source_dir)
+      def announce(source_dir)
         streams[:out].puts "  copying #{source_dir}"
       end
     end

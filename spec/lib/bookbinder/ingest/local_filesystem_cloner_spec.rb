@@ -4,7 +4,7 @@ module Bookbinder
   module Ingest
     describe LocalFilesystemCloner do
       context "when the local repo is present" do
-        it "logs the fact that it's copying" do
+        it "logs the fact that it's cloning" do
           fs = double('filesystem')
           out = StringIO.new
 
@@ -12,7 +12,7 @@ module Bookbinder
             with(Pathname("/my/repo/dir/myrepo")) { true }
           allow(fs).to receive(:file_exist?).
             with(Pathname("/my/dest/myrepo")) { false }
-          allow(fs).to receive(:copy_contents)
+          allow(fs).to receive(:link_creating_intermediate_dirs)
 
           cloner = LocalFilesystemCloner.new({out: out}, fs, "/my/repo/dir")
           cloner.call(source_repo_name: "myorg/myrepo",
@@ -20,7 +20,7 @@ module Bookbinder
           expect(out.tap(&:rewind).read).to match(%r{ copying.*/my/repo/dir})
         end
 
-        it "copies the repo to the destination" do
+        it "links the repo to the destination" do
           fs = double('filesystem')
 
           allow(fs).to receive(:file_exist?).
@@ -28,7 +28,7 @@ module Bookbinder
           allow(fs).to receive(:file_exist?).
             with(Pathname("/destination/dir/myrepo")) { false }
 
-          expect(fs).to receive(:copy_contents).
+          expect(fs).to receive(:link_creating_intermediate_dirs).
             with(Pathname("/my/repo/dir/myrepo"),
                  Pathname("/destination/dir/myrepo"))
 
@@ -46,7 +46,7 @@ module Bookbinder
             allow(fs).to receive(:file_exist?).
               with(Pathname("/destparent/mycustomdestrepo")) { false }
 
-            expect(fs).to receive(:copy_contents).
+            expect(fs).to receive(:link_creating_intermediate_dirs).
               with(Pathname("/sourceparent/sourcerepo"),
                    Pathname("/destparent/mycustomdestrepo"))
 
@@ -64,7 +64,7 @@ module Bookbinder
             with(Pathname("/my/repo/dir/myrepo")) { true }
           allow(fs).to receive(:file_exist?).
             with(Pathname("/destination/dir/myrepo")) { false }
-          allow(fs).to receive(:copy_contents)
+          allow(fs).to receive(:link_creating_intermediate_dirs)
 
           cloner = LocalFilesystemCloner.new({out: StringIO.new}, fs, "/my/repo/dir")
           result = cloner.call(source_repo_name: "myorg/myrepo",
