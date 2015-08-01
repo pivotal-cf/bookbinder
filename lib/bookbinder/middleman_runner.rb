@@ -31,9 +31,10 @@ end
 
 module Bookbinder
   class MiddlemanRunner
-    def initialize(logger, git_accessor)
+    def initialize(logger, git_accessor, code_example_reader)
       @logger = logger
       @git_accessor = git_accessor
+      @code_example_reader = code_example_reader
     end
 
     def run(output_locations,
@@ -56,7 +57,7 @@ module Bookbinder
 
     private
 
-    attr_reader :git_accessor
+    attr_reader :git_accessor, :code_example_reader
 
     def within(temp_root, &block)
       Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
@@ -80,6 +81,7 @@ module Bookbinder
       config = {
         archive_menu: archive_menu,
         cloner: cloner,
+        code_example_reader: code_example_reader,
         production_host: production_host,
         relative_links: false,
         subnav_templates: subnav_templates,

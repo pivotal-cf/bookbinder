@@ -10,9 +10,10 @@ module Bookbinder
     include SpecHelperMethods
 
     UNEXERCISED_GIT_ACCESSOR = "UNEXERCISED_GIT_ACCESSOR"
+    UNEXERCISED_CODE_EXAMPLE_READER = "UNEXERCISED_CODE_EXAMPLE_READER"
 
     let(:logger) { NilLogger.new }
-    let(:middleman_runner) { MiddlemanRunner.new(logger, UNEXERCISED_GIT_ACCESSOR) }
+    let(:middleman_runner) { MiddlemanRunner.new(logger, UNEXERCISED_GIT_ACCESSOR, UNEXERCISED_CODE_EXAMPLE_READER) }
 
     let(:context_dir) { Pathname(Dir.mktmpdir) }
     let(:target_dir_path) { context_dir.join('output', 'master_middleman') }

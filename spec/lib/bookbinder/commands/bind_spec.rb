@@ -106,7 +106,7 @@ module Bookbinder
     let(:final_app_dir) { File.absolute_path('final_app') }
     let(:git_client) { GitClient.new }
     let(:logger) { NilLogger.new }
-    let(:middleman_runner) { MiddlemanRunner.new(logger, GitFake.new) }
+    let(:middleman_runner) { MiddlemanRunner.new(logger, GitFake.new, code_example_reader = nil) }
     let(:sheller) { double('sheller', run_command: double('status', success?: true)) }
     let(:sitemap_writer) { Postprocessing::SitemapWriter.build(logger, final_app_dir, random_port) }
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
@@ -282,6 +282,7 @@ module Bookbinder
 
     describe 'including code snippets' do
       include Redirection
+      let(:middleman_runner) { MiddlemanRunner.new(logger, GitFake.new, CodeExampleReader.new({}, file_system_accessor)) }
 
       it 'applies the syntax highlighting CSS' do
         section_repo_name = 'org/my-repo-with-code-snippets'
@@ -486,7 +487,6 @@ Content:
                                              'cred_repo' => 'my-org/my-creds',
                                              'public_host' => 'docs.dogs.com')
         config_factory = double('config factory', produce: config)
-        middleman_runner = MiddlemanRunner.new(logger, GitFake.new)
         final_app_dir = File.absolute_path('final_app')
         spider = Spider.new(app_dir: final_app_dir)
         server_director = ServerDirector.new(directory: final_app_dir)

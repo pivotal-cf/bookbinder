@@ -2,6 +2,7 @@ Dir.glob(File.expand_path('../../commands/*.rb', __FILE__)).each do |command_fil
   require command_file
 end
 
+require_relative '../code_example_reader'
 require_relative '../commands/bind/directory_preparer'
 require_relative '../config/bind_config_factory'
 require_relative '../config/fetcher'
@@ -91,7 +92,10 @@ module Bookbinder
           Config::BindConfigFactory.new(version_control_system, configuration_fetcher),
           Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           local_file_system_accessor,
-          MiddlemanRunner.new(logger, version_control_system),
+          MiddlemanRunner.new(
+            logger, version_control_system,
+            CodeExampleReader.new(streams, local_file_system_accessor)
+          ),
           Postprocessing::SitemapWriter.build(logger, final_app_directory, sitemap_port),
           Preprocessing::Preprocessor.new(
             Preprocessing::DitaPreprocessor.new(

@@ -4,6 +4,7 @@ require 'middleman-core/cli'
 require 'middleman-core/profiling'
 require 'ostruct'
 require 'redcarpet'
+require_relative '../../../lib/bookbinder/code_example_reader'
 require_relative '../../../lib/bookbinder/ingest/git_cloner'
 require_relative '../../../lib/bookbinder/ingest/local_filesystem_cloner'
 require_relative '../../../lib/bookbinder/local_file_system_accessor'
@@ -148,25 +149,20 @@ p fib.take_while { |n| n <= 4E6 }
 ```
 MARKDOWN
       end
+      let(:cloner) { Ingest::LocalFilesystemCloner.new({out: StringIO.new}, LocalFileSystemAccessor.new, '..') }
+      let(:code_example_reader) { instance_double('Bookbinder::CodeExampleReader') }
+      let(:config) { {code_example_reader: code_example_reader, cloner: cloner, workspace: 'code-example-repo'} }
 
-      context 'when not local' do
-        let(:cloner) { Ingest::GitCloner.new(Bookbinder::GitFake.new) }
-        let(:config) { {cloner: cloner, workspace: 'code-example-repo'} }
-        use_fixture_repo
+      use_fixture_repo
 
-        it 'returns markdown from git' do
-          expect(yielded_snippet).to eq(markdown_snippet.chomp)
-        end
-      end
-
-      context 'when local' do
-        let(:cloner) { Ingest::LocalFilesystemCloner.new({out: StringIO.new}, LocalFileSystemAccessor.new, '..') }
-        let(:config) { {cloner: cloner, workspace: 'code-example-repo'} }
-        use_fixture_repo
-
-        it 'returns markdown from the local repo' do
-          expect(yielded_snippet).to eq(markdown_snippet.chomp)
-        end
+      it 'returns markdown from the local repo' do
+        allow(code_example_reader).to receive(:get_snippet_and_language_at).with(
+          'complicated_function', Ingest::WorkingCopy.new(copied_to: Pathname('code-example-repo/code-example-repo'),
+                                                          full_name: 'fantastic/code-example-repo')
+        ) {
+          markdown_snippet
+        }
+        expect(yielded_snippet).to eq(markdown_snippet)
       end
     end
 
