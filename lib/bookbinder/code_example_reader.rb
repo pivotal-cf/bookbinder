@@ -1,3 +1,5 @@
+require 'find'
+
 module Bookbinder
   class CodeExampleReader
     class InvalidSnippet < StandardError
@@ -54,16 +56,29 @@ module Bookbinder
       def get_snippet(marker, working_copy)
         @snippet ||=
           begin
-            snippet = ''
-            FileUtils.cd(working_copy.path) {
-              locale = 'LC_CTYPE=C LANG=C' # Quiets 'sed: RE error: illegal byte sequence'
-              result = `#{locale} find . -exec sed -ne '/code_snippet #{marker} start/,/code_snippet #{marker} end/ p' {} \\; 2> /dev/null`
-              snippet = if result.lines.last && result.lines.last.match(/code_snippet #{marker} end/)
-                          result
-                        else
-                          ""
-                        end
-            }
+            snippet = ""
+            Find.find(working_copy.path) do |path|
+              if FileTest.directory?(path)
+                if File.basename(path)[0] == ?.
+                  Find.prune
+                else
+                  next
+                end
+              else
+                File.open(path, 'r') { |f|
+                  start_marker = f.each_line.detect {|l|
+                    l.match(/code_snippet #{marker} start/)
+                  }
+                  if start_marker.nil?
+                    Find.prune
+                  else
+                    return f.tap(&:rewind).read.
+                      scan(/(code_snippet #{marker} start.*)code_snippet #{marker} end/m).
+                      flatten.first || ""
+                  end
+                }
+              end
+            end
             snippet
           end
       end
