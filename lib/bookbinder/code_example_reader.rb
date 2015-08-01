@@ -35,17 +35,15 @@ module Bookbinder
       end
 
       def valid?
-        ! get_snippet(marker, working_copy).empty?
+        ! snippet.empty?
       end
 
       def language
-        lines = get_snippet(marker, working_copy).split("\n")
         language_match = lines[0].match(/code_snippet #{Regexp.escape(marker)} start (\w+)/)
         Array(language_match)[1]
       end
 
       def content
-        lines = get_snippet(marker, working_copy).split("\n")
         lines[1..-2].join("\n")
       end
 
@@ -53,30 +51,30 @@ module Bookbinder
 
       attr_reader :marker, :working_copy
 
-      def get_snippet(marker, working_copy)
+      def lines
+        snippet.split("\n")
+      end
+
+      def snippet
         @snippet ||=
           begin
             snippet = ""
-            Find.find(working_copy.path) do |path|
-              if FileTest.directory?(path)
-                if File.basename(path)[0] == ?.
-                  Find.prune
-                else
-                  next
-                end
+            pattern = /code_snippet #{marker} start.*code_snippet #{marker} end/m
+            from = working_copy.path
+
+            Find.find(from) do |dir|
+              path = Pathname(dir)
+              if path.directory? && path.basename.to_s[0] == ?.
+                Find.prune
+              elsif path.directory?
+                next
               else
-                File.open(path, 'r') { |f|
-                  start_marker = f.each_line.detect {|l|
-                    l.match(/code_snippet #{marker} start/)
-                  }
-                  if start_marker.nil?
-                    Find.prune
-                  else
-                    return f.tap(&:rewind).read.
-                      scan(/(code_snippet #{marker} start.*)code_snippet #{marker} end/m).
-                      flatten.first || ""
-                  end
-                }
+                scanned, * = path.read.scan(pattern)
+                if scanned
+                  return scanned
+                else
+                  Find.prune
+                end
               end
             end
             snippet
