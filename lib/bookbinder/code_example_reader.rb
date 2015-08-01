@@ -6,7 +6,7 @@ module Bookbinder
       end
     end
 
-    def initialize(out: out)
+    def initialize(out: nil)
       @out = out
     end
 
