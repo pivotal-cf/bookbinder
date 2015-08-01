@@ -1,4 +1,4 @@
-require 'find'
+require_relative 'local_file_system_accessor'
 
 module Bookbinder
   class CodeExampleReader
@@ -56,29 +56,10 @@ module Bookbinder
       end
 
       def snippet
-        @snippet ||=
-          begin
-            snippet = ""
-            pattern = /code_snippet #{marker} start.*code_snippet #{marker} end/m
-            from = working_copy.path
-
-            Find.find(from) do |dir|
-              path = Pathname(dir)
-              if path.directory? && path.basename.to_s[0] == ?.
-                Find.prune
-              elsif path.directory?
-                next
-              else
-                scanned, * = path.read.scan(pattern)
-                if scanned
-                  return scanned
-                else
-                  Find.prune
-                end
-              end
-            end
-            snippet
-          end
+        @snippet ||= LocalFileSystemAccessor.new.find_lines_recursively(
+          working_copy.path,
+          /code_snippet #{marker} start.*code_snippet #{marker} end/m
+        )
       end
     end
 
