@@ -14,11 +14,11 @@ module Bookbinder
     end
 
     def get_snippet_and_language_at(marker, working_copy)
-      if ! working_copy.available?
+      if working_copy.available?
+        process_snippet(marker, working_copy)
+      else
         out << "  skipping (not found) #{working_copy.full_name}"
         ''
-      else
-        process_snippet(marker, working_copy)
       end
     end
 
@@ -55,13 +55,15 @@ module Bookbinder
     attr_reader :out, :fs
 
     def process_snippet(marker, working_copy)
-      snippet = Snippet.new(
-        fs.find_lines_recursively(
-          working_copy.path,
-          /code_snippet #{marker} start.*code_snippet #{marker} end/m
-        ),
-        /code_snippet #{Regexp.escape(marker)} start (\w+)/
-      )
+      pattern = /code_snippet #{marker} start.*code_snippet #{marker} end/m
+      language_pattern = /code_snippet #{Regexp.escape(marker)} start (\w+)/
+
+      found_text = fs.find_files_recursively(working_copy.path).
+        lazy.map {|path| fs.read(path).scan(pattern).first}.
+        detect ->{""} {|lines| lines}
+
+      snippet = Snippet.new(found_text, language_pattern)
+
       if snippet.valid?
         [snippet.content, snippet.language]
       else

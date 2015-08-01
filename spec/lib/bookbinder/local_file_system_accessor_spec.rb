@@ -305,38 +305,17 @@ module Bookbinder
       end
     end
 
-    describe 'finding a section in a directory matching a pattern' do
-      it 'returns a string with the match' do
+    describe 'finding files in a directory' do
+      it 'returns files after following symlinks' do
         Dir.mktmpdir do |dir|
           path = Pathname(dir)
-          path.join("some/nested/dir").mkpath
-          path.join("some/other/nested/dir").mkpath
-          lines = <<-LINES.chomp
-Here is my starting line, inclusive.
-Here are
-Some lines
-Here is my finishing line, inclusive.
-          LINES
-
-          File.write(path.join("some/other/nested/dir/foo"), <<-DOC)
-Just some prologue.
-
-#{lines}
-
-Just some epilogue.
-          DOC
-
-          expect(fs_accessor.find_lines_recursively(path, /Here is my start.*Here is my finishing line, inclusive\./m)).to eq(lines)
-        end
-      end
-
-      it "returns an empty string when there's no match" do
-        Dir.mktmpdir do |dir|
-          path = Pathname(dir)
-          path.join("some/nested/dir").mkpath
-          path.join("some/other/nested/dir").mkpath
-
-          expect(fs_accessor.find_lines_recursively(path, /wont-be-found/)).to eq("")
+          path.join("top-dir/nested/dir").mkpath
+          path.join("parallel-dir/other/nested/dir").mkpath
+          FileUtils.touch(path.join("top-dir/nested/dir/foo"))
+          FileUtils.touch(path.join("parallel-dir/other/nested/dir/bar"))
+          File.symlink(path.join("parallel-dir/other"), path.join("top-dir/other"))
+          expect(fs_accessor.find_files_recursively(path.join("top-dir")).map {|p| p.to_s.sub(dir, '')}).
+            to eq(%w(/top-dir/nested/dir/foo /top-dir/other/nested/dir/bar))
         end
       end
     end

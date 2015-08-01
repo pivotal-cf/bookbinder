@@ -72,23 +72,12 @@ module Bookbinder
       relative_path.to_s
     end
 
-    def find_lines_recursively(from, pattern)
-      Find.find(from) do |dir|
-        path = Pathname(dir)
-        if path.directory? && path.basename.to_s[0] == ?.
-          Find.prune
-        elsif path.directory?
-          next
-        else
-          scanned, * = path.read.scan(pattern)
-          if scanned
-            return scanned
-          else
-            Find.prune
-          end
-        end
-      end
-      ""
+    def find_files_recursively(from)
+      `find -L #{from}`.
+        lines.
+        map(&:chomp).
+        map(&Pathname.method(:new)).
+        reject(&:directory?)
     end
   end
 end

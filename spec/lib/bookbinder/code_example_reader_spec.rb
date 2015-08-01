@@ -31,10 +31,14 @@ p fib.take_while { |n| n <= 4E6 }
 
       fs = instance_double('Bookbinder::LocalFileSystemAccessor')
 
-      allow(fs).to receive(:find_lines_recursively).with(
+      allow(fs).to receive(:find_files_recursively).with(
         working_copy.path,
-        /code_snippet complicated_function start.*code_snippet complicated_function end/m
-      ) { found_text }
+      ) { ["foo", "bar"] }
+      allow(fs).to receive(:read).with("foo").and_return(<<-DOC)
+prologue
+#{found_text}
+epilogue
+      DOC
 
       snippet_from_repo, language =
         CodeExampleReader.new({}, fs).get_snippet_and_language_at('complicated_function', working_copy)
@@ -46,7 +50,8 @@ p fib.take_while { |n| n <= 4E6 }
     context 'when the snippet is not found' do
       it 'raises an InvalidSnippet error' do
         fs = instance_double('Bookbinder::LocalFileSystemAccessor')
-        allow(fs).to receive(:find_lines_recursively) { "" }
+        allow(fs).to receive(:find_files_recursively) { ["foo"] }
+        allow(fs).to receive(:read).with("foo") { "asdf" }
         expect { CodeExampleReader.new({}, fs).get_snippet_and_language_at('missing_snippet', working_copy) }.
           to raise_exception(CodeExampleReader::InvalidSnippet)
       end
@@ -66,7 +71,8 @@ p fib.take_while { |n| n <= 4E6 }
     context 'when there is no language specified' do
       it 'returns a nil language :(' do
         fs = instance_double('Bookbinder::LocalFileSystemAccessor')
-        allow(fs).to receive(:find_lines_recursively) { "# code_snippet typeless_stuff\n" }
+        allow(fs).to receive(:find_files_recursively) { %w(foo) }
+        allow(fs).to receive(:read).with("foo") { "# code_snippet typeless_stuff start\n# code_snippet typeless_stuff end\n" }
         snippet_from_repo, language =
           CodeExampleReader.new({}, fs).get_snippet_and_language_at('typeless_stuff', working_copy)
         expect(language).to be_nil
