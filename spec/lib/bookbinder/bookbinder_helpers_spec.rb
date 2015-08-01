@@ -155,7 +155,7 @@ MARKDOWN
 
       use_fixture_repo
 
-      it 'returns markdown from the local repo' do
+      it 'returns markdown from the cloned repo' do
         allow(code_example_reader).to receive(:get_snippet_and_language_at).with(
           'complicated_function', Ingest::WorkingCopy.new(copied_to: Pathname('code-example-repo/code-example-repo'),
                                                           full_name: 'fantastic/code-example-repo')
