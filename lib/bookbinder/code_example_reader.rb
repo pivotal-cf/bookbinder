@@ -1,5 +1,3 @@
-require_relative 'local_file_system_accessor'
-
 module Bookbinder
   class CodeExampleReader
     class InvalidSnippet < StandardError
