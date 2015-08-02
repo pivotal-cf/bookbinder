@@ -79,14 +79,19 @@ module Bookbinder
       builder = Middleman::Cli::Build.shared_instance(verbose)
 
       config = {
-        archive_menu: archive_menu,
+        # dependencies
         cloner: cloner,
         code_example_reader: code_example_reader,
+
+        # Bookbinder config (serializable)
+        archive_menu: archive_menu,
         production_host: production_host,
-        relative_links: false,
         subnav_templates: subnav_templates,
         template_variables: template_variables,
         workspace: workspace_dir,
+
+        # Middleman config (serializable)
+        relative_links: false,
       }
 
       config.each { |k, v| builder.config[k] = v }
