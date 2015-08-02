@@ -77,6 +77,7 @@ module Bookbinder
         lines.
         map(&:chomp).
         map(&Pathname.method(:new)).
+        reject {|p| p.to_s.match %r{/\.}}.
         reject(&:directory?)
     end
   end

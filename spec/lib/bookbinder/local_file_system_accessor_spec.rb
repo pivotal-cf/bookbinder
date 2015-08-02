@@ -306,11 +306,12 @@ module Bookbinder
     end
 
     describe 'finding files in a directory' do
-      it 'returns files after following symlinks' do
+      it 'returns files after following symlinks, excluding hidden files' do
         Dir.mktmpdir do |dir|
           path = Pathname(dir)
           path.join("top-dir/nested/dir").mkpath
           path.join("parallel-dir/other/nested/dir").mkpath
+          FileUtils.touch(path.join("top-dir/.exclude-me-please"))
           FileUtils.touch(path.join("top-dir/nested/dir/foo"))
           FileUtils.touch(path.join("parallel-dir/other/nested/dir/bar"))
           File.symlink(path.join("parallel-dir/other"), path.join("top-dir/other"))
