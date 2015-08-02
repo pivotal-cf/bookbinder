@@ -445,7 +445,10 @@ Content:
 
           command = bind_cmd(bind_config_factory: config_factory)
           collected_output = capture_stdout {
-            expect { command.run(['remote']) }.to raise_error
+            begin
+              command.run(['remote'])
+            rescue SystemExit
+            end
           }
 
           expect(collected_output).not_to match(/error.*build\/index.html/)
@@ -472,7 +475,10 @@ Content:
 
         command = bind_cmd(bind_config_factory: config_factory)
         collected_output = capture_stdout {
-          expect { command.run(['remote', '--verbose']) }.to raise_error
+          begin
+            command.run(['remote', '--verbose'])
+          rescue SystemExit
+          end
         }
 
         expect(collected_output).to match(/error.*build/)
