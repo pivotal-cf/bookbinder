@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'unf', ['~> 0.1']
   s.add_runtime_dependency 'middleman', ['~> 3.3.5']
   s.add_runtime_dependency 'middleman-syntax', ['~> 2.0']
+  s.add_runtime_dependency 'rouge', ['1.9.0']
   s.add_runtime_dependency 'redcarpet', ['~> 3.2.3']
   s.add_runtime_dependency 'vienna', ['= 0.4.0']
   s.add_runtime_dependency 'anemone'
