@@ -53,8 +53,9 @@ module Bookbinder
     attr_reader :out, :fs
 
     def process_snippet(marker, working_copy)
-      pattern = /code_snippet #{marker} start.*code_snippet #{marker} end/m
-      language_pattern = /code_snippet #{Regexp.escape(marker)} start (\w+)/
+      escaped_marker = Regexp.escape(marker)
+      pattern = /code_snippet #{escaped_marker} start.*code_snippet #{escaped_marker} end/m
+      language_pattern = /code_snippet #{escaped_marker} start (\w+)/
 
       found_text = fs.find_files_recursively(working_copy.path).
         lazy.map {|path| fs.read(path).scan(pattern).first}.

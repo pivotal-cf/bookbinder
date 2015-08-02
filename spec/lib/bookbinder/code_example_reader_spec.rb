@@ -78,5 +78,30 @@ epilogue
         expect(language).to be_nil
       end
     end
+
+    it "isn't susceptible to regexp injection" do
+      require 'timeout'
+
+      found_text = <<-RUBY
+# code_snippet aaaaaaaaaaaaaaaaaaaaaaaa start
+some stuff
+# code_snippet aaaaaaaaaaaaaaaaaaaaaaaa end
+      RUBY
+
+      fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+
+      allow(fs).to receive(:find_files_recursively).with(
+        working_copy.path,
+      ) { ["foo"] }
+      allow(fs).to receive(:read).with("foo") { found_text }
+
+      snippet_from_repo, language = [nil, nil]
+
+      expect {
+        Timeout::timeout(2) {
+          CodeExampleReader.new({}, fs).get_snippet_and_language_at('(.*a){11}', working_copy)
+        }
+      }.to raise_error(CodeExampleReader::InvalidSnippet)
+    end
   end
 end
