@@ -90,12 +90,8 @@ some stuff
 
       fs = instance_double('Bookbinder::LocalFileSystemAccessor')
 
-      allow(fs).to receive(:find_files_recursively).with(
-        working_copy.path,
-      ) { ["foo"] }
+      allow(fs).to receive(:find_files_recursively) { ["foo"] }
       allow(fs).to receive(:read).with("foo") { found_text }
-
-      snippet_from_repo, language = [nil, nil]
 
       expect {
         Timeout::timeout(2) {
