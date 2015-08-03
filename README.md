@@ -5,7 +5,7 @@
 
 ~~~bash
 source 'https://rubygems.org'
-gem 'bookbindery', '~> 4.0.0'
+gem 'bookbindery', '~> 4.2.0'
 ~~~
 
 Bookbinder is a gem that binds together a unified documentation web application
@@ -22,38 +22,76 @@ See the [Bookbinder wiki](https://github.com/pivotal-cf/bookbinder/wiki) for det
 
 **Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
 
-To install the Bookbinder gem, add `gem "bookbindery"` to your Gemfile.
-Creating a book is more involved process, but we plan to automate this process
-in the near future.
+Follow the instructions below to install Bookbinder:
 
-### DITA-OT
+1. Add `gem "bookbindery"` to your Gemfile.
+1. Run `bundle install` to install the dependencies specified in your Gemfile.
 
-Bookbinder uses the [DITA Open Toolkit](http://www.dita-ot.org/) (DITA-OT) to
-process documents written in DITA.
-If you have DITA sections in your book, you must install DITA-OT to process
-them.
+1. (**Optional**) Install the [DITA Open Toolkit](http://www.dita-ot.org/)
+    (DITA-OT).
 
-Once installed, specify the location of the DITA-OT library as an environment
-variable named "PATH_TO_DITA_OT_LIBRARY".
-We recommend that you use the full_easy_install type for the DITA-OT library.
+    Bookbinder uses the [DITA Open Toolkit](http://www.dita-ot.org/) (DITA-OT)
+    to process documents written in DITA.
+    If you have DITA sections in your book, you must install DITA-OT to process
+    them.
 
-**Note**: Ensure that the version of the DITA-OT library that you install
-supports the DITA version in which your documents are written.
+    Once installed, specify the location of the DITA-OT library as an
+    environment variable named **PATH_TO_DITA_OT_LIBRARY**.
+
+    We recommend that you use the `full_easy_install` type for the DITA-OT
+    library.
+
+    **Note**: Ensure that the version of the DITA-OT library that you install
+    supports the DITA version in which your documents are written.
 
 ## Usage
 
 Bookbinder is meant to be used from within a project called a **book**.
 The book includes a configuration file that describes which documentation
 repositories to use as source materials.
+
 The bookbindery gem provides a set of scripts to aggregate those repositories
 and publish them to various locations.
+
 Bookbinder also provides scripts for running on a Continuous Integration system
 that can detect when a documentation repository has been updated with new
 content, and that can verify a composed book is free of any dead links.
 
-### Creating a book from scratch using local sections
+### Creating a Book
 
-Typically, the disparate source materials of your book are organized into
+1. To create a new book on your local machine, run `bookbinder generate
+    BOOKNAME`, replacing BOOKNAME with the name of your book. For example:
+
+    ```
+    $ bundle exec bookbinder generate cloud-documentation
+    ```
+
+    The `bookbinder generate BOOKNAME` command creates a directory named
+    `BOOKNAME`.
+    This directory contains the following:
+    * A Gemfile referencing the `bookbindery` gem
+    * A minimal `config.yml` file
+    * A `bin` directory containing code
+    * A `master_middleman/source` directory containing an index page
+    * An empty `master_middleman/build/` directory
+
+1. After running `bookbinder generate`, run `bookbinder bind local` to assemble
+    your book from the repos specified in the `config.yml` file.
+
+    **Note**: At this point, unless you've added anything to the `config.yml`,
+    the `config.yml` contains no references to any repos, and so bookbinder will
+    bind a book with no content.
+
+1. Run the following commands to start up the web site locally:
+    * `cd final_app`
+    * `rackup`
+
+1. Launch a web browser to
+[localhost:9292/my/included-section](http://localhost:9292/) to view your book.
+
+
+
+As typically used, the disparate source materials of a book are organized into
 separate git repositories.
 
 When writing documentation on your local machine, however, we recommend that you
@@ -64,63 +102,13 @@ from sibling directories of your book.
 These sections' directories must have the same name as their remote git
 repositories, but don't need to be git repositories for all commands.
 
-The following is an annotated script that sets up a new book allowing 'bind
-local' to run successfully.
-This script names your book "mynewbook" and includes only one section,
-[cloudfoundry/docs-dev-guide](https://github.com/cloudfoundry/docs-dev-guide).
-
-    mkdir mynewbook
-    cd mynewbook
-
-    # Create a Gemfile
-    bundle init
-
-    # Add the bookbindery gem to it
-    echo 'gem "bookbindery"' >> Gemfile
-
-    # Install gems listed in the Gemfile, creating a bin/ dir for executables
-    bundle install --binstubs
-
-    # Create a minimal configuration file
-    cat > config.yml <<YAML
-    book_repo: myorg/myrepo
-    public_host: localhost:9292
-    sections:
-    - repository:
-        name: cloudfoundry/docs-dev-guide
-      directory: my/included-section
-    YAML
-
-    # Create a directory required by Middleman
-    mkdir -p master_middleman/build
-
-    # Clone the section in the config.yml so it can be included in
-    # the final site
-    git clone https://github.com/cloudfoundry/docs-dev-guide ../docs-dev-guide
-
-    # Run the bind local command, which pulls in the section from
-    # the directory cloned above
-    bin/bookbinder bind local
-
-    # Start up the web site locally
-    cd final_app
-    bundle
-    rackup
-
-After running the script, you can visit your book at
-[localhost:9292/my/included-section](http://localhost:9292/my/included-section)
-and see the section that was brought in. Browsing to the [home page](http://localhost:9292/) currently returns a 404 because we did not inlcude
-anything inside the `master_middleman/source/` directory.
-
-You can skip ahead for [more information on the bind command](#bind-command).
-
-### Deploying your book
+### Deploying your Book
 - Create an AWS bucket for green builds and put info into `credentials.yml`
 - Set up CF spaces for staging and production and put details into `credentials.yml`
 - Deploy to production
 - (Optional) Register your sitemap with Google Webmaster Tools
 
-### A more exhaustive config.yml example
+### A More Exhaustive config.yml Example
 
 ```YAML
 book_repo: org-name/repo-name
@@ -213,8 +201,6 @@ sections:
 
 **Note**: Bookbinder only uses the <code>ref</code> key when binding 'remote'. The <code>bookbinder bind local</code> command ignores the <code>ref</code> key.
 
-
-
 ## Supported Formats
 
 * [Markdown](#user-content-markdown)
@@ -263,7 +249,7 @@ Bookbinder provides several helper functions that can be called from within an .
 `<%= quick_links %>` produces a table of contents based on in-page anchors.
 
 ### Breadcrumbs
-`<%= breadcrumbs %>` generates a series of breadcrumbs as a UL HTML tag. The breadcrumbs go up to the site's top-level, based on the title of each page. The bottom-most entry in the list of breadcrumbs represents the current page; the rest of the breadcrumbs show the hiearchy of directories that the page lives in. Each breadcrumb above the current page is generated by looking at the [frontmatter](http://middlemanapp.com/basics/frontmatter/) title of the index template of that directory. If you'd like to use breadcrumb text that is different than the title, an optional 'breadcrumb' attribute can be used in the frontmatter section to override the title.
+`<%= breadcrumbs %>` generates a series of breadcrumbs as a UL HTML tag. The breadcrumbs go up to the site's top-level, based on the title of each page. The bottom-most entry in the list of breadcrumbs represents the current page; the rest of the breadcrumbs show the hierarchy of directories that the page lives in. Each breadcrumb above the current page is generated by looking at the [frontmatter](http://middlemanapp.com/basics/frontmatter/) title of the index template of that directory. If you'd like to use breadcrumb text that is different than the title, an optional 'breadcrumb' attribute can be used in the frontmatter section to override the title.
 
 ### Subnavs
 `<%= yield_for_subnav %>` inserts the appropriate template in /subnavs, based on each constituent repositories' `subnav_template:` parameter in `config.yml`. The default template (`\_default.erb`) uses the label `default` and is applied to all sections unless another template is specified with subnav\_template. Template labels are the name of the template file with extensions removed. ("sample" for a template named "sample.erb")
@@ -305,7 +291,7 @@ Code snippet example:
 
 ### Archive Menu
 
-Bookbinder allows you to specify a drop-down menu template for use in the navbar. This can contain links to PDFs or other archived versions of documentation. To specify a dropdown menu, add the `archive_menu` key in `config.yml` as follows:
+Bookbinder allows you to specify a drop-down menu template for use in the navbar. This can contain links to PDFs or other archived versions of documentation. To specify a drop-down menu, add the `archive_menu` key in `config.yml` as follows:
 
 ```
   archive_menu:
@@ -315,25 +301,25 @@ Bookbinder allows you to specify a drop-down menu template for use in the navbar
 
 The first key (e.g. v1.3.0.0) is available for use as a title in your navbar. You can configure the structure of the drop-down menu by creating a template in `master_middleman/source/archive_menus/_default.erb`.
 
-Finally, to insert the archive menu, use the `<%= yield_for_archive_drop_down_menu %>` tag in the appropriate part of the navbar in your layout.erb. 
+Finally, to insert the archive menu, use the `<%= yield_for_archive_drop_down_menu %>` tag in the appropriate part of the navbar in your layout.erb.
 
 ### Template Variables
 
-Bookbinder allows you to define **template variables** by adding key-value pairs to the `config.yml` file for your book. 
+Bookbinder allows you to define **template variables** by adding key-value pairs to the `config.yml` file for your book.
 
-To use a template variable, add the key to a source file. 
+To use a template variable, add the key to a source file.
 When you then bind your book, Bookbinder replaces the key with the value defined in the `config.yml` file.
 
 * To define a new template variable, add the key-value pair to the **template_variables** section of the  `config.yml` file.
 
     Example `config.yml` file excerpt:
 
-    <pre> 
+    <pre>
     ...
     template_variables:
       app_domain: example.com
       my-app: < a href="http://my-app.example.org" >this link</a>
-    </pre> 
+    </pre>
 
 * To use a template variable, add the key (in <%=vars.MY-KEY%> form) to a source file.
 
@@ -341,14 +327,14 @@ When you then bind your book, Bookbinder replaces the key with the value defined
 
     <pre>
     I deployed my app to <%=vars.app_domain%>. You can see it by clicking <%=vars.my-app%>.
-    </pre> 
+    </pre>
 
 
 ### Partials
 
-Bookbinder supports **partials**, reusable blocks of source material. 
+Bookbinder supports **partials**, reusable blocks of source material.
 
-Create a partial by adding a file containing source material to a repo. 
+Create a partial by adding a file containing source material to a repo.
 The name of the file must start with an underscore.
 
 To use the partial, use the name of the file without the starting underscore in the following code, and add this code to the source file where you want the partial to appear: <%= partial 'FILENAME' %>
@@ -438,7 +424,7 @@ This will bind a book and push it to staging.
 
 ## Deploying
 
-Bookbinder has the ability to deploy the finished product to either staging or production. The deployment scripts requires the Cloud Foundry command line interface (cf CLI). 
+Bookbinder has the ability to deploy the finished product to either staging or production. The deployment scripts requires the Cloud Foundry command line interface (cf CLI).
 
 Download the cf CLI from [https://github.com/cloudfoundry/cli/releases](https://github.com/cloudfoundry/cli/releases). For more information and instructions, see the [cf CLI documentation](http://docs.cloudfoundry.org/devguide/installcf/index.html).
 
