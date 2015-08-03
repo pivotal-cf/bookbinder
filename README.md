@@ -86,8 +86,7 @@ content, and that can verify a composed book is free of any dead links.
     * `cd final_app`
     * `rackup`
 
-1. Launch a web browser to
-[localhost:9292](http://localhost:9292/) to view your book.
+1. Launch a web browser to `http://localhost:9292/` to view your book.
 
 As typically used, the disparate source materials of a book are organized into
 separate git repositories.
