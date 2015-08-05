@@ -1,5 +1,3 @@
-require 'mime/types'
-
 module Bookbinder
   class CodeExampleReader
     class InvalidSnippet < StandardError
@@ -55,12 +53,19 @@ module Bookbinder
     attr_reader :out, :fs
 
     def process_snippet(marker, working_copy)
-      escaped_marker = Regexp.escape(marker)
-      pattern = /code_snippet #{escaped_marker} start.*code_snippet #{escaped_marker} end/m
-      language_pattern = /code_snippet #{escaped_marker} start (\w+)/
+      snippet = Snippet.new(
+        find_text(working_copy.path, pattern_for(marker)),
+        language_pattern_for(marker)
+      )
+      if snippet.valid?
+        [snippet.content, snippet.language]
+      else
+        raise InvalidSnippet.new(working_copy.full_name, marker)
+      end
+    end
 
-      found_text =
-        fs.find_files_recursively(working_copy.path).
+    def find_text(start_path, pattern)
+      fs.find_files_recursively(start_path).
         lazy.
         map {|path| fs.read(path)}.
         map {|contents|
@@ -71,15 +76,15 @@ module Bookbinder
           end
         }.
         map(&:first).
-        detect ->{""} {|lines| lines}
+        detect ->{""} {|text| text}
+    end
 
-      snippet = Snippet.new(found_text, language_pattern)
+    def pattern_for(marker)
+      /code_snippet #{Regexp.escape(marker)} start.*code_snippet #{Regexp.escape(marker)} end/m
+    end
 
-      if snippet.valid?
-        [snippet.content, snippet.language]
-      else
-        raise InvalidSnippet.new(working_copy.full_name, marker)
-      end
+    def language_pattern_for(marker)
+      /code_snippet #{Regexp.escape(marker)} start (\w+)/
     end
 
     def cannot_scan
