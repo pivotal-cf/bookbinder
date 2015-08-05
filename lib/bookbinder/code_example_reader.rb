@@ -1,3 +1,5 @@
+require 'mime/types'
+
 module Bookbinder
   class CodeExampleReader
     class InvalidSnippet < StandardError
@@ -57,8 +59,18 @@ module Bookbinder
       pattern = /code_snippet #{escaped_marker} start.*code_snippet #{escaped_marker} end/m
       language_pattern = /code_snippet #{escaped_marker} start (\w+)/
 
-      found_text = fs.find_files_recursively(working_copy.path).
-        lazy.map {|path| fs.read(path).scan(pattern).first}.
+      found_text =
+        fs.find_files_recursively(working_copy.path).
+        lazy.
+        map {|path| fs.read(path)}.
+        map {|contents|
+          begin
+            contents.scan(pattern)
+          rescue ArgumentError => e
+            cannot_scan
+          end
+        }.
+        map(&:first).
         detect ->{""} {|lines| lines}
 
       snippet = Snippet.new(found_text, language_pattern)
@@ -68,6 +80,10 @@ module Bookbinder
       else
         raise InvalidSnippet.new(working_copy.full_name, marker)
       end
+    end
+
+    def cannot_scan
+      []
     end
   end
 end

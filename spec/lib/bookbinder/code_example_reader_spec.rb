@@ -5,7 +5,7 @@ module Bookbinder
   describe CodeExampleReader do
     let(:working_copy) { Ingest::WorkingCopy.new(copied_to: 'my/dir', full_name: 'code-example-repo') }
 
-    it 'produces a string for the given excerpt_marker' do
+    it 'produces a string for the given excerpt_marker, without choking on binary files' do
       code_snippet = <<-RUBY
 fib = Enumerator.new do |yielder|
   i = 0
@@ -30,11 +30,13 @@ p fib.take_while { |n| n <= 4E6 }
       RUBY
 
       fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+      path_to_binary_file = File.absolute_path('../../../fixtures/binary_file', __FILE__)
 
       allow(fs).to receive(:find_files_recursively).with(
         working_copy.path,
-      ) { ["foo", "bar"] }
-      allow(fs).to receive(:read).with("foo").and_return(<<-DOC)
+      ) { %w(foo bar baz) }
+      allow(fs).to receive(:read).with("foo") { File.read(path_to_binary_file) }
+      allow(fs).to receive(:read).with("bar").and_return(<<-DOC)
 prologue
 #{found_text}
 epilogue
