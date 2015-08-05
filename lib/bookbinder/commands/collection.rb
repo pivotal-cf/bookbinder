@@ -93,7 +93,7 @@ module Bookbinder
           Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           local_file_system_accessor,
           MiddlemanRunner.new(
-            logger, version_control_system,
+            logger,
             CodeExampleReader.new(streams, local_file_system_accessor)
           ),
           Postprocessing::SitemapWriter.build(logger, final_app_directory, sitemap_port),
