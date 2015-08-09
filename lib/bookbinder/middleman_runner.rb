@@ -39,8 +39,8 @@ module Bookbinder
     def run(output_locations,
             config,
             local_repo_dir,
-            verbose = false,
-            subnav_templates_by_directory = {})
+            verbose,
+            subnav_templates_by_directory)
       out.puts "\nRunning middleman...\n\n"
 
       within(output_locations.master_dir) do
