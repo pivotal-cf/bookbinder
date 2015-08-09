@@ -106,7 +106,8 @@ module Bookbinder
     let(:final_app_dir) { File.absolute_path('final_app') }
     let(:git_client) { GitClient.new }
     let(:logger) { NilLogger.new }
-    let(:middleman_runner) { MiddlemanRunner.new({out: StringIO.new}, file_system_accessor) }
+    let(:middleman_streams) { { out: StringIO.new, err: StringIO.new } }
+    let(:middleman_runner) { MiddlemanRunner.new(middleman_streams, file_system_accessor, Sheller.new) }
     let(:sheller) { double('sheller', run_command: double('status', success?: true)) }
     let(:sitemap_writer) { Postprocessing::SitemapWriter.build(logger, final_app_dir, random_port) }
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
@@ -418,15 +419,14 @@ Content:
         config_factory = double('config factory', produce: config)
 
         command = bind_cmd(bind_config_factory: config_factory)
-        collected_output = capture_stdout {
-          begin
-            command.run(['remote', '--verbose'])
-          rescue SystemExit
-          end
-        }
+        begin
+          command.run(['remote', '--verbose'])
+        rescue SystemExit
+        end
 
-        expect(collected_output).to match(/error.*build/)
-        expect(collected_output).to match(/undefined local variable or method `function_that_does_not_exist'/)
+        # Middleman puts errors to stdout when asked for --verbose
+        expect(middleman_streams[:out].tap(&:rewind).read).to match(/error.*build/)
+        expect(middleman_streams[:out].tap(&:rewind).read).to match(/undefined local variable or method `function_that_does_not_exist'/)
       end
     end
 
