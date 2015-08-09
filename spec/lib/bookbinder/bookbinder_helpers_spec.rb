@@ -4,6 +4,7 @@ require 'middleman-core/cli'
 require 'middleman-core/profiling'
 require 'ostruct'
 require 'redcarpet'
+require 'yaml'
 require_relative '../../../lib/bookbinder/middleman_runner'
 require_relative '../../helpers/middleman'
 require_relative '../../helpers/redirection'
@@ -41,9 +42,9 @@ module Bookbinder
       ENV['MM_ROOT'] = tmpdir.to_s
       Dir.chdir(tmpdir) do
         build_command = Middleman::Cli::Build.new [], {:quiet => false}, {}
-        Middleman::Cli::Build.shared_instance(false).config[:template_variables] = template_variables
-        Middleman::Cli::Build.shared_instance(false).config[:subnav_templates] = subnav_templates
-        Middleman::Cli::Build.shared_instance(false).config[:archive_menu] = archive_menu
+        File.write('bookbinder_config.yml', YAML.dump(template_variables: template_variables,
+                                                      subnav_templates: subnav_templates,
+                                                      archive_menu: archive_menu))
         build_command.invoke :build, [], {:verbose => true}
       end
 
@@ -97,6 +98,7 @@ module Bookbinder
               Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
               ENV['MM_ROOT'] = tmpdir.to_s
               Dir.chdir(tmpdir) do
+                File.write('bookbinder_config.yml', YAML.dump({}))
                 build_command = Middleman::Cli::Build.new [], {:quiet => false}, {}
                 build_command.invoke :build, [], {:verbose => false}
               end

@@ -1,6 +1,11 @@
 require 'bookbinder_helpers'
 require 'submodule_aware_assets'
 
+config = YAML.load_file('bookbinder_config.yml')
+config.each do |k, v|
+  set k, v
+end
+
 set :markdown_engine, :redcarpet
 set :markdown, :layout_engine => :erb,
                :tables => true,

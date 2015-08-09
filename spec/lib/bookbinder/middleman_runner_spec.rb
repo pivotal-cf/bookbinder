@@ -58,57 +58,11 @@ module Bookbinder
       expect(Pathname.new(working_directory_path).realpath).to eq(Pathname.new(target_dir_path).realpath)
     end
 
-    it 'tells middleman about template variables' do
-      run_middleman
-
-      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
-      expect(middleman_instance.config[:template_variables]).to eq(template_variables)
-    end
-
-    it 'tells middleman the production host' do
-      run_middleman
-
-      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
-      expect(middleman_instance.config[:production_host]).to eq(production_host)
-    end
-
-    it 'tells middleman the archive menu' do
-      run_middleman
-
-      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
-      expect(middleman_instance.config[:archive_menu]).to eq(archive_menu)
-    end
-
-    it 'tells middleman not to use relative links' do
-      run_middleman
-
-      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
-      expect(middleman_instance.config[:relative_links]).to eq false
-    end
-
-    it 'tells middleman about subnav_templates' do
-      templates = {
-          'my_place_rocks' => 'my_subnav_template',
-          'fraggles_rock' => 'default'
-      }
-
-      run_middleman
-
-      middleman_instance = Middleman::Cli::Build.shared_instance(verbose)
-      expect(middleman_instance.config[:subnav_templates]).to eq(templates)
-    end
-
     it 'builds with middleman and passes the verbose parameter' do
       build_command = expect_to_receive_and_return_real_now(Middleman::Cli::Build, :new, [], {:quiet => !verbose}, {})
       expect(build_command).to receive(:invoke).with(:build, [], {:verbose => verbose})
 
       run_middleman
-    end
-
-    it 'clears its shared_instance list' do
-      old_instance = Middleman::Cli::Build.shared_instance(verbose)
-      run_middleman
-      expect(Middleman::Cli::Build.shared_instance(verbose)).to_not eq(old_instance)
     end
 
     it 'sets the MM root for invocation' do

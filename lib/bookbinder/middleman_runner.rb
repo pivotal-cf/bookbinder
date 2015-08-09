@@ -1,6 +1,7 @@
 require 'middleman-core'
 require 'middleman-core/cli'
 require 'middleman-core/profiling'
+require 'yaml'
 require_relative 'code_example_reader'
 
 class Middleman::Cli::BuildAction
@@ -42,10 +43,7 @@ module Bookbinder
       @logger.log "\nRunning middleman...\n\n"
 
       within(output_locations.master_dir) do
-        builder = Middleman::Cli::Build.shared_instance(verbose)
-
         config = {
-          # Bookbinder config (serializable)
           archive_menu: config.archive_menu,
           production_host: config.public_host,
           subnav_templates: subnav_templates_by_directory,
@@ -54,7 +52,8 @@ module Bookbinder
           workspace: output_locations.workspace_dir,
         }
 
-        config.each { |k, v| builder.config[k] = v }
+        File.write("bookbinder_config.yml", YAML.dump(config))
+
         Middleman::Cli::Build.new([], {quiet: !verbose}, {}).invoke :build, [], {verbose: verbose}
       end
     end
