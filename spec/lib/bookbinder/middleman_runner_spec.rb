@@ -113,8 +113,7 @@ module Bookbinder
         run_middleman
     end
 
-    it "raises an exception if Middleman gives a nonzero exit code" do
-
+    xit "raises an exception if Middleman gives a nonzero exit code" do
     end
   end
 end
