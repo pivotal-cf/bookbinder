@@ -1,3 +1,4 @@
+require 'tmpdir'
 require_relative '../../../lib/bookbinder/config/configuration'
 require_relative '../../../lib/bookbinder/middleman_runner'
 require_relative '../../../lib/bookbinder/values/output_locations'
@@ -8,12 +9,28 @@ module Bookbinder
   describe MiddlemanRunner do
     include SpecHelperMethods
 
-    let(:middleman_runner) { MiddlemanRunner.new(out: StringIO.new) }
+    class RecordingFs
+      def write(to: nil, text: nil)
+        @to = to
+        @text = text
+      end
+
+      def received_to
+        @to
+      end
+
+      def received_text_parsed
+        YAML.load(@text)
+      end
+    end
+
+    let(:fs) { RecordingFs.new }
+    let(:middleman_runner) { MiddlemanRunner.new({out: StringIO.new}, fs) }
 
     let(:context_dir) { Pathname(Dir.mktmpdir) }
     let(:target_dir_path) { context_dir.join('output', 'master_middleman') }
     let(:template_variables) { {'anybody' => 'nobody'} }
-    let(:production_host) { double }
+    let(:production_host) { 'somehost' }
     let(:archive_menu) { {} }
     let(:verbose) { false }
     let(:sections) { [
@@ -54,6 +71,19 @@ module Bookbinder
       run_middleman
 
       expect(Pathname.new(working_directory_path).realpath).to eq(Pathname.new(target_dir_path).realpath)
+    end
+
+    it "stores bookbinder config for later consumption by our extension" do
+      run_middleman
+      expect(fs.received_to).to eq('bookbinder_config.yml')
+      expect(fs.received_text_parsed).to eq(
+        archive_menu: archive_menu,
+        local_repo_dir: 'local',
+        production_host: production_host,
+        subnav_templates: { 'my_place_rocks' => 'my_subnav_template', 'fraggles_rock' => 'default' },
+        template_variables: template_variables,
+        workspace: context_dir.join('output/master_middleman/source'),
+      )
     end
 
     it 'builds with middleman and passes the verbose parameter' do

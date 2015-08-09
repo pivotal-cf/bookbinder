@@ -106,7 +106,7 @@ module Bookbinder
     let(:final_app_dir) { File.absolute_path('final_app') }
     let(:git_client) { GitClient.new }
     let(:logger) { NilLogger.new }
-    let(:middleman_runner) { MiddlemanRunner.new(out: StringIO.new) }
+    let(:middleman_runner) { MiddlemanRunner.new({out: StringIO.new}, file_system_accessor) }
     let(:sheller) { double('sheller', run_command: double('status', success?: true)) }
     let(:sitemap_writer) { Postprocessing::SitemapWriter.build(logger, final_app_dir, random_port) }
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }

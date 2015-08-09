@@ -31,8 +31,9 @@ end
 
 module Bookbinder
   class MiddlemanRunner
-    def initialize(streams)
+    def initialize(streams, fs)
       @out = streams[:out]
+      @fs = fs
     end
 
     def run(output_locations,
@@ -40,7 +41,7 @@ module Bookbinder
             local_repo_dir,
             verbose = false,
             subnav_templates_by_directory = {})
-      @out.puts "\nRunning middleman...\n\n"
+      out.puts "\nRunning middleman...\n\n"
 
       within(output_locations.master_dir) do
         config = {
@@ -52,13 +53,15 @@ module Bookbinder
           workspace: output_locations.workspace_dir,
         }
 
-        File.write("bookbinder_config.yml", YAML.dump(config))
+        fs.write(to: "bookbinder_config.yml", text: YAML.dump(config))
 
         Middleman::Cli::Build.new([], {quiet: !verbose}, {}).invoke :build, [], {verbose: verbose}
       end
     end
 
     private
+
+    attr_reader :out, :fs
 
     def within(temp_root, &block)
       Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
