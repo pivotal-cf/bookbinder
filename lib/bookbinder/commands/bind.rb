@@ -81,10 +81,10 @@ module Bookbinder
         success = publish(
           sections.map(&:subnav).reduce({}, :merge),
           {verbose: options.include?('--verbose')},
+          local_repo_dir,
           bind_options.streams,
           output_locations,
           archive_menu_config.generate(bind_config, sections),
-          cloner
         )
 
         success ? 0 : 1
@@ -108,14 +108,14 @@ module Bookbinder
         :static_site_generator,
       )
 
-      def publish(subnavs, cli_options, streams, output_locations, publish_config, cloner)
+      def publish(subnavs, cli_options, local_repo_dir, streams, output_locations, publish_config)
         FileUtils.cp 'redirects.rb', output_locations.final_app_dir if File.exists?('redirects.rb')
 
         host_for_sitemap = publish_config.public_host
 
         static_site_generator.run(output_locations,
                                   publish_config,
-                                  cloner,
+                                  local_repo_dir,
                                   cli_options[:verbose],
                                   subnavs)
         file_system_accessor.copy output_locations.build_dir, output_locations.public_dir

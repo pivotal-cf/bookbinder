@@ -9,10 +9,8 @@ module Bookbinder
   describe MiddlemanRunner do
     include SpecHelperMethods
 
-    UNEXERCISED_CODE_EXAMPLE_READER = "UNEXERCISED_CODE_EXAMPLE_READER"
-
     let(:logger) { NilLogger.new }
-    let(:middleman_runner) { MiddlemanRunner.new(logger, UNEXERCISED_CODE_EXAMPLE_READER) }
+    let(:middleman_runner) { MiddlemanRunner.new(logger) }
 
     let(:context_dir) { Pathname(Dir.mktmpdir) }
     let(:target_dir_path) { context_dir.join('output', 'master_middleman') }
@@ -44,7 +42,7 @@ module Bookbinder
           'public_host' => production_host,
           'archive_menu' => archive_menu
         ),
-        double('cloner'),
+        'local',
         verbose,
         subnav_templates)
     end

@@ -1,4 +1,3 @@
-require 'git/lib'
 require 'middleman-core'
 require 'middleman-core/cli'
 require 'middleman-core/profiling'
@@ -31,32 +30,39 @@ end
 
 module Bookbinder
   class MiddlemanRunner
-    def initialize(logger, code_example_reader)
+    def initialize(logger)
       @logger = logger
-      @code_example_reader = code_example_reader
     end
 
     def run(output_locations,
             config,
-            cloner,
+            local_repo_dir,
             verbose = false,
             subnav_templates_by_directory = {})
       @logger.log "\nRunning middleman...\n\n"
 
       within(output_locations.master_dir) do
-        invoke_against_current_dir(output_locations.workspace_dir,
-                                   config.public_host,
-                                   subnav_templates_by_directory,
-                                   config.template_variables,
-                                   config.archive_menu,
-                                   verbose,
-                                   cloner)
+        builder = Middleman::Cli::Build.shared_instance(verbose)
+
+        config = {
+          # Bookbinder config (serializable)
+          archive_menu: config.archive_menu,
+          production_host: config.public_host,
+          subnav_templates: subnav_templates_by_directory,
+          template_variables: config.template_variables,
+          local_repo_dir: local_repo_dir,
+          workspace: output_locations.workspace_dir,
+
+          # Middleman config (serializable)
+          relative_links: false,
+        }
+
+        config.each { |k, v| builder.config[k] = v }
+        Middleman::Cli::Build.new([], {quiet: !verbose}, {}).invoke :build, [], {verbose: verbose}
       end
     end
 
     private
-
-    attr_reader :code_example_reader
 
     def within(temp_root, &block)
       Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
@@ -66,35 +72,6 @@ module Bookbinder
       Dir.chdir(temp_root) { block.call }
 
       ENV['MM_ROOT']    = original_mm_root
-    end
-
-    def invoke_against_current_dir(workspace_dir,
-                                   production_host,
-                                   subnav_templates,
-                                   template_variables,
-                                   archive_menu,
-                                   verbose,
-                                   cloner)
-      builder = Middleman::Cli::Build.shared_instance(verbose)
-
-      config = {
-        # dependencies
-        cloner: cloner,
-        code_example_reader: code_example_reader,
-
-        # Bookbinder config (serializable)
-        archive_menu: archive_menu,
-        production_host: production_host,
-        subnav_templates: subnav_templates,
-        template_variables: template_variables,
-        workspace: workspace_dir,
-
-        # Middleman config (serializable)
-        relative_links: false,
-      }
-
-      config.each { |k, v| builder.config[k] = v }
-      Middleman::Cli::Build.new([], {quiet: !verbose}, {}).invoke :build, [], {verbose: verbose}
     end
   end
 end

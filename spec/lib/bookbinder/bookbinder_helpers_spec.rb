@@ -4,13 +4,9 @@ require 'middleman-core/cli'
 require 'middleman-core/profiling'
 require 'ostruct'
 require 'redcarpet'
-require_relative '../../../lib/bookbinder/code_example_reader'
-require_relative '../../../lib/bookbinder/ingest/git_cloner'
-require_relative '../../../lib/bookbinder/ingest/local_filesystem_cloner'
-require_relative '../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../lib/bookbinder/middleman_runner'
-require_relative '../../helpers/git_fake'
 require_relative '../../helpers/middleman'
+require_relative '../../helpers/redirection'
 require_relative '../../helpers/tmp_dirs'
 require_relative '../../helpers/use_fixture_repo'
 
@@ -145,13 +141,8 @@ p fib.take_while { |n| n <= 4E6 }
 MARKDOWN
       end
       let(:excerpt_mark) { 'complicated_function' }
-      let(:cloner) { Ingest::LocalFilesystemCloner.new({out: StringIO.new},
-                                                       LocalFileSystemAccessor.new,
-                                                       File.absolute_path('..')) }
-      let(:code_example_reader) { CodeExampleReader.new({}, LocalFileSystemAccessor.new) }
-      let(:config) { {cloner: cloner,
-                      code_example_reader: code_example_reader,
-                      workspace: File.absolute_path('../my-special-workspace')} }
+      let(:config) { {workspace: File.absolute_path('../my-special-workspace'),
+                      local_repo_dir: File.absolute_path('../../../fixtures/repositories', __FILE__)} }
 
       use_fixture_repo
 
@@ -159,8 +150,12 @@ MARKDOWN
         klass.new(config).yield_for_code_snippet(from: repo, at: excerpt_mark)
       end
 
+      include Redirection
+
       it 'returns markdown from the cloned repo' do
-        expect(yielded_snippet).to eq(markdown_snippet.chomp)
+        swallow_stdout do
+          expect(yielded_snippet).to eq(markdown_snippet.chomp)
+        end
       end
     end
 

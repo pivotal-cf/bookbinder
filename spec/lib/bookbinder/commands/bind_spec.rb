@@ -106,7 +106,7 @@ module Bookbinder
     let(:final_app_dir) { File.absolute_path('final_app') }
     let(:git_client) { GitClient.new }
     let(:logger) { NilLogger.new }
-    let(:middleman_runner) { MiddlemanRunner.new(logger, code_example_reader = nil) }
+    let(:middleman_runner) { MiddlemanRunner.new(logger) }
     let(:sheller) { double('sheller', run_command: double('status', success?: true)) }
     let(:sitemap_writer) { Postprocessing::SitemapWriter.build(logger, final_app_dir, random_port) }
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
@@ -277,62 +277,6 @@ module Bookbinder
         final_app_dir = File.absolute_path('final_app')
         index_html = File.read File.join(final_app_dir, 'public', 'var-repo', 'variable_index.html')
         expect(index_html).to include 'My variable name is Spartacus.'
-      end
-    end
-
-    describe 'including code snippets' do
-      include Redirection
-      let(:middleman_runner) { MiddlemanRunner.new(logger, CodeExampleReader.new({}, file_system_accessor)) }
-
-      it 'applies the syntax highlighting CSS' do
-        section_repo_name = 'org/my-repo-with-code-snippets'
-        code_repo = 'cloudfoundry/code-example-repo'
-
-        sections = [
-            {'repository' => {
-                'name' => 'org/my-repo-with-code-snippets'},
-             'directory' => 'my-code-snippet-repo'
-            }
-        ]
-
-        config_hash = {
-            'sections' => sections,
-            'book_repo' => book,
-            'cred_repo' => 'my-org/my-creds',
-            'pdf_index' => [],
-            'public_host' => 'example.com',
-        }
-
-        config = Config::Configuration.parse(config_hash)
-        config_factory = double('config factory', produce: config)
-
-        command = bind_cmd(bind_config_factory: config_factory)
-        swallow_stdout do
-          command.run(['remote', '--verbose'])
-        end
-
-        final_app_dir = File.absolute_path('final_app')
-        index_html = File.read(File.join(final_app_dir, 'public', 'my-code-snippet-repo', 'code_snippet_index.html'))
-        doc = Nokogiri::HTML(index_html)
-
-        ruby_part = 'fib = Enumerator.new do |yielder|'
-        yaml_part = 'this_is_yaml'
-        typeless_part = 'this = untyped_code'
-
-        ruby_text = doc.css('.highlight.ruby').text
-        expect(ruby_text).to include(ruby_part)
-        expect(ruby_text).not_to include(yaml_part)
-        expect(ruby_text).not_to include(typeless_part)
-
-        yaml_text = doc.css('.highlight.yaml').text
-        expect(yaml_text).to include(yaml_part)
-        expect(yaml_text).not_to include(ruby_part)
-        expect(yaml_text).not_to include(typeless_part)
-
-        typeless_text = doc.css('.highlight.plaintext').text
-        expect(typeless_text).to include(typeless_part)
-        expect(typeless_text).not_to include(yaml_part)
-        expect(typeless_text).not_to include(ruby_part)
       end
     end
 

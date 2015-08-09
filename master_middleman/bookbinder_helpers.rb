@@ -1,3 +1,6 @@
+require 'bookbinder/ingest/cloner_factory'
+require 'bookbinder/ingest/git_accessor'
+require 'bookbinder/local_file_system_accessor'
 require 'date'
 require_relative 'archive_drop_down_menu'
 require_relative 'quicklinks_renderer'
@@ -17,11 +20,18 @@ module Bookbinder
     module HelperMethods
 
       def yield_for_code_snippet(from: nil, at: nil)
-        working_copy = config[:cloner].call(source_repo_name: from,
-                                            source_ref: 'master',
-                                            destination_parent_dir: config[:workspace])
+        cloner_factory = Ingest::ClonerFactory.new({out: $stdout},
+                                                   LocalFileSystemAccessor.new,
+                                                   Ingest::GitAccessor.new)
 
-        snippet, language = config[:code_example_reader].get_snippet_and_language_at(at, working_copy)
+        cloner = cloner_factory.produce(config[:local_repo_dir])
+        code_example_reader = CodeExampleReader.new({out: $stdout},
+                                                    LocalFileSystemAccessor.new)
+        working_copy = cloner.call(source_repo_name: from,
+                                   source_ref: 'master',
+                                   destination_parent_dir: config[:workspace])
+
+        snippet, language = code_example_reader.get_snippet_and_language_at(at, working_copy)
 
         delimiter = '```'
 
