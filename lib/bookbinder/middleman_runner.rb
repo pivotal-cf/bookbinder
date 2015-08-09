@@ -31,8 +31,8 @@ end
 
 module Bookbinder
   class MiddlemanRunner
-    def initialize(logger)
-      @logger = logger
+    def initialize(streams)
+      @out = streams[:out]
     end
 
     def run(output_locations,
@@ -40,7 +40,7 @@ module Bookbinder
             local_repo_dir,
             verbose = false,
             subnav_templates_by_directory = {})
-      @logger.log "\nRunning middleman...\n\n"
+      @out.puts "\nRunning middleman...\n\n"
 
       within(output_locations.master_dir) do
         config = {

@@ -3,14 +3,12 @@ require_relative '../../../lib/bookbinder/middleman_runner'
 require_relative '../../../lib/bookbinder/values/output_locations'
 require_relative '../../../lib/bookbinder/values/section'
 require_relative '../../helpers/middleman'
-require_relative '../../helpers/nil_logger'
 
 module Bookbinder
   describe MiddlemanRunner do
     include SpecHelperMethods
 
-    let(:logger) { NilLogger.new }
-    let(:middleman_runner) { MiddlemanRunner.new(logger) }
+    let(:middleman_runner) { MiddlemanRunner.new(out: StringIO.new) }
 
     let(:context_dir) { Pathname(Dir.mktmpdir) }
     let(:target_dir_path) { context_dir.join('output', 'master_middleman') }
