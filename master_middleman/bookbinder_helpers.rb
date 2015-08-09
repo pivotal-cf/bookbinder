@@ -1,3 +1,4 @@
+require 'bookbinder/code_example_reader'
 require 'bookbinder/ingest/cloner_factory'
 require 'bookbinder/ingest/git_accessor'
 require 'bookbinder/local_file_system_accessor'

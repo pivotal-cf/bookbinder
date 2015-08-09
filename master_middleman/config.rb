@@ -1,4 +1,5 @@
 require 'bookbinder_helpers'
+require 'middleman-syntax'
 require 'submodule_aware_assets'
 
 config = YAML.load_file('bookbinder_config.yml')
