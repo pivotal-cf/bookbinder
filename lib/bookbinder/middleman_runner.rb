@@ -52,9 +52,6 @@ module Bookbinder
           template_variables: config.template_variables,
           local_repo_dir: local_repo_dir,
           workspace: output_locations.workspace_dir,
-
-          # Middleman config (serializable)
-          relative_links: false,
         }
 
         config.each { |k, v| builder.config[k] = v }

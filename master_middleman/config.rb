@@ -14,7 +14,7 @@ set :js_dir, 'javascripts'
 
 set :images_dir, 'images'
 
-set :relative_links, true
+set :relative_links, false
 
 activate :submodule_aware_assets
 
