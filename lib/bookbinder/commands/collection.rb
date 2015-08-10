@@ -3,6 +3,7 @@ Dir.glob(File.expand_path('../../commands/*.rb', __FILE__)).each do |command_fil
 end
 
 require_relative '../commands/bind/directory_preparer'
+require_relative '../config/archive_menu_configuration'
 require_relative '../config/bind_config_factory'
 require_relative '../config/fetcher'
 require_relative '../config/remote_yaml_credential_provider'
@@ -61,7 +62,7 @@ module Bookbinder
         @standard_commands ||= [
           Commands::Generate.new(
             local_file_system_accessor,
-            Sheller.new,
+            sheller,
             Dir.pwd,
             streams
           ),
@@ -91,14 +92,14 @@ module Bookbinder
           Config::BindConfigFactory.new(version_control_system, configuration_fetcher),
           Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           local_file_system_accessor,
-          MiddlemanRunner.new(streams, local_file_system_accessor),
+          MiddlemanRunner.new(streams, local_file_system_accessor, sheller),
           Postprocessing::SitemapWriter.build(logger, final_app_directory, sitemap_port),
           Preprocessing::Preprocessor.new(
             Preprocessing::DitaPreprocessor.new(
               DitaHtmlToMiddlemanFormatter.new(local_file_system_accessor, subnav_formatter, html_document_manipulator),
               local_file_system_accessor,
               DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY']),
-              Sheller.new
+              sheller
             ),
             Preprocessing::LinkToSiteGenDir.new(local_file_system_accessor),
           ),
@@ -152,6 +153,10 @@ module Bookbinder
 
       def local_file_system_accessor
         @local_file_system_accessor ||= LocalFileSystemAccessor.new
+      end
+
+      def sheller
+        @sheller ||= Sheller.new
       end
 
       def sitemap_port

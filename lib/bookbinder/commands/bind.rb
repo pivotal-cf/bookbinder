@@ -1,6 +1,5 @@
 require 'middleman-syntax'
 
-require_relative '../config/archive_menu_configuration'
 require_relative '../errors/cli_error'
 require_relative 'bind/bind_options'
 require_relative 'naming'
@@ -13,7 +12,7 @@ module Bookbinder
       def initialize(base_streams,
                      output_locations,
                      config_factory,
-                     archive_menu_config,
+                     config_decorator,
                      file_system_accessor,
                      static_site_generator,
                      sitemap_writer,
@@ -24,7 +23,7 @@ module Bookbinder
         @base_streams = base_streams
         @output_locations = output_locations
         @config_factory = config_factory
-        @archive_menu_config = archive_menu_config
+        @config_decorator = config_decorator
         @file_system_accessor = file_system_accessor
         @static_site_generator = static_site_generator
         @sitemap_writer = sitemap_writer
@@ -48,15 +47,10 @@ module Bookbinder
       end
 
       def run(cli_arguments)
-        bind_options = BindComponents::BindOptions.new(cli_arguments, base_streams)
-        bind_options.validate!
-
-        bind_source, *options = cli_arguments
-        bind_config = config_factory.produce(bind_source)
-
-        local_repo_dir = generate_local_repo_dir(context_dir, bind_source)
-        cloner = cloner_factory.produce(local_repo_dir)
-        section_repository = section_repository_factory.produce(cloner)
+        bind_options        = BindComponents::BindOptions.new(cli_arguments, base_streams).tap(&:validate!)
+        bind_config         = config_factory.produce(bind_options.bind_source)
+        cloner              = cloner_factory.produce(bind_options.local_repo_dir)
+        section_repository  = section_repository_factory.produce(cloner)
 
         directory_preparer.prepare_directories(
           bind_config,
@@ -64,40 +58,50 @@ module Bookbinder
           output_locations,
           layout_repo_path(bind_config, cloner)
         )
-
         sections = section_repository.fetch(
           configured_sections: bind_config.sections,
           destination_dir: output_locations.cloned_preprocessing_dir,
           ref_override: bind_options.ref_override
         )
-
         preprocessor.preprocess(
           sections,
           output_locations,
-          options: options,
+          options: bind_options.options,
           output_streams: bind_options.streams
         )
-
-        success = publish(
-          sections.map(&:subnav).reduce({}, :merge),
-          {verbose: options.include?('--verbose')},
-          local_repo_dir,
-          bind_options.streams,
+        if file_system_accessor.file_exist?('redirects.rb')
+          file_system_accessor.copy('redirects.rb', output_locations.final_app_dir)
+        end
+        generation_result = static_site_generator.run(
           output_locations,
-          archive_menu_config.generate(bind_config, sections),
+          config_decorator.generate(bind_config, sections),
+          bind_options.local_repo_dir,
+          bind_options.verbose?,
+          subnavs(sections)
         )
+        if generation_result.success?
+          file_system_accessor.copy(output_locations.build_dir, output_locations.public_dir)
+          result = sitemap_writer.write(
+            bind_config.public_host,
+            bind_options.streams,
+            bind_config.broken_link_exclusions
+          )
 
-        success ? 0 : 1
+          bind_options.streams[:success].puts "Bookbinder bound your book into #{output_locations.final_app_dir}"
+
+          result.has_broken_links? ? 1 : 0
+        else
+          1
+        end
       end
 
       private
 
       attr_reader(
-        :archive_menu_config,
         :base_streams,
         :cloner_factory,
+        :config_decorator,
         :config_factory,
-        :context_dir,
         :directory_preparer,
         :file_system_accessor,
         :final_app_directory,
@@ -108,31 +112,8 @@ module Bookbinder
         :static_site_generator,
       )
 
-      def publish(subnavs, cli_options, local_repo_dir, streams, output_locations, publish_config)
-        FileUtils.cp 'redirects.rb', output_locations.final_app_dir if File.exists?('redirects.rb')
-
-        host_for_sitemap = publish_config.public_host
-
-        static_site_generator.run(output_locations,
-                                  publish_config,
-                                  local_repo_dir,
-                                  cli_options[:verbose],
-                                  subnavs)
-        file_system_accessor.copy output_locations.build_dir, output_locations.public_dir
-
-        result = sitemap_writer.write(
-          host_for_sitemap,
-          streams,
-          publish_config.broken_link_exclusions
-        )
-
-        streams[:success].puts "Bookbinder bound your book into #{output_locations.final_app_dir}"
-
-        !result.has_broken_links?
-      end
-
-      def generate_local_repo_dir(context_dir, bind_source)
-        File.expand_path('..', context_dir) if bind_source == 'local'
+      def subnavs(sections)
+        sections.map(&:subnav).reduce({}, :merge)
       end
 
       def layout_repo_path(config, cloner)

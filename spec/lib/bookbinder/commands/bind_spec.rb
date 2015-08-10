@@ -1,5 +1,6 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
 require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
+require_relative '../../../../lib/bookbinder/config/configuration'
 require_relative '../../../../lib/bookbinder/dita_command_creator'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
@@ -39,7 +40,7 @@ module Bookbinder
       bind_logger = partial_args.fetch(:logger, logger)
       null_streams = {success: Sheller::DevNull.new, out: Sheller::DevNull.new, err: Sheller::DevNull.new}
       Commands::Bind.new(
-        null_streams,
+        partial_args.fetch(:streams, null_streams),
         OutputLocations.new(
           final_app_dir: partial_args.fetch(:final_app_directory, final_app_dir),
           context_dir: partial_args.fetch(:context_dir, File.absolute_path('.'))
@@ -106,11 +107,64 @@ module Bookbinder
     let(:final_app_dir) { File.absolute_path('final_app') }
     let(:git_client) { GitClient.new }
     let(:logger) { NilLogger.new }
-    let(:middleman_runner) { MiddlemanRunner.new({out: StringIO.new}, file_system_accessor) }
-    let(:sheller) { double('sheller', run_command: double('status', success?: true)) }
+    let(:middleman_streams) { { out: StringIO.new, err: StringIO.new } }
+    let(:middleman_runner) { MiddlemanRunner.new(middleman_streams, file_system_accessor, Sheller.new) }
+    let(:success) { double('success', success?: true) }
+    let(:failure) { double('failure', success?: false) }
+    let(:sheller) { double('sheller', run_command: success) }
     let(:sitemap_writer) { Postprocessing::SitemapWriter.build(logger, final_app_dir, random_port) }
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
     let(:subnav_formatter) { SubnavFormatter.new }
+
+    describe "both local and remote" do
+      context "when site generation fails" do
+        it "returns a nonzero exit code" do
+          generator = instance_double('Bookbinder::MiddlemanRunner')
+          fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+          disallowed_streams = {}
+          command = bind_cmd(streams: disallowed_streams,
+                             outfs: fs,
+                             static_site_generator: generator,
+                             sitemap_writer: double('disallowed sitemap writer'))
+
+          allow(fs).to receive(:file_exist?) { false }
+          allow(generator).to receive(:run) { failure }
+
+          expect(command.run(['local'])).to be_nonzero
+        end
+      end
+
+      it "copies a redirects file from the current directory to the final app directory, prior to site generation" do
+        fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+        generator = instance_double('Bookbinder::MiddlemanRunner')
+        command = bind_cmd(file_system_accessor: fs,
+                           static_site_generator: generator,
+                           sitemap_writer: double('sitemap writer').as_null_object)
+
+        allow(fs).to receive(:file_exist?).with('redirects.rb') { true }
+        allow(fs).to receive(:copy)
+
+        expect(fs).to receive(:copy).with('redirects.rb', Pathname(File.absolute_path('final_app'))).ordered
+        expect(generator).to receive(:run).ordered { success }
+
+        command.run(['local'])
+      end
+
+      it "doesn't attempt to copy the redirect file if it doesn't exist" do
+        fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+        generator = instance_double('Bookbinder::MiddlemanRunner')
+        command = bind_cmd(file_system_accessor: fs,
+                           static_site_generator: generator,
+                           sitemap_writer: double('sitemap writer').as_null_object)
+
+        allow(fs).to receive(:file_exist?).with('redirects.rb') { false }
+
+        expect(generator).to receive(:run).ordered { success }
+        expect(fs).to receive(:copy).ordered
+
+        command.run(['local'])
+      end
+    end
 
     describe 'local' do
       let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
@@ -174,8 +228,8 @@ module Bookbinder
                                                  public_host: '',
                                                  layout_repo: 'my/configuredrepo') }
         let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
-        let(:null_site_generator) { double('site gen', run: nil) }
-        let(:null_fs_accessor) { double('fs accessor', copy: nil) }
+        let(:null_site_generator) { double('site gen', run: success) }
+        let(:null_fs_accessor) { double('fs accessor').as_null_object }
 
         it 'clones the repo' do
           bind = bind_cmd(cloner_factory: factory,
@@ -418,15 +472,14 @@ Content:
         config_factory = double('config factory', produce: config)
 
         command = bind_cmd(bind_config_factory: config_factory)
-        collected_output = capture_stdout {
-          begin
-            command.run(['remote', '--verbose'])
-          rescue SystemExit
-          end
-        }
+        begin
+          command.run(['remote', '--verbose'])
+        rescue SystemExit
+        end
 
-        expect(collected_output).to match(/error.*build/)
-        expect(collected_output).to match(/undefined local variable or method `function_that_does_not_exist'/)
+        # Middleman puts errors to stdout when asked for --verbose
+        expect(middleman_streams[:out].tap(&:rewind).read).to match(/error.*build/)
+        expect(middleman_streams[:out].tap(&:rewind).read).to match(/undefined local variable or method `function_that_does_not_exist'/)
       end
     end
 

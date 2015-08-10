@@ -1,6 +1,7 @@
 require 'tmpdir'
 require_relative '../../../lib/bookbinder/config/configuration'
 require_relative '../../../lib/bookbinder/middleman_runner'
+require_relative '../../../lib/bookbinder/sheller'
 require_relative '../../../lib/bookbinder/values/output_locations'
 require_relative '../../../lib/bookbinder/values/section'
 require_relative '../../helpers/middleman'
@@ -25,7 +26,9 @@ module Bookbinder
     end
 
     let(:fs) { RecordingFs.new }
-    let(:middleman_runner) { MiddlemanRunner.new({out: StringIO.new}, fs) }
+    let(:sheller) { instance_double('Bookbinder::Sheller') }
+    let(:streams) { { out: StringIO.new, err: StringIO.new } }
+    let(:middleman_runner) { MiddlemanRunner.new(streams, fs, sheller) }
 
     let(:context_dir) { Pathname(Dir.mktmpdir) }
     let(:target_dir_path) { context_dir.join('output', 'master_middleman') }
@@ -63,17 +66,20 @@ module Bookbinder
     end
 
     it 'invokes Middleman in the requested directory' do
-      build_command = expect_to_receive_and_return_real_now(Middleman::Cli::Build, :new, [], {:quiet => !verbose}, {})
-
       working_directory_path = nil
-      allow(build_command).to receive(:invoke) { working_directory_path = `pwd`.strip }
-
+      allow(sheller).to receive(:run_command) { working_directory_path = `pwd`.strip }
       run_middleman
-
       expect(Pathname.new(working_directory_path).realpath).to eq(Pathname.new(target_dir_path).realpath)
     end
 
+    it "returns the sheller's return value" do
+      process_status = double('process status')
+      allow(sheller).to receive(:run_command) { process_status }
+      expect(run_middleman).to eq(process_status)
+    end
+
     it "stores bookbinder config for later consumption by our extension" do
+      allow(sheller).to receive(:run_command)
       run_middleman
       expect(fs.received_to).to eq('bookbinder_config.yml')
       expect(fs.received_text_parsed).to eq(
@@ -86,38 +92,31 @@ module Bookbinder
       )
     end
 
-    it 'builds with middleman and passes the verbose parameter' do
-      build_command = expect_to_receive_and_return_real_now(Middleman::Cli::Build, :new, [], {:quiet => !verbose}, {})
-      expect(build_command).to receive(:invoke).with(:build, [], {:verbose => verbose})
+    context "when verbose output is requested" do
+      let(:verbose) { true }
+      it 'builds with middleman in verbose mode' do
+        expect(sheller).to receive(:run_command).with(anything,
+                                                      "middleman build --verbose",
+                                                      streams)
+        run_middleman
+      end
+    end
 
-      run_middleman
+    context "when verbose output is not requested" do
+      let(:verbose) { false }
+      it 'builds with middleman in no verbose mode' do
+        expect(sheller).to receive(:run_command).with(anything,
+                                                      "middleman build --no-verbose",
+                                                      streams)
+        run_middleman
+      end
     end
 
     it 'sets the MM root for invocation' do
-      build_command = expect_to_receive_and_return_real_now(Middleman::Cli::Build, :new, [], {:quiet => !verbose}, {})
-
-      invocation_mm_root = nil
-      allow(build_command).to receive(:invoke) { invocation_mm_root = ENV['MM_ROOT'] }
-
-      run_middleman
-
-      expect(invocation_mm_root).to eq(target_dir_path.to_s)
-    end
-
-    it 'resets the MM root in cleanup' do
-      build_command = expect_to_receive_and_return_real_now(Middleman::Cli::Build, :new, [], {:quiet => !verbose}, {})
-
-      original_mm_root = ENV['MM_ROOT']
-
-      ENV['MM_ROOT'] = 'anything'
-
-      allow(build_command).to receive(:invoke)
-
-      run_middleman
-
-      expect(ENV['MM_ROOT']).to eq('anything')
-
-      ENV['MM_ROOT'] = original_mm_root
+        expect(sheller).to receive(:run_command).with({'MM_ROOT' => context_dir.join('output/master_middleman').to_s},
+                                                      anything,
+                                                      anything)
+        run_middleman
     end
   end
 end
