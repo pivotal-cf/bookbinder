@@ -72,6 +72,12 @@ module Bookbinder
       expect(Pathname.new(working_directory_path).realpath).to eq(Pathname.new(target_dir_path).realpath)
     end
 
+    it "returns the sheller's return value" do
+      process_status = double('process status')
+      allow(sheller).to receive(:run_command) { process_status }
+      expect(run_middleman).to eq(process_status)
+    end
+
     it "stores bookbinder config for later consumption by our extension" do
       allow(sheller).to receive(:run_command)
       run_middleman
@@ -111,9 +117,6 @@ module Bookbinder
                                                       anything,
                                                       anything)
         run_middleman
-    end
-
-    xit "raises an exception if Middleman gives a nonzero exit code" do
     end
   end
 end

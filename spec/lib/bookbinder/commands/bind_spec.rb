@@ -40,7 +40,7 @@ module Bookbinder
       bind_logger = partial_args.fetch(:logger, logger)
       null_streams = {success: Sheller::DevNull.new, out: Sheller::DevNull.new, err: Sheller::DevNull.new}
       Commands::Bind.new(
-        null_streams,
+        partial_args.fetch(:streams, null_streams),
         OutputLocations.new(
           final_app_dir: partial_args.fetch(:final_app_directory, final_app_dir),
           context_dir: partial_args.fetch(:context_dir, File.absolute_path('.'))
@@ -109,12 +109,31 @@ module Bookbinder
     let(:logger) { NilLogger.new }
     let(:middleman_streams) { { out: StringIO.new, err: StringIO.new } }
     let(:middleman_runner) { MiddlemanRunner.new(middleman_streams, file_system_accessor, Sheller.new) }
-    let(:sheller) { double('sheller', run_command: double('status', success?: true)) }
+    let(:success) { double('success', success?: true) }
+    let(:failure) { double('failure', success?: false) }
+    let(:sheller) { double('sheller', run_command: success) }
     let(:sitemap_writer) { Postprocessing::SitemapWriter.build(logger, final_app_dir, random_port) }
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
     let(:subnav_formatter) { SubnavFormatter.new }
 
     describe "both local and remote" do
+      context "when site generation fails" do
+        it "returns a nonzero exit code" do
+          generator = instance_double('Bookbinder::MiddlemanRunner')
+          fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+          disallowed_streams = {}
+          command = bind_cmd(streams: disallowed_streams,
+                             outfs: fs,
+                             static_site_generator: generator,
+                             sitemap_writer: double('disallowed sitemap writer'))
+
+          allow(fs).to receive(:file_exist?) { false }
+          allow(generator).to receive(:run) { failure }
+
+          expect(command.run(['local'])).to be_nonzero
+        end
+      end
+
       it "copies a redirects file from the current directory to the final app directory, prior to site generation" do
         fs = instance_double('Bookbinder::LocalFileSystemAccessor')
         generator = instance_double('Bookbinder::MiddlemanRunner')
@@ -126,7 +145,7 @@ module Bookbinder
         allow(fs).to receive(:copy)
 
         expect(fs).to receive(:copy).with('redirects.rb', Pathname(File.absolute_path('final_app'))).ordered
-        expect(generator).to receive(:run).ordered
+        expect(generator).to receive(:run).ordered { success }
 
         command.run(['local'])
       end
@@ -140,7 +159,7 @@ module Bookbinder
 
         allow(fs).to receive(:file_exist?).with('redirects.rb') { false }
 
-        expect(generator).to receive(:run).ordered
+        expect(generator).to receive(:run).ordered { success }
         expect(fs).to receive(:copy).ordered
 
         command.run(['local'])
@@ -209,7 +228,7 @@ module Bookbinder
                                                  public_host: '',
                                                  layout_repo: 'my/configuredrepo') }
         let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
-        let(:null_site_generator) { double('site gen', run: nil) }
+        let(:null_site_generator) { double('site gen', run: success) }
         let(:null_fs_accessor) { double('fs accessor').as_null_object }
 
         it 'clones the repo' do

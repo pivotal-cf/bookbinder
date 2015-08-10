@@ -72,23 +72,27 @@ module Bookbinder
         if file_system_accessor.file_exist?('redirects.rb')
           file_system_accessor.copy('redirects.rb', output_locations.final_app_dir)
         end
-        static_site_generator.run(
+        generation_result = static_site_generator.run(
           output_locations,
           config_decorator.generate(bind_config, sections),
           bind_options.local_repo_dir,
           bind_options.verbose?,
           subnavs(sections)
         )
-        file_system_accessor.copy(output_locations.build_dir, output_locations.public_dir)
-        result = sitemap_writer.write(
-          bind_config.public_host,
-          bind_options.streams,
-          bind_config.broken_link_exclusions
-        )
+        if generation_result.success?
+          file_system_accessor.copy(output_locations.build_dir, output_locations.public_dir)
+          result = sitemap_writer.write(
+            bind_config.public_host,
+            bind_options.streams,
+            bind_config.broken_link_exclusions
+          )
 
-        bind_options.streams[:success].puts "Bookbinder bound your book into #{output_locations.final_app_dir}"
+          bind_options.streams[:success].puts "Bookbinder bound your book into #{output_locations.final_app_dir}"
 
-        result.has_broken_links? ? 1 : 0
+          result.has_broken_links? ? 1 : 0
+        else
+          1
+        end
       end
 
       private
