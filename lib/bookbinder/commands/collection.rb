@@ -3,6 +3,7 @@ Dir.glob(File.expand_path('../../commands/*.rb', __FILE__)).each do |command_fil
 end
 
 require_relative '../commands/bind/directory_preparer'
+require_relative '../config/archive_menu_configuration'
 require_relative '../config/bind_config_factory'
 require_relative '../config/fetcher'
 require_relative '../config/remote_yaml_credential_provider'

@@ -1,6 +1,5 @@
 require 'middleman-syntax'
 
-require_relative '../config/archive_menu_configuration'
 require_relative '../errors/cli_error'
 require_relative 'bind/bind_options'
 require_relative 'naming'
@@ -70,12 +69,16 @@ module Bookbinder
           options: bind_options.options,
           output_streams: bind_options.streams
         )
-        FileUtils.cp 'redirects.rb', output_locations.final_app_dir if File.exists?('redirects.rb')
-        static_site_generator.run(output_locations,
-                                  config_decorator.generate(bind_config, sections),
-                                  bind_options.local_repo_dir,
-                                  bind_options.verbose?,
-                                  subnavs(sections))
+        if file_system_accessor.file_exist?('redirects.rb')
+          file_system_accessor.copy('redirects.rb', output_locations.final_app_dir)
+        end
+        static_site_generator.run(
+          output_locations,
+          config_decorator.generate(bind_config, sections),
+          bind_options.local_repo_dir,
+          bind_options.verbose?,
+          subnavs(sections)
+        )
         file_system_accessor.copy(output_locations.build_dir, output_locations.public_dir)
         result = sitemap_writer.write(
           bind_config.public_host,

@@ -1,5 +1,6 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
 require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
+require_relative '../../../../lib/bookbinder/config/configuration'
 require_relative '../../../../lib/bookbinder/dita_command_creator'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
@@ -113,6 +114,39 @@ module Bookbinder
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
     let(:subnav_formatter) { SubnavFormatter.new }
 
+    describe "both local and remote" do
+      it "copies a redirects file from the current directory to the final app directory, prior to site generation" do
+        fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+        generator = instance_double('Bookbinder::MiddlemanRunner')
+        command = bind_cmd(file_system_accessor: fs,
+                           static_site_generator: generator,
+                           sitemap_writer: double('sitemap writer').as_null_object)
+
+        allow(fs).to receive(:file_exist?).with('redirects.rb') { true }
+        allow(fs).to receive(:copy)
+
+        expect(fs).to receive(:copy).with('redirects.rb', Pathname(File.absolute_path('final_app'))).ordered
+        expect(generator).to receive(:run).ordered
+
+        command.run(['local'])
+      end
+
+      it "doesn't attempt to copy the redirect file if it doesn't exist" do
+        fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+        generator = instance_double('Bookbinder::MiddlemanRunner')
+        command = bind_cmd(file_system_accessor: fs,
+                           static_site_generator: generator,
+                           sitemap_writer: double('sitemap writer').as_null_object)
+
+        allow(fs).to receive(:file_exist?).with('redirects.rb') { false }
+
+        expect(generator).to receive(:run).ordered
+        expect(fs).to receive(:copy).ordered
+
+        command.run(['local'])
+      end
+    end
+
     describe 'local' do
       let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
 
@@ -176,7 +210,7 @@ module Bookbinder
                                                  layout_repo: 'my/configuredrepo') }
         let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
         let(:null_site_generator) { double('site gen', run: nil) }
-        let(:null_fs_accessor) { double('fs accessor', copy: nil) }
+        let(:null_fs_accessor) { double('fs accessor').as_null_object }
 
         it 'clones the repo' do
           bind = bind_cmd(cloner_factory: factory,
