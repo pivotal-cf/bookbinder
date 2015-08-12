@@ -37,11 +37,5 @@ module Bookbinder
 
     attr_reader :streams, :fs, :sheller
 
-    def verbosity_levels
-      {
-        true => "--verbose",
-        false => "--no-verbose"
-      }
-    end
   end
 end
