@@ -35,7 +35,6 @@ module Bookbinder
     let(:template_variables) { {'anybody' => 'nobody'} }
     let(:production_host) { 'somehost' }
     let(:archive_menu) { {} }
-    let(:verbose) { false }
     let(:sections) { [
         Section.new('path/to/repo', '', true, 'path/to', 'my/place/rocks', 'my_subnav_template'),
         Section.new('path/to/repo', '', true, 'path/to', 'fraggles/rock')
@@ -54,18 +53,18 @@ module Bookbinder
       target_dir_path.mkpath
 
       middleman_runner.run(
-        output_locations,
-        Config::Configuration.parse(
+        "potato",
+        output_locations: output_locations,
+        config: Config::Configuration.parse(
           'template_variables' => template_variables,
           'public_host' => production_host,
           'archive_menu' => archive_menu
         ),
-        'local',
-        verbose,
-        subnav_templates)
+        local_repo_dir: 'local',
+        subnavs: subnav_templates)
     end
 
-    it 'invokes Middleman in the requested directory' do
+    it "invokes Middleman in the requested directory" do
       working_directory_path = nil
       allow(sheller).to receive(:run_command) { working_directory_path = `pwd`.strip }
       run_middleman
@@ -92,31 +91,16 @@ module Bookbinder
       )
     end
 
-    context "when verbose output is requested" do
-      let(:verbose) { true }
-      it 'builds with middleman in verbose mode' do
-        expect(sheller).to receive(:run_command).with(anything,
-                                                      "middleman build --verbose",
-                                                      streams)
-        run_middleman
-      end
+    it "sends the command to the sheller" do
+      expect(sheller).to receive(:run_command).with(anything, "middleman potato", anything)
+      run_middleman
     end
 
-    context "when verbose output is not requested" do
-      let(:verbose) { false }
-      it 'builds with middleman in no verbose mode' do
-        expect(sheller).to receive(:run_command).with(anything,
-                                                      "middleman build --no-verbose",
-                                                      streams)
-        run_middleman
-      end
-    end
-
-    it 'sets the MM root for invocation' do
-        expect(sheller).to receive(:run_command).with({'MM_ROOT' => context_dir.join('output/master_middleman').to_s},
-                                                      anything,
-                                                      anything)
-        run_middleman
+    it "sets the MM root for invocation" do
+      expect(sheller).to receive(:run_command).with({'MM_ROOT' => context_dir.join('output/master_middleman').to_s},
+                                                    anything,
+                                                    anything)
+      run_middleman
     end
   end
 end

@@ -72,12 +72,11 @@ module Bookbinder
         if file_system_accessor.file_exist?('redirects.rb')
           file_system_accessor.copy('redirects.rb', output_locations.final_app_dir)
         end
-        generation_result = static_site_generator.run(
-          output_locations,
-          config_decorator.generate(bind_config, sections),
-          bind_options.local_repo_dir,
-          bind_options.verbose?,
-          subnavs(sections)
+        generation_result = static_site_generator.run("build #{bind_options.verbosity}",
+          output_locations: output_locations,
+          config: config_decorator.generate(bind_config, sections),
+          local_repo_dir: bind_options.local_repo_dir,
+          subnavs: subnavs(sections)
         )
         if generation_result.success?
           file_system_accessor.copy(output_locations.build_dir, output_locations.public_dir)

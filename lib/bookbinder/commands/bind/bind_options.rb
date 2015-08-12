@@ -31,12 +31,12 @@ module Bookbinder
 
         def streams
           base_streams.merge(
-            out: verbose? ? base_streams[:out] : Sheller::DevNull.new,
+            out: verbosity ? base_streams[:out] : Sheller::DevNull.new,
           )
         end
 
-        def verbose?
-          options.include?('--verbose')
+        def verbosity
+          options.detect {|arg| arg == '--verbose'}
         end
 
         private

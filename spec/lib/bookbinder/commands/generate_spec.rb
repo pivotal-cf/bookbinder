@@ -12,8 +12,8 @@ module Bookbinder
       UNUSED_FS = Object.new
       UNUSED_SHELLER = Object.new
       UNUSED_PATH = 'unused/path'
-      UNUSED_LOGGER = Object.new
       UNCHECKED_STREAMS = {out: StringIO.new, err: StringIO.new}
+      let(:unused_logger) { Object.new }
 
       def generate_cmd(fs: UNUSED_FS,
                        sheller: UNUSED_SHELLER,
@@ -66,7 +66,7 @@ module Bookbinder
 
       it "is available as a command" do
         commands = Commands::Collection.new(
-          UNUSED_LOGGER, UNCHECKED_STREAMS, double('vcs')
+          unused_logger, UNCHECKED_STREAMS, double('vcs')
         )
         expect(commands.detect {|c| c.command_for?('generate')}).to be_a(Generate)
       end
@@ -76,7 +76,7 @@ module Bookbinder
       end
 
       it "is compatible with the help command" do
-        help = Commands::Help.new(UNUSED_LOGGER, [generate_cmd])
+        help = Commands::Help.new(unused_logger, [generate_cmd])
         expect(help.usage_message).to include('generate')
       end
 
