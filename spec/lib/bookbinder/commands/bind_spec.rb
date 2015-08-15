@@ -122,7 +122,7 @@ module Bookbinder
           fs = instance_double('Bookbinder::LocalFileSystemAccessor')
           disallowed_streams = {}
           command = bind_cmd(streams: disallowed_streams,
-                             outfs: fs,
+                             file_system_accessor: fs,
                              static_site_generator: generator,
                              sitemap_writer: double('disallowed sitemap writer'))
 

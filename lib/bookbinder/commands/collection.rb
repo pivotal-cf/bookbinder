@@ -78,6 +78,7 @@ module Bookbinder
             configuration_fetcher,
             version_control_system
           ),
+          watch
         ]
       end
 
@@ -92,7 +93,7 @@ module Bookbinder
           Config::BindConfigFactory.new(version_control_system, configuration_fetcher),
           Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           local_file_system_accessor,
-          MiddlemanRunner.new(local_file_system_accessor, sheller),
+          runner,
           Postprocessing::SitemapWriter.build(logger, final_app_directory, sitemap_port),
           Preprocessing::Preprocessor.new(
             Preprocessing::DitaPreprocessor.new(
@@ -106,6 +107,21 @@ module Bookbinder
           Ingest::ClonerFactory.new(streams, local_file_system_accessor, version_control_system),
           Ingest::SectionRepositoryFactory.new(logger),
           Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
+        )
+      end
+
+      def watch
+        @watch ||= Commands::Watch.new(
+          streams,
+          middleman_runner: runner,
+          output_locations: OutputLocations.new(final_app_dir: final_app_directory, context_dir: File.absolute_path('.')),
+          config_fetcher: configuration_fetcher,
+          config_decorator: Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
+          file_system_accessor: local_file_system_accessor,
+          preprocessor: Preprocessing::Preprocessor.new(Preprocessing::LinkToSiteGenDir.new(local_file_system_accessor)),
+          cloner: local_file_system_cloner,
+          section_repository: Ingest::SectionRepository.new(logger, local_file_system_cloner),
+          directory_preparer: Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
         )
       end
 
@@ -161,6 +177,14 @@ module Bookbinder
 
       def sitemap_port
         41722
+      end
+
+      def runner
+        MiddlemanRunner.new(local_file_system_accessor, sheller)
+      end
+
+      def local_file_system_cloner
+        Ingest::LocalFilesystemCloner.new(streams, local_file_system_accessor, File.expand_path('..'))
       end
     end
   end
