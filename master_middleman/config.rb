@@ -1,5 +1,6 @@
 require 'bookbinder_helpers'
 require 'middleman-syntax'
+require 'middleman-livereload'
 require 'submodule_aware_assets'
 
 config = YAML.load_file('bookbinder_config.yml')
@@ -27,3 +28,5 @@ activate :submodule_aware_assets
 activate :navigation
 
 activate :syntax
+
+activate :livereload
