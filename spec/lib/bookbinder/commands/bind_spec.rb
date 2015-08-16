@@ -107,8 +107,7 @@ module Bookbinder
     let(:final_app_dir) { File.absolute_path('final_app') }
     let(:git_client) { GitClient.new }
     let(:logger) { NilLogger.new }
-    let(:middleman_streams) { { out: StringIO.new, err: StringIO.new } }
-    let(:middleman_runner) { MiddlemanRunner.new(middleman_streams, file_system_accessor, Sheller.new) }
+    let(:middleman_runner) { MiddlemanRunner.new(file_system_accessor, Sheller.new) }
     let(:success) { double('success', success?: true) }
     let(:failure) { double('failure', success?: false) }
     let(:sheller) { double('sheller', run_command: success) }
@@ -470,16 +469,18 @@ Content:
 
         config = Config::Configuration.parse(config_hash)
         config_factory = double('config factory', produce: config)
+        streams = { out: StringIO.new }
 
-        command = bind_cmd(bind_config_factory: config_factory)
+        command = bind_cmd(streams: streams, bind_config_factory: config_factory)
         begin
           command.run(['remote', '--verbose'])
         rescue SystemExit
         end
 
         # Middleman puts errors to stdout when asked for --verbose
-        expect(middleman_streams[:out].tap(&:rewind).read).to match(/error.*build/)
-        expect(middleman_streams[:out].tap(&:rewind).read).to match(/undefined local variable or method `function_that_does_not_exist'/)
+        output = streams[:out].tap(&:rewind).read
+        expect(output).to match(/error.*build/)
+        expect(output).to match(/undefined local variable or method `function_that_does_not_exist'/)
       end
     end
 

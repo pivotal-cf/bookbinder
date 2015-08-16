@@ -5,13 +5,13 @@ require 'yaml'
 
 module Bookbinder
   class MiddlemanRunner
-    def initialize(streams, fs, sheller)
-      @streams = streams
+    def initialize(fs, sheller)
       @fs = fs
       @sheller = sheller
     end
 
     def run(command,
+            streams: nil,
             output_locations: nil,
             config: nil,
             local_repo_dir: nil,
