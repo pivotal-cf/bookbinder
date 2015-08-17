@@ -28,7 +28,7 @@ module Bookbinder
     let(:fs) { RecordingFs.new }
     let(:sheller) { instance_double('Bookbinder::Sheller') }
     let(:streams) { { out: StringIO.new, err: StringIO.new } }
-    let(:middleman_runner) { MiddlemanRunner.new(streams, fs, sheller) }
+    let(:middleman_runner) { MiddlemanRunner.new(fs, sheller) }
 
     let(:context_dir) { Pathname(Dir.mktmpdir) }
     let(:target_dir_path) { context_dir.join('output', 'master_middleman') }
@@ -54,6 +54,7 @@ module Bookbinder
 
       middleman_runner.run(
         "potato",
+        streams: streams,
         output_locations: output_locations,
         config: Config::Configuration.parse(
           'template_variables' => template_variables,
@@ -100,6 +101,11 @@ module Bookbinder
       expect(sheller).to receive(:run_command).with({'MM_ROOT' => context_dir.join('output/master_middleman').to_s},
                                                     anything,
                                                     anything)
+      run_middleman
+    end
+
+    it "passes the streams through to the sheller" do
+      expect(sheller).to receive(:run_command).with(anything, anything, streams)
       run_middleman
     end
   end

@@ -72,7 +72,9 @@ module Bookbinder
         if file_system_accessor.file_exist?('redirects.rb')
           file_system_accessor.copy('redirects.rb', output_locations.final_app_dir)
         end
-        generation_result = static_site_generator.run("build #{bind_options.verbosity}",
+        generation_result = static_site_generator.run(
+          "build #{bind_options.verbosity}",
+          streams: bind_options.streams,
           output_locations: output_locations,
           config: config_decorator.generate(bind_config, sections),
           local_repo_dir: bind_options.local_repo_dir,
