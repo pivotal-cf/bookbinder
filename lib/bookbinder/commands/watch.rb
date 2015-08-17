@@ -59,6 +59,7 @@ module Bookbinder
           output_locations: output_locations,
           config: config_decorator.generate(watch_config, sections),
           local_repo_dir: File.expand_path('..'),
+          streams: streams,
           subnavs: subnavs(sections)
         )
       end

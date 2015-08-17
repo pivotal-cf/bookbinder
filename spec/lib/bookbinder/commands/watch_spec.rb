@@ -89,6 +89,7 @@ module Bookbinder
         runner = instance_double('MiddlemanRunner')
         config = Config::Configuration.new({book_repo: "best_book"})
         section = Section.new('fake/path', 'foo/bar')
+        streams = {out: "foo"}
         config_decorator = double('decorator')
         decorated_config = Config::Configuration.new(book_repo: "best_book", public_host: "a_host")
         allow(config_decorator).to receive(:generate).with(config, [section]) { decorated_config }
@@ -97,10 +98,11 @@ module Bookbinder
           output_locations: output_locations,
           config:           decorated_config,
           local_repo_dir:   File.expand_path(".."),
+          streams:          streams,
           subnavs:          section.subnav)
 
         Watch.new(
-          untested_streams,
+          streams,
           middleman_runner: runner,
           output_locations: output_locations,
           config_fetcher: instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
