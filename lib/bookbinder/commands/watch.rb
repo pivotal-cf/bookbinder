@@ -55,7 +55,7 @@ module Bookbinder
           file_system_accessor.copy('redirects.rb', output_locations.final_app_dir)
         end
 
-        middleman_runner.run("server --force-polling",
+        middleman_runner.run("server --force-polling --latency=5.0",
           output_locations: output_locations,
           config: config_decorator.generate(watch_config, sections),
           local_repo_dir: File.expand_path('..'),
