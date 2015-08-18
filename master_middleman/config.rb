@@ -1,7 +1,6 @@
 require 'bookbinder_helpers'
 require 'middleman-syntax'
 require 'middleman-livereload'
-require 'submodule_aware_assets'
 
 config = YAML.load_file('bookbinder_config.yml')
 config.each do |k, v|
@@ -22,8 +21,6 @@ set :js_dir, 'javascripts'
 set :images_dir, 'images'
 
 set :relative_links, false
-
-activate :submodule_aware_assets
 
 activate :navigation
 
