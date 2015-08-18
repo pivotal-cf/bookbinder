@@ -44,7 +44,7 @@ module Bookbinder
           )
         else
           streams[:out].puts "  skipping (not found) #{source_dir}"
-          MissingWorkingCopy.new(source_repo_name)
+          MissingWorkingCopy.new(source_repo_name, source_dir)
         end
       end
 
