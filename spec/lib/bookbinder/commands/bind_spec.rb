@@ -45,7 +45,7 @@ module Bookbinder
           final_app_dir: partial_args.fetch(:final_app_directory, final_app_dir),
           context_dir: partial_args.fetch(:context_dir, File.absolute_path('.'))
         ),
-        partial_args.fetch(:bind_config_factory, double('config factory', produce: config)),
+        partial_args.fetch(:config_fetcher, double('config fetcher', fetch_config: config)),
         partial_args.fetch(:archive_menu_config, archive_menu_config),
         partial_args.fetch(:file_system_accessor, file_system_accessor),
         partial_args.fetch(:static_site_generator, middleman_runner),
@@ -315,7 +315,7 @@ module Bookbinder
 
     describe 'using template variables' do
       it 'includes them in the final site' do
-        bind_cmd(bind_config_factory: double('config factory', produce: Config::Configuration.new(
+        bind_cmd(config_fetcher: double('config fetcher', fetch_config: Config::Configuration.new(
           sections: [
             Config::SectionConfig.new(
               'repository' => {'name' => 'fantastic/my-variable-repo'},
@@ -345,9 +345,9 @@ module Bookbinder
 
         it 'contains the given pages in an XML sitemap' do
           command = bind_cmd(
-            bind_config_factory: double(
-              'config factory',
-              produce: Config::Configuration.parse(
+            config_fetcher: double(
+              'config fetcher',
+              fetch_config: Config::Configuration.parse(
                 'sections' => [ {'repository' => {'name' => 'org/dogs-repo'}} ],
                 'book_repo' => 'fantastic/book',
                 'cred_repo' => 'my-org/my-creds',
@@ -409,9 +409,9 @@ Content:
         }
 
         config = Config::Configuration.parse(config_hash)
-        config_factory = double('config factory', produce: config)
+        config_fetcher = double('config fetcher', fetch_config: config)
 
-        command = bind_cmd(bind_config_factory: config_factory)
+        command = bind_cmd(config_fetcher: config_fetcher)
         command.run(['remote'])
 
         final_app_dir = File.absolute_path('final_app')
@@ -438,9 +438,9 @@ Content:
           }
 
           config = Config::Configuration.parse(config_hash)
-          config_factory = double('config factory', produce: config)
+          config_fetcher = double('config fetcher', fetch_config: config)
 
-          command = bind_cmd(bind_config_factory: config_factory)
+          command = bind_cmd(config_fetcher: config_fetcher)
           collected_output = capture_stdout {
             begin
               command.run(['remote'])
@@ -468,10 +468,10 @@ Content:
         }
 
         config = Config::Configuration.parse(config_hash)
-        config_factory = double('config factory', produce: config)
+        config_fetcher = double('config fetcher', fetch_config: config)
         streams = { out: StringIO.new }
 
-        command = bind_cmd(streams: streams, bind_config_factory: config_factory)
+        command = bind_cmd(streams: streams, config_fetcher: config_fetcher)
         begin
           command.run(['remote', '--verbose'])
         rescue SystemExit
@@ -490,12 +490,12 @@ Content:
                                              'book_repo' => book,
                                              'cred_repo' => 'my-org/my-creds',
                                              'public_host' => 'docs.dogs.com')
-        config_factory = double('config factory', produce: config)
+        config_fetcher = double('config fetcher', fetch_config: config)
         final_app_dir = File.absolute_path('final_app')
         spider = Spider.new(app_dir: final_app_dir)
         server_director = ServerDirector.new(directory: final_app_dir)
 
-        bind_cmd(bind_config_factory: config_factory,
+        bind_cmd(config_fetcher: config_fetcher,
                  static_site_generator: middleman_runner,
                  final_app_directory: final_app_dir,
                  spider: spider,

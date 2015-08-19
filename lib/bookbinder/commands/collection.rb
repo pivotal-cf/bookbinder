@@ -4,7 +4,6 @@ end
 
 require_relative '../commands/bind/directory_preparer'
 require_relative '../config/archive_menu_configuration'
-require_relative '../config/bind_config_factory'
 require_relative '../config/fetcher'
 require_relative '../config/remote_yaml_credential_provider'
 require_relative '../config/validator'
@@ -90,7 +89,7 @@ module Bookbinder
         @bind ||= Commands::Bind.new(
           streams,
           OutputLocations.new(final_app_dir: final_app_directory, context_dir: File.absolute_path('.')),
-          Config::BindConfigFactory.new(version_control_system, configuration_fetcher),
+          configuration_fetcher,
           Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           local_file_system_accessor,
           runner,

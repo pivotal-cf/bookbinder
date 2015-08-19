@@ -73,10 +73,6 @@ module Bookbinder
         config.fetch(:template_variables, {})
       end
 
-      def versions
-        config.fetch(:versions, [])
-      end
-
       def merge(other_configuration)
         Configuration.new(config.merge(other_configuration.instance_variable_get(:@config)))
       end

@@ -39,10 +39,6 @@ module Bookbinder
         expect('d').not_to match(config.broken_link_exclusions)
       end
 
-      it "returns an empty collection of versions if none are provided" do
-        expect(Configuration.parse({}).versions).to be_empty
-      end
-
       it "can merge another config object" do
         expect(Configuration.parse('book_repo' => 'foo/bar',
                                    'cred_repo' => 'cred/repo',

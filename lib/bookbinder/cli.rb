@@ -38,9 +38,6 @@ module Bookbinder
       begin
         command_runner.run command_name, command_arguments
 
-      rescue Config::RemoteBindConfiguration::VersionUnsupportedError => e
-        colorized_streams[:err].puts "config.yml at version '#{e.message}' has an unsupported API."
-        1
       rescue Config::CfCredentials::CredentialKeyError => e
         colorized_streams[:err].puts "#{e.message}, in credentials.yml"
         1

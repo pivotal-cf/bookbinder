@@ -11,7 +11,7 @@ module Bookbinder
 
       def initialize(base_streams,
                      output_locations,
-                     config_factory,
+                     config_fetcher,
                      config_decorator,
                      file_system_accessor,
                      static_site_generator,
@@ -22,7 +22,7 @@ module Bookbinder
                      directory_preparer)
         @base_streams = base_streams
         @output_locations = output_locations
-        @config_factory = config_factory
+        @config_fetcher = config_fetcher
         @config_decorator = config_decorator
         @file_system_accessor = file_system_accessor
         @static_site_generator = static_site_generator
@@ -48,7 +48,7 @@ module Bookbinder
 
       def run(cli_arguments)
         bind_options        = BindComponents::BindOptions.new(cli_arguments, base_streams).tap(&:validate!)
-        bind_config         = config_factory.produce(bind_options.bind_source)
+        bind_config         = config_fetcher.fetch_config
         cloner              = cloner_factory.produce(bind_options.local_repo_dir)
         section_repository  = section_repository_factory.produce(cloner)
 
@@ -102,7 +102,7 @@ module Bookbinder
         :base_streams,
         :cloner_factory,
         :config_decorator,
-        :config_factory,
+        :config_fetcher,
         :directory_preparer,
         :file_system_accessor,
         :final_app_directory,
