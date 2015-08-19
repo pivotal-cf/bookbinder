@@ -114,6 +114,7 @@ module Bookbinder
     let(:sitemap_writer) { Postprocessing::SitemapWriter.build(logger, final_app_dir, random_port) }
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
     let(:subnav_formatter) { SubnavFormatter.new }
+    let(:untested_streams) { {} }
 
     describe "both local and remote" do
       context "when site generation fails" do
@@ -162,6 +163,58 @@ module Bookbinder
         expect(fs).to receive(:copy).ordered
 
         command.run(['local'])
+      end
+
+      it "prepares directories and then preprocesses fetched sections" do
+        directory_preparer = instance_double('BindComponents::DirectoryPreparer')
+        output_locations = OutputLocations.new(context_dir: ".")
+        preprocessor = instance_double('Preprocessing::Preprocessor')
+
+        cloner = instance_double('Ingest::Cloner')
+        cloner_factory = instance_double('Ingest::ClonerFactory')
+        allow(cloner_factory).to receive(:produce).with(File.expand_path('..')) { cloner}
+
+        section_config = Config::SectionConfig.new({'directory' => 'foo'})
+        config = Config::Configuration.new({book_repo: "some_book", sections: [section_config]})
+        sections = [Section.new('fake/path', 'foo/bar'), Section.new('other/path', 'cat/dog')]
+
+        section_repository = instance_double('Ingest::SectionRepository')
+        allow(section_repository).to receive(:fetch).with(
+                                                      configured_sections: [section_config],
+                                                      destination_dir: output_locations.cloned_preprocessing_dir,
+                                                      ref_override: nil
+                                     ) { sections }
+
+        section_repository_factory = instance_double('Ingest::SectionRepositoryFactory')
+        allow(section_repository_factory).to receive(:produce).with(cloner) { section_repository }
+
+        expect(directory_preparer).to receive(:prepare_directories).with(
+                                          config,
+                                          File.expand_path('../../../../', __dir__),
+                                          output_locations,
+                                          File.absolute_path('master_middleman')
+                                      ).ordered
+
+        expect(preprocessor).to receive(:preprocess).with(
+                                    sections,
+                                    output_locations,
+                                    options: [],
+                                    output_streams: { out: instance_of(Sheller::DevNull) }
+                                ).ordered
+
+        Commands::Bind.new(
+            untested_streams,
+            output_locations,
+            instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
+            double('decorator', generate: config),
+            instance_double('LocalFileSystemAccessor', file_exist?: false),
+            instance_double('MiddlemanRunner', run: failure),
+            instance_double('Postprocessing::SitemapWriter'),
+            preprocessor,
+            cloner_factory,
+            section_repository_factory,
+            directory_preparer
+        ).run(['local'])
       end
     end
 
