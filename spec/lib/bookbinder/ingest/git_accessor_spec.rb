@@ -22,7 +22,7 @@ module Bookbinder
         end
       end
 
-      it "only clones once for a given set of params" do
+      it "only clones once for a given set of params for a single GitAccessor instance" do
         Dir.mktmpdir do |dir|
           path = Pathname(dir)
           init_repo(at_dir: path.join('srcrepo'),
@@ -34,6 +34,23 @@ module Bookbinder
 
           git.clone(path.join('srcrepo'), 'destrepo', path: path)
           expect { git.clone(path.join('srcrepo'), 'destrepo', path: path) }.
+            not_to change { path.join('destrepo', 'Gemfile').mtime }
+        end
+      end
+
+      it "only clones once for a given set of params for multiple GitAccessor instances" do
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+          init_repo(at_dir: path.join('srcrepo'),
+                    file: 'Gemfile',
+                    contents: 'gemstuffz',
+                    commit_message: 'new railz plz')
+
+          first_git = GitAccessor.new
+          second_git = GitAccessor.new
+
+          first_git.clone(path.join('srcrepo'), 'destrepo', path: path)
+          expect { second_git.clone(path.join('srcrepo'), 'destrepo', path: path) }.
             not_to change { path.join('destrepo', 'Gemfile').mtime }
         end
       end

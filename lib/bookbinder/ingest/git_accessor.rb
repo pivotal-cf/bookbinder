@@ -77,7 +77,12 @@ module Bookbinder
       end
 
       def _clone(url, name, path)
-        Git.clone(url, name, path: path)
+        dest_dir = path.join(name)
+        if dest_dir.exist?
+          Git.open(dest_dir)
+        else
+          Git.clone(url, name, path: path)
+        end
       end
     end
   end
