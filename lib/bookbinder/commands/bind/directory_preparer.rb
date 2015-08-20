@@ -2,6 +2,8 @@ module Bookbinder
   module Commands
     module BindComponents
       class DirectoryPreparer
+        include Bookbinder::DirectoryHelperMethods
+
         def initialize(fs)
           @fs = fs
         end
@@ -17,6 +19,10 @@ module Bookbinder
         private
 
         attr_reader :fs
+
+        def copy_directory_from_gem(gem_root, dir, output_dir)
+          fs.copy_contents(File.join(gem_root, dir), output_dir)
+        end
       end
     end
   end

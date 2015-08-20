@@ -61,7 +61,8 @@ module Bookbinder
         partial_args.fetch(:preprocessor, null_preprocessor),
         partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(null_streams, null_fs_accessor, GitFake.new)),
         partial_args.fetch(:section_repository, Ingest::SectionRepository.new),
-        partial_args.fetch(:directory_preparer, Commands::BindComponents::DirectoryPreparer.new(real_fs_accessor)))
+        partial_args.fetch(:directory_preparer, Commands::BindComponents::DirectoryPreparer.new(real_fs_accessor))
+      )
     end
 
     it "returns a nonzero exit code when Middleman fails" do
