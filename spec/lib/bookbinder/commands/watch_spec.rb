@@ -24,10 +24,11 @@ module Bookbinder
       end
 
       it "prepares directories and then preprocesses fetched sections" do
-        streams = {out: "foo"}
+        streams = {out: "foo", success: "bar"}
         directory_preparer = instance_double('BindComponents::DirectoryPreparer')
         output_locations = OutputLocations.new(context_dir: ".")
         preprocessor = instance_double('Preprocessing::Preprocessor')
+        cloner = instance_double('Ingest::LocalFileSystemCloner')
 
         section_config = Config::SectionConfig.new({'directory' => 'foo'})
         config = Config::Configuration.new({book_repo: "some_book", sections: [section_config]})

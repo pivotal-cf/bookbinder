@@ -42,10 +42,10 @@ module Bookbinder
           File.absolute_path('master_middleman')
         )
         sections = section_repository.fetch(
-          cloner: cloner,
           configured_sections: watch_config.sections,
           destination_dir: output_locations.cloned_preprocessing_dir,
-          streams: streams,
+          cloner: cloner,
+          streams: streams
         )
         preprocessor.preprocess(
           sections,

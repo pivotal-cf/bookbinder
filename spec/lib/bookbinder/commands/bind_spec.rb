@@ -137,9 +137,10 @@ module Bookbinder
              streams: merged_streams) { sections }
 
       expect(directory_preparer).to receive(:prepare_directories).
-        with(File.expand_path('../../../../', __dir__),
+        with(config,
+             File.expand_path('../../../../', __dir__),
              output_locations,
-             File.absolute_path('master_middleman')).ordered
+             cloner).ordered
 
       expect(preprocessor).to receive(:preprocess).
         with(sections,
@@ -155,34 +156,6 @@ module Bookbinder
         section_repository: section_repository,
         directory_preparer: directory_preparer
       ).run(['local'])
-    end
-
-    context 'when configured with a layout repo' do
-      it 'sets the repo as the layout repo path when prepping dirs' do
-        factory = double('cloner factory')
-        cloner = double('cloner')
-        directory_preparer = double('dir preparer', prepare_directories: nil)
-
-        config = Config::Configuration.new(sections: [],
-                                           book_repo: '',
-                                           public_host: '',
-                                           layout_repo: 'my/configuredrepo')
-
-        bind = bind_cmd(cloner_factory: factory,
-                        directory_preparer: directory_preparer,
-                        config_fetcher: double('config fetcher', fetch_config: config))
-
-        allow(factory).to receive(:produce).with(nil) { cloner }
-        allow(cloner).to receive(:call).
-          with(hash_including(source_repo_name: "my/configuredrepo")) {
-          Ingest::WorkingCopy.new(copied_to: 'foo/repo')
-        }
-
-        bind.run(['remote'])
-
-        expect(directory_preparer).to have_received(:prepare_directories).
-          with(anything, anything, Pathname('foo/repo'))
-      end
     end
 
     context 'when there are invalid arguments' do
