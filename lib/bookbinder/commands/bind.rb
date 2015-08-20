@@ -62,7 +62,7 @@ module Bookbinder
           destination_dir: output_locations.cloned_preprocessing_dir,
           ref_override: bind_options.ref_override,
           cloner: cloner,
-          streams: base_streams
+          streams: bind_options.streams
         )
         preprocessor.preprocess(
           sections,

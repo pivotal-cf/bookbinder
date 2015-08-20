@@ -114,7 +114,6 @@ module Bookbinder
     let(:sitemap_writer) { Postprocessing::SitemapWriter.build(logger, final_app_dir, random_port) }
     let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(file_system_accessor, subnav_formatter, document_parser) }
     let(:subnav_formatter) { SubnavFormatter.new }
-    let(:untested_streams) { {} }
 
     describe "both local and remote" do
       context "when site generation fails" do
@@ -171,6 +170,7 @@ module Bookbinder
         directory_preparer = instance_double('BindComponents::DirectoryPreparer')
         output_locations = OutputLocations.new(context_dir: ".")
         preprocessor = instance_double('Preprocessing::Preprocessor')
+        merged_streams = { out: instance_of(Sheller::DevNull) }
 
         cloner = instance_double('Ingest::Cloner')
         cloner_factory = instance_double('Ingest::ClonerFactory')
@@ -186,7 +186,7 @@ module Bookbinder
                                                       destination_dir: output_locations.cloned_preprocessing_dir,
                                                       ref_override: nil,
                                                       cloner: cloner,
-                                                      streams: untested_streams
+                                                      streams: merged_streams
                                      ) { sections }
 
         expect(directory_preparer).to receive(:prepare_directories).with(
@@ -200,11 +200,11 @@ module Bookbinder
                                     sections,
                                     output_locations,
                                     options: [],
-                                    output_streams: { out: instance_of(Sheller::DevNull) }
+                                    output_streams: merged_streams
                                 ).ordered
 
         Commands::Bind.new(
-            untested_streams,
+            {},
             output_locations,
             instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
             double('decorator', generate: config),
