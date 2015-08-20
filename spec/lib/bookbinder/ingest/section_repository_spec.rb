@@ -5,8 +5,8 @@ require_relative '../../../../lib/bookbinder/ingest/working_copy'
 module Bookbinder
   module Ingest
     describe SectionRepository do
-      let(:null_logger) { double('deprecated logger').as_null_object }
       let(:null_cloner) { ->(*) { Ingest::WorkingCopy.new(copied_to: 'some/place') } }
+      let(:null_streams) { double('unused stream').as_null_object }
       let(:spy_cloner) {
         Class.new {
           attr_reader :clones
@@ -23,14 +23,16 @@ module Bookbinder
       }
 
       it "clones all sections into the provided destination dir" do
-        SectionRepository.new(null_logger, spy_cloner).fetch(
+        SectionRepository.new.fetch(
           configured_sections: [
             Config::SectionConfig.new('repository' => { 'name' => 'myorg/myrepo' },
                                       'directory' => 'mydesireddir'),
             Config::SectionConfig.new('repository' => { 'name' => 'myorg/myotherrepo' },
                                       'directory' => nil),
           ],
-          destination_dir: 'my/place/to/dump/repos'
+          destination_dir: 'my/place/to/dump/repos',
+          cloner: spy_cloner,
+          streams: null_streams
         )
 
         expect(spy_cloner.clones).to eq(
@@ -48,14 +50,16 @@ module Bookbinder
       end
 
       it "can override all refs" do
-        SectionRepository.new(null_logger, spy_cloner).fetch(
+        SectionRepository.new.fetch(
           configured_sections: [
             Config::SectionConfig.new('repository' => { 'name' => 'myorg/myrepo',
                                                         'ref' => 'mydesiredref' }),
             Config::SectionConfig.new('repository' => { 'name' => 'myorg/myotherrepo' }),
           ],
           destination_dir: 'anywhere/really',
-          ref_override: 'actuallythisversionplz'
+          ref_override: 'actuallythisversionplz',
+          cloner: spy_cloner,
+          streams: null_streams
         )
 
         expect(spy_cloner.clones.map {|clone| clone[:source_ref]}).to eq([ 'actuallythisversionplz' ] * 2)
@@ -70,7 +74,7 @@ module Bookbinder
         n = -1
         cloner = ->(*) { working_copies[n += 1] }
 
-        sections = SectionRepository.new(null_logger, cloner).fetch(
+        sections = SectionRepository.new.fetch(
           configured_sections: [
             Config::SectionConfig.new(
               'directory' => 'my-desired-dir-name',
@@ -83,7 +87,9 @@ module Bookbinder
             ),
           ],
           destination_dir: 'anywhere/really',
-          ref_override: 'actuallythisversionplz'
+          ref_override: 'actuallythisversionplz',
+          cloner: cloner,
+          streams: null_streams
         )
 
         expect(sections).to eq(
@@ -95,17 +101,20 @@ module Bookbinder
       end
 
       it "informs the user that it's fetching each repository" do
-        logger = double('deprecated logger interface')
+        colorized_stream = instance_double('Streams::ColorizedStream')
+        streams = {success: colorized_stream}
 
-        expect(logger).to receive(:log).with(%r{Gathering .*foo/section})
-        expect(logger).to receive(:log).with(%r{Gathering .*bar/section})
+        expect(colorized_stream).to receive(:puts).with(%r{Gathering .*foo/section})
+        expect(colorized_stream).to receive(:puts).with(%r{Gathering .*bar/section})
 
-        SectionRepository.new(logger, null_cloner).fetch(
+        SectionRepository.new.fetch(
           configured_sections: [
             Config::SectionConfig.new('repository' => { 'name' => 'foo/section' }),
             Config::SectionConfig.new('repository' => { 'name' => 'bar/section' }),
           ],
-          destination_dir: 'some/place'
+          destination_dir: 'some/place',
+          cloner: null_cloner,
+          streams: streams
         )
       end
     end

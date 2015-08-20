@@ -18,7 +18,7 @@ module Bookbinder
                      sitemap_writer,
                      preprocessor,
                      cloner_factory,
-                     section_repository_factory,
+                     section_repository,
                      directory_preparer)
         @base_streams = base_streams
         @output_locations = output_locations
@@ -29,7 +29,7 @@ module Bookbinder
         @sitemap_writer = sitemap_writer
         @preprocessor = preprocessor
         @cloner_factory = cloner_factory
-        @section_repository_factory = section_repository_factory
+        @section_repository = section_repository
         @directory_preparer = directory_preparer
       end
 
@@ -50,7 +50,6 @@ module Bookbinder
         bind_options        = BindComponents::BindOptions.new(cli_arguments, base_streams).tap(&:validate!)
         bind_config         = config_fetcher.fetch_config
         cloner              = cloner_factory.produce(bind_options.local_repo_dir)
-        section_repository  = section_repository_factory.produce(cloner)
 
         directory_preparer.prepare_directories(
           bind_config,
@@ -61,7 +60,9 @@ module Bookbinder
         sections = section_repository.fetch(
           configured_sections: bind_config.sections,
           destination_dir: output_locations.cloned_preprocessing_dir,
-          ref_override: bind_options.ref_override
+          ref_override: bind_options.ref_override,
+          cloner: cloner,
+          streams: base_streams
         )
         preprocessor.preprocess(
           sections,
@@ -108,7 +109,7 @@ module Bookbinder
         :final_app_directory,
         :output_locations,
         :preprocessor,
-        :section_repository_factory,
+        :section_repository,
         :sitemap_writer,
         :static_site_generator,
       )

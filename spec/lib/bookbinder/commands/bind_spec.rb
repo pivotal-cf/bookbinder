@@ -5,7 +5,7 @@ require_relative '../../../../lib/bookbinder/dita_command_creator'
 require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
-require_relative '../../../../lib/bookbinder/ingest/section_repository_factory'
+require_relative '../../../../lib/bookbinder/ingest/section_repository'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/postprocessing/sitemap_writer'
@@ -52,7 +52,7 @@ module Bookbinder
         partial_args.fetch(:sitemap_writer, sitemap_writer),
         partial_args.fetch(:preprocessor, preprocessor),
         partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(null_streams, file_system_accessor, GitFake.new)),
-        Ingest::SectionRepositoryFactory.new(logger),
+        partial_args.fetch(:section_repository, Ingest::SectionRepository.new),
         partial_args.fetch(:directory_preparer,
                            Commands::BindComponents::DirectoryPreparer.new(bind_logger,
                                                                            file_system_accessor,
@@ -122,10 +122,12 @@ module Bookbinder
           generator = instance_double('Bookbinder::MiddlemanRunner')
           fs = instance_double('Bookbinder::LocalFileSystemAccessor')
           disallowed_streams = {}
+
           command = bind_cmd(streams: disallowed_streams,
                              file_system_accessor: fs,
                              static_site_generator: generator,
-                             sitemap_writer: double('disallowed sitemap writer'))
+                             sitemap_writer: double('disallowed sitemap writer'),
+                             section_repository: instance_double('Ingest::SectionRepository', fetch: []))
 
           allow(fs).to receive(:file_exist?) { false }
           allow(generator).to receive(:run) { failure }
@@ -182,11 +184,10 @@ module Bookbinder
         allow(section_repository).to receive(:fetch).with(
                                                       configured_sections: [section_config],
                                                       destination_dir: output_locations.cloned_preprocessing_dir,
-                                                      ref_override: nil
+                                                      ref_override: nil,
+                                                      cloner: cloner,
+                                                      streams: untested_streams
                                      ) { sections }
-
-        section_repository_factory = instance_double('Ingest::SectionRepositoryFactory')
-        allow(section_repository_factory).to receive(:produce).with(cloner) { section_repository }
 
         expect(directory_preparer).to receive(:prepare_directories).with(
                                           config,
@@ -212,7 +213,7 @@ module Bookbinder
             instance_double('Postprocessing::SitemapWriter'),
             preprocessor,
             cloner_factory,
-            section_repository_factory,
+            section_repository,
             directory_preparer
         ).run(['local'])
       end
@@ -522,7 +523,7 @@ Content:
 
         config = Config::Configuration.parse(config_hash)
         config_fetcher = double('config fetcher', fetch_config: config)
-        streams = { out: StringIO.new }
+        streams = { out: StringIO.new, success: StringIO.new }
 
         command = bind_cmd(streams: streams, config_fetcher: config_fetcher)
         begin

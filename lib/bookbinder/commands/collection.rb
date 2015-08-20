@@ -12,7 +12,7 @@ require_relative '../dita_command_creator'
 require_relative '../dita_html_to_middleman_formatter'
 require_relative '../html_document_manipulator'
 require_relative '../ingest/cloner_factory'
-require_relative '../ingest/section_repository_factory'
+require_relative '../ingest/section_repository'
 require_relative '../local_file_system_accessor'
 require_relative '../middleman_runner'
 require_relative '../postprocessing/sitemap_writer'
@@ -104,7 +104,7 @@ module Bookbinder
             Preprocessing::LinkToSiteGenDir.new(local_file_system_accessor),
           ),
           Ingest::ClonerFactory.new(streams, local_file_system_accessor, version_control_system),
-          Ingest::SectionRepositoryFactory.new(logger),
+          Ingest::SectionRepository.new,
           Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
         )
       end
@@ -119,7 +119,7 @@ module Bookbinder
           file_system_accessor: local_file_system_accessor,
           preprocessor: Preprocessing::Preprocessor.new(Preprocessing::LinkToSiteGenDir.new(local_file_system_accessor)),
           cloner: local_file_system_cloner,
-          section_repository: Ingest::SectionRepository.new(logger, local_file_system_cloner),
+          section_repository: Ingest::SectionRepository.new,
           directory_preparer: Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
         )
       end

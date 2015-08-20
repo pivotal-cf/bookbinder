@@ -5,16 +5,13 @@ require_relative '../values/section'
 module Bookbinder
   module Ingest
     class SectionRepository
-      def initialize(logger, cloner)
-        @logger = logger
-        @cloner = cloner
-      end
-
       def fetch(configured_sections: [],
                 destination_dir: nil,
-                ref_override: nil)
+                ref_override: nil,
+                cloner: nil,
+                streams: nil)
         configured_sections.map do |section_config|
-          logger.log "Gathering #{section_config.repo_name.cyan}"
+          streams[:success].puts("Gathering #{section_config.repo_name}")
           working_copy = cloner.call(source_repo_name: section_config.repo_name,
                                      source_ref: ref_override || section_config.repo_ref,
                                      destination_parent_dir: destination_dir,
@@ -29,10 +26,6 @@ module Bookbinder
           )
         end
       end
-
-      private
-
-      attr_reader :logger, :cloner
     end
   end
 end
