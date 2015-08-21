@@ -9,7 +9,6 @@ require_relative '../../../../lib/bookbinder/postprocessing/sitemap_writer'
 require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
-require_relative '../../../../lib/bookbinder/spider'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../helpers/git_fake'
 require_relative '../../../helpers/middleman'
@@ -39,26 +38,22 @@ module Bookbinder
     let(:real_middleman_runner) { MiddlemanRunner.new(real_fs_accessor, Sheller.new) }
 
     let(:archive_menu_config) { FakeArchiveMenuConfig.new }
-    let(:config) {
-      Config::Configuration.new(sections: [],
-                                book_repo: 'fantastic/book',
-                                public_host: 'example.com',
-                                archive_menu: [])
-    }
     let(:success) { double('success', success?: true) }
     let(:failure) { double('failure', success?: false) }
 
     def bind_cmd(partial_args = {})
-      bind_version_control_system = partial_args.fetch(:version_control_system, Bookbinder::GitFake.new)
-      bind_logger = partial_args.fetch(:logger, null_logger)
       null_streams = {success: Sheller::DevNull.new, out: Sheller::DevNull.new, err: Sheller::DevNull.new}
+      stub_config = Config::Configuration.new(sections: [],
+                                              book_repo: 'fantastic/book',
+                                              public_host: 'example.com',
+                                              archive_menu: [])
       Commands::Bind.new(
         partial_args.fetch(:streams, null_streams),
         partial_args.fetch(:output_locations, OutputLocations.new(
           final_app_dir: partial_args.fetch(:final_app_directory, File.absolute_path('final_app')),
           context_dir: partial_args.fetch(:context_dir, File.absolute_path('.'))
         )),
-        partial_args.fetch(:config_fetcher, double('config fetcher', fetch_config: config)),
+        partial_args.fetch(:config_fetcher, double('config fetcher', fetch_config: stub_config)),
         partial_args.fetch(:archive_menu_config, archive_menu_config),
         partial_args.fetch(:file_system_accessor, null_fs_accessor),
         partial_args.fetch(:middleman_runner, null_middleman_runner),
@@ -163,20 +158,19 @@ module Bookbinder
     end
 
     context 'when configured with a layout repo' do
-      let(:cloner) { double('cloner') }
-      let(:factory) { double('cloner factory') }
-      let(:config) { Config::Configuration.new(sections: [],
-                                               book_repo: '',
-                                               public_host: '',
-                                               layout_repo: 'my/configuredrepo') }
-
       it 'sets the repo as the layout repo path when prepping dirs' do
-        received_output_locations = nil
-        directory_preparer = double('dir preparer')
-        allow(directory_preparer).to receive(:prepare_directories)
+        factory = double('cloner factory')
+        cloner = double('cloner')
+        directory_preparer = double('dir preparer', prepare_directories: nil)
+
+        config = Config::Configuration.new(sections: [],
+                                           book_repo: '',
+                                           public_host: '',
+                                           layout_repo: 'my/configuredrepo')
 
         bind = bind_cmd(cloner_factory: factory,
-                        directory_preparer: directory_preparer)
+                        directory_preparer: directory_preparer,
+                        config_fetcher: double('config fetcher', fetch_config: config))
 
         allow(factory).to receive(:produce).with(nil) { cloner }
         allow(cloner).to receive(:call).
