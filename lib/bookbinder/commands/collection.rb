@@ -105,7 +105,7 @@ module Bookbinder
           ),
           Ingest::ClonerFactory.new(streams, local_file_system_accessor, version_control_system),
           Ingest::SectionRepository.new,
-          Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
+          directory_preparer
         )
       end
 
@@ -120,7 +120,7 @@ module Bookbinder
           preprocessor: Preprocessing::Preprocessor.new(Preprocessing::LinkToSiteGenDir.new(local_file_system_accessor)),
           cloner: local_file_system_cloner,
           section_repository: Ingest::SectionRepository.new,
-          directory_preparer: Commands::BindComponents::DirectoryPreparer.new(logger, local_file_system_accessor, version_control_system)
+          directory_preparer: directory_preparer
         )
       end
 
@@ -152,6 +152,10 @@ module Bookbinder
 
       def config_loader
         @config_loader ||= Config::YAMLLoader.new
+      end
+
+      def directory_preparer
+        Commands::BindComponents::DirectoryPreparer.new(local_file_system_accessor)
       end
 
       def final_app_directory

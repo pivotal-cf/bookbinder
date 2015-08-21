@@ -53,10 +53,7 @@ module Bookbinder
         partial_args.fetch(:preprocessor, preprocessor),
         partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(null_streams, file_system_accessor, GitFake.new)),
         partial_args.fetch(:section_repository, Ingest::SectionRepository.new),
-        partial_args.fetch(:directory_preparer,
-                           Commands::BindComponents::DirectoryPreparer.new(bind_logger,
-                                                                           file_system_accessor,
-                                                                           bind_version_control_system)))
+        partial_args.fetch(:directory_preparer, Commands::BindComponents::DirectoryPreparer.new(file_system_accessor)))
     end
 
     def random_port
@@ -181,27 +178,23 @@ module Bookbinder
         sections = [Section.new('fake/path', 'foo/bar'), Section.new('other/path', 'cat/dog')]
 
         section_repository = instance_double('Ingest::SectionRepository')
-        allow(section_repository).to receive(:fetch).with(
-                                                      configured_sections: [section_config],
-                                                      destination_dir: output_locations.cloned_preprocessing_dir,
-                                                      ref_override: nil,
-                                                      cloner: cloner,
-                                                      streams: merged_streams
-                                     ) { sections }
+        allow(section_repository).to receive(:fetch).
+          with(configured_sections: [section_config],
+               destination_dir: output_locations.cloned_preprocessing_dir,
+               ref_override: nil,
+               cloner: cloner,
+               streams: merged_streams) { sections }
 
-        expect(directory_preparer).to receive(:prepare_directories).with(
-                                          config,
-                                          File.expand_path('../../../../', __dir__),
-                                          output_locations,
-                                          File.absolute_path('master_middleman')
-                                      ).ordered
+        expect(directory_preparer).to receive(:prepare_directories).
+          with(File.expand_path('../../../../', __dir__),
+               output_locations,
+               File.absolute_path('master_middleman')).ordered
 
-        expect(preprocessor).to receive(:preprocess).with(
-                                    sections,
-                                    output_locations,
-                                    options: [],
-                                    output_streams: merged_streams
-                                ).ordered
+        expect(preprocessor).to receive(:preprocess).
+          with(sections,
+               output_locations,
+               options: [],
+               output_streams: merged_streams).ordered
 
         Commands::Bind.new(
             {},
@@ -318,7 +311,7 @@ module Bookbinder
           bind.run(['remote'])
 
           expect(directory_preparer).to have_received(:prepare_directories).
-            with(anything, anything, anything, Pathname('foo/repo'))
+            with(anything, anything, Pathname('foo/repo'))
         end
       end
 

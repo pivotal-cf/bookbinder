@@ -42,7 +42,6 @@ module Bookbinder
                cloner: cloner) { sections }
 
         expect(directory_preparer).to receive(:prepare_directories).with(
-            config,
             File.expand_path('../../../../', __dir__),
             output_locations,
             File.absolute_path('master_middleman')

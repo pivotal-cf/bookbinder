@@ -37,7 +37,6 @@ module Bookbinder
         watch_config = config_fetcher.fetch_config
 
         directory_preparer.prepare_directories(
-          watch_config,
           File.expand_path('../../../../', __FILE__),
           output_locations,
           File.absolute_path('master_middleman')
