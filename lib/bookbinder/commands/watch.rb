@@ -39,7 +39,7 @@ module Bookbinder
         directory_preparer.prepare_directories(
           File.expand_path('../../../../', __FILE__),
           output_locations,
-          File.absolute_path('master_middleman')
+          cloner
         )
         sections = section_repository.fetch(
           configured_sections: watch_config.sections,

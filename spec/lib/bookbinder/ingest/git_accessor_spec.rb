@@ -12,13 +12,12 @@ module Bookbinder
 
       it "clones to a given dir" do
         Dir.mktmpdir do |dir|
-          path = Pathname(dir)
-          init_repo(at_dir: path.join('srcgorepo'),
+          init_repo(at_dir: "#{dir}/srcgorepo",
                     file: 'foo',
                     contents: 'bar',
                     commit_message: 'baz')
-          GitAccessor.new.clone(path.join("srcgorepo"), 'destgorepo', path: path)
-          expect(path.join('destgorepo', 'foo').read).to eq("bar\n")
+          GitAccessor.new.clone("#{dir}/srcgorepo", 'destgorepo', path: dir)
+          expect(Pathname("#{dir}/destgorepo/foo").read).to eq("bar\n")
         end
       end
 

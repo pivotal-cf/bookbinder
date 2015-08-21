@@ -9,7 +9,7 @@ module Bookbinder
       InvalidTagRef = Class.new(RuntimeError)
 
       def clone(url, name, path: nil, checkout: 'master')
-        cached_clone(url, name, path).tap do |git|
+        cached_clone(url, name, Pathname(path)).tap do |git|
           git.checkout(checkout)
         end
       end

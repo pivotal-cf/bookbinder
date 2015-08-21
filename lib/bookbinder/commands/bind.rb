@@ -54,7 +54,7 @@ module Bookbinder
         directory_preparer.prepare_directories(
           File.expand_path('../../../../', __FILE__),
           output_locations,
-          layout_repo_path(bind_config, cloner)
+          cloner
         )
         sections = section_repository.fetch(
           configured_sections: bind_config.sections,
@@ -115,16 +115,6 @@ module Bookbinder
 
       def subnavs(sections)
         sections.map(&:subnav).reduce({}, :merge)
-      end
-
-      def layout_repo_path(config, cloner)
-        if config.has_option?('layout_repo')
-          working_copy = cloner.call(source_repo_name: config.layout_repo,
-                                     destination_parent_dir: Dir.mktmpdir)
-          working_copy.path
-        else
-          File.absolute_path('master_middleman')
-        end
       end
     end
   end

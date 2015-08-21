@@ -65,6 +65,108 @@ module Bookbinder
       )
     end
 
+    context "when site generation fails" do
+      it "returns a nonzero exit code" do
+        generator = instance_double('Bookbinder::MiddlemanRunner')
+        fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+        disallowed_streams = {}
+
+        command = bind_cmd(streams: disallowed_streams,
+                           file_system_accessor: fs,
+                           static_site_generator: generator,
+                           sitemap_writer: double('disallowed sitemap writer'),
+                           section_repository: instance_double('Ingest::SectionRepository', fetch: []))
+
+        allow(fs).to receive(:file_exist?) { false }
+        allow(generator).to receive(:run) { failure }
+
+        expect(command.run(['local'])).to be_nonzero
+      end
+    end
+
+    it "copies a redirects file from the current directory to the final app directory, prior to site generation" do
+      fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+      generator = instance_double('Bookbinder::MiddlemanRunner')
+      command = bind_cmd(file_system_accessor: fs,
+                         static_site_generator: generator,
+                         sitemap_writer: double('sitemap writer').as_null_object)
+
+      allow(fs).to receive(:file_exist?).with('redirects.rb') { true }
+      allow(fs).to receive(:copy)
+
+      expect(fs).to receive(:copy).with('redirects.rb', Pathname(File.absolute_path('final_app'))).ordered
+      expect(generator).to receive(:run).ordered { success }
+
+      command.run(['local'])
+    end
+
+    it "doesn't attempt to copy the redirect file if it doesn't exist" do
+      fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+      generator = instance_double('Bookbinder::MiddlemanRunner')
+      command = bind_cmd(file_system_accessor: fs,
+                         static_site_generator: generator,
+                         sitemap_writer: double('sitemap writer').as_null_object)
+
+      allow(fs).to receive(:file_exist?).with('redirects.rb') { false }
+
+      expect(generator).to receive(:run).ordered { success }
+      expect(fs).to receive(:copy).ordered
+
+      command.run(['local'])
+    end
+
+    it "prepares directories and then preprocesses fetched sections" do
+      directory_preparer = instance_double('BindComponents::DirectoryPreparer')
+      output_locations = OutputLocations.new(context_dir: ".")
+      preprocessor = instance_double('Preprocessing::Preprocessor')
+      merged_streams = { out: instance_of(Sheller::DevNull) }
+
+      cloner = instance_double('Ingest::Cloner')
+      cloner_factory = instance_double('Ingest::ClonerFactory')
+      allow(cloner_factory).to receive(:produce).with(File.expand_path('..')) { cloner}
+
+      section_config = Config::SectionConfig.new({'directory' => 'foo'})
+      config = Config::Configuration.new({book_repo: "some_book", sections: [section_config]})
+      sections = [Section.new('fake/path', 'foo/bar'), Section.new('other/path', 'cat/dog')]
+
+      section_repository = instance_double('Ingest::SectionRepository')
+      allow(section_repository).to receive(:fetch).with(
+                                                    configured_sections: [section_config],
+                                                    destination_dir: output_locations.cloned_preprocessing_dir,
+                                                    ref_override: nil,
+                                                    cloner: cloner,
+                                                    streams: {}
+                                   ) { sections }
+
+      expect(directory_preparer).to receive(:prepare_directories).with(
+                                        config,
+                                        File.expand_path('../../../../', __dir__),
+                                        output_locations,
+                                        cloner
+                                    ).ordered
+
+      expect(preprocessor).to receive(:preprocess).with(
+                                  sections,
+                                  output_locations,
+                                  options: [],
+                                  output_streams: merged_streams
+                              ).ordered
+
+      Commands::Bind.new(
+          {},
+          output_locations,
+          instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
+          double('decorator', generate: config),
+          instance_double('LocalFileSystemAccessor', file_exist?: false),
+          instance_double('MiddlemanRunner', run: failure),
+          instance_double('Postprocessing::SitemapWriter'),
+          preprocessor,
+          cloner_factory,
+          section_repository,
+          directory_preparer
+      ).run(['local'])
+    end
+
     it "returns a nonzero exit code when Middleman fails" do
       middleman_runner = instance_double('Bookbinder::MiddlemanRunner')
       fs = instance_double('Bookbinder::LocalFileSystemAccessor')

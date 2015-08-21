@@ -45,7 +45,7 @@ module Bookbinder
         expect(directory_preparer).to receive(:prepare_directories).with(
             File.expand_path('../../../../', __dir__),
             output_locations,
-            File.absolute_path('master_middleman')
+            cloner
         ).ordered
 
         expect(preprocessor).to receive(:preprocess).with(
