@@ -54,10 +54,10 @@ module Bookbinder
       null_streams = {success: Sheller::DevNull.new, out: Sheller::DevNull.new, err: Sheller::DevNull.new}
       Commands::Bind.new(
         partial_args.fetch(:streams, null_streams),
-        OutputLocations.new(
+        partial_args.fetch(:output_locations, OutputLocations.new(
           final_app_dir: partial_args.fetch(:final_app_directory, File.absolute_path('final_app')),
           context_dir: partial_args.fetch(:context_dir, File.absolute_path('.'))
-        ),
+        )),
         partial_args.fetch(:config_fetcher, double('config fetcher', fetch_config: config)),
         partial_args.fetch(:archive_menu_config, archive_menu_config),
         partial_args.fetch(:file_system_accessor, null_fs_accessor),
@@ -119,16 +119,18 @@ module Bookbinder
 
     it "prepares directories and then preprocesses fetched sections" do
       directory_preparer = instance_double('BindComponents::DirectoryPreparer')
-      output_locations = OutputLocations.new(context_dir: ".")
+      output_locations = OutputLocations.new(context_dir: ".", final_app_dir: 'foo')
       preprocessor = instance_double('Preprocessing::Preprocessor')
-      merged_streams = { out: instance_of(Sheller::DevNull) }
+      merged_streams = { out: instance_of(Sheller::DevNull),
+                         err: instance_of(Sheller::DevNull),
+                         success: instance_of(Sheller::DevNull) }
 
       cloner = instance_double('Ingest::Cloner')
       cloner_factory = instance_double('Ingest::ClonerFactory')
       allow(cloner_factory).to receive(:produce).with(File.expand_path('..')) { cloner}
 
-      section_config = Config::SectionConfig.new({'directory' => 'foo'})
-      config = Config::Configuration.new({book_repo: "some_book", sections: [section_config]})
+      section_config = Config::SectionConfig.new('directory' => 'foo')
+      config = Config::Configuration.new(book_repo: "some_book", sections: [section_config], public_host: 'somehost')
       sections = [Section.new('fake/path', 'foo/bar'), Section.new('other/path', 'cat/dog')]
 
       section_repository = instance_double('Ingest::SectionRepository')
@@ -150,18 +152,13 @@ module Bookbinder
              options: [],
              output_streams: merged_streams).ordered
 
-      Commands::Bind.new(
-        {},
-        output_locations,
-        instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
-        double('decorator', generate: config),
-        instance_double('LocalFileSystemAccessor', file_exist?: false),
-        instance_double('MiddlemanRunner', run: failure),
-        instance_double('Postprocessing::SitemapWriter'),
-        preprocessor,
-        cloner_factory,
-        section_repository,
-        directory_preparer
+      bind_cmd(
+        config_fetcher: double('config fetcher', fetch_config: config),
+        output_locations: output_locations,
+        preprocessor: preprocessor,
+        cloner_factory: cloner_factory,
+        section_repository: section_repository,
+        directory_preparer: directory_preparer
       ).run(['local'])
     end
 
