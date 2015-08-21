@@ -89,7 +89,6 @@ module Bookbinder
       }
     end
     let(:book) { 'fantastic/book' }
-    let(:command) { bind_cmd }
     let(:command_creator) { double('command creator', convert_to_html_command: 'stubbed command') }
     let(:config) { Config::Configuration.parse(config_hash) }
     let(:config_hash) { base_config_hash }
@@ -210,61 +209,6 @@ module Bookbinder
             directory_preparer
         ).run(['local'])
       end
-    end
-
-    describe 'local' do
-      let(:dogs_index) { File.join('final_app', 'public', 'dogs', 'index.html') }
-
-      it 'runs idempotently' do
-        silence_io_streams do
-          command.run(['local']) # Run Once
-          expect(File.exist? dogs_index).to eq true
-          command.run(['local']) # Run twice
-          expect(File.exist? dogs_index).to eq true
-        end
-      end
-
-      it 'creates some static HTML' do
-        command.run(['local'])
-
-        index_html = File.read dogs_index
-        expect(index_html).to include 'Woof'
-      end
-
-      it 'it can find repos locally rather than going to git' do
-        final_app_dir = File.absolute_path('final_app')
-        command.run(['local'])
-
-        index_html = File.read File.join(final_app_dir, 'public', 'foods/sweet', 'index.html')
-        expect(index_html).to include 'This is a Markdown Page'
-      end
-
-      context 'when code snippets are yielded' do
-        let(:non_broken_master_middleman_dir) { generate_middleman_with 'remote_code_snippets_index.html' }
-
-        context 'and the code repo is present' do
-          it 'can find code example repos locally rather than going to git' do
-            expect(GitFake.new).to_not receive(:clone)
-
-            command.run(['local'])
-          end
-        end
-      end
-    end
-
-    describe 'remote' do
-      let(:github_config_hash) do
-        base_config_hash.merge({'cred_repo' => 'my-org/my-creds'})
-      end
-
-      let(:config_hash) { github_config_hash }
-
-      it 'creates some static HTML' do
-        command.run(['remote'])
-
-        index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
-        expect(index_html).to include 'This is a Markdown Page'
-      end
 
       context 'when configured with a layout repo' do
         let(:cloner) { double('cloner') }
@@ -277,23 +221,6 @@ module Bookbinder
         let(:null_site_generator) { double('site gen', run: success) }
         let(:null_fs_accessor) { double('fs accessor').as_null_object }
 
-        it 'clones the repo' do
-          bind = bind_cmd(cloner_factory: factory,
-                          file_system_accessor: null_fs_accessor,
-                          static_site_generator: null_site_generator,
-                          sitemap_writer: null_sitemap_writer,
-                          directory_preparer: double('dir preparer', prepare_directories: nil))
-
-          allow(factory).to receive(:produce).with(nil) { cloner }
-
-          expect(cloner).to receive(:call).
-            with(source_repo_name: "my/configuredrepo", destination_parent_dir: anything) {
-            Ingest::WorkingCopy.new(copied_to: 'some/place')
-          }
-
-          bind.run(['remote'])
-        end
-
         it 'sets the repo as the layout repo path when prepping dirs' do
           received_output_locations = nil
           directory_preparer = double('dir preparer')
@@ -305,8 +232,11 @@ module Bookbinder
                           sitemap_writer: null_sitemap_writer,
                           directory_preparer: directory_preparer)
 
-          allow(factory).to receive(:produce) { cloner }
-          allow(cloner).to receive(:call) { Ingest::WorkingCopy.new(copied_to: 'foo/repo') }
+          allow(factory).to receive(:produce).with(nil) { cloner }
+          allow(cloner).to receive(:call).
+            with(hash_including(source_repo_name: "my/configuredrepo")) {
+            Ingest::WorkingCopy.new(copied_to: 'foo/repo')
+          }
 
           bind.run(['remote'])
 
@@ -314,49 +244,34 @@ module Bookbinder
             with(anything, anything, Pathname('foo/repo'))
         end
       end
-
-      it 'creates a directory per repo with the generated html from middleman' do
-        silence_io_streams do
-          command.run(['remote'])
-        end
-
-        final_app_dir = File.absolute_path('final_app')
-
-        index_html = File.read File.join(final_app_dir, 'public', 'dogs', 'index.html')
-        expect(index_html).to include 'breeds.png'
-
-        other_index_html = File.read File.join(final_app_dir, 'public', 'foods/sweet', 'index.html')
-        expect(other_index_html).to include 'This is a Markdown Page'
-
-        third_index_html = File.read File.join(final_app_dir, 'public', 'foods/savory', 'index.html')
-        expect(third_index_html).to include 'This is another Markdown Page'
-      end
     end
 
-    describe 'validating' do
-      context 'when there are invalid arguments' do
-        it 'raises Cli::InvalidArguments' do
-          expect {
-            command.run(['blah', 'blah', 'whatever'])
-          }.to raise_error(CliError::InvalidArguments)
-
-          expect {
-            command.run([])
-          }.to raise_error(CliError::InvalidArguments)
-        end
+    it 'creates a directory per repo with the generated html from middleman' do
+      silence_io_streams do
+        bind_cmd.run(['remote'])
       end
+
+      final_app_dir = File.absolute_path('final_app')
+
+      index_html = File.read File.join(final_app_dir, 'public', 'dogs', 'index.html')
+      expect(index_html).to include 'breeds.png'
+
+      other_index_html = File.read File.join(final_app_dir, 'public', 'foods/sweet', 'index.html')
+      expect(other_index_html).to include 'This is a Markdown Page'
+
+      third_index_html = File.read File.join(final_app_dir, 'public', 'foods/savory', 'index.html')
+      expect(third_index_html).to include 'This is another Markdown Page'
     end
 
-    describe 'generating links' do
-      let(:github_config_hash) do
-        base_config_hash.merge({'cred_repo' => 'my-org/my-creds'})
-      end
+    context 'when there are invalid arguments' do
+      it 'raises Cli::InvalidArguments' do
+        expect {
+          bind_cmd.run(['blah', 'blah', 'whatever'])
+        }.to raise_error(CliError::InvalidArguments)
 
-      let(:config_hash) { github_config_hash }
-
-      it 'succeeds when all links are functional' do
-        exit_code = command.run(['github'])
-        expect(exit_code).to eq 0
+        expect {
+          bind_cmd.run([])
+        }.to raise_error(CliError::InvalidArguments)
       end
     end
 
@@ -439,34 +354,6 @@ Content:
       end
     end
 
-    describe 'creating subdirectories for a section with a multileveled output directory' do
-      it 'creates intermediate directories' do
-        sections = [
-            {
-                'repository' => {'name' => 'my-docs-org/my-docs-repo', 'ref' => 'some-sha'},
-                'directory' => 'a/b/c'
-            }
-        ]
-
-        config_hash = {
-            'sections' => sections,
-            'book_repo' => book,
-            'cred_repo' => 'my-org/my-creds',
-            'public_host' => 'docs.dogs.com'
-        }
-
-        config = Config::Configuration.parse(config_hash)
-        config_fetcher = double('config fetcher', fetch_config: config)
-
-        command = bind_cmd(config_fetcher: config_fetcher)
-        command.run(['remote'])
-
-        final_app_dir = File.absolute_path('final_app')
-        index_html = File.read(File.join(final_app_dir, 'public', 'a', 'b', 'c', 'index.html'))
-        expect(index_html).to include('This is a Markdown Page')
-      end
-    end
-
     describe 'verbose mode' do
       include Redirection
 
@@ -528,67 +415,6 @@ Content:
         output = streams[:out].tap(&:rewind).read
         expect(output).to match(/error.*build/)
         expect(output).to match(/undefined local variable or method `function_that_does_not_exist'/)
-      end
-    end
-
-    describe 'creating necessary directories' do
-      def create_command
-        config = Config::Configuration.parse('sections' => [],
-                                             'book_repo' => book,
-                                             'cred_repo' => 'my-org/my-creds',
-                                             'public_host' => 'docs.dogs.com')
-        config_fetcher = double('config fetcher', fetch_config: config)
-        final_app_dir = File.absolute_path('final_app')
-        spider = Spider.new(app_dir: final_app_dir)
-        server_director = ServerDirector.new(directory: final_app_dir)
-
-        bind_cmd(config_fetcher: config_fetcher,
-                 static_site_generator: middleman_runner,
-                 final_app_directory: final_app_dir,
-                 spider: spider,
-                 server_director: server_director)
-      end
-
-      it 'creates the output directory' do
-        command = create_command
-
-        output_dir = File.absolute_path('./output')
-
-        expect(File.exists?(output_dir)).to eq false
-
-        command.run(['remote'])
-
-        expect(File.exists?(output_dir)).to eq true
-      end
-
-      it 'clears the output directory before running' do
-        command = create_command
-
-        output_dir = File.absolute_path('./output')
-        FileUtils.mkdir_p output_dir
-        pre_existing_file = File.join(output_dir, 'happy')
-        FileUtils.touch pre_existing_file
-
-        expect(File.exists?(pre_existing_file)).to eq true
-
-        command.run(['remote'])
-
-        expect(File.exists?(pre_existing_file)).to eq false
-      end
-
-      it 'clears and then copies the template_app skeleton inside final_app' do
-        final_app_dir = File.absolute_path('./final_app')
-        FileUtils.mkdir_p final_app_dir
-        pre_existing_file = File.join(final_app_dir, 'happy')
-        FileUtils.touch pre_existing_file
-
-        command = create_command
-        command.run(['remote'])
-
-        expect(File.exists?(pre_existing_file)).to eq false
-        copied_manifest = File.read File.join(final_app_dir, 'app.rb')
-        template_manifest = File.read(File.expand_path('../../../../../template_app/app.rb', __FILE__))
-        expect(copied_manifest).to eq(template_manifest)
       end
     end
   end
