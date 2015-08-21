@@ -28,33 +28,9 @@ module Bookbinder
 
     use_fixture_repo
 
-    def bind_cmd(partial_args = {})
-      bind_version_control_system = partial_args.fetch(:version_control_system, Bookbinder::GitFake.new)
-      bind_logger = partial_args.fetch(:logger, null_logger)
-      null_streams = {success: Sheller::DevNull.new, out: Sheller::DevNull.new, err: Sheller::DevNull.new}
-      Commands::Bind.new(
-        partial_args.fetch(:streams, null_streams),
-        OutputLocations.new(
-          final_app_dir: partial_args.fetch(:final_app_directory, File.absolute_path('final_app')),
-          context_dir: partial_args.fetch(:context_dir, File.absolute_path('.'))
-        ),
-        partial_args.fetch(:config_fetcher, double('config fetcher', fetch_config: config)),
-        partial_args.fetch(:archive_menu_config, archive_menu_config),
-        partial_args.fetch(:file_system_accessor, null_fs_accessor),
-        partial_args.fetch(:middleman_runner, null_middleman_runner),
-        partial_args.fetch(:sitemap_writer, null_sitemap_writer),
-        partial_args.fetch(:preprocessor, real_preprocessor),
-        partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(null_streams, real_fs_accessor, GitFake.new)),
-        partial_args.fetch(:section_repository, Ingest::SectionRepository.new),
-        partial_args.fetch(:directory_preparer, Commands::BindComponents::DirectoryPreparer.new(real_fs_accessor)))
-    end
-
-    def random_port
-      rand(49152..65535)
-    end
-
     let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
     let(:null_fs_accessor) { double('fs accessor').as_null_object }
+    let(:null_preprocessor) { instance_double('Bookbinder::Preprocessing::LinkToSiteGenDir', preprocess: nil) }
     let(:null_middleman_runner) { instance_double('Bookbinder::MiddlemanRunner', run: success) }
     let(:null_logger) { double('deprecated logger').as_null_object }
 
@@ -71,6 +47,27 @@ module Bookbinder
     }
     let(:success) { double('success', success?: true) }
     let(:failure) { double('failure', success?: false) }
+
+    def bind_cmd(partial_args = {})
+      bind_version_control_system = partial_args.fetch(:version_control_system, Bookbinder::GitFake.new)
+      bind_logger = partial_args.fetch(:logger, null_logger)
+      null_streams = {success: Sheller::DevNull.new, out: Sheller::DevNull.new, err: Sheller::DevNull.new}
+      Commands::Bind.new(
+        partial_args.fetch(:streams, null_streams),
+        OutputLocations.new(
+          final_app_dir: partial_args.fetch(:final_app_directory, File.absolute_path('final_app')),
+          context_dir: partial_args.fetch(:context_dir, File.absolute_path('.'))
+        ),
+        partial_args.fetch(:config_fetcher, double('config fetcher', fetch_config: config)),
+        partial_args.fetch(:archive_menu_config, archive_menu_config),
+        partial_args.fetch(:file_system_accessor, null_fs_accessor),
+        partial_args.fetch(:middleman_runner, null_middleman_runner),
+        partial_args.fetch(:sitemap_writer, null_sitemap_writer),
+        partial_args.fetch(:preprocessor, null_preprocessor),
+        partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(null_streams, null_fs_accessor, GitFake.new)),
+        partial_args.fetch(:section_repository, Ingest::SectionRepository.new),
+        partial_args.fetch(:directory_preparer, Commands::BindComponents::DirectoryPreparer.new(real_fs_accessor)))
+    end
 
     it "returns a nonzero exit code when Middleman fails" do
       middleman_runner = instance_double('Bookbinder::MiddlemanRunner')
@@ -227,6 +224,7 @@ module Bookbinder
           middleman_runner: real_middleman_runner,
           config_fetcher: double('config fetcher', fetch_config: config),
           file_system_accessor: real_fs_accessor,
+          preprocessor: real_preprocessor
         ).run(['remote'])
 
         index_html = File.read File.join('final_app', 'public', 'var-repo', 'variable_index.html')
@@ -237,6 +235,10 @@ module Bookbinder
     describe 'generating a site-map' do
       context 'when configured with a single host' do
         use_fixture_repo 'sitemap_tester'
+
+        def random_port
+          rand(49152..65535)
+        end
 
         around do |example|
           $sitemap_debug = ENV['SITEMAP_DEBUG']
@@ -249,6 +251,7 @@ module Bookbinder
             middleman_runner: real_middleman_runner,
             file_system_accessor: real_fs_accessor,
             sitemap_writer: Postprocessing::SitemapWriter.build(null_logger, File.absolute_path('final_app'), random_port),
+            preprocessor: real_preprocessor,
             config_fetcher: double(
               'config fetcher',
               fetch_config: Config::Configuration.parse(
