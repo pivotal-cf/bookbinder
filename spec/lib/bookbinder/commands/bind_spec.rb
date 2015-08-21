@@ -1,25 +1,18 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
 require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
 require_relative '../../../../lib/bookbinder/config/configuration'
-require_relative '../../../../lib/bookbinder/dita_command_creator'
-require_relative '../../../../lib/bookbinder/dita_html_to_middleman_formatter'
-require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/ingest/section_repository'
 require_relative '../../../../lib/bookbinder/local_file_system_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/postprocessing/sitemap_writer'
-require_relative '../../../../lib/bookbinder/preprocessing/dita_preprocessor'
 require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
-require_relative '../../../../lib/bookbinder/preprocessing/preprocessor'
 require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../../lib/bookbinder/spider'
-require_relative '../../../../lib/bookbinder/subnav_formatter'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../helpers/git_fake'
 require_relative '../../../helpers/middleman'
-require_relative '../../../helpers/nil_logger'
 require_relative '../../../helpers/redirection'
 require_relative '../../../helpers/use_fixture_repo'
 
@@ -35,26 +28,22 @@ module Bookbinder
 
     use_fixture_repo
 
-    let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
-    let(:null_fs_accessor) { double('fs accessor').as_null_object }
-    let(:null_middleman_runner) { instance_double('Bookbinder::MiddlemanRunner', run: success) }
-
     def bind_cmd(partial_args = {})
       bind_version_control_system = partial_args.fetch(:version_control_system, Bookbinder::GitFake.new)
-      bind_logger = partial_args.fetch(:logger, logger)
+      bind_logger = partial_args.fetch(:logger, null_logger)
       null_streams = {success: Sheller::DevNull.new, out: Sheller::DevNull.new, err: Sheller::DevNull.new}
       Commands::Bind.new(
         partial_args.fetch(:streams, null_streams),
         OutputLocations.new(
-          final_app_dir: partial_args.fetch(:final_app_directory, final_app_dir),
+          final_app_dir: partial_args.fetch(:final_app_directory, File.absolute_path('final_app')),
           context_dir: partial_args.fetch(:context_dir, File.absolute_path('.'))
         ),
         partial_args.fetch(:config_fetcher, double('config fetcher', fetch_config: config)),
         partial_args.fetch(:archive_menu_config, archive_menu_config),
-        partial_args.fetch(:file_system_accessor, real_fs_accessor),
+        partial_args.fetch(:file_system_accessor, null_fs_accessor),
         partial_args.fetch(:middleman_runner, null_middleman_runner),
         partial_args.fetch(:sitemap_writer, null_sitemap_writer),
-        partial_args.fetch(:preprocessor, preprocessor),
+        partial_args.fetch(:preprocessor, real_preprocessor),
         partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(null_streams, real_fs_accessor, GitFake.new)),
         partial_args.fetch(:section_repository, Ingest::SectionRepository.new),
         partial_args.fetch(:directory_preparer, Commands::BindComponents::DirectoryPreparer.new(real_fs_accessor)))
@@ -64,56 +53,24 @@ module Bookbinder
       rand(49152..65535)
     end
 
-    let(:archive_menu_config) { FakeArchiveMenuConfig.new }
-    let(:sections) do
-      [
-          {'repository' => {
-              'name' => 'fantastic/dogs-repo',
-              'ref' => 'dog-sha'},
-           'directory' => 'dogs',
-           'subnav_template' => 'dogs'},
-          {'repository' => {
-              'name' => 'fantastic/my-docs-repo',
-              'ref' => 'some-sha'},
-           'directory' => 'foods/sweet',
-           'subnav_template' => 'fruits'},
-          {'repository' => {
-              'name' => 'fantastic/my-other-docs-repo',
-              'ref' => 'some-other-sha'},
-           'directory' => 'foods/savory',
-           'subnav_template' => 'vegetables'}
-      ]
-    end
-    let(:archive_menu) { [] }
-    let(:base_config_hash) do
-      {'sections' => sections,
-       'book_repo' => book,
-       'public_host' => 'example.com',
-       'archive_menu' => archive_menu
-      }
-    end
-    let(:book) { 'fantastic/book' }
-    let(:command_creator) { double('command creator', convert_to_html_command: 'stubbed command') }
-    let(:config) { Config::Configuration.parse(config_hash) }
-    let(:config_hash) { base_config_hash }
-    let(:preprocessor) {
-      Preprocessing::Preprocessor.new(
-         Preprocessing::DitaPreprocessor.new(static_site_generator_formatter, real_fs_accessor, command_creator, sheller),
-         Preprocessing::LinkToSiteGenDir.new(real_fs_accessor),
-      )
-    }
-    let(:document_parser) { HtmlDocumentManipulator.new }
+    let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
+    let(:null_fs_accessor) { double('fs accessor').as_null_object }
+    let(:null_middleman_runner) { instance_double('Bookbinder::MiddlemanRunner', run: success) }
+    let(:null_logger) { double('deprecated logger').as_null_object }
+
     let(:real_fs_accessor) { LocalFileSystemAccessor.new }
-    let(:final_app_dir) { File.absolute_path('final_app') }
-    let(:git_client) { GitClient.new }
-    let(:logger) { NilLogger.new }
+    let(:real_preprocessor) { Preprocessing::LinkToSiteGenDir.new(real_fs_accessor) }
+    let(:real_middleman_runner) { MiddlemanRunner.new(real_fs_accessor, Sheller.new) }
+
+    let(:archive_menu_config) { FakeArchiveMenuConfig.new }
+    let(:config) {
+      Config::Configuration.new(sections: [],
+                                book_repo: 'fantastic/book',
+                                public_host: 'example.com',
+                                archive_menu: [])
+    }
     let(:success) { double('success', success?: true) }
     let(:failure) { double('failure', success?: false) }
-    let(:sheller) { double('sheller', run_command: success) }
-    let(:static_site_generator_formatter) { DitaHtmlToMiddlemanFormatter.new(real_fs_accessor, subnav_formatter, document_parser) }
-    let(:subnav_formatter) { SubnavFormatter.new }
-
-    let(:real_middleman_runner) { MiddlemanRunner.new(real_fs_accessor, Sheller.new) }
 
     it "returns a nonzero exit code when Middleman fails" do
       middleman_runner = instance_double('Bookbinder::MiddlemanRunner')
@@ -223,11 +180,9 @@ module Bookbinder
         received_output_locations = nil
         directory_preparer = double('dir preparer')
         allow(directory_preparer).to receive(:prepare_directories)
-        fs = double('fs').as_null_object
 
         bind = bind_cmd(cloner_factory: factory,
-                        directory_preparer: directory_preparer,
-                        file_system_accessor: fs)
+                        directory_preparer: directory_preparer)
 
         allow(factory).to receive(:produce).with(nil) { cloner }
         allow(cloner).to receive(:call).
@@ -240,23 +195,6 @@ module Bookbinder
         expect(directory_preparer).to have_received(:prepare_directories).
           with(anything, anything, Pathname('foo/repo'))
       end
-    end
-
-    it 'creates a directory per repo with the generated html from middleman' do
-      silence_io_streams do
-        bind_cmd(middleman_runner: real_middleman_runner).run(['remote'])
-      end
-
-      final_app_dir = File.absolute_path('final_app')
-
-      index_html = File.read File.join(final_app_dir, 'public', 'dogs', 'index.html')
-      expect(index_html).to include 'breeds.png'
-
-      other_index_html = File.read File.join(final_app_dir, 'public', 'foods/sweet', 'index.html')
-      expect(other_index_html).to include 'This is a Markdown Page'
-
-      third_index_html = File.read File.join(final_app_dir, 'public', 'foods/savory', 'index.html')
-      expect(third_index_html).to include 'This is another Markdown Page'
     end
 
     context 'when there are invalid arguments' do
@@ -277,20 +215,21 @@ module Bookbinder
           sections: [
             Config::SectionConfig.new(
               'repository' => {'name' => 'fantastic/my-variable-repo'},
-              'directory' => 'var-repo')
+              'directory' => 'var-repo'
+            )
           ],
-          book_repo: book,
+          book_repo: 'some/book',
           cred_repo: 'my-org/my-creds',
           public_host: 'example.com',
           template_variables: {'name' => 'Spartacus'}
         )
         bind_cmd(
           middleman_runner: real_middleman_runner,
-          config_fetcher: double('config fetcher', fetch_config: config)
+          config_fetcher: double('config fetcher', fetch_config: config),
+          file_system_accessor: real_fs_accessor,
         ).run(['remote'])
 
-        final_app_dir = File.absolute_path('final_app')
-        index_html = File.read File.join(final_app_dir, 'public', 'var-repo', 'variable_index.html')
+        index_html = File.read File.join('final_app', 'public', 'var-repo', 'variable_index.html')
         expect(index_html).to include 'My variable name is Spartacus.'
       end
     end
@@ -308,7 +247,8 @@ module Bookbinder
         it 'contains the given pages in an XML sitemap' do
           command = bind_cmd(
             middleman_runner: real_middleman_runner,
-            sitemap_writer: Postprocessing::SitemapWriter.build(logger, final_app_dir, random_port),
+            file_system_accessor: real_fs_accessor,
+            sitemap_writer: Postprocessing::SitemapWriter.build(null_logger, File.absolute_path('final_app'), random_port),
             config_fetcher: double(
               'config fetcher',
               fetch_config: Config::Configuration.parse(
