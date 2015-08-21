@@ -73,7 +73,7 @@ module Bookbinder
           file_system_accessor.copy('redirects.rb', output_locations.final_app_dir)
         end
         generation_result = static_site_generator.run(
-          "build #{bind_options.verbosity}",
+          ["build", bind_options.verbosity].compact.join(" "),
           streams: bind_options.streams,
           output_locations: output_locations,
           config: config_decorator.generate(bind_config, sections),
