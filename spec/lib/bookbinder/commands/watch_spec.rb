@@ -10,6 +10,7 @@ module Bookbinder
     describe Watch do
       let(:unused_dependency) { Object.new }
       let(:untested_streams) { {} }
+      let(:success) { double('process status', success?: true, exitstatus: 0) }
 
       it "has a command name" do
         watch = Watch.new({})
@@ -32,8 +33,13 @@ module Bookbinder
         config = Config::Configuration.new({book_repo: "some_book", sections: [section_config]})
         sections = [Section.new('fake/path', 'foo/bar'), Section.new('other/path', 'cat/dog')]
         section_repository = instance_double('Ingest::SectionRepository')
-        allow(section_repository).to receive(:fetch).with(configured_sections: [section_config],
-                                                          destination_dir: Pathname("output/preprocessing/sections")) { sections }
+        cloner = instance_double('Ingest::LocalFileSystemCloner')
+
+        allow(section_repository).to receive(:fetch).
+          with(configured_sections: [section_config],
+               destination_dir: Pathname("output/preprocessing/sections"),
+               streams: streams,
+               cloner: cloner) { sections }
 
         expect(directory_preparer).to receive(:prepare_directories).with(
             config,
@@ -50,13 +56,13 @@ module Bookbinder
 
         Watch.new(
           streams,
-          middleman_runner: instance_double('MiddlemanRunner', run: nil),
+          middleman_runner: instance_double('MiddlemanRunner', run: success),
           output_locations: output_locations,
           config_fetcher: instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
           config_decorator: double('decorator', generate: config),
           file_system_accessor: instance_double('LocalFileSystemAccessor', file_exist?: false),
           preprocessor: preprocessor,
-          cloner: instance_double('Ingest::LocalFileSystemCloner'),
+          cloner: cloner,
           section_repository: section_repository,
           directory_preparer: directory_preparer
         ).run([])
@@ -65,7 +71,7 @@ module Bookbinder
       it "copies the redirect file if present before running middleman" do
         fs = instance_double("LocalFileSystemAccessor")
         allow(fs).to receive(:file_exist?).with("redirects.rb") { true }
-        runner = instance_double('MiddlemanRunner')
+        runner = instance_double('MiddlemanRunner', run: success)
         config = Config::Configuration.new({})
 
         expect(fs).to receive(:copy).with("redirects.rb", Pathname("foo")).ordered
@@ -86,7 +92,7 @@ module Bookbinder
 
       it "runs the middleman server" do
         output_locations = OutputLocations.new(context_dir: ".")
-        runner = instance_double('MiddlemanRunner')
+        runner = instance_double('MiddlemanRunner', run: success)
         config = Config::Configuration.new({book_repo: "best_book"})
         section = Section.new('fake/path', 'foo/bar')
         streams = {out: "foo"}
