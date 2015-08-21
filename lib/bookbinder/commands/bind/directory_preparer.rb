@@ -2,8 +2,6 @@ module Bookbinder
   module Commands
     module BindComponents
       class DirectoryPreparer
-        include Bookbinder::DirectoryHelperMethods
-
         def initialize(fs)
           @fs = fs
         end

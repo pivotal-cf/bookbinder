@@ -73,7 +73,7 @@ module Bookbinder
 
         command = bind_cmd(streams: disallowed_streams,
                            file_system_accessor: fs,
-                           static_site_generator: generator,
+                           middleman_runner: generator,
                            sitemap_writer: double('disallowed sitemap writer'),
                            section_repository: instance_double('Ingest::SectionRepository', fetch: []))
 
@@ -88,7 +88,7 @@ module Bookbinder
       fs = instance_double('Bookbinder::LocalFileSystemAccessor')
       generator = instance_double('Bookbinder::MiddlemanRunner')
       command = bind_cmd(file_system_accessor: fs,
-                         static_site_generator: generator,
+                         middleman_runner: generator,
                          sitemap_writer: double('sitemap writer').as_null_object)
 
       allow(fs).to receive(:file_exist?).with('redirects.rb') { true }
@@ -104,7 +104,7 @@ module Bookbinder
       fs = instance_double('Bookbinder::LocalFileSystemAccessor')
       generator = instance_double('Bookbinder::MiddlemanRunner')
       command = bind_cmd(file_system_accessor: fs,
-                         static_site_generator: generator,
+                         middleman_runner: generator,
                          sitemap_writer: double('sitemap writer').as_null_object)
 
       allow(fs).to receive(:file_exist?).with('redirects.rb') { false }

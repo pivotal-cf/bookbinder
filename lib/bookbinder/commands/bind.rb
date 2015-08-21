@@ -52,6 +52,7 @@ module Bookbinder
         cloner              = cloner_factory.produce(bind_options.local_repo_dir)
 
         directory_preparer.prepare_directories(
+          bind_config,
           File.expand_path('../../../../', __FILE__),
           output_locations,
           cloner
