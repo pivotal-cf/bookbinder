@@ -10,7 +10,7 @@ module Bookbinder
       def to_str
         if input_identifier.nil?
           ""
-        elsif input_identifier.include?(':')
+        elsif input_identifier.include?(':') || input_identifier.match(/^\//)
           input_identifier
         else
           "#{DEFAULT_VCS_PREFIX}#{input_identifier}"
