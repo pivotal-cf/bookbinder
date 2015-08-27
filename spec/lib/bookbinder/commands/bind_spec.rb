@@ -32,6 +32,10 @@ module Bookbinder
     let(:null_preprocessor) { instance_double('Bookbinder::Preprocessing::LinkToSiteGenDir', preprocess: nil) }
     let(:null_middleman_runner) { instance_double('Bookbinder::MiddlemanRunner', run: success) }
     let(:null_logger) { double('deprecated logger').as_null_object }
+    let(:null_directory_preparer) { instance_double('Bookbinder::Commands::BindComponents::DirectoryPreparer', prepare_directories: nil) }
+    let(:null_cloner) { double('cloner').as_null_object }
+    let(:null_cloner_factory) { instance_double('Bookbinder::Ingest::ClonerFactory', produce: null_cloner) }
+    let(:null_section_repository) { instance_double('Ingest::SectionRepository', fetch: []) }
 
     let(:real_fs_accessor) { LocalFileSystemAccessor.new }
     let(:real_preprocessor) { Preprocessing::LinkToSiteGenDir.new(real_fs_accessor) }
@@ -63,56 +67,6 @@ module Bookbinder
         partial_args.fetch(:section_repository, Ingest::SectionRepository.new),
         partial_args.fetch(:directory_preparer, Commands::BindComponents::DirectoryPreparer.new(real_fs_accessor))
       )
-    end
-
-    context "when site generation fails" do
-      it "returns a nonzero exit code" do
-        generator = instance_double('Bookbinder::MiddlemanRunner')
-        fs = instance_double('Bookbinder::LocalFileSystemAccessor')
-        disallowed_streams = {}
-
-        command = bind_cmd(streams: disallowed_streams,
-                           file_system_accessor: fs,
-                           middleman_runner: generator,
-                           sitemap_writer: double('disallowed sitemap writer'),
-                           section_repository: instance_double('Ingest::SectionRepository', fetch: []))
-
-        allow(fs).to receive(:file_exist?) { false }
-        allow(generator).to receive(:run) { failure }
-
-        expect(command.run(['local'])).to be_nonzero
-      end
-    end
-
-    it "copies a redirects file from the current directory to the final app directory, prior to site generation" do
-      fs = instance_double('Bookbinder::LocalFileSystemAccessor')
-      generator = instance_double('Bookbinder::MiddlemanRunner')
-      command = bind_cmd(file_system_accessor: fs,
-                         middleman_runner: generator,
-                         sitemap_writer: double('sitemap writer').as_null_object)
-
-      allow(fs).to receive(:file_exist?).with('redirects.rb') { true }
-      allow(fs).to receive(:copy)
-
-      expect(fs).to receive(:copy).with('redirects.rb', Pathname(File.absolute_path('final_app'))).ordered
-      expect(generator).to receive(:run).ordered { success }
-
-      command.run(['local'])
-    end
-
-    it "doesn't attempt to copy the redirect file if it doesn't exist" do
-      fs = instance_double('Bookbinder::LocalFileSystemAccessor')
-      generator = instance_double('Bookbinder::MiddlemanRunner')
-      command = bind_cmd(file_system_accessor: fs,
-                         middleman_runner: generator,
-                         sitemap_writer: double('sitemap writer').as_null_object)
-
-      allow(fs).to receive(:file_exist?).with('redirects.rb') { false }
-
-      expect(generator).to receive(:run).ordered { success }
-      expect(fs).to receive(:copy).ordered
-
-      command.run(['local'])
     end
 
     it "prepares directories and then preprocesses fetched sections" do
@@ -167,6 +121,79 @@ module Bookbinder
       ).run(['local'])
     end
 
+    it "copies a redirects file from the current directory to the final app directory, prior to site generation" do
+      fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+      generator = instance_double('Bookbinder::MiddlemanRunner')
+      command = bind_cmd(file_system_accessor: fs,
+        middleman_runner: generator,
+        sitemap_writer: double('sitemap writer').as_null_object)
+
+      allow(fs).to receive(:file_exist?).with('redirects.rb') { true }
+      allow(fs).to receive(:copy)
+
+      expect(fs).to receive(:copy).with('redirects.rb', Pathname(File.absolute_path('final_app'))).ordered
+      expect(generator).to receive(:run).ordered { success }
+
+      command.run(['local'])
+    end
+
+    it "doesn't attempt to copy the redirect file if it doesn't exist" do
+      fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+      generator = instance_double('Bookbinder::MiddlemanRunner')
+      command = bind_cmd(file_system_accessor: fs,
+        middleman_runner: generator,
+        sitemap_writer: double('sitemap writer').as_null_object)
+
+      allow(fs).to receive(:file_exist?).with('redirects.rb') { false }
+
+      expect(generator).to receive(:run).ordered { success }
+      expect(fs).to receive(:copy).ordered
+
+      command.run(['local'])
+    end
+
+    it "runs Middleman build" do
+      merged_streams = { out: instance_of(Sheller::DevNull) }
+      output_locations = OutputLocations.new(context_dir: ".", final_app_dir: "foo")
+      runner = instance_double('MiddlemanRunner')
+
+      section_config = Config::SectionConfig.new({})
+      config = Config::Configuration.new({book_repo: "some_book", sections: [section_config], public_host: "some.book.domain"})
+      section = Section.new('fake/path', 'foo/bar')
+
+      cloner = instance_double('Ingest::Cloner')
+
+      section_repository = instance_double('Ingest::SectionRepository')
+      allow(section_repository).to receive(:fetch).with(
+          configured_sections: [section_config],
+          destination_dir: output_locations.cloned_preprocessing_dir,
+          ref_override: nil,
+          cloner: cloner,
+          streams: {}
+        ) { [section] }
+
+      expect(runner).to receive(:run).with("build",
+          streams: merged_streams,
+          output_locations: output_locations,
+          config: config,
+          local_repo_dir: File.expand_path(".."),
+          subnavs: section.subnav) { failure }
+
+      Commands::Bind.new(
+        {},
+        output_locations,
+        instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
+        double('decorator', generate: config),
+        null_fs_accessor,
+        runner,
+        null_sitemap_writer,
+        null_preprocessor,
+        instance_double('Ingest::ClonerFactory', produce: cloner),
+        section_repository,
+        null_directory_preparer
+      ).run(['local'])
+    end
+
     it "returns a nonzero exit code when Middleman fails" do
       middleman_runner = instance_double('Bookbinder::MiddlemanRunner')
       fs = instance_double('Bookbinder::LocalFileSystemAccessor')
@@ -182,6 +209,91 @@ module Bookbinder
       allow(middleman_runner).to receive(:run) { failure }
 
       expect(command.run(['local'])).to be_nonzero
+    end
+
+    it "writes required files to output directory and outputs success message" do
+      fs = instance_double('Bookbinder::LocalFileSystemAccessor', file_exist?: false)
+      sitemap_writer = instance_double('Bookbinder::Postprocessing:SitemapWriter')
+
+      streams = { success: double('stream') }
+
+      output_locations = OutputLocations.new(final_app_dir: 'whatever_final_app', context_dir: ".")
+      config = Config::Configuration.new({public_host: 'some.site.io'})
+
+      expect(fs).to receive(:copy).with(output_locations.build_dir, output_locations.public_dir).ordered
+      expect(sitemap_writer).to receive(:write).with(config.public_host,
+                                                     streams.merge({ out: instance_of(Sheller::DevNull) }),
+                                                     config.broken_link_exclusions).ordered { double('result').as_null_object }
+
+      expect(streams[:success]).to receive(:puts).with(include(output_locations.final_app_dir.to_s))
+
+      Commands::Bind.new(
+        streams,
+        output_locations,
+        instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
+        double('decorator', generate: config),
+        fs,
+        instance_double('Bookbinder::MiddlemanRunner', run: success),
+        sitemap_writer,
+        null_preprocessor,
+        null_cloner_factory,
+        null_section_repository,
+        null_directory_preparer
+      ).run(['local'])
+    end
+
+    context "with broken links" do
+      it "exits a non-zero exit code" do
+        output_locations = OutputLocations.new(final_app_dir: 'some_other_final_app', context_dir: ".")
+        config = Config::Configuration.new({public_host: 'some.site.io'})
+
+        result = instance_double('Bookbinder::Spider::Result', has_broken_links?: true)
+        sitemap_writer = instance_double('Bookbinder::Postprocessing:SitemapWriter')
+        allow(sitemap_writer).to receive(:write) { result }
+
+        command = Commands::Bind.new(
+          double('streams').as_null_object,
+          output_locations,
+          instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
+          double('decorator', generate: config),
+          null_fs_accessor,
+          null_middleman_runner,
+          sitemap_writer,
+          null_preprocessor,
+          null_cloner_factory,
+          null_section_repository,
+          null_directory_preparer
+        )
+
+        expect(command.run(['local'])).to be_nonzero
+      end
+    end
+
+    context "without broken links" do
+      it "exits a zero exit code" do
+        output_locations = OutputLocations.new(final_app_dir: 'some_other_final_app', context_dir: ".")
+        config = Config::Configuration.new({public_host: 'some.site.io'})
+
+        result = instance_double('Bookbinder::Spider::Result', has_broken_links?: false)
+        sitemap_writer = instance_double('Bookbinder::Postprocessing:SitemapWriter')
+        allow(sitemap_writer).to receive(:write) { result }
+
+        command = Commands::Bind.new(
+          double('streams').as_null_object,
+          output_locations,
+          instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
+          double('decorator', generate: config),
+          null_fs_accessor,
+          null_middleman_runner,
+          sitemap_writer,
+          null_preprocessor,
+          null_cloner_factory,
+          null_section_repository,
+          null_directory_preparer
+        )
+
+        expect(command.run(['local'])).to be_zero
+      end
     end
 
     context 'when there are invalid arguments' do
