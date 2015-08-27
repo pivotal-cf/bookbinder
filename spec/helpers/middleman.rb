@@ -2,12 +2,6 @@ require 'middleman-core/logger'
 
 module Bookbinder
   module SpecHelperMethods
-    def expect_to_receive_and_return_real_now(subject, method, *args)
-      real_obj = subject.public_send(method, *args)
-      expect(subject).to receive(method).with(*args).and_return(real_obj)
-      real_obj
-    end
-
     def generate_middleman_with(index_page)
       dir = tmp_subdir 'master_middleman'
       source_dir = File.join(dir, 'source')
