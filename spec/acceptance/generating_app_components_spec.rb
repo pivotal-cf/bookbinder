@@ -1,6 +1,6 @@
 require 'yaml'
-require_relative '../../../helpers/redirection'
-require_relative '../../../helpers/use_fixture_repo'
+require_relative '../helpers/redirection'
+require_relative '../helpers/use_fixture_repo'
 
 module Bookbinder
   describe 'bind local' do
@@ -12,7 +12,7 @@ module Bookbinder
       File.write('./config.yml', config.to_yaml)
     end
 
-    let(:gem_root) { File.absolute_path('../../../..', __dir__) }
+    let(:gem_root) { File.absolute_path('../../', __dir__) }
 
     include Bookbinder::Redirection
 
