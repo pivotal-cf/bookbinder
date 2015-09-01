@@ -132,7 +132,7 @@ module Bookbinder
         original_date = ENV['GIT_AUTHOR_DATE']
 
         begin
-          date = DateTime.new(1995, 1, 3)
+          date = Time.new(1995, 1, 3)
           ENV['GIT_AUTHOR_DATE'] = date.iso8601
 
           init_repo(at_dir: tmp_subdir('source/sections/section-repo'),
@@ -147,6 +147,51 @@ module Bookbinder
         ensure
           ENV['GIT_AUTHOR_DATE'] = original_date
         end
+      end
+
+      it "copes with multiple git repos in same middleman app" do
+        FileUtils.cp_r 'master_middleman/.', tmpdir
+
+        original_date = ENV['GIT_AUTHOR_DATE']
+
+        begin
+          date_one = Time.new(1995, 1, 3)
+          ENV['GIT_AUTHOR_DATE'] = date_one.iso8601
+          init_repo(at_dir: tmp_subdir('source/sections/section-repo-one'),
+            contents: '<%= modified_date %>',
+            file: 'index.html.md.erb')
+
+          date_two = Time.new(2005, 3, 8)
+          ENV['GIT_AUTHOR_DATE'] = date_two.iso8601
+          init_repo(at_dir: tmp_subdir('source/sections/section-repo-two'),
+            contents: '<%= modified_date %>',
+            file: 'index.html.md.erb')
+
+          squelch_middleman_output
+          run_middleman
+          output_one = tmpdir.join('build', 'sections', 'section-repo-one', 'index.html').read
+          output_two = tmpdir.join('build', 'sections', 'section-repo-two', 'index.html').read
+
+          expect(output_one.chomp).to eq('<p>Page last updated: January 3, 1995</p>')
+          expect(output_two.chomp).to eq('<p>Page last updated: March 8, 2005</p>')
+        ensure
+          ENV['GIT_AUTHOR_DATE'] = original_date
+        end
+      end
+
+      it "returns something for a file not in version control" do
+        section_dir = tmp_subdir('source/sections/section-repo')
+        FileUtils.cp_r 'master_middleman/.', tmpdir
+        FileUtils.mkdir_p section_dir
+        File.open(File.join(section_dir, 'index.html.md.erb'), "a") do |io|
+          io.write('<%= modified_date %>')
+        end
+
+        squelch_middleman_output
+        run_middleman
+        output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
+
+        expect(output.chomp).to eq('<p>Page last updated: January 1, 1984</p>')
       end
     end
 

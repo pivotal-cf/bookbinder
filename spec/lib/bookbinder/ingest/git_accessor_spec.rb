@@ -109,13 +109,13 @@ module Bookbinder
       end
 
       it "can access the last commit date of a given file in an existing repo" do
-        require 'date'
+        require 'time'
         Dir.mktmpdir do |dir|
           path = Pathname(dir)
           original_date = ENV['GIT_AUTHOR_DATE']
 
           begin
-            date = DateTime.new(2003, 1, 2)
+            date = Time.new(2003, 1, 2)
             ENV['GIT_AUTHOR_DATE'] = date.iso8601
 
             init_repo(at_dir: path.join('source', 'section-repo'),
@@ -131,6 +131,23 @@ module Bookbinder
           ensure
             ENV['GIT_AUTHOR_DATE'] = original_date
           end
+        end
+      end
+
+      it "returns nil if a given file is not checked into version control" do
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+
+          FileUtils.mkdir(path.join('section-dir'))
+          File.open(path.join('section-dir', 'Gemfile'), "a") do |io|
+            io.write('bookbindery')
+          end
+
+          git = GitAccessor.new
+
+          expect(
+            git.author_date(path.join('section-dir', 'Gemfile'))
+          ).to be_nil
         end
       end
 

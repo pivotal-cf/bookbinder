@@ -55,8 +55,8 @@ module Bookbinder
 
       def modified_date(format="%B %-d, %Y")
         git_accessor = Ingest::GitAccessor.new
-        date = git_accessor.author_date(current_page.source_file).strftime(format)
-        "Page last updated: #{date}"
+        date = git_accessor.author_date(current_page.source_file) || Time.new(1984,1,1)
+        "Page last updated: #{date.strftime(format)}"
       end
 
       def breadcrumbs

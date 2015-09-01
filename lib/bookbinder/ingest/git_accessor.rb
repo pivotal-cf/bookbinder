@@ -40,13 +40,12 @@ module Bookbinder
       end
 
       def author_date(path)
-        dir = Pathname(path).dirname.ascend do |current_dir|
+        Pathname(path).dirname.ascend do |current_dir|
           if current_dir.to_s.include?(source_dir_name) && current_dir.entries.include?(Pathname(".git"))
-            break current_dir
+            git = Git.open(current_dir)
+            return git.gblob(path).log.first.author.date
           end
         end
-        git = Git.open(dir)
-        git.gblob(path).log.first.author.date.to_datetime.utc
       end
 
       def remote_tag(url, tagname, commit_or_object)
