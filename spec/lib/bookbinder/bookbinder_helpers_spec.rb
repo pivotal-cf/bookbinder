@@ -10,12 +10,14 @@ require_relative '../../helpers/middleman'
 require_relative '../../helpers/redirection'
 require_relative '../../helpers/tmp_dirs'
 require_relative '../../helpers/use_fixture_repo'
+require_relative '../../helpers/git_repo'
 
 require './master_middleman/bookbinder_helpers'
 
 module Bookbinder
   describe Navigation::HelperMethods do
     include Bookbinder::SpecHelperMethods
+    include Bookbinder::GitRepo
     include_context 'tmp_dirs'
 
     let(:klass) do
@@ -119,6 +121,31 @@ module Bookbinder
             doc = Nokogiri::HTML(output)
             expect(doc.css('div .header-dropdown-link').text).to eq(first_version)
           end
+        end
+      end
+    end
+
+    describe '#modified_date' do
+      it 'returns the last modified date of the file' do
+        FileUtils.cp_r 'master_middleman/.', tmpdir
+
+        original_date = ENV['GIT_AUTHOR_DATE']
+
+        begin
+          date = DateTime.new(1995, 1, 3)
+          ENV['GIT_AUTHOR_DATE'] = date.iso8601
+
+          init_repo(at_dir: tmp_subdir('source/sections/section-repo'),
+                    contents: '<%= modified_date %>',
+                    file: 'index.html.md.erb')
+
+          squelch_middleman_output
+          run_middleman
+          output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
+
+          expect(output.chomp).to eq('<p>Page last updated: January 3, 1995</p>')
+        ensure
+          ENV['GIT_AUTHOR_DATE'] = original_date
         end
       end
     end

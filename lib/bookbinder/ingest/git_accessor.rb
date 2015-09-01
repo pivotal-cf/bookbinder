@@ -1,4 +1,5 @@
 require 'git'
+require_relative '../directory_helpers'
 require_relative 'update_failure'
 require_relative 'update_success'
 
@@ -7,6 +8,7 @@ module Bookbinder
     class GitAccessor
       TagExists = Class.new(RuntimeError)
       InvalidTagRef = Class.new(RuntimeError)
+      include DirectoryHelperMethods
 
       def clone(url, name, path: nil, checkout: 'master')
         cached_clone(url, name, Pathname(path)).tap do |git|
@@ -35,6 +37,16 @@ module Bookbinder
           git.checkout(checkout)
           path.join(temp_name("read-file"), filename).read
         end
+      end
+
+      def author_date(path)
+        dir = Pathname(path).dirname.ascend do |current_dir|
+          if current_dir.to_s.include?(source_dir_name) && current_dir.entries.include?(Pathname(".git"))
+            break current_dir
+          end
+        end
+        git = Git.open(dir)
+        git.gblob(path).log.first.author.date.to_datetime.utc
       end
 
       def remote_tag(url, tagname, commit_or_object)

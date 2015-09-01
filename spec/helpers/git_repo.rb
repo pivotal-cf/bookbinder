@@ -5,7 +5,7 @@ module Bookbinder
                   commit_message: "I love commits!",
                   contents: nil,
                   file: nil)
-      FileUtils.mkdir(at_dir)
+      FileUtils.mkdir_p(File.join(at_dir, File.dirname(file)))
       `#{<<-SCRIPT}`
 cd #{at_dir};
 git init;
@@ -16,7 +16,7 @@ echo foo > bar
 git add .
 git commit -m "root master commit"
 #{create_branch(branch)}
-echo #{contents} > #{file}
+echo '#{contents}' > #{file}
 git add .
 git commit -m "#{commit_message}"
 git checkout --quiet master
@@ -43,6 +43,6 @@ git checkout --quiet master
 
     def create_branch(branch)
       "git checkout --quiet -b #{branch}" if branch
-      end
+    end
   end
 end

@@ -53,6 +53,12 @@ module Bookbinder
                                                    dropdown_links: menu.dropdown_links }
       end
 
+      def modified_date(format="%B %-d, %Y")
+        git_accessor = Ingest::GitAccessor.new
+        date = git_accessor.author_date(current_page.source_file).strftime(format)
+        "Page last updated: #{date}"
+      end
+
       def breadcrumbs
         page_chain = add_ancestors_of(current_page, [])
         breadcrumbs = page_chain.map do |page|

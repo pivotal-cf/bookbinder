@@ -108,6 +108,32 @@ module Bookbinder
         end
       end
 
+      it "can access the last commit date of a given file in an existing repo" do
+        require 'date'
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+          original_date = ENV['GIT_AUTHOR_DATE']
+
+          begin
+            date = DateTime.new(2003, 1, 2)
+            ENV['GIT_AUTHOR_DATE'] = date.iso8601
+
+            init_repo(at_dir: path.join('source', 'section-repo'),
+                      file: 'some-dir/Gemfile',
+                      contents: 'gemstuffz',
+                      commit_message: 'new railz plz')
+
+            git = GitAccessor.new
+
+            expect(
+              git.author_date(path.join('source', 'section-repo', 'some-dir', 'Gemfile'))
+            ).to eq(date)
+          ensure
+            ENV['GIT_AUTHOR_DATE'] = original_date
+          end
+        end
+      end
+
       it "can tag and push in one step" do
         Dir.mktmpdir do |dir|
           path = Pathname(dir)
