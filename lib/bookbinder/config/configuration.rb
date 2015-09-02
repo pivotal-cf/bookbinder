@@ -1,3 +1,4 @@
+require_relative '../ingest/destination_directory'
 require_relative '../ingest/repo_identifier'
 require_relative 'section_config'
 
@@ -32,17 +33,36 @@ module Bookbinder
         end
 
         def dita_sections(input_config)
-          (input_config['dita_sections'] || []).map { |dita_section|
+          dita_sections = input_config['dita_sections']
+          (dita_sections || []).map { |dita_section|
             dita_section.merge(
               'preprocessor_config' => {
                 'ditamap_location' => dita_section['ditamap_location'],
                 'ditaval_location' => dita_section['ditaval_location']
               },
-              'subnav_template' => 'dita_subnav'
+              'subnav_template' => dita_subnav_template(dita_sections, dita_section)
             ).reject { |k, _|
               %w(ditamap_location ditaval_location).include?(k)
             }
           }
+        end
+
+        def dita_subnav_template(all_sections, current_section)
+          subnav_sections = all_sections.select { |section| section['ditamap_location'] }
+          if subnav_sections.empty?
+            nil
+          elsif subnav_sections.one?
+            "dita_subnav"
+          else
+            subnav_section = subnav_sections.include?(current_section) ? current_section : subnav_sections.first
+            (
+              ["dita_subnav"] +
+              Array(
+                Ingest::DestinationDirectory.new(
+                  subnav_section.fetch('repository', {})['name'], subnav_section['directory'])
+              )
+            ).join('_')
+          end
         end
       end
 

@@ -41,7 +41,7 @@ module Bookbinder
     end
 
     def exposes_subnav_links_for(dita_section)
-      props_location = "./output/master_middleman/source/subnavs/dita-subnav-props.json"
+      props_location = "./output/master_middleman/source/subnavs/dita-subnav-props-#{dita_section.dir}.json"
 
       File.exist?(props_location) && (
         props_text = File.read(props_location)
@@ -98,7 +98,11 @@ module Bookbinder
       doc = Nokogiri::HTML(text)
 
       text.include?('<div class="nav-content"') &&
-          doc.css('.nav-content').first.attr('data-props-location') == 'dita-subnav-props.json'
+          is_dita_subnav_props?(doc.css('.nav-content').first.attr('data-props-location'))
+    end
+
+    def is_dita_subnav_props?(json_filename)
+      Regexp.new(/^dita-subnav-props.*\.json$/).match(json_filename)
     end
 
     def has_frontmatter?(topic)

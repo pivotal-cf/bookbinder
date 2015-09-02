@@ -15,36 +15,31 @@ module Bookbinder
       end
 
       def applicable_to?(section)
-        section.subnav_template == 'dita_subnav'
+        section.subnav_template.include?('dita_subnav') if section.subnav_template
       end
 
-      def preprocess(dita_sections, output_locations, options: nil, output_streams: nil)
-        dita_sections.select { |dita_section| dita_section.path_to_preprocessor_attribute('ditamap_location') }.each do |dita_section|
-          command = command_creator.convert_to_html_command(
-            dita_section,
-            dita_flags: dita_flags(options),
-            write_to: output_locations.html_from_preprocessing_dir.join(dita_section.destination_directory)
-          )
-          status = sheller.run_command(command, output_streams.to_h)
-          unless status.success?
-            raise DitaToHtmlLibraryFailure.new 'The DITA-to-HTML conversion failed. ' +
-              'Please check that you have specified the path to your DITA-OT library in the ENV, ' +
-              'that your DITA-specific keys/values in config.yml are set, ' +
-              'and that your DITA toolkit is correctly configured.'
+      def preprocess(dita_sections, output_locations, options: [], output_streams: nil)
+        dita_options = dita_flags(options)
+        dita_sections.each do |dita_section|
+          if dita_section.path_to_preprocessor_attribute('ditamap_location')
+            convert_dita_files(dita_section,
+                               command_creator,
+                               dita_options,
+                               output_locations.html_from_preprocessing_dir.join(dita_section.destination_directory),
+                               sheller,
+                               output_streams)
+
+            generate_subnav(dita_section,
+                            output_locations,
+                            output_locations.source_for_site_generator.join('subnavs', '_dita_subnav_template.erb'),
+                            output_locations.subnavs_for_layout_dir)
           end
 
-          generate_subnav(dita_section.destination_directory,
-                          output_locations,
-                          output_locations.source_for_site_generator.join('subnavs', '_dita_subnav_template.erb'),
-                          output_locations.subnavs_for_layout_dir)
-        end
-
-        dita_sections.each do |dita_section|
-          html_dir = output_locations.html_from_preprocessing_dir.join(dita_section.destination_directory)
+          section_html_dir = output_locations.html_from_preprocessing_dir.join(dita_section.destination_directory)
           formatted_dir = output_locations.formatted_dir.join(dita_section.destination_directory)
           source_for_site_gen_dir = output_locations.source_for_site_generator.join(dita_section.destination_directory)
 
-          dita_formatter.format_html html_dir, formatted_dir
+          dita_formatter.format_html section_html_dir, formatted_dir
 
           copy_images(dita_section.path_to_repository, formatted_dir)
 
@@ -56,26 +51,41 @@ module Bookbinder
 
       attr_reader :dita_formatter, :local_fs_accessor, :command_creator, :sheller
 
-      def generate_subnav(dita_section_dir, output_locations, dita_subnav_template_path, subnavs_dir)
+      def convert_dita_files(section, command_creator, options, section_html_dir, sheller, output_streams)
+        command = command_creator.convert_to_html_command(
+          section,
+          dita_flags: options,
+          write_to: section_html_dir
+        )
+        status = sheller.run_command(command, output_streams.to_h)
+        unless status.success?
+          raise DitaToHtmlLibraryFailure.new 'The DITA-to-HTML conversion failed. ' +
+                'Please check that you have specified the path to your DITA-OT library in the ENV, ' +
+                'that your DITA-specific keys/values in config.yml are set, ' +
+                'and that your DITA toolkit is correctly configured.'
+        end
+      end
+
+      def generate_subnav(dita_section, output_locations, dita_subnav_template_path, subnavs_dir)
         dita_subnav_template_text = local_fs_accessor.read(dita_subnav_template_path)
 
         tocjs_text = local_fs_accessor.read(
           File.join(
-            output_locations.html_from_preprocessing_dir.join(dita_section_dir),
+            output_locations.html_from_preprocessing_dir.join(dita_section.destination_directory),
             'index.html')
         )
-        json_props_location = File.join('dita-subnav-props.json')
+        json_props_location = json_props_location(dita_section.destination_directory)
         props_file_location = File.join(subnavs_dir, json_props_location)
 
-        subnav = dita_formatter.format_subnav(dita_section_dir,
+        subnav = dita_formatter.format_subnav(dita_section.destination_directory,
                                               dita_subnav_template_text,
                                               json_props_location,
                                               tocjs_text)
 
-       local_fs_accessor.write text: subnav.json_links, to: props_file_location
+        local_fs_accessor.write text: subnav.json_links, to: props_file_location
 
-       local_fs_accessor.write text: subnav.text,
-                               to: File.join(subnavs_dir, "dita_subnav.erb")
+        local_fs_accessor.write text: subnav.text,
+                                to: File.join(subnavs_dir, "#{dita_section.subnav_template}.erb")
       end
 
       def copy_images(src, dest)
@@ -88,6 +98,10 @@ module Bookbinder
                                                              src,
                                                              dest)
         end
+      end
+
+      def json_props_location(section_dir)
+        (["dita-subnav-props"] + Array(section_dir.to_s)).join("-") + ".json"
       end
 
       def dita_flags(opts)

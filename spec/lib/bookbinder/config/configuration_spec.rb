@@ -55,30 +55,56 @@ module Bookbinder
         expect(Configuration.parse('public_host' => 'foo.bar').public_host).to eq('foo.bar')
       end
 
-      it "combines dita sections and regular sections, setting dita-specific config" do
-        config = Configuration.parse(
-          'sections' => [
-            {'repository' => {'name' => 'must/be-github'}},
-          ],
-          'dita_sections' => [
-            {'repository' => {'name' => 'must/be-github'},
-             'directory' => 'my-renamed-dita-section-one',
-             'ditamap_location' => 'example.ditamap',
-             'ditaval_location' => 'dita-filter.ditaval',},
-          ]
-        )
-        expect(config.sections.size).to eq(2)
-        expect(config.sections[1]).to eq(
-          Config::SectionConfig.new(
-            'repository' => {'name' => 'must/be-github'},
-            'directory' => 'my-renamed-dita-section-one',
-            'preprocessor_config' => {
-              'ditamap_location' => 'example.ditamap',
-              'ditaval_location' => 'dita-filter.ditaval'
-            },
-            'subnav_template' => 'dita_subnav',
+      context "when there are dita sections" do
+        it "combines dita sections and regular sections" do
+          config = Configuration.parse(
+            'sections' => [
+              {'repository' => {'name' => 'must/be-github'}},
+            ],
+            'dita_sections' => [
+              {'repository' => {'name' => 'must/be-github'},
+                'ditamap_location' => 'example.ditamap',
+                'ditaval_location' => 'dita-filter.ditaval'}
+            ]
           )
-        )
+          expect(config.sections.size).to eq(2)
+          expect(config.sections[1]).to eq(
+              Config::SectionConfig.new(
+                'repository' => {'name' => 'must/be-github'},
+                'preprocessor_config' => {
+                  'ditamap_location' => 'example.ditamap',
+                  'ditaval_location' => 'dita-filter.ditaval'
+                },
+                'subnav_template' => 'dita_subnav'
+              )
+            )
+        end
+
+        context "with one ditamap" do
+          it "uses the default dita subnav template" do
+            config = Configuration.parse(
+              'dita_sections' => [
+                {'repository' => {'name' => 'org/repo-name'},
+                 'ditamap_location' => 'first-ditamap-location'}
+              ]
+            )
+            expect(config.sections[0].subnav_template).to eq('dita_subnav')
+          end
+        end
+
+        context "when a DITA section doesn't have a ditamap" do
+          it "takes its subnav template from the first DITA section with a ditamap" do
+            config = Configuration.parse(
+              'dita_sections' => [
+                {'repository' => {'name' => 'org/repo-name1'},
+                 'ditamap_location' => 'first-ditamap-location'},
+                {'repository' => {'name' => 'another-org/repo-name2'}},
+              ]
+            )
+            expect(config.sections[0].subnav_template).to eq('dita_subnav')
+            expect(config.sections[1].subnav_template).to eq('dita_subnav')
+          end
+        end
       end
 
       it 'returns nil when optional keys do not exist' do
