@@ -316,7 +316,7 @@ module Bookbinder
           FileUtils.touch(path.join("parallel-dir/other/nested/dir/bar"))
           File.symlink(path.join("parallel-dir/other"), path.join("top-dir/other"))
           expect(fs_accessor.find_files_recursively(path.join("top-dir")).map {|p| p.to_s.sub(dir, '')}).
-            to eq(%w(/top-dir/nested/dir/foo /top-dir/other/nested/dir/bar))
+            to match_array(%w(/top-dir/nested/dir/foo /top-dir/other/nested/dir/bar))
         end
       end
     end
