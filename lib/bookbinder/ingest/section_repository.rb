@@ -19,7 +19,6 @@ module Bookbinder
           Section.new(
             working_copy.path,
             working_copy.full_name,
-            destination_dir,
             section_config.desired_directory_name,
             section_config.subnav_template,
             section_config.preprocessor_config

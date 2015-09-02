@@ -4,7 +4,6 @@ require_relative '../ingest/destination_directory'
 module Bookbinder
   Section = Struct.new(:path_to_repository,
                        :full_name,
-                       :destination_dir,
                        :desired_directory_name,
                        :subnav_templ,
                        :preprocessor_config) do

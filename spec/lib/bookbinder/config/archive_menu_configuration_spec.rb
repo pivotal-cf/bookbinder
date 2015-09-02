@@ -15,7 +15,7 @@ module Bookbinder
             config_filename: 'iampresent.yml'
           )
           dir = 'some/path'
-          sections = [Section.new(dir, nil, nil, 'my/dir')]
+          sections = [Section.new(dir, nil, 'my/dir')]
 
           allow(loader).
             to receive(:load_key).

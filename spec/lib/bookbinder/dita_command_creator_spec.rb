@@ -10,7 +10,6 @@ module Bookbinder
       processed_dita_location = '/path/to/processed/dita/boo'
       dita_section = Section.new('/local/path/to/repo',
                                  'org/foo',
-                                 'some/dest/dir',
                                  'boo',
                                  'dita_subnav',
                                  'ditamap_location' => 'path/to/map.ditamap',
@@ -37,7 +36,6 @@ module Bookbinder
         processed_dita_location = '/path/to/processed/dita/boo'
         dita_section = Section.new('/local/path/to/repo',
                                    'org/foo',
-                                   'some/dest/dir',
                                    'boo',
                                    'dita_subnav',
                                    'ditamap_location' => 'path/to/map.ditamap',
@@ -56,7 +54,6 @@ module Bookbinder
           processed_dita_location = '/path/to/processed/dita/boo'
           dita_section = Section.new('/local/path/to/repo',
                                      'org/foo',
-                                     'some/dest/dir',
                                      'boo',
                                      'dita_subnav',
                                      'ditamap_location' => 'path/to/map.ditamap',
@@ -75,7 +72,6 @@ module Bookbinder
         processed_dita_location = '/path/to/processed/dita/boo'
         dita_section = Section.new('/local/path/to/repo',
                                    'org/foo',
-                                   'some/dest/dir',
                                    'boo',
                                    'dita_subnav',
                                    'ditamap_location' => 'path/to/map.ditamap',
@@ -96,7 +92,6 @@ module Bookbinder
           processed_dita_location = '/path/to/processed/dita/boo'
           dita_section = Section.new('/local/path/to/repo',
                                      'org/foo',
-                                     'some/dest/dir',
                                      'boo',
                                      'dita_subnav',
                                      'ditamap_location' => 'path/to/map.ditamap',

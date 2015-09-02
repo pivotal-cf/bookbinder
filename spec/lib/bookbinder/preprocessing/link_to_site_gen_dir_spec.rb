@@ -16,13 +16,11 @@ module Bookbinder
           Section.new(
             'path1',
             'myorg/myrepo',
-            'irrelevant/dest/dir',
             'my/desired/dir'
           ),
           Section.new(
             'path2',
             'myorg/myrepo2',
-            'irrelevant/other/dest/dir',
             desired_dir = nil
           )
         ]

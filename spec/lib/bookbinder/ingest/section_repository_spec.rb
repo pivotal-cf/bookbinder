@@ -94,8 +94,8 @@ module Bookbinder
 
         expect(sections).to eq(
           [
-            Section.new(Pathname('bar'), 'qux', 'anywhere/really', 'my-desired-dir-name', nil, 'my' => 'stuff', 'to' => 'preprocess'),
-            Section.new(Pathname('b'), 'd', 'anywhere/really', nil, 'specified_a_template', {}),
+            Section.new(Pathname('bar'), 'qux', 'my-desired-dir-name', nil, 'my' => 'stuff', 'to' => 'preprocess'),
+            Section.new(Pathname('b'), 'd', nil, 'specified_a_template', {}),
           ]
         )
       end
