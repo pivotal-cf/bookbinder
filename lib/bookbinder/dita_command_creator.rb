@@ -40,11 +40,7 @@ module Bookbinder
     end
 
     def filter(ditaval_path)
-      if ditaval_path
-        { 'args.filter' => ditaval_path }
-      else
-        {}
-      end
+      ditaval_path ? { 'args.filter' => ditaval_path } : {}
     end
 
     def base_flags
@@ -59,18 +55,19 @@ module Bookbinder
 
     def optional_flags(flags_str)
       flags = flags_str ? flags_str.split(" ") : []
-      flags.inject({}) do |h, f|
-        k,v = f.split('=')
-        h[k] = v
-        raise MissingDitaOTFlagValue.new("The DITA-flag '#{k}' that you passed is missing a value. Please pass your DITA option in the format '#{k}=<value>'.") unless v
-        h
+      {}.tap do |h|
+        flags.each do |f|
+          k,v = f.split('=')
+          h[k] = v
+          raise MissingDitaOTFlagValue.new("The DITA-flag '#{k}' that you passed is missing a value. Please pass your DITA option in the format '#{k}=<value>'.") unless v
+        end
       end
     end
 
     def format(flags)
       flags.inject("") do |res, f|
         k,v = f
-        res += "-D#{k}='#{stripped_flag_value v}' "
+        res + "-D#{k}='#{stripped_flag_value v}' "
       end
     end
 
