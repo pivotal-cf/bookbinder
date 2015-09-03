@@ -52,5 +52,14 @@ YAML
       index = File.read File.join('final_app', 'public', 'index.html')
       expect(index).to include('This is an alternate layout file.')
     end
+
+    it 'includes images' do
+      swallow_stdout do
+        `#{gem_root}/install_bin/bookbinder bind local`
+      end
+
+      index = File.read File.join('final_app', 'public', 'dogs', 'index.html')
+      expect(index).to include('<p><img src="images/breeds.png" /></p>')
+    end
   end
 end
