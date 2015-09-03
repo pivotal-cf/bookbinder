@@ -35,6 +35,8 @@ p fib.take_while { |n| n <= 4E6 }
       allow(fs).to receive(:find_files_recursively).with(
         working_copy.path,
       ) { %w(foo bar baz) }
+      allow(fs).to receive(:file_exist?).with("foo") { true }
+      allow(fs).to receive(:file_exist?).with("bar") { true }
       allow(fs).to receive(:read).with("foo") { File.read(path_to_binary_file) }
       allow(fs).to receive(:read).with("bar").and_return(<<-DOC)
 prologue
@@ -53,6 +55,7 @@ epilogue
       it 'raises an InvalidSnippet error' do
         fs = instance_double('Bookbinder::LocalFilesystemAccessor')
         allow(fs).to receive(:find_files_recursively) { ["foo"] }
+        allow(fs).to receive(:file_exist?).with("foo") { true }
         allow(fs).to receive(:read).with("foo") { "asdf" }
         expect { CodeExampleReader.new({}, fs).get_snippet_and_language_at('missing_snippet', working_copy) }.
           to raise_exception(CodeExampleReader::InvalidSnippet)
@@ -74,6 +77,7 @@ epilogue
       it 'returns a nil language :(' do
         fs = instance_double('Bookbinder::LocalFilesystemAccessor')
         allow(fs).to receive(:find_files_recursively) { %w(foo) }
+        allow(fs).to receive(:file_exist?).with("foo") { true }
         allow(fs).to receive(:read).with("foo") { "# code_snippet typeless_stuff start\n# code_snippet typeless_stuff end\n" }
         snippet_from_repo, language =
           CodeExampleReader.new({}, fs).get_snippet_and_language_at('typeless_stuff', working_copy)
@@ -93,6 +97,7 @@ some stuff
       fs = instance_double('Bookbinder::LocalFilesystemAccessor')
 
       allow(fs).to receive(:find_files_recursively) { ["foo"] }
+      allow(fs).to receive(:file_exist?).with("foo") { true }
       allow(fs).to receive(:read).with("foo") { found_text }
 
       expect {
@@ -100,6 +105,21 @@ some stuff
           CodeExampleReader.new({}, fs).get_snippet_and_language_at('(.*a){11}', working_copy)
         }
       }.to raise_error(CodeExampleReader::InvalidSnippet)
+    end
+
+    it "does not choke by reading missing files" do
+      fs = instance_double('Bookbinder::LocalFilesystemAccessor')
+      snippet = double('snippet').as_null_object
+
+      allow(fs).to receive(:find_files_recursively) { %w(foo) }
+      allow(fs).to receive(:file_exist?).with("foo") { false }
+      allow(snippet).to receive(:valid?) { true }
+
+      allow(CodeExampleReader::Snippet).to receive(:new).with('', /code_snippet super\ language start (\w+)/) { snippet }
+
+      expect(fs).to_not receive(:read) { %w(foo) }
+
+      CodeExampleReader.new({}, fs).get_snippet_and_language_at('super language', working_copy)
     end
   end
 end

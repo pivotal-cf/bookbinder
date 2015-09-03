@@ -67,7 +67,8 @@ module Bookbinder
     def find_text(start_path, pattern)
       fs.find_files_recursively(start_path).
         lazy.
-        map {|path| fs.read(path)}.
+        select {|path| fs.file_exist?(path) }.
+        map {|path| fs.read(path) }.
         map {|contents|
           begin
             contents.scan(pattern)
