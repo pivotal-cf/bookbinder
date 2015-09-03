@@ -1,10 +1,10 @@
-require_relative '../../../lib/bookbinder/local_file_system_accessor'
+require_relative '../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../helpers/use_fixture_repo'
 
 module Bookbinder
-  describe LocalFileSystemAccessor do
+  describe LocalFilesystemAccessor do
     def fs_accessor
-      LocalFileSystemAccessor.new
+      LocalFilesystemAccessor.new
     end
 
     describe 'writing to a new file' do

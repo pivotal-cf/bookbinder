@@ -154,7 +154,7 @@ module Bookbinder
       describe "generating a subnav" do
         context "for dita sections with multiple ditamaps" do
           it "generates a json props file for each ditamap" do
-            fs = instance_double('Bookbinder::LocalFileSystemAccessor', find_files_with_ext: nil, copy_including_intermediate_dirs: nil, copy_contents: nil)
+            fs = instance_double('Bookbinder::LocalFilesystemAccessor', find_files_with_ext: nil, copy_including_intermediate_dirs: nil, copy_contents: nil)
             dita_formatter = instance_double('Bookbinder::DitaHtmlToMiddlemanFormatter', format_html: nil)
 
             section_one = Section.new('path-to-repository',

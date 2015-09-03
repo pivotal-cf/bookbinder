@@ -1,7 +1,7 @@
 require 'bookbinder/code_example_reader'
 require 'bookbinder/ingest/cloner_factory'
 require 'bookbinder/ingest/git_accessor'
-require 'bookbinder/local_file_system_accessor'
+require 'bookbinder/local_filesystem_accessor'
 require 'date'
 require_relative 'archive_drop_down_menu'
 require_relative 'quicklinks_renderer'
@@ -22,12 +22,12 @@ module Bookbinder
 
       def yield_for_code_snippet(from: nil, at: nil)
         cloner_factory = Ingest::ClonerFactory.new({out: $stdout},
-                                                   LocalFileSystemAccessor.new,
+                                                   LocalFilesystemAccessor.new,
                                                    Ingest::GitAccessor.new)
 
         cloner = cloner_factory.produce(config[:local_repo_dir])
         code_example_reader = CodeExampleReader.new({out: $stdout},
-                                                    LocalFileSystemAccessor.new)
+                                                    LocalFilesystemAccessor.new)
         working_copy = cloner.call(source_repo_name: from,
                                    source_ref: 'master',
                                    destination_parent_dir: config[:workspace])

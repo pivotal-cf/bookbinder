@@ -5,7 +5,7 @@ require_relative 'errors/programmer_mistake'
 
 module Bookbinder
 
-  class LocalFileSystemAccessor
+  class LocalFilesystemAccessor
     def file_exist?(path)
       File.exist?(path)
     end

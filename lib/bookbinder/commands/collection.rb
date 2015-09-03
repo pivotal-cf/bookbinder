@@ -13,7 +13,7 @@ require_relative '../dita_html_to_middleman_formatter'
 require_relative '../html_document_manipulator'
 require_relative '../ingest/cloner_factory'
 require_relative '../ingest/section_repository'
-require_relative '../local_file_system_accessor'
+require_relative '../local_filesystem_accessor'
 require_relative '../middleman_runner'
 require_relative '../postprocessing/sitemap_writer'
 require_relative '../preprocessing/dita_preprocessor'
@@ -60,7 +60,7 @@ module Bookbinder
       def standard_commands
         @standard_commands ||= [
           Commands::Generate.new(
-            local_file_system_accessor,
+            local_filesystem_accessor,
             sheller,
             Dir.pwd,
             streams
@@ -91,19 +91,19 @@ module Bookbinder
           OutputLocations.new(final_app_dir: final_app_directory, context_dir: File.absolute_path('.')),
           configuration_fetcher,
           Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
-          local_file_system_accessor,
+          local_filesystem_accessor,
           runner,
           Postprocessing::SitemapWriter.build(logger, final_app_directory, sitemap_port),
           Preprocessing::Preprocessor.new(
             Preprocessing::DitaPreprocessor.new(
-              DitaHtmlToMiddlemanFormatter.new(local_file_system_accessor, subnav_formatter, html_document_manipulator),
-              local_file_system_accessor,
+              DitaHtmlToMiddlemanFormatter.new(local_filesystem_accessor, subnav_formatter, html_document_manipulator),
+              local_filesystem_accessor,
               DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY']),
               sheller
             ),
-            Preprocessing::LinkToSiteGenDir.new(local_file_system_accessor),
+            Preprocessing::LinkToSiteGenDir.new(local_filesystem_accessor),
           ),
-          Ingest::ClonerFactory.new(streams, local_file_system_accessor, version_control_system),
+          Ingest::ClonerFactory.new(streams, local_filesystem_accessor, version_control_system),
           Ingest::SectionRepository.new,
           directory_preparer
         )
@@ -116,8 +116,8 @@ module Bookbinder
           output_locations: OutputLocations.new(final_app_dir: final_app_directory, context_dir: File.absolute_path('.')),
           config_fetcher: configuration_fetcher,
           config_decorator: Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
-          file_system_accessor: local_file_system_accessor,
-          preprocessor: Preprocessing::Preprocessor.new(Preprocessing::LinkToSiteGenDir.new(local_file_system_accessor)),
+          file_system_accessor: local_filesystem_accessor,
+          preprocessor: Preprocessing::Preprocessor.new(Preprocessing::LinkToSiteGenDir.new(local_filesystem_accessor)),
           cloner: local_file_system_cloner,
           section_repository: Ingest::SectionRepository.new,
           directory_preparer: directory_preparer
@@ -142,7 +142,7 @@ module Bookbinder
 
       def configuration_fetcher
         @configuration_fetcher ||= Config::Fetcher.new(
-          Config::Validator.new(local_file_system_accessor),
+          Config::Validator.new(local_filesystem_accessor),
           config_loader,
           Config::RemoteYamlCredentialProvider.new(logger, version_control_system)
         ).tap do |fetcher|
@@ -155,7 +155,7 @@ module Bookbinder
       end
 
       def directory_preparer
-        Commands::BindComponents::DirectoryPreparer.new(local_file_system_accessor)
+        Commands::BindComponents::DirectoryPreparer.new(local_filesystem_accessor)
       end
 
       def final_app_directory
@@ -170,8 +170,8 @@ module Bookbinder
         @html_document_manipulator ||= HtmlDocumentManipulator.new
       end
 
-      def local_file_system_accessor
-        @local_file_system_accessor ||= LocalFileSystemAccessor.new
+      def local_filesystem_accessor
+        @local_filesystem_accessor ||= LocalFilesystemAccessor.new
       end
 
       def sheller
@@ -183,11 +183,11 @@ module Bookbinder
       end
 
       def runner
-        MiddlemanRunner.new(local_file_system_accessor, sheller)
+        MiddlemanRunner.new(local_filesystem_accessor, sheller)
       end
 
       def local_file_system_cloner
-        Ingest::LocalFilesystemCloner.new(streams, local_file_system_accessor, File.expand_path('..'))
+        Ingest::LocalFilesystemCloner.new(streams, local_filesystem_accessor, File.expand_path('..'))
       end
     end
   end

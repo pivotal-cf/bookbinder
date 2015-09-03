@@ -1,4 +1,4 @@
-require_relative '../../../../lib/bookbinder/local_file_system_accessor'
+require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/values/section'
@@ -8,7 +8,7 @@ module Bookbinder
   module Preprocessing
     describe LinkToSiteGenDir do
       it 'links sections from their cloned dir to the dir ready for site generation' do
-        fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+        fs = instance_double('Bookbinder::LocalFilesystemAccessor')
         preprocessor = LinkToSiteGenDir.new(fs)
         output_locations = OutputLocations.new(context_dir: 'mycontextdir')
 

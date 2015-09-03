@@ -61,7 +61,7 @@ module Bookbinder
           output_locations: output_locations,
           config_fetcher: instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
           config_decorator: double('decorator', generate: config),
-          file_system_accessor: instance_double('LocalFileSystemAccessor', file_exist?: false),
+          file_system_accessor: instance_double('LocalFilesystemAccessor', file_exist?: false),
           preprocessor: preprocessor,
           cloner: cloner,
           section_repository: section_repository,
@@ -70,7 +70,7 @@ module Bookbinder
       end
 
       it "copies the redirect file if present before running middleman" do
-        fs = instance_double("LocalFileSystemAccessor")
+        fs = instance_double("LocalFilesystemAccessor")
         allow(fs).to receive(:file_exist?).with("redirects.rb") { true }
         runner = instance_double('MiddlemanRunner', run: success)
         config = Config::Configuration.new({})
@@ -114,7 +114,7 @@ module Bookbinder
           output_locations: output_locations,
           config_fetcher: instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
           config_decorator: config_decorator,
-          file_system_accessor: instance_double('LocalFileSystemAccessor', file_exist?: false),
+          file_system_accessor: instance_double('LocalFilesystemAccessor', file_exist?: false),
           preprocessor: instance_double('Preprocessing::Preprocessor', preprocess: nil),
           cloner: instance_double('Ingest::LocalFileSystemCloner'),
           section_repository: instance_double('Ingest::SectionRepository', fetch: [section]),

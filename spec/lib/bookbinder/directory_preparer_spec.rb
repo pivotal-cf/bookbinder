@@ -13,7 +13,7 @@ module Bookbinder
               config = Config::Configuration.new({})
               output_locations = OutputLocations.new(final_app_dir: 'final/app/dir', context_dir: '.')
               cloner = instance_double('Ingest::LocalFilesystemCloner')
-              fs = instance_double('LocalFileSystemAccessor')
+              fs = instance_double('LocalFilesystemAccessor')
 
               expect(fs).to receive(:remove_directory).with(output_locations.output_dir).ordered
               expect(fs).to receive(:empty_directory).with(output_locations.final_app_dir).ordered
@@ -36,7 +36,7 @@ module Bookbinder
               output_locations = OutputLocations.new(final_app_dir: 'final/app/dir', context_dir: '.')
               working_copy = instance_double('Ingest::WorkingCopy', path: Pathname('path/to/working/copy'))
               cloner = instance_double('Ingest::LocalFilesystemCloner')
-              fs = instance_double('LocalFileSystemAccessor', remove_directory: nil, empty_directory: nil)
+              fs = instance_double('LocalFilesystemAccessor', remove_directory: nil, empty_directory: nil)
 
               expect(fs).to receive(:copy_contents).with('fake/gem/root/template_app', output_locations.final_app_dir).ordered
               expect(fs).to receive(:copy_contents).with('fake/gem/root/master_middleman', output_locations.site_generator_home).ordered

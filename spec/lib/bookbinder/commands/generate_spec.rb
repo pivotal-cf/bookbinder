@@ -1,7 +1,7 @@
 require 'rack/test'
 require_relative '../../../../lib/bookbinder/commands/collection'
 require_relative '../../../../lib/bookbinder/commands/generate'
-require_relative '../../../../lib/bookbinder/local_file_system_accessor'
+require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/sheller'
 
 module Bookbinder
@@ -32,7 +32,7 @@ module Bookbinder
       it "produces a book that can be bound and run" do
         Dir.mktmpdir do |tmpdir|
           path = Pathname(tmpdir)
-          generate = generate_cmd(fs: LocalFileSystemAccessor.new,
+          generate = generate_cmd(fs: LocalFilesystemAccessor.new,
                                   sheller: Sheller.new,
                                   context_dir: path,
                                   streams: {out: StringIO.new,

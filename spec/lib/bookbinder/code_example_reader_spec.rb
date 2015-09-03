@@ -29,7 +29,7 @@ p fib.take_while { |n| n <= 4E6 }
 # code_snippet complicated_function end
       RUBY
 
-      fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+      fs = instance_double('Bookbinder::LocalFilesystemAccessor')
       path_to_binary_file = File.absolute_path('../../../fixtures/binary_file', __FILE__)
 
       allow(fs).to receive(:find_files_recursively).with(
@@ -51,7 +51,7 @@ epilogue
 
     context 'when the snippet is not found' do
       it 'raises an InvalidSnippet error' do
-        fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+        fs = instance_double('Bookbinder::LocalFilesystemAccessor')
         allow(fs).to receive(:find_files_recursively) { ["foo"] }
         allow(fs).to receive(:read).with("foo") { "asdf" }
         expect { CodeExampleReader.new({}, fs).get_snippet_and_language_at('missing_snippet', working_copy) }.
@@ -64,7 +64,7 @@ epilogue
 
       it 'logs a warning' do
         out = StringIO.new
-        fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+        fs = instance_double('Bookbinder::LocalFilesystemAccessor')
         CodeExampleReader.new({out: out}, fs).get_snippet_and_language_at('can_be_anything', working_copy)
         expect(out.tap(&:rewind).read).to eq('  skipping (not found) code-example-repo')
       end
@@ -72,7 +72,7 @@ epilogue
 
     context 'when there is no language specified' do
       it 'returns a nil language :(' do
-        fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+        fs = instance_double('Bookbinder::LocalFilesystemAccessor')
         allow(fs).to receive(:find_files_recursively) { %w(foo) }
         allow(fs).to receive(:read).with("foo") { "# code_snippet typeless_stuff start\n# code_snippet typeless_stuff end\n" }
         snippet_from_repo, language =
@@ -90,7 +90,7 @@ some stuff
 # code_snippet aaaaaaaaaaaaaaaaaaaaaaaa end
       RUBY
 
-      fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+      fs = instance_double('Bookbinder::LocalFilesystemAccessor')
 
       allow(fs).to receive(:find_files_recursively) { ["foo"] }
       allow(fs).to receive(:read).with("foo") { found_text }

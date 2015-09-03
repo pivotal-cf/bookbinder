@@ -3,7 +3,7 @@ require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
 require_relative '../../../../lib/bookbinder/config/configuration'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/ingest/section_repository'
-require_relative '../../../../lib/bookbinder/local_file_system_accessor'
+require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/postprocessing/sitemap_writer'
 require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
@@ -37,7 +37,7 @@ module Bookbinder
     let(:null_cloner_factory) { instance_double('Bookbinder::Ingest::ClonerFactory', produce: null_cloner) }
     let(:null_section_repository) { instance_double('Ingest::SectionRepository', fetch: []) }
 
-    let(:real_fs_accessor) { LocalFileSystemAccessor.new }
+    let(:real_fs_accessor) { LocalFilesystemAccessor.new }
     let(:real_preprocessor) { Preprocessing::LinkToSiteGenDir.new(real_fs_accessor) }
     let(:real_middleman_runner) { MiddlemanRunner.new(real_fs_accessor, Sheller.new) }
 
@@ -111,7 +111,7 @@ module Bookbinder
           output_locations,
           instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
           double('decorator', generate: config),
-          instance_double('LocalFileSystemAccessor', file_exist?: false),
+          instance_double('LocalFilesystemAccessor', file_exist?: false),
           instance_double('MiddlemanRunner', run: failure),
           instance_double('Postprocessing::SitemapWriter'),
           preprocessor,
@@ -122,7 +122,7 @@ module Bookbinder
     end
 
     it "copies a redirects file from the current directory to the final app directory, prior to site generation" do
-      fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+      fs = instance_double('Bookbinder::LocalFilesystemAccessor')
       generator = instance_double('Bookbinder::MiddlemanRunner')
       command = bind_cmd(file_system_accessor: fs,
         middleman_runner: generator,
@@ -138,7 +138,7 @@ module Bookbinder
     end
 
     it "doesn't attempt to copy the redirect file if it doesn't exist" do
-      fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+      fs = instance_double('Bookbinder::LocalFilesystemAccessor')
       generator = instance_double('Bookbinder::MiddlemanRunner')
       command = bind_cmd(file_system_accessor: fs,
         middleman_runner: generator,
@@ -196,7 +196,7 @@ module Bookbinder
 
     it "returns a nonzero exit code when Middleman fails" do
       middleman_runner = instance_double('Bookbinder::MiddlemanRunner')
-      fs = instance_double('Bookbinder::LocalFileSystemAccessor')
+      fs = instance_double('Bookbinder::LocalFilesystemAccessor')
       disallowed_streams = {}
 
       command = bind_cmd(streams: disallowed_streams,
@@ -212,7 +212,7 @@ module Bookbinder
     end
 
     it "writes required files to output directory and outputs success message" do
-      fs = instance_double('Bookbinder::LocalFileSystemAccessor', file_exist?: false)
+      fs = instance_double('Bookbinder::LocalFilesystemAccessor', file_exist?: false)
       sitemap_writer = instance_double('Bookbinder::Postprocessing:SitemapWriter')
 
       streams = { success: double('stream') }
