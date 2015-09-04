@@ -15,7 +15,7 @@ module Bookbinder
       if working_copy.available?
         process_snippet(marker, working_copy)
       else
-        out << "  skipping (not found) #{working_copy.full_name}"
+        out.puts("  skipping (not found) #{working_copy.full_name}")
         ''
       end
     end

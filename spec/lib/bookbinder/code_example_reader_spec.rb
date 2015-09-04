@@ -69,7 +69,7 @@ epilogue
         out = StringIO.new
         fs = instance_double('Bookbinder::LocalFilesystemAccessor')
         CodeExampleReader.new({out: out}, fs).get_snippet_and_language_at('can_be_anything', working_copy)
-        expect(out.tap(&:rewind).read).to eq('  skipping (not found) code-example-repo')
+        expect(out.tap(&:rewind).read).to eq("  skipping (not found) code-example-repo\n")
       end
     end
 
