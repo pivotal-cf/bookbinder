@@ -92,6 +92,23 @@ module Bookbinder
           end
         end
 
+        context "with multiple ditamaps" do
+          it "uses the desired directory name in each subnav template" do
+            config = Configuration.parse(
+              'dita_sections' => [
+                {'repository' => {'name' => 'org/repo-name1'},
+                  'directory' => 1,
+                  'ditamap_location' => 'ditamap-location'},
+                {'repository' => {'name' => 'another-org/repo-name2'},
+                  'directory' => 2,
+                  'ditamap_location' => 'ditamap-location'},
+              ]
+            )
+            expect(config.sections[0].subnav_template).to eq('dita_subnav_1')
+            expect(config.sections[1].subnav_template).to eq('dita_subnav_2')
+          end
+        end
+
         context "when a DITA section doesn't have a ditamap" do
           it "takes its subnav template from the first DITA section with a ditamap" do
             config = Configuration.parse(

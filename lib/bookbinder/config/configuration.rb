@@ -55,13 +55,10 @@ module Bookbinder
             "dita_subnav"
           else
             subnav_section = subnav_sections.include?(current_section) ? current_section : subnav_sections.first
-            (
-              ["dita_subnav"] +
-              Array(
-                Ingest::DestinationDirectory.new(
-                  subnav_section.fetch('repository', {})['name'], subnav_section['directory'])
-              )
-            ).join('_')
+            dest_dir = Ingest::DestinationDirectory.new(
+              subnav_section.fetch('repository', {})['name'], subnav_section['directory'])
+
+            dest_dir ? "dita_subnav_#{dest_dir}" : "dita_subnav"
           end
         end
       end
