@@ -3,7 +3,7 @@ require_relative '../../helpers/use_fixture_repo'
 
 module Bookbinder
   describe LocalFilesystemAccessor do
-    def fs_accessor
+    let(:fs_accessor) do
       LocalFilesystemAccessor.new
     end
 
@@ -193,6 +193,27 @@ module Bookbinder
           expect { fs_accessor.copy_contents source_dir_path, dest_dir_path }.
             to change{ File.exist? File.join(dest_dir_path, "some", "nested", "dir", "file.txt") }.
             from(false).to(true)
+        end
+      end
+
+      context 'when a file already exists in the destination directory' do
+        it 'overwrites the existing file' do
+          Dir.mktmpdir do |tmpdir|
+            dest_dir_path = File.join(tmpdir, 'dest_dir')
+            source_dir_path = File.join(tmpdir, 'source_dir')
+
+            FileUtils.mkdir_p(dest_dir_path)
+            dest_file_path = File.join(dest_dir_path, 'file.txt')
+            File.write(dest_file_path, 'destination text')
+
+            FileUtils.mkdir_p(source_dir_path)
+            source_file_path = File.join(source_dir_path, 'file.txt')
+            File.write(source_file_path, 'source text')
+
+            expect { fs_accessor.copy_contents(source_dir_path, dest_dir_path) }.
+              to change{ File.read(File.join(dest_dir_path, "file.txt")) }.
+                  from('destination text').to('source text')
+          end
         end
       end
 

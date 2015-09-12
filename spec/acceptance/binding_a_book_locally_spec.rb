@@ -49,8 +49,25 @@ YAML
         `#{gem_root}/install_bin/bookbinder bind local`
       end
 
+      expect(Pathname(File.join('final_app', 'public', 'cake.html'))).to exist
+    end
+
+    it 'prefers local layout files' do
+      swallow_stdout do
+        `#{gem_root}/install_bin/bookbinder bind local`
+      end
+
       index = File.read File.join('final_app', 'public', 'index.html')
-      expect(index).to include('This is an alternate layout file.')
+      expect(index).to include('I come from the source layout.')
+    end
+
+    it 'compiles stylesheets files' do
+      swallow_stdout do
+        `#{gem_root}/install_bin/bookbinder bind local`
+      end
+
+      expect(Pathname(File.join('final_app', 'public', 'stylesheets', 'book-styles.css'))).to exist
+      expect(Pathname(File.join('final_app', 'public', 'stylesheets', 'fab-styles.css'))).to exist
     end
 
     it 'includes images' do

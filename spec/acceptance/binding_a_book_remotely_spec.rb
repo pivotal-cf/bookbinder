@@ -33,25 +33,4 @@ describe 'binding a book remotely' do
       end
     end
   end
-
-  context 'with a layout_repo specified' do
-    it 'applies the specified layout repo' do
-      Dir.mktmpdir do |dir|
-        Dir.chdir(dir) do
-
-          init_layout_repo(at_dir: 'some-layout-repo',
-                           contents: 'My dog hates canals.')
-
-
-          File.write('./config.yml', YAML.dump('book_repo' => 'does-not/matter',
-                                               'public_host' => 'does-not-matter.foo.com',
-                                               'layout_repo' => File.absolute_path('some-layout-repo')))
-
-          `#{gem_root}/install_bin/bookbinder bind remote`
-
-          expect(File.read("#{dir}/final_app/public/index.html")).to include('My dog hates canals.')
-        end
-      end
-    end
-  end
 end
