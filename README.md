@@ -5,7 +5,7 @@
 
 ~~~bash
 source 'https://rubygems.org'
-gem 'bookbindery', '~> 5.0.1'
+gem 'bookbindery'
 ~~~
 
 Bookbinder is a gem that binds together a unified documentation web application
