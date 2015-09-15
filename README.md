@@ -3,10 +3,10 @@
 
 **Note**: The Bookbinder gem is now named `bookbindery`, and this GitHub repository is no longer a supported gem source for the gem. To use the Bookbinder gem, include the following in your book's Gemfile:
 
-~~~bash
+```
 source 'https://rubygems.org'
 gem 'bookbindery'
-~~~
+```
 
 Bookbinder is a gem that binds together a unified documentation web application
 from disparate source material.
@@ -173,6 +173,8 @@ cloud_foundry:
 ### Layout Repository
 
 If you specify a `layout_repo:` in `config.yml` with the full name of a git repository (e.g., `cloudfoundry/my-doc-layout`, which will default to GitHub), it will be downloaded for use as your book's `master_middleman` directory.
+
+Any files included in your book's `master_middleman/source` directory will override files of the same name in the specified layout repository.
 
 ### Section Repository Ref
 
