@@ -1,5 +1,3 @@
-require 'tmpdir'
-require_relative '../deprecated_logger'
 require_relative '../values/section'
 
 module Bookbinder
