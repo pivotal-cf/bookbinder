@@ -2,7 +2,7 @@ require 'puma'
 
 module Bookbinder
   class ServerDirector
-    def initialize(app: app, directory: nil, port: 41722)
+    def initialize(app: nil, directory: nil, port: 41722)
       @app = app
       @directory = directory
       @port = port

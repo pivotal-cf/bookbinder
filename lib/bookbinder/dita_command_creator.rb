@@ -24,13 +24,13 @@ module Bookbinder
           write_to: write_to,
           dita_flags: dita_flags,
           ditamap_path: dita_section.path_to_preprocessor_attribute('ditamap_location'),
-          ditaval_path: dita_section.path_to_preprocessor_attribute('ditaval_location'),
+          ditaval_path: dita_section.path_to_preprocessor_attribute('ditaval_location')
       )
     end
 
     private
 
-    def unduplicated_flags(write_to: nil, ditamap_path: nil, ditaval_path: nil, dita_flags: dita_flags)
+    def unduplicated_flags(write_to: nil, ditamap_path: nil, ditaval_path: nil, dita_flags: nil)
       arg_flags = {
           'output.dir' => write_to,
           'args.input' => ditamap_path,
