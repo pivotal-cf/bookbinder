@@ -5,6 +5,9 @@ module Bookbinder
   module Preprocessing
     class SubnavJsonGenerator
 
+      def get_links_from_config(subnav_config)
+      end
+
       def get_links_as_json(raw_subnav_text, base_dirname)
         doc = Nokogiri::XML(raw_subnav_text)
 
