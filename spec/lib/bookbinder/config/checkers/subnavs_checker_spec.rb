@@ -8,7 +8,7 @@ module Bookbinder
       describe SubnavsChecker do
         context 'when a subnav name is specified' do
           context 'when there is no subnavs key' do
-            it 'raises an informative error' do
+            it 'returns an informative error' do
               config = {
                 'sections' => [
                   {
@@ -18,12 +18,12 @@ module Bookbinder
               }
 
               expect(SubnavsChecker.new.
-                  check(Configuration.parse(config)).class).to eq(SubnavsChecker::MissingSubnavsKeyError)
+                  check(Configuration.parse(config))).to be_a(SubnavsChecker::MissingSubnavsKeyError)
             end
           end
 
           context 'and the subnav group is not one of the subnav names' do
-            it 'raises an informative error' do
+            it 'returns an informative error' do
               config = {
                 'sections' => [
                   {
@@ -36,11 +36,11 @@ module Bookbinder
                 ]
               }
               expect(SubnavsChecker.new.
-                  check(Configuration.parse(config)).class).to eq(SubnavsChecker::MissingSubnavNameError)
+                  check(Configuration.parse(config))).to be_a(SubnavsChecker::MissingSubnavNameError)
             end
           end
 
-          context 'and the subnav group is in the subnavs.yml' do
+          context 'and the subnav group is in the subnavs key' do
             it 'returns nil' do
               config = {
                 'sections' => [
@@ -48,8 +48,8 @@ module Bookbinder
                   { 'subnav_name' => 'other-group' }
                 ],
                 'subnavs' => [
-                  { 'name' => 'other-group' },
-                  { 'name' => 'subnav-group' }
+                  { 'name' => 'other-group', 'topics' => [] },
+                  { 'name' => 'subnav-group', 'topics' => [] }
                 ]
               }
               expect(SubnavsChecker.new.
@@ -62,6 +62,22 @@ module Bookbinder
           it 'returns nil' do
             config = {}
             expect(SubnavsChecker.new.check(Configuration.parse(config))).to be_nil
+          end
+        end
+
+        context 'when required keys are missing' do
+          it 'returns an informative error' do
+            config = {
+              'sections' => [
+                { 'subnav_name' => 'other-group' }
+              ],
+              'subnavs' => [
+                { 'name' => 'other-group' }
+              ]
+            }
+
+            expect(SubnavsChecker.new.check(Configuration.parse(config))).
+              to be_a(SubnavsChecker::MissingRequiredKeyError)
           end
         end
       end

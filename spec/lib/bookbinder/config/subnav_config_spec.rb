@@ -7,6 +7,7 @@ module Bookbinder
         expect(SubnavConfig.new({'name' => 'mysubnav'}).name).
           to eq('mysubnav')
       end
+
       it 'can return topics in the order specified' do
         config = {
           'topics' => [
@@ -24,6 +25,16 @@ module Bookbinder
 
         expect(SubnavConfig.new(config).topics).
           to eq([])
+      end
+
+      it 'is valid with required keys' do
+        config = { 'topics' => [], 'name' => 'elena'}
+        expect(SubnavConfig.new(config).valid?).to be(true)
+      end
+
+      it 'is not valid when missing required keys' do
+        config = { 'topics' => [] }
+        expect(SubnavConfig.new(config).valid?).to be(false)
       end
     end
   end
