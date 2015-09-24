@@ -28,7 +28,6 @@ module Bookbinder
         directory_preparer = instance_double('BindComponents::DirectoryPreparer')
         output_locations = OutputLocations.new(context_dir: ".")
         preprocessor = instance_double('Preprocessing::Preprocessor')
-        cloner = instance_double('Ingest::LocalFileSystemCloner')
 
         section_config = Config::SectionConfig.new({'directory' => 'foo'})
         config = Config::Configuration.new({book_repo: "some_book", sections: [section_config]})
@@ -52,7 +51,8 @@ module Bookbinder
         expect(preprocessor).to receive(:preprocess).with(
             sections,
             output_locations,
-            output_streams: streams
+            output_streams: streams,
+            config: config
         ).ordered
 
         Watch.new(

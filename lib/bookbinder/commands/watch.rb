@@ -51,7 +51,8 @@ module Bookbinder
         preprocessor.preprocess(
           sections,
           output_locations,
-          output_streams: streams
+          output_streams: streams,
+          config: watch_config
         )
         if file_system_accessor.file_exist?('redirects.rb')
           file_system_accessor.copy('redirects.rb', output_locations.final_app_dir)

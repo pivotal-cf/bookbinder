@@ -180,11 +180,11 @@ module Bookbinder
         }
         expect(Configuration.parse(config).subnavs[0]).to be_an_instance_of(SubnavConfig)
       end
-      it 'returns nil when no subnavs specified' do
+      it 'returns an empty array when no subnavs specified' do
         config = {
           'subnavs' => nil
         }
-        expect(Configuration.parse(config).subnavs).to be_nil
+        expect(Configuration.parse(config).subnavs).to eq([])
       end
     end
   end

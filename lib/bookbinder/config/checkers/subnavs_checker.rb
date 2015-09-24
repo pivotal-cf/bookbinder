@@ -14,7 +14,7 @@ module Bookbinder
           @config = config
 
           if section_subnav_names.count > 0
-            if config.subnavs.nil?
+            if config.subnavs.empty?
                MissingSubnavsKeyError.new("You must specify at least one subnav under the subnavs key in config.yml")
             elsif missing_subnavs.count != 0
               MissingSubnavNameError.new("Your config.yml is missing required subnav names under the subnavs key. Required subnav names are #{missing_subnavs.join(", ")}.")

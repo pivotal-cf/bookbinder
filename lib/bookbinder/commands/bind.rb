@@ -68,7 +68,8 @@ module Bookbinder
           sections,
           output_locations,
           options: bind_options.options,
-          output_streams: bind_options.streams
+          output_streams: bind_options.streams,
+          config: bind_config
         )
         if file_system_accessor.file_exist?('redirects.rb')
           file_system_accessor.copy('redirects.rb', output_locations.final_app_dir)

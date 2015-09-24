@@ -56,7 +56,7 @@ module Bookbinder
             fs,
             instance_double('Bookbinder::DitaCommandCreator', convert_to_html_command: nil),
             instance_double('Bookbinder::Sheller', run_command: double('success').as_null_object)).
-            preprocess([section], output_locations, options: [], output_streams: {})
+            preprocess([section], output_locations, options: [], output_streams: {}, random_key: 'thing')
         end
       end
 

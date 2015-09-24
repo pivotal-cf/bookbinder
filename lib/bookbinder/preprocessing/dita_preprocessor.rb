@@ -18,7 +18,7 @@ module Bookbinder
         section.subnav_template.include?('dita_subnav') if section.subnav_template
       end
 
-      def preprocess(dita_sections, output_locations, options: [], output_streams: nil)
+      def preprocess(dita_sections, output_locations, options: [], output_streams: nil, **_)
         dita_options = dita_flags(options)
         dita_sections.each do |dita_section|
           if dita_section.path_to_preprocessor_attribute('ditamap_location')

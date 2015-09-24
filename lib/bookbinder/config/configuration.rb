@@ -66,6 +66,7 @@ module Bookbinder
 
       def initialize(config)
         @config = config
+        @subnavs = assemble_subnavs || []
       end
 
       CONFIG_REQUIRED_KEYS = %w(book_repo public_host)
@@ -81,10 +82,6 @@ module Bookbinder
         define_method(method_name) do
           config[method_name.to_sym]
         end
-      end
-
-      def subnavs
-        config[:subnavs].map{|subnav| Config::SubnavConfig.new(subnav)} if config[:subnavs]
       end
 
       def broken_link_exclusions
@@ -113,7 +110,13 @@ module Bookbinder
 
       alias_method :eql?, :==
 
+      attr_reader :subnavs
+
       private
+
+      def assemble_subnavs
+        config[:subnavs].map{|subnav| Config::SubnavConfig.new(subnav)} if config[:subnavs]
+      end
 
       attr_reader :config
     end

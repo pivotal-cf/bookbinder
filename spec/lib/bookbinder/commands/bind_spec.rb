@@ -103,7 +103,8 @@ module Bookbinder
                                   sections,
                                   output_locations,
                                   options: [],
-                                  output_streams: merged_streams
+                                  output_streams: merged_streams,
+                                  config: config
                               ).ordered
 
       Commands::Bind.new(
