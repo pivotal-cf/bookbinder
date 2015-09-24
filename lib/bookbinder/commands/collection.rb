@@ -20,7 +20,7 @@ require_relative '../preprocessing/dita_preprocessor'
 require_relative '../preprocessing/link_to_site_gen_dir'
 require_relative '../preprocessing/preprocessor'
 require_relative '../sheller'
-require_relative '../subnav_json_generator'
+require_relative '../preprocessing/subnav_json_generator'
 require_relative '../values/output_locations'
 
 module Bookbinder
@@ -95,7 +95,7 @@ module Bookbinder
           Postprocessing::SitemapWriter.build(logger, final_app_directory, sitemap_port),
           Preprocessing::Preprocessor.new(
             Preprocessing::DitaPreprocessor.new(
-              DitaHtmlToMiddlemanFormatter.new(local_filesystem_accessor, subnav_formatter, html_document_manipulator),
+              DitaHtmlToMiddlemanFormatter.new(local_filesystem_accessor, subnav_json_generator, html_document_manipulator),
               local_filesystem_accessor,
               DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY']),
               sheller
@@ -161,8 +161,8 @@ module Bookbinder
         @final_app_directory ||= File.absolute_path('final_app')
       end
 
-      def subnav_formatter
-        @subnav_formatter ||= SubnavJsonGenerator.new
+      def subnav_json_generator
+        @subnav_json_generator ||= Preprocessing::SubnavJsonGenerator.new
       end
 
       def html_document_manipulator
