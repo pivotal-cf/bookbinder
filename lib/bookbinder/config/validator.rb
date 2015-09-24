@@ -3,6 +3,7 @@ require_relative 'checkers/archive_menu_checker'
 require_relative 'checkers/required_keys_checker'
 require_relative 'checkers/repository_name_presence_checker'
 require_relative 'checkers/dita_section_checker'
+require_relative 'checkers/subnavs_checker'
 
 module Bookbinder
   module Config
@@ -17,7 +18,8 @@ module Bookbinder
           Checkers::DuplicateSectionNameChecker.new,
           Checkers::RepositoryNamePresenceChecker.new,
           Checkers::DitaSectionChecker.new,
-          Checkers::ArchiveMenuChecker.new(@file_system_accessor)
+          Checkers::ArchiveMenuChecker.new(@file_system_accessor),
+          Checkers::SubnavsChecker.new
         ].map do |checker|
           checker.check(config)
         end

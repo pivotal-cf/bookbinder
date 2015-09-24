@@ -1,6 +1,7 @@
 require_relative '../ingest/destination_directory'
 require_relative '../ingest/repo_identifier'
 require_relative 'section_config'
+require_relative 'subnav_config'
 
 module Bookbinder
   module Config
@@ -80,6 +81,10 @@ module Bookbinder
         define_method(method_name) do
           config[method_name.to_sym]
         end
+      end
+
+      def subnavs
+        config[:subnavs].map{|subnav| Config::SubnavConfig.new(subnav)} if config[:subnavs]
       end
 
       def broken_link_exclusions

@@ -21,6 +21,11 @@ module Bookbinder
           to eq('mysubnav')
       end
 
+      it "can return the provided subnav name" do
+        expect(SectionConfig.new('subnav_name' => 'mygeneratedsubnav').subnav_name).
+          to eq('mygeneratedsubnav')
+      end
+
       it "can return the desired directory name" do
         expect(SectionConfig.new('directory' => 'mygreatdir').desired_directory_name).
           to eq('mygreatdir')

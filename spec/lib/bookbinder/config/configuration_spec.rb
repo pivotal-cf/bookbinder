@@ -172,5 +172,20 @@ module Bookbinder
         expect(config).not_to have_option('bar')
       end
     end
+
+    describe 'subnavs' do
+      it 'returns an array of SubnavConfig objects' do
+        config = {
+          'subnavs' => [ {'name' => 'some_group'} ]
+        }
+        expect(Configuration.parse(config).subnavs[0]).to be_an_instance_of(SubnavConfig)
+      end
+      it 'returns nil when no subnavs specified' do
+        config = {
+          'subnavs' => nil
+        }
+        expect(Configuration.parse(config).subnavs).to be_nil
+      end
+    end
   end
 end

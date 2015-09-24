@@ -11,6 +11,10 @@ module Bookbinder
         config['subnav_template']
       end
 
+      def subnav_name
+        config['subnav_name']
+      end
+
       def desired_directory_name
         config['directory']
       end
