@@ -1,13 +1,13 @@
-require_relative '../../../../lib/bookbinder/preprocessing/subnav_json_generator'
+require_relative '../../../../lib/bookbinder/preprocessing/json_from_html'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require 'nokogiri'
 
 module Bookbinder
   module Preprocessing
-    describe SubnavJsonGenerator do
+    describe JsonFromHtml do
       describe 'formatting a subnav' do
         def subnav_formatter
-          SubnavJsonGenerator.new
+          JsonFromHtml.new
         end
 
         it 'applies the appropriate CSS classes, wraps divs, and creates anchor paths from root' do

@@ -1,4 +1,4 @@
-require_relative 'subnav_json_generator'
+require_relative 'json_from_html'
 require_relative 'subnav_template_generator'
 
 module Bookbinder

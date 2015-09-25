@@ -20,7 +20,7 @@ require_relative '../preprocessing/dita_preprocessor'
 require_relative '../preprocessing/link_to_site_gen_dir'
 require_relative '../preprocessing/preprocessor'
 require_relative '../sheller'
-require_relative '../preprocessing/subnav_json_generator'
+require_relative '../preprocessing/json_from_html'
 require_relative '../values/output_locations'
 
 module Bookbinder
@@ -170,7 +170,7 @@ module Bookbinder
       end
 
       def subnav_json_generator
-        @subnav_json_generator ||= Preprocessing::SubnavJsonGenerator.new
+        @subnav_json_generator ||= Preprocessing::JsonFromHtml.new
       end
 
       def html_document_manipulator
