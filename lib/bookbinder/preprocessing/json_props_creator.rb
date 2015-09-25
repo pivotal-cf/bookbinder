@@ -8,7 +8,7 @@ module Bookbinder
       end
 
       def create(subnav_config)
-        json_links = json_generator.generate(subnav_config)
+        json_links = json_generator.get_links(subnav_config)
 
         fs.write(text: json_links, to: props_path(subnav_config.name))
 

@@ -17,7 +17,7 @@ module Bookbinder
         props_filename = 'best-subnav-props.json'
         props_location = output_locations.subnavs_for_layout_dir.join(props_filename)
 
-        expect(json_generator).to receive(:generate).with(subnav_config) { 'toc text' }
+        expect(json_generator).to receive(:get_links).with(subnav_config) { 'toc text' }
         expect(fs).to receive(:write).with(text: 'toc text', to: props_location)
 
         expect(JsonPropsCreator.new(fs, output_locations, json_generator).create(subnav_config)).
