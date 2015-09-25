@@ -6,10 +6,6 @@ module Bookbinder
         MissingSubnavsKeyError = Class.new(RuntimeError)
         MissingSubnavNameError = Class.new(RuntimeError)
 
-        def initialize
-          @config = nil
-        end
-
         def check(config)
           @config = config
 

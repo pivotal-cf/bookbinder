@@ -3,8 +3,9 @@ require_relative 'subnav_generator'
 module Bookbinder
   module Preprocessing
     class LinkToSiteGenDir
-      def initialize(filesystem)
+      def initialize(filesystem, subnav_generator_factory)
         @filesystem = filesystem
+        @subnav_generator_factory = subnav_generator_factory
       end
 
       def applicable_to?(section)
@@ -19,8 +20,6 @@ module Bookbinder
           )
         end
 
-        subnav_generator = SubnavGenerator.new(filesystem, output_locations)
-
         config.subnavs.each do |subnav|
           subnav_generator.generate(subnav)
         end
@@ -28,7 +27,11 @@ module Bookbinder
 
       private
 
-      attr_reader :filesystem
+      def subnav_generator
+        @subnav_generator ||= subnav_generator_factory.produce(JsonFromConfig.new)
+      end
+
+      attr_reader :filesystem, :subnav_generator_factory
     end
   end
 end

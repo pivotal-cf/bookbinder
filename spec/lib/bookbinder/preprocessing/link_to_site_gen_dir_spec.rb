@@ -1,4 +1,5 @@
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
+require_relative '../../../../lib/bookbinder/preprocessing/json_from_config'
 require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/preprocessing/subnav_generator'
 require_relative '../../../../lib/bookbinder/values/output_locations'
@@ -61,6 +62,7 @@ module Bookbinder
 
       it 'calls generate subnav for each subnav in the config' do
         fs = double('fs')
+        subnav_generator_factory = instance_double('Bookbinder::Preprocessing::SubnavGeneratorFactory')
         generator = instance_double('Bookbinder::Preprocessing::SubnavGenerator')
 
         output_locations = OutputLocations.new(context_dir: 'mycontextdir')
@@ -73,10 +75,10 @@ module Bookbinder
           }
         )
 
-        expect(SubnavGenerator).to receive(:new).with(fs, output_locations) { generator }
+        expect(subnav_generator_factory).to receive(:produce).with(instance_of(JsonFromConfig)) { generator }
         expect(generator).to receive(:generate).with(config.subnavs[0])
 
-        preprocessor = LinkToSiteGenDir.new(fs)
+        preprocessor = LinkToSiteGenDir.new(fs, subnav_generator_factory)
         preprocessor.preprocess([], output_locations, config: config, output_streams: {})
       end
     end

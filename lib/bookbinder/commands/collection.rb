@@ -87,7 +87,7 @@ module Bookbinder
       def bind
         @bind ||= Commands::Bind.new(
           streams,
-          OutputLocations.new(final_app_dir: final_app_directory, context_dir: File.absolute_path('.')),
+          output_locations,
           configuration_fetcher,
           Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           local_filesystem_accessor,
@@ -100,7 +100,7 @@ module Bookbinder
               DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY']),
               sheller
             ),
-            Preprocessing::LinkToSiteGenDir.new(local_filesystem_accessor),
+            Preprocessing::LinkToSiteGenDir.new(local_filesystem_accessor, subnav_generator_factory)
           ),
           Ingest::ClonerFactory.new(streams, local_filesystem_accessor, version_control_system),
           Ingest::SectionRepository.new,
@@ -112,7 +112,7 @@ module Bookbinder
         @watch ||= Commands::Watch.new(
           streams,
           middleman_runner: runner,
-          output_locations: OutputLocations.new(final_app_dir: final_app_directory, context_dir: File.absolute_path('.')),
+          output_locations: output_locations,
           config_fetcher: configuration_fetcher,
           config_decorator: Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           file_system_accessor: local_filesystem_accessor,
@@ -153,8 +153,16 @@ module Bookbinder
         @config_loader ||= Config::YAMLLoader.new
       end
 
+      def subnav_generator_factory
+        Preprocessing::SubnavGeneratorFactory.new(local_filesystem_accessor, output_locations)
+      end
+
       def directory_preparer
         Commands::BindComponents::DirectoryPreparer.new(local_filesystem_accessor)
+      end
+
+      def output_locations
+        OutputLocations.new(final_app_dir: final_app_directory, context_dir: File.absolute_path('.'))
       end
 
       def final_app_directory
