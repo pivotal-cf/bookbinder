@@ -1,19 +1,20 @@
 require_relative 'subnav_json_generator'
+require_relative 'subnav_template_generator'
 
 module Bookbinder
   module Preprocessing
     class SubnavGenerator
-      def initialize(fs, output_locations)
-        @fs = fs
-        @output_locations = output_locations
-        @json_generator = SubnavJsonGenerator.new
+      def initialize(json_props_creator, template_creator)
+        @json_props_creator = json_props_creator
+        @template_creator = template_creator
       end
 
-      def generate(subnav_config)
-        json_generator.get_links_from_config(subnav_config)
+      def generate(toc_spec)
+        location = json_props_creator.create(toc_spec)
+        template_creator.create(location)
       end
 
-      attr_reader :fs, :output_locations, :json_generator
+      attr_reader :json_props_creator, :template_creator
     end
   end
 end

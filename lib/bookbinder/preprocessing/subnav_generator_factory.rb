@@ -7,7 +7,7 @@ module Bookbinder
       end
 
       def produce(json_generator)
-        SubnavGenerator.new(fs, output_locations, json_props_creator(json_generator), template_creator)
+        SubnavGenerator.new(json_props_creator(json_generator), template_creator)
       end
 
       attr_reader :fs, :output_locations

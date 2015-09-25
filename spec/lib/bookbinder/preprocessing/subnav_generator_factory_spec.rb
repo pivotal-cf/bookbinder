@@ -21,7 +21,7 @@ module Bookbinder
           allow(JsonPropsCreator).to receive(:new).with(fs, output_locations, json_generator) { json_props_creator }
           allow(TemplateCreator).to receive(:new).with(fs, output_locations) { template_creator }
 
-          expect(SubnavGenerator).to receive(:new).with(fs, output_locations, json_props_creator, template_creator) { subnav_generator }
+          expect(SubnavGenerator).to receive(:new).with(json_props_creator, template_creator) { subnav_generator }
           expect(factory.produce(json_generator)).to be(subnav_generator)
         end
       end

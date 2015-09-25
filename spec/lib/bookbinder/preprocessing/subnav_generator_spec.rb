@@ -1,22 +1,23 @@
 require_relative '../../../../lib/bookbinder/preprocessing/subnav_generator'
-require_relative '../../../../lib/bookbinder/preprocessing/subnav_json_generator'
+require_relative '../../../../lib/bookbinder/preprocessing/json_props_creator'
+require_relative '../../../../lib/bookbinder/preprocessing/template_creator'
 require_relative '../../../../lib/bookbinder/config/subnav_config'
-require_relative '../../../../lib/bookbinder/values/output_locations'
 
 module Bookbinder
   module Preprocessing
     describe SubnavGenerator do
-      it 'passes a subnav config to a subnav json generator' do
-        subnav_config = Config::SubnavConfig.new('whatever')
-        output_locations = OutputLocations.new(context_dir: 'mycontextdir')
+      it 'creates a json props file and passes the return to template creator' do
+        subnav_config = Config::SubnavConfig.new({'whatever' => 'thing'})
+        props_location = Pathname('some/dir')
 
-        fs = double('fs')
-        json_generator = instance_double('Bookbinder::SubnavJsonGenerator')
+        props_creator = instance_double('Bookbinder::Preprocessing::JsonPropsCreator')
+        template_creator = instance_double('Bookbinder::Preprocessing::TemplateCreator')
 
-        expect(SubnavJsonGenerator).to receive(:new) { json_generator }
-        expect(json_generator).to receive(:get_links_from_config).with(subnav_config)
+        expect(props_creator).to receive(:create).with(subnav_config) { props_location }
+        expect(template_creator).to receive(:create).with(props_location)
 
-        SubnavGenerator.new(fs, output_locations).generate(subnav_config)
+        SubnavGenerator.new(props_creator, template_creator)
+          .generate(subnav_config)
       end
     end
   end
