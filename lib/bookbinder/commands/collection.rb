@@ -19,6 +19,7 @@ require_relative '../postprocessing/sitemap_writer'
 require_relative '../preprocessing/dita_preprocessor'
 require_relative '../preprocessing/link_to_site_gen_dir'
 require_relative '../preprocessing/preprocessor'
+require_relative '../preprocessing/subnav_generator_factory'
 require_relative '../sheller'
 require_relative '../preprocessing/json_from_html'
 require_relative '../values/output_locations'
@@ -116,7 +117,7 @@ module Bookbinder
           config_fetcher: configuration_fetcher,
           config_decorator: Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           file_system_accessor: local_filesystem_accessor,
-          preprocessor: Preprocessing::Preprocessor.new(Preprocessing::LinkToSiteGenDir.new(local_filesystem_accessor)),
+          preprocessor: Preprocessing::Preprocessor.new(Preprocessing::LinkToSiteGenDir.new(local_filesystem_accessor, subnav_generator_factory)),
           cloner: local_file_system_cloner,
           section_repository: Ingest::SectionRepository.new,
           directory_preparer: directory_preparer

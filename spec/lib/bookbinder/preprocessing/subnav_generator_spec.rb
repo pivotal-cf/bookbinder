@@ -8,13 +8,13 @@ module Bookbinder
     describe SubnavGenerator do
       it 'creates a json props file and passes the return to template creator' do
         subnav_config = Config::SubnavConfig.new({'whatever' => 'thing'})
-        props_location = Pathname('some/dir')
+        props_filename = 'props.json'
 
         props_creator = instance_double('Bookbinder::Preprocessing::JsonPropsCreator')
         template_creator = instance_double('Bookbinder::Preprocessing::TemplateCreator')
 
-        expect(props_creator).to receive(:create).with(subnav_config) { props_location }
-        expect(template_creator).to receive(:create).with(props_location)
+        expect(props_creator).to receive(:create).with(subnav_config) { props_filename }
+        expect(template_creator).to receive(:create).with(props_filename, subnav_config)
 
         SubnavGenerator.new(props_creator, template_creator)
           .generate(subnav_config)

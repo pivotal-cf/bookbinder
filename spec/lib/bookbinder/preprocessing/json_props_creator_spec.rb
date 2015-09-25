@@ -1,5 +1,6 @@
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/preprocessing/json_props_creator'
+require_relative '../../../../lib/bookbinder/preprocessing/json_from_config'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/config/subnav_config'
 
@@ -13,13 +14,14 @@ module Bookbinder
         output_locations = OutputLocations.new(context_dir: '.')
         subnav_config = Config::SubnavConfig.new({'name' => 'best'})
 
-        props_location = output_locations.subnavs_for_layout_dir.join('best-subnav-props.json')
+        props_filename = 'best-subnav-props.json'
+        props_location = output_locations.subnavs_for_layout_dir.join(props_filename)
 
         expect(json_generator).to receive(:generate).with(subnav_config) { 'toc text' }
         expect(fs).to receive(:write).with(text: 'toc text', to: props_location)
 
         expect(JsonPropsCreator.new(fs, output_locations, json_generator).create(subnav_config)).
-          to eq(props_location)
+          to eq(props_filename)
       end
     end
   end

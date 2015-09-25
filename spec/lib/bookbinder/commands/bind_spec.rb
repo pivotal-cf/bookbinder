@@ -36,9 +36,10 @@ module Bookbinder
     let(:null_cloner) { double('cloner').as_null_object }
     let(:null_cloner_factory) { instance_double('Bookbinder::Ingest::ClonerFactory', produce: null_cloner) }
     let(:null_section_repository) { instance_double('Ingest::SectionRepository', fetch: []) }
+    let(:null_dep) { double('dependency').as_null_object }
 
     let(:real_fs_accessor) { LocalFilesystemAccessor.new }
-    let(:real_preprocessor) { Preprocessing::LinkToSiteGenDir.new(real_fs_accessor) }
+    let(:real_preprocessor) { Preprocessing::LinkToSiteGenDir.new(real_fs_accessor, null_dep) }
     let(:real_middleman_runner) { MiddlemanRunner.new(real_fs_accessor, Sheller.new) }
 
     let(:archive_menu_config) { FakeArchiveMenuConfig.new }

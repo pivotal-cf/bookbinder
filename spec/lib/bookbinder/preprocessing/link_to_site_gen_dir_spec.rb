@@ -10,9 +10,11 @@ require_relative '../../../../spec/helpers/nil_logger'
 module Bookbinder
   module Preprocessing
     describe LinkToSiteGenDir do
+      let(:unused_dependency) { double('something we do not use').as_null_object }
+
       it 'links sections from their cloned dir to the dir ready for site generation' do
         fs = instance_double('Bookbinder::LocalFilesystemAccessor')
-        preprocessor = LinkToSiteGenDir.new(fs)
+        preprocessor = LinkToSiteGenDir.new(fs, unused_dependency)
         output_locations = OutputLocations.new(context_dir: 'mycontextdir')
 
         sections = [
@@ -47,7 +49,7 @@ module Bookbinder
 
         allow(fs).to receive(:file_exist?).with(Pathname('foo')) { true }
 
-        preprocessor = LinkToSiteGenDir.new(fs)
+        preprocessor = LinkToSiteGenDir.new(fs, unused_dependency)
         expect(preprocessor).to be_applicable_to(Section.new('foo'))
       end
 
@@ -56,7 +58,7 @@ module Bookbinder
 
         allow(fs).to receive(:file_exist?).with(Pathname('foo')) { false }
 
-        preprocessor = LinkToSiteGenDir.new(fs)
+        preprocessor = LinkToSiteGenDir.new(fs, unused_dependency)
         expect(preprocessor).not_to be_applicable_to(Section.new('foo'))
       end
 

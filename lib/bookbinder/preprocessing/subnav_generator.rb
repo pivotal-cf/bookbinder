@@ -1,6 +1,3 @@
-require_relative 'json_from_html'
-require_relative 'subnav_template_generator'
-
 module Bookbinder
   module Preprocessing
     class SubnavGenerator
@@ -9,9 +6,9 @@ module Bookbinder
         @template_creator = template_creator
       end
 
-      def generate(toc_spec)
-        location = json_props_creator.create(toc_spec)
-        template_creator.create(location)
+      def generate(subnav_config)
+        filename = json_props_creator.create(subnav_config)
+        template_creator.create(filename, subnav_config)
       end
 
       attr_reader :json_props_creator, :template_creator

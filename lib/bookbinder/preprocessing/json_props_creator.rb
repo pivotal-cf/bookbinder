@@ -10,12 +10,12 @@ module Bookbinder
       def create(subnav_config)
         json_links = json_generator.generate(subnav_config)
 
-        fs.write(text: json_links, to: full_path_to_props(subnav_config.name))
+        fs.write(text: json_links, to: props_path(subnav_config.name))
 
-        props_path
+        filename
       end
 
-      attr_reader :fs, :output_locations, :json_generator, :props_path
+      attr_reader :fs, :output_locations, :json_generator, :filename
 
       private
 
@@ -23,12 +23,12 @@ module Bookbinder
         output_locations.subnavs_for_layout_dir
       end
 
-      def filename(name)
-        "#{name}-subnav-props.json"
+      def set_filename(name)
+        @filename ||= "#{name}-subnav-props.json"
       end
 
-      def full_path_to_props(name)
-        @props_path ||= subnavs_path.join(filename(name))
+      def props_path(name)
+        subnavs_path.join(set_filename(name))
       end
     end
   end
