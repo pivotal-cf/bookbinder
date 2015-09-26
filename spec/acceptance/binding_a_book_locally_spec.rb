@@ -79,4 +79,43 @@ YAML
       expect(index).to include('<p><img src="images/breeds.png" /></p>')
     end
   end
+
+  context 'when subnavs are specified in config.yml' do
+    let(:section) do
+<<YAML
+- repository:
+    name: fantastic/dogs-repo
+    ref: 'dog-sha'
+  directory: dogs
+  subnav_name: doggies
+YAML
+    end
+
+    let(:subnav) do
+<<YAML
+- name: doggies
+  topics:
+  - title: First pug
+  - title: Second greyhound
+YAML
+    end
+
+    before do
+      config = YAML.load(File.read('./config.yml'))
+      config.delete('cred_repo')
+      config['sections'] = YAML.load(section)
+      config['subnavs'] = YAML.load(subnav)
+      File.write('./config.yml', config.to_yaml)
+    end
+
+    it 'includes titles from config in the subnav for generated html' do
+      swallow_stdout do
+        `#{gem_root}/install_bin/bookbinder bind local`
+      end
+
+      expect(Pathname(File.join('final_app', 'public', 'subnavs', 'doggies-subnav-props.json'))).to exist
+      index = File.read File.join('final_app', 'public', 'dogs', 'index.html')
+      expect(index).to include('<div class="nav-content" data-props-location="doggies-subnav-props.json">I am the default subnav!</div>')
+    end
+  end
 end

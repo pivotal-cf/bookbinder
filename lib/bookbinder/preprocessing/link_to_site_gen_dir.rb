@@ -1,4 +1,5 @@
 require_relative 'subnav_generator'
+require_relative 'json_from_config'
 
 module Bookbinder
   module Preprocessing

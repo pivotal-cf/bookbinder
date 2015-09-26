@@ -1,3 +1,7 @@
+require_relative 'json_props_creator'
+require_relative 'template_creator'
+require_relative '../html_document_manipulator'
+
 module Bookbinder
   module Preprocessing
     class SubnavGeneratorFactory
@@ -19,7 +23,7 @@ module Bookbinder
       end
 
       def template_creator
-        @template_creator ||= TemplateCreator.new(fs, output_locations)
+        @template_creator ||= TemplateCreator.new(fs, output_locations, HtmlDocumentManipulator.new)
       end
     end
   end

@@ -3,6 +3,7 @@ require_relative '../../../../lib/bookbinder/preprocessing/subnav_generator'
 require_relative '../../../../lib/bookbinder/preprocessing/subnav_generator_factory'
 require_relative '../../../../lib/bookbinder/preprocessing/template_creator'
 require_relative '../../../../lib/bookbinder/values/output_locations'
+require_relative '../../../../lib/bookbinder/html_document_manipulator'
 
 module Bookbinder
   module Preprocessing
@@ -15,11 +16,14 @@ module Bookbinder
           template_creator = double('template creator')
           subnav_generator = double('subnav generator')
 
+          html_manipulator = double('html manipulator')
+          allow(HtmlDocumentManipulator).to receive(:new) { html_manipulator }
+
           output_locations = OutputLocations.new(context_dir: '.')
           factory = Preprocessing::SubnavGeneratorFactory.new(fs, output_locations)
 
           allow(JsonPropsCreator).to receive(:new).with(fs, output_locations, json_generator) { json_props_creator }
-          allow(TemplateCreator).to receive(:new).with(fs, output_locations) { template_creator }
+          allow(TemplateCreator).to receive(:new).with(fs, output_locations, html_manipulator) { template_creator }
 
           expect(SubnavGenerator).to receive(:new).with(json_props_creator, template_creator) { subnav_generator }
           expect(factory.produce(json_generator)).to be(subnav_generator)
