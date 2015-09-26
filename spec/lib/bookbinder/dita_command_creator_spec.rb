@@ -12,6 +12,7 @@ module Bookbinder
                                  'org/foo',
                                  'boo',
                                  'dita_subnav',
+                                  nil,
                                  'ditamap_location' => 'path/to/map.ditamap',
                                  'ditaval_location' => 'path/to/val.ditaval')
 
@@ -38,6 +39,7 @@ module Bookbinder
                                    'org/foo',
                                    'boo',
                                    'dita_subnav',
+                                    nil,
                                    'ditamap_location' => 'path/to/map.ditamap',
                                    'ditaval_location' => nil)
 
@@ -56,6 +58,7 @@ module Bookbinder
                                      'org/foo',
                                      'boo',
                                      'dita_subnav',
+                                      nil,
                                      'ditamap_location' => 'path/to/map.ditamap',
                                      'ditaval_location' => nil)
 
@@ -74,6 +77,7 @@ module Bookbinder
                                    'org/foo',
                                    'boo',
                                    'dita_subnav',
+                                    nil,
                                    'ditamap_location' => 'path/to/map.ditamap',
                                    'ditaval_location' => nil)
 
@@ -94,6 +98,7 @@ module Bookbinder
                                      'org/foo',
                                      'boo',
                                      'dita_subnav',
+                                      nil,
                                      'ditamap_location' => 'path/to/map.ditamap',
                                      'ditaval_location' => nil)
 

@@ -26,7 +26,7 @@ module Bookbinder
       end
 
       def filename(name)
-        "#{name}_subnav.erb"
+        "#{name}.erb"
       end
 
       def template_path

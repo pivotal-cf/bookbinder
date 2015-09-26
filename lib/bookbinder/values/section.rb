@@ -6,6 +6,7 @@ module Bookbinder
                        :full_name,
                        :desired_directory_name,
                        :subnav_templ,
+                       :subnav_name,
                        :preprocessor_config) do
     def path_to_repository
       Pathname(self[:path_to_repository].to_s)
@@ -21,7 +22,7 @@ module Bookbinder
 
     def subnav
       namespace = destination_directory.to_s.gsub('/', '_')
-      template = subnav_template || 'default'
+      template = subnav_template || subnav_name || 'default'
       {namespace => template}
     end
 

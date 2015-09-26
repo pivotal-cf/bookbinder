@@ -25,7 +25,7 @@ module Bookbinder
                                                                      attribute: 'data-props-location',
                                                                      value: props_filename) { generated_content}.ordered
 
-        expect(fs).to receive(:write).with(text: generated_content, to: subnavs_dir.join('best_subnav.erb')).ordered
+        expect(fs).to receive(:write).with(text: generated_content, to: subnavs_dir.join('best.erb')).ordered
 
         TemplateCreator.new(fs, output_locations, html_doc_manipulator).create(props_filename, subnav_config)
       end

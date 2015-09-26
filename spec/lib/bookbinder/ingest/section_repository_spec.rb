@@ -79,7 +79,8 @@ module Bookbinder
             Config::SectionConfig.new(
               'directory' => 'my-desired-dir-name',
               'preprocessor_config' => {'my' => 'stuff', 'to' => 'preprocess'},
-              'repository' => { 'name' => 'myorg/myrepo', 'ref' => 'mydesiredref' }
+              'repository' => { 'name' => 'myorg/myrepo', 'ref' => 'mydesiredref' },
+              'subnav_name' => 'awesome_subnav_name'
             ),
             Config::SectionConfig.new(
               'repository' => { 'name' => 'myorg/myotherrepo' },
@@ -94,8 +95,8 @@ module Bookbinder
 
         expect(sections).to eq(
           [
-            Section.new(Pathname('bar'), 'qux', 'my-desired-dir-name', nil, 'my' => 'stuff', 'to' => 'preprocess'),
-            Section.new(Pathname('b'), 'd', nil, 'specified_a_template', {}),
+            Section.new(Pathname('bar'), 'qux', 'my-desired-dir-name', nil, 'awesome_subnav_name', {'my' => 'stuff', 'to' => 'preprocess'}),
+            Section.new(Pathname('b'), 'd', nil, 'specified_a_template', nil, {}),
           ]
         )
       end

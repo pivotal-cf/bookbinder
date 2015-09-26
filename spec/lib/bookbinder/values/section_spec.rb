@@ -44,6 +44,49 @@ module Bookbinder
           expect(repo.subnav_template).to be_nil
         end
       end
+
+    end
+
+    describe '#subnav' do
+      let(:section) do
+        Section.new('directory', 'full name', 'desired_dir', subnav_template, subnav_name)
+      end
+
+      context 'when the section provides a subnav name but no template' do
+        let(:subnav_name){ 'some_subnav_name' }
+        let(:subnav_template){ nil }
+
+        it 'uses the subnav name' do
+          expect(section.subnav).to eq({ 'desired_dir' => subnav_name })
+        end
+      end
+
+      context 'when the section provides both a subnav name and a template' do
+        let(:subnav_name){ 'some_subnav_name' }
+        let(:subnav_template){ 'some_subnav_template' }
+
+        it 'uses the subnav template' do
+          expect(section.subnav).to eq({ 'desired_dir' => subnav_template })
+        end
+      end
+
+      context 'when the section provides a template but no subnav name' do
+        let(:subnav_name){ nil }
+        let(:subnav_template){ 'some_subnav_template' }
+
+        it 'uses the subnav template' do
+          expect(section.subnav).to eq({ 'desired_dir' => subnav_template })
+        end
+      end
+
+      context 'when the section provides neither a template nor a subnav name' do
+        let(:subnav_name){ nil }
+        let(:subnav_template){ nil }
+
+        it 'uses the subnav template' do
+          expect(section.subnav).to eq({ 'desired_dir' => 'default' })
+        end
+      end
     end
 
     it "is a mistake to ask for a path to a preprocessor attribute when Section not applicable to preprocessor" do

@@ -19,6 +19,7 @@ module Bookbinder
             working_copy.full_name,
             section_config.desired_directory_name,
             section_config.subnav_template,
+            section_config.subnav_name,
             section_config.preprocessor_config
           )
         end

@@ -35,6 +35,7 @@ module Bookbinder
             'full-name',
             'go-here-please',
             'subnav-template',
+            nil,
             {})
 
           formatted_dir = output_locations.formatted_dir.join(section.destination_directory)
@@ -72,6 +73,7 @@ module Bookbinder
               'full/repo-name',
               nil,
               'subnav-template',
+              nil,
               {'ditamap_location' => 'fake-ditamap'})
 
           formatted_dir = output_locations.formatted_dir.join(section.destination_directory)
@@ -109,6 +111,7 @@ module Bookbinder
             'full-name',
             'go-here-please',
             'subnav-template',
+            nil,
             {'ditamap_location' => 'something'}
           )
 
@@ -144,6 +147,7 @@ module Bookbinder
                 'full-name',
                 'go-here-please',
                 'subnav-template',
+                nil,
                 {'ditamap_location' => 'fake-ditamap'})],
             OutputLocations.new(context_dir: "."),
             options: ["--dita-flags=#{dita_options}"]
@@ -161,12 +165,14 @@ module Bookbinder
                                       'full-name',
                                       'dir-one',
                                       'subnav-template-one',
+                                      nil,
                                       {'ditamap_location' => 'fake-ditamap-one'})
 
             section_two = Section.new('path-to-repository',
                                       'full-name',
                                       'dir-two',
                                       'subnav-template-two',
+                                      nil,
                                       {'ditamap_location' => 'fake-ditamap-two'})
 
             output_locations = OutputLocations.new(context_dir: '.')
