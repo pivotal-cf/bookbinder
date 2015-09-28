@@ -88,6 +88,9 @@ YAML
     ref: 'dog-sha'
   directory: dogs
   subnav_name: doggies
+- repository:
+    name: fantastic/my-docs-repo
+  subnav_name: doctastic
 YAML
     end
 
@@ -97,6 +100,9 @@ YAML
   topics:
   - title: First pug
   - title: Second greyhound
+- name: doctastic
+  topics:
+  - title: Wordilicious
 YAML
     end
 
@@ -113,9 +119,14 @@ YAML
         `#{gem_root}/install_bin/bookbinder bind local`
       end
 
-      expect(Pathname(File.join('final_app', 'public', 'subnavs', 'doggies-subnav-props.json'))).to exist
-      index = File.read File.join('final_app', 'public', 'dogs', 'index.html')
-      expect(index).to include('<div class="nav-content" data-props-location="doggies-subnav-props.json">I am the default subnav!</div>')
+      expect(Pathname(File.join('final_app', 'public', 'subnavs', 'doggies-props.json'))).to exist
+      expect(Pathname(File.join('final_app', 'public', 'subnavs', 'doctastic-props.json'))).to exist
+
+      index_one = File.read File.join('final_app', 'public', 'dogs', 'index.html')
+      expect(index_one).to include('<div class="nav-content" data-props-location="doggies-props.json">I am the default subnav!</div>')
+
+      index_two = File.read File.join('final_app', 'public', 'my-docs-repo', 'index.html')
+      expect(index_two).to include('<div class="nav-content" data-props-location="doctastic-props.json">I am the default subnav!</div>')
     end
   end
 end
