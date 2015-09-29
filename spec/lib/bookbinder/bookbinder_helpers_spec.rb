@@ -123,6 +123,20 @@ module Bookbinder
           end
         end
       end
+
+      context 'when the archive template does not exist' do
+        context 'and no versions are specified' do
+          let(:archive_menu) do
+            { '.' => nil }
+          end
+
+          it 'should not error' do
+            expect do
+              run_middleman(archive_menu: archive_menu)
+            end.to_not raise_error
+          end
+        end
+      end
     end
 
     describe '#modified_date' do

@@ -48,9 +48,10 @@ module Bookbinder
           config[:archive_menu],
           current_path: current_page.path
         )
-
-        partial 'archive_menus/default', locals: { menu_title: menu.title,
-                                                   dropdown_links: menu.dropdown_links }
+        unless menu.empty?
+          partial 'archive_menus/default', locals: { menu_title: menu.title,
+                                                     dropdown_links: menu.dropdown_links }
+        end
       end
 
       def modified_date(format="%B %-d, %Y")

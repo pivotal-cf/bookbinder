@@ -50,5 +50,27 @@ module Bookbinder
         end
       end
     end
+
+    describe "#empty?" do
+      context "when the menu is empty" do
+        it "returns true" do
+          menu = ArchiveDropDownMenu.new({'.' => nil}, current_path: 'index.html')
+          expect(menu.empty?).to eq(true)
+        end
+      end
+
+      context "when the menu is not empty" do
+        it "returns false" do
+          menu = ArchiveDropDownMenu.new(
+            { '.' => [
+              'v2.5',
+              {'v1.1' => 'great/place'}
+            ] },
+            current_path: 'index.html')
+
+          expect(menu.empty?).to eq(false)
+        end
+      end
+    end
   end
 end

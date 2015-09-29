@@ -15,6 +15,10 @@ module Bookbinder
       }
     end
 
+    def empty?
+      title.nil? && dropdown_links.empty?
+    end
+
     private
 
     attr_reader :config, :current_path
