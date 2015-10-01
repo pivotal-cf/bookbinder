@@ -8,18 +8,6 @@ module Bookbinder
           to eq('mysubnav')
       end
 
-      it 'can return topics in the order specified' do
-        config = {
-          'topics' => [
-            {'title' => 'Learn About This Really Exciting Thing'},
-            {'title' => 'This Thing Is Even Better'}
-          ]
-        }
-
-        expect(SubnavConfig.new(config).topics).
-          to eq(config['topics'])
-      end
-
       it 'returns an empty array when topic titles are not specified' do
         config = { 'topics' => nil }
 
@@ -35,6 +23,18 @@ module Bookbinder
       it 'is not valid when missing required keys' do
         config = { 'topics' => [] }
         expect(SubnavConfig.new(config).valid?).to be(false)
+      end
+
+      describe 'topics' do
+        it 'returns an array of TopicConfig objects in the order specified' do
+          config = {
+            'topics' => [
+              {'title' => 'Learn About This Really Exciting Thing'}
+            ]
+          }
+
+          expect(SubnavConfig.new(config).topics[0]).to be_an_instance_of(TopicConfig)
+        end
       end
     end
   end

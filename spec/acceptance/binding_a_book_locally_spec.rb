@@ -99,10 +99,13 @@ YAML
 - name: doggies
   topics:
   - title: First pug
+    toc_url: Pug page
   - title: Second greyhound
+    toc_url: Greyhound page
 - name: doctastic
   topics:
   - title: Wordilicious
+    toc_url: Wordiest of words page
 YAML
     end
 

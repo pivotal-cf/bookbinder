@@ -11,7 +11,7 @@ module Bookbinder
 
       def get_titles_from(config)
         config.topics.map do |topic|
-          { text: topic['title'] }
+          { text: topic.title }
         end
       end
     end
