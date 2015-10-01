@@ -13,6 +13,10 @@ module Bookbinder
         config['toc_url']
       end
 
+      def toc_nav_name
+        config['toc_nav_name'] || title
+      end
+
       def valid?
         (CONFIG_REQUIRED_KEYS - config.keys).empty?
       end

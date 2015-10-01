@@ -17,6 +17,25 @@ module Bookbinder
           to eq('An Overview at This Excellent Url')
       end
 
+      describe 'toc_nav_name' do
+        it 'can return a toc nav name' do
+          config = { 'toc_nav_name' => 'The Naming of Things' }
+
+          expect(TopicConfig.new(config).toc_nav_name).
+            to eq('The Naming of Things')
+        end
+
+        it 'defaults to topic title when not provided with a toc_nav_name' do
+          config = {
+            'title' => 'Learn About This Really Exciting Thing',
+            'toc_url' => 'An Overview at This Excellent Url'
+          }
+
+          expect(TopicConfig.new(config).toc_nav_name).
+            to eq('Learn About This Really Exciting Thing')
+        end
+      end
+
       it 'is valid with required keys' do
         config = {
           'title' => 'Learn About This Really Exciting Thing',
