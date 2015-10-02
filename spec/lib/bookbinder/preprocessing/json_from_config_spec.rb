@@ -10,7 +10,8 @@ module Bookbinder
           {'topics' => [
             {
               'title' => 'Puppy bowls are great',
-              'toc_url' => 'puppy bowl dot com'
+              'toc_url' => 'puppy bowl dot com',
+              'toc_nav_name' => 'Cat OVERRIDE'
             }
           ]}
         )
@@ -43,6 +44,7 @@ module Bookbinder
 
         some_json = {links: [
           {text: 'Puppy bowls are great', title: true},
+          {url: 'puppy bowl dot com', text: 'Cat OVERRIDE'},
           {url: 'first-doc.html', text: 'First Document'},
           {text: 'Some Menu Subtitle'},
           {url: 'second-doc.html', text: 'Second Document'},

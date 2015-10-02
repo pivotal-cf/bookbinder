@@ -23,6 +23,7 @@ module Bookbinder
 
           config.topics.map do |topic|
           menu_items << { text: topic.title, title: true }
+          menu_items << { url: topic.toc_url, text: topic.toc_nav_name }
 
           links_from_toc_page = parse_toc_url(topic.toc_url)
           links_from_toc_page.each {|link| menu_items << link}
