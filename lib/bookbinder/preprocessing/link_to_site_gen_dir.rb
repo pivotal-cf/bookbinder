@@ -29,7 +29,7 @@ module Bookbinder
       private
 
       def subnav_generator
-        @subnav_generator ||= subnav_generator_factory.produce(JsonFromConfig.new)
+        @subnav_generator ||= subnav_generator_factory.produce(JsonFromConfig.new(filesystem))
       end
 
       attr_reader :filesystem, :subnav_generator_factory
