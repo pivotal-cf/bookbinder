@@ -18,28 +18,22 @@ module Bookbinder
 
         fs = instance_double('Bookbinder::LocalFilesystemAccessor')
 
-        toc_url_html = <<-EOT
-<main>
-  <div>
-    <h2 class='nav-exclude'>TOC</h2>
-    <ul>
-      <li><a href='first-doc.html'>First Document</a></li>
-    </ul>
-    <h2>Some Menu Subtitle</h2>
-    <ul>
-      <li><a href='second-doc.html'>Second Document</a></li>
-      <li><a href='third-doc.html'>Third Document</a></li>
-    </ul>
-    <h2 class='nav-exclude'>Ignorable</h2
-    <ol class='nav-exclude'>
-      <li><a href='ignore-this.html'>Ignorable Document</a></li>
-    </ol>
-  </div>
-  <h2 class='nav-exclude'>Nonsensical</h2>
-  <ul class='nav-exclude'>
-    <li><a href='do-not-read.html'>Nonsense Document</a></li>
-  </ul>
-</main>
+        toc_url_md =  <<-EOT
+<h2 class='nav-exclude'>TOC</h2>
+* [First Document](first-doc.html)
+
+## Some Menu Subtitle
+* [Second Document](second-doc.html)
+* [Third Document](third-doc.html)
+
+<h2 class='nav-exclude'>Ignorable</h2
+<ol class='nav-exclude'>
+  <li><a href='ignore-this.html'>Ignorable Document</a></li>
+</ol>
+<h2 class='nav-exclude'>Nonsensical</h2>
+<ul class='nav-exclude'>
+  <li><a href='do-not-read.html'>Nonsense Document</a></li>
+</ul>
         EOT
 
         some_json = {links: [
@@ -52,7 +46,7 @@ module Bookbinder
         ]}.to_json
 
         allow(fs).to receive(:file_exist?).with('source/puppy bowl dot com.md.erb') { true }
-        allow(fs).to receive(:read).with('source/puppy bowl dot com.md.erb') { toc_url_html }
+        allow(fs).to receive(:read).with('source/puppy bowl dot com.md.erb') { toc_url_md }
 
         expect(JsonFromConfig.new(fs).get_links(subnav_config, Pathname('source'))).to eq(some_json)
       end
