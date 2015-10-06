@@ -24,13 +24,6 @@ module Bookbinder
           to eq(Pathname('some/random/dir'))
       end
 
-      it 'returns filename without extension' do
-        config = { 'toc_file' => 'some/random/dir/index.html.erb.whatev' }
-
-        expect(TopicConfig.new(config).toc_filename).
-          to eq('index')
-      end
-
       describe 'toc_nav_name' do
         it 'can return a toc nav name' do
           config = { 'toc_nav_name' => 'The Naming of Things' }

@@ -348,13 +348,15 @@ module Bookbinder
         Dir.mktmpdir do |dir|
           path = Pathname(dir)
           path.join("top-dir/nested/dir").mkpath
+          path.join("top-dir/nested/dir/nested/again").mkpath
           path.join("bottom-dir/nested/dir").mkpath
           FileUtils.touch(path.join("top-dir/nested/dir/foo.html"))
           FileUtils.touch(path.join("top-dir/nested/dir/foo.erb.blah"))
+          FileUtils.touch(path.join("top-dir/nested/dir/nested/again/foo.html"))
           FileUtils.touch(path.join("top-dir/nested/dir/bar"))
           FileUtils.touch(path.join("bottom-dir/nested/dir/foo.html"))
 
-          expect(fs_accessor.find_files_extension_agnostically(path.join('top-dir/nested/dir'), 'foo')).
+          expect(fs_accessor.find_files_extension_agnostically(path.join('top-dir/nested/dir'), 'dir/foo')).
             to match_array([path.join("top-dir/nested/dir/foo.html"), path.join("top-dir/nested/dir/foo.erb.blah")])
         end
       end

@@ -82,7 +82,7 @@ module Bookbinder
     end
 
     def find_files_extension_agnostically(directory, pattern)
-      `find -L #{directory} -name '#{pattern}.*'`.
+      `find -L #{directory} -path '*/#{pattern}.*'`.
         lines.
         map(&:chomp).
         map(&Pathname.method(:new))

@@ -25,10 +25,6 @@ module Bookbinder
         Pathname(toc_file.split('/').tap{|paths| paths.pop }.join('/'))
       end
 
-      def toc_filename
-        toc_file.split('/').pop.split('.').shift
-      end
-
       CONFIG_REQUIRED_KEYS = %w(title toc_file)
 
       attr_reader :config

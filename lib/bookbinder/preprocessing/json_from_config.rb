@@ -25,9 +25,9 @@ module Bookbinder
 
         config.topics.map do |topic|
           menu_items << { text: topic.title, title: true }
-          menu_items << { url: "/#{topic.toc_dir_path.join(topic.toc_filename + '.html')}", text: topic.toc_nav_name }
+          menu_items << { url: "/#{topic.toc_file}.html", text: topic.toc_nav_name }
 
-          links_from_toc_page = parse_toc_file(topic.toc_dir_path, topic.toc_filename)
+          links_from_toc_page = parse_toc_file(topic.toc_dir_path, topic.toc_file)
           links_from_toc_page.each {|link| menu_items << link}
         end
 

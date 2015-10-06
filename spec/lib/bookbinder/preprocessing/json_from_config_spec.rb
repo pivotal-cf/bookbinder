@@ -55,7 +55,7 @@ title: Title for the Webz Page
 
         toc_path = Pathname(output_locations.source_for_site_generator.join('puppy-repo', 'puppy.html.md.erb'))
 
-        allow(fs).to receive(:find_files_extension_agnostically).with(output_locations.source_for_site_generator.join('puppy-repo'), 'puppy') { [toc_path] }
+        allow(fs).to receive(:find_files_extension_agnostically).with(output_locations.source_for_site_generator.join('puppy-repo'), 'puppy-repo/puppy') { [toc_path] }
 
         allow(fs).to receive(:read).with(toc_path) { toc_url_md }
 
