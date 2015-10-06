@@ -23,6 +23,10 @@ module Bookbinder
         fs = instance_double('Bookbinder::LocalFilesystemAccessor')
 
         toc_url_md =  <<-EOT
+---
+title: Title for the Webz Page
+---
+
 <h2 class='nav-exclude'>TOC</h2>
 * [First Document](first-doc.html)
 

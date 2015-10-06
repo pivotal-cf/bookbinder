@@ -51,7 +51,7 @@ module Bookbinder
 
       def gather_urls_and_texts(base_node)
         nav_items(base_node).map do |element|
-          if element.name == 'h2'
+          if element.name == 'h2' && !frontmatter_header?(element)
             {text: element.inner_html}
           else
             list_elements = element.css('li > a')
@@ -64,6 +64,10 @@ module Bookbinder
 
       def nav_items(base_node)
         base_node.css("h2, h2 + ul") - base_node.css(".nav-exclude")
+      end
+
+      def frontmatter_header?(element)
+        element.inner_html.include?('title: ')
       end
     end
   end
