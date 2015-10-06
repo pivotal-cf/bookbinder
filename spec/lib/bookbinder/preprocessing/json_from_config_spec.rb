@@ -1,16 +1,20 @@
-require_relative '../../../../lib/bookbinder/preprocessing/json_from_config'
 require_relative '../../../../lib/bookbinder/config/subnav_config'
+require_relative '../../../../lib/bookbinder/config/topic_config'
+require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
+require_relative '../../../../lib/bookbinder/preprocessing/json_from_config'
+require_relative '../../../../lib/bookbinder/values/output_locations'
 require 'json'
 
 module Bookbinder
   module Preprocessing
     describe JsonFromConfig do
       it 'returns formatted json from topics in a subnav config, ignoring elements marked for exclusion' do
+        output_locations = OutputLocations.new(context_dir: '.')
         subnav_config = Config::SubnavConfig.new(
           {'topics' => [
             {
               'title' => 'Puppy bowls are great',
-              'toc_url' => 'puppy bowl dot com',
+              'toc_file' => 'puppy-repo/puppy',
               'toc_nav_name' => 'Cat OVERRIDE'
             }
           ]}
@@ -38,17 +42,21 @@ module Bookbinder
 
         some_json = {links: [
           {text: 'Puppy bowls are great', title: true},
-          {url: 'puppy bowl dot com', text: 'Cat OVERRIDE'},
+          {url: '/puppy-repo/puppy.html', text: 'Cat OVERRIDE'},
           {url: 'first-doc.html', text: 'First Document'},
           {text: 'Some Menu Subtitle'},
           {url: 'second-doc.html', text: 'Second Document'},
           {url: 'third-doc.html', text: 'Third Document'}
         ]}.to_json
 
-        allow(fs).to receive(:file_exist?).with('source/puppy bowl dot com.md.erb') { true }
-        allow(fs).to receive(:read).with('source/puppy bowl dot com.md.erb') { toc_url_md }
+        toc_path = Pathname(output_locations.source_for_site_generator.join('puppy-repo', 'puppy.html.md.erb'))
 
-        expect(JsonFromConfig.new(fs).get_links(subnav_config, Pathname('source'))).to eq(some_json)
+        allow(fs).to receive(:find_files_extension_agnostically).with(output_locations.source_for_site_generator.join('puppy-repo'), 'puppy') { [toc_path] }
+
+        allow(fs).to receive(:read).with(toc_path) { toc_url_md }
+
+        expect(JsonFromConfig.new(fs).get_links(subnav_config, output_locations.source_for_site_generator)).
+          to eq(some_json)
       end
     end
   end

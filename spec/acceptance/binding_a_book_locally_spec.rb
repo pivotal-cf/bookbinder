@@ -99,13 +99,13 @@ YAML
 - name: doggies
   topics:
   - title: First pug
-    toc_url: dogs/pugs/index.html
+    toc_file: dogs/pugs/index
   - title: Second greyhound
-    toc_url: dogs/greyhounds/index.html
+    toc_file: dogs/greyhounds/index
 - name: doctastic
   topics:
   - title: Wordilicious
-    toc_url: my-docs-repo/index.html
+    toc_file: my-docs-repo/index
 YAML
     end
 

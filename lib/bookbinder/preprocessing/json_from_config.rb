@@ -25,23 +25,20 @@ module Bookbinder
 
         config.topics.map do |topic|
           menu_items << { text: topic.title, title: true }
-          menu_items << { url: topic.toc_url, text: topic.toc_nav_name }
+          menu_items << { url: "/#{topic.toc_dir_path.join(topic.toc_filename + '.html')}", text: topic.toc_nav_name }
 
-          links_from_toc_page = parse_toc_url(topic.toc_url)
+          links_from_toc_page = parse_toc_file(topic.toc_dir_path, topic.toc_filename)
           links_from_toc_page.each {|link| menu_items << link}
         end
 
         menu_items
       end
 
-      def parse_toc_url(url)
-        full_path_to_toc_file = File.join(source_for_site_gen.join(url))
+      def parse_toc_file(dir, filename)
+        full_path = source_for_site_gen.join(dir)
 
-        toc_md = if fs.file_exist?("#{full_path_to_toc_file}.md.erb")
-          fs.read("#{full_path_to_toc_file}.md.erb")
-        else
-          fs.read("#{full_path_to_toc_file}.md")
-        end
+        toc_files = fs.find_files_extension_agnostically(full_path, filename)
+        toc_md = fs.read(toc_files.first)
 
         toc_html = get_html(toc_md)
 

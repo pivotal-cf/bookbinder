@@ -10,7 +10,7 @@ module Bookbinder
             'subnavs' => [
               { 'topics' => [
                   { 'title' => 'A fabulous topic',
-                    'toc_url' => 'url of toc page'
+                    'toc_file' => 'toc page file'
                   }
                 ]
               }
@@ -24,7 +24,7 @@ module Bookbinder
           config = {
             'subnavs' => [
               { 'topics' => [
-                  { 'toc_url' => 'url of toc page' }
+                  { 'toc_file' => 'toc page file' }
                 ]
               }
             ]

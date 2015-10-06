@@ -80,5 +80,12 @@ module Bookbinder
         reject {|p| p.to_s.match %r{/\.}}.
         reject(&:directory?)
     end
+
+    def find_files_extension_agnostically(directory, pattern)
+      `find -L #{directory} -name '#{pattern}.*'`.
+        lines.
+        map(&:chomp).
+        map(&Pathname.method(:new))
+    end
   end
 end

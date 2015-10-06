@@ -336,8 +336,26 @@ module Bookbinder
           FileUtils.touch(path.join("top-dir/nested/dir/foo"))
           FileUtils.touch(path.join("parallel-dir/other/nested/dir/bar"))
           File.symlink(path.join("parallel-dir/other"), path.join("top-dir/other"))
+
           expect(fs_accessor.find_files_recursively(path.join("top-dir")).map {|p| p.to_s.sub(dir, '')}).
             to match_array(%w(/top-dir/nested/dir/foo /top-dir/other/nested/dir/bar))
+        end
+      end
+    end
+
+    describe 'finding files matching a given pattern' do
+      it 'returns the path to each matching file' do
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+          path.join("top-dir/nested/dir").mkpath
+          path.join("bottom-dir/nested/dir").mkpath
+          FileUtils.touch(path.join("top-dir/nested/dir/foo.html"))
+          FileUtils.touch(path.join("top-dir/nested/dir/foo.erb.blah"))
+          FileUtils.touch(path.join("top-dir/nested/dir/bar"))
+          FileUtils.touch(path.join("bottom-dir/nested/dir/foo.html"))
+
+          expect(fs_accessor.find_files_extension_agnostically(path.join('top-dir/nested/dir'), 'foo')).
+            to match_array([path.join("top-dir/nested/dir/foo.html"), path.join("top-dir/nested/dir/foo.erb.blah")])
         end
       end
     end
