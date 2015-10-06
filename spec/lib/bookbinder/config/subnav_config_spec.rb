@@ -4,7 +4,9 @@ module Bookbinder
   module Config
     describe SubnavConfig do
       it 'can return a subnav name' do
-        expect(SubnavConfig.new({'name' => 'mysubnav'}).name).
+        config = {'name' => 'mysubnav'}
+
+        expect(SubnavConfig.new(config).name).
           to eq('mysubnav')
       end
 
@@ -17,11 +19,13 @@ module Bookbinder
 
       it 'is valid with required keys' do
         config = { 'topics' => [], 'name' => 'elena'}
+
         expect(SubnavConfig.new(config).valid?).to be(true)
       end
 
       it 'is not valid when missing required keys' do
         config = { 'topics' => [] }
+
         expect(SubnavConfig.new(config).valid?).to be(false)
       end
 
@@ -34,6 +38,14 @@ module Bookbinder
           }
 
           expect(SubnavConfig.new(config).topics[0]).to be_an_instance_of(TopicConfig)
+        end
+      end
+
+      describe 'subnav exclusions' do
+        it 'returns an array of html attributes to exclude' do
+          config = { 'subnav_exclusions' => ['this', '.that'] }
+
+          expect(SubnavConfig.new(config).subnav_exclusions). to match_array(['this', '.that'])
         end
       end
     end

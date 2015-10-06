@@ -12,15 +12,21 @@ module Bookbinder
         config['name']
       end
 
+      def subnav_exclusions
+        config['subnav_exclusions'] || []
+      end
+
       def valid?
         (CONFIG_REQUIRED_KEYS - config.keys).empty?
       end
 
       CONFIG_REQUIRED_KEYS = %w(name topics)
 
-      attr_reader :config, :topics
+      attr_reader :topics
 
       private
+
+      attr_reader :config
 
       def assemble_topics
         config['topics'].map{|topic| Config::TopicConfig.new(topic)} if config['topics']

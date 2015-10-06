@@ -12,15 +12,16 @@ module Bookbinder
 
       def get_links(subnav_config, source_for_site_gen)
         @source_for_site_gen = source_for_site_gen
+        @config = subnav_config
 
-        { links: get_links_and_headers(subnav_config) }.to_json
+        { links: get_links_and_headers }.to_json
       end
 
-      attr_reader :fs, :source_for_site_gen, :renderer
+      attr_reader :fs, :source_for_site_gen, :renderer, :config
 
       private
 
-      def get_links_and_headers(config)
+      def get_links_and_headers
         menu_items = []
 
         config.topics.map do |topic|
@@ -63,7 +64,11 @@ module Bookbinder
       end
 
       def nav_items(base_node)
-        base_node.css('h2, h2 + ul') - base_node.css('.nav-exclude')
+        base_node.css('h2, ul') - base_node.css(*exclusions)
+      end
+
+      def exclusions
+        config.subnav_exclusions << '.nav-exclude'
       end
 
       def frontmatter_header?(element)

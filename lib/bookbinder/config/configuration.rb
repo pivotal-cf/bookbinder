@@ -70,7 +70,7 @@ module Bookbinder
       end
 
       CONFIG_REQUIRED_KEYS = %w(book_repo public_host)
-      CONFIG_OPTIONAL_KEYS = %w(archive_menu book_repo_url cred_repo cred_repo_url layout_repo layout_repo_url sections)
+      CONFIG_OPTIONAL_KEYS = %w(archive_menu book_repo_url cred_repo cred_repo_url layout_repo layout_repo_url sections subnav_exclusions)
 
       CONFIG_REQUIRED_KEYS.each do |method_name|
         define_method(method_name) do
@@ -115,7 +115,12 @@ module Bookbinder
       private
 
       def assemble_subnavs
-        config[:subnavs].map{|subnav| Config::SubnavConfig.new(subnav)} if config[:subnavs]
+        if config[:subnavs]
+          config[:subnavs].map do |subnav|
+            subnav.merge!({'subnav_exclusions' => subnav_exclusions})
+            Config::SubnavConfig.new(subnav)
+          end
+        end
       end
 
       attr_reader :config
