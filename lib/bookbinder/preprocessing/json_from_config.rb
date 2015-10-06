@@ -54,7 +54,7 @@ module Bookbinder
           if element.name == 'h2' && !frontmatter_header?(element)
             {text: element.inner_html}
           else
-            list_elements = element.css('li > a')
+            list_elements = element.css('li > a', 'li > p > a')
             list_elements.map do |li|
               {url: li['href'], text: li.inner_text}
             end
@@ -63,7 +63,7 @@ module Bookbinder
       end
 
       def nav_items(base_node)
-        base_node.css("h2, h2 + ul") - base_node.css(".nav-exclude")
+        base_node.css('h2, h2 + ul') - base_node.css('.nav-exclude')
       end
 
       def frontmatter_header?(element)

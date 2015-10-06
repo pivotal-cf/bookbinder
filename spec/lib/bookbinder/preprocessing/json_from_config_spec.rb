@@ -34,6 +34,14 @@ title: Title for the Webz Page
 * [Second Document](second-doc.html)
 * [Third Document](third-doc.html)
 
+## Another Menu with Nested Links
+
+* [Fourth Document](fourth-doc.html)
+
+* [Fifth Document](fifth-doc.html)
+
+* [Sixth Document](sixth-doc.html)
+
 <h2 class='nav-exclude'>Ignorable</h2
 <ol class='nav-exclude'>
   <li><a href='ignore-this.html'>Ignorable Document</a></li>
@@ -50,7 +58,11 @@ title: Title for the Webz Page
           {url: 'first-doc.html', text: 'First Document'},
           {text: 'Some Menu Subtitle'},
           {url: 'second-doc.html', text: 'Second Document'},
-          {url: 'third-doc.html', text: 'Third Document'}
+          {url: 'third-doc.html', text: 'Third Document'},
+          {text: 'Another Menu with Nested Links'},
+          {url: 'fourth-doc.html', text: 'Fourth Document'},
+          {url: 'fifth-doc.html', text: 'Fifth Document'},
+          {url: 'sixth-doc.html', text: 'Sixth Document'}
         ]}.to_json
 
         toc_path = Pathname(output_locations.source_for_site_generator.join('puppy-repo', 'puppy.html.md.erb'))
