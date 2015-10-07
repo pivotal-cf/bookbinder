@@ -26,38 +26,36 @@ module Bookbinder
 
         config.topics.map do |topic|
           menu_items << { text: topic.title, title: true }
-          menu_items << { url: "/#{topic.toc_file}.html", text: topic.toc_nav_name }
+          menu_items << { url: "/#{topic.toc_full_path}.html", text: topic.toc_nav_name }
 
-          links_from_toc_page = parse_toc_file(topic.toc_dir_path, topic.toc_file)
+          links_from_toc_page = parse_toc_file(topic)
           links_from_toc_page.each {|link| menu_items << link}
         end
 
         menu_items
       end
 
-      def parse_toc_file(dir, filename)
-        full_path = source_for_site_gen.join(dir)
-
-        toc_files = fs.find_files_extension_agnostically(full_path, filename)
+      def parse_toc_file(topic)
+        toc_files = fs.find_files_extension_agnostically(topic.toc_full_path, source_for_site_gen)
         toc_md = fs.read(toc_files.first)
 
         toc_html = get_html(toc_md)
 
-        gather_urls_and_texts(toc_html.css('html'))
+        gather_urls_and_texts(toc_html.css('html'), topic)
       end
 
       def get_html(md)
         Nokogiri::HTML(renderer.render(md))
       end
 
-      def gather_urls_and_texts(base_node)
+      def gather_urls_and_texts(base_node, topic)
         nav_items(base_node).map do |element|
           if element.name == 'h2' && !frontmatter_header?(element)
             {text: element.inner_html}
           else
             list_elements = element.css('li > a', 'li > p > a')
             list_elements.map do |li|
-              {url: li['href'], text: li.inner_text}
+              { url: "/#{topic.base_path.join(li['href'])}", text: li.inner_text }
             end
           end
         end.flatten

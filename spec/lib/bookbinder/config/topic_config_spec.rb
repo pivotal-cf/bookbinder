@@ -10,18 +10,26 @@ module Bookbinder
           to eq('Learn About This Really Exciting Thing')
       end
 
-      it 'can return a toc file' do
-        config = { 'toc_file' => 'An Overview at This Excellent Url' }
+      it 'can return a base path' do
+        config = { 'base_path' => 'some/dir' }
 
-        expect(TopicConfig.new(config).toc_file).
-          to eq('An Overview at This Excellent Url')
+        expect(TopicConfig.new(config).base_path).
+          to eq(Pathname('some/dir'))
       end
 
-      it 'returns relative path' do
-        config = { 'toc_file' => 'some/random/dir/index' }
+      it 'returns a relative toc path' do
+        config = { 'toc_path' => 'dir/index' }
 
-        expect(TopicConfig.new(config).toc_dir_path).
-          to eq(Pathname('some/random/dir'))
+        expect(TopicConfig.new(config).toc_path).
+          to eq('dir/index')
+      end
+
+      it 'returns full path to toc file' do
+        config = { 'base_path' => 'some/random',
+                   'toc_path' => 'dir/at/index' }
+
+        expect(TopicConfig.new(config).toc_full_path).
+          to eq(Pathname('some/random/dir/at/index'))
       end
 
       describe 'toc_nav_name' do
@@ -45,14 +53,15 @@ module Bookbinder
       it 'is valid with required keys' do
         config = {
           'title' => 'Learn About This Really Exciting Thing',
-          'toc_file' => 'An Overview at This Excellent Url'
+          'base_path' => 'Section of Great Stuff',
+          'toc_path' => 'An Overview at This Excellent Url'
         }
 
         expect(TopicConfig.new(config).valid?).to be(true)
       end
 
       it 'is not valid when missing required keys' do
-        config = { 'toc_file' => 'An Overview at This Excellent Url' }
+        config = {}
 
         expect(TopicConfig.new(config).valid?).to be(false)
       end

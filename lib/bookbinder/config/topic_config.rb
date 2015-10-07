@@ -9,8 +9,16 @@ module Bookbinder
         config['title']
       end
 
-      def toc_file
-        config['toc_file']
+      def base_path
+        Pathname(config['base_path'])
+      end
+
+      def toc_path
+        config['toc_path']
+      end
+
+      def toc_full_path
+        base_path.join(toc_path)
       end
 
       def toc_nav_name
@@ -21,11 +29,7 @@ module Bookbinder
         (CONFIG_REQUIRED_KEYS - config.keys).empty?
       end
 
-      def toc_dir_path
-        Pathname(toc_file.split('/').tap{|paths| paths.pop }.join('/'))
-      end
-
-      CONFIG_REQUIRED_KEYS = %w(title toc_file)
+      CONFIG_REQUIRED_KEYS = %w(title toc_path base_path)
 
       attr_reader :config
     end

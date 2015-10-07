@@ -10,7 +10,8 @@ module Bookbinder
             'subnavs' => [
               { 'topics' => [
                   { 'title' => 'A fabulous topic',
-                    'toc_file' => 'toc page file'
+                    'base_path' => 'base of things',
+                    'toc_path' => 'toc page file'
                   }
                 ]
               }
@@ -24,7 +25,7 @@ module Bookbinder
           config = {
             'subnavs' => [
               { 'topics' => [
-                  { 'toc_file' => 'toc page file' }
+                  { }
                 ]
               }
             ]

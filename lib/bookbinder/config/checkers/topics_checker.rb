@@ -21,7 +21,7 @@ module Bookbinder
         end
 
         def invalid_topics(topics)
-          topics.reject {|topic| topic.toc_file && topic.title}
+          topics.map {|topic| topic unless topic.valid? }
         end
 
         def invalid_subnav_names

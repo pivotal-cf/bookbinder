@@ -8,13 +8,14 @@ require 'json'
 module Bookbinder
   module Preprocessing
     describe JsonFromConfig do
-      it 'returns formatted json from topics in a subnav config, ignoring elements marked for exclusion' do
+      it 'returns formatted json from topics in a subnav config' do
         output_locations = OutputLocations.new(context_dir: '.')
         subnav_config = Config::SubnavConfig.new(
-          {'topics' => [
+          { 'topics' => [
             {
               'title' => 'Puppy bowls are great',
-              'toc_file' => 'puppy-repo/puppy',
+              'base_path' => 'puppy-repo',
+              'toc_path' => 'puppy',
               'toc_nav_name' => 'Cat OVERRIDE'
             }
           ]}
@@ -27,42 +28,33 @@ module Bookbinder
 title: Title for the Webz Page
 ---
 
-<h2 class='nav-exclude'>TOC</h2>
-* [First Document](first-doc.html)
+* [First Document](./first-doc.html)
 
 ## Some Menu Subtitle
-* [Second Document](second-doc.html)
+* [Second Document](../cat-repo/second-doc.html)
 
 ## Another Menu with Nested Links
 
-* [Third Document](third-doc.html)
+* [Third Document](./third-doc.html)
 
-* [Fourth Document](fourth-doc.html)
-
-<h2 class='nav-exclude'>Ignorable</h2
-<ol class='nav-exclude'>
-  <li><a href='ignore-this.html'>Ignorable Document</a></li>
-</ol>
-<h2 class='nav-exclude'>Nonsensical</h2>
-<ul class='nav-exclude'>
-  <li><a href='do-not-read.html'>Nonsense Document</a></li>
-</ul>
+* [Fourth Document](./fourth-doc.html)
         EOT
 
         some_json = {links: [
           {text: 'Puppy bowls are great', title: true},
           {url: '/puppy-repo/puppy.html', text: 'Cat OVERRIDE'},
-          {url: 'first-doc.html', text: 'First Document'},
+          {url: '/puppy-repo/first-doc.html', text: 'First Document'},
           {text: 'Some Menu Subtitle'},
-          {url: 'second-doc.html', text: 'Second Document'},
+          {url: '/cat-repo/second-doc.html', text: 'Second Document'},
           {text: 'Another Menu with Nested Links'},
-          {url: 'third-doc.html', text: 'Third Document'},
-          {url: 'fourth-doc.html', text: 'Fourth Document'}
+          {url: '/puppy-repo/third-doc.html', text: 'Third Document'},
+          {url: '/puppy-repo/fourth-doc.html', text: 'Fourth Document'}
         ]}.to_json
 
         toc_path = Pathname(output_locations.source_for_site_generator.join('puppy-repo', 'puppy.html.md.erb'))
 
-        allow(fs).to receive(:find_files_extension_agnostically).with(output_locations.source_for_site_generator.join('puppy-repo'), 'puppy-repo/puppy') { [toc_path] }
+        allow(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('puppy-repo/puppy'), output_locations.source_for_site_generator) { [toc_path] }
 
         allow(fs).to receive(:read).with(toc_path) { toc_url_md }
 
@@ -77,7 +69,8 @@ title: Title for the Webz Page
             'topics' => [
             {
               'title' => 'Puppy bowls are great',
-              'toc_file' => 'puppy-repo/puppy'
+              'base_path' => 'puppy-repo',
+              'toc_path' => 'puppy'
             }
           ]}
         )
@@ -90,18 +83,22 @@ title: Title for the Webz Page
 * [A Document](a-doc.html)
 
 <h2 class='dog'>Ignorable</h2
+<h2 class='nav-exclude'>Ignorable</h2
+<ol class='nav-exclude'>
+  <li><a href='ignore-this.html'>Ignorable Document</a></li>
+</ol>
         EOT
 
         some_json = {links: [
           {text: 'Puppy bowls are great', title: true},
           {url: '/puppy-repo/puppy.html', text: 'Puppy bowls are great'},
           {text: 'Some Menu Subtitle'},
-          {url: 'a-doc.html', text: 'A Document'}
+          {url: '/puppy-repo/a-doc.html', text: 'A Document'}
         ]}.to_json
 
         toc_path = Pathname(output_locations.source_for_site_generator.join('puppy-repo', 'puppy.html.md.erb'))
 
-        allow(fs).to receive(:find_files_extension_agnostically).with(output_locations.source_for_site_generator.join('puppy-repo'), 'puppy-repo/puppy') { [toc_path] }
+        allow(fs).to receive(:find_files_extension_agnostically).with(Pathname('puppy-repo/puppy'), output_locations.source_for_site_generator) { [toc_path] }
 
         allow(fs).to receive(:read).with(toc_path) { toc_url_md }
 

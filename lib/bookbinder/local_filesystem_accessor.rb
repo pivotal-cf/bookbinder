@@ -81,8 +81,10 @@ module Bookbinder
         reject(&:directory?)
     end
 
-    def find_files_extension_agnostically(directory, pattern)
-      `find -L #{directory} -path '*/#{pattern}.*'`.
+    def find_files_extension_agnostically(pattern, directory='.')
+      extensionless_pattern = pattern.to_s.split('.').first
+
+      `find -L #{directory} -path '*/#{extensionless_pattern}.*'`.
         lines.
         map(&:chomp).
         map(&Pathname.method(:new))
