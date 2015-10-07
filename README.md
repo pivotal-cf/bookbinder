@@ -213,8 +213,8 @@ All markdown sections must be specified within the section key of the `config.ym
 Specify the following in the `config.yml`:
 
 * All DITA sections within the dita_sections key of the `config.yml`
-* In the first DITA section listed in the `config.yml`, a key-value pair "ditamap_location: my-ditamap.ditamap"
-* (optional) In the first DITA section listed in the `config.yml`, a key-value pair "ditaval_location: my-ditaval.ditaval"
+* In either the first or in each (for multiple ditamaps) DITA section listed in the `config.yml`, a key-value pair "ditamap_location: my-ditamap.ditamap"
+* (optional) In either the first or in each (for multiple ditamaps) DITA section listed in the `config.yml`, a key-value pair "ditaval_location: my-ditaval.ditaval"
 
 For example:
 
@@ -232,8 +232,9 @@ dita_sections:
  - repository:
  	 name: org-name/dependent-section
  	 ref: 165c28e967d58e6ff23a882689c123998a7b577e                 #optional
-   directory: dependent-section
-
+    directory: dependent-section
+	ditamap_location: path/to/other-ditamap.ditamap
+	ditaval_location: path/to/other-ditamap.ditaval                 #optional
 ```
 
 **Note**: You'll need to have properly installed and specified the [DITA-OT](#user-content-dita-ot) library.
@@ -258,7 +259,7 @@ Bookbinder provides several helper functions that can be called from within an .
 
 If your book includes a dita_section, instead of providing a subnav_template, Bookbinder will look for a file `_dita_subnav_template.erb` from `master_middleman/source/subnavs`.
 
-Optionally, Bookbinder will make available subnav links in a json format at `/subnavs/dita-subnav-props.json`. They could be consumed with a javascript library (e.g. React.js) to create your subnav. Bookbinder will have written the name of the file containing the links (`dita-subnav-props.json`) from _dita_subnav_template.erb at a data attribute called data-props-location on 'div.nav-content'.
+If your book generates any subnavs for dita_sections by specifying a `subnav_template`, Bookbinder makes subnav links available in a json format at `/subnavs/dita-subnav-props-<your-dita-section-directory>.json`. They could be consumed with a javascript library (e.g. React.js) to create your subnav. Bookbinder will have written the name of the file containing the links from _dita_subnav_template.erb at a data attribute called data-props-location on 'div.nav-content'.
 
 An example of the json links:
 
@@ -391,12 +392,6 @@ r301      %r{/wiki/(\w+)_\w+},    '/$1'
 As a convenience, Bookbinder provides a command to update all your local doc repos, performing a git pull on each one:
 
         bin/bookbinder update_local_doc_repos
-
-### `tag` command
-
-The `bookbinder tag` command commits Git tags to checkpoint a book and its constituent document repositories. This allows the tagged version of the documentation to be re-generated at a later time.
-
-        bin/bookbinder tag book-formerly-known-as-v1.0.1
 
 ## Running the App Locally
 
