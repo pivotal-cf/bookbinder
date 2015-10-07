@@ -66,7 +66,7 @@ module Bookbinder
       end
 
       def exclusions
-        config.subnav_exclusions << '.nav-exclude'
+        @exclusions ||= config.subnav_exclusions << '.nav-exclude'
       end
 
       def frontmatter_header?(element)
