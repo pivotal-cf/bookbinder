@@ -8,7 +8,7 @@ module Bookbinder
           @config = config
 
           if invalid_subnavs.any?
-            MissingRequiredKeyError.new("Your config.yml is missing required key(s) for subnav(s) #{invalid_subnav_names}. Required keys for subnav topics are toc_file and title.")
+            MissingRequiredKeyError.new("Your config.yml is missing required key(s) for subnav(s) #{invalid_subnav_names}. Required keys are #{required_topic_keys.join(", ")}.")
           end
         end
 
@@ -26,6 +26,10 @@ module Bookbinder
 
         def invalid_subnav_names
           invalid_subnavs.map(&:name).join(', ')
+        end
+
+        def required_topic_keys
+          Bookbinder::Config::TopicConfig::CONFIG_REQUIRED_KEYS
         end
       end
     end
