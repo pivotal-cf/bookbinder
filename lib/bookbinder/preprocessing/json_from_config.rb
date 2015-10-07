@@ -26,7 +26,7 @@ module Bookbinder
 
         config.topics.map do |topic|
           menu_items << { text: topic.title, title: true }
-          menu_items << { url: "/#{topic.toc_full_path}.html", text: topic.toc_nav_name }
+          menu_items << { url: "/#{topic.toc_path}.html", text: topic.toc_nav_name }
 
           links_from_toc_page = parse_toc_file(topic)
           links_from_toc_page.each {|link| menu_items << link}
@@ -36,7 +36,7 @@ module Bookbinder
       end
 
       def parse_toc_file(topic)
-        toc_files = fs.find_files_extension_agnostically(topic.toc_full_path, source_for_site_gen)
+        toc_files = fs.find_files_extension_agnostically(topic.toc_path, source_for_site_gen)
         toc_md = fs.read(toc_files.first)
 
         toc_html = get_html(toc_md)
@@ -55,7 +55,7 @@ module Bookbinder
           else
             list_elements = element.css('li > a', 'li > p > a')
             list_elements.map do |li|
-              { url: "/#{topic.base_path.join(li['href'])}", text: li.inner_text }
+              { url: "/#{topic.toc_path.dirname.join(li['href'])}", text: li.inner_text }
             end
           end
         end.flatten

@@ -14,8 +14,7 @@ module Bookbinder
           { 'topics' => [
             {
               'title' => 'Puppy bowls are great',
-              'base_path' => 'puppy-repo',
-              'toc_path' => 'puppy',
+              'toc_path' => 'puppy-repo/puppy',
               'toc_nav_name' => 'Cat OVERRIDE'
             }
           ]}
@@ -69,8 +68,7 @@ title: Title for the Webz Page
             'topics' => [
             {
               'title' => 'Puppy bowls are great',
-              'base_path' => 'puppy-repo',
-              'toc_path' => 'puppy'
+              'toc_path' => 'puppy-repo/puppy',
             }
           ]}
         )

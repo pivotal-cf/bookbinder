@@ -10,25 +10,10 @@ module Bookbinder
           to eq('Learn About This Really Exciting Thing')
       end
 
-      it 'can return a base path' do
-        config = { 'base_path' => 'some/dir' }
-
-        expect(TopicConfig.new(config).base_path).
-          to eq(Pathname('some/dir'))
-      end
-
-      it 'returns a relative toc path' do
-        config = { 'toc_path' => 'dir/index' }
+      it 'returns full path to toc file' do
+        config = { 'toc_path' => 'some/random/dir/at/index' }
 
         expect(TopicConfig.new(config).toc_path).
-          to eq('dir/index')
-      end
-
-      it 'returns full path to toc file' do
-        config = { 'base_path' => 'some/random',
-                   'toc_path' => 'dir/at/index' }
-
-        expect(TopicConfig.new(config).toc_full_path).
           to eq(Pathname('some/random/dir/at/index'))
       end
 
@@ -53,8 +38,7 @@ module Bookbinder
       it 'is valid with required keys' do
         config = {
           'title' => 'Learn About This Really Exciting Thing',
-          'base_path' => 'Section of Great Stuff',
-          'toc_path' => 'An Overview at This Excellent Url'
+          'toc_path' => 'some/path'
         }
 
         expect(TopicConfig.new(config).valid?).to be(true)
