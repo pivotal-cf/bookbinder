@@ -19,12 +19,12 @@ module Bookbinder
 
       private
 
-      def subnavs_path
-        output_locations.subnavs_for_layout_dir
-      end
-
       def filename(name)
         "#{name}-props.json"
+      end
+
+      def subnavs_path
+        output_locations.subnavs_for_layout_dir
       end
 
       def props_path(name)

@@ -1,3 +1,4 @@
+require 'json'
 require 'yaml'
 
 require_relative '../helpers/use_fixture_repo'
@@ -125,11 +126,80 @@ YAML
       expect(Pathname(File.join('final_app', 'public', 'subnavs', 'doggies-props.json'))).to exist
       expect(Pathname(File.join('final_app', 'public', 'subnavs', 'doctastic-props.json'))).to exist
 
-      index_one = File.read File.join('final_app', 'public', 'dogs', 'index.html')
+      index_one = File.read File.join('final_app', 'public', 'dogs', 'pugs', 'index.html')
+      expect(index_one).to include('<div class="nav-content" data-props-location="doggies-props.json">I am the default subnav!</div>')
+
+      index_one = File.read File.join('final_app', 'public', 'dogs', 'greyhounds', 'index.html')
       expect(index_one).to include('<div class="nav-content" data-props-location="doggies-props.json">I am the default subnav!</div>')
 
       index_two = File.read File.join('final_app', 'public', 'my-docs-repo', 'index.html')
       expect(index_two).to include('<div class="nav-content" data-props-location="doctastic-props.json">I am the default subnav!</div>')
+    end
+
+    it 'properly formats the json props json' do
+      swallow_stdout do
+        `#{gem_root}/install_bin/bookbinder bind local`
+      end
+
+      json_props = File.read File.join('final_app', 'public', 'subnavs', 'doggies-props.json')
+      expect(JSON.parse(json_props)['links']).to match_array([
+            {'text' => 'First pug', 'title' => true},
+            {'url' => '/dogs/pugs/index.html', 'text' => 'First pug'},
+            {'text' => 'Second greyhound', 'title' => true},
+            {'url' => '/dogs/greyhounds/index.html', 'text' => 'Second greyhound'},
+            {'url' => '/dogs/greyhounds/origin.html', 'text' => 'The Origin of the Greyhound'},
+            {'url' =>'/dogs/greyhounds/fantabulousness.html', 'text'=> 'Greyhounds are Fantabulous'},
+            {'text'=> 'Fun Facts about Greyhounds'},
+            {'url'=> '/dogs/greyhounds/colors.html', 'text' => 'Grey?'},
+            {'url'=> '/dogs/greyhounds/hounds.html', 'text' => 'Houndy'}
+      ])
+    end
+
+    context 'when pdf_config specified' do
+      let(:subnav) do
+        <<YAML
+- name: doggies
+  pdf_config: dog-pdf.yml
+  topics:
+  - title: First pug
+    toc_path: dogs/pugs/index
+  - title: Second greyhound
+    toc_path: dogs/greyhounds/index
+YAML
+      end
+      let(:section) do
+        <<YAML
+- repository:
+    name: fantastic/dogs-repo
+  directory: dogs
+  subnav_name: doggies
+YAML
+      end
+
+      it 'generates pdf config with each link in the props json' do
+        swallow_stdout do
+        `#{gem_root}/install_bin/bookbinder bind local`
+        end
+
+        pdf_config = <<YAML
+---
+copyright_notice: REPLACE ME
+header: REPLACE ME
+executable: REPLACE ME
+pages:
+- dogs/pugs/index.html
+- dogs/greyhounds/index.html
+- dogs/greyhounds/origin.html
+- dogs/greyhounds/fantabulousness.html
+- dogs/greyhounds/colors.html
+- dogs/greyhounds/hounds.html
+YAML
+
+        expect(Pathname(File.join('dog-pdf.yml'))).to exist
+
+        yaml_content = File.read File.join('dog-pdf.yml')
+        expect(yaml_content).to eq(pdf_config)
+      end
     end
   end
 end

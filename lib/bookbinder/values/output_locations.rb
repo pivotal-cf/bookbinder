@@ -62,6 +62,10 @@ module Bookbinder
       source_for_site_generator.join('subnavs')
     end
 
+    def pdf_config_dir
+      context_dir
+    end
+
     private
 
     def context_dir

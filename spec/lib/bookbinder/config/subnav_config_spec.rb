@@ -10,6 +10,13 @@ module Bookbinder
           to eq('mysubnav')
       end
 
+      it 'can return a pdf config name' do
+        config = {'pdf_config' => 'mypdfconfig'}
+
+        expect(SubnavConfig.new(config).pdf_config).
+          to eq('mypdfconfig')
+      end
+
       it 'returns an empty array when topic titles are not specified' do
         config = { 'topics' => nil }
 
@@ -42,7 +49,7 @@ module Bookbinder
       end
 
       describe 'subnav exclusions' do
-        it 'returns an array of html attributes to exclude' do
+        it 'can return an array of html attributes to exclude' do
           config = { 'subnav_exclusions' => ['this', '.that'] }
 
           expect(SubnavConfig.new(config).subnav_exclusions). to match_array(['this', '.that'])

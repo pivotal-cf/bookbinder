@@ -12,6 +12,10 @@ module Bookbinder
         config['name']
       end
 
+      def pdf_config
+        config['pdf_config']
+      end
+
       def subnav_exclusions
         config['subnav_exclusions'] || []
       end

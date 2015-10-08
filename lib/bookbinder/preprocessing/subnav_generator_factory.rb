@@ -1,5 +1,6 @@
 require_relative 'json_props_creator'
 require_relative 'template_creator'
+require_relative 'pdf_config_creator'
 require_relative '../html_document_manipulator'
 
 module Bookbinder
@@ -11,7 +12,7 @@ module Bookbinder
       end
 
       def produce(json_generator)
-        SubnavGenerator.new(json_props_creator(json_generator), template_creator)
+        SubnavGenerator.new(json_props_creator(json_generator), template_creator, pdf_config_creator)
       end
 
       attr_reader :fs, :output_locations
@@ -24,6 +25,10 @@ module Bookbinder
 
       def template_creator
         @template_creator ||= TemplateCreator.new(fs, output_locations, HtmlDocumentManipulator.new)
+      end
+
+      def pdf_config_creator
+        @pdf_config_creator ||= PdfConfigCreator.new(fs, output_locations)
       end
     end
   end
