@@ -192,7 +192,7 @@ module Bookbinder
           end
 
           def it_generates_a_custom_subnav_for(section, fs, dita_formatter, output_locations)
-            subnav = Subnav.new('subnav text', 'some json links')
+            subnav = SubnavTemplate.new('subnav text', 'some json links')
 
             template_path = output_locations.source_for_site_generator.join('subnavs', '_dita_subnav_template.erb')
             expect(fs).to receive(:read).with(template_path) { 'template text' }

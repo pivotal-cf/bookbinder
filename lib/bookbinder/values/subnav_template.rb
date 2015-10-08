@@ -1,4 +1,4 @@
 module Bookbinder
-  Subnav = Struct.new(:json_links,
+  SubnavTemplate = Struct.new(:json_links,
                       :text)
 end

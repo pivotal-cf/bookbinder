@@ -1,11 +1,11 @@
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
-require_relative '../../../../lib/bookbinder/preprocessing/template_creator'
+require_relative '../../../../lib/bookbinder/subnav/template_creator'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/config/subnav_config'
 
 module Bookbinder
-  module Preprocessing
+  module Subnav
     describe TemplateCreator do
       it 'writes the template to subnavs directory' do
         output_locations = OutputLocations.new(context_dir: '.')

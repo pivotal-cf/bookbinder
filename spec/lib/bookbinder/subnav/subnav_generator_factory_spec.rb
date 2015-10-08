@@ -1,13 +1,13 @@
-require_relative '../../../../lib/bookbinder/preprocessing/json_props_creator'
-require_relative '../../../../lib/bookbinder/preprocessing/subnav_generator'
-require_relative '../../../../lib/bookbinder/preprocessing/subnav_generator_factory'
-require_relative '../../../../lib/bookbinder/preprocessing/template_creator'
-require_relative '../../../../lib/bookbinder/preprocessing/pdf_config_creator'
+require_relative '../../../../lib/bookbinder/subnav/json_props_creator'
+require_relative '../../../../lib/bookbinder/subnav/subnav_generator'
+require_relative '../../../../lib/bookbinder/subnav/subnav_generator_factory'
+require_relative '../../../../lib/bookbinder/subnav/template_creator'
+require_relative '../../../../lib/bookbinder/subnav/pdf_config_creator'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
 
 module Bookbinder
-  module Preprocessing
+  module Subnav
     describe SubnavGeneratorFactory do
       describe 'produce' do
         it 'returns a subnav generator' do
@@ -22,7 +22,7 @@ module Bookbinder
           allow(HtmlDocumentManipulator).to receive(:new) { html_manipulator }
 
           output_locations = OutputLocations.new(context_dir: '.')
-          factory = Preprocessing::SubnavGeneratorFactory.new(fs, output_locations)
+          factory = SubnavGeneratorFactory.new(fs, output_locations)
 
           allow(JsonPropsCreator).to receive(:new).with(fs, output_locations, json_generator) { json_props_creator }
           allow(TemplateCreator).to receive(:new).with(fs, output_locations, html_manipulator) { template_creator }

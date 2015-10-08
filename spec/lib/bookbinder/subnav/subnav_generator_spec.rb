@@ -1,11 +1,11 @@
-require_relative '../../../../lib/bookbinder/preprocessing/subnav_generator'
-require_relative '../../../../lib/bookbinder/preprocessing/json_props_creator'
-require_relative '../../../../lib/bookbinder/preprocessing/template_creator'
-require_relative '../../../../lib/bookbinder/preprocessing/pdf_config_creator'
+require_relative '../../../../lib/bookbinder/subnav/subnav_generator'
+require_relative '../../../../lib/bookbinder/subnav/json_props_creator'
+require_relative '../../../../lib/bookbinder/subnav/template_creator'
+require_relative '../../../../lib/bookbinder/subnav/pdf_config_creator'
 require_relative '../../../../lib/bookbinder/config/subnav_config'
 
 module Bookbinder
-  module Preprocessing
+  module Subnav
     describe SubnavGenerator do
       context 'without pdf_config in config' do
         it 'creates a json props file and then creates the template and pdf configs' do

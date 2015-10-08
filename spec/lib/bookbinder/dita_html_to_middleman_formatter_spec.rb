@@ -74,7 +74,7 @@ module Bookbinder
                                               '/json/props/location',
                                               'unformatted_subnav_text')
 
-        expect(subnav).to eq(Subnav.new(['this is some json'], '<div class=nav-content>this is formatted</div>'))
+        expect(subnav).to eq(SubnavTemplate.new(['this is some json'], '<div class=nav-content>this is formatted</div>'))
       end
     end
   end

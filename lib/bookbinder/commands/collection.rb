@@ -19,9 +19,9 @@ require_relative '../postprocessing/sitemap_writer'
 require_relative '../preprocessing/dita_preprocessor'
 require_relative '../preprocessing/link_to_site_gen_dir'
 require_relative '../preprocessing/preprocessor'
-require_relative '../preprocessing/subnav_generator_factory'
+require_relative '../subnav/subnav_generator_factory'
 require_relative '../sheller'
-require_relative '../preprocessing/json_from_html'
+require_relative '../subnav/json_from_html'
 require_relative '../values/output_locations'
 
 module Bookbinder
@@ -155,11 +155,11 @@ module Bookbinder
       end
 
       def subnav_generator_factory
-        Preprocessing::SubnavGeneratorFactory.new(local_filesystem_accessor, output_locations)
+        Subnav::SubnavGeneratorFactory.new(local_filesystem_accessor, output_locations)
       end
 
       def json_generator
-        Preprocessing::JsonFromConfig.new
+        Subnav::JsonFromConfig.new
       end
 
       def directory_preparer
@@ -175,7 +175,7 @@ module Bookbinder
       end
 
       def dita_json_generator
-        Preprocessing::JsonFromHtml.new
+        Subnav::JsonFromHtml.new
       end
 
       def html_document_manipulator

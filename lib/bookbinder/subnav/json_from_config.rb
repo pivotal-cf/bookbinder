@@ -3,7 +3,7 @@ require 'nokogiri'
 require 'redcarpet'
 
 module Bookbinder
-  module Preprocessing
+  module Subnav
     class JsonFromConfig
       def initialize(fs)
         @fs = fs

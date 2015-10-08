@@ -1,5 +1,5 @@
 module Bookbinder
-  module Preprocessing
+  module Subnav
     class TemplateCreator
       def initialize(fs, output_locations, html_doc_manipulator)
         @fs = fs

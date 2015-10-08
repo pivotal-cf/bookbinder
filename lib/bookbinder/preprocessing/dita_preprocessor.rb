@@ -1,4 +1,4 @@
-require_relative '../values/subnav'
+require_relative '../values/subnav_template'
 
 module Bookbinder
   module Preprocessing

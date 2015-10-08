@@ -2,7 +2,7 @@ require 'yaml'
 require "json"
 
 module Bookbinder
-  module Preprocessing
+  module Subnav
     class PdfConfigCreator
       def initialize(fs, output_locations)
         @fs = fs

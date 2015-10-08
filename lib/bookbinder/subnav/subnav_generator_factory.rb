@@ -4,7 +4,7 @@ require_relative 'pdf_config_creator'
 require_relative '../html_document_manipulator'
 
 module Bookbinder
-  module Preprocessing
+  module Subnav
     class SubnavGeneratorFactory
       def initialize(fs, output_locations)
         @fs = fs

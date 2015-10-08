@@ -1,11 +1,11 @@
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
-require_relative '../../../../lib/bookbinder/preprocessing/json_props_creator'
-require_relative '../../../../lib/bookbinder/preprocessing/json_from_config'
+require_relative '../../../../lib/bookbinder/subnav/json_props_creator'
+require_relative '../../../../lib/bookbinder/subnav/json_from_config'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/config/subnav_config'
 
 module Bookbinder
-  module Preprocessing
+  module Subnav
     describe JsonPropsCreator do
       it 'gets the toc links from json generator and writes them to a props file' do
         fs = instance_double('Bookbinder::LocalFilesystemAccessor')

@@ -1,10 +1,10 @@
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
-require_relative '../../../../lib/bookbinder/preprocessing/pdf_config_creator'
+require_relative '../../../../lib/bookbinder/subnav/pdf_config_creator'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/config/subnav_config'
 
 module Bookbinder
-  module Preprocessing
+  module Subnav
     describe PdfConfigCreator do
       it 'creates a yaml with a page for each link in json props file' do
         config = Config::SubnavConfig.new({'pdf_config' => 'my-pdf.yml'})

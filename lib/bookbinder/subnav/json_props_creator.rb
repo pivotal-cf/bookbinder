@@ -1,5 +1,5 @@
 module Bookbinder
-  module Preprocessing
+  module Subnav
     class JsonPropsCreator
       def initialize(fs, output_locations, json_generator)
         @fs = fs

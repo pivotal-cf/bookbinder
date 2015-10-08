@@ -1,9 +1,9 @@
-require_relative '../../../../lib/bookbinder/preprocessing/json_from_html'
+require_relative '../../../../lib/bookbinder/subnav/json_from_html'
 require_relative '../../../../lib/bookbinder/html_document_manipulator'
 require 'nokogiri'
 
 module Bookbinder
-  module Preprocessing
+  module Subnav
     describe JsonFromHtml do
       describe 'formatting a subnav' do
         def subnav_formatter

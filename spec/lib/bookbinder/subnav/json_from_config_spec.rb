@@ -1,12 +1,12 @@
 require_relative '../../../../lib/bookbinder/config/subnav_config'
 require_relative '../../../../lib/bookbinder/config/topic_config'
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
-require_relative '../../../../lib/bookbinder/preprocessing/json_from_config'
+require_relative '../../../../lib/bookbinder/subnav/json_from_config'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require 'json'
 
 module Bookbinder
-  module Preprocessing
+  module Subnav
     describe JsonFromConfig do
       it 'returns formatted json from topics in a subnav config' do
         output_locations = OutputLocations.new(context_dir: '.')

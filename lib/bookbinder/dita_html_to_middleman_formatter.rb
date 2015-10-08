@@ -1,4 +1,4 @@
-require_relative 'values/subnav'
+require_relative 'values/subnav_template'
 
 module Bookbinder
 
@@ -40,7 +40,7 @@ module Bookbinder
                                                          selector: 'div.nav-content',
                                                          attribute: 'data-props-location',
                                                          value: json_props_location)
-      Subnav.new(formatted_json_links, nav_text)
+      SubnavTemplate.new(formatted_json_links, nav_text)
     end
 
     private
