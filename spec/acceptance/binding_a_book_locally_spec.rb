@@ -99,16 +99,13 @@ YAML
 - name: doggies
   topics:
   - title: First pug
-    base_path: dogs/pugs
-    toc_path: index
+    toc_path: dogs/pugs/index
   - title: Second greyhound
-    base_path: dogs/greyhounds
-    toc_path: index
+    toc_path: dogs/greyhounds/index
 - name: doctastic
   topics:
   - title: Wordilicious
-    base_path: my-docs-repo
-    toc_path: index
+    toc_path: my-docs-repo/index
 YAML
     end
 
@@ -120,7 +117,7 @@ YAML
       File.write('./config.yml', config.to_yaml)
     end
 
-    it 'includes titles from config in the subnav for generated html' do
+    it 'generates nav html with json props file' do
       swallow_stdout do
         `#{gem_root}/install_bin/bookbinder bind local`
       end
