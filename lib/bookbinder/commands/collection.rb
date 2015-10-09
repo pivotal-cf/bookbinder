@@ -147,6 +147,7 @@ module Bookbinder
           Config::RemoteYamlCredentialProvider.new(logger, version_control_system)
         ).tap do |fetcher|
           fetcher.set_config_file_path './config.yml'
+          fetcher.set_config_dir_path './config/'
         end
       end
 

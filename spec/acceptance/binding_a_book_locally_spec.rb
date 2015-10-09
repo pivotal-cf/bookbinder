@@ -201,5 +201,30 @@ YAML
         expect(yaml_content).to eq(pdf_config)
       end
     end
+
+    context 'when multiple config files used' do
+      before do
+        config = YAML.load(File.read('./config.yml'))
+        config.delete('cred_repo')
+        config['sections'] = YAML.load(section)
+        config['subnavs'] = YAML.load(subnav)
+        File.write('./config.yml', config.to_yaml)
+        FileUtils.mkdir('./config')
+        File.open('./config/sections.yml', 'w') {|f| f.write({'sections' => config['sections']}.to_yaml) }
+        File.open('./config/subnavs.yml', 'w') {|f| f.write({'subnavs' => config['subnavs']}.to_yaml) }
+      end
+
+      after do
+        FileUtils.rmdir('./config')
+      end
+
+      it 'should succeed' do
+        swallow_stdout do
+          `#{gem_root}/install_bin/bookbinder bind local`
+        end
+
+        expect(Pathname(File.join('final_app', 'public', 'dogs', 'pugs', 'index.html'))).to exist
+      end
+    end
   end
 end
