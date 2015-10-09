@@ -373,6 +373,32 @@ module Bookbinder
         end
       end
     end
+
+    describe 'overwriting a file' do
+      it 'should overwrite the existing file content' do
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+          filepath = path.join('my-file.html')
+          FileUtils.touch(filepath)
+          File.write filepath, 'this is some text'
+
+          fs_accessor.overwrite(to: filepath, text: 'and this is more text')
+
+          expect(File.read(filepath)).to eq 'and this is more text'
+        end
+      end
+
+      it 'should create a new file if no existing file by same name' do
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+          filepath = path.join('my-file.html')
+
+          fs_accessor.overwrite(to: filepath, text: 'and this is more text')
+
+          expect(File.read(filepath)).to eq 'and this is more text'
+        end
+      end
+    end
   end
 end
 

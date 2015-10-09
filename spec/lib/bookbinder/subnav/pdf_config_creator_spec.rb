@@ -31,7 +31,7 @@ pages:
         fs = instance_double('Bookbinder::LocalFilesystemAccessor')
 
         expect(fs).to receive(:read).with(output_locations.subnavs_for_layout_dir.join('my-props.json')) { json }
-        expect(fs).to receive(:write).with(to: output_locations.pdf_config_dir.join('my-pdf.yml'), text: pdf_yml)
+        expect(fs).to receive(:overwrite).with(to: output_locations.pdf_config_dir.join('my-pdf.yml'), text: pdf_yml)
 
         PdfConfigCreator.new(fs, output_locations).create('my-props.json', config)
       end

@@ -20,6 +20,11 @@ module Bookbinder
       to
     end
 
+    def overwrite(to: nil, text: nil)
+      File.delete(to) if file_exist?(to)
+      write(to: to, text: text)
+    end
+
     def read(path)
       File.read(path)
     end

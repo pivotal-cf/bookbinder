@@ -13,8 +13,8 @@ module Bookbinder
         json = JSON.parse(fs.read(props_location(props_filename)))
         @links = format_links(json['links'])
 
-        fs.write(to: output_locations.pdf_config_dir.join(subnav_config.pdf_config),
-                 text: config_content)
+        fs.overwrite(to: output_locations.pdf_config_dir.join(subnav_config.pdf_config),
+                     text: config_content)
       end
 
       attr_reader :fs, :output_locations
