@@ -74,7 +74,8 @@ module Bookbinder
       directory_preparer = instance_double('BindComponents::DirectoryPreparer')
       output_locations = OutputLocations.new(context_dir: ".")
       preprocessor = instance_double('Preprocessing::Preprocessor')
-      merged_streams = { out: instance_of(Sheller::DevNull) }
+      base_streams = { err: double('stream').as_null_object }
+      merged_streams = base_streams.merge({ out: instance_of(Sheller::DevNull) })
 
       cloner = instance_double('Ingest::Cloner')
       cloner_factory = instance_double('Ingest::ClonerFactory')
@@ -90,7 +91,7 @@ module Bookbinder
                                                     destination_dir: output_locations.cloned_preprocessing_dir,
                                                     ref_override: nil,
                                                     cloner: cloner,
-                                                    streams: {}
+                                                    streams: base_streams
                                    ) { sections }
 
       expect(directory_preparer).to receive(:prepare_directories).with(
@@ -109,7 +110,7 @@ module Bookbinder
                               ).ordered
 
       Commands::Bind.new(
-          {},
+          base_streams,
           output_locations,
           instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
           double('decorator', generate: config),
@@ -155,7 +156,8 @@ module Bookbinder
     end
 
     it "runs Middleman build" do
-      merged_streams = { out: instance_of(Sheller::DevNull) }
+      base_streams = { err: double('stream').as_null_object }
+      merged_streams = base_streams.merge({ out: instance_of(Sheller::DevNull) })
       output_locations = OutputLocations.new(context_dir: ".", final_app_dir: "foo")
       runner = instance_double('MiddlemanRunner')
 
@@ -171,7 +173,7 @@ module Bookbinder
           destination_dir: output_locations.cloned_preprocessing_dir,
           ref_override: nil,
           cloner: cloner,
-          streams: {}
+          streams: base_streams
         ) { [section] }
 
       expect(runner).to receive(:run).with("build",
@@ -182,7 +184,7 @@ module Bookbinder
           subnavs: section.subnav) { failure }
 
       Commands::Bind.new(
-        {},
+        base_streams,
         output_locations,
         instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
         double('decorator', generate: config),
