@@ -94,6 +94,7 @@ module Bookbinder
 
           result.has_broken_links? ? 1 : 0
         else
+          bind_options.streams[:err].puts "Your bind failed. Rerun with --verbose to troubleshoot."
           1
         end
       end

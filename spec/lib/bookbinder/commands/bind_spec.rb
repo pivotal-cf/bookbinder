@@ -199,9 +199,9 @@ module Bookbinder
     it "returns a nonzero exit code when Middleman fails" do
       middleman_runner = instance_double('Bookbinder::MiddlemanRunner')
       fs = instance_double('Bookbinder::LocalFilesystemAccessor')
-      disallowed_streams = {}
+      streams = { err: double('stream') }
 
-      command = bind_cmd(streams: disallowed_streams,
+      command = bind_cmd(streams: streams,
                          file_system_accessor: fs,
                          middleman_runner: middleman_runner,
                          sitemap_writer: double('disallowed sitemap writer'),
@@ -210,6 +210,7 @@ module Bookbinder
       allow(fs).to receive(:file_exist?) { false }
       allow(middleman_runner).to receive(:run) { failure }
 
+      expect(streams[:err]).to receive(:puts).with(include('--verbose'))
       expect(command.run(['local'])).to be_nonzero
     end
 
