@@ -139,6 +139,42 @@ module Bookbinder
       end
     end
 
+    describe '#mermaid_diagram' do
+      it 'wraps given content in div.mermaid' do
+        FileUtils.cp_r 'master_middleman/.', tmpdir
+
+        init_repo(at_dir: tmp_subdir('source/sections/section-repo'),
+                  contents: "<% mermaid_diagram do%>
+                             filler text
+                             <% end %>",
+                  file: 'index.html.md.erb')
+
+        squelch_middleman_output
+        run_middleman
+
+        output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
+        doc = Nokogiri::HTML(output)
+
+        expect(doc.css('div.mermaid').empty?).to eq(false)
+      end
+
+      it 'escapes dashes' do
+        FileUtils.cp_r 'master_middleman/.', tmpdir
+
+        init_repo(at_dir: tmp_subdir('source/sections/section-repo'),
+          contents: "<% mermaid_diagram do%>some--thing-good<% end %>",
+          file: 'index.html.md.erb')
+
+        squelch_middleman_output
+        run_middleman
+
+        output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
+        doc = Nokogiri::HTML(output)
+
+        expect(doc.css('div.mermaid').first.inner_html).to eq('some/-/-thing/-good')
+      end
+    end
+
     describe '#modified_date' do
       it 'returns the last modified date of the file' do
         FileUtils.cp_r 'master_middleman/.', tmpdir

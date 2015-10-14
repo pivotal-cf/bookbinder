@@ -54,6 +54,12 @@ module Bookbinder
         end
       end
 
+      def mermaid_diagram(&blk)
+        escaped_text = capture(&blk).gsub('-','/-')
+
+        @_out_buf.concat "<div class='mermaid'>#{escaped_text}</div>"
+      end
+
       def modified_date(format="%B %-d, %Y")
         git_accessor = Ingest::GitAccessor.new
         date = git_accessor.author_date(current_page.source_file) || Time.new(1984,1,1)
