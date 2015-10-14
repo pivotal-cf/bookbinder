@@ -162,7 +162,7 @@ module Bookbinder
         FileUtils.cp_r 'master_middleman/.', tmpdir
 
         init_repo(at_dir: tmp_subdir('source/sections/section-repo'),
-          contents: "<% mermaid_diagram do%>some--thing-good<% end %>",
+          contents: "<% mermaid_diagram do%>some--->thing-good<% end %>",
           file: 'index.html.md.erb')
 
         squelch_middleman_output
@@ -171,7 +171,7 @@ module Bookbinder
         output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
         doc = Nokogiri::HTML(output)
 
-        expect(doc.css('div.mermaid').first.inner_html).to eq('some/-/-thing/-good')
+        expect(doc.css('div.mermaid').first.inner_html).to eq('some--->thing-good')
       end
     end
 

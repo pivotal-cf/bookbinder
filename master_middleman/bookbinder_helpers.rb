@@ -55,7 +55,7 @@ module Bookbinder
       end
 
       def mermaid_diagram(&blk)
-        escaped_text = capture(&blk).gsub('-','/-')
+        escaped_text = capture(&blk).gsub('-','\-')
 
         @_out_buf.concat "<div class='mermaid'>#{escaped_text}</div>"
       end
