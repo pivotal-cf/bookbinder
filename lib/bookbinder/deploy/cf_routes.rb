@@ -17,7 +17,7 @@ module Bookbinder
       attr_reader :raw_routes
 
       def parse_apps(apps)
-        apps.split(',').map(&:strip)
+        apps.split(',').map(&:strip) unless apps.nil?
       end
 
       def headers(raw)
