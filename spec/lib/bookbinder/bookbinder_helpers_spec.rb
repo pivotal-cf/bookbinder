@@ -171,7 +171,7 @@ module Bookbinder
         output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
         doc = Nokogiri::HTML(output)
 
-        expect(doc.css('div.mermaid').first.inner_html).to eq('some--->thing-good')
+        expect(doc.css('div.mermaid').first.inner_html).to eq('some---&gt;thing-good')
       end
     end
 
