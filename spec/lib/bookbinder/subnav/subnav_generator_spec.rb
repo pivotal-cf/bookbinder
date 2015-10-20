@@ -41,6 +41,15 @@ module Bookbinder
             .generate(subnav_config)
         end
       end
+
+      it 'does not error when trying to access a pdf config when method not implemented' do
+        expect {
+          SubnavGenerator.new(
+            double('props creator').as_null_object,
+            double('template_creator').as_null_object,
+            double('pdf_config_creator').as_null_object).generate({})
+        }.to_not raise_error
+      end
     end
   end
 end

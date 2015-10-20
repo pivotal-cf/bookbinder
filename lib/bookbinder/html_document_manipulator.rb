@@ -12,6 +12,13 @@ module Bookbinder
       doc.to_html
     end
 
+    def add_class(document: nil, selector: nil, classname: nil)
+      doc = Nokogiri::HTML.fragment(document)
+      node_set = doc.css(selector)
+      node_set.add_class(classname)
+      doc.to_html
+    end
+
     def read_html_in_tag(document: nil, tag: nil)
       doc = Nokogiri::HTML(document)
       doc.css(tag).inner_html

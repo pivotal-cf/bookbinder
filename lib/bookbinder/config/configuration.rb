@@ -50,16 +50,12 @@ module Bookbinder
 
         def dita_subnav_template(all_sections, current_section)
           subnav_sections = all_sections.select { |section| section['ditamap_location'] }
-          if subnav_sections.empty?
-            nil
-          elsif subnav_sections.one?
-            "dita_subnav"
-          else
+          if subnav_sections.any?
             subnav_section = subnav_sections.include?(current_section) ? current_section : subnav_sections.first
             dest_dir = Ingest::DestinationDirectory.new(
               subnav_section.fetch('repository', {})['name'], subnav_section['directory'])
 
-            dest_dir ? "dita_subnav_#{dest_dir}" : "dita_subnav"
+            "dita_subnav_#{dest_dir}"
           end
         end
       end

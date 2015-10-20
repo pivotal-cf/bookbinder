@@ -4,14 +4,14 @@ require 'redcarpet'
 
 module Bookbinder
   module Subnav
-    class JsonFromConfig
+    class JsonFromMarkdownToc
       def initialize(fs)
         @fs = fs
         @renderer = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new)
       end
 
-      def get_links(subnav_config, source_for_site_gen)
-        @source_for_site_gen = source_for_site_gen
+      def get_links(subnav_config, output_locations)
+        @source_for_site_gen = output_locations.source_for_site_generator
         @config = subnav_config
 
         { links: get_links_and_headers }.to_json

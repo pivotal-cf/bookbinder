@@ -1,13 +1,13 @@
 require_relative '../../../../lib/bookbinder/config/subnav_config'
 require_relative '../../../../lib/bookbinder/config/topic_config'
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
-require_relative '../../../../lib/bookbinder/subnav/json_from_config'
+require_relative '../../../../lib/bookbinder/subnav/json_from_markdown_toc'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require 'json'
 
 module Bookbinder
   module Subnav
-    describe JsonFromConfig do
+    describe JsonFromMarkdownToc do
       it 'returns formatted json from topics in a subnav config' do
         output_locations = OutputLocations.new(context_dir: '.')
         subnav_config = Config::SubnavConfig.new(
@@ -57,7 +57,7 @@ title: Title for the Webz Page
 
         allow(fs).to receive(:read).with(toc_path) { toc_url_md }
 
-        expect(JsonFromConfig.new(fs).get_links(subnav_config, output_locations.source_for_site_generator)).
+        expect(JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations)).
           to eq(some_json)
       end
 
@@ -100,7 +100,7 @@ title: Title for the Webz Page
 
         allow(fs).to receive(:read).with(toc_path) { toc_url_md }
 
-        expect(JsonFromConfig.new(fs).get_links(subnav_config, output_locations.source_for_site_generator)).
+        expect(JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations)).
           to eq(some_json)
       end
     end

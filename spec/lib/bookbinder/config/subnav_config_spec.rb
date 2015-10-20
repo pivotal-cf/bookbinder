@@ -6,7 +6,7 @@ module Bookbinder
       it 'can return a subnav name' do
         config = {'name' => 'mysubnav'}
 
-        expect(SubnavConfig.new(config).name).
+        expect(SubnavConfig.new(config).subnav_name).
           to eq('mysubnav')
       end
 

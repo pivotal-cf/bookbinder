@@ -25,7 +25,7 @@ module Bookbinder
         end
 
         def invalid_subnav_names
-          invalid_subnavs.map(&:name).join(', ')
+          invalid_subnavs.map(&:subnav_name).join(', ')
         end
 
         def required_topic_keys

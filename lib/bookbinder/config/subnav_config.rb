@@ -8,7 +8,7 @@ module Bookbinder
         @topics = assemble_topics || []
       end
 
-      def name
+      def subnav_name
         config['name']
       end
 

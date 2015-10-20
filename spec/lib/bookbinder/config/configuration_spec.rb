@@ -75,24 +75,12 @@ module Bookbinder
                   'ditamap_location' => 'example.ditamap',
                   'ditaval_location' => 'dita-filter.ditaval'
                 },
-                'subnav_template' => 'dita_subnav'
+                'subnav_template' => 'dita_subnav_be-github'
               )
             )
         end
 
-        context "with one ditamap" do
-          it "uses the default dita subnav template" do
-            config = Configuration.parse(
-              'dita_sections' => [
-                {'repository' => {'name' => 'org/repo-name'},
-                 'ditamap_location' => 'first-ditamap-location'}
-              ]
-            )
-            expect(config.sections[0].subnav_template).to eq('dita_subnav')
-          end
-        end
-
-        context "with multiple ditamaps" do
+        context "with one or more ditamaps" do
           it "uses the desired directory name in each subnav template" do
             config = Configuration.parse(
               'dita_sections' => [
@@ -100,12 +88,11 @@ module Bookbinder
                   'directory' => 1,
                   'ditamap_location' => 'ditamap-location'},
                 {'repository' => {'name' => 'another-org/repo-name2'},
-                  'directory' => 2,
                   'ditamap_location' => 'ditamap-location'},
               ]
             )
             expect(config.sections[0].subnav_template).to eq('dita_subnav_1')
-            expect(config.sections[1].subnav_template).to eq('dita_subnav_2')
+            expect(config.sections[1].subnav_template).to eq('dita_subnav_repo-name2')
           end
         end
 
@@ -118,8 +105,8 @@ module Bookbinder
                 {'repository' => {'name' => 'another-org/repo-name2'}},
               ]
             )
-            expect(config.sections[0].subnav_template).to eq('dita_subnav')
-            expect(config.sections[1].subnav_template).to eq('dita_subnav')
+            expect(config.sections[0].subnav_template).to eq('dita_subnav_repo-name1')
+            expect(config.sections[1].subnav_template).to eq('dita_subnav_repo-name1')
           end
         end
       end

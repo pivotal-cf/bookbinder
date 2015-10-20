@@ -1,11 +1,8 @@
-require_relative 'values/subnav_template'
-
 module Bookbinder
 
-  class DitaHtmlToMiddlemanFormatter
-    def initialize(file_system_accessor, subnav_formatter, html_document_manipulator)
+  class DitaHtmlForMiddlemanFormatter
+    def initialize(file_system_accessor, html_document_manipulator)
       @file_system_accessor = file_system_accessor
-      @subnav_formatter = subnav_formatter
       @html_document_manipulator = html_document_manipulator
     end
 
@@ -29,23 +26,9 @@ module Bookbinder
       end
     end
 
-    def format_subnav(path_to_dita_section,
-                      subnav_template_text,
-                      json_props_location,
-                      unformatted_subnav_text)
-      formatted_json_links = subnav_formatter.get_links_as_json(unformatted_subnav_text,
-                                                                path_to_dita_section)
-
-      nav_text = html_document_manipulator.set_attribute(document: subnav_template_text,
-                                                         selector: 'div.nav-content',
-                                                         attribute: 'data-props-location',
-                                                         value: json_props_location)
-      SubnavTemplate.new(formatted_json_links, nav_text)
-    end
-
     private
 
-    attr_reader :file_system_accessor, :subnav_formatter, :html_document_manipulator
+    attr_reader :file_system_accessor, :html_document_manipulator
 
     def frontmatter(title)
       sanitized_title = title.gsub('"', '\"')

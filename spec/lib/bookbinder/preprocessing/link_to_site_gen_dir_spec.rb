@@ -1,5 +1,5 @@
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
-require_relative '../../../../lib/bookbinder/subnav/json_from_config'
+require_relative '../../../../lib/bookbinder/subnav/json_from_markdown_toc'
 require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/subnav/subnav_generator'
 require_relative '../../../../lib/bookbinder/values/output_locations'
@@ -77,7 +77,7 @@ module Bookbinder
           }
         )
 
-        expect(subnav_generator_factory).to receive(:produce).with(instance_of(Subnav::JsonFromConfig)) { generator }
+        expect(subnav_generator_factory).to receive(:produce).with(instance_of(Subnav::JsonFromMarkdownToc)) { generator }
         expect(generator).to receive(:generate).with(config.subnavs[0])
 
         preprocessor = LinkToSiteGenDir.new(fs, subnav_generator_factory)

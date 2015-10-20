@@ -9,7 +9,7 @@ require_relative '../config/remote_yaml_credential_provider'
 require_relative '../config/validator'
 require_relative '../config/yaml_loader'
 require_relative '../dita_command_creator'
-require_relative '../dita_html_to_middleman_formatter'
+require_relative '../dita_html_for_middleman_formatter'
 require_relative '../html_document_manipulator'
 require_relative '../ingest/cloner_factory'
 require_relative '../ingest/section_repository'
@@ -21,7 +21,6 @@ require_relative '../preprocessing/link_to_site_gen_dir'
 require_relative '../preprocessing/preprocessor'
 require_relative '../subnav/subnav_generator_factory'
 require_relative '../sheller'
-require_relative '../subnav/json_from_html'
 require_relative '../values/output_locations'
 
 module Bookbinder
@@ -96,8 +95,9 @@ module Bookbinder
           Postprocessing::SitemapWriter.build(logger, final_app_directory, sitemap_port),
           Preprocessing::Preprocessor.new(
             Preprocessing::DitaPreprocessor.new(
-              DitaHtmlToMiddlemanFormatter.new(local_filesystem_accessor, dita_json_generator, html_document_manipulator),
               local_filesystem_accessor,
+              subnav_generator_factory,
+              DitaHtmlForMiddlemanFormatter.new(local_filesystem_accessor, html_document_manipulator),
               DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY']),
               sheller
             ),
@@ -159,10 +159,6 @@ module Bookbinder
         Subnav::SubnavGeneratorFactory.new(local_filesystem_accessor, output_locations)
       end
 
-      def json_generator
-        Subnav::JsonFromConfig.new
-      end
-
       def directory_preparer
         Commands::BindComponents::DirectoryPreparer.new(local_filesystem_accessor)
       end
@@ -173,10 +169,6 @@ module Bookbinder
 
       def final_app_directory
         @final_app_directory ||= File.absolute_path('final_app')
-      end
-
-      def dita_json_generator
-        Subnav::JsonFromHtml.new
       end
 
       def html_document_manipulator

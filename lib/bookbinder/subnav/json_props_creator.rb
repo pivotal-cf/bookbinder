@@ -7,12 +7,12 @@ module Bookbinder
         @json_generator = json_generator
       end
 
-      def create(subnav_config)
-        json_links = json_generator.get_links(subnav_config, output_locations.source_for_site_generator)
+      def create(subnav_spec)
+        json_links = json_generator.get_links(subnav_spec, output_locations)
 
-        fs.write(text: json_links, to: props_path(subnav_config.name))
+        fs.write(text: json_links, to: props_path(subnav_spec.subnav_name))
 
-        filename(subnav_config.name)
+        filename(subnav_spec.subnav_name)
       end
 
       attr_reader :fs, :output_locations, :json_generator

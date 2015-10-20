@@ -23,6 +23,16 @@ module Bookbinder
       end
     end
 
+    describe 'adding a class' do
+      it 'returns a copy of the document with the given class added to the element' do
+        expect(html_document_manipulator.add_class(
+            document: '<div class="wrapper"><div class="selector"></div></div>',
+            selector: 'div.selector',
+            classname: 'classier')
+        ).to eq '<div class="wrapper"><div class="selector classier"></div></div>'
+      end
+    end
+
     describe 'reading from a particular part of a file' do
       it 'returns the desired content as a string' do
         Dir.mktmpdir do |tmpdir|

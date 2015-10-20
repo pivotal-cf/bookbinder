@@ -7,19 +7,27 @@ module Bookbinder
         @html_doc_manipulator = html_doc_manipulator
       end
 
-      def create(props_filename, subnav_config)
+      def create(props_filename, subnav_spec)
         template_content = fs.read(template_path)
-        nav_content = html_doc_manipulator.set_attribute(document: template_content,
-                                                         selector: 'div.nav-content',
-                                                         attribute: 'data-props-location',
-                                                         value: props_filename)
+        nav_with_props = html_doc_manipulator.set_attribute(document: template_content,
+                                                            selector: 'div.nav-content',
+                                                            attribute: 'data-props-location',
+                                                            value: props_filename)
 
-        fs.write(text: nav_content, to: subnav_destination(subnav_config.name))
+        nav_content = html_doc_manipulator.add_class(document: nav_with_props,
+                                                         selector: 'div.nav-content',
+                                                         classname: nav_type(subnav_spec))
+
+        fs.write(text: nav_content, to: subnav_destination(subnav_spec.subnav_name))
       end
 
       attr_reader :fs, :output_locations, :html_doc_manipulator
 
       private
+
+      def nav_type(subnav_spec)
+        subnav_spec.subnav_name.include?('dita') ? 'deepnav' : 'shallownav'
+      end
 
       def subnavs_path
         output_locations.subnavs_for_layout_dir

@@ -29,11 +29,11 @@ module Bookbinder
         end
 
         def invalid_subnav_names
-          invalid_subnavs.map(&:name).join(", ")
+          invalid_subnavs.map(&:subnav_name).join(", ")
         end
 
         def missing_subnavs
-          section_subnav_names - config.subnavs.map(&:name)
+          section_subnav_names - config.subnavs.map(&:subnav_name)
         end
 
         def required_subnav_keys
