@@ -99,7 +99,16 @@ from sibling directories of your book.
 These sections' directories must have the same name as their remote git
 repositories, but don't need to be git repositories for all commands.
 
-### Deploying your Book
+### Adding Basic Auth to Your Served Book
+
+You can optionally require a username and password to access any book served by running `rackup` in `final_app` by setting the following environment variables:
+
+* 	`$ export SITE_AUTH_USERNAME=<your-book-username>`
+*	`$ export SITE_AUTH_PASSWORD=<your-book-password>`
+
+If these environment variables are not set, basic auth is not enabled.
+
+### Deploying Your Book
 - Create an AWS bucket for green builds and put info into `credentials.yml`
 - Set up CF spaces for staging and production and put details into `credentials.yml`
 - Deploy to production
