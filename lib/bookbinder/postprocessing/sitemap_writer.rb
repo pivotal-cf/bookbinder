@@ -9,7 +9,7 @@ module Bookbinder
         new(
           Spider.new(app_dir: final_app_directory),
           ServerDirector.new(
-            app: RackApp.new(Pathname('redirects.rb')).app,
+            app: RackApp.new(Pathname('redirects.rb'), auth_required: false).app,
             directory: final_app_directory,
             port: port
           )
