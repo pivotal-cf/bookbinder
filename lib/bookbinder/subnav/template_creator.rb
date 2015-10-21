@@ -1,3 +1,7 @@
+require_relative '../../../lib/bookbinder/values/user_message'
+require_relative '../../../lib/bookbinder/colorizer'
+require_relative '../../../lib/bookbinder/terminal'
+
 module Bookbinder
   module Subnav
     class TemplateCreator
@@ -26,7 +30,7 @@ module Bookbinder
       private
 
       def nav_type(subnav_spec)
-        subnav_spec.subnav_name.include?('dita') ? 'deepnav' : 'shallownav'
+        subnav_spec.subnav_name.include?('dita') ? 'deepnav-content' : 'shallownav-content'
       end
 
       def subnavs_path
@@ -38,7 +42,16 @@ module Bookbinder
       end
 
       def template_path
-        subnavs_path.join('subnav_template.erb')
+        deprecated_prefix = '_dita_' unless fs.file_exist?(subnavs_path.join('subnav_template.erb'))
+
+        if deprecated_prefix
+          Terminal.new(Colorizer.new).update(UserMessage.new(
+            "Use of '_dita_subnav_template.erb' is deprecated. " +
+              "The preferred template is 'subnav_template.erb'. Please rename your file.",
+            EscalationType.warn
+          ))
+        end
+        subnavs_path.join("#{deprecated_prefix}subnav_template.erb")
       end
 
       def subnav_destination(name)
