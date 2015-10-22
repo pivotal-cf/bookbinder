@@ -14,6 +14,16 @@ module Bookbinder
                                      source_ref: ref_override || section_config.repo_ref,
                                      destination_parent_dir: destination_dir,
                                      destination_dir_name: section_config.desired_directory_name)
+
+          if section_config.dependent_sections.any?
+            section_config.dependent_sections.map do |dependent_config|
+              cloner.call(source_repo_name: dependent_config.repo_name,
+                          source_ref: ref_override || dependent_config.repo_ref,
+                          destination_parent_dir: "#{destination_dir}/#{section_config.desired_directory_name}",
+                          destination_dir_name: dependent_config.desired_directory_name)
+            end
+          end
+
           Section.new(
             working_copy.path,
             working_copy.full_name,

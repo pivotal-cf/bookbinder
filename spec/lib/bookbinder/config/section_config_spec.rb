@@ -56,6 +56,42 @@ module Bookbinder
         end
       end
 
+      it "can return dependent sections" do
+        section_config = SectionConfig.new(
+          {
+            'repository' => {'name' => 'foo/section'},
+            'directory' => 'parent_dir',
+            'dependent_sections' => [
+              {
+                'repository' => {'name' => 'my/first-dependent-repo'},
+                'directory' => 'first_dependent_dir'
+              },
+              {
+                'repository' => {'name' => 'my/second-dependent-repo'},
+                'directory' => 'second_dependent_dir'
+              }
+            ]
+          }
+        )
+
+        expect(section_config.dependent_sections).to eq(
+            [
+              SectionConfig.new(
+                {
+                  'repository' => {'name' => 'my/first-dependent-repo'},
+                  'directory' => 'first_dependent_dir'
+                }
+              ),
+              SectionConfig.new(
+              {
+                'repository' => {'name' => 'my/second-dependent-repo'},
+                'directory' => 'second_dependent_dir'
+              }
+            )
+          ]
+        )
+      end
+
       it "is equal to another instance with same config" do
         expect(SectionConfig.new('repository' => {'ref' => 'foo'})).
           to eq(SectionConfig.new('repository' => {'ref' => 'foo'}))

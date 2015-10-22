@@ -51,7 +51,7 @@ module Bookbinder
         output_locations.html_from_preprocessing_dir.join(section.destination_directory)
       end
 
-      def formatted_dir( section)
+      def formatted_dir(section)
         output_locations.formatted_dir.join(section.destination_directory)
       end
 

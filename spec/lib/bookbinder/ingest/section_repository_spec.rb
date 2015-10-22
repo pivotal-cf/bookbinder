@@ -118,6 +118,50 @@ module Bookbinder
           streams: streams
         )
       end
+
+      context 'with dependent sections' do
+        it 'calls clone for each dependent section' do
+          streams = { success: double('stream').as_null_object }
+
+          expect(null_cloner).to receive(:call).with(source_repo_name: 'foo/section',
+                                                source_ref: 'master',
+                                                destination_parent_dir: 'some/place',
+                                                destination_dir_name: 'parent_dir') { double('working copy').as_null_object}
+
+          expect(null_cloner).to receive(:call).with(source_repo_name: 'my/first-dependent-repo',
+                                                source_ref: 'master',
+                                                destination_parent_dir: 'some/place/parent_dir',
+                                                destination_dir_name: 'first_dependent_dir')
+
+          expect(null_cloner).to receive(:call).with(source_repo_name: 'my/second-dependent-repo',
+                                                source_ref: 'master',
+                                                destination_parent_dir: 'some/place/parent_dir',
+                                                destination_dir_name: 'second_dependent_dir')
+
+
+          SectionRepository.new.fetch(
+            configured_sections: [
+              Config::SectionConfig.new(
+                'repository' => {'name' => 'foo/section'},
+                'directory' => 'parent_dir',
+                'dependent_sections' => [
+                  {
+                    'repository' => {'name' => 'my/first-dependent-repo'},
+                    'directory' => 'first_dependent_dir'
+                  },
+                  {
+                    'repository' => {'name' => 'my/second-dependent-repo'},
+                    'directory' => 'second_dependent_dir'
+                  }
+                ]
+              )
+            ],
+            destination_dir: 'some/place',
+            cloner: null_cloner,
+            streams: streams
+          )
+        end
+      end
     end
   end
 end

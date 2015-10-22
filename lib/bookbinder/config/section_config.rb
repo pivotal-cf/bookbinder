@@ -31,6 +31,12 @@ module Bookbinder
         repo['ref'] || 'master'
       end
 
+      def dependent_sections
+        @sections ||= (config['dependent_sections'] || []).map do |dep_section|
+          SectionConfig.new(dep_section)
+        end
+      end
+
       def preprocessor_config
         config.fetch('preprocessor_config', {})
       end
