@@ -26,6 +26,30 @@ describe 'binding a book locally' do
     expect(index).to include('My production host is: docs.example.com')
   end
 
+  context 'when section directory specified in config.yml' do
+    let(:section) do <<-YAML
+- repository:
+    name: fantastic/dogs-repo
+    at_path: big_dogs/great_danes
+  directory: tiny_guys
+    YAML
+    end
+
+    before do
+      config = YAML.load(File.read('./config.yml'))
+      config['sections'] = YAML.load(section)
+      File.write('./config.yml', config.to_yaml)
+    end
+
+    it 'puts specified content into named directory' do
+      swallow_stdout do
+        `#{gem_root}/install_bin/bookbinder bind local`
+      end
+
+      expect(Pathname(File.join('final_app', 'public', 'tiny_guys', 'great_danes.html'))).to exist
+    end
+  end
+
   context 'when a layout_repo is provided' do
     let(:section) do
 <<YAML

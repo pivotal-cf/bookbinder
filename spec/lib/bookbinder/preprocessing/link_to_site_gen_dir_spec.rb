@@ -33,11 +33,11 @@ module Bookbinder
         config = Config::Configuration.parse({})
 
         expect(fs).to receive(:link_creating_intermediate_dirs).with(
-          sections[0].path_to_repository,
+          sections[0].path_to_repo_dir,
           output_locations.source_for_site_generator.join('my/desired/dir')
         )
         expect(fs).to receive(:link_creating_intermediate_dirs).with(
-          sections[1].path_to_repository,
+          sections[1].path_to_repo_dir,
           output_locations.source_for_site_generator.join('myrepo2')
         )
 

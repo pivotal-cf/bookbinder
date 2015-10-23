@@ -10,13 +10,13 @@ module Bookbinder
       end
 
       def applicable_to?(section)
-        filesystem.file_exist?(section.path_to_repository)
+        filesystem.file_exist?(section.path_to_repo_dir)
       end
 
       def preprocess(sections, output_locations, config: nil, **_)
         sections.each do |section|
           filesystem.link_creating_intermediate_dirs(
-            section.path_to_repository,
+            section.path_to_repo_dir,
             output_locations.source_for_site_generator.join(section.destination_directory)
           )
         end

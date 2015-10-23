@@ -2,16 +2,22 @@ require_relative '../../../../lib/bookbinder/values/section'
 
 module Bookbinder
   describe Section do
-    describe "repo path" do
-      it "wraps the input in a Pathname, for easier manipulation" do
+    describe 'repo path' do
+      it 'wraps the input in a Pathname, for easier manipulation' do
         expect(Section.new('some/path/to/repo').
-               path_to_repository.join('or/something')).
+               path_to_repo_dir.join('or/something')).
         to eq(Pathname('some/path/to/repo/or/something'))
       end
 
-      it "even wraps a nil repo path, so that e.g. file existence checks fail" do
-        expect(Section.new.path_to_repository.join('foo')).
+      it 'even wraps a nil repo path, so that e.g. file existence checks fail' do
+        expect(Section.new.path_to_repo_dir.join('foo')).
           to eq(Pathname('foo'))
+      end
+
+      it 'appends path to directory in repo if provided' do
+        expect(Section.new('some/path/to/repo', nil, nil, nil, nil, nil, 'our/dir').
+            path_to_repo_dir).
+          to eq(Pathname('some/path/to/repo/our/dir'))
       end
     end
 

@@ -158,10 +158,10 @@ module Bookbinder
                  nav_formatted_dir)
 
         expect(fs).to receive(:find_files_with_ext).
-            with('img-format', sections[0].path_to_repository) { ['fake/img/path'] }
+            with('img-format', sections[0].path_to_repo_dir) { ['fake/img/path'] }
 
         expect(fs).to receive(:copy_including_intermediate_dirs).
-            with('fake/img/path', sections[0].path_to_repository, nav_formatted_dir)
+            with('fake/img/path', sections[0].path_to_repo_dir, nav_formatted_dir)
 
         expect(fs).to receive(:copy_contents).
             with(nav_formatted_dir, Pathname('output/master_middleman/source/nav-here-please'))
@@ -171,10 +171,10 @@ module Bookbinder
               nonnav_formatted_dir)
 
         expect(fs).to receive(:find_files_with_ext).
-            with('img-format', sections[1].path_to_repository) { ['fake/img/path'] }
+            with('img-format', sections[1].path_to_repo_dir) { ['fake/img/path'] }
 
         expect(fs).to receive(:copy_including_intermediate_dirs).
-            with('fake/img/path', sections[1].path_to_repository, nonnav_formatted_dir)
+            with('fake/img/path', sections[1].path_to_repo_dir, nonnav_formatted_dir)
 
         expect(fs).to receive(:copy_contents).
             with(nonnav_formatted_dir, Pathname('output/master_middleman/source/go-here-please'))

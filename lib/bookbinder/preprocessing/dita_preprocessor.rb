@@ -38,7 +38,7 @@ module Bookbinder
           end
 
           dita_formatter.format_html(section_html_dir(section), formatted_dir(section))
-          copy_images(section.path_to_repository, formatted_dir(section))
+          copy_images(section.path_to_repo_dir, formatted_dir(section))
           fs.copy_contents(formatted_dir(section), source_for_site_gen_dir(section))
         end
       end

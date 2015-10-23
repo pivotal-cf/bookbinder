@@ -31,6 +31,10 @@ module Bookbinder
         repo['ref'] || 'master'
       end
 
+      def at_repo_path
+        repo['at_path']
+      end
+
       def dependent_sections
         @sections ||= (config['dependent_sections'] || []).map do |dep_section|
           SectionConfig.new(dep_section)

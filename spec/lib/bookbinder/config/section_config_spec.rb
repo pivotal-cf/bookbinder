@@ -36,6 +36,11 @@ module Bookbinder
           to eq('foo/bar')
       end
 
+      it "can return the path to a directory in repo" do
+        expect(SectionConfig.new('repository' => {'name' => 'foo/bar', 'at_path' => 'some/nested/dir'}).at_repo_path).
+          to eq('some/nested/dir')
+      end
+
       it "produces a URL from a name" do
         expect(SectionConfig.new('repository' => {'name' => 'foo/bar'}).repo_url).
           to eq('git@github.com:foo/bar')
