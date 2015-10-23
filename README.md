@@ -232,6 +232,21 @@ sections:
 
 **Note**: Bookbinder only uses the <code>ref</code> key when binding 'remote'. The <code>bookbinder bind local</code> command ignores the <code>ref</code> key.
 
+### Specifying a Path in Repo for Section
+
+You can optionally specify a directory inside a source repository to use as a section with the `at_path` key, as follows:
+
+```
+sections:
+  - repository:
+      name: org-name/bird-repo
+      at_path: scrub/jay
+    directory: birds
+    subnav_template: cool-sidebar-partial
+```
+
+In the above example, the contents of the `bird-repo/scrub/jay` directory would be made available at `birds` on your bound book.
+
 ## Supported Formats
 
 * [Markdown](#user-content-markdown)
