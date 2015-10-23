@@ -271,6 +271,27 @@ dita_sections:
 
 **Note**: You'll need to have properly installed and specified the [DITA-OT](#user-content-dita-ot) library.
 
+#### DITA Dependent Sections
+
+If a `dita_section` requires support DITA files from another repository, you can specify the support repository beneath a `dependent_sections` key in the parent repository.
+
+Dependent sections are cloned into the parent section's directory. In the following example, the content from the dependent section will be available at `<your-domain>/birds/dinosaurs/`.
+
+```
+dita_sections:
+  - repository:
+      name: org-name/bird-repo
+      ref: 165c28e967d58e6ff23a882689c953954a7b588d
+    directory: birds
+    ditamap_location: path/to/my-special-ditamap-location.ditamap
+    ditaval_location: path/to/my-special-ditaval-location.ditaval
+    dependent_sections:
+    - repository:
+        name: org-name/dinosaur-repo
+        ref: pterodactyl
+      directory: dinosaurs
+```
+
 ## Middleman Templating Helpers
 
 Bookbinder comes with a Middleman configuration that provides a handful of helpful functions, and should work for most book projects. To use a custom Middleman configuration instead, place a `config.rb` file in the `master_middleman` directory of the book project. This will overwrite Bookbinder's `config.rb`.
@@ -311,22 +332,13 @@ The `mermaid_diagram` helper accepts a block including text formatted to generat
 
 The default template (`\_default.erb`) uses the label `default` and is applied to all sections unless another template is specified with subnav\_template or subnav\_name. Template labels are the name of the template file with extensions removed. ("sample" for a template named "sample.erb")
 
-#### Subnav from Template (subnav_template):
-If specified for a section, Bookbinder will look for a file of name <subnav-template>.erb in `master_middleman/source/subnavs` and insert this partial into the template at the code helper.
+#### Subnavs for DITA
 
-```YAML
-sections:
-  - repository:
-      name: org-name/bird-repo
-    directory: birds
-    subnav_template: subnav-about-birds
-```
+If your book includes a dita_section, Bookbinder will automatically look for a file `subnav_template.erb` from `master_middleman/source/subnavs`. No additional keys are necessary in your `config.yml`.
 
-If your book includes a dita_section, instead of providing a subnav_template, Bookbinder will look for a file `_dita_subnav_template.erb` from `master_middleman/source/subnavs`.
+Bookbinder makes subnav links available in a JSON format at `/subnavs/dita_subnav_<your-dita-section-directory>-props.json`. They could be consumed with a JavaScript library (e.g. React.js) to create your subnav. Bookbinder will have written the name of the file containing the links from `subnav_template.erb` at a data attribute called data-props-location on 'div.nav-content'.
 
-If your book generates any subnavs for dita_sections by specifying a `subnav_template`, Bookbinder makes subnav links available in a json format at `/subnavs/dita-subnav-props-<your-dita-section-directory>.json`. They could be consumed with a javascript library (e.g. React.js) to create your subnav. Bookbinder will have written the name of the file containing the links from _dita_subnav_template.erb at a data attribute called data-props-location on 'div.nav-content'.
-
-An example of the json links:
+An example of the JSON links:
 
 ```code
 {
@@ -336,6 +348,19 @@ An example of the json links:
     {"url": "/dita-section-one/../dita-section-dependency/some-guide-1.html", "text": "my topic dependency"}
   ]
 }
+```
+
+**Note:** Use of `_dita_subnav_template.erb` is deprecated as of Bookbindery 7.2.0. If your DITA subnavs currently rely on this file, simply rename it to `subnav_template.erb` in the same location.
+
+#### Subnav from Template (subnav_template):
+If specified for a section, Bookbinder will look for a file of name <subnav-template>.erb in `master_middleman/source/subnavs` and insert this partial into the template at the code helper.
+
+```YAML
+sections:
+  - repository:
+      name: org-name/bird-repo
+    directory: birds
+    subnav_template: subnav-about-birds
 ```
 
 #### Subnav from Config (subnav_name):
