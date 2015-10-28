@@ -54,6 +54,10 @@ module Bookbinder
         end
       end
 
+      def yield_for_feedback
+        partial 'layouts/feedback' if config[:feedback_enabled]
+      end
+
       def mermaid_diagram(&blk)
         escaped_text = capture(&blk).gsub('-','\-')
 

@@ -37,7 +37,7 @@ module Bookbinder
       end
     end
 
-    def run_middleman(template_variables: {}, subnav_templates: {}, archive_menu: {})
+    def run_middleman(template_variables: {}, subnav_templates: {}, archive_menu: {}, feedback_enabled: false)
       original_mm_root = ENV['MM_ROOT']
 
       Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
@@ -46,7 +46,8 @@ module Bookbinder
         build_command = Middleman::Cli::Build.new [], {:quiet => false}, {}
         File.write('bookbinder_config.yml', YAML.dump(template_variables: template_variables,
                                                       subnav_templates: subnav_templates,
-                                                      archive_menu: archive_menu))
+                                                      archive_menu: archive_menu,
+                                                      feedback_enabled: feedback_enabled))
         build_command.invoke :build, [], {:verbose => true}
       end
 
@@ -242,6 +243,41 @@ module Bookbinder
         output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
 
         expect(output.chomp).to eq('<p>Page last updated: January 1, 1984</p>')
+      end
+    end
+
+    describe '#yield_for_feedback' do
+      before(:each) do
+        FileUtils.cp_r 'master_middleman/.', tmpdir
+        FileUtils.mkdir_p(File.join(tmpdir, 'source','layouts'))
+        File.open(File.join(tmpdir, 'source', 'index.html.erb'), 'w') do |f|
+          f.write('<%= yield_for_feedback %>')
+        end
+        File.open(File.join(tmpdir, 'source', 'layouts', '_feedback.erb'), 'w') do |f|
+          f.write('Hella feedback')
+        end
+      end
+
+      context 'when feedback is enabled' do
+        it 'renders feedback partial' do
+          squelch_middleman_output
+          run_middleman(feedback_enabled: true)
+
+          output = File.read(tmpdir.join('build', 'index.html'))
+
+          expect(output).to include('Hella feedback')
+        end
+      end
+
+      context 'when feedback is not enabled' do
+        it 'does not render feedback partial' do
+          squelch_middleman_output
+          run_middleman(feedback_enabled: false)
+
+          output = File.read(tmpdir.join('build', 'index.html'))
+
+          expect(output).to_not include('Hella feedback')
+        end
       end
     end
 

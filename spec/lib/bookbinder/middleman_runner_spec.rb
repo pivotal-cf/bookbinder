@@ -57,6 +57,7 @@ module Bookbinder
         streams: streams,
         output_locations: output_locations,
         config: Config::Configuration.parse(
+          'feedback_enabled' => true,
           'template_variables' => template_variables,
           'public_host' => production_host,
           'archive_menu' => archive_menu
@@ -89,6 +90,7 @@ module Bookbinder
         subnav_templates: { 'my_place_rocks' => 'my_subnav_template', 'fraggles_rock' => 'default' },
         template_variables: template_variables,
         workspace: context_dir.join('output/master_middleman/source'),
+        feedback_enabled: true
       )
     end
 
