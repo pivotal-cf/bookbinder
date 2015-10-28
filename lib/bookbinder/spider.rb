@@ -79,9 +79,6 @@ Found #{broken_links.count} broken links!
         Anemone.crawl(url) do |anemone|
           dont_visit_fragments(anemone)
           anemone.on_every_page do |page|
-            if $sitemap_debug
-              puts "\n\n********** Visiting page: #{page.url}\n\n#{page.body}"
-            end
             broken, working = sieve.links_from Stabilimentum.new(page), is_first_pass
             broken_links.concat broken
             sitemap.concat working
