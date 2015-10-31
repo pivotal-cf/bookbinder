@@ -33,6 +33,46 @@ module Bookbinder
       expect(session.last_response.status).to eq(404)
     end
 
+    describe 'sending feedback' do
+      let(:redirects) { instance_double('Pathname', exist?: false) }
+      let(:mail_client) { double('mail client') }
+
+      it 'responds to post at endpoint and returns its response' do
+        response = [201, {}, 'Creation!']
+
+        app = RackApp.new(redirects, mail_client).app
+        session = Rack::Test::Session.new(app)
+
+        expect(mail_client).to receive(:send_mail).
+            with({'helpful' => 'yes',
+                 'comments' => 'I love it',
+                 'date' => 'the future',
+                 'page_url' => 'the page'}) { response }
+
+        session.post('/api/feedback', {helpful:'yes', comments:'I love it', date:'the future', page_url:'the page'})
+
+        expect(session.last_response.status).to eq(201)
+      end
+
+      it 'responds with a 404 to a get at endpoint' do
+        app = RackApp.new(redirects, mail_client).app
+        session = Rack::Test::Session.new(app)
+
+        session.get('/api/feedback')
+
+        expect(session.last_response.status).to eq(404)
+      end
+
+      it 'responds with 404 to post if mail_client is not provided' do
+        app = RackApp.new(redirects).app
+        session = Rack::Test::Session.new(app)
+
+        session.post('/api/feedback', {helpful:'yes', comments:'I love it', date:'the future', page_url:'the page'})
+
+        expect(session.last_response.status).to eq(404)
+      end
+    end
+
     describe 'authorization' do
       let(:redirects) { instance_double('Pathname', exist?: false) }
 

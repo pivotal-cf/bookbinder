@@ -347,12 +347,6 @@ module Bookbinder
           rand(49152..65535)
         end
 
-        around do |example|
-          $sitemap_debug = ENV['SITEMAP_DEBUG']
-          example.run
-          $sitemap_debug = nil
-        end
-
         it 'contains the given pages in an XML sitemap' do
           command = bind_cmd(
             middleman_runner: real_middleman_runner,
