@@ -25,7 +25,8 @@ module Bookbinder
         allow(SendGrid::Mail).to receive(:new).with(
             to: 'recipient@email.com',
             from: 'sender@email.com',
-            text: 'some text') { mail_object }
+            text: 'some text',
+            subject: 'My subject') { mail_object }
 
         expect(client).to receive(:send).with(mail_object) { sendgrid_response }
         expect(Rack::Response).to receive(:new).with('stuff', '1000', ['A', 'Great']) { 'I was sent' }
@@ -42,11 +43,23 @@ module Bookbinder
             date: 'the future',
             page_url: 'the page') { 'some text' }
 
+        allow(sender).to receive(:assemble_subject).with('the page') { 'My subject' }
+
         expect(sender.send_mail({'helpful' => 'yes',
               'comments' => 'I love it',
               'date' => 'the future',
               'page_url' => 'the page',
               'extra parameter' => 'I do not belong'})).to eq('I was sent')
+      end
+    end
+
+    describe '#assemble_subject' do
+      it 'should assemble a subject string to supply for mail sending' do
+        sender = MailSender.new('username', 'api-key')
+
+        expect(sender.assemble_subject('http://a-book-site.io/some/doc.html')).to eq(
+            '[Feedback] New feedback submitted for a-book-site.io'
+          )
       end
     end
 
