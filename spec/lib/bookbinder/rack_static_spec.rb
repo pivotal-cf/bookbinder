@@ -1,9 +1,9 @@
 require_relative '../../../template_app/lib/rack_static'
 
 module Bookbinder
-  describe StaticRack do
+  describe RackStatic do
     let(:index) { 'index.html' }
-    let(:app) { StaticRack.new(double, {urls: urls, index: index}) }
+    let(:app) { RackStatic.new(double, {urls: urls, index: index}) }
     let(:urls) { ['valid-and-present'] }
 
     describe '#route_file' do

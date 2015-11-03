@@ -11,7 +11,7 @@ module Bookbinder
     class Application
       def initialize(root = 'public')
         @app = Rack::Builder.new do
-          use StaticRack, {
+          use RackStatic, {
               urls: Dir.glob("#{root}/**/*").map { |fn| fn.gsub(/^#{root}/, '')},
               root: root,
               index: 'index.html',

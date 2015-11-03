@@ -1,7 +1,7 @@
 require 'rack'
 
 module Bookbinder
-  class StaticRack < Rack::Static
+  class RackStatic < Rack::Static
     def route_file(path)
       @urls.kind_of?(Array) && @urls.any? { |url| url.index(path) == 0 }
     end
