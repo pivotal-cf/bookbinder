@@ -8,6 +8,7 @@ module Bookbinder
       include Commands::Naming
 
       CredentialKeyError = Class.new(RuntimeError)
+      FeedbackConfigError = Class.new(RuntimeError)
       REQUIRED_AWS_KEYS = %w(access_key secret_key green_builds_bucket)
       REQUIRED_CF_KEYS = %w(username password api_endpoint organization app_name)
 
@@ -61,7 +62,7 @@ module Bookbinder
         "push_local_to_#{environment}"
       end
 
-      def error_message
+      def creds_error_message
         <<-ERROR
 Cannot locate a specific key in credentials.yml.
 Your credentials file should follow this format:
@@ -88,6 +89,19 @@ cloud_foundry:
         ERROR
       end
 
+      def mail_error_message
+        <<-ERROR
+Your environment variables for sending feedback are not set.
+
+To enable feedback, you must set the following variables in your environment:
+
+export SENDGRID_USERNAME=<your-username>
+export SENDGRID_API_KEY=<your-api-key>
+export FEEDBACK_TO=<email-to-receive-feedback>
+export FEEDBACK_FROM=<email-to-send-feedback>
+        ERROR
+      end
+
       def validate
         missing_keys = []
 
@@ -106,7 +120,12 @@ cloud_foundry:
           missing_keys << key unless cf_creds.send(key)
         end
 
-        raise CredentialKeyError.new error_message if missing_keys.any?
+        raise CredentialKeyError.new(creds_error_message) if missing_keys.any?
+        raise FeedbackConfigError.new(mail_error_message) if config.feedback_enabled && mail_vars_absent?
+      end
+
+      def mail_vars_absent?
+        !(ENV['SENDGRID_USERNAME'] && ENV['SENDGRID_API_KEY'] && ENV['FEEDBACK_TO'] && ENV['FEEDBACK_FROM'])
       end
     end
   end
