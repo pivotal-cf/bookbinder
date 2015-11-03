@@ -8,15 +8,16 @@ module Bookbinder
       @client = SendGrid::Client.new(api_user: username, api_key: api_key, raise_exceptions: false)
     end
 
-    def send_mail(helpful:nil, comments:nil, date:nil, page_url:nil)
-      @body = assemble_body(helpful, comments, date, page_url)
+    def send_mail(params)
+      params = whitelisted_params(params)
+      @body = assemble_body(**params)
       @mail = SendGrid::Mail.new(merged_options)
 
       response = client.send(@mail)
       Rack::Response.new(response.body, response.code, response.headers)
     end
 
-    def assemble_body(helpful, comments, date, page_url)
+    def assemble_body(helpful: nil, comments: nil, date: nil, page_url: nil)
       <<-EOT
 Dear docs writer,
 
@@ -37,6 +38,18 @@ Happy editing!
     private
 
     attr_reader :config, :client
+
+    def whitelist
+      %w{helpful comments date page_url}
+    end
+
+    def whitelisted_params(params)
+      {}.tap do |hash|
+        params.each do |key, value|
+          hash[key.to_sym] = value if whitelist.include?(key)
+        end
+      end
+    end
 
     def merged_options
       config.merge({text: @body})

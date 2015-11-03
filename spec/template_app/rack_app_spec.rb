@@ -44,12 +44,9 @@ module Bookbinder
         session = Rack::Test::Session.new(app)
 
         expect(mail_client).to receive(:send_mail).
-            with({'helpful' => 'yes',
-                 'comments' => 'I love it',
-                 'date' => 'the future',
-                 'page_url' => 'the page'}) { response }
+            with({'some_key' => 'a fantastic value'}) { response }
 
-        session.post('/api/feedback', {helpful:'yes', comments:'I love it', date:'the future', page_url:'the page'})
+        session.post('/api/feedback', {some_key: 'a fantastic value'})
 
         expect(session.last_response.status).to eq(201)
       end
@@ -67,7 +64,7 @@ module Bookbinder
         app = RackApp.new(redirects).app
         session = Rack::Test::Session.new(app)
 
-        session.post('/api/feedback', {helpful:'yes', comments:'I love it', date:'the future', page_url:'the page'})
+        session.post('/api/feedback', {this: 'is a fake key value pair'})
 
         expect(session.last_response.status).to eq(404)
       end

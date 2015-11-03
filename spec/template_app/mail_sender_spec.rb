@@ -15,7 +15,7 @@ module Bookbinder
     end
 
     describe '#send_mail' do
-      it 'sends SendGrid mail object and returns its response' do
+      it 'sends SendGrid mail object with whitelisted parameters and returns its response' do
         mail_object = instance_double('SendGrid::Mail')
         client = instance_double('SendGrid::Client')
         sendgrid_response = double('sendgrid response', body: 'stuff', code: '1000', headers: ['A', 'Great'])
@@ -36,9 +36,17 @@ module Bookbinder
           to: 'recipient@email.com',
           from: 'sender@email.com'
         )
-        allow(sender).to receive(:assemble_body) { 'some text' }
+        allow(sender).to receive(:assemble_body).with(
+            helpful: 'yes',
+            comments: 'I love it',
+            date: 'the future',
+            page_url: 'the page') { 'some text' }
 
-        expect(sender.send_mail).to eq('I was sent')
+        expect(sender.send_mail({'helpful' => 'yes',
+              'comments' => 'I love it',
+              'date' => 'the future',
+              'page_url' => 'the page',
+              'extra parameter' => 'I do not belong'})).to eq('I was sent')
       end
     end
 
@@ -47,10 +55,10 @@ module Bookbinder
         sender = MailSender.new('username', 'api-key')
 
         expect(sender.assemble_body(
-          true,
-          'This is the actual feedback',
-          'Feb 14, 2050',
-          'http://some/page.html'
+          helpful: true,
+          comments: 'This is the actual feedback',
+          date: 'Feb 14, 2050',
+          page_url: 'http://some/page.html'
         )).to include('was helpful', 'This is the actual feedback', 'Feb 14, 2050', 'http://some/page.html')
       end
     end
