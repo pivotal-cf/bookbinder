@@ -307,6 +307,29 @@ dita_sections:
       directory: dinosaurs
 ```
 
+## Feedback Form
+
+Render a feedback form on your book's pages.
+
+### Creating a feedback endpoint
+
+In `config.yml`, add:
+
+```
+feedback_enabled: true
+```
+
+When feedback is enabled in this way, a POST endpoint is created at `/api/feedback` on your server, which will send a formatted email via the SendGrid Mail API. Accepted parameters for the post include: `date`, `page_url`, `comments`, and `is_helpful`.
+
+Required credentials will need to be set in your environment for the feature to send mail. These include: `SENDGRID_USERNAME`, `SENDGRID_API_KEY`, `FEEDBACK_TO`, `FEEDBACK_FROM`.
+
+### Including feedback partial
+
+1. In the master_middleman dir or the layout repo's `source/layouts/layout.erb`, or an individual page to which you'd like to add feedback, add the line `<%= yield_for_feedback %>` in the desired location for your feedback form.
+
+1.  Create a partial named `_feedback.erb` that is your feedback form, and any JavaScript required to send a valid POST to the endpoint configured above.
+
+
 ## Middleman Templating Helpers
 
 Bookbinder comes with a Middleman configuration that provides a handful of helpful functions, and should work for most book projects. To use a custom Middleman configuration instead, place a `config.rb` file in the `master_middleman` directory of the book project. This will overwrite Bookbinder's `config.rb`.
