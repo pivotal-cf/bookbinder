@@ -614,6 +614,14 @@ r301      %r{/wiki/(\w+)_\w+},    '/$1'
 
 `output/` contains an intermediary state. This includes `output/master_middleman`, the final prepared directory that the `bind` script ran middleman against.
 
+### `watch` command
+
+Bookbinder's command for live previews in development is `watch`. Its functionality is similar to `bind local` in that it only includes repositories stored on disk. It then watches the sections (not the book or layout repositories) for changes and runs a preview server that updates upon file save.
+
+        bin/bookbinder watch
+
+**Note:** CPU usage directly relates to the number of sections your book is watching. If you find that watch is running slowly, either use `bind` or delete unused local repositories.
+
 ### `punch` command
 
 For snapshotting books at specific point in time, Bookbinder provides the `punch` command. This command git tags your book, all sections specified in the `config.yml`, and the layout repo (if provided) at the current head of master.
