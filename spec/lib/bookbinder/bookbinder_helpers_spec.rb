@@ -267,6 +267,30 @@ module Bookbinder
 
           expect(output).to include('Hella feedback')
         end
+
+        it 'does not render feedback partial on page marked for exclusion' do
+          File.open(File.join(tmpdir, 'source', 'index_two.html.erb'), 'w') do |f|
+            f.write('<% exclude_feedback %>')
+          end
+
+          File.open(File.join(tmpdir, 'source', 'index.html.erb'), 'w') do |f|
+            f.write('Some dummy text')
+          end
+
+          File.open(File.join(tmpdir, 'source', 'layouts', 'layout.erb'), 'w') do |f|
+            f.write('<%= yield %>')
+            f.write('<%= yield_for_feedback %>')
+          end
+
+          squelch_middleman_output
+          run_middleman(feedback_enabled: true)
+
+          output = File.read(tmpdir.join('build', 'index.html'))
+          expect(output).to include('Hella feedback')
+
+          output_two = File.read(tmpdir.join('build', 'index_two.html'))
+          expect(output_two).to_not include('Hella feedback')
+        end
       end
 
       context 'when feedback is not enabled' do

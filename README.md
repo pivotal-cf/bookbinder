@@ -327,7 +327,16 @@ Required credentials will need to be set in your environment for the feature to 
 
 1. In the master_middleman dir or the layout repo's `source/layouts/layout.erb`, or an individual page to which you'd like to add feedback, add the line `<%= yield_for_feedback %>` in the desired location for your feedback form.
 
+	If you include `<%= yield_for_feedback %>` in your `source/layouts/layout.erb`, the feedback partial will be rendered on every page of your book.
+
+
 1.  Create a partial named `_feedback.erb` that is your feedback form, and any JavaScript required to send a valid POST to the endpoint configured above.
+
+#### Excluding feedback partial on specified pages
+
+You can choose to not have the feedback form render on specified pages if you add the following line `<%= exclude_feedback %>` above `<%= yield_for_feedback %>`.
+
+This functionality is most useful if you have included `<%= yield_for_feedback %>` in your `source/layouts/layout.erb` and want to exclude the partial from certain pages.
 
 
 ## Middleman Templating Helpers

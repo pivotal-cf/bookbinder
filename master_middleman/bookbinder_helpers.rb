@@ -54,8 +54,12 @@ module Bookbinder
         end
       end
 
+      def exclude_feedback
+        current_page.add_metadata({page: {feedback_disabled: true}})
+      end
+
       def yield_for_feedback
-        partial 'layouts/feedback' if config[:feedback_enabled]
+        partial 'layouts/feedback' if config[:feedback_enabled] && !current_page.metadata[:page][:feedback_disabled]
       end
 
       def mermaid_diagram(&blk)
