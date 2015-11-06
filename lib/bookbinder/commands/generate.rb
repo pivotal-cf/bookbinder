@@ -1,3 +1,5 @@
+require 'bundler'
+
 module Bookbinder
   module Commands
     class Generate
