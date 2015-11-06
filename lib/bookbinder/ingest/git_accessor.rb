@@ -39,6 +39,29 @@ module Bookbinder
         end
       end
 
+      def remote_tag(url, tagname, commit_or_object)
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+          git = cached_clone(url, temp_name("tag"), path)
+          git.config('user.name', 'Bookbinder')
+          git.config('user.email', 'bookbinder@cloudfoundry.org')
+          begin
+            git.add_tag(tagname, "origin/#{commit_or_object}",
+              message: 'Tagged by Bookbinder')
+          rescue Git::GitExecuteError => e
+            case e.message
+              when /already exists/
+                raise TagExists
+              when /as a valid ref/
+                raise InvalidTagRef
+              else
+                raise
+            end
+          end
+          git.push("origin", "master", tags: true)
+        end
+      end
+
       def author_date(path)
         Pathname(path).dirname.ascend do |current_dir|
           if current_dir.to_s.include?(source_dir_name) && current_dir.entries.include?(Pathname(".git"))

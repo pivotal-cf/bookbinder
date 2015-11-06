@@ -193,6 +193,57 @@ module Bookbinder
           expect(result.reason).to match(/merge error/)
         end
       end
+
+      describe 'remote_tagging' do
+        it "can tag and push in one step" do
+          Dir.mktmpdir do |dir|
+            path = Pathname(dir)
+            init_repo(branch: 'branchiwanttotag',
+              at_dir: path.join('srcrepo'),
+              file: 'foo',
+              contents: 'bar',
+              commit_message: 'baz')
+            git = GitAccessor.new
+            git.remote_tag(path.join("srcrepo"), 'mytagname', 'branchiwanttotag')
+            git.clone(path.join("srcrepo"), "destrepo", path: path)
+
+            tags = `cd #{path.join('destrepo')}; git tag`.split("\n")
+
+            expect(tags).to eq(["mytagname"])
+          end
+        end
+
+        it "raises an exception if tag exists" do
+          Dir.mktmpdir do |dir|
+            path = Pathname(dir)
+            init_repo(branch: 'branchiwanttotag',
+              at_dir: path.join('srcrepo'),
+              file: 'foo',
+              contents: 'bar',
+              commit_message: 'baz')
+            git = GitAccessor.new
+            git.remote_tag(path.join("srcrepo"), 'mytagname', 'branchiwanttotag')
+
+            expect { git.remote_tag(path.join("srcrepo"), 'mytagname', 'branchiwanttotag') }.
+              to raise_error(GitAccessor::TagExists)
+          end
+        end
+
+        it "raises an exception if tag ref is invalid" do
+          Dir.mktmpdir do |dir|
+            path = Pathname(dir)
+            init_repo(branch: 'branchiwanttotag',
+              at_dir: path.join('srcrepo'),
+              file: 'foo',
+              contents: 'bar',
+              commit_message: 'baz')
+            git = GitAccessor.new
+
+            expect { git.remote_tag(path.join("srcrepo"), 'mytagname', 'nonexistent') }.
+              to raise_error(GitAccessor::InvalidTagRef)
+          end
+        end
+      end
     end
   end
 end

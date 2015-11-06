@@ -614,7 +614,15 @@ r301      %r{/wiki/(\w+)_\w+},    '/$1'
 
 `output/` contains an intermediary state. This includes `output/master_middleman`, the final prepared directory that the `bind` script ran middleman against.
 
-**Note**: As of version 0.2.0, the `bind` command no longer generates PDFs.
+### `punch` command
+
+For snapshotting books at specific point in time, Bookbinder provides the `punch` command. This command git tags your book, all sections specified in the `config.yml`, and the layout repo (if provided) at the current head of master.
+
+It takes one argument on the command line: the name of the tag you'd like to add.
+
+        bin/bookbinder punch <tag-name>
+
+Note that in order to tag any remote repositories, you will require push access. If you have not already, you should [create an SSH key](https://help.github.com/articles/generating-ssh-keys/) and `ssh-add` the key for Bookbinder from an account that has push access to the repositories.
 
 ### `update_local_doc_repos` command
 
