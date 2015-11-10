@@ -55,7 +55,8 @@ module Bookbinder
           bind_config,
           File.expand_path('../../../../', __FILE__),
           output_locations,
-          cloner
+          cloner,
+          ref_override: bind_options.ref_override
         )
         sections = section_repository.fetch(
           configured_sections: bind_config.sections,

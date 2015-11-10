@@ -98,7 +98,8 @@ module Bookbinder
                                         config,
                                         File.expand_path('../../../../', __dir__),
                                         output_locations,
-                                        cloner
+                                        cloner,
+                                        ref_override: nil
                                     ).ordered
 
       expect(preprocessor).to receive(:preprocess).with(

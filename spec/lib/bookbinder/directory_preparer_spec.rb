@@ -12,6 +12,7 @@ module Bookbinder
           it "empties and then populates output and final app directories" do
             config = Config::Configuration.new({})
             output_locations = OutputLocations.new(final_app_dir: 'final/app/dir', context_dir: '.')
+            ref_override = nil
             cloner = instance_double('Ingest::LocalFilesystemCloner')
             fs = instance_double('LocalFilesystemAccessor')
             layout_preparer = instance_double('LayoutPreparer')
@@ -23,12 +24,15 @@ module Bookbinder
             expect(fs).to receive(:copy_contents).with('fake/gem/root/master_middleman', output_locations.site_generator_home).ordered
 
             expect(LayoutPreparer).to receive(:new).with(fs) { layout_preparer }
-            expect(layout_preparer).to receive(:prepare).with(output_locations, cloner, config)
+            expect(layout_preparer).to receive(:prepare).with(output_locations, cloner, ref_override, config)
 
-            DirectoryPreparer.new(fs).prepare_directories(config,
+            DirectoryPreparer.new(fs).prepare_directories(
+              config,
               Pathname('fake/gem/root'),
               output_locations,
-              cloner)
+              cloner,
+              ref_override: ref_override,
+            )
           end
         end
       end

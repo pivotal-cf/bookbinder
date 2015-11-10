@@ -8,14 +8,14 @@ module Bookbinder
           @fs = fs
         end
 
-        def prepare_directories(config, gem_root, output_locations, cloner)
+        def prepare_directories(config, gem_root, output_locations, cloner, ref_override: nil)
           fs.remove_directory(output_locations.output_dir)
           fs.empty_directory(output_locations.final_app_dir)
 
           copy_directory_from_gem(gem_root, 'template_app', output_locations.final_app_dir)
           copy_directory_from_gem(gem_root, 'master_middleman', output_locations.site_generator_home)
 
-          LayoutPreparer.new(fs).prepare(output_locations, cloner, config)
+          LayoutPreparer.new(fs).prepare(output_locations, cloner, ref_override, config)
         end
 
         private
