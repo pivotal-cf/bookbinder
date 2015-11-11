@@ -208,9 +208,11 @@ If you specify a `layout_repo:` in `config.yml` with the full name of a git repo
 
 Any files included in your book's `master_middleman/source` directory will override files of the same name in the specified layout repository.
 
-### Section Repository Ref
+### Specifying Repository Refs
 
 By default, the `bookbinder bind remote` command binds the most current versions (i.e., the `master` branch) of the documents in the git repositories specified by the `sections:` of your `config.yml`.
+
+#### Section Repository Ref
 
 Bookbinder supports a `ref` key to enable use of an alternate version of a repo. The value of this key can be the name of a branch (e.g., `develop`), a SHA, or a tag (`v19`).
 
@@ -228,6 +230,15 @@ sections:
   - repository:
       name: org-name/bird-repo
       ref: 165c28e967d58e6ff23a882689c953954a7b588d
+```
+
+#### Layout Repository Ref
+
+Bookbinder supports a `layout_repo_ref` key to enable use of an alternate version of a layout repo. The value of this key can be the name of a branch (e.g., `develop`), a SHA, or a tag (`v19`).
+
+```
+layout_repo: cloudfoundry/my-doc-layout
+layout_repo_ref: v19
 ```
 
 **Note**: Bookbinder only uses the <code>ref</code> key when binding 'remote'. The <code>bookbinder bind local</code> command ignores the <code>ref</code> key.
