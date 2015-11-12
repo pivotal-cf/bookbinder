@@ -58,9 +58,11 @@ module Bookbinder
         output_locations: output_locations,
         config: Config::Configuration.parse(
           'feedback_enabled' => true,
+          'dir_repo_link_enabled' => true,
           'template_variables' => template_variables,
           'public_host' => production_host,
-          'archive_menu' => archive_menu
+          'archive_menu' => archive_menu,
+          'dir_repo_links' => ['some_dir' => 'some repo link']
         ),
         local_repo_dir: 'local',
         subnavs: subnav_templates)
@@ -90,7 +92,9 @@ module Bookbinder
         subnav_templates: { 'my_place_rocks' => 'my_subnav_template', 'fraggles_rock' => 'default' },
         template_variables: template_variables,
         workspace: context_dir.join('output/master_middleman/source'),
-        feedback_enabled: true
+        feedback_enabled: true,
+        dir_repo_link_enabled: true,
+        dir_repo_links: ['some_dir' => 'some repo link']
       )
     end
 

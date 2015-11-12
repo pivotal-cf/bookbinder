@@ -3,7 +3,7 @@ Dir.glob(File.expand_path('../../commands/*.rb', __FILE__)).each do |command_fil
 end
 
 require_relative '../commands/bind/directory_preparer'
-require_relative '../config/archive_menu_configuration'
+require_relative '../config/configuration_decorator'
 require_relative '../config/fetcher'
 require_relative '../config/remote_yaml_credential_provider'
 require_relative '../config/validator'
@@ -90,7 +90,7 @@ module Bookbinder
           streams,
           output_locations,
           configuration_fetcher,
-          Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
+          Config::ConfigurationDecorator.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           local_filesystem_accessor,
           runner,
           Postprocessing::SitemapWriter.build(logger, final_app_directory, sitemap_port),
@@ -116,7 +116,7 @@ module Bookbinder
           middleman_runner: runner,
           output_locations: output_locations,
           config_fetcher: configuration_fetcher,
-          config_decorator: Config::ArchiveMenuConfiguration.new(loader: config_loader, config_filename: 'bookbinder.yml'),
+          config_decorator: Config::ConfigurationDecorator.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           file_system_accessor: local_filesystem_accessor,
           preprocessor: Preprocessing::Preprocessor.new(Preprocessing::LinkToSiteGenDir.new(local_filesystem_accessor, subnav_generator_factory)),
           cloner: local_file_system_cloner,
