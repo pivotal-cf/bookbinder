@@ -15,7 +15,7 @@ module Bookbinder
           sections = [Section.new('must/be-github', nil, 'go here!!!')]
           expected_config = Configuration.parse(
             'dir_repo_link_enabled' => true,
-            'dir_repo_links' => ['go here!!!' => 'must/be-github'],
+            'dir_repo_links' => {'go here!!!' => 'must/be-github'},
             'archive_menu' => {
               '.' => nil
             }

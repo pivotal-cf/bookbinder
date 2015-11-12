@@ -62,7 +62,7 @@ module Bookbinder
           'template_variables' => template_variables,
           'public_host' => production_host,
           'archive_menu' => archive_menu,
-          'dir_repo_links' => ['some_dir' => 'some repo link']
+          'dir_repo_links' => {'some_dir' => 'some repo link'}
         ),
         local_repo_dir: 'local',
         subnavs: subnav_templates)
@@ -94,7 +94,7 @@ module Bookbinder
         workspace: context_dir.join('output/master_middleman/source'),
         feedback_enabled: true,
         dir_repo_link_enabled: true,
-        dir_repo_links: ['some_dir' => 'some repo link']
+        dir_repo_links: {'some_dir' => 'some repo link'}
       )
     end
 
