@@ -32,7 +32,8 @@ module Bookbinder
             section_config.subnav_template,
             section_config.subnav_name,
             section_config.preprocessor_config,
-            section_config.at_repo_path
+            section_config.at_repo_path,
+            section_config.repo_name
           )
         end
       end

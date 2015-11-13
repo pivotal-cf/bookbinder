@@ -8,7 +8,8 @@ module Bookbinder
                        :subnav_templ,
                        :desired_subnav_name,
                        :preprocessor_config,
-                       :at_repo_path) do
+                       :at_repo_path,
+                       :repo_name) do
     def path_to_repo_dir
       at_repo_path.nil? ? path_to_repository : path_to_repository.join(at_repo_path)
     end

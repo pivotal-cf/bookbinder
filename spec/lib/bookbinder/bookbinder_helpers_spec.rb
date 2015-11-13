@@ -37,7 +37,7 @@ module Bookbinder
       end
     end
 
-    def run_middleman(template_variables: {}, subnav_templates: {}, archive_menu: {}, feedback_enabled: false)
+    def run_middleman(template_variables: {}, subnav_templates: {}, archive_menu: {}, feedback_enabled: false, dir_repo_link_enabled: false, dir_repo_links: {})
       original_mm_root = ENV['MM_ROOT']
 
       Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
@@ -47,7 +47,9 @@ module Bookbinder
         File.write('bookbinder_config.yml', YAML.dump(template_variables: template_variables,
                                                       subnav_templates: subnav_templates,
                                                       archive_menu: archive_menu,
-                                                      feedback_enabled: feedback_enabled))
+                                                      feedback_enabled: feedback_enabled,
+                                                      dir_repo_link_enabled: dir_repo_link_enabled,
+                                                      dir_repo_links: dir_repo_links))
         build_command.invoke :build, [], {:verbose => true}
       end
 
@@ -301,6 +303,69 @@ module Bookbinder
           output = File.read(tmpdir.join('build', 'index.html'))
 
           expect(output).to_not include('Hella feedback')
+        end
+      end
+    end
+
+    describe '#render_repo_link' do
+      before(:each) do
+        FileUtils.cp_r 'master_middleman/.', tmpdir
+        FileUtils.mkdir_p(File.join(tmpdir, 'source','layouts'))
+        FileUtils.mkdir_p(File.join(tmpdir, 'source', 'desired', 'dir'))
+      end
+      context 'when dir repo link is enabled' do
+        it 'renders the repo link using the values from bookbinder config' do
+          File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'index.html.erb'), 'w') do |f|
+            f.write('<%= render_repo_link %>')
+          end
+
+          squelch_middleman_output
+          run_middleman(dir_repo_link_enabled: true, dir_repo_links: {'desired/dir' => 'the best repo evah'})
+
+          output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
+
+          expect(output).to include("<a href='http://github.com/the best repo evah'>View the source for this page in GitHub</a>")
+        end
+
+        it 'does not render repo link on page marked for exclusion' do
+          FileUtils.mkdir_p(File.join(tmpdir, 'source', 'dir-one'))
+          FileUtils.mkdir_p(File.join(tmpdir, 'source', 'dir-two'))
+          File.open(File.join(tmpdir, 'source', 'dir-one', 'index_one.html.erb'), 'w') do |f|
+            f.write('<% exclude_repo_link %>')
+          end
+
+          File.open(File.join(tmpdir, 'source', 'dir-two', 'index_two.html.erb'), 'w') do |f|
+            f.write('Some dummy text')
+          end
+
+          File.open(File.join(tmpdir, 'source', 'layouts', 'layout.erb'), 'w') do |f|
+            f.write('<%= yield %>')
+            f.write('<%= render_repo_link %>')
+          end
+
+          squelch_middleman_output
+          run_middleman(dir_repo_link_enabled: true, dir_repo_links: {'dir-one' => 'repo one', 'dir-two' => 'repo two'})
+
+          output_one = File.read(tmpdir.join('build', 'dir-one', 'index_one.html'))
+          output_two = File.read(tmpdir.join('build', 'dir-two', 'index_two.html'))
+
+          expect(output_one).to_not include("<a href='http://github.com/repo one'>View the source for this page in GitHub</a>")
+          expect(output_two).to include("<a href='http://github.com/repo two'>View the source for this page in GitHub</a>")
+        end
+      end
+
+      context 'when dir repo link is not enabled' do
+        it 'does not render the repo link' do
+          File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'index.html.erb'), 'w') do |f|
+            f.write('<%= render_repo_link %>')
+          end
+
+          squelch_middleman_output
+          run_middleman(dir_repo_link_enabled: false, dir_repo_links: {'desired/dir' => 'the best repo evah'})
+
+          output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
+
+          expect(output).to_not include("<a href='the best repo evah'>your amazing repo can be found here</a>")
         end
       end
     end

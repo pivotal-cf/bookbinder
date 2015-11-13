@@ -23,7 +23,7 @@ module Bookbinder
       def dir_repo_link_config(base_config, sections)
         if base_config.dir_repo_link_enabled
           sections.reduce({}) {|config, section|
-            config.merge(section.desired_directory_name => section.path_to_repo_dir.to_s)
+            config.merge(section.desired_directory_name => section.repo_name.to_s)
           }
         end
       end

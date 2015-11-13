@@ -62,6 +62,18 @@ module Bookbinder
         partial 'layouts/feedback' if config[:feedback_enabled] && !current_page.metadata[:page][:feedback_disabled]
       end
 
+      def exclude_repo_link
+        current_page.add_metadata({page: {repo_link_disabled: true}})
+      end
+
+      def render_repo_link
+        page_repo_url = config[:dir_repo_links][page_directories]
+
+        if config[:dir_repo_link_enabled] && !current_page.metadata[:page][:repo_link_disabled]
+          "<a href='http://github.com/#{page_repo_url}'>View the source for this page in GitHub</a>"
+        end
+      end
+
       def mermaid_diagram(&blk)
         escaped_text = capture(&blk).gsub('-','\-')
 
@@ -110,6 +122,10 @@ module Bookbinder
 
       def numeric_class_prefix
         'NUMERIC_CLASS_PREFIX'
+      end
+
+      def page_directories
+        current_page.path.include?('/') ? current_page.path.gsub(/\/?[^\/]*.html$/, "") : current_page.path
       end
 
       def add_ancestors_of(page, ancestors)
