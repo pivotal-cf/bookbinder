@@ -318,6 +318,23 @@ dita_sections:
       directory: dinosaurs
 ```
 
+## Source Repository Link
+
+Render a link to current page's source repository.
+
+In `config.yml`, add:
+
+```
+dir_repo_link_enabled: true
+```
+
+### Including source repository link
+
+In the master_middleman dir or the layout repo's `source/layouts/layout.erb`, or an individual page to which you'd like to add a link, add the line `<%= render_repo_link %>` in the desired location for your link.
+
+If you include `<%= yield_for_feedback %>` in your `source/layouts/layout.erb`, the feedback partial will be rendered on every page of your book, unless you add the line `<% exclude_repo_link %>`.
+
+
 ## Feedback Form
 
 Render a feedback form on your book's pages.
