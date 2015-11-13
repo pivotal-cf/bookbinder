@@ -320,7 +320,7 @@ dita_sections:
 
 ## Source Repository Link
 
-Render a link to current page's source repository.
+Render a link with the URL of the current page's source repository and the text 'View the source for this page in GitHub'.
 
 In `config.yml`, add:
 
