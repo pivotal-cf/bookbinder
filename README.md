@@ -325,14 +325,16 @@ Render a link with the URL of the current page's source repository and the text 
 In `config.yml`, add:
 
 ```
-dir_repo_link_enabled: true
+repo_link_enabled: true
 ```
+
+**Note**: This feature renders a link to a file with the extension `.html.md.erb`. Ensure that your files have this extension.
 
 ### Including source repository link
 
 In the master_middleman dir or the layout repo's `source/layouts/layout.erb`, or an individual page to which you'd like to add a link, add the line `<%= render_repo_link %>` in the desired location for your link.
 
-If you include `<%= yield_for_feedback %>` in your `source/layouts/layout.erb`, the feedback partial will be rendered on every page of your book, unless you add the line `<% exclude_repo_link %>`.
+If you include `<%= render_repo_link %>` in your `source/layouts/layout.erb`, the feedback partial will be rendered on every page of your book, unless you add the line `<% exclude_repo_link %>`.
 
 
 ## Feedback Form
