@@ -37,7 +37,7 @@ module Bookbinder
       end
     end
 
-    def run_middleman(template_variables: {}, subnav_templates: {}, archive_menu: {}, feedback_enabled: false, dir_repo_link_enabled: false, dir_repo_links: {})
+    def run_middleman(template_variables: {}, subnav_templates: {}, archive_menu: {}, feedback_enabled: false, repo_link_enabled: false, repo_links: {})
       original_mm_root = ENV['MM_ROOT']
 
       Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
@@ -48,8 +48,8 @@ module Bookbinder
                                                       subnav_templates: subnav_templates,
                                                       archive_menu: archive_menu,
                                                       feedback_enabled: feedback_enabled,
-                                                      dir_repo_link_enabled: dir_repo_link_enabled,
-                                                      dir_repo_links: dir_repo_links))
+                                                      repo_link_enabled: repo_link_enabled,
+                                                      repo_links: repo_links))
         build_command.invoke :build, [], {:verbose => true}
       end
 
@@ -314,17 +314,97 @@ module Bookbinder
         FileUtils.mkdir_p(File.join(tmpdir, 'source', 'desired', 'dir'))
       end
       context 'when dir repo link is enabled' do
-        it 'renders the repo link using the values from bookbinder config' do
-          File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'index.html.erb'), 'w') do |f|
-            f.write('<%= render_repo_link %>')
+        context 'when the page url directories exactly match the desired dir' do
+          it 'renders the repo link using the values from bookbinder config' do
+            File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'index.html.erb'), 'w') do |f|
+              f.write('<%= render_repo_link %>')
+            end
+
+            squelch_middleman_output
+            run_middleman(
+              repo_link_enabled: true,
+              repo_links: {
+                'desired/dir' => {
+                'repo' => 'the-best-repo-evah',
+                'ref' => 'awesome-ref'}
+              }
+            )
+
+            output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
+
+            expected_url = "<a href='http://github.com/the-best-repo-evah/blob/awesome-ref/index.html.md.erb'>View the source for this page in GitHub</a>"
+
+            expect(output).to include(expected_url)
+          end
+        end
+
+        context 'when the page url directories are not an exact match for the desired dir' do
+          context 'when at_path is specified and the page has no nested directory' do
+            it 'renders the repo link using the current page url and values from bookbinder config' do
+              File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'index.html.erb'), 'w') do |f|
+                f.write('<%= render_repo_link %>')
+              end
+
+              squelch_middleman_output
+              run_middleman(repo_link_enabled: true, repo_links: {
+                  'desired/dir' => {
+                    'repo' => 'the-best-repo-evah',
+                    'ref' => 'master',
+                    'at_path' => 'some/path'
+                  }
+                }
+              )
+
+              output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
+
+              expect(output).to include("<a href='http://github.com/the-best-repo-evah/blob/master/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
+            end
           end
 
-          squelch_middleman_output
-          run_middleman(dir_repo_link_enabled: true, dir_repo_links: {'desired/dir' => 'the best repo evah'})
+          context 'when at_path is not specified and the page has a nested directory' do
+            it 'renders the repo link using the current page url and values from bookbinder config' do
+              FileUtils.mkdir_p(File.join(tmpdir, 'source', 'desired', 'dir', 'nested'))
+              File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'nested', 'index.html.erb'), 'w') do |f|
+                f.write('<%= render_repo_link %>')
+              end
 
-          output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
+              squelch_middleman_output
+              run_middleman(repo_link_enabled: true, repo_links: {
+                  'desired/dir' => {
+                    'repo' => 'the-best-repo-evah',
+                    'ref' => 'master'
+                  }
+                }
+              )
 
-          expect(output).to include("<a href='http://github.com/the best repo evah'>View the source for this page in GitHub</a>")
+              output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
+
+              expect(output).to include("<a href='http://github.com/the-best-repo-evah/blob/master/nested/index.html.md.erb'>View the source for this page in GitHub</a>")
+            end
+          end
+
+          context 'when at_path is specified and the page has a nested directory' do
+            it 'renders the repo link using the current page url and values from bookbinder config' do
+              FileUtils.mkdir_p(File.join(tmpdir, 'source', 'desired', 'dir', 'nested'))
+              File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'nested', 'index.html.erb'), 'w') do |f|
+                f.write('<%= render_repo_link %>')
+              end
+
+              squelch_middleman_output
+              run_middleman(repo_link_enabled: true, repo_links: {
+                  'desired/dir' => {
+                    'repo' => 'the-best-repo-evah',
+                    'ref' => 'master',
+                    'at_path' => 'some/path'
+                  }
+                }
+              )
+
+              output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
+
+              expect(output).to include("<a href='http://github.com/the-best-repo-evah/blob/master/nested/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
+            end
+          end
         end
 
         it 'does not render repo link on page marked for exclusion' do
@@ -344,13 +424,37 @@ module Bookbinder
           end
 
           squelch_middleman_output
-          run_middleman(dir_repo_link_enabled: true, dir_repo_links: {'dir-one' => 'repo one', 'dir-two' => 'repo two'})
+          run_middleman(
+            repo_link_enabled: true,
+            repo_links: {
+              'dir-one' => {'repo' => 'repo-one', 'ref' => 'awesome-ref'},
+              'dir-two' => {'repo' => 'repo-two', 'ref' => 'master'}
+            }
+          )
 
           output_one = File.read(tmpdir.join('build', 'dir-one', 'index_one.html'))
           output_two = File.read(tmpdir.join('build', 'dir-two', 'index_two.html'))
 
-          expect(output_one).to_not include("<a href='http://github.com/repo one'>View the source for this page in GitHub</a>")
-          expect(output_two).to include("<a href='http://github.com/repo two'>View the source for this page in GitHub</a>")
+          expect(output_one).to_not include("<a href='http://github.com/repo-one/blob/awesome-ref/dir-one/index_one.html.md.erb'>View the source for this page in GitHub</a>")
+          expect(output_two).to include("<a href='http://github.com/repo-two/blob/master/index_two.html.md.erb'>View the source for this page in GitHub</a>")
+        end
+
+        it 'does not render a link when binding locally' do
+          File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'index.html.erb'), 'w') do |f|
+            f.write('<%= render_repo_link %>')
+          end
+
+          squelch_middleman_output
+          run_middleman(
+            repo_link_enabled: true,
+            repo_links: {
+              'dir' => {'repo' => 'repo-one'}
+            }
+          )
+
+          output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
+
+          expect(output).to_not include("View the source for this page in GitHub")
         end
       end
 
@@ -361,11 +465,13 @@ module Bookbinder
           end
 
           squelch_middleman_output
-          run_middleman(dir_repo_link_enabled: false, dir_repo_links: {'desired/dir' => 'the best repo evah'})
+          run_middleman(
+            repo_link_enabled: false,
+          )
 
           output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
 
-          expect(output).to_not include("<a href='the best repo evah'>your amazing repo can be found here</a>")
+          expect(output).to_not include("View the source for this page in GitHub")
         end
       end
     end

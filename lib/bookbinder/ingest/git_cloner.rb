@@ -24,6 +24,7 @@ module Bookbinder
         WorkingCopy.new(
           copied_to: copied_to,
           full_name: source_repo_name,
+          ref: source_ref
         )
       end
 

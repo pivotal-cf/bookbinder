@@ -67,10 +67,8 @@ module Bookbinder
       end
 
       def render_repo_link
-        page_repo_url = config[:dir_repo_links][page_directories]
-
-        if config[:dir_repo_link_enabled] && !current_page.metadata[:page][:repo_link_disabled]
-          "<a href='http://github.com/#{page_repo_url}'>View the source for this page in GitHub</a>"
+        if config[:repo_link_enabled] && !current_page.metadata[:page][:repo_link_disabled] && repo_url
+          "<a href='#{repo_url}'>View the source for this page in GitHub</a>"
         end
       end
 
@@ -124,8 +122,37 @@ module Bookbinder
         'NUMERIC_CLASS_PREFIX'
       end
 
-      def page_directories
-        current_page.path.include?('/') ? current_page.path.gsub(/\/?[^\/]*.html$/, "") : current_page.path
+      def repo_url
+        nested_dir, filename = parse_out_nested_dir_and_filename
+        repo_dir = config[:repo_links].keys.select{|key| nested_dir.include? key }[0]
+        page_repo_config = config[:repo_links][repo_dir]
+
+        if page_repo_config && page_repo_config['ref']
+          at_path = at_path(page_repo_config)
+          ref = Pathname(page_repo_config['ref'])
+          org_repo = Pathname(page_repo_config['repo'])
+
+          nested_dir = extract_nested_directory(nested_dir, repo_dir)
+
+          "http://github.com/#{org_repo.join(Pathname('blob'), ref, Pathname(nested_dir), at_path, filename)}.md.erb"
+        end
+      end
+
+      def parse_out_nested_dir_and_filename
+        current_page.path.match(/\/?(.*?)\/?([^\/]*.html$?)/).captures
+      end
+
+      def extract_nested_directory(nested_dir, repo_dir)
+        nested_dir = nested_dir.gsub("#{repo_dir}", '')
+        nested_dir = nested_dir.sub('/', '') if nested_dir[0] == '/'
+
+        nested_dir
+      end
+
+      def at_path(page_repo_config)
+        path = page_repo_config['at_path'] || ""
+
+        Pathname(path)
       end
 
       def add_ancestors_of(page, ancestors)

@@ -26,8 +26,8 @@ module Bookbinder
           local_repo_dir: local_repo_dir,
           workspace: output_locations.workspace_dir,
           feedback_enabled: config.feedback_enabled,
-          dir_repo_link_enabled: config.dir_repo_link_enabled,
-          dir_repo_links: config.dir_repo_links
+          repo_link_enabled: config.repo_link_enabled,
+          repo_links: config.repo_links
         }
         fs.write(to: "bookbinder_config.yml", text: YAML.dump(config))
         sheller.run_command({'MM_ROOT' => output_locations.master_dir.to_s},

@@ -67,8 +67,8 @@ module Bookbinder
 
       it "returns section representations" do
         working_copies = [
-          Ingest::WorkingCopy.new(copied_to: 'bar', full_name: 'qux'),
-          Ingest::WorkingCopy.new(copied_to: 'b', full_name: 'd'),
+          Ingest::WorkingCopy.new(copied_to: 'bar', full_name: 'qux', ref: 'mydesiredref'),
+          Ingest::WorkingCopy.new(copied_to: 'b', full_name: 'd', ref: 'master'),
         ]
 
         n = -1
@@ -95,8 +95,8 @@ module Bookbinder
 
         expect(sections).to eq(
           [
-            Section.new(Pathname('bar'), 'qux', 'my-desired-dir-name', nil, 'awesome_subnav_name', {'my' => 'stuff', 'to' => 'preprocess'}, nil, 'myorg/myrepo'),
-            Section.new(Pathname('b'), 'd', nil, 'specified_a_template', nil, {}, 'my/cool/path', 'myorg/myotherrepo'),
+            Section.new(Pathname('bar'), 'qux', 'my-desired-dir-name', nil, 'awesome_subnav_name', {'my' => 'stuff', 'to' => 'preprocess'}, nil, 'myorg/myrepo', 'mydesiredref'),
+            Section.new(Pathname('b'), 'd', nil, 'specified_a_template', nil, {}, 'my/cool/path', 'myorg/myotherrepo', 'master', ),
           ]
         )
       end

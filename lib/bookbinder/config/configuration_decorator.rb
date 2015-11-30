@@ -11,7 +11,7 @@ module Bookbinder
       def generate(base_config, sections)
         base_config.merge(
           Configuration.new(
-            dir_repo_links: dir_repo_link_config(base_config, sections),
+            repo_links: repo_link_config(base_config, sections),
             archive_menu: root_config(base_config).merge(section_config(sections)))
         )
       end
@@ -20,10 +20,16 @@ module Bookbinder
 
       attr_reader :loader, :config_filename
 
-      def dir_repo_link_config(base_config, sections)
-        if base_config.dir_repo_link_enabled
+      def repo_link_config(base_config, sections)
+        if base_config.repo_link_enabled
           sections.reduce({}) {|config, section|
-            config.merge(section.desired_directory_name => section.repo_name.to_s)
+            config.merge(
+              section.desired_directory_name => {
+                'repo' => section.repo_name,
+                'ref' => section.source_ref,
+                'at_path' => section.at_repo_path
+              }
+            )
           }
         end
       end
