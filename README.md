@@ -381,6 +381,8 @@ Bookbinder provides several helper functions that can be called from within an `
 ### Modified Date
 `<%= modified_date %>` displays the most recent commit date for the file in the format 'Page last updated: September 1, 2015'. You can provide an optional date format, i.e. `<%= modified_date '%m/%d/%y'%>`.
 
+The `modified_date` helper uses the date of the most recent commit that does not contain the text "[exclude]" in its commit message.
+
 ### Diagram (using [Mermaid](https://github.com/knsv/mermaid))
 
 The `mermaid_diagram` helper accepts a block including text formatted to generate [Mermaid diagrams](http://knsv.github.io/mermaid/usage.html). In order to use this helper, include [the Mermaid package](http://knsv.github.io/mermaid/usage.html#installation) in your book.

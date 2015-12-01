@@ -108,26 +108,38 @@ module Bookbinder
         end
       end
 
-      it "can access the last commit date of a given file in an existing repo" do
+      it "can access the date of the last non-excluded commit for a given file in an existing repo" do
         require 'time'
         Dir.mktmpdir do |dir|
           path = Pathname(dir)
           original_date = ENV['GIT_AUTHOR_DATE']
 
+          git = GitAccessor.new
+
           begin
-            date = Time.new(2003, 1, 2)
-            ENV['GIT_AUTHOR_DATE'] = date.iso8601
+            first_date = Time.new(2003, 1, 2)
+            ENV['GIT_AUTHOR_DATE'] = first_date.iso8601
 
             init_repo(at_dir: path.join('source', 'section-repo'),
                       file: 'some-dir/Gemfile',
                       contents: 'gemstuffz',
                       commit_message: 'new railz plz')
 
-            git = GitAccessor.new
+            expect(
+              git.author_date(path.join('source', 'section-repo', 'some-dir', 'Gemfile'))
+            ).to eq(first_date)
+
+            second_date = Time.new(2003, 1, 5)
+            ENV['GIT_AUTHOR_DATE'] = second_date.iso8601
+
+            swallow_stderr do
+              system("cd #{path.join('source', 'section-repo', 'some-dir')}; echo '!' > Gemfile; git add .; git commit -q -m 'Some commit [exclude]';")
+            end
 
             expect(
               git.author_date(path.join('source', 'section-repo', 'some-dir', 'Gemfile'))
-            ).to eq(date)
+            ).to eq(first_date)
+
           ensure
             ENV['GIT_AUTHOR_DATE'] = original_date
           end

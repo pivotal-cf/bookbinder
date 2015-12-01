@@ -62,11 +62,15 @@ module Bookbinder
         end
       end
 
-      def author_date(path)
+      def author_date(path, exclusion_flag: '[exclude]')
         Pathname(path).dirname.ascend do |current_dir|
           if current_dir.to_s.include?(source_dir_name) && current_dir.entries.include?(Pathname(".git"))
             git = Git.open(current_dir)
-            return git.gblob(path).log.first.author.date
+            logs = git.gblob(path).log
+
+            last_non_excluded_commit = logs.detect { |log| !log.message.include?(exclusion_flag) }
+
+            return last_non_excluded_commit.author.date
           end
         end
       end
