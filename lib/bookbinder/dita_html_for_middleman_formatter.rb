@@ -39,7 +39,7 @@ module Bookbinder
     end
 
     def revert_to_erb(text)
-      text.gsub('&lt;%', '<%').gsub('%&gt;', '%>')
+      text.gsub('&lt;%', '<%').gsub('%&gt;', '%>').gsub('&lt;\%', '&lt;%')
     end
   end
 end
