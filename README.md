@@ -318,6 +318,13 @@ dita_sections:
       directory: dinosaurs
 ```
 
+#### ERB Support
+
+Bookbinder supports ERB tags if they are specified as unicode: `<%=` is `&lt;%=` and `%>` is `%&gt;`. This enables use of [helper functions](#middleman-templating-helpers).
+
+If you want to render ERB tags as text and not evaluated as code by the Ruby interpreter, you must escape the opening ERB tag with a backslash as follows: `&lt;%=` is escaped as `&lt;\%=`. This functionality is useful for code examples, for instance.
+
+
 ## Source Repository Link
 
 Render a link with the URL of the current page's source repository and the text 'View the source for this page in GitHub'.
