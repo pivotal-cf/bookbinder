@@ -66,9 +66,14 @@ module Bookbinder
         current_page.add_metadata({page: {repo_link_disabled: true}})
       end
 
-      def render_repo_link
-        if config[:repo_link_enabled] && !current_page.metadata[:page][:repo_link_disabled] && repo_url
-          "<a href='#{repo_url}'>View the source for this page in GitHub</a>"
+      def render_repo_link(include_environments: [])
+        if config[:repo_link_enabled] && repo_url && !current_page.metadata[:page][:repo_link_disabled]
+          id = 'repo-link'
+          whitelisted_envs = include_environments.join(" ")
+          default_display = 'display: none;'
+          display_text = 'View the source for this page in GitHub'
+
+          "<a id='#{id}' data-whitelist='#{whitelisted_envs}' style='#{default_display}' href='#{repo_url}'>#{display_text}</a>"
         end
       end
 
