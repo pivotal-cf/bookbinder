@@ -146,6 +146,38 @@ module Bookbinder
         end
       end
 
+      it "returns the default date if the given file has no non-exclued commits" do
+        require 'time'
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+          original_date = ENV['GIT_AUTHOR_DATE']
+
+          git = GitAccessor.new
+
+          begin
+            date = Time.new(2003, 1, 2)
+            current_time = Time.now
+
+            ENV['GIT_AUTHOR_DATE'] = date.iso8601
+
+            init_repo(at_dir: path.join('source', 'section-repo'),
+              file: 'some-dir/Gemfile',
+              contents: 'gemstuffz',
+              commit_message: 'new railz plz [exclude]')
+
+            output_time = git.author_date(path.join('source', 'section-repo', 'some-dir', 'Gemfile'))
+            expected_time = current_time
+
+            expect(
+              output_time.strftime("%B %-d, %Y")
+            ).to eq(expected_time.strftime("%B %-d, %Y"))
+
+          ensure
+            ENV['GIT_AUTHOR_DATE'] = original_date
+          end
+        end
+      end
+
       it "returns nil if a given file is not checked into version control" do
         Dir.mktmpdir do |dir|
           path = Pathname(dir)

@@ -70,6 +70,7 @@ module Bookbinder
 
             last_non_excluded_commit = logs.detect { |log| !log.message.include?(exclusion_flag) }
 
+            return Time.now if last_non_excluded_commit.nil?
             return last_non_excluded_commit.author.date
           end
         end
