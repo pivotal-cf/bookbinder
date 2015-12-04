@@ -337,11 +337,21 @@ repo_link_enabled: true
 
 **Note**: This feature renders a link to a file with the extension `.html.md.erb`. Ensure that your files have this extension.
 
+For this helper to render the link, you must specify a whitelist of the environments where you want the link to display.
+
+For example, suppose you have an application with staging and production environments available at 'example-staging.cfapps.io' and 'example-production.cfapps.io', and you only want this link to display in the staging environment. Whitelist staging as an included environment as illustrated in the [section below](#including-source-repository-link).
+
 ### Including source repository link
 
-In the master_middleman dir or the layout repo's `source/layouts/layout.erb`, or an individual page to which you'd like to add a link, add the line `<%= render_repo_link %>` in the desired location for your link.
+In the master_middleman dir or the layout repo's `source/layouts/layout.erb`, or an individual page to which you'd like to add a link. For example, add the line `<%= render_repo_link(include_environments: ['staging'])%>` in the desired location for your link to include the link only on sites with 'staging' in their URLs.
 
-If you include `<%= render_repo_link %>` in your `source/layouts/layout.erb`, the feedback partial will be rendered on every page of your book, unless you add the line `<% exclude_repo_link %>`.
+If you include the line below in your `source/layouts/layout.erb`, the feedback partial will be rendered on every page of your book that has not been specifically excluded:
+
+```
+render_repo_link(include_environments: [<your-environments])%>`
+```
+
+To specifically exclude the repo link from being rendered on a page, add the line `<% exclude_repo_link %>` to the desired page.
 
 
 ## Feedback Form
