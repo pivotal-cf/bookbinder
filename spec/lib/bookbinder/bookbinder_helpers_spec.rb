@@ -405,6 +405,38 @@ module Bookbinder
               expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/blob/master/nested/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
             end
           end
+
+          it 'renders the repo link using the current page url and values from bookbinder config for dita pages' do
+            dita_frontmatter = <<-EOT
+---
+dita: true
+---
+            EOT
+
+            FileUtils.mkdir_p(File.join(tmpdir, 'source', 'desired', 'dir', 'nested'))
+            File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'nested', 'index.html.erb'), 'w') do |f|
+              f.write(dita_frontmatter)
+              f.write('<%= render_repo_link %>')
+            end
+
+            squelch_middleman_output
+            run_middleman(repo_link_enabled: true, repo_links: {
+                'desired' => {
+                  'repo' => 'the-best-repo-evah-in-the-historeh-of-the-universe',
+                  'ref' => 'bogus-branch',
+                  'at_path' => 'some/bogus/path'
+                },
+                'desired/dir' => {
+                  'repo' => 'the-best-repo-evah',
+                  'ref' => 'master',
+                  'at_path' => 'some/path'
+                }
+              }
+            )
+
+            output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
+            expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/blob/master/nested/some/path/index.xml'>View the source for this page in GitHub</a>")
+          end
         end
 
         it 'does not render repo link on page marked for exclusion' do

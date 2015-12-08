@@ -129,7 +129,7 @@ module Bookbinder
 
       def repo_url
         nested_dir, filename = parse_out_nested_dir_and_filename
-        repo_dir = config[:repo_links].keys.select{|key| nested_dir.include? key }[0]
+        repo_dir = match_repo_dir(nested_dir)
         page_repo_config = config[:repo_links][repo_dir]
 
         if page_repo_config && page_repo_config['ref']
@@ -138,13 +138,23 @@ module Bookbinder
           org_repo = Pathname(page_repo_config['repo'])
 
           nested_dir = extract_nested_directory(nested_dir, repo_dir)
+          source_file_extension = current_page.data.dita ? '.xml' : '.html.md.erb'
 
-          "http://github.com/#{org_repo.join(Pathname('blob'), ref, Pathname(nested_dir), at_path, filename)}.md.erb"
+          "http://github.com/#{org_repo.join(Pathname('blob'), ref, Pathname(nested_dir), at_path, filename)}#{source_file_extension}"
         end
       end
 
+      def match_repo_dir(nested_dir)
+        config[:repo_links].keys
+          .select{|key| nested_dir.match(/^#{key}/) }
+          .sort_by{ |key| key.length}
+          .last
+      end
+
       def parse_out_nested_dir_and_filename
-        current_page.path.match(/\/?(.*?)\/?([^\/]*.html$?)/).captures
+        current_page.path
+          .match(/\/?(.*?)\/?([^\/]*)\.html$?/)
+          .captures
       end
 
       def extract_nested_directory(nested_dir, repo_dir)
