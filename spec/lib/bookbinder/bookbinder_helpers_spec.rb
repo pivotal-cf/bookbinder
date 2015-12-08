@@ -406,36 +406,65 @@ module Bookbinder
             end
           end
 
-          it 'renders the repo link using the current page url and values from bookbinder config for dita pages' do
-            dita_frontmatter = <<-EOT
+          context 'when rendering the repo link for dita pages' do
+            it 'matches the desired directory when there is another directory that is a substring of the correct match' do
+              dita_frontmatter = <<-EOT
 ---
 dita: true
 ---
-            EOT
+              EOT
 
-            FileUtils.mkdir_p(File.join(tmpdir, 'source', 'desired', 'dir', 'nested'))
-            File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'nested', 'index.html.erb'), 'w') do |f|
-              f.write(dita_frontmatter)
-              f.write('<%= render_repo_link %>')
+              FileUtils.mkdir_p(File.join(tmpdir, 'source', 'desired', 'dir', 'nested'))
+              File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'nested', 'index.html.erb'), 'w') do |f|
+                f.write(dita_frontmatter)
+                f.write('<%= render_repo_link %>')
+              end
+
+              squelch_middleman_output
+              run_middleman(repo_link_enabled: true, repo_links: {
+                  'desired' => {
+                    'repo' => 'the-best-repo-evah-in-the-historeh-of-the-universe',
+                    'ref' => 'bogus-branch',
+                    'at_path' => 'some/bogus/path'
+                  },
+                  'desired/dir' => {
+                    'repo' => 'the-best-repo-evah',
+                    'ref' => 'master',
+                    'at_path' => 'some/path'
+                  }
+                }
+              )
+
+              output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
+              expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/blob/master/nested/some/path/index.xml'>View the source for this page in GitHub</a>")
             end
 
-            squelch_middleman_output
-            run_middleman(repo_link_enabled: true, repo_links: {
-                'desired' => {
-                  'repo' => 'the-best-repo-evah-in-the-historeh-of-the-universe',
-                  'ref' => 'bogus-branch',
-                  'at_path' => 'some/bogus/path'
-                },
-                'desired/dir' => {
-                  'repo' => 'the-best-repo-evah',
-                  'ref' => 'master',
-                  'at_path' => 'some/path'
-                }
-              }
-            )
+            it 'matches desired directories that are numbers' do
+              dita_frontmatter = <<-EOT
+---
+dita: true
+---
+              EOT
 
-            output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
-            expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/blob/master/nested/some/path/index.xml'>View the source for this page in GitHub</a>")
+              FileUtils.mkdir_p(File.join(tmpdir, 'source', '200'))
+              File.open(File.join(tmpdir, 'source', '200', 'index.html.erb'), 'w') do |f|
+                f.write(dita_frontmatter)
+                f.write('<%= render_repo_link %>')
+              end
+
+              squelch_middleman_output
+              run_middleman(repo_link_enabled: true, repo_links: {
+                  200 => {
+                    'repo' => 'the-best-repo-evah',
+                    'ref' => 'master',
+                    'at_path' => 'some/path'
+                  }
+                }
+              )
+
+              output = File.read(tmpdir.join('build', '200', 'index.html'))
+              expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/blob/master/some/path/index.xml'>View the source for this page in GitHub</a>")
+            end
           end
         end
 
