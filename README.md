@@ -335,9 +335,9 @@ In `config.yml`, add:
 repo_link_enabled: true
 ```
 
-**Note**: This feature renders a link to a file with the extension `.html.md.erb`. Ensure that your files have this extension.
+**Note**: This feature renders a link to a file with either the extension `.html.md.erb` for Markdown source files, or the extension `.xml` for DITA source files. Ensure that all of your files have appropriate extensions.
 
-For this helper to render the link, you must specify a whitelist of the environments where you want the link to display.
+For this helper to render the link, you must pass the helper a whitelist of the environments where you want the link to display.
 
 For example, suppose you have an application with staging and production environments available at 'example-staging.cfapps.io' and 'example-production.cfapps.io', and you only want this link to display in the staging environment. Whitelist staging as an included environment as illustrated in the [section below](#including-source-repository-link).
 
