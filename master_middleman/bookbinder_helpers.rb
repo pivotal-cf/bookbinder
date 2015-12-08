@@ -147,7 +147,7 @@ module Bookbinder
       def match_repo_dir(nested_dir)
         config[:repo_links].keys
           .select{ |key| nested_dir.match(/^#{key}/) }
-          .sort_by{ |key| key.to_s.length }
+          .sort_by{ |key| key.length }
           .last
       end
 

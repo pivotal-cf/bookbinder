@@ -24,7 +24,7 @@ module Bookbinder
         if base_config.repo_link_enabled
           sections.reduce({}) {|config, section|
             config.merge(
-              section.desired_directory_name => {
+              section.destination_directory.to_s => {
                 'repo' => section.repo_name,
                 'ref' => section.source_ref,
                 'at_path' => section.at_repo_path

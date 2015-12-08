@@ -13,11 +13,11 @@ module Bookbinder
         it "generates configuration mapping section desired dirs to repo names and refs" do
           config_decorator = ConfigurationDecorator.new(loader: loader, config_filename: 'iampresent.yml')
           base_config = Configuration.parse('repo_link_enabled' => true)
-          sections = [Section.new('must/be-github', nil, 'go here!!!', nil, nil, nil, 'special/path', 'our-org/repo', 'our-ref')]
+          sections = [Section.new('must/be-github', nil, 200, nil, nil, nil, 'special/path', 'our-org/repo', 'our-ref')]
           expected_config = Configuration.parse(
             'repo_link_enabled' => true,
             'repo_links' => {
-              'go here!!!' => {
+              '200' => {
                 'repo' => 'our-org/repo',
                 'ref' => 'our-ref',
                 'at_path' => 'special/path'
