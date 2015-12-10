@@ -267,7 +267,7 @@ dita: true
         end
       end
 
-      it "returns something for a file not in version control" do
+      it "returns nothing for a file not in version control" do
         section_dir = tmp_subdir('source/sections/section-repo')
         FileUtils.cp_r 'master_middleman/.', tmpdir
         FileUtils.mkdir_p section_dir
@@ -280,6 +280,53 @@ dita: true
         output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
 
         expect(output.chomp).to eq('')
+      end
+
+      it "returns nothing for a file that has no non-excluded commits and no user-provided date" do
+        FileUtils.cp_r 'master_middleman/.', tmpdir
+
+        begin
+          original_date = ENV['GIT_AUTHOR_DATE']
+          date = Time.new(1995, 1, 3)
+
+          ENV['GIT_AUTHOR_DATE'] = date.iso8601
+          init_repo(at_dir: tmp_subdir('source/sections/section-repo'),
+            commit_message: '[exclude]',
+            contents: '<%= modified_date %>',
+            file: 'index.html.md.erb')
+
+          squelch_middleman_output
+          run_middleman
+          output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
+
+          expect(output.chomp).to eq('')
+        ensure
+          ENV['GIT_AUTHOR_DATE'] = original_date
+        end
+      end
+
+      it "returns the user-provided date for a file that has no non-excluded commits" do
+        FileUtils.cp_r 'master_middleman/.', tmpdir
+
+        original_date = ENV['GIT_AUTHOR_DATE']
+
+        begin
+          date = Time.new(1995, 1, 3)
+
+          ENV['GIT_AUTHOR_DATE'] = date.iso8601
+          init_repo(at_dir: tmp_subdir('source/sections/section-repo'),
+            contents: '<%= modified_date(default_date: "December 31, 1999") %>',
+            commit_message: '[exclude]',
+            file: 'index.html.md.erb')
+
+          squelch_middleman_output
+          run_middleman
+          output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
+
+          expect(output.chomp).to eq('<p>Page last updated: December 31, 1999</p>')
+        ensure
+          ENV['GIT_AUTHOR_DATE'] = original_date
+        end
       end
     end
 

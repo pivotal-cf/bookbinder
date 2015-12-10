@@ -83,8 +83,8 @@ module Bookbinder
             logs = git.gblob(path_to_file).log
 
             last_non_excluded_commit = logs.detect { |log| !log.message.include?(exclusion_flag) }
-            return Time.now if last_non_excluded_commit.nil?
-            return last_non_excluded_commit.author.date
+
+            return last_non_excluded_commit.author.date if last_non_excluded_commit
           end
         end
       end

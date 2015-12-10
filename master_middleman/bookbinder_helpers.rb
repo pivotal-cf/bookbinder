@@ -83,16 +83,13 @@ module Bookbinder
         @_out_buf.concat "<div class='mermaid'>#{escaped_text}</div>"
       end
 
-      def modified_date(format="%B %-d, %Y")
-        git_accessor = Ingest::GitAccessor.new
+      def modified_date(format: "%B %-d, %Y", default_date: nil)
+        date = page_last_modified_date
+        author_date = date.strftime(format) if date
 
-        if current_page.data.dita
-          date = git_accessor.author_date(preprocessing_path(current_page.source_file), dita: true)
-        else
-          date = git_accessor.author_date(current_page.source_file)
-        end
+        display_date = author_date || default_date
 
-        "Page last updated: #{date.strftime(format)}" if date
+        "Page last updated: #{display_date}" if display_date
       end
 
       def breadcrumbs
@@ -131,6 +128,16 @@ module Bookbinder
 
       def numeric_class_prefix
         'NUMERIC_CLASS_PREFIX'
+      end
+
+      def page_last_modified_date
+        git_accessor = Ingest::GitAccessor.new
+
+        if current_page.data.dita
+          git_accessor.author_date(preprocessing_path(current_page.source_file), dita: true)
+        else
+          git_accessor.author_date(current_page.source_file)
+        end
       end
 
       def repo_url

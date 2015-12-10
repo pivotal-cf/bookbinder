@@ -197,7 +197,7 @@ module Bookbinder
         end
       end
 
-      it "returns the default date if the given file has no non-exclued commits" do
+      it "returns nil if the given file has no non-excluded commits" do
         require 'time'
         Dir.mktmpdir do |dir|
           path = Pathname(dir)
@@ -207,7 +207,6 @@ module Bookbinder
 
           begin
             date = Time.new(2003, 1, 2)
-            current_time = Time.now
 
             ENV['GIT_AUTHOR_DATE'] = date.iso8601
 
@@ -216,12 +215,9 @@ module Bookbinder
               contents: 'gemstuffz',
               commit_message: 'new railz plz [exclude]')
 
-            output_time = git.author_date(path.join('source', 'section-repo', 'some-dir', 'Gemfile').to_s)
-            expected_time = current_time
-
             expect(
-              output_time.strftime("%B %-d, %Y")
-            ).to eq(expected_time.strftime("%B %-d, %Y"))
+              git.author_date(path.join('source', 'section-repo', 'some-dir', 'Gemfile').to_s)
+            ).to be_nil
 
           ensure
             ENV['GIT_AUTHOR_DATE'] = original_date
