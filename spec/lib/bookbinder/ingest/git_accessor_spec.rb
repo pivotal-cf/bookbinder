@@ -126,7 +126,7 @@ module Bookbinder
                       commit_message: 'new railz plz')
 
             expect(
-              git.author_date(path.join('source', 'section-repo', 'some-dir', 'Gemfile'))
+              git.author_date(path.join('source', 'section-repo', 'some-dir', 'Gemfile').to_s)
             ).to eq(first_date)
 
             second_date = Time.new(2003, 1, 5)
@@ -137,8 +137,59 @@ module Bookbinder
             end
 
             expect(
-              git.author_date(path.join('source', 'section-repo', 'some-dir', 'Gemfile'))
+              git.author_date(path.join('source', 'section-repo', 'some-dir', 'Gemfile').to_s)
             ).to eq(first_date)
+
+          ensure
+            ENV['GIT_AUTHOR_DATE'] = original_date
+          end
+        end
+      end
+
+      it "can access the date of the last non-excluded commit for a preprocessing-sourced file in an existing repo" do
+        require 'time'
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+          original_date = ENV['GIT_AUTHOR_DATE']
+
+          git = GitAccessor.new
+
+          begin
+            date = Time.new(2000, 11, 5)
+            ENV['GIT_AUTHOR_DATE'] = date.iso8601
+
+            init_repo(at_dir: path.join('output', 'preprocessing', 'sections', 'section-repo'),
+              file: 'some-dir/Gemfile',
+              contents: 'gemstuffz',
+              commit_message: 'new railz plz')
+
+            expect(
+              git.author_date(path.join('output', 'preprocessing', 'sections', 'section-repo', 'some-dir', 'Gemfile').to_s, dita: true)
+            ).to eq(date)
+
+          ensure
+            ENV['GIT_AUTHOR_DATE'] = original_date
+          end
+        end
+      end
+
+      it "returns nil when a preprocessing-sourced file is not found in the repo" do
+        require 'time'
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+          original_date = ENV['GIT_AUTHOR_DATE']
+
+          git = GitAccessor.new
+
+          begin
+            init_repo(at_dir: path.join('output', 'preprocessing', 'sections', 'section-repo'),
+              file: 'some-dir/ghost.xml',
+              contents: 'gemstuffz',
+              commit_message: 'new railz plz')
+
+            expect(
+              git.author_date(path.join('output', 'preprocessing', 'sections', 'section-repo', 'some-dir', 'ghost.dita').to_s, dita: true)
+            ).to be_nil
 
           ensure
             ENV['GIT_AUTHOR_DATE'] = original_date
@@ -165,7 +216,7 @@ module Bookbinder
               contents: 'gemstuffz',
               commit_message: 'new railz plz [exclude]')
 
-            output_time = git.author_date(path.join('source', 'section-repo', 'some-dir', 'Gemfile'))
+            output_time = git.author_date(path.join('source', 'section-repo', 'some-dir', 'Gemfile').to_s)
             expected_time = current_time
 
             expect(
@@ -190,7 +241,7 @@ module Bookbinder
           git = GitAccessor.new
 
           expect(
-            git.author_date(path.join('section-dir', 'Gemfile'))
+            git.author_date(path.join('section-dir', 'Gemfile').to_s)
           ).to be_nil
         end
       end

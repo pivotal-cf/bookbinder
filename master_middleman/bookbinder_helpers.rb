@@ -85,8 +85,14 @@ module Bookbinder
 
       def modified_date(format="%B %-d, %Y")
         git_accessor = Ingest::GitAccessor.new
-        date = git_accessor.author_date(current_page.source_file) || Time.new(1984,1,1)
-        "Page last updated: #{date.strftime(format)}"
+
+        if current_page.data.dita
+          date = git_accessor.author_date(preprocessing_path(current_page.source_file), dita: true)
+        else
+          date = git_accessor.author_date(current_page.source_file)
+        end
+
+        "Page last updated: #{date.strftime(format)}" if date
       end
 
       def breadcrumbs
@@ -149,6 +155,14 @@ module Bookbinder
           .select{ |key| nested_dir.match(/^#{key}/) }
           .sort_by{ |key| key.length }
           .last
+      end
+
+      def preprocessing_path(current_source_path)
+        root_path, nested_repo_path = current_source_path.split('source')
+
+        root_path.gsub!('/output/master_middleman', '')
+
+        "#{root_path}output/preprocessing/sections#{nested_repo_path}"
       end
 
       def parse_out_nested_dir_and_filename

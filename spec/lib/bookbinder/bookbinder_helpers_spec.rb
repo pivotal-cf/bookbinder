@@ -232,6 +232,41 @@ module Bookbinder
         end
       end
 
+      it "finds the appropriate modification date for dita files" do
+        original_date = ENV['GIT_AUTHOR_DATE']
+        FileUtils.cp_r 'master_middleman/.', tmpdir
+
+        begin
+          date = Time.new(1995, 1, 3)
+
+          ENV['GIT_AUTHOR_DATE'] = date.iso8601
+          init_repo(at_dir: tmp_subdir('output/preprocessing/sections/section-repo'),
+            contents: '<%= modified_date %>',
+            file: 'index.xml')
+
+          dita_frontmatter = <<-EOT
+---
+dita: true
+---
+          EOT
+
+          section_dir = tmp_subdir('source/section-repo')
+          FileUtils.mkdir_p section_dir
+          File.open(File.join(section_dir, 'index.html.md.erb'), "a") do |io|
+            io.write(dita_frontmatter)
+            io.write('<%= modified_date %>')
+          end
+
+          squelch_middleman_output
+          run_middleman
+          output = tmpdir.join('build', 'section-repo', 'index.html').read
+
+          expect(output.chomp).to eq('<p>Page last updated: January 3, 1995</p>')
+        ensure
+          ENV['GIT_AUTHOR_DATE'] = original_date
+        end
+      end
+
       it "returns something for a file not in version control" do
         section_dir = tmp_subdir('source/sections/section-repo')
         FileUtils.cp_r 'master_middleman/.', tmpdir
@@ -244,7 +279,7 @@ module Bookbinder
         run_middleman
         output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
 
-        expect(output.chomp).to eq('<p>Page last updated: January 1, 1984</p>')
+        expect(output.chomp).to eq('')
       end
     end
 

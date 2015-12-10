@@ -62,14 +62,27 @@ module Bookbinder
         end
       end
 
-      def author_date(path, exclusion_flag: '[exclude]')
+      def author_date(path, exclusion_flag: '[exclude]', dita: false)
+        if dita
+          source_dir = 'preprocessing'
+          path_to_file = path.sub(/\.html(.md)?(.erb)?/, '.xml')
+        else
+          source_dir = source_dir_name
+          path_to_file = path
+        end
+
+
         Pathname(path).dirname.ascend do |current_dir|
-          if current_dir.to_s.include?(source_dir_name) && current_dir.entries.include?(Pathname(".git"))
+          if (
+              current_dir.to_s.include?(source_dir) &&
+              current_dir.entries.include?(Pathname(".git")) &&
+              source_file_exists(Pathname(path).dirname, path_to_file)
+            )
+
             git = Git.open(current_dir)
-            logs = git.gblob(path).log
+            logs = git.gblob(path_to_file).log
 
             last_non_excluded_commit = logs.detect { |log| !log.message.include?(exclusion_flag) }
-
             return Time.now if last_non_excluded_commit.nil?
             return last_non_excluded_commit.author.date
           end
@@ -77,6 +90,16 @@ module Bookbinder
       end
 
       private
+
+      def source_file_exists(directory, path_to_file)
+        path = Pathname(path_to_file.split('/').last)
+
+        source_file_found = false
+        directory.ascend do |dir|
+          source_file_found = true if dir.entries.any? { |entry| entry == path }
+        end
+        source_file_found
+      end
 
       def temp_name(purpose)
         "bookbinder-git-accessor-#{purpose}"
