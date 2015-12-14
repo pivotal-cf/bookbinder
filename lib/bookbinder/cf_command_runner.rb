@@ -46,7 +46,7 @@ module Bookbinder
       # The routes will then be recreated from the creds repo.
       result = sheller.run_command(
         environment_variables,
-        "#{cf_binary_path} push #{deploy_target_app} -s cflinuxfs2 --no-route -m 256M -i 3",
+        "#{cf_binary_path} push #{deploy_target_app} -b ruby_buildpack -s cflinuxfs2 --no-route -m 256M -i 3",
         streams
       )
       raise "Could not deploy app to #{deploy_target_app}" unless result.success?
