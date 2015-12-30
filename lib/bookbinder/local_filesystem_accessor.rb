@@ -94,5 +94,15 @@ module Bookbinder
         map(&:chomp).
         map(&Pathname.method(:new))
     end
+
+    def source_file_exists?(directory, path_to_file)
+      path = Pathname(path_to_file.split('/').last)
+      source_file_found = false
+
+      Pathname(directory).ascend do |dir|
+        source_file_found = true if dir.entries.any? { |entry| entry == path }
+      end
+      source_file_found
+    end
   end
 end

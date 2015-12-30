@@ -314,6 +314,18 @@ module Bookbinder
       end
     end
 
+    describe 'finding a source file' do
+      it 'determines whether the given file exists in the given directory' do
+        Dir.mktmpdir do |tmpdir|
+          filepath = File.join tmpdir, 'file.txt'
+          File.write filepath, 'this is some text'
+
+          expect(fs_accessor.source_file_exists?(tmpdir, 'file.txt')).to eq true
+          expect(fs_accessor.source_file_exists?(tmpdir, 'nonexistent-file.txt')).to eq false
+        end
+      end
+    end
+
     describe 'calculating a relative path' do
       it 'returns the path from the source to the target directory' do
         Dir.mktmpdir do |tmpdir|

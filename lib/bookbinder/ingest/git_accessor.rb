@@ -1,5 +1,6 @@
 require 'git'
 require_relative '../directory_helpers'
+require_relative '../local_filesystem_accessor'
 require_relative 'update_failure'
 require_relative 'update_success'
 
@@ -63,6 +64,8 @@ module Bookbinder
       end
 
       def author_date(path, exclusion_flag: '[exclude]', dita: false)
+        fs = LocalFilesystemAccessor.new
+
         if dita
           source_dir = 'preprocessing'
           path_to_file = path.sub(/\.html(.md)?(.erb)?/, '.xml')
@@ -76,7 +79,7 @@ module Bookbinder
           if (
               current_dir.to_s.include?(source_dir) &&
               current_dir.entries.include?(Pathname(".git")) &&
-              source_file_exists(Pathname(path).dirname, path_to_file)
+              fs.source_file_exists?(Pathname(path).dirname, path_to_file)
             )
 
             git = Git.open(current_dir)
@@ -90,16 +93,6 @@ module Bookbinder
       end
 
       private
-
-      def source_file_exists(directory, path_to_file)
-        path = Pathname(path_to_file.split('/').last)
-
-        source_file_found = false
-        directory.ascend do |dir|
-          source_file_found = true if dir.entries.any? { |entry| entry == path }
-        end
-        source_file_found
-      end
 
       def temp_name(purpose)
         "bookbinder-git-accessor-#{purpose}"

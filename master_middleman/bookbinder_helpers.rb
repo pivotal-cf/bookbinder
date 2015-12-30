@@ -142,18 +142,17 @@ module Bookbinder
 
       def repo_url
         nested_dir, filename = parse_out_nested_dir_and_filename
+
         repo_dir = match_repo_dir(nested_dir)
         page_repo_config = config[:repo_links][repo_dir]
 
         if page_repo_config && page_repo_config['ref']
-          at_path = at_path(page_repo_config)
-          ref = Pathname(page_repo_config['ref'])
           org_repo = Pathname(page_repo_config['repo'])
-
+          ref = Pathname(page_repo_config['ref'])
+          at_path = at_path(page_repo_config)
           nested_dir = extract_nested_directory(nested_dir, repo_dir)
-          source_file_extension = current_page.data.dita ? '.xml' : '.html.md.erb'
 
-          "http://github.com/#{org_repo.join(Pathname('blob'), ref, Pathname(nested_dir), at_path, filename)}#{source_file_extension}"
+          "http://github.com/#{org_repo.join(Pathname('tree'), ref, Pathname(nested_dir), at_path, source_file(filename))}"
         end
       end
 
@@ -162,6 +161,23 @@ module Bookbinder
           .select{ |key| nested_dir.match(/^#{key}/) }
           .sort_by{ |key| key.length }
           .last
+      end
+
+      def source_file(filename)
+        fs = LocalFilesystemAccessor.new
+
+        if current_page.data.dita
+          source_filename = "#{filename}.xml"
+
+          if fs.source_file_exists?(Pathname(preprocessing_path(current_page.source_file)).dirname,
+                                             source_filename)
+            source_filename
+          else
+            ''
+          end
+        else
+          "#{filename}.html.md.erb"
+        end
       end
 
       def preprocessing_path(current_source_path)

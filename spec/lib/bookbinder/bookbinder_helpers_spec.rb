@@ -407,14 +407,15 @@ dita: true
               repo_link_enabled: true,
               repo_links: {
                 'desired/dir' => {
-                'repo' => 'the-best-repo-evah',
-                'ref' => 'awesome-ref'}
+                  'repo' => 'the-best-repo-evah',
+                  'ref' => 'awesome-ref'
+                }
               }
             )
 
             output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
 
-            expected_url = "<a id='repo-link' data-whitelist='ocean-trench martian-wasteland' style='display: none;' href='http://github.com/the-best-repo-evah/blob/awesome-ref/index.html.md.erb'>View the source for this page in GitHub</a>"
+            expected_url = "<a id='repo-link' data-whitelist='ocean-trench martian-wasteland' style='display: none;' href='http://github.com/the-best-repo-evah/tree/awesome-ref/index.html.md.erb'>View the source for this page in GitHub</a>"
 
             expect(output).to include(expected_url)
           end
@@ -439,7 +440,7 @@ dita: true
 
               output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
 
-              expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/blob/master/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
+              expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/tree/master/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
             end
           end
 
@@ -461,7 +462,7 @@ dita: true
 
               output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
 
-              expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/blob/master/nested/index.html.md.erb'>View the source for this page in GitHub</a>")
+              expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/tree/master/nested/index.html.md.erb'>View the source for this page in GitHub</a>")
             end
           end
 
@@ -484,7 +485,7 @@ dita: true
 
               output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
 
-              expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/blob/master/nested/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
+              expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/tree/master/nested/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
             end
           end
 
@@ -500,6 +501,10 @@ dita: true
               f.write(dita_frontmatter)
               f.write('<%= render_repo_link %>')
             end
+
+            init_repo(at_dir: tmp_subdir('output/preprocessing/sections/desired/dir/nested'),
+              contents: '<%= modified_date %>',
+              file: 'index.xml')
 
             squelch_middleman_output
             run_middleman(repo_link_enabled: true, repo_links: {
@@ -517,8 +522,42 @@ dita: true
             )
 
             output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
-            expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/blob/master/nested/some/path/index.xml'>View the source for this page in GitHub</a>")
+            expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/tree/master/nested/some/path/index.xml'>View the source for this page in GitHub</a>")
           end
+        end
+
+        it 'links to the parent directory if full source file for current page does not exist in version control' do
+          dita_frontmatter = <<-EOT
+---
+dita: true
+---
+          EOT
+
+          File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'index.html.erb'), 'w') do |f|
+            f.write(dita_frontmatter)
+            f.write("<%= render_repo_link %>")
+          end
+
+          init_repo(at_dir: tmp_subdir('output/preprocessing/sections/desired/dir'),
+                    contents: '<%= render_repo_link %>',
+                    file: 'not-the-source.xml')
+
+          squelch_middleman_output
+          run_middleman(
+            repo_link_enabled: true,
+            repo_links: {
+              'desired/dir' => {
+                'repo' => 'the-best-repo-evah',
+                'ref' => 'awesome-ref'
+              }
+            }
+          )
+
+          output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
+
+          expected_url = "<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/tree/awesome-ref'>View the source for this page in GitHub</a>"
+
+          expect(output).to include(expected_url)
         end
 
         it 'does not render repo link on page marked for exclusion' do
@@ -549,8 +588,8 @@ dita: true
           output_one = File.read(tmpdir.join('build', 'dir-one', 'index_one.html'))
           output_two = File.read(tmpdir.join('build', 'dir-two', 'index_two.html'))
 
-          expect(output_one).to_not include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/repo-one/blob/awesome-ref/dir-one/index_one.html.md.erb'>View the source for this page in GitHub</a>")
-          expect(output_two).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/repo-two/blob/master/index_two.html.md.erb'>View the source for this page in GitHub</a>")
+          expect(output_one).to_not include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/repo-one/tree/awesome-ref/dir-one/index_one.html.md.erb'>View the source for this page in GitHub</a>")
+          expect(output_two).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/repo-two/tree/master/index_two.html.md.erb'>View the source for this page in GitHub</a>")
         end
 
         it 'does not render a link when binding locally' do
