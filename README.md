@@ -343,12 +343,12 @@ For example, suppose you have an application with staging and production environ
 
 ### Including source repository link
 
-In the master_middleman dir or the layout repo's `source/layouts/layout.erb`, or an individual page to which you'd like to add a link. For example, add the line `<%= render_repo_link(include_environments: ['staging'])%>` in the desired location for your link to include the link only on sites with 'staging' in their URLs.
+In the master_middleman dir or the layout repo's `source/layouts/layout.erb`, or an individual page to which you'd like to add a link. For example, add the line `<%= render_repo_link(include_environments: ['staging']) %>` in the desired location for your link to include the link only on sites with 'staging' in their URLs.
 
 If you include the line below in your `source/layouts/layout.erb`, the feedback partial will be rendered on every page of your book that has not been specifically excluded:
 
 ```
-render_repo_link(include_environments: [<your-environments])%>`
+<%= render_repo_link(include_environments: [<your-environments]) %>
 ```
 
 To specifically exclude the repo link from being rendered on a page, add the line `<% exclude_repo_link %>` to the desired page.
