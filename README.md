@@ -717,7 +717,7 @@ This will bind a book and push it to staging.
 
 Bookbinder has the ability to deploy the finished product to either staging or production. The deployment scripts requires the Cloud Foundry command line interface (cf CLI).
 
-Download the cf CLI from [https://github.com/cloudfoundry/cli/releases](https://github.com/cloudfoundry/cli/releases). For more information and instructions, see the [cf CLI documentation](http://docs.cloudfoundry.org/devguide/installcf/index.html).
+Download the cf CLI from [https://github.com/cloudfoundry/cli/releases](https://github.com/cloudfoundry/cli/releases). For more information and instructions, see the [cf CLI documentation](http://docs.cloudfoundry.org/devguide/cf-cli/index.html).
 
 ### Setting up CF Apps
 
