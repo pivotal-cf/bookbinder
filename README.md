@@ -137,12 +137,10 @@ subnavs:										# optional
   - name: my_subnav
     topics:
     - title: My Nav Section
-      base_path: birds/robins
-      toc_path:  egg/index
+      toc_path:  birds/egg/index
       toc_nav_name: My Nav Overview
     - title: Other Nav Section
-      base_path: reptiles
-      toc_path:  index
+      toc_path:  reptiles/index
 
 subnav_exclusions:								# optional
   - .ignore-class
