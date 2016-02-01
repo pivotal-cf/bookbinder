@@ -88,13 +88,13 @@ module Bookbinder
       def bind
         @bind ||= Commands::Bind.new(
           streams,
-          output_locations,
-          configuration_fetcher,
-          Config::ConfigurationDecorator.new(loader: config_loader, config_filename: 'bookbinder.yml'),
-          local_filesystem_accessor,
-          runner,
-          Postprocessing::SitemapWriter.build(logger, final_app_directory, sitemap_port),
-          Preprocessing::Preprocessor.new(
+          output_locations: output_locations,
+          config_fetcher: configuration_fetcher,
+          config_decorator: Config::ConfigurationDecorator.new(loader: config_loader, config_filename: 'bookbinder.yml'),
+          file_system_accessor: local_filesystem_accessor,
+          middleman_runner: runner,
+          sitemap_writer: Postprocessing::SitemapWriter.build(logger, final_app_directory, sitemap_port),
+          preprocessor: Preprocessing::Preprocessor.new(
             Preprocessing::DitaPreprocessor.new(
               local_filesystem_accessor,
               subnav_generator_factory,
@@ -104,9 +104,9 @@ module Bookbinder
             ),
             Preprocessing::LinkToSiteGenDir.new(local_filesystem_accessor, subnav_generator_factory)
           ),
-          Ingest::ClonerFactory.new(streams, local_filesystem_accessor, version_control_system),
-          Ingest::SectionRepository.new,
-          directory_preparer
+          cloner_factory: Ingest::ClonerFactory.new(streams, local_filesystem_accessor, version_control_system),
+          section_repository: Ingest::SectionRepository.new,
+          directory_preparer: directory_preparer
         )
       end
 

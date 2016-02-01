@@ -10,22 +10,23 @@ module Bookbinder
       include Commands::Naming
 
       def initialize(base_streams,
-                     output_locations,
-                     config_fetcher,
-                     config_decorator,
-                     file_system_accessor,
-                     static_site_generator,
-                     sitemap_writer,
-                     preprocessor,
-                     cloner_factory,
-                     section_repository,
-                     directory_preparer)
+                     output_locations: nil,
+                     config_fetcher: nil,
+                     config_decorator: nil,
+                     file_system_accessor: nil,
+                     middleman_runner: nil,
+                     sitemap_writer: nil,
+                     preprocessor: nil,
+                     cloner_factory: nil,
+                     section_repository: nil,
+                     directory_preparer: nil)
+
         @base_streams = base_streams
         @output_locations = output_locations
         @config_fetcher = config_fetcher
         @config_decorator = config_decorator
         @file_system_accessor = file_system_accessor
-        @static_site_generator = static_site_generator
+        @middleman_runner = middleman_runner
         @sitemap_writer = sitemap_writer
         @preprocessor = preprocessor
         @cloner_factory = cloner_factory
@@ -75,7 +76,7 @@ module Bookbinder
         if file_system_accessor.file_exist?('redirects.rb')
           file_system_accessor.copy('redirects.rb', output_locations.final_app_dir)
         end
-        generation_result = static_site_generator.run(
+        generation_result = middleman_runner.run(
           ["build", bind_options.verbosity].compact.join(" "),
           streams: bind_options.streams,
           output_locations: output_locations,
@@ -114,7 +115,7 @@ module Bookbinder
         :preprocessor,
         :section_repository,
         :sitemap_writer,
-        :static_site_generator,
+        :middleman_runner,
       )
 
       def subnavs(sections)

@@ -54,19 +54,19 @@ module Bookbinder
                                               archive_menu: [])
       Commands::Bind.new(
         partial_args.fetch(:streams, null_streams),
-        partial_args.fetch(:output_locations, OutputLocations.new(
+        output_locations: partial_args.fetch(:output_locations, OutputLocations.new(
           final_app_dir: partial_args.fetch(:final_app_directory, File.absolute_path('final_app')),
           context_dir: partial_args.fetch(:context_dir, File.absolute_path('.'))
         )),
-        partial_args.fetch(:config_fetcher, double('config fetcher', fetch_config: stub_config)),
-        partial_args.fetch(:archive_menu_config, archive_menu_config),
-        partial_args.fetch(:file_system_accessor, null_fs_accessor),
-        partial_args.fetch(:middleman_runner, null_middleman_runner),
-        partial_args.fetch(:sitemap_writer, null_sitemap_writer),
-        partial_args.fetch(:preprocessor, null_preprocessor),
-        partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(null_streams, null_fs_accessor, GitFake.new)),
-        partial_args.fetch(:section_repository, Ingest::SectionRepository.new),
-        partial_args.fetch(:directory_preparer, Commands::BindComponents::DirectoryPreparer.new(real_fs_accessor))
+        config_fetcher: partial_args.fetch(:config_fetcher, double('config fetcher', fetch_config: stub_config)),
+        config_decorator: partial_args.fetch(:archive_menu_config, archive_menu_config),
+        file_system_accessor: partial_args.fetch(:file_system_accessor, null_fs_accessor),
+        middleman_runner: partial_args.fetch(:middleman_runner, null_middleman_runner),
+        sitemap_writer: partial_args.fetch(:sitemap_writer, null_sitemap_writer),
+        preprocessor: partial_args.fetch(:preprocessor, null_preprocessor),
+        cloner_factory: partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(null_streams, null_fs_accessor, GitFake.new)),
+        section_repository: partial_args.fetch(:section_repository, Ingest::SectionRepository.new),
+        directory_preparer: partial_args.fetch(:directory_preparer, Commands::BindComponents::DirectoryPreparer.new(real_fs_accessor))
       )
     end
 
@@ -112,16 +112,16 @@ module Bookbinder
 
       Commands::Bind.new(
           base_streams,
-          output_locations,
-          instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
-          double('decorator', generate: config),
-          instance_double('LocalFilesystemAccessor', file_exist?: false),
-          instance_double('MiddlemanRunner', run: failure),
-          instance_double('Postprocessing::SitemapWriter'),
-          preprocessor,
-          cloner_factory,
-          section_repository,
-          directory_preparer
+          output_locations: output_locations,
+          config_fetcher: instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
+          config_decorator: double('decorator', generate: config),
+          file_system_accessor: instance_double('LocalFilesystemAccessor', file_exist?: false),
+          middleman_runner: instance_double('MiddlemanRunner', run: failure),
+          sitemap_writer: instance_double('Postprocessing::SitemapWriter'),
+          preprocessor: preprocessor,
+          cloner_factory: cloner_factory,
+          section_repository: section_repository,
+          directory_preparer: directory_preparer
       ).run(['local'])
     end
 
@@ -186,16 +186,16 @@ module Bookbinder
 
       Commands::Bind.new(
         base_streams,
-        output_locations,
-        instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
-        double('decorator', generate: config),
-        null_fs_accessor,
-        runner,
-        null_sitemap_writer,
-        null_preprocessor,
-        instance_double('Ingest::ClonerFactory', produce: cloner),
-        section_repository,
-        null_directory_preparer
+        output_locations: output_locations,
+        config_fetcher: instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
+        config_decorator: double('decorator', generate: config),
+        file_system_accessor: null_fs_accessor,
+        middleman_runner: runner,
+        sitemap_writer: null_sitemap_writer,
+        preprocessor: null_preprocessor,
+        cloner_factory: instance_double('Ingest::ClonerFactory', produce: cloner),
+        section_repository: section_repository,
+        directory_preparer: null_directory_preparer
       ).run(['local'])
     end
 
@@ -235,16 +235,16 @@ module Bookbinder
 
       Commands::Bind.new(
         streams,
-        output_locations,
-        instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
-        double('decorator', generate: config),
-        fs,
-        instance_double('Bookbinder::MiddlemanRunner', run: success),
-        sitemap_writer,
-        null_preprocessor,
-        null_cloner_factory,
-        null_section_repository,
-        null_directory_preparer
+        output_locations: output_locations,
+        config_fetcher: instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
+        config_decorator: double('decorator', generate: config),
+        file_system_accessor: fs,
+        middleman_runner: instance_double('Bookbinder::MiddlemanRunner', run: success),
+        sitemap_writer: sitemap_writer,
+        preprocessor: null_preprocessor,
+        cloner_factory: null_cloner_factory,
+        section_repository: null_section_repository,
+        directory_preparer: null_directory_preparer
       ).run(['local'])
     end
 
@@ -259,16 +259,16 @@ module Bookbinder
 
         command = Commands::Bind.new(
           double('streams').as_null_object,
-          output_locations,
-          instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
-          double('decorator', generate: config),
-          null_fs_accessor,
-          null_middleman_runner,
-          sitemap_writer,
-          null_preprocessor,
-          null_cloner_factory,
-          null_section_repository,
-          null_directory_preparer
+          output_locations: output_locations,
+          config_fetcher: instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
+          config_decorator: double('decorator', generate: config),
+          file_system_accessor: null_fs_accessor,
+          middleman_runner: null_middleman_runner,
+          sitemap_writer: sitemap_writer,
+          preprocessor: null_preprocessor,
+          cloner_factory: null_cloner_factory,
+          section_repository: null_section_repository,
+          directory_preparer: null_directory_preparer
         )
 
         expect(command.run(['local'])).to be_nonzero
@@ -286,16 +286,16 @@ module Bookbinder
 
         command = Commands::Bind.new(
           double('streams').as_null_object,
-          output_locations,
-          instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
-          double('decorator', generate: config),
-          null_fs_accessor,
-          null_middleman_runner,
-          sitemap_writer,
-          null_preprocessor,
-          null_cloner_factory,
-          null_section_repository,
-          null_directory_preparer
+          output_locations: output_locations,
+          config_fetcher: instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
+          config_decorator: double('decorator', generate: config),
+          file_system_accessor: null_fs_accessor,
+          middleman_runner: null_middleman_runner,
+          sitemap_writer: sitemap_writer,
+          preprocessor: null_preprocessor,
+          cloner_factory: null_cloner_factory,
+          section_repository: null_section_repository,
+          directory_preparer: null_directory_preparer
         )
 
         expect(command.run(['local'])).to be_zero
