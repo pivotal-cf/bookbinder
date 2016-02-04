@@ -185,7 +185,7 @@ module Bookbinder
         original_date = ENV['GIT_AUTHOR_DATE']
 
         begin
-          date = Time.new(1995, 1, 3)
+          date = Time.new(1995, 1, 3, 2, 2, 2, "+02:00")
           ENV['GIT_AUTHOR_DATE'] = date.iso8601
 
           init_repo(at_dir: tmp_subdir('source/sections/section-repo'),
@@ -196,13 +196,15 @@ module Bookbinder
           run_middleman
           output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
 
-          expect(output.chomp).to eq('<p>Page last updated: January 3, 1995</p>')
+          expect(output.chomp).to eq(
+            "<p>Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date.utc}\"></span></p>"
+          )
         ensure
           ENV['GIT_AUTHOR_DATE'] = original_date
         end
       end
 
-      it "copes with multiple git repos in same middleman app" do
+      it 'copes with multiple git repos in same middleman app' do
         FileUtils.cp_r 'master_middleman/.', tmpdir
 
         original_date = ENV['GIT_AUTHOR_DATE']
@@ -225,14 +227,15 @@ module Bookbinder
           output_one = tmpdir.join('build', 'sections', 'section-repo-one', 'index.html').read
           output_two = tmpdir.join('build', 'sections', 'section-repo-two', 'index.html').read
 
-          expect(output_one.chomp).to eq('<p>Page last updated: January 3, 1995</p>')
-          expect(output_two.chomp).to eq('<p>Page last updated: March 8, 2005</p>')
+
+          expect(output_one.chomp).to eq("<p>Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date_one.utc}\"></span></p>")
+          expect(output_two.chomp).to eq("<p>Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date_two.utc}\"></span></p>")
         ensure
           ENV['GIT_AUTHOR_DATE'] = original_date
         end
       end
 
-      it "finds the appropriate modification date for dita files" do
+      it 'finds the appropriate modification date for dita files' do
         original_date = ENV['GIT_AUTHOR_DATE']
         FileUtils.cp_r 'master_middleman/.', tmpdir
 
@@ -261,13 +264,13 @@ dita: true
           run_middleman
           output = tmpdir.join('build', 'section-repo', 'index.html').read
 
-          expect(output.chomp).to eq('<p>Page last updated: January 3, 1995</p>')
+          expect(output.chomp).to eq("<p>Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date.utc}\"></span></p>")
         ensure
           ENV['GIT_AUTHOR_DATE'] = original_date
         end
       end
 
-      it "returns nothing for a file not in version control" do
+      it 'returns nothing for a file not in version control' do
         section_dir = tmp_subdir('source/sections/section-repo')
         FileUtils.cp_r 'master_middleman/.', tmpdir
         FileUtils.mkdir_p section_dir
@@ -282,7 +285,7 @@ dita: true
         expect(output.chomp).to eq('')
       end
 
-      it "returns nothing for a file that has no non-excluded commits and no user-provided date" do
+      it 'returns nothing for a file that has no non-excluded commits and no user-provided date' do
         FileUtils.cp_r 'master_middleman/.', tmpdir
 
         begin
@@ -305,15 +308,18 @@ dita: true
         end
       end
 
-      it "returns the user-provided date for a file that has no non-excluded commits" do
+      it 'returns the user-provided date for a file that has no non-excluded commits' do
         FileUtils.cp_r 'master_middleman/.', tmpdir
 
         original_date = ENV['GIT_AUTHOR_DATE']
 
         begin
           date = Time.new(1995, 1, 3)
+          default_date = Time.new(1999, 12, 31)
+
 
           ENV['GIT_AUTHOR_DATE'] = date.iso8601
+
           init_repo(at_dir: tmp_subdir('source/sections/section-repo'),
             contents: '<%= modified_date(default_date: "December 31, 1999") %>',
             commit_message: '[exclude]',
@@ -323,7 +329,7 @@ dita: true
           run_middleman
           output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
 
-          expect(output.chomp).to eq('<p>Page last updated: December 31, 1999</p>')
+          expect(output.chomp).to eq("<p>Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{default_date.utc}\"></span></p>")
         ensure
           ENV['GIT_AUTHOR_DATE'] = original_date
         end
