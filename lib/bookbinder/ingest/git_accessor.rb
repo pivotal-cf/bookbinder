@@ -103,7 +103,7 @@ module Bookbinder
         if dest_dir.exist?
           Git.open(dest_dir)
         else
-          Git.clone(url, name, path: path)
+          Git.clone(url, name, path: path, recursive: true)
         end
       end
     end
