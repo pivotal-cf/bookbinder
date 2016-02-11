@@ -8,18 +8,22 @@ module Bookbinder
       let(:config_validator)      { double('validator') }
       let(:loader)                { double('loader') }
       let(:credentials_provider)  { double('creds provider') }
+      let(:config_class)          { Configuration }
       let(:config_fetcher)        { Fetcher.new(config_validator,
                                                 loader,
-                                                credentials_provider) }
+                                                credentials_provider,
+                                                config_class) }
 
       it 'can read config from a relative path even when I have changed working directory' do
         config_fetcher.set_config_file_path(path_to_config_file)
         config_fetcher.set_config_dir_path(path_to_config_dir)
         allow(Dir).to receive(:[]).and_return([])
-        allow(config_validator).to receive(:exceptions).and_return []
+
+        allow(config_validator).to receive(:exceptions) { [] }
         allow(loader).to receive(:load).with(File.expand_path(path_to_config_file)) { { foo: 'bar' } }
+
         Dir.chdir('/tmp') do |tmp|
-          expect(config_fetcher.fetch_config).to eq(Configuration.parse(foo: 'bar'))
+          expect(config_fetcher.fetch_config).to eq(config_class.parse({ foo: 'bar' }))
         end
       end
 
@@ -37,7 +41,8 @@ module Bookbinder
         allow(credentials_provider).
           to receive(:credentials).
           with('git@myvcs.biz:org/repo') { creds }
-        allow(config_validator).to receive(:exceptions) { [] }
+
+        allow(config_validator).to receive(:exceptions).with(config_class.parse({ 'cred_repo' => 'git@myvcs.biz:org/repo' })) { [] }
         expect(config_fetcher.fetch_credentials('acceptance')[:aws].access_key).to eq('foobar')
       end
 
@@ -77,13 +82,13 @@ module Bookbinder
             'public_host' => 'http://example.com',
           }
           allow(loader).to receive(:load).with(File.expand_path(path_to_config_file)) { config_hash_in_file }
-          expect(config_fetcher.fetch_config).to eq(Configuration.parse(expected_config_hash))
+          expect(config_fetcher.fetch_config).to eq(config_class.parse(expected_config_hash))
         end
 
         it 'passes the configuration object to the validator' do
           input_hash = {'book_repo' => 'foo/baz', 'public_host' => 'foo.camels.io' }
           allow(loader).to receive(:load) { input_hash }
-          expect(config_validator).to receive(:exceptions).with(Configuration.parse(input_hash))
+          expect(config_validator).to receive(:exceptions).with(config_class.parse(input_hash))
 
           config_fetcher.fetch_config
         end
@@ -129,12 +134,8 @@ module Bookbinder
       end
 
       context 'when optional config directory is present' do
-        before do
-          config_fetcher.set_config_file_path(path_to_config_file)
-          config_fetcher.set_config_dir_path('./my-dir')
-          allow(Dir).to receive(:[]).with(File.expand_path('./my-dir') + '/*.yml') { ['one.yml', 'two.yml'] }
-        end
         it 'calls loader for config.yml and each file in config directory, and validates the merged hash' do
+          allow(Dir).to receive(:[]).with(File.expand_path('./my-dir') + '/*.yml') { ['one.yml', 'two.yml'] }
           allow(config_validator).to receive(:exceptions) { [] }
 
           expect(loader).to receive(:load).with(
@@ -151,14 +152,20 @@ module Bookbinder
 
           merged_hash = {config: 'yml', thing: {nested: 'item'}, first: 'value', second: 'place'}
 
-          expect(config_validator).to receive(:exceptions).with(Configuration.parse(merged_hash))
-          expect(config_fetcher.fetch_config).to eq(Configuration.parse(merged_hash))
+          config_fetcher.set_config_file_path(path_to_config_file)
+          config_fetcher.set_config_dir_path('./my-dir')
+          expect(config_fetcher.fetch_config).to eq(config_class.parse(merged_hash))
         end
 
         context 'when optional configuration file has invalid syntax' do
           it 'raises an informative error' do
+            allow(Dir).to receive(:[]).with(File.expand_path('./my-dir') + '/*.yml') { ['one.yml', 'two.yml'] }
             allow(loader).to receive(:load).with(File.expand_path('config.yml')) { {} }
             allow(loader).to receive(:load).with(File.expand_path('one.yml')) { raise InvalidSyntaxError }
+
+            config_fetcher.set_config_file_path(path_to_config_file)
+            config_fetcher.set_config_dir_path('./my-dir')
+
             expect { config_fetcher.fetch_config }.to raise_error /There is a syntax error in your config file/
           end
         end

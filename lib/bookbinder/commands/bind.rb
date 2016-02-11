@@ -1,7 +1,6 @@
 require 'middleman-syntax'
 
-require_relative '../errors/cli_error'
-require_relative 'bind/bind_options'
+require_relative 'components/command_options'
 require_relative 'naming'
 
 module Bookbinder
@@ -35,7 +34,7 @@ module Bookbinder
       end
 
       def usage
-        ["bind <local|remote> [--verbose] [--dita-flags='<dita-option>=<value>']",
+        ["bind <local|remote> [--verbose] [--dita-flags=\"<dita-option>='<value>'\"]",
          "Bind the sections specified in config.yml from <local> or <remote> into the final_app directory"]
       end
 
@@ -48,7 +47,7 @@ module Bookbinder
       end
 
       def run(cli_arguments)
-        bind_options        = BindComponents::BindOptions.new(cli_arguments, base_streams).tap(&:validate!)
+        bind_options        = Components::CommandOptions.new(cli_arguments, base_streams).tap(&:validate!)
         bind_config         = config_fetcher.fetch_config
         cloner              = cloner_factory.produce(bind_options.local_repo_dir)
 

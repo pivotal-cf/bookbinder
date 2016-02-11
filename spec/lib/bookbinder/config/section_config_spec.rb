@@ -26,6 +26,11 @@ module Bookbinder
           to eq('mygeneratedsubnav')
       end
 
+      it "can return the pdf output filename" do
+        expect(SectionConfig.new('output_filename' => 'my-filename.pdf').pdf_output_filename).
+          to eq('my-filename.pdf')
+      end
+
       it "can return the desired directory name" do
         expect(SectionConfig.new('directory' => 'mygreatdir').desired_directory_name).
           to eq('mygreatdir')

@@ -36,7 +36,7 @@ module Bookbinder
       end
 
       begin
-        command_runner.run command_name, command_arguments
+        command_runner.run(command_name, command_arguments)
 
       rescue Config::CfCredentials::CredentialKeyError => e
         colorized_streams[:err].puts "#{e.message}, in credentials.yml"

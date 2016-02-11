@@ -46,6 +46,11 @@ module Bookbinder
       FileUtils.cp_r src, dest
     end
 
+    def copy_and_rename(src, dest)
+      make_directory(Pathname(dest).dirname)
+      FileUtils.cp_r src, dest
+    end
+
     def copy_contents(src, dest)
       raise Errors::ProgrammerMistake.new("The method copy_contents cannot copy the contents of the directory '#{src}' because it was not found.") unless Dir.exists?(src)
       copy "#{src}/.", dest
@@ -68,7 +73,9 @@ module Bookbinder
     end
 
     def find_files_with_ext(ext, path)
-      Dir[File.join path, "**/*.#{ext}"]
+      all_files = find_files_recursively(path)
+      matching_files = all_files.select {|p| p.to_s.match(/\.#{ext}/) }
+      matching_files.map(&:to_s)
     end
 
     def relative_path_from(src, target)
@@ -78,7 +85,7 @@ module Bookbinder
     end
 
     def find_files_recursively(from)
-      `find -L #{from}`.
+      `find -L #{from} -type f`.
         lines.
         map(&:chomp).
         map(&Pathname.method(:new)).

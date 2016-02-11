@@ -25,7 +25,7 @@ module Bookbinder
 
       it "prepares directories and then preprocesses fetched sections" do
         streams = {out: "foo", success: "bar"}
-        directory_preparer = instance_double('BindComponents::DirectoryPreparer')
+        directory_preparer = instance_double('Components::Bind::DirectoryPreparer')
         output_locations = OutputLocations.new(context_dir: ".")
         preprocessor = instance_double('Preprocessing::Preprocessor')
 
@@ -87,7 +87,7 @@ module Bookbinder
           file_system_accessor: fs,
           preprocessor: instance_double('Preprocessing::Preprocessor', preprocess: nil),
           section_repository: instance_double('Ingest::SectionRepository', fetch: []),
-          directory_preparer: instance_double('BindComponents::DirectoryPreparer', prepare_directories: nil)
+          directory_preparer: instance_double('Components::Bind::DirectoryPreparer', prepare_directories: nil)
         ).run([])
       end
 
@@ -118,7 +118,7 @@ module Bookbinder
           preprocessor: instance_double('Preprocessing::Preprocessor', preprocess: nil),
           cloner: instance_double('Ingest::LocalFileSystemCloner'),
           section_repository: instance_double('Ingest::SectionRepository', fetch: [section]),
-          directory_preparer: instance_double('BindComponents::DirectoryPreparer', prepare_directories: nil)
+          directory_preparer: instance_double('Components::Bind::DirectoryPreparer', prepare_directories: nil)
         ).run([])
       end
     end

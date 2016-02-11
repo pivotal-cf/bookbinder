@@ -1,3 +1,4 @@
+require_relative '../../../lib/bookbinder/config/dita_config_generator'
 require_relative '../ingest/destination_directory'
 require_relative '../ingest/repo_identifier'
 require_relative 'section_config'
@@ -8,12 +9,17 @@ module Bookbinder
     class Configuration
       class << self
         def parse(input_config)
-          new(symbolize_keys(input_config).
-              merge(expand_repo_identifiers(input_config)).
-              merge(sections: combined_sections(input_config)))
+          section_configs = to_section_configs(combined_sections(input_config))
+          parse_sections(input_config, section_configs)
         end
 
-        private
+        protected
+
+        def parse_sections(input_config, section_configs)
+          new(symbolize_keys(input_config).
+              merge(expand_repo_identifiers(input_config)).
+              merge(sections: section_configs))
+        end
 
         def symbolize_keys(h)
           h.reduce({}) {|acc, (k, v)| acc.merge(k.to_sym => v) }
@@ -24,9 +30,14 @@ module Bookbinder
             reduce({}) {|h, (k, v)| h.merge(:"#{k}_url" => Ingest::RepoIdentifier.new(v))}
         end
 
+        def to_section_configs sections
+          sections.map { |section| Config::SectionConfig.new(section) }
+        end
+
+        private
+
         def combined_sections(input_config)
-          (regular_sections(input_config) + dita_sections(input_config)).
-            map { |section| Config::SectionConfig.new(section) }
+          regular_sections(input_config) + dita_sections(input_config)
         end
 
         def regular_sections(input_config)
@@ -34,29 +45,9 @@ module Bookbinder
         end
 
         def dita_sections(input_config)
-          dita_sections = input_config['dita_sections']
-          (dita_sections || []).map { |dita_section|
-            dita_section.merge(
-              'preprocessor_config' => {
-                'ditamap_location' => dita_section['ditamap_location'],
-                'ditaval_location' => dita_section['ditaval_location']
-              },
-              'subnav_template' => dita_subnav_template(dita_sections, dita_section)
-            ).reject { |k, _|
-              %w(ditamap_location ditaval_location).include?(k)
-            }
+          (input_config['dita_sections'] || []).map { |dita_section|
+            DitaConfigGenerator.new(dita_section).to_hash
           }
-        end
-
-        def dita_subnav_template(all_sections, current_section)
-          subnav_sections = all_sections.select { |section| section['ditamap_location'] }
-          if subnav_sections.any?
-            subnav_section = subnav_sections.include?(current_section) ? current_section : subnav_sections.first
-            dest_dir = Ingest::DestinationDirectory.new(
-              subnav_section.fetch('repository', {})['name'], subnav_section['directory'])
-
-            "dita_subnav_#{dest_dir}"
-          end
         end
       end
 

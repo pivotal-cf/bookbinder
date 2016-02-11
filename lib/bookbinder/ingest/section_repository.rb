@@ -34,7 +34,8 @@ module Bookbinder
             section_config.preprocessor_config,
             section_config.at_repo_path,
             section_config.repo_name,
-            working_copy.ref
+            working_copy.ref,
+            section_config.pdf_output_filename
           )
         end
       end

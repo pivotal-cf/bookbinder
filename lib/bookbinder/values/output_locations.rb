@@ -46,6 +46,10 @@ module Bookbinder
       preprocessing_home_dir.join('html_from_preprocessing')
     end
 
+    def pdf_from_preprocessing_dir
+      preprocessing_home_dir.join('pdf_from_preprocessing')
+    end
+
     def formatted_dir
       preprocessing_home_dir.join('site_generator_ready')
     end
@@ -64,6 +68,14 @@ module Bookbinder
 
     def pdf_config_dir
       context_dir
+    end
+
+    def artifact_dir
+      context_dir.join('artifacts')
+    end
+
+    def pdf_artifact_dir
+      artifact_dir.join('pdfs')
     end
 
     private

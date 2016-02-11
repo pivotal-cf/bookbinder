@@ -59,7 +59,7 @@ module Bookbinder
           dita_book = BookFixture.new('dita-book', SectionSource.local)
           dita_options = "args.copycss='yes' " +
                          "args.css='master.css' " +
-                         "args.cssroot='#{File.absolute_path '../fixtures/repositories/dita-book/master_middleman/source/stylesheets/', __dir__} " +
+                         "args.cssroot='#{File.absolute_path '../fixtures/repositories/dita-book/master_middleman/source/stylesheets/', __dir__}' " +
                          "args.csspath='./copied_stylesheets/' "
           application.bind_book_with_dita_options(dita_book,
                                                   silent: true,
@@ -80,20 +80,18 @@ module Bookbinder
                                                     'my-dita-section-at-v-two')
 
       expect(dita_book.html_files_for_dita_section(dita_section_at_ref_one)).
-          to match_array ['some-guide-v-one', '../dita-section-dependency/some-guide-1']
+          to match_array ['some-guide-v-one', './dita-section-dependency/some-guide-1']
 
       expect(dita_book.html_files_for_dita_section(dita_section_at_ref_two)).
-          to match_array ['some-guide-v-two', '../dita-section-dependency/some-guide-1']
+          to match_array ['some-guide-v-two', './dita-section-dependency/some-guide-1']
     end
 
     def it_correctly_binds_sections_in(dita_book)
       dita_section_one = DitaSectionData.new('dita-section-one',
                                              'my-renamed-dita-section-one')
-      dita_section_dependency = DitaSectionData.new('dita-section-dependency',
-                                                    'dita-section-dependency')
 
       expect(dita_book.html_files_for_dita_section(dita_section_one)).
-          to match_array ['some-guide', '../dita-section-dependency/some-guide-1']
+          to match_array ['some-guide', './dita-section-dependency/some-guide-1']
 
       expect(dita_book.has_frontmatter(dita_section_one)).to be_truthy
 
@@ -105,11 +103,9 @@ module Bookbinder
 
       expect(dita_book.final_images_for(dita_section_one))
       .to match_array %w(./final_app/public/my-renamed-dita-section-one/image_one.png
-                         ./final_app/public/my-renamed-dita-section-one/images/image_two.jpeg)
-
-      expect(dita_book.final_images_for(dita_section_dependency))
-      .to match_array %w(./final_app/public/dita-section-dependency/image_one_dependency.jpeg
-                         ./final_app/public/dita-section-dependency/images/image_two_dependency.png)
+                         ./final_app/public/my-renamed-dita-section-one/images/image_two.jpeg
+                         ./final_app/public/my-renamed-dita-section-one/dita-section-dependency/image_one_dependency.jpeg
+                         ./final_app/public/my-renamed-dita-section-one/dita-section-dependency/images/image_two_dependency.png)
     end
 
     def it_correctly_creates_a_dita_subnav_for(dita_book)

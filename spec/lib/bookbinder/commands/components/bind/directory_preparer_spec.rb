@@ -1,12 +1,12 @@
-require_relative '../../../lib/bookbinder/config/configuration'
-require_relative '../../../lib/bookbinder/commands/bind/directory_preparer'
-require_relative '../../../lib/bookbinder/commands/bind/layout_preparer'
-require_relative '../../../lib/bookbinder/local_filesystem_accessor'
-require_relative '../../../lib/bookbinder/values/output_locations'
+require_relative '../../../../../../lib/bookbinder/config/configuration'
+require_relative '../../../../../../lib/bookbinder/commands/components/bind/directory_preparer'
+require_relative '../../../../../../lib/bookbinder/commands/components/bind/layout_preparer'
+require_relative '../../../../../../lib/bookbinder/local_filesystem_accessor'
+require_relative '../../../../../../lib/bookbinder/values/output_locations'
 
 module Bookbinder
-  module Commands
-    module BindComponents
+  module Commands::Components
+    module Bind
       describe DirectoryPreparer do
         describe "#prepare_directories" do
           it "empties and then populates output and final app directories" do

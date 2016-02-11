@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<val>
+	<prop att="otherprops" val="test-phrase-included" action="include"/>
+	<prop att="otherprops" val="test-phrase-excluded" action="exclude"/>
+</val>

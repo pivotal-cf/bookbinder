@@ -6,10 +6,11 @@ require_relative 'yaml_loader'
 module Bookbinder
   module Config
     class Fetcher
-      def initialize(configuration_validator, loader, credentials_provider)
+      def initialize(configuration_validator, loader, credentials_provider, config_class)
         @loader = loader
         @configuration_validator = configuration_validator
         @credentials_provider = credentials_provider
+        @config_class = config_class
       end
 
       def fetch_config
@@ -43,7 +44,7 @@ module Bookbinder
       private
 
       attr_reader(:loader, :configuration_validator, :config, :config_file_path, :config_dir_path,
-                  :credentials_provider)
+                  :credentials_provider, :config_class)
 
       def read_config_file
         loader.load(config_file_path)
@@ -65,7 +66,7 @@ module Bookbinder
       def validate(base_hash, optional_hash)
         raise 'Your config.yml appears to be empty. Please check and try again.' unless base_hash
 
-        Configuration.parse(base_hash.merge(optional_hash)).tap do |config|
+        config_class.parse(base_hash.merge(optional_hash)).tap do |config|
           errors = configuration_validator.exceptions(config)
           raise errors.first if errors.any?
         end

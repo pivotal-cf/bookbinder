@@ -2,12 +2,15 @@ Dir.glob(File.expand_path('../../commands/*.rb', __FILE__)).each do |command_fil
   require command_file
 end
 
-require_relative '../commands/bind/directory_preparer'
+require_relative '../commands/components/bind/directory_preparer'
+require_relative '../commands/components/imprint/directory_preparer'
 require_relative '../config/configuration_decorator'
 require_relative '../config/fetcher'
 require_relative '../config/remote_yaml_credential_provider'
 require_relative '../config/validator'
 require_relative '../config/yaml_loader'
+require_relative '../config/configuration'
+require_relative '../config/imprint/configuration'
 require_relative '../dita_command_creator'
 require_relative '../dita_html_for_middleman_formatter'
 require_relative '../html_document_manipulator'
@@ -16,7 +19,8 @@ require_relative '../ingest/section_repository'
 require_relative '../local_filesystem_accessor'
 require_relative '../middleman_runner'
 require_relative '../postprocessing/sitemap_writer'
-require_relative '../preprocessing/dita_preprocessor'
+require_relative '../preprocessing/dita_html_preprocessor'
+require_relative '../preprocessing/dita_pdf_preprocessor'
 require_relative '../preprocessing/link_to_site_gen_dir'
 require_relative '../preprocessing/preprocessor'
 require_relative '../subnav/subnav_generator_factory'
@@ -67,17 +71,18 @@ module Bookbinder
           ),
           build_and_push_tarball,
           bind,
-          Commands::PushFromLocal.new(streams, logger, configuration_fetcher, 'acceptance'),
+          Commands::PushFromLocal.new(streams, logger, configuration_fetcher(Config::Configuration), 'acceptance'),
           push_local_to_staging,
-          Commands::PushToProd.new(streams, logger, configuration_fetcher, Dir.mktmpdir),
+          Commands::PushToProd.new(streams, logger, configuration_fetcher(Config::Configuration), Dir.mktmpdir),
           Commands::RunPublishCI.new(bind, push_local_to_staging, build_and_push_tarball),
-          Commands::Punch.new(streams, configuration_fetcher, version_control_system),
+          Commands::Punch.new(streams, configuration_fetcher(Config::Configuration), version_control_system),
           Commands::UpdateLocalDocRepos.new(
             streams,
-            configuration_fetcher,
+            configuration_fetcher(Config::Configuration),
             version_control_system
           ),
-          watch
+          watch,
+          imprint
         ]
       end
 
@@ -89,17 +94,17 @@ module Bookbinder
         @bind ||= Commands::Bind.new(
           streams,
           output_locations: output_locations,
-          config_fetcher: configuration_fetcher,
+          config_fetcher: configuration_fetcher(Config::Configuration),
           config_decorator: Config::ConfigurationDecorator.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           file_system_accessor: local_filesystem_accessor,
           middleman_runner: runner,
           sitemap_writer: Postprocessing::SitemapWriter.build(logger, final_app_directory, sitemap_port),
           preprocessor: Preprocessing::Preprocessor.new(
-            Preprocessing::DitaPreprocessor.new(
+            Preprocessing::DitaHTMLPreprocessor.new(
               local_filesystem_accessor,
               subnav_generator_factory,
               DitaHtmlForMiddlemanFormatter.new(local_filesystem_accessor, html_document_manipulator),
-              DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY']),
+              dita_command_creator,
               sheller
             ),
             Preprocessing::LinkToSiteGenDir.new(local_filesystem_accessor, subnav_generator_factory)
@@ -110,12 +115,16 @@ module Bookbinder
         )
       end
 
+      def dita_command_creator
+        DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY'])
+      end
+
       def watch
         @watch ||= Commands::Watch.new(
           streams,
           middleman_runner: runner,
           output_locations: output_locations,
-          config_fetcher: configuration_fetcher,
+          config_fetcher: configuration_fetcher(Config::Configuration),
           config_decorator: Config::ConfigurationDecorator.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           file_system_accessor: local_filesystem_accessor,
           preprocessor: Preprocessing::Preprocessor.new(Preprocessing::LinkToSiteGenDir.new(local_filesystem_accessor, subnav_generator_factory)),
@@ -125,11 +134,23 @@ module Bookbinder
         )
       end
 
+      def imprint
+        Commands::Imprint.new(
+          streams,
+          output_locations: output_locations,
+          config_fetcher: configuration_fetcher(Config::Imprint::Configuration),
+          preprocessor: Preprocessing::Preprocessor.new(Preprocessing::DitaPDFPreprocessor.new(local_filesystem_accessor, dita_command_creator, sheller)),
+          cloner_factory: Ingest::ClonerFactory.new(streams, local_filesystem_accessor, version_control_system),
+          section_repository: Ingest::SectionRepository.new,
+          directory_preparer: Commands::Components::Imprint::DirectoryPreparer.new(local_filesystem_accessor)
+        )
+      end
+
       def push_local_to_staging
         @push_local_to_staging ||= Commands::PushFromLocal.new(
           streams,
           logger,
-          configuration_fetcher,
+          configuration_fetcher(Config::Configuration),
           'staging'
         )
       end
@@ -137,15 +158,16 @@ module Bookbinder
       def build_and_push_tarball
         @build_and_push_tarball ||= Commands::BuildAndPushTarball.new(
           streams,
-          configuration_fetcher
+          configuration_fetcher(Config::Configuration)
         )
       end
 
-      def configuration_fetcher
-        @configuration_fetcher ||= Config::Fetcher.new(
+      def configuration_fetcher(config_class)
+        Config::Fetcher.new(
           Config::Validator.new(local_filesystem_accessor),
           config_loader,
-          Config::RemoteYamlCredentialProvider.new(logger, version_control_system)
+          Config::RemoteYamlCredentialProvider.new(logger, version_control_system),
+          config_class
         ).tap do |fetcher|
           fetcher.set_config_file_path './config.yml'
           fetcher.set_config_dir_path './config/'
@@ -161,7 +183,7 @@ module Bookbinder
       end
 
       def directory_preparer
-        Commands::BindComponents::DirectoryPreparer.new(local_filesystem_accessor)
+        Commands::Components::Bind::DirectoryPreparer.new(local_filesystem_accessor)
       end
 
       def output_locations

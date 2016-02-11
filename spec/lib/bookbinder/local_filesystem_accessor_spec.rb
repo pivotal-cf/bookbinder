@@ -148,7 +148,21 @@ module Bookbinder
       end
     end
 
-    describe 'copying a file' do
+    describe 'copying and renaming a file' do
+      it 'copies a file to the specified location with the specified filename' do
+        Dir.mktmpdir do |tmpdir|
+          dest_file_path = File.join(tmpdir, 'dest_dir', 'new_file.txt')
+          old_filepath = File.join tmpdir, 'old_file.txt'
+
+          File.write old_filepath, 'this is some text'
+
+          expect { fs_accessor.copy_and_rename(old_filepath, dest_file_path) }.
+            to change { File.exist?(dest_file_path) }.from(false).to(true)
+        end
+      end
+    end
+
+    describe 'copying a file while preserving filename' do
       it 'copies a file to a specified location' do
         Dir.mktmpdir do |tmpdir|
           dest_dir_path = File.join(tmpdir, 'dest_dir')
@@ -310,6 +324,26 @@ module Bookbinder
           File.write nested_filepath, 'this is some text in a nested file'
 
           expect(fs_accessor.find_files_with_ext('txt', tmpdir)).to include filepath, nested_filepath
+        end
+      end
+
+      it 'finds all files in symlinked directories' do
+        Dir.mktmpdir do |tmpdir|
+          filepath = File.join tmpdir, 'my-dir', 'file.txt'
+          FileUtils.mkdir File.join tmpdir, 'my-dir'
+          File.write filepath, 'this is some text'
+
+          symlinked_filepath = File.join tmpdir, 'symlink-dir', 'linked-file.txt'
+          FileUtils.mkdir File.join tmpdir, 'symlink-dir'
+          File.write symlinked_filepath, 'this is some text in a nested file'
+
+          linked_dir = Pathname(tmpdir).join('my-dir', 'symlink-dir').to_s
+          existing_dir = Pathname(tmpdir).join('symlink-dir').to_s
+          FileUtils.symlink(existing_dir, linked_dir)
+
+          search_directory = File.join tmpdir, 'my-dir'
+          expected_path = File.join tmpdir, 'my-dir', 'symlink-dir', 'linked-file.txt'
+          expect(fs_accessor.find_files_with_ext('txt', search_directory)).to include filepath, expected_path
         end
       end
     end

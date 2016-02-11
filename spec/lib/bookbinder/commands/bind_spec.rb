@@ -1,5 +1,5 @@
 require_relative '../../../../lib/bookbinder/commands/bind'
-require_relative '../../../../lib/bookbinder/commands/bind/directory_preparer'
+require_relative '../../../../lib/bookbinder/commands/components/bind/directory_preparer'
 require_relative '../../../../lib/bookbinder/config/configuration'
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/ingest/section_repository'
@@ -32,7 +32,7 @@ module Bookbinder
     let(:null_preprocessor) { instance_double('Bookbinder::Preprocessing::LinkToSiteGenDir', preprocess: nil) }
     let(:null_middleman_runner) { instance_double('Bookbinder::MiddlemanRunner', run: success) }
     let(:null_logger) { double('deprecated logger').as_null_object }
-    let(:null_directory_preparer) { instance_double('Bookbinder::Commands::BindComponents::DirectoryPreparer', prepare_directories: nil) }
+    let(:null_directory_preparer) { instance_double('Bookbinder::Commands::Components::Bind::DirectoryPreparer', prepare_directories: nil) }
     let(:null_cloner) { double('cloner').as_null_object }
     let(:null_cloner_factory) { instance_double('Bookbinder::Ingest::ClonerFactory', produce: null_cloner) }
     let(:null_section_repository) { instance_double('Ingest::SectionRepository', fetch: []) }
@@ -66,12 +66,12 @@ module Bookbinder
         preprocessor: partial_args.fetch(:preprocessor, null_preprocessor),
         cloner_factory: partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(null_streams, null_fs_accessor, GitFake.new)),
         section_repository: partial_args.fetch(:section_repository, Ingest::SectionRepository.new),
-        directory_preparer: partial_args.fetch(:directory_preparer, Commands::BindComponents::DirectoryPreparer.new(real_fs_accessor))
+        directory_preparer: partial_args.fetch(:directory_preparer, Commands::Components::Bind::DirectoryPreparer.new(real_fs_accessor))
       )
     end
 
     it "prepares directories and then preprocesses fetched sections" do
-      directory_preparer = instance_double('BindComponents::DirectoryPreparer')
+      directory_preparer = instance_double('Components::Bind::DirectoryPreparer')
       output_locations = OutputLocations.new(context_dir: ".")
       preprocessor = instance_double('Preprocessing::Preprocessor')
       base_streams = { err: double('stream').as_null_object }

@@ -19,6 +19,10 @@ module Bookbinder
         config['directory']
       end
 
+      def pdf_output_filename
+        config['output_filename']
+      end
+
       def repo_name
         repo['name']
       end

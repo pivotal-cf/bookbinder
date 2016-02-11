@@ -1,11 +1,11 @@
-require_relative '../../../lib/bookbinder/commands/bind/layout_preparer'
+require_relative '../../../lib/bookbinder/commands/components/bind/layout_preparer'
 require_relative '../../../lib/bookbinder/config/configuration'
 require_relative '../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../lib/bookbinder/values/output_locations'
 
 module Bookbinder
-  module Commands
-    module BindComponents
+  module Commands::Components
+    module Bind
       describe LayoutPreparer do
         let(:null_dep) { double('dependency').as_null_object }
         let(:fs) { instance_double('Bookbinder::LocalFilesystemAccessor')}

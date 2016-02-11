@@ -10,6 +10,10 @@ dita_sections:
   directory: my-dita-section-at-v-one
   ditamap_location: example.ditamap
   ditaval_location: dita-filter.ditaval
+  dependent_sections:
+  - repository:
+      name: my-org/dita-section-dependency
+    directory: dita-section-dependency
 
 - repository:
     name: my-org/dita-section-one
@@ -17,9 +21,9 @@ dita_sections:
   directory: my-dita-section-at-v-two
   ditamap_location: example.ditamap
   ditaval_location: dita-filter.ditaval
-
-- repository:
-    name: my-org/dita-section-dependency
-  directory: dita-section-dependency
+  dependent_sections:
+  - repository:
+      name: my-org/dita-section-dependency
+    directory: dita-section-dependency
 
 public_host: something-irrelevant.cfapps.io

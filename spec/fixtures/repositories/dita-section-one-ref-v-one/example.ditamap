@@ -21,6 +21,6 @@
       type="concept"/>
   </frontmatter>
   <part>
-    <topicref href="../dita-section-dependency/some-guide-1.xml" />
+    <topicref href="./dita-section-dependency/some-guide-1.xml" />
   </part>
 </bookmap>

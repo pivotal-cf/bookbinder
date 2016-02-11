@@ -1,4 +1,3 @@
-require_relative 'bind/bind_options'
 require_relative 'naming'
 
 module Bookbinder

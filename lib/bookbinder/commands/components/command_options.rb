@@ -2,8 +2,8 @@ require_relative '../../sheller'
 
 module Bookbinder
   module Commands
-    module BindComponents
-      class BindOptions
+    module Components
+      class CommandOptions
         def initialize(opts, base_streams)
           @opts = opts
           @base_streams = base_streams
