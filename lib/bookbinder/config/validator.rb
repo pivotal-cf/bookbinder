@@ -2,7 +2,8 @@ require_relative 'checkers/duplicate_section_name_checker'
 require_relative 'checkers/archive_menu_checker'
 require_relative 'checkers/required_keys_checker'
 require_relative 'checkers/repository_name_presence_checker'
-require_relative 'checkers/dita_section_checker'
+require_relative 'checkers/ditamap_presence_checker'
+require_relative 'checkers/section_presence_checker'
 require_relative 'checkers/subnavs_checker'
 require_relative 'checkers/topics_checker'
 
@@ -18,7 +19,8 @@ module Bookbinder
           Checkers::RequiredKeysChecker.new,
           Checkers::DuplicateSectionNameChecker.new,
           Checkers::RepositoryNamePresenceChecker.new,
-          Checkers::DitaSectionChecker.new,
+          Checkers::SectionPresenceChecker.new,
+          Checkers::DitamapPresenceChecker.new,
           Checkers::ArchiveMenuChecker.new(@file_system_accessor),
           Checkers::SubnavsChecker.new,
           Checkers::TopicsChecker.new
