@@ -34,7 +34,7 @@ module Bookbinder
       end
 
       def usage
-        ["bind <local|remote> [--verbose] [--dita-flags=\"<dita-option>='<value>'\"]",
+        ["bind <local|remote> [--verbose] [--dita-flags=\\\"<dita-option>=<value>\\\"]",
          "Bind the sections specified in config.yml from <local> or <remote> into the final_app directory"]
       end
 

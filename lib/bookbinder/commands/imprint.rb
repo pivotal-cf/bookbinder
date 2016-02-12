@@ -24,7 +24,7 @@ module Bookbinder
       end
 
       def usage
-        ["imprint <local|remote> [--verbose] [--dita-flags=\"<dita-option>='<value>'\"]", "Generate a PDF for a given book"]
+        ["imprint <local|remote> [--verbose] [--dita-flags=\\\"<dita-option>=<value>\\\"]", "Generate a PDF for a given book"]
       end
 
       def run(cli_arguments)
