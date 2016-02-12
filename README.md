@@ -18,7 +18,7 @@ that you can deploy to Cloud Foundry.
 
 See the [Bookbinder wiki](https://github.com/pivotal-cf/bookbinder/wiki) for detailed information and instructions, such as how to configure [credentials for multiple git services](https://github.com/pivotal-cf/bookbinder/wiki/Credentials-for-multiple-git-services).
 
-## Installation
+## <a id='install-ditaot'> Installation
 
 **Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
 
@@ -668,6 +668,40 @@ Bookbinder's command for live previews in development is `watch`. Its functional
         bin/bookbinder watch
 
 **Note:** CPU usage directly relates to the number of sections your book is watching. If you find that watch is running slowly, either use `bind` or delete unused local repositories.
+
+### `imprint` command
+
+Bookbinder's command for generating PDFs from books is `imprint`. It is currently only supported for DITA, and requires DITA-OT to be [installed locally](#install-ditaot). Generated PDFs will be deposited in `artifacts/pdf`.
+
+It takes one argument on the command line: `local` or `remote`.
+
+        bin/bookbinder imprint local
+
+will find documentation repositories in directories that are siblings to your current directory.
+
+        bin/bookbinder imprint remote
+        
+will find doc repos by downloading the latest version from git.
+
+Optionally and simliar to `bind`, it also takes `--verbose` and `--dita-flags`. There is a known bug with the `--dita-flags` flag that requires escaped quotes surrounding any passed arguments, like so: `--dita-flags=\"my=argument other=argument\"`.
+
+Imprint looks in the config.yml for content specified as `pdf_sections`, as so:
+
+```
+pdf_sections:
+- repository:
+    name: org/content
+  ditamap_location: content.ditamap
+  ditaval_location: content.ditaval
+  output_filename: awesome-pdf
+- repository:
+    name: org/more-content
+  ditamap_location: more-content.ditamap
+  ditaval_location: more-content.ditaval
+```
+
+Running `imprint` with the config specified above will result in the creation of two pdfs, one called 'awesome-pdf.pdf', as specified under `output_filename`, and the other  defaulting to the name of the ditamap, 'more-content.pdf'.
+
 
 ### `punch` command
 
