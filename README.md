@@ -735,7 +735,7 @@ window. It can be terminated by hitting `ctrl-c`.
 
 ### CI for books
 
-The currently recommended tool for CI with Bookbinder is [GoCD](http://www.go.cd).
+We recommend using [Concourse](http://concourse.ci/) for continuous intergration.
 
 #### CI Runner
 You will want a build that executes this shell command:
