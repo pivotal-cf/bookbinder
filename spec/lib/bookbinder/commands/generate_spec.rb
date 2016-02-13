@@ -3,17 +3,22 @@ require_relative '../../../../lib/bookbinder/commands/collection'
 require_relative '../../../../lib/bookbinder/commands/generate'
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/sheller'
+require_relative '../../../helpers/use_fixture_repo'
+
 
 module Bookbinder
   module Commands
     describe Generate do
       include Rack::Test::Methods
 
+      use_fixture_repo
+
       UNUSED_FS = Object.new
       UNUSED_SHELLER = Object.new
       UNUSED_PATH = 'unused/path'
       UNCHECKED_STREAMS = {out: StringIO.new, err: StringIO.new}
       let(:unused_logger) { Object.new }
+      let(:context_dir) { tmp_subdir('repositories') }
 
       def generate_cmd(fs: UNUSED_FS,
                        sheller: UNUSED_SHELLER,
@@ -29,38 +34,46 @@ module Bookbinder
         $VERBOSE = original_verbose
       end
 
-      it "produces a book that can be bound and run" do
-        Dir.mktmpdir do |tmpdir|
-          path = Pathname(tmpdir)
-          generate = generate_cmd(fs: LocalFilesystemAccessor.new,
-                                  sheller: Sheller.new,
-                                  context_dir: path,
-                                  streams: {out: StringIO.new,
-                                            success: StringIO.new,
-                                            err: $stderr})
-          expect(generate.run(%w(mynewbook))).to be_zero
+      it "produces a book that can be bound and run, provided a valid config.yml" do
+        generate = generate_cmd(fs: LocalFilesystemAccessor.new,
+                                sheller: Sheller.new,
+                                context_dir: context_dir,
+                                streams: {out: StringIO.new,
+                                          success: StringIO.new,
+                                          err: $stderr})
+        expect(generate.run(%w(mynewbook))).to be_zero
 
-          expect(path.join('mynewbook/Gemfile.lock').exist?).to be_truthy
+        expect(context_dir.join('mynewbook/Gemfile.lock').exist?).to be_truthy
 
-          Dir.chdir(path.join('mynewbook')) do
-            result = Sheller.new.run_command('bin/bookbinder bind local',
-                                             out: StringIO.new,
-                                             err: StringIO.new)
-            expect(result).to be_success
+        Dir.chdir(context_dir.join('mynewbook')) do
+          File.open('./config.yml', 'a') do |f|
+            f << <<-YAML
+sections:
+- repository:
+    name: fantastic/dogs-repo
+    ref: 'dog-sha'
+  directory: dogs
+  subnav_template: dogs
+            YAML
           end
 
-          Dir.chdir(path.join('mynewbook/final_app')) do
-            app = suppress_ruby_warnings do
-              Rack::Builder.parse_file(
-                path.join('mynewbook/final_app/config.ru').to_s
-              ).first
-            end
+          result = Sheller.new.run_command('bin/bookbinder bind local',
+                                           out: StringIO.new,
+                                           err: StringIO.new)
+          expect(result).to be_success
+        end
 
-            session = Rack::Test::Session.new(app)
-
-            session.get '/'
-            expect(session.last_response).to be_ok
+        Dir.chdir(context_dir.join('mynewbook/final_app')) do
+          app = suppress_ruby_warnings do
+            Rack::Builder.parse_file(
+              context_dir.join('mynewbook/final_app/config.ru').to_s
+            ).first
           end
+
+          session = Rack::Test::Session.new(app)
+
+          session.get '/'
+          expect(session.last_response).to be_ok
         end
       end
 
