@@ -131,11 +131,11 @@ sections:
       name: org-name/reptile-repo
       ref: d07101dec08a698932ef0aa2fc36316d6f7c4851
     directory: reptiles
-    subnav_name: my_subnav						# optional
+    product_id: my_product  			        # optional
 
-subnavs:										# optional
-  - name: my_subnav
-    topics:
+products:										# optional
+  - id: my_product
+    subnav_topics:
     - title: My Nav Section
       toc_path:  birds/egg/index
       toc_nav_name: My Nav Overview
@@ -464,7 +464,7 @@ This feature not currently supported for DITA, though the `subnav_template` key 
 
 **Requirements:**
 
-* In `config.yml`: a `subnav_name` key for each section to display the generated subnav, and a `subnavs` section that defines each `subnav_name` (as key `name`) used for those sections.
+* In `config.yml`: a `product_id` key for each section to display the generated subnav, and a `products` section that defines each `product_id` (as key `id`) used for those sections.
 * In `master_middleman/source/subnavs`, a file `subnav_template.erb` that contains html to which the generated subnav json will be appended. The file must contain one div with class 'nav-content'.
 * Properly formatted table of contents file for each topic, as specified by key `toc_path`
 
@@ -473,15 +473,15 @@ sections:
   - repository:
       name: org-name/bird-repo
     directory: birds
-    subnav_name: my_subnav
+    product_identifier: my_product
   - repository:
       name: org-name/reptile-repo
     directory: reptiles
-    subnav_name: my_subnav
+    product_id: my_product
 
-subnavs:
-  - name: my_subnav
-    topics:
+products:
+  - id: my_product
+    subnav_topics:
     - title: My Nav Section
       toc_path: birds/robins/index
       toc_nav_name: My Nav Overview
@@ -491,8 +491,8 @@ subnavs:
 
 **Keys:**
 
-* `name`: Defines name of the subnav, to be used to associate to sections in config
-* `topics`: Top-level items for subnav
+* `id`: Links a given section to its product in the config. Should contain no spaces.
+* `subnav_topics`: Top-level items for to-be-generated subnavs
 	* `title`: Human-readable name of the topic, to be included in subnav
 	* `toc_path`: Where the topic's Table of Contents file is found in the final app, without file extension. Usually this will be <section-directory>/index
 	* `toc_nav_name`: Human-readable name of the table of contents page to be included in subnav. If not provided, a link to the TOC will still be added to the nav with name specified in `title`.

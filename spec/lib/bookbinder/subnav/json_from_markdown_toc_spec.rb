@@ -1,4 +1,4 @@
-require_relative '../../../../lib/bookbinder/config/subnav_config'
+require_relative '../../../../lib/bookbinder/config/product_config'
 require_relative '../../../../lib/bookbinder/config/topic_config'
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/subnav/json_from_markdown_toc'
@@ -8,10 +8,10 @@ require 'json'
 module Bookbinder
   module Subnav
     describe JsonFromMarkdownToc do
-      it 'returns formatted json from topics in a subnav config' do
+      it 'returns formatted json from topics in a product config' do
         output_locations = OutputLocations.new(context_dir: '.')
-        subnav_config = Config::SubnavConfig.new(
-          { 'topics' => [
+        subnav_config = Config::ProductConfig.new(
+          { 'subnav_topics' => [
             {
               'title' => 'Puppy bowls are great',
               'toc_path' => 'puppy-repo/puppy',
@@ -20,7 +20,7 @@ module Bookbinder
           ]}
         )
 
-        fs = instance_double('Bookbinder::LocalFilesystemAccessor')
+        fs = instance_double(Bookbinder::LocalFilesystemAccessor)
 
         toc_url_md =  <<-EOT
 ---
@@ -63,9 +63,9 @@ title: Title for the Webz Page
 
       it 'does not include excluded html attributes' do
         output_locations = OutputLocations.new(context_dir: '.')
-        subnav_config = Config::SubnavConfig.new(
+        subnav_config = Config::ProductConfig.new(
           { 'subnav_exclusions' => ['.dog'],
-            'topics' => [
+            'subnav_topics' => [
             {
               'title' => 'Puppy bowls are great',
               'toc_path' => 'puppy-repo/puppy',
@@ -73,7 +73,7 @@ title: Title for the Webz Page
           ]}
         )
 
-        fs = instance_double('Bookbinder::LocalFilesystemAccessor')
+        fs = instance_double(Bookbinder::LocalFilesystemAccessor)
 
         toc_url_md =  <<-EOT
 

@@ -1,13 +1,13 @@
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/subnav/pdf_config_creator'
 require_relative '../../../../lib/bookbinder/values/output_locations'
-require_relative '../../../../lib/bookbinder/config/subnav_config'
+require_relative '../../../../lib/bookbinder/config/product_config'
 
 module Bookbinder
   module Subnav
     describe PdfConfigCreator do
       it 'creates a yaml with a page for each link in json props file' do
-        config = Config::SubnavConfig.new({'pdf_config' => 'my-pdf.yml'})
+        config = Config::ProductConfig.new({'pdf_config' => 'my-pdf.yml'})
         output_locations = OutputLocations.new(context_dir: '.')
 
         json = { 'links' => [
@@ -28,7 +28,7 @@ pages:
 - yuki/pooch.html
         EOT
 
-        fs = instance_double('Bookbinder::LocalFilesystemAccessor')
+        fs = instance_double(Bookbinder::LocalFilesystemAccessor)
 
         expect(fs).to receive(:read).with(output_locations.subnavs_for_layout_dir.join('my-props.json')) { json }
         expect(fs).to receive(:overwrite).with(to: output_locations.pdf_config_dir.join('my-pdf.yml'), text: pdf_yml)

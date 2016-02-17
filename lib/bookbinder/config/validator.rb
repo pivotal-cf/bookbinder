@@ -4,8 +4,8 @@ require_relative 'checkers/required_keys_checker'
 require_relative 'checkers/repository_name_presence_checker'
 require_relative 'checkers/ditamap_presence_checker'
 require_relative 'checkers/section_presence_checker'
-require_relative 'checkers/subnavs_checker'
-require_relative 'checkers/topics_checker'
+require_relative 'checkers/products_checker'
+require_relative 'checkers/subnav_topics_checker'
 
 module Bookbinder
   module Config
@@ -22,8 +22,8 @@ module Bookbinder
           Checkers::SectionPresenceChecker.new,
           Checkers::DitamapPresenceChecker.new,
           Checkers::ArchiveMenuChecker.new(@file_system_accessor),
-          Checkers::SubnavsChecker.new,
-          Checkers::TopicsChecker.new
+          Checkers::ProductsChecker.new,
+          Checkers::SubnavTopicsChecker.new
         ].map do |checker|
           checker.check(config)
         end

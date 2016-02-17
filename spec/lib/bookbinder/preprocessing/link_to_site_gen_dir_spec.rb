@@ -2,6 +2,7 @@ require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/subnav/json_from_markdown_toc'
 require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/subnav/subnav_generator'
+require_relative '../../../../lib/bookbinder/subnav/subnav_generator_factory'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/values/section'
 require_relative '../../../../lib/bookbinder/config/configuration'
@@ -13,7 +14,7 @@ module Bookbinder
       let(:unused_dependency) { double('something we do not use').as_null_object }
 
       it 'links sections from their cloned dir to the dir ready for site generation' do
-        fs = instance_double('Bookbinder::LocalFilesystemAccessor')
+        fs = instance_double(Bookbinder::LocalFilesystemAccessor)
         preprocessor = LinkToSiteGenDir.new(fs, unused_dependency)
         output_locations = OutputLocations.new(context_dir: 'mycontextdir')
 
@@ -62,23 +63,23 @@ module Bookbinder
         expect(preprocessor).not_to be_applicable_to(Section.new('foo'))
       end
 
-      it 'calls generate subnav for each subnav in the config' do
+      it 'calls generate product for each product in the config' do
         fs = double('fs')
-        subnav_generator_factory = instance_double('Bookbinder::Subnav::SubnavGeneratorFactory')
-        generator = instance_double('Bookbinder::Subnav::SubnavGenerator')
+        subnav_generator_factory = instance_double(Bookbinder::Subnav::SubnavGeneratorFactory)
+        generator = instance_double(Bookbinder::Subnav::SubnavGenerator)
 
         output_locations = OutputLocations.new(context_dir: 'mycontextdir')
         config = Config::Configuration.parse({
-            'subnavs' => [
-              {'name' => 'subnav-group',
-                'topics' => ['The best topic']
+            'products' => [
+              {'id' => 'product-group',
+                'subnav_topics' => ['The best topic']
               }
             ]
           }
         )
 
         expect(subnav_generator_factory).to receive(:produce).with(instance_of(Subnav::JsonFromMarkdownToc)) { generator }
-        expect(generator).to receive(:generate).with(config.subnavs[0])
+        expect(generator).to receive(:generate).with(config.products[0])
 
         preprocessor = LinkToSiteGenDir.new(fs, subnav_generator_factory)
         preprocessor.preprocess([], output_locations, config: config, output_streams: {})

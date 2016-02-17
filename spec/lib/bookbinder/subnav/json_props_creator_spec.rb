@@ -1,17 +1,18 @@
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
+require_relative '../../../../lib/bookbinder/subnav/json_from_markdown_toc'
 require_relative '../../../../lib/bookbinder/subnav/json_props_creator'
 require_relative '../../../../lib/bookbinder/values/output_locations'
-require_relative '../../../../lib/bookbinder/config/subnav_config'
+require_relative '../../../../lib/bookbinder/config/product_config'
 
 module Bookbinder
   module Subnav
     describe JsonPropsCreator do
       it 'gets the toc links from json generator and writes them to a props file' do
-        fs = instance_double('Bookbinder::LocalFilesystemAccessor')
-        json_generator = instance_double('Bookbinder::Preprocessing::JsonFromConfig')
+        fs = instance_double(Bookbinder::LocalFilesystemAccessor)
+        json_generator = instance_double(Bookbinder::Subnav::JsonFromMarkdownToc)
 
         output_locations = OutputLocations.new(context_dir: '.')
-        subnav_config = Config::SubnavConfig.new({'name' => 'best'})
+        subnav_config = Config::ProductConfig.new({'id' => 'best'})
 
         props_filename = 'best-props.json'
         props_location = output_locations.subnavs_for_layout_dir.join(props_filename)
@@ -24,12 +25,12 @@ module Bookbinder
       end
 
       it 'returns different names for different subnavs' do
-        fs = instance_double('Bookbinder::LocalFilesystemAccessor')
-        json_generator = instance_double('Bookbinder::Preprocessing::JsonFromConfig')
+        fs = instance_double(Bookbinder::LocalFilesystemAccessor)
+        json_generator = instance_double(Bookbinder::Subnav::JsonFromMarkdownToc)
 
         output_locations = OutputLocations.new(context_dir: '.')
-        config_one = Config::SubnavConfig.new({'name' => 'best'})
-        config_two = Config::SubnavConfig.new({'name' => 'worst'})
+        config_one = Config::ProductConfig.new({'id' => 'best'})
+        config_two = Config::ProductConfig.new({'id' => 'worst'})
 
         props_location = output_locations.subnavs_for_layout_dir
 

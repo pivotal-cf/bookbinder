@@ -21,8 +21,8 @@ module Bookbinder
           )
         end
 
-        config.subnavs.each do |subnav|
-          subnav_generator.generate(subnav)
+        config.products.each do |product|
+          subnav_generator.generate(product)
         end
       end
 

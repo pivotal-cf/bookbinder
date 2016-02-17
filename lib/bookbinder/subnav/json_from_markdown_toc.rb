@@ -24,7 +24,7 @@ module Bookbinder
       def get_links_and_headers
         menu_items = []
 
-        config.topics.map do |topic|
+        config.subnav_topics.map do |topic|
           menu_items << { text: topic.title, title: true }
           menu_items << { url: "/#{topic.toc_path}.html", text: topic.toc_nav_name }
 

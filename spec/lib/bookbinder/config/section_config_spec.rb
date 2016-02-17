@@ -21,9 +21,14 @@ module Bookbinder
           to eq('mysubnav')
       end
 
-      it "can return the provided subnav name" do
-        expect(SectionConfig.new('subnav_name' => 'mygeneratedsubnav').subnav_name).
-          to eq('mygeneratedsubnav')
+      it "can return the provided product id" do
+        expect(SectionConfig.new('product_id' => 'my_product_id').product_id).
+            to eq('my_product_id')
+      end
+
+      it "can return the provided product id as subnav name" do
+        expect(SectionConfig.new('product_id' => 'my_product_id').subnav_name).
+            to eq('my_product_id')
       end
 
       it "can return the pdf output filename" do

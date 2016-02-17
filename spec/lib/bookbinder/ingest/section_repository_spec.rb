@@ -80,7 +80,7 @@ module Bookbinder
               'directory' => 'my-desired-dir-name',
               'preprocessor_config' => {'my' => 'stuff', 'to' => 'preprocess'},
               'repository' => { 'name' => 'myorg/myrepo', 'ref' => 'mydesiredref' },
-              'subnav_name' => 'awesome_subnav_name',
+              'product_id' => 'awesome_subnav_name',
               'output_filename' => 'awesome_output_filename.awesome'
             ),
             Config::SectionConfig.new(

@@ -105,30 +105,30 @@ YAML
     end
   end
 
-  context 'when subnavs are specified in config.yml' do
+  context 'when products with subnav topics are specified in config.yml' do
     let(:section) do
 <<YAML
 - repository:
     name: fantastic/dogs-repo
     ref: 'dog-sha'
   directory: dogs
-  subnav_name: doggies
+  product_id: doggies
 - repository:
     name: fantastic/my-docs-repo
-  subnav_name: doctastic
+  product_id: doctastic
 YAML
     end
 
-    let(:subnav) do
+    let(:product) do
 <<YAML
-- name: doggies
-  topics:
+- id: doggies
+  subnav_topics:
   - title: First pug
     toc_path: dogs/pugs/index
   - title: Second greyhound
     toc_path: dogs/greyhounds/index
-- name: doctastic
-  topics:
+- id: doctastic
+  subnav_topics:
   - title: Wordilicious
     toc_path: my-docs-repo/index
 YAML
@@ -138,7 +138,7 @@ YAML
       config = YAML.load(File.read('./config.yml'))
       config.delete('cred_repo')
       config['sections'] = YAML.load(section)
-      config['subnavs'] = YAML.load(subnav)
+      config['products'] = YAML.load(product)
       File.write('./config.yml', config.to_yaml)
     end
 
@@ -180,11 +180,11 @@ YAML
     end
 
     context 'when pdf_config specified' do
-      let(:subnav) do
+      let(:product) do
         <<YAML
-- name: doggies
+- id: doggies
   pdf_config: dog-pdf.yml
-  topics:
+  subnav_topics:
   - title: First pug
     toc_path: dogs/pugs/index
   - title: Second greyhound
@@ -196,7 +196,7 @@ YAML
 - repository:
     name: fantastic/dogs-repo
   directory: dogs
-  subnav_name: doggies
+  product_id: doggies
 YAML
       end
 
@@ -231,11 +231,11 @@ YAML
         config = YAML.load(File.read('./config.yml'))
         config.delete('cred_repo')
         config['sections'] = YAML.load(section)
-        config['subnavs'] = YAML.load(subnav)
+        config['products'] = YAML.load(product)
         File.write('./config.yml', config.to_yaml)
         FileUtils.mkdir('./config')
         File.open('./config/sections.yml', 'w') {|f| f.write({'sections' => config['sections']}.to_yaml) }
-        File.open('./config/subnavs.yml', 'w') {|f| f.write({'subnavs' => config['subnavs']}.to_yaml) }
+        File.open('./config/products.yml', 'w') {|f| f.write({'products' => config['products']}.to_yaml) }
       end
 
       after do

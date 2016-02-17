@@ -1,14 +1,14 @@
 module Bookbinder
   module Config
     module Checkers
-      class TopicsChecker
+      class SubnavTopicsChecker
         MissingRequiredKeyError = Class.new(RuntimeError)
 
         def check(config)
           @config = config
 
-          if invalid_subnavs.any?
-            MissingRequiredKeyError.new("Your config.yml is missing required key(s) for subnav(s) #{invalid_subnav_names}. Required keys are #{required_topic_keys.join(", ")}.")
+          if invalid_products.any?
+            MissingRequiredKeyError.new("Your config.yml is missing required key(s) for subnav_topics in product id(s) #{invalid_product_ids}. Required keys are #{required_topic_keys.join(", ")}.")
           end
         end
 
@@ -16,16 +16,16 @@ module Bookbinder
 
         private
 
-        def invalid_subnavs
-          config.subnavs.select { |subnav_config| invalid_topics(subnav_config.topics).any? }
+        def invalid_products
+          config.products.select { |product_config| invalid_topics(product_config.subnav_topics).any? }
         end
 
         def invalid_topics(topics)
           topics.map {|topic| topic unless topic.valid? }
         end
 
-        def invalid_subnav_names
-          invalid_subnavs.map(&:subnav_name).join(', ')
+        def invalid_product_ids
+          invalid_products.map(&:id).join(', ')
         end
 
         def required_topic_keys

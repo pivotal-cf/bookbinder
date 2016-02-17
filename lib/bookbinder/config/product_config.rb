@@ -2,14 +2,14 @@ require_relative '../config/topic_config'
 
 module Bookbinder
   module Config
-    class SubnavConfig
+    class ProductConfig
       def initialize(config)
         @config = config
-        @topics = assemble_topics || []
+        @subnav_topics = assemble_topics || []
       end
 
-      def subnav_name
-        config['name']
+      def id
+        config['id']
       end
 
       def pdf_config
@@ -20,20 +20,25 @@ module Bookbinder
         config['subnav_exclusions'] || []
       end
 
+      def specifies_subnav?
+        !subnav_topics.empty?
+      end
+
       def valid?
         (CONFIG_REQUIRED_KEYS - config.keys).empty?
       end
 
-      CONFIG_REQUIRED_KEYS = %w(name topics)
+      CONFIG_REQUIRED_KEYS = %w(id subnav_topics)
 
-      attr_reader :topics
+      attr_reader :subnav_topics
+      alias_method :subnav_name, :id
 
       private
 
       attr_reader :config
 
       def assemble_topics
-        config['topics'].map{|topic| Config::TopicConfig.new(topic)} if config['topics']
+        config['subnav_topics'].map{|topic| Config::TopicConfig.new(topic)} if config['subnav_topics']
       end
     end
   end

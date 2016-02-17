@@ -3,7 +3,7 @@ require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/subnav/template_creator'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/values/section'
-require_relative '../../../../lib/bookbinder/config/subnav_config'
+require_relative '../../../../lib/bookbinder/config/product_config'
 require_relative '../../../../lib/bookbinder/terminal'
 
 module Bookbinder
@@ -17,7 +17,7 @@ module Bookbinder
       let(:html_doc_manipulator) { instance_double('Bookbinder::HtmlDocumentManipulator') }
 
       it 'writes the template to subnavs directory' do
-        subnav_config = Config::SubnavConfig.new({'name' => 'best'})
+        subnav_config = Config::ProductConfig.new({'id' => 'best'})
         props_filename = 'props.json'
 
         allow(fs).to receive(:file_exist?) { true }
@@ -76,7 +76,7 @@ module Bookbinder
 
       context 'for regular subnav' do
         it 'sets class "shallownav" on the nav content div' do
-          config = Config::SubnavConfig.new({'name' => 'some_nav_name'})
+          config = Config::ProductConfig.new({'id' => 'some_nav_name'})
 
           allow(fs).to receive(:file_exist?) { true }
           allow(fs).to receive(:write)

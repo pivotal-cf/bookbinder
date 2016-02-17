@@ -2,7 +2,7 @@ require_relative '../../../lib/bookbinder/config/dita_config_generator'
 require_relative '../ingest/destination_directory'
 require_relative '../ingest/repo_identifier'
 require_relative 'section_config'
-require_relative 'subnav_config'
+require_relative 'product_config'
 
 module Bookbinder
   module Config
@@ -53,7 +53,7 @@ module Bookbinder
 
       def initialize(config)
         @config = config
-        @subnavs = assemble_subnavs || []
+        @products = assemble_products || []
       end
 
       CONFIG_REQUIRED_KEYS = %w(book_repo public_host)
@@ -97,15 +97,15 @@ module Bookbinder
 
       alias_method :eql?, :==
 
-      attr_reader :subnavs
+      attr_reader :products
 
       private
 
-      def assemble_subnavs
-        if config[:subnavs]
-          config[:subnavs].map do |subnav|
-            subnav.merge!({'subnav_exclusions' => subnav_exclusions})
-            Config::SubnavConfig.new(subnav)
+      def assemble_products
+        if config[:products]
+          config[:products].map do |product|
+            product.merge!({'subnav_exclusions' => subnav_exclusions})
+            Config::ProductConfig.new(product)
           end
         end
       end

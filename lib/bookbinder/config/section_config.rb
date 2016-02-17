@@ -11,8 +11,8 @@ module Bookbinder
         config['subnav_template']
       end
 
-      def subnav_name
-        config['subnav_name']
+      def product_id
+        config['product_id']
       end
 
       def desired_directory_name
@@ -60,6 +60,7 @@ module Bookbinder
       def inspect
         config.inspect
       end
+      alias_method :subnav_name, :product_id
 
       private
 

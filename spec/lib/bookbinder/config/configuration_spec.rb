@@ -129,36 +129,34 @@ module Bookbinder
           expect(config).not_to have_option('bar')
         end
 
-        describe 'subnavs' do
-          it 'returns an array of SubnavConfig objects' do
+        describe '.products' do
+          it 'returns an array of ProductConfig objects' do
             config = {
-              'subnavs' => [ {'name' => 'some_group'} ]
+              'products' => [ {'id' => 'some_product'} ]
             }
-            expect(Configuration.parse(config).subnavs[0]).to be_an_instance_of(SubnavConfig)
+            expect(Configuration.parse(config).products[0]).to be_an_instance_of(ProductConfig)
           end
-          it 'returns an empty array when no subnavs specified' do
+          it 'returns an empty array when no products specified' do
             config = {
-              'subnavs' => nil
+              'products' => nil
             }
-            expect(Configuration.parse(config).subnavs).to eq([])
+            expect(Configuration.parse(config).products).to eq([])
           end
-          it 'passes subnav exclusion to subnav configs' do
+          it 'passes subnav exclusion to product configs' do
             config = {
               'subnav_exclusions' => ['.class-one', '#some-id'],
-              'subnavs' => [
-                { 'name' => 'some_group'}
+              'products' => [
+                { 'id' => 'some_group'}
               ]
             }
 
-            expect(SubnavConfig).to receive(:new).
-                with({'name' => 'some_group', 'subnav_exclusions' => ['.class-one', '#some-id']})
+            expect(ProductConfig).to receive(:new).
+                with({'id' => 'some_group', 'subnav_exclusions' => ['.class-one', '#some-id']})
 
             Configuration.parse(config)
           end
         end
       end
-
-
     end
   end
 end
