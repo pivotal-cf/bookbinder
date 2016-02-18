@@ -21,6 +21,29 @@ module Bookbinder
         end
       end
 
+      it "clones submodules" do
+        Dir.mktmpdir do |dir|
+          init_repo(at_dir: "#{dir}/submodule_gorepo",
+            file: 'submodule_foo',
+            contents: 'submodule_bar',
+            commit_message: 'submodule_baz')
+
+          init_repo(at_dir: "#{dir}/srcgorepo",
+            file: 'foo',
+            contents: 'bar',
+            commit_message: 'baz')
+
+          `#{<<-SCRIPT}`
+cd #{dir}/srcgorepo
+git submodule add ../submodule_gorepo my_submodule 2>&1 /dev/null
+git commit -m "Create submodule"
+          SCRIPT
+
+          GitAccessor.new.clone("#{dir}/srcgorepo", 'destgorepo', path: dir)
+          expect(Pathname("#{dir}/destgorepo/my_submodule/submodule_foo").read).to eq("submodule_bar\n")
+        end
+      end
+
       it "only clones once for a given set of params for a single GitAccessor instance" do
         Dir.mktmpdir do |dir|
           path = Pathname(dir)
