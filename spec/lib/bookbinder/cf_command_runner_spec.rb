@@ -54,10 +54,14 @@ module Bookbinder
           'password' => 'password',
           'api_endpoint' => 'api.example.com',
           'organization' => 'my-org',
-          'staging_space' => 'my-space',
-          'staging_host' => {
-            'domain-name-one.io' => ['some-name', 'some-other-name'],
-            'domain_name_two.io'=> ['madeup-name', 'some-madeup-name']
+          'env' => {
+            'staging' => {
+              'space' => 'my-space',
+              'host' => {
+                'domain-name-one.io' => ['some-name', 'some-other-name'],
+                'domain_name_two.io'=> ['madeup-name', 'some-madeup-name']
+              }
+            }
           }
         }
       end
@@ -117,8 +121,12 @@ OUTPUT
 
       let(:config_hash) do
         {
-          'staging_host' => {
-            'cfapps.io' => ['docs', 'docs-test']
+          'env' => {
+            'staging' => {
+              'host' => {
+                'cfapps.io' => ['docs', 'docs-test']
+              }
+            }
           }
         }
       end
@@ -174,7 +182,17 @@ OUTPUT
 
     describe '#map_routes' do
       context 'when a single domain and host exists' do
-        let(:config_hash) { { 'staging_host' => { 'domain-one.io' => ['docs'] } } }
+        let(:config_hash) do
+          {
+            'env' => {
+              'staging' => {
+                'host' => {
+                  'domain-one.io' => ['docs']
+                }
+              }
+            }
+          }
+        end
 
         it "maps the route" do
           expect_with_success(/cf map-route my-app-name domain-one.io -n docs/)
@@ -191,9 +209,15 @@ OUTPUT
 
       context 'when multiple domains with multiple routes exist' do
         let(:config_hash) do
-          { 'staging_host'=>
-              { 'domain-one.io' => ['docs-blue', 'docs-green'],
-                'domain-two.io'=> ['docs-orange'] }
+          {
+            'env' => {
+              'staging' => {
+                'host' => {
+                  'domain-one.io' => ['docs-blue', 'docs-green'],
+                  'domain-two.io'=> ['docs-orange']
+                }
+              }
+            }
           }
         end
 
@@ -239,7 +263,17 @@ OUTPUT
       end
 
       context 'when the host is an empty string' do
-        let(:config_hash) { { 'staging_host' => { 'domain-one.io' => [""] } } }
+        let(:config_hash) do
+          {
+            'env' => {
+              'staging' => {
+                'host' => {
+                  'domain-one.io' => [""]
+                }
+              }
+            }
+          }
+        end
 
         it 'should run cf map-routes without the -n feature' do
           expect_with_success(/cf map-route my-app-name domain-one.io/)
@@ -249,7 +283,17 @@ OUTPUT
     end
 
     describe '#unmap_routes' do
-      let(:config_hash) { { 'staging_host'=> { 'cfapps.io' => ['some-staging-host'] } } }
+      let(:config_hash) do
+        {
+          'env' => {
+            'staging' => {
+              'host' => {
+                'cfapps.io' => ['some-staging-host']
+              }
+            }
+          }
+        }
+      end
 
       context 'when a single domain and route exists' do
         it "unmaps the route" do
@@ -268,17 +312,22 @@ OUTPUT
       context 'when multiple domains / routes exist' do
         let(:config_hash) do
           {
-            'staging_host' => {
-              'some-staging-domain.io' => ['some-staging-host', 'some-other-staging-host'],
-              'madeup-staging-domain.io'=> ['some-madeup-host', 'another-madeup-host']
+            'env' => {
+              'staging' => {
+                'host' => {
+                  'some-staging-domain.io' => ['some-staging-host', 'some-other-staging-host'],
+                  'madeup-staging-domain.io'=> ['some-madeup-host', 'another-madeup-host']
+                }
+              }
             }
           }
         end
 
         it 'unmaps all routes' do
-          config_hash['staging_host'].each do |domain, (host1, host2)|
-            expect_with_success(/cf unmap-route my-app-name #{domain} -n #{host1}/)
-            expect_with_success(/cf unmap-route my-app-name #{domain} -n #{host2}/)
+          config_hash['env']['staging']['host'].each do |domain, hosts|
+            hosts.each do |host|
+              expect_with_success(/cf unmap-route my-app-name #{domain} -n #{host}/)
+            end
           end
           cf.unmap_routes('my-app-name')
         end
@@ -294,7 +343,17 @@ OUTPUT
       end
 
       context 'when the host is an empty string' do
-        let(:config_hash) { { 'staging_host' => { 'domain-one.io' => [""] } } }
+        let(:config_hash) do
+          {
+            'env' => {
+              'staging' => {
+                'host' => {
+                  'domain-one.io' => [""]
+                }
+              }
+            }
+          }
+        end
 
         it 'should run cf unmap-routes without the -n feature' do
           expect_with_success(/cf unmap-route my-app-name domain-one.io$/)
@@ -304,7 +363,17 @@ OUTPUT
     end
 
     describe '#takedown_old_target_app' do
-      let(:config_hash) { { 'staging_host' => { 'some-staging-domain.io' => ['some-staging-host', 'some-other-staging-host'] } } }
+      let(:config_hash) do
+        {
+          'env' => {
+            'staging' => {
+              'host' => {
+                'some-staging-domain.io' => ['some-staging-host', 'some-other-staging-host']
+              }
+            }
+          }
+        }
+      end
 
       before do
         expect(Kernel).to receive(:sleep).with(1).exactly(15).times

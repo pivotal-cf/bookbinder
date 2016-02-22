@@ -189,15 +189,18 @@ cloud_foundry:
   api_endpoint: https://api.run.pivotal.io
   organization: documentation-team
   app_name: docs
-  staging_space: docs-staging
-  production_space: docs-production
-  staging_host:
-    cfapps.io:
-      - staging-route-subdomain
-      - another-staging-route-subdomain
-  production_host:
-    cfapps.io:
-      - production-route-subdomain
+  env:
+    staging:
+      space: docs-staging
+      host:
+        cfapps.io:
+        - staging-route-subdomain
+        - another-staging-route-subdomain
+    production:	
+      space: docs-production
+      host:
+        cfapps.io:
+        - production-route-subdomain
 ```
 
 ### Layout Repository

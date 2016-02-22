@@ -25,11 +25,15 @@ module Bookbinder
       let(:cf_credentials) do
         Bookbinder::Config::CfCredentials.new({
           'api_endpoint' => 'http://get.your.apis.here.io',
-          'staging_host' => {
-            'http://get.your.apis.for.staging.here.io' => ['a_staging_host']
+          'env' => {
+            'staging' => {
+              'host' => {
+                'http://get.your.apis.for.staging.here.io' => ['a_staging_host']
+              },
+              'space' => 'foo_stage'
+            }
           },
           'organization' => 'foooo',
-          'staging_space' => 'foo_stage',
           'app_name' => 'foooo',
           'username' => 'username'
         }, 'staging')

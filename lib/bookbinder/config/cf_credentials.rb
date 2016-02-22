@@ -23,7 +23,7 @@ module Bookbinder
       end
 
       def routes
-        fetch(host_key) if correctly_formatted_domain_and_routes?(host_key)
+        fetch('host') if correctly_formatted_domain_and_routes?
       end
 
       def flat_routes
@@ -31,25 +31,21 @@ module Bookbinder
       end
 
       def space
-        fetch(space_key)
+        fetch('space')
       end
 
       private
 
       attr_reader :creds, :environment
 
-      def production?
-        environment == 'production'
-      end
-
       def fetch(key)
-        creds.fetch(key)
+        creds.fetch('env').fetch(environment).fetch(key)
       rescue KeyError => e
         raise CredentialKeyError, e
       end
 
-      def correctly_formatted_domain_and_routes?(deploy_environment)
-        routes_hash = fetch(deploy_environment)
+      def correctly_formatted_domain_and_routes?
+        routes_hash = fetch('host')
         domains = routes_hash.keys
         domains.each { |domain| correctly_formatted_domain?(domain, routes_hash) }
       end
@@ -60,14 +56,6 @@ module Bookbinder
         raise "Did you mean to add a list of hosts for domain #{domain}? Check your credentials.yml." unless routes_hash[domain]
         raise "Hosts in credentials must be nested as an array under the desired domain #{domain}." unless routes_hash[domain].is_a? Array
         raise "Did you mean to provide a hostname for the domain #{domain}? Check your credentials.yml." if routes_hash[domain].any?(&:nil?)
-      end
-
-      def host_key
-        "#{environment}_host"
-      end
-
-      def space_key
-        "#{environment}_space"
       end
     end
   end

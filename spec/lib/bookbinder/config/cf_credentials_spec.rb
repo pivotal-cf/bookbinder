@@ -9,10 +9,16 @@ module Bookbinder
       let(:cf_hash) do
         {
             'api_endpoint' => 'http://some-api-endpoint.example.com',
-            'staging_host' => cf_staging_routes,
-            'production_space' => 'some-prod-space',
-            'production_host' => cf_prod_routes,
-            'staging_space' => 'some-staging-space',
+            'env' => {
+              'staging' => {
+                'host' => cf_staging_routes,
+                'space' => 'some-staging-space'
+              },
+              'production' => {
+                'host' => cf_prod_routes,
+                'space' => 'some-prod-space'
+              }
+            },
             'app_name' => 'some-app',
             'username' => 'some-user',
             'password' => 'some-pass',
@@ -134,6 +140,20 @@ module Bookbinder
           it 'raises' do
             expect { cf_credentials.routes }.to raise_error(/Did you mean to provide a hostname for the domain some-prod-domain.io/)
           end
+        end
+      end
+
+      describe 'CredentialKeyErrors' do
+        let(:cf_hash) do
+          super().merge('env' => { 'staging' => {} })
+        end
+
+        it 'should throw a CredentialKeyError when getting routes' do
+          expect { cf_credentials.routes }.to raise_error(CfCredentials::CredentialKeyError)
+        end
+
+        it 'should throw a CredentialKeyError when getting space' do
+          expect { cf_credentials.space }.to raise_error(CfCredentials::CredentialKeyError)
         end
       end
     end
