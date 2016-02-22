@@ -12,7 +12,7 @@ module Bookbinder
       let(:logger) { NilLogger.new }
       let(:configuration_fetcher) { double('configuration_fetcher') }
       let(:config) { Config::Configuration.parse(config_hash) }
-      let(:command) { PushFromLocal.new(streams = {}, logger, configuration_fetcher, 'foobar_env') }
+      let(:command) { PushFromLocal.new(streams = {}, logger, configuration_fetcher) }
       let(:credentials) {
         {
           aws: Config::AwsCredentials.new(
@@ -23,10 +23,14 @@ module Bookbinder
           cloud_foundry: Config::CfCredentials.new({
             'username' => 'your_CF_account',
             'password' => 'your_CF_password',
-            'app_name' => 'your_app_name',
+            'app_name' => 'your_app_nam\e',
             'api_endpoint' => 'your_api_endpoint',
             'organization' => 'your_organization',
-            'foobar_env_host' => {}
+            'env' => {
+              'foobar_env' => {
+                'host' => {}
+              }
+            }
           }, 'foobar_env')
         }
       }
@@ -45,7 +49,7 @@ module Bookbinder
               with('foobar_env').
               and_return(credentials)
 
-            expect { command.run([]) }.to raise_error PushFromLocal::CredentialKeyError
+            expect { command.run(['foobar_env']) }.to raise_error PushFromLocal::CredentialKeyError
           end
         end
 
@@ -69,7 +73,7 @@ module Bookbinder
                 with('foobar_env').
                 and_return(credentials)
 
-              expect { command.run([]) }.to raise_error PushFromLocal::CredentialKeyError
+              expect { command.run(['foobar_env']) }.to raise_error PushFromLocal::CredentialKeyError
             end
           end
 
@@ -88,7 +92,7 @@ module Bookbinder
                 with('foobar_env').
                 and_return(credentials)
 
-              expect { command.run([]) }.to raise_error PushFromLocal::CredentialKeyError
+              expect { command.run(['foobar_env']) }.to raise_error PushFromLocal::CredentialKeyError
             end
           end
         end

@@ -12,19 +12,19 @@ module Bookbinder
       REQUIRED_AWS_KEYS = %w(access_key secret_key green_builds_bucket)
       REQUIRED_CF_KEYS = %w(username password api_endpoint organization app_name)
 
-      def initialize(streams, logger, configuration_fetcher, environment)
+      def initialize(streams, logger, configuration_fetcher)
         @streams = streams
         @logger = logger
         @configuration_fetcher = configuration_fetcher
-        @environment = environment
       end
 
       def usage
-        [command_name,
-         "Push the contents of final_app to the #{environment} host specified in credentials.yml"]
+        ["push_local_to <environment>",
+         "Push the contents of final_app to the specified environment using the credentials.yml"]
       end
 
-      def run(_)
+      def run(cli_arguments)
+        @environment = cli_arguments.first
         validate
         deployment = Deploy::Deployment.new(
           app_dir: './final_app',
@@ -56,10 +56,6 @@ module Bookbinder
 
       def credentials
         configuration_fetcher.fetch_credentials(environment)
-      end
-
-      def command_name
-        "push_local_to_#{environment}"
       end
 
       def creds_error_message

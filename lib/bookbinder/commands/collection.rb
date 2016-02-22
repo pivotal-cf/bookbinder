@@ -71,10 +71,9 @@ module Bookbinder
           ),
           build_and_push_tarball,
           bind,
-          Commands::PushFromLocal.new(streams, logger, configuration_fetcher(Config::Configuration), 'acceptance'),
-          push_local_to_staging,
+          push_local_to,
           Commands::PushToProd.new(streams, logger, configuration_fetcher(Config::Configuration), Dir.mktmpdir),
-          Commands::RunPublishCI.new(bind, push_local_to_staging, build_and_push_tarball),
+          Commands::RunPublishCI.new(bind, push_local_to, build_and_push_tarball),
           Commands::Punch.new(streams, configuration_fetcher(Config::Configuration), version_control_system),
           Commands::UpdateLocalDocRepos.new(
             streams,
@@ -146,12 +145,11 @@ module Bookbinder
         )
       end
 
-      def push_local_to_staging
-        @push_local_to_staging ||= Commands::PushFromLocal.new(
+      def push_local_to
+        @push_local_to ||= Commands::PushFromLocal.new(
           streams,
           logger,
-          configuration_fetcher(Config::Configuration),
-          'staging'
+          configuration_fetcher(Config::Configuration)
         )
       end
 

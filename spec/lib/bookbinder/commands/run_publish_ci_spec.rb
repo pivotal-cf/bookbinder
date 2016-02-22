@@ -6,9 +6,9 @@ module Bookbinder
     include SpecHelperMethods
 
     let(:fake_publish) { double 'fake_publish' }
-    let(:fake_push_local_to_staging) { double 'fake_push_to_staging' }
+    let(:fake_push_local_to) { double 'fake_push_to_staging' }
     let(:fake_build_and_push_tarball) { double 'fake_build_and_push_tarball' }
-    let(:command) { Commands::RunPublishCI.new(fake_publish, fake_push_local_to_staging, fake_build_and_push_tarball) }
+    let(:command) { Commands::RunPublishCI.new(fake_publish, fake_push_local_to, fake_build_and_push_tarball) }
 
     context 'when ENV["BUILD_NUMBER"] is set' do
       before do
@@ -18,7 +18,7 @@ module Bookbinder
 
       it 'runs three commands and returns 0 if all three do so' do
         expect(fake_publish).to receive(:run).with(['remote']).and_return(0)
-        expect(fake_push_local_to_staging).to receive(:run).with([]).and_return(0)
+        expect(fake_push_local_to).to receive(:run).with(['staging']).and_return(0)
         expect(fake_build_and_push_tarball).to receive(:run).with([]).and_return(0)
         result = command.run []
         expect(result).to eq(0)
@@ -26,7 +26,7 @@ module Bookbinder
 
       it 'does not execute PushFromLocal if Bind fails' do
         expect(fake_publish).to receive(:run).with(['remote']).and_return(1)
-        expect(fake_push_local_to_staging).not_to receive(:run)
+        expect(fake_push_local_to).not_to receive(:run)
         expect(fake_build_and_push_tarball).not_to receive(:run)
         result = command.run []
         expect(result).to eq(1)
@@ -34,7 +34,7 @@ module Bookbinder
 
       it 'does not execute BuildAndPushTarball if PushFromLocal fails' do
         expect(fake_publish).to receive(:run).with(['remote']).and_return(0)
-        expect(fake_push_local_to_staging).to receive(:run).with([]).and_return(1)
+        expect(fake_push_local_to).to receive(:run).with(['staging']).and_return(1)
         expect(fake_build_and_push_tarball).not_to receive(:run)
         result = command.run []
         expect(result).to eq(1)

@@ -768,7 +768,7 @@ Deploying to staging is not normally something a human needs to do: the book's C
 
 The following command will deploy the build in your local 'final_app' directory to staging:
 
-        bin/bookbinder push_local_to_staging
+        bin/bookbinder push_local_to staging
 
 ### Deploy to Production
 Deploying to prod is always done manually. It can be done from any machine with the book project checked out, but does not depend on the results from a local bind (or the contents of your `final_app` directory). Instead, it pulls the latest green build from S3, untars it locally, and then pushes it up to prod:
