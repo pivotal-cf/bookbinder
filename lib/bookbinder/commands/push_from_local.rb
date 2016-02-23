@@ -50,6 +50,10 @@ module Bookbinder
 
       attr_reader :configuration_fetcher, :environment, :streams
 
+      def command_name
+        'push_local_to'
+      end
+
       def config
         configuration_fetcher.fetch_config
       end
