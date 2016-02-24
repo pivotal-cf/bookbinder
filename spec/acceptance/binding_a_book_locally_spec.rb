@@ -122,15 +122,9 @@ YAML
     let(:product) do
 <<YAML
 - id: doggies
-  subnav_topics:
-  - title: First pug
-    toc_path: dogs/pugs/index
-  - title: Second greyhound
-    toc_path: dogs/greyhounds/index
+  subnav_root: dogs/index
 - id: doctastic
-  subnav_topics:
-  - title: Wordilicious
-    toc_path: my-docs-repo/index
+  subnav_root: my-docs-repo/index
 YAML
     end
 
@@ -167,15 +161,8 @@ YAML
 
       json_props = File.read File.join('final_app', 'public', 'subnavs', 'doggies-props.json')
       expect(JSON.parse(json_props)['links']).to match_array([
-            {'text' => 'First pug', 'title' => true},
             {'url' => '/dogs/pugs/index.html', 'text' => 'First pug'},
-            {'text' => 'Second greyhound', 'title' => true},
-            {'url' => '/dogs/greyhounds/index.html', 'text' => 'Second greyhound'},
-            {'url' => '/dogs/greyhounds/origin.html', 'text' => 'The Origin of the Greyhound'},
-            {'url' =>'/dogs/greyhounds/fantabulousness.html', 'text'=> 'Greyhounds are Fantabulous'},
-            {'text'=> 'Fun Facts about Greyhounds'},
-            {'url'=> '/dogs/greyhounds/colors.html', 'text' => 'Grey?'},
-            {'url'=> '/dogs/greyhounds/hounds.html', 'text' => 'Houndy'}
+            {'url' => '/dogs/greyhounds/index.html', 'text' => 'Second greyhound'}
       ])
     end
 

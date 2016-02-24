@@ -24,11 +24,11 @@ module Bookbinder
           to eq('mypdfconfig')
       end
 
-      it 'returns an empty array when topic titles are not specified' do
-        config = { 'subnav_topics' => nil }
+      it 'can return a subnav root' do
+        config = {'subnav_root' => 'some/file/path'}
 
-        expect(ProductConfig.new(config).subnav_topics).
-          to eq([])
+        expect(ProductConfig.new(config).subnav_root).
+          to eq('some/file/path')
       end
 
       it 'is valid with required keys' do
@@ -38,31 +38,9 @@ module Bookbinder
       end
 
       it 'is not valid when missing required keys' do
-        config = { 'subnav_topics' => [] }
+        config = {}
 
         expect(ProductConfig.new(config).valid?).to be(false)
-      end
-
-      describe '#specifies_subnav?' do
-        it 'returns false if no topics specified' do
-          expect(ProductConfig.new({}).specifies_subnav?).to be(false)
-        end
-
-        it 'returns true if topics specified' do
-          expect(ProductConfig.new({'subnav_topics' => ['fake topic']}).specifies_subnav?).to be(true)
-        end
-      end
-
-      describe '#subnav_topics' do
-        it 'returns an array of TopicConfig objects in the order specified' do
-          config = {
-            'subnav_topics' => [
-              {'title' => 'Learn About This Really Exciting Thing'}
-            ]
-          }
-
-          expect(ProductConfig.new(config).subnav_topics[0]).to be_an_instance_of(TopicConfig)
-        end
       end
 
       describe 'subnav exclusions' do

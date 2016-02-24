@@ -10,59 +10,42 @@ module Bookbinder
         @renderer = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new)
       end
 
-      def get_links(subnav_config, output_locations)
+      def get_links(product_config, output_locations)
         @source_for_site_gen = output_locations.source_for_site_generator
-        @config = subnav_config
+        @config = product_config
 
-        { links: get_links_and_headers }.to_json
+        { links: parse_toc_file(Pathname(config.subnav_root)) }.to_json
       end
 
       attr_reader :fs, :source_for_site_gen, :renderer, :config
 
       private
 
-      def get_links_and_headers
-        menu_items = []
-
-        config.subnav_topics.map do |topic|
-          menu_items << { text: topic.title, title: true }
-          menu_items << { url: "/#{topic.toc_path}.html", text: topic.toc_nav_name }
-
-          links_from_toc_page = parse_toc_file(topic)
-          links_from_toc_page.each {|link| menu_items << link}
-        end
-
-        menu_items
-      end
-
-      def parse_toc_file(topic)
-        toc_files = fs.find_files_extension_agnostically(topic.toc_path, source_for_site_gen)
+      def parse_toc_file(subnav_root)
+        toc_files = fs.find_files_extension_agnostically(subnav_root, source_for_site_gen)
         toc_md = fs.read(toc_files.first)
 
         toc_html = get_html(toc_md)
 
-        gather_urls_and_texts(toc_html.css('html'), topic)
+        gather_urls_and_texts(subnav_root, toc_html.css('html'))
       end
 
       def get_html(md)
         Nokogiri::HTML(renderer.render(md))
       end
 
-      def gather_urls_and_texts(base_node, topic)
-        nav_items(base_node).map do |element|
-          if element.name == 'h2' && !frontmatter_header?(element)
-            {text: element.inner_html}
-          else
-            list_elements = element.css('li > a', 'li > p > a')
-            list_elements.map do |li|
-              { url: "/#{topic.toc_path.dirname.join(li['href'])}", text: li.inner_text }
-            end
+      def gather_urls_and_texts(subnav_root, base_node)
+        nav_items(base_node).flat_map do |element|
+          unless frontmatter_header?(element)
+            href = element.at_css('a')['href']
+            expanded_url = '/' + subnav_root.dirname.join(href).to_s
+            {url: expanded_url, text: element.inner_text}
           end
-        end.flatten
+        end.compact
       end
 
       def nav_items(base_node)
-        base_node.css('h2, ul') - base_node.css(*exclusions)
+        base_node.css('h2') - base_node.css(*exclusions)
       end
 
       def exclusions
