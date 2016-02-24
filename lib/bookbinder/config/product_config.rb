@@ -28,7 +28,7 @@ module Bookbinder
         (CONFIG_REQUIRED_KEYS - config.keys).empty?
       end
 
-      CONFIG_REQUIRED_KEYS = %w(id subnav_topics)
+      CONFIG_REQUIRED_KEYS = %w(id)
 
       attr_reader :subnav_topics
       alias_method :subnav_name, :id

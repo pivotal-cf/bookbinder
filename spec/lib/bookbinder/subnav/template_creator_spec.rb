@@ -23,77 +23,33 @@ module Bookbinder
         allow(fs).to receive(:file_exist?) { true }
 
         expect(fs).to receive(:read).with(subnavs_dir.join('subnav_template.erb')) { template_content }
-        expect(html_doc_manipulator).to receive(:set_attribute)
-        expect(html_doc_manipulator).to receive(:add_class) { manipulated_content }
+        expect(html_doc_manipulator).to receive(:set_attribute).
+            with(hash_including(document: template_content)) { manipulated_content }
 
         expect(fs).to receive(:write).with(text: manipulated_content, to: subnavs_dir.join('best.erb'))
 
         TemplateCreator.new(fs, output_locations, html_doc_manipulator).create(props_filename, subnav_config)
       end
 
-      context 'for dita subnav' do
-        it 'sets class "deepnav" on the nav content div' do
-          section = Section.new(nil, nil, nil, 'dita_nav')
 
-          allow(fs).to receive(:file_exist?).with(subnavs_dir.join('subnav_template.erb')) { true }
-          allow(fs).to receive(:write)
+      it 'uses _dita_subnav_template.erb if subnav_template.erb is missing' do
+        section = Section.new(nil, nil, nil, 'dita_nav')
 
-          expect(fs).to receive(:read).with(subnavs_dir.join('subnav_template.erb')) { template_content }
-          expect(html_doc_manipulator).to receive(:set_attribute).with(document: template_content,
-                                                                       selector: 'div.nav-content',
-                                                                       attribute: 'data-props-location',
-                                                                       value: 'props.json') { manipulated_content }
+        allow(fs).to receive(:file_exist?).with(subnavs_dir.join('subnav_template.erb')) { false }
+        allow(fs).to receive(:write)
 
-          expect(html_doc_manipulator).to receive(:add_class).with(document: manipulated_content,
-                                                                   selector: 'div.nav-content',
-                                                                   classname: 'deepnav-content')
+        allow_any_instance_of(Terminal).to receive(:update)
 
-          TemplateCreator.new(fs, output_locations, html_doc_manipulator).create('props.json', section)
-        end
+        expect(fs).to receive(:read).with(subnavs_dir.join('_dita_subnav_template.erb')) { template_content }
 
-        it 'uses _dita_subnav_template.erb if subnav_template.erb is missing' do
-          section = Section.new(nil, nil, nil, 'dita_nav')
+        expect(html_doc_manipulator).to receive(:set_attribute).with(document: template_content,
+                                                                     selector: 'div.nav-content',
+                                                                     attribute: 'data-props-location',
+                                                                     value: 'props.json') { manipulated_content }
 
-          allow(fs).to receive(:file_exist?).with(subnavs_dir.join('subnav_template.erb')) { false }
-          allow(fs).to receive(:write)
-
-          allow_any_instance_of(Terminal).to receive(:update)
-
-          expect(fs).to receive(:read).with(subnavs_dir.join('_dita_subnav_template.erb')) { template_content }
-
-          expect(html_doc_manipulator).to receive(:set_attribute).with(document: template_content,
-                                                                       selector: 'div.nav-content',
-                                                                       attribute: 'data-props-location',
-                                                                       value: 'props.json') { manipulated_content }
-
-          expect(html_doc_manipulator).to receive(:add_class).with(document: manipulated_content,
-                                                                   selector: 'div.nav-content',
-                                                                   classname: 'deepnav-content')
-
-          TemplateCreator.new(fs, output_locations, html_doc_manipulator).create('props.json', section)
-        end
+        TemplateCreator.new(fs, output_locations, html_doc_manipulator).create('props.json', section)
       end
 
-      context 'for regular subnav' do
-        it 'sets class "shallownav" on the nav content div' do
-          config = Config::ProductConfig.new({'id' => 'some_nav_name'})
-
-          allow(fs).to receive(:file_exist?) { true }
-          allow(fs).to receive(:write)
-
-          expect(fs).to receive(:read).with(subnavs_dir.join('subnav_template.erb')) { template_content }
-          expect(html_doc_manipulator).to receive(:set_attribute).with(document: template_content,
-              selector: 'div.nav-content',
-              attribute: 'data-props-location',
-              value: 'props.json') { manipulated_content }
-
-          expect(html_doc_manipulator).to receive(:add_class).with(document: manipulated_content,
-                                                                   selector: 'div.nav-content',
-                                                                   classname: 'shallownav-content')
-
-          TemplateCreator.new(fs, output_locations, html_doc_manipulator).create('props.json', config)
-        end
-      end
     end
   end
 end

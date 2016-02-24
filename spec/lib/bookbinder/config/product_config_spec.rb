@@ -32,7 +32,7 @@ module Bookbinder
       end
 
       it 'is valid with required keys' do
-        config = { 'id' => 'elena', 'subnav_topics' => []}
+        config = { 'id' => 'elena'}
 
         expect(ProductConfig.new(config).valid?).to be(true)
       end

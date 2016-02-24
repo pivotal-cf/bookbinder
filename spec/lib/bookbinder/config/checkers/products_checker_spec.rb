@@ -58,26 +58,14 @@ module Bookbinder
           end
         end
 
-        context 'when a product id is not specified' do
+        context 'when there are no products' do
           it 'returns nil' do
-            config = {}
-            expect(ProductsChecker.new.check(Configuration.parse(config))).to be_nil
-          end
-        end
-
-        context 'when required keys are missing' do
-          it 'returns an informative error' do
             config = {
               'sections' => [
-                { 'product_id' => 'other-group' }
-              ],
-              'products' => [
-                { 'id' => 'other-group' }
+                { 'some' => 'thing' }
               ]
             }
-
-            expect(ProductsChecker.new.check(Configuration.parse(config))).
-              to be_a(ProductsChecker::MissingRequiredKeyError)
+            expect(ProductsChecker.new.check(Configuration.parse(config))).to be_nil
           end
         end
       end

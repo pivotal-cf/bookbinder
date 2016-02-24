@@ -151,13 +151,13 @@ YAML
       expect(Pathname(File.join('final_app', 'public', 'subnavs', 'doctastic-props.json'))).to exist
 
       index_one = File.read File.join('final_app', 'public', 'dogs', 'pugs', 'index.html')
-      expect(index_one).to include('<div class="nav-content shallownav-content" data-props-location="doggies-props.json">I am the default subnav!</div>')
+      expect(index_one).to include('<div class="nav-content" data-props-location="doggies-props.json">I am the default subnav!</div>')
 
       index_one = File.read File.join('final_app', 'public', 'dogs', 'greyhounds', 'index.html')
-      expect(index_one).to include('<div class="nav-content shallownav-content" data-props-location="doggies-props.json">I am the default subnav!</div>')
+      expect(index_one).to include('<div class="nav-content" data-props-location="doggies-props.json">I am the default subnav!</div>')
 
       index_two = File.read File.join('final_app', 'public', 'my-docs-repo', 'index.html')
-      expect(index_two).to include('<div class="nav-content shallownav-content" data-props-location="doctastic-props.json">I am the default subnav!</div>')
+      expect(index_two).to include('<div class="nav-content" data-props-location="doctastic-props.json">I am the default subnav!</div>')
     end
 
     it 'properly formats the json props json' do
