@@ -69,7 +69,7 @@ Move along, nothing to see.
           ]
         }.to_json
 
-        expect(fs).to receive(:find_files_extension_agnostically).
+        expect(fs).to receive(:find_files_extension_agnostically).twice.
             with(Pathname('my/index'), output_locations.source_for_site_generator) { [Pathname('root path')] }
         expect(fs).to receive(:find_files_extension_agnostically).
             with(Pathname('my/cats/first-doc.html'), output_locations.source_for_site_generator) { [Pathname('my first doc')] }
@@ -109,12 +109,10 @@ Some Text
 Some Text
         EOT
 
-        expect(fs).to receive(:find_files_extension_agnostically).
+        expect(fs).to receive(:find_files_extension_agnostically).twice.
             with(Pathname('my/index'), output_locations.source_for_site_generator) { [Pathname('my/index.html')] }
         expect(fs).to receive(:find_files_extension_agnostically).
             with(Pathname('my/first-doc.html'), output_locations.source_for_site_generator) { [Pathname('my/first-doc.extension')] }
-        expect(fs).to receive(:find_files_extension_agnostically).
-            with(Pathname('my/index.html'), output_locations.source_for_site_generator) { [Pathname('my/index.html')] }
 
         allow(fs).to receive(:read).with(Pathname('my/index.html')) { root_index }
         allow(fs).to receive(:read).with(Pathname('my/first-doc.extension')) { first_doc }
@@ -141,8 +139,8 @@ title: Title for the Webz Page
 Some Text
         EOT
 
-        expect(fs).to receive(:find_files_extension_agnostically).
-            with(Pathname('my/index'), outputlocations.source_for_site_generator) { [Pathname('my/index.html')] }
+        expect(fs).to receive(:find_files_extension_agnostically).twice.
+            with(Pathname('my/index'), output_locations.source_for_site_generator) { [Pathname('my/index.html')] }
         expect(fs).to receive(:find_files_extension_agnostically).
             with(Pathname('my/bogus-doc.html'), output_locations.source_for_site_generator) { [] }
 
