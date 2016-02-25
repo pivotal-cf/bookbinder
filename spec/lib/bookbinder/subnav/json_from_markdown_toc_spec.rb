@@ -120,8 +120,37 @@ Some Text
         allow(fs).to receive(:read).with(Pathname('my/first-doc.extension')) { first_doc }
 
         expect { JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations) }.
-          to raise_error(JsonFromMarkdownToc::DuplicateSubnavLinkError) do |error|
+          to raise_error(JsonFromMarkdownToc::SubnavDuplicateLinkError) do |error|
             expect(error.message).to include('my/index.html')
+        end
+      end
+
+      it 'raises an error if a link goes to a bogus place' do
+        output_locations = OutputLocations.new(context_dir: '.')
+        subnav_config = Config::ProductConfig.new({ 'subnav_root' => 'my/index' })
+
+        fs = instance_double(Bookbinder::LocalFilesystemAccessor)
+
+        root_index =  <<-EOT
+---
+title: Title for the Webz Page
+---
+
+## [Bogus Document](./bogus-doc.html)
+
+Some Text
+        EOT
+
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/index'), outputlocations.source_for_site_generator) { [Pathname('my/index.html')] }
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/bogus-doc.html'), output_locations.source_for_site_generator) { [] }
+
+        allow(fs).to receive(:read).with(Pathname('my/index.html')) { root_index }
+
+        expect { JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations) }.
+          to raise_error(JsonFromMarkdownToc::SubnavBrokenLinkError) do |error|
+          expect(error.message).to include('my/bogus-doc.html')
         end
       end
 

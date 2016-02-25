@@ -5,7 +5,8 @@ require 'redcarpet'
 module Bookbinder
   module Subnav
     class JsonFromMarkdownToc
-      DuplicateSubnavLinkError = Class.new(RuntimeError)
+      SubnavDuplicateLinkError = Class.new(RuntimeError)
+      SubnavBrokenLinkError = Class.new(RuntimeError)
 
       def initialize(fs)
         @fs = fs
@@ -18,20 +19,19 @@ module Bookbinder
         @source_for_site_gen = output_locations.source_for_site_generator
         @config = product_config
 
-        { links: gather_urls_and_texts(config.subnav_root) }.to_json
+        {links: gather_urls_and_texts(config.subnav_root)}.to_json
       end
 
       attr_reader :fs, :source_for_site_gen, :renderer, :config
 
       private
 
-      def parse_toc_file(subnav_root)
-        toc_files = fs.find_files_extension_agnostically(subnav_root, source_for_site_gen)
+      def parse_toc_file(toc_file_path)
+        toc_files = fs.find_files_extension_agnostically(toc_file_path, source_for_site_gen)
         toc_file = toc_files.first
 
-        if @parsed_files.include?(toc_file)
-          raise DuplicateSubnavLinkError.new(toc_file)
-        end
+        raise SubnavBrokenLinkError.new(toc_file_path) unless toc_file
+        raise SubnavDuplicateLinkError.new(toc_file) if @parsed_files.include?(toc_file)
 
         @parsed_files << toc_file
 
