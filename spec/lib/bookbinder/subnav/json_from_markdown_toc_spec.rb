@@ -8,7 +8,7 @@ module Bookbinder
   module Subnav
     describe JsonFromMarkdownToc do
       it 'returns formatted json from subnav root in a product config' do
-        output_locations = OutputLocations.new(context_dir: '.')
+        output_locations = OutputLocations.new(context_dir: '/')
         subnav_config = Config::ProductConfig.new({ 'subnav_root' => 'my/index' })
 
         fs = instance_double(Bookbinder::LocalFilesystemAccessor)
@@ -69,26 +69,26 @@ Move along, nothing to see.
           ]
         }.to_json
 
-        expect(fs).to receive(:find_files_extension_agnostically).twice.
-            with(Pathname('my/index'), output_locations.source_for_site_generator) { [Pathname('root path')] }
         expect(fs).to receive(:find_files_extension_agnostically).
-            with(Pathname('my/cats/first-doc.html'), output_locations.source_for_site_generator) { [Pathname('my first doc')] }
+            with(Pathname('my/index'), output_locations.source_for_site_generator) { [Pathname('/output/master_middleman/source/my/index.html')] }
         expect(fs).to receive(:find_files_extension_agnostically).
-            with(Pathname('my/second-doc.html'), output_locations.source_for_site_generator) { [Pathname('my second doc')] }
+            with(Pathname('my/cats/first-doc.html'), output_locations.source_for_site_generator) { [Pathname('/output/master_middleman/source/my/cats/first-doc.html.md')] }
         expect(fs).to receive(:find_files_extension_agnostically).
-            with(Pathname('my/nested-doc.html'), output_locations.source_for_site_generator) { [Pathname('my nested doc')] }
+            with(Pathname('my/second-doc.html'), output_locations.source_for_site_generator) { [Pathname('/output/master_middleman/source/my/second-doc.html.md.erb')] }
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/nested-doc.html'), output_locations.source_for_site_generator) { [Pathname('/output/master_middleman/source/my/nested-doc.html')] }
 
-        allow(fs).to receive(:read).with(Pathname('root path')) { root_index }
-        allow(fs).to receive(:read).with(Pathname('my first doc')) { first_doc }
-        allow(fs).to receive(:read).with(Pathname('my second doc')) { second_doc }
-        allow(fs).to receive(:read).with(Pathname('my nested doc')) { nested_doc }
+        allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/index.html')) { root_index }
+        allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/cats/first-doc.html.md')) { first_doc }
+        allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/second-doc.html.md.erb')) { second_doc }
+        allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/nested-doc.html')) { nested_doc }
 
         expect(JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations)).
           to eq(json_toc)
       end
 
       it 'raises an error if a link is included twice in a subnav' do
-        output_locations = OutputLocations.new(context_dir: '.')
+        output_locations = OutputLocations.new(context_dir: '/')
         subnav_config = Config::ProductConfig.new({ 'subnav_root' => 'my/index' })
 
         fs = instance_double(Bookbinder::LocalFilesystemAccessor)
@@ -109,13 +109,15 @@ Some Text
 Some Text
         EOT
 
-        expect(fs).to receive(:find_files_extension_agnostically).twice.
-            with(Pathname('my/index'), output_locations.source_for_site_generator) { [Pathname('my/index.html')] }
         expect(fs).to receive(:find_files_extension_agnostically).
-            with(Pathname('my/first-doc.html'), output_locations.source_for_site_generator) { [Pathname('my/first-doc.extension')] }
+            with(Pathname('my/index'), output_locations.source_for_site_generator) { [Pathname('/output/master_middleman/source/my/index.html')] }
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/index.html'), output_locations.source_for_site_generator) { [Pathname('/output/master_middleman/source/my/index.html')] }
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/first-doc.html'), output_locations.source_for_site_generator) { [Pathname('/output/master_middleman/source/my/first-doc.extension')] }
 
-        allow(fs).to receive(:read).with(Pathname('my/index.html')) { root_index }
-        allow(fs).to receive(:read).with(Pathname('my/first-doc.extension')) { first_doc }
+        allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/index.html')) { root_index }
+        allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/first-doc.extension')) { first_doc }
 
         expect { JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations) }.
           to raise_error(JsonFromMarkdownToc::SubnavDuplicateLinkError) do |error|
@@ -124,7 +126,7 @@ Some Text
       end
 
       it 'raises an error if a link goes to a bogus place' do
-        output_locations = OutputLocations.new(context_dir: '.')
+        output_locations = OutputLocations.new(context_dir: '/')
         subnav_config = Config::ProductConfig.new({ 'subnav_root' => 'my/index' })
 
         fs = instance_double(Bookbinder::LocalFilesystemAccessor)
@@ -139,12 +141,12 @@ title: Title for the Webz Page
 Some Text
         EOT
 
-        expect(fs).to receive(:find_files_extension_agnostically).twice.
-            with(Pathname('my/index'), output_locations.source_for_site_generator) { [Pathname('my/index.html')] }
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/index'), output_locations.source_for_site_generator) { [Pathname('/output/master_middleman/source/my/index.html')] }
         expect(fs).to receive(:find_files_extension_agnostically).
             with(Pathname('my/bogus-doc.html'), output_locations.source_for_site_generator) { [] }
 
-        allow(fs).to receive(:read).with(Pathname('my/index.html')) { root_index }
+        allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/index.html')) { root_index }
 
         expect { JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations) }.
           to raise_error(JsonFromMarkdownToc::SubnavBrokenLinkError) do |error|
