@@ -135,16 +135,7 @@ sections:
 
 products:										# optional
   - id: my_product
-    subnav_topics:
-    - title: My Nav Section
-      toc_path:  birds/egg/index
-      toc_nav_name: My Nav Overview
-    - title: Other Nav Section
-      toc_path:  reptiles/index
-
-subnav_exclusions:								# optional
-  - .ignore-class
-  - h2:contains("Table of Contents")
+    subnav_root: reptiles/index
 
 archive_menu:									# optional
   - v1.3.0.0
@@ -461,9 +452,7 @@ sections:
 ```
 
 #### Subnav from Config (product_id):
-Specifying `subnav_topics` under the `products` key and associating this to a section via `product_id` allows users to generate their own navigation-related json by specifying topics in a `config.yml` and parsing the topic's specified table of contents page for navigation items, rather than defining as static HTML (as with `subnav_template`). This json can then be consumed with a javascript library (e.g. React.js) to create your subnav.
-
-Previously this feature was enabled under the `subnavs`, `topics`, and `subnav_name` keys, however we have changed the implementation to reflect the first-order nature of products and their one-to-one relationship with subnavs.
+Specifying `subnav_root` under the `products` key and associating this to a section via `product_id` generates navigation-related json by parsing the HTML file specified by `subnav_root` for any linked H2s and spidering to those linked pages to make a subnav tree. This json can then be consumed with a javascript library (e.g. React.js) to create your subnav.
 
 This feature not currently supported for DITA, though the `subnav_template` key does something very similar when used in dita_sections (see above).
 
@@ -471,14 +460,14 @@ This feature not currently supported for DITA, though the `subnav_template` key 
 
 * In `config.yml`: a `product_id` key for each section to display the generated subnav, and a `products` section that defines each `product_id` (as key `id`) used for those sections.
 * In `master_middleman/source/subnavs`, a file `subnav_template.erb` that contains html to which the generated subnav json will be appended. The file must contain one div with class 'nav-content'.
-* Properly formatted table of contents file for each topic, as specified by key `toc_path`
+* Properly formatted page for each `subnav_root`
 
-```YAML
+```yaml
 sections:
   - repository:
       name: org-name/bird-repo
     directory: birds
-    product_identifier: my_product
+    product_id: my_product
   - repository:
       name: org-name/reptile-repo
     directory: reptiles
@@ -486,71 +475,73 @@ sections:
 
 products:
   - id: my_product
-    subnav_topics:
-    - title: My Nav Section
-      toc_path: birds/robins/index
-      toc_nav_name: My Nav Overview
-    - title: Other Nav Section
-      toc_path: reptiles/index
+    subnav_root: reptiles/index
 ```
 
 **Keys:**
 
 * `id`: Links a given section to its product in the config. Should contain no spaces.
-* `subnav_topics`: Top-level items for to-be-generated subnavs
-	* `title`: Human-readable name of the topic, to be included in subnav
-	* `toc_path`: Where the topic's Table of Contents file is found in the final app, without file extension. Usually this will be <section-directory>/index
-	* `toc_nav_name`: Human-readable name of the table of contents page to be included in subnav. If not provided, a link to the TOC will still be added to the nav with name specified in `title`.
-
-There is also an optional top-level key in `config.yml` that allows for manual exclusion of elements when parsing the file at toc_path to populate submenu items. Any valid Nokogiri css selector may be passed as an exclusion.
-
-```YAML
-subnav_exclusions:
-  - .ignore-class
-  - h2:contains("Table of Contents")
-```
-
+* `subnav_root`: Root file to be parsed for to-be-generated subnavs.
+ 
 **Example Table of Contents page:**
 
-The parser only looks for `h2` and `ul`/`ol` `li > a` elements on the specified toc_file for generating the subnav. Additionally, elements with class '.nav-exclude' will be ignored, along with any elements specified in the `config.yml`'s `subnav_exclusions` key.
+The parser only looks for `h2` elements with links on the specified `subnav_root` for generating the subnav.
 
-An example Table of Contents file:
+`reptiles/index.html.md`:
+```markdown
+## [My First Nav Item](./thing-one.html)
 
-```Markdown
-# Some Title
+Some text that won't be in the Nav
 
-Some Introductory text
+## [My Second Nav Item](./thing-two.html)
+```
 
-## Table of Contents
+`reptiles/thing-one.html`:
+```markdown
 
-* [A Blue Generated Nav Item](./blue.html)
+## [My Nested Nav Item](./nested-thing.html)
 
-## Some Former H2
+```
 
-* [A Red Generated Nav Item](./red.html)
+`reptiles/thing-two.html`:
+```markdown
+## Won't Show Up in the Nav
+Nothing to see here.
+```	
 
+`reptiles/nested-thing.html`:
+```markdown
+## End of the line
+
+No more.
 ```
 
 **Generated JSON:**
 
-Upon binding, Bookbinder parses each of the toc_files specified in the config and specifies any `h2s` as unlinked subheaders and `ol`/`ul` with `li + a` as children navigation items. Topics will be added to the json file in first the order specified in the config, then in the order specified in the TOC file.
+Upon binding, Bookbinder parses each of the subnav roots specified in the config and follows `h2`s with links to create the subnav tree.
 
 Bookbinder makes these subnav links available in a json format at `/subnavs/<your-subnav-name>.json`. It will have written the name of the file containing the links from subnav_template.erb at a data attribute called data-props-location on 'div.nav-content'.
 
-An example of the json links using the config and TOC file included above:
+An example of the json links using the config and subnav root file included above:
 
-```code
+```json
 {
-  "links":
-  [
-  	{"text": "My Nav Section", title: true},
-    {"url": "/birds/robins/egg/index.html", "text": "My Nav Overview"},
-    {"url": "/birds/robins/egg/blue.html", "text": "A Generated Nav Item From Link"},
-    {"text": "Some Former H2"},
-    {"url": "/birds/robins/egg/red.html", "text": "Another Generated Nav Item From Link"},
-    {"text": "Other Nav Section", title: true},
-    {"url": "/reptiles/index.html", "text": "Other Nav Section"}
-  ]
+    'links': [
+        { 
+            'url': 'reptiles/thing-one.html',
+            'text': 'My First Nav Item',
+            'nestedLinks': [
+                { 
+                    'url': 'reptiles/nested-thing.html',
+                    'text': 'My Nested Nav Item'
+                }
+            ]
+        },
+        { 
+            'url': 'reptiles/thing-two.html',
+            'text': 'My Second Nav Item'
+        }
+    ]
 }
 ```
 
