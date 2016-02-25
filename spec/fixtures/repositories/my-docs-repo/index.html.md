@@ -2,7 +2,7 @@
 title: This is the Title of this Page
 ---
 
-## [Wordilicious](my-docs-repo/index.html)
+## Wordilicious
 
 This is a Markdown Page
 

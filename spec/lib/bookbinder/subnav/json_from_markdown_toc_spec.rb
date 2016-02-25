@@ -13,7 +13,87 @@ module Bookbinder
 
         fs = instance_double(Bookbinder::LocalFilesystemAccessor)
 
-        my_index =  <<-EOT
+        root_index =  <<-EOT
+---
+title: Title for the Webz Page
+---
+
+## [First Document](./cats/first-doc.html)
+
+Some Text
+
+## [Second Document](./second-doc.html)
+
+More text
+
+- list item
+- another list item
+
+## My Unlinked Header
+
+## <a id='my-id'></a> My Quicklink
+
+[A link](./third-doc.html)
+        EOT
+
+        first_doc = <<-EOT
+## [Nested Link](../nested-doc.html)
+
+Some Text
+        EOT
+
+        second_doc = <<-EOT
+Just some text here.
+        EOT
+
+        nested_doc = <<-EOT
+Move along, nothing to see.
+        EOT
+
+        json_toc = {links:
+          [
+            {
+              url: '/my/cats/first-doc.html',
+              text: 'First Document',
+              nestedLinks: [
+                {
+                  url: '/my/nested-doc.html',
+                  text: 'Nested Link'
+                }
+              ]
+            },
+            {
+              url: '/my/second-doc.html',
+              text: 'Second Document'
+            }
+          ]
+        }.to_json
+
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/index'), output_locations.source_for_site_generator) { [Pathname('root path')] }
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/cats/first-doc.html'), output_locations.source_for_site_generator) { [Pathname('my first doc')] }
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/second-doc.html'), output_locations.source_for_site_generator) { [Pathname('my second doc')] }
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/nested-doc.html'), output_locations.source_for_site_generator) { [Pathname('my nested doc')] }
+
+        allow(fs).to receive(:read).with(Pathname('root path')) { root_index }
+        allow(fs).to receive(:read).with(Pathname('my first doc')) { first_doc }
+        allow(fs).to receive(:read).with(Pathname('my second doc')) { second_doc }
+        allow(fs).to receive(:read).with(Pathname('my nested doc')) { nested_doc }
+
+        expect(JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations)).
+          to eq(json_toc)
+      end
+
+      it 'raises an error if a link is included twice in a subnav' do
+        output_locations = OutputLocations.new(context_dir: '.')
+        subnav_config = Config::ProductConfig.new({ 'subnav_root' => 'my/index' })
+
+        fs = instance_double(Bookbinder::LocalFilesystemAccessor)
+
+        root_index =  <<-EOT
 ---
 title: Title for the Webz Page
 ---
@@ -21,39 +101,28 @@ title: Title for the Webz Page
 ## [First Document](./first-doc.html)
 
 Some Text
-
-## [Second Document](../cat-repo/second-doc.html)
-
-More text
-
-- list item
-- another list item
-
-[A link](./third-doc.html)
         EOT
 
-        some_json = {links:
-          [
-            {
-              url: '/my/first-doc.html',
-              text: 'First Document'
-            },
-            {
-              url: '/cat-repo/second-doc.html',
-              text: 'Second Document'
-            }
-          ]
-        }.to_json
+        first_doc = <<-EOT
+## [Nested Link](./index.html)
 
-        toc_path = Pathname(output_locations.source_for_site_generator.join('my', 'index.my.extension'))
+Some Text
+        EOT
 
-        allow(fs).to receive(:find_files_extension_agnostically).
-            with(Pathname('my/index'), output_locations.source_for_site_generator) { [toc_path] }
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/index'), output_locations.source_for_site_generator) { [Pathname('my/index.html')] }
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/first-doc.html'), output_locations.source_for_site_generator) { [Pathname('my/first-doc.extension')] }
+        expect(fs).to receive(:find_files_extension_agnostically).
+            with(Pathname('my/index.html'), output_locations.source_for_site_generator) { [Pathname('my/index.html')] }
 
-        allow(fs).to receive(:read).with(toc_path) { my_index }
+        allow(fs).to receive(:read).with(Pathname('my/index.html')) { root_index }
+        allow(fs).to receive(:read).with(Pathname('my/first-doc.extension')) { first_doc }
 
-        expect(JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations)).
-          to eq(some_json)
+        expect { JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations) }.
+          to raise_error(JsonFromMarkdownToc::DuplicateSubnavLinkError) do |error|
+            expect(error.message).to include('my/index.html')
+        end
       end
 
       xit 'does not include excluded html attributes' do

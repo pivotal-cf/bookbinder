@@ -105,7 +105,7 @@ YAML
     end
   end
 
-  context 'when products with subnav topics are specified in config.yml' do
+  context 'when products with subnav root are specified in config.yml' do
     let(:section) do
 <<YAML
 - repository:
@@ -171,11 +171,7 @@ YAML
         <<YAML
 - id: doggies
   pdf_config: dog-pdf.yml
-  subnav_topics:
-  - title: First pug
-    toc_path: dogs/pugs/index
-  - title: Second greyhound
-    toc_path: dogs/greyhounds/index
+  subnav_root: dogs/index
 YAML
       end
       let(:section) do
@@ -200,10 +196,6 @@ executable: REPLACE ME
 pages:
 - dogs/pugs/index.html
 - dogs/greyhounds/index.html
-- dogs/greyhounds/origin.html
-- dogs/greyhounds/fantabulousness.html
-- dogs/greyhounds/colors.html
-- dogs/greyhounds/hounds.html
 YAML
 
         expect(Pathname(File.join('dog-pdf.yml'))).to exist
