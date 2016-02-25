@@ -31,10 +31,7 @@ module Bookbinder
 
       def full_source_from_path(path)
         full_sources = fs.find_files_extension_agnostically(path, source_for_site_gen)
-        full_source = full_sources.first
-
-        raise SubnavBrokenLinkError.new(path) unless full_source
-        full_source
+        full_sources.first
       end
 
       # href: ./cat/index.html
@@ -44,6 +41,12 @@ module Bookbinder
         current_expanded_path = Pathname(current_expanded_href)
 
         full_source = full_source_from_path(current_expanded_path)
+        raise SubnavBrokenLinkError.new(<<-ERROR) unless full_source
+Broken link found in subnav for product_id: #{config.id}
+
+Link: #{current_expanded_href}
+Source file: #{@parsed_files[current_expanded_href]}
+        ERROR
 
         toc_md = fs.read(full_source)
         base_node = get_html(toc_md).css('html')
@@ -56,21 +59,22 @@ module Bookbinder
             href = a['href']
             next if href.nil?
 
-            expanded_url = current_expanded_path.dirname.join(href).to_s
-            raise SubnavDuplicateLinkError.new(<<-ERROR) if @parsed_files.has_key?(expanded_url)
+            next_expanded_href = current_expanded_path.dirname.join(href).to_s
+            raise SubnavDuplicateLinkError.new(<<-ERROR) if @parsed_files.has_key?(next_expanded_href)
+ )
 Duplicate link found in subnav for product_id: #{config.id}
 
-Link: #{expanded_url}
-Original file: #{@parsed_files[expanded_url]}
+Link: #{next_expanded_href}
+Original file: #{@parsed_files[next_expanded_href]}
 Current file: #{full_source}
             ERROR
-            @parsed_files[expanded_url] = full_source
+            @parsed_files[next_expanded_href] = full_source
 
-            nested_urls_and_texts = gather_urls_and_texts(expanded_url)
+            nested_urls_and_texts = gather_urls_and_texts(next_expanded_href )
             nested_links = {}
             nested_links.merge!(nestedLinks: nested_urls_and_texts) unless nested_urls_and_texts.empty?
 
-            {url: '/' + expanded_url, text: element.inner_text}.merge(nested_links)
+            {url: '/' + next_expanded_href , text: element.inner_text}.merge(nested_links)
           end
         end.compact
       end
