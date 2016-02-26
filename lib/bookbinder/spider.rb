@@ -25,6 +25,21 @@ module Bookbinder
       def to_path
         Pathname(@app_dir).join('public/sitemap.xml')
       end
+
+      def announce_broken_links(streams)
+        if @broken_links.none?
+          streams[:out].puts "\nNo broken links!"
+        else
+          streams[:err].puts(<<-MESSAGE)
+
+Found #{@broken_links.count} broken links!
+
+#{@broken_links.sort.join("\n")}
+
+Found #{@broken_links.count} broken links!
+          MESSAGE
+        end
+      end
     end
 
     def self.prepend_location(location, url)
@@ -33,6 +48,16 @@ module Bookbinder
 
     def initialize(app_dir: nil)
       @app_dir = app_dir || raise('Spiders must be initialized with an app directory.')
+    end
+
+    def find_broken_links(port, broken_link_exclusions: /(?!.*)/)
+      temp_host = "localhost:#{port}"
+      sieve = Sieve.new domain: "http://#{temp_host}"
+      links = crawl_from "http://#{temp_host}/index.html", sieve
+      broken_links = links.first
+      public_broken_links = broken_links.reject {|l| l.match(broken_link_exclusions)}
+
+      Result.new(public_broken_links, nil, nil)
     end
 
     def generate_sitemap(target_host, port, streams,

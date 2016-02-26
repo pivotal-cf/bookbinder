@@ -35,8 +35,8 @@ module Bookbinder
       write_arbitrary_yaml_to(public_directory)
 
       server_director = ServerDirector.new(app: RackApp.new(Pathname('redirects.rb')).app,
-                                           directory: final_app_dir,
-                                           port: port)
+        directory: final_app_dir,
+        port: port)
 
       server_director.use_server do
         Dir.chdir(final_app_dir) { spec.run }
@@ -53,70 +53,34 @@ module Bookbinder
         FileUtils.rm File.join(public_directory, 'stylesheets', 'stylesheet.css')
       end
 
-      it 'creates a valid-looking sitemap' do
-        result = spider.generate_sitemap('example.com', port, out: StringIO.new)
-        expect(Nokogiri::XML(result.to_xml).css('url loc').first.text).
-          to eq('http://example.com/index.html')
-      end
-
-      it 'suggests a path for the sitemap, based on the app dir' do
-        result = spider.generate_sitemap('example.com', port, out: StringIO.new)
-        expect(result.to_path).to eq(Pathname(final_app_dir).join('public/sitemap.xml'))
-      end
-
       it 'reports no broken links' do
-        result = spider.generate_sitemap 'example.com', port, out: StringIO.new
-        expect(result).not_to have_broken_links
+        expect(spider.find_broken_links(port)).not_to have_broken_links
       end
     end
 
     context 'when there are broken links' do
-      let(:host) { 'example.com' }
-      let(:sitemap_links) { ["http://#{host}/index.html", "http://#{host}/other_page.html", "http://#{host}/yaml_page.yml"]}
       let(:portal_page) { File.join('spec', 'fixtures', 'broken_index.html') }
       let(:other_page) { File.join('spec', 'fixtures', 'page_with_broken_links.html') }
-      let(:broken_links) do
-        [
-          "/index.html => http://localhost:#{port}/non_existent.yml",
-          "/index.html => http://localhost:#{port}/non_existent/index.html",
-          "/index.html => http://localhost:#{port}/also_non_existent/index.html",
-          'public/stylesheets/stylesheet.css => absent-relative.gif',
-            'public/stylesheets/stylesheet.css => /absent-absolute.gif',
-            'public/stylesheets/stylesheet.css => http://something-nonexistent.com/absent-remote.gif',
-        ]
-      end
-      let(:broken_anchor_links) do
-        [
-          '/index.html => #missing-anchor',
-          '/index.html => #ill-formed.anchor',
-          '/index.html => #missing',
-          '/other_page.html => #this-doesnt',
-          '/index.html => #missing.and.bad',
-          '/index.html => #still-bad=anchor',
-          '/other_page.html => #another"bad"anchor',
-        ]
-      end
 
       it 'reports that they are present' do
-        expect(spider.generate_sitemap host, port, err: StringIO.new).
-          to have_broken_links
+        expect(spider.find_broken_links(port)).to have_broken_links
       end
 
       context 'and a whitelist has been provided' do
         it 'does not report them if they are on the whitelist' do
-          expect(spider.generate_sitemap(
-            host, port,
-            { out: StringIO.new },
-            broken_link_exclusions: /./
-          )).not_to have_broken_links
+          expect(spider.find_broken_links(
+              port,
+              broken_link_exclusions: /./
+            )).not_to have_broken_links
         end
       end
 
       it 'logs them as errors' do
         errors = StringIO.new
-        streams = { err: errors }
+        streams = {err: errors}
 
-        spider.generate_sitemap(host, port, streams)
+        result = spider.find_broken_links(port)
+        result.announce_broken_links(streams)
 
         errors.rewind
         expect(errors.read).to eq(<<-MESSAGE)
@@ -139,12 +103,6 @@ public/stylesheets/stylesheet.css => http://something-nonexistent.com/absent-rem
 
 Found 13 broken links!
         MESSAGE
-      end
-
-      it 'excludes them from the sitemap' do
-        result = spider.generate_sitemap host, port, err: StringIO.new
-        broken_link_targets = broken_links.map {|link| link.split(" => ").last.gsub("localhost:#{port}", host) }
-        expect(result.to_xml).not_to include(*broken_link_targets)
       end
     end
   end
