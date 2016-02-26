@@ -154,6 +154,23 @@ Some Text
         end
       end
 
+      it 'barfs informatively if it cannot find a subnav root' do
+
+        output_locations = OutputLocations.new(context_dir: '/')
+        subnav_config = Config::ProductConfig.new({ 'subnav_root' => 'my/index' })
+
+        fs = instance_double(Bookbinder::LocalFilesystemAccessor)
+
+        expect(fs).to receive(:find_files_extension_agnostically).with(Pathname('my/index'), output_locations.source_for_site_generator){[]}
+
+        expect { JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations) }.to raise_error(JsonFromMarkdownToc::SubnavRootMissingError)
+
+
+
+
+
+      end
+
       xit 'does not include excluded html attributes' do
         output_locations = OutputLocations.new(context_dir: '.')
         subnav_config = Config::ProductConfig.new(
@@ -196,6 +213,8 @@ Some Text
         expect(JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations)).
           to eq(some_json)
       end
+
+
     end
   end
 end

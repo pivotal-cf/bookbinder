@@ -7,6 +7,7 @@ module Bookbinder
     class JsonFromMarkdownToc
       SubnavDuplicateLinkError = Class.new(RuntimeError)
       SubnavBrokenLinkError = Class.new(RuntimeError)
+      SubnavRootMissingError = Class.new(RuntimeError)
 
       def initialize(fs)
         @fs = fs
@@ -18,6 +19,9 @@ module Bookbinder
         @config = product_config
 
         root = absolute_source_from_path(Pathname(config.subnav_root))
+
+        raise SubnavRootMissingError.new('Subnav root not found at: ' + config.subnav_root) if root.nil?
+
         @parsed_files = { Pathname(root) => '(root)'}
 
         {links: gather_urls_and_texts(root)}.to_json
