@@ -28,7 +28,7 @@ module Bookbinder
 
     use_fixture_repo
 
-    let(:null_broken_links_checker) { double('broken links checker', find_broken_links: double(announce_broken_links: nil, has_broken_links?: false)) }
+    let(:null_broken_links_checker) { double('broken links checker', check!: nil, announce: nil, has_broken_links?: false) }
     let(:null_fs_accessor) { double('fs accessor').as_null_object }
     let(:null_preprocessor) { instance_double('Bookbinder::Preprocessing::LinkToSiteGenDir', preprocess: nil) }
     let(:null_middleman_runner) { instance_double('Bookbinder::MiddlemanRunner', run: success) }
@@ -220,18 +220,16 @@ module Bookbinder
 
     it "writes required files to output directory and outputs success message" do
       fs = instance_double('Bookbinder::LocalFilesystemAccessor', file_exist?: false)
-      broken_links_checker = instance_double(Bookbinder::Postprocessing::BrokenLinksChecker)
+      broken_links_checker = instance_double(Bookbinder::Postprocessing::BrokenLinksChecker, has_broken_links?: false)
 
       streams = { success: double('stream') }
-      result = double('result', has_broken_links?: false)
 
       output_locations = OutputLocations.new(final_app_dir: 'whatever_final_app', context_dir: ".")
       config = Config::Configuration.new({public_host: 'some.site.io'})
 
       expect(fs).to receive(:copy).with(output_locations.build_dir, output_locations.public_dir).ordered
-      expect(broken_links_checker).to receive(:find_broken_links).with(config.broken_link_exclusions).ordered { result }
-
-      expect(result).to receive(:announce_broken_links).with(streams.merge({ out: instance_of(Sheller::DevNull) }))
+      expect(broken_links_checker).to receive(:check!).with(config.broken_link_exclusions).ordered
+      expect(broken_links_checker).to receive(:announce).with(streams.merge({ out: instance_of(Sheller::DevNull)})).ordered
 
       expect(streams[:success]).to receive(:puts).with(include(output_locations.final_app_dir.to_s))
 
@@ -255,9 +253,8 @@ module Bookbinder
         output_locations = OutputLocations.new(final_app_dir: 'some_other_final_app', context_dir: ".")
         config = Config::Configuration.new({public_host: 'some.site.io'})
 
-        result = instance_double(Bookbinder::Spider::Result, announce_broken_links: nil, has_broken_links?: true)
-        broken_links_checker = instance_double(Bookbinder::Postprocessing::BrokenLinksChecker)
-        allow(broken_links_checker).to receive(:find_broken_links) { result }
+        broken_links_checker = instance_double(Postprocessing::BrokenLinksChecker, check!: nil, announce: nil)
+        allow(broken_links_checker).to receive(:has_broken_links?) { true }
 
         command = Commands::Bind.new(
           double('streams').as_null_object,
@@ -282,9 +279,8 @@ module Bookbinder
         output_locations = OutputLocations.new(final_app_dir: 'some_other_final_app', context_dir: ".")
         config = Config::Configuration.new({public_host: 'some.site.io'})
 
-        result = instance_double(Bookbinder::Spider::Result, announce_broken_links: nil, has_broken_links?: false)
-        broken_links_checker = instance_double(Bookbinder::Postprocessing::BrokenLinksChecker)
-        allow(broken_links_checker).to receive(:find_broken_links) { result }
+        broken_links_checker = instance_double(Postprocessing::BrokenLinksChecker, check!: nil, announce: nil)
+        allow(broken_links_checker).to receive(:has_broken_links?) { false }
 
         command = Commands::Bind.new(
           double('streams').as_null_object,

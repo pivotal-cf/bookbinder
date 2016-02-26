@@ -21,10 +21,18 @@ module Bookbinder
         @server_director = server_director
       end
 
-      def find_broken_links(broken_link_exclusions)
+      def check!(broken_link_exclusions)
         server_director.use_server { |port|
-          spider.find_broken_links(port, broken_link_exclusions: broken_link_exclusions)
+          @result = spider.find_broken_links(port, broken_link_exclusions: broken_link_exclusions)
         }
+      end
+
+      def announce(streams)
+        @result.announce_broken_links(streams)
+      end
+
+      def has_broken_links?
+        @result.has_broken_links?
       end
 
       private

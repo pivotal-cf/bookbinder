@@ -86,12 +86,12 @@ module Bookbinder
         if generation_result.success?
           file_system_accessor.copy(output_locations.build_dir, output_locations.public_dir)
 
-          result = broken_links_checker.find_broken_links(bind_config.broken_link_exclusions)
-          result.announce_broken_links(bind_options.streams)
+          broken_links_checker.check!(bind_config.broken_link_exclusions)
+          broken_links_checker.announce(bind_options.streams)
 
           bind_options.streams[:success].puts "Bookbinder bound your book into #{output_locations.final_app_dir}"
 
-          result.has_broken_links? ? 1 : 0
+          broken_links_checker.has_broken_links? ? 1 : 0
         else
           bind_options.streams[:err].puts "Your bind failed. Rerun with --verbose to troubleshoot."
           1

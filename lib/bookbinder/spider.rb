@@ -7,22 +7,12 @@ require_relative 'stabilimentum'
 module Bookbinder
   class Spider
     class Result
-      def initialize(broken_links, sitemap, app_dir)
+      def initialize(broken_links)
         @broken_links = broken_links
-        @sitemap = sitemap
-        @app_dir = app_dir
       end
 
       def has_broken_links?
         @broken_links.any?
-      end
-
-      def to_xml
-        @sitemap
-      end
-
-      def to_path
-        Pathname(@app_dir).join('public/sitemap.xml')
       end
 
       def announce_broken_links(streams)
@@ -56,7 +46,7 @@ Found #{@broken_links.count} broken links!
       broken_links = links.first
       public_broken_links = broken_links.reject {|l| l.match(broken_link_exclusions)}
 
-      Result.new(public_broken_links, nil, nil)
+      Result.new(public_broken_links)
     end
 
     private
@@ -72,7 +62,7 @@ Found #{@broken_links.count} broken links!
         Anemone.crawl(url) do |anemone|
           dont_visit_fragments(anemone)
           anemone.on_every_page do |page|
-            broken, working = sieve.links_from Stabilimentum.new(page), is_first_pass
+            broken, working = sieve.links_from(Stabilimentum.new(page), is_first_pass)
             broken_links.concat broken
             sitemap.concat working
           end
