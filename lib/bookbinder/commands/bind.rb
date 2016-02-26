@@ -14,7 +14,7 @@ module Bookbinder
                      config_decorator: nil,
                      file_system_accessor: nil,
                      middleman_runner: nil,
-                     sitemap_writer: nil,
+                     broken_links_checker: nil,
                      preprocessor: nil,
                      cloner_factory: nil,
                      section_repository: nil,
@@ -26,7 +26,7 @@ module Bookbinder
         @config_decorator = config_decorator
         @file_system_accessor = file_system_accessor
         @middleman_runner = middleman_runner
-        @sitemap_writer = sitemap_writer
+        @broken_links_checker = broken_links_checker
         @preprocessor = preprocessor
         @cloner_factory = cloner_factory
         @section_repository = section_repository
@@ -85,11 +85,9 @@ module Bookbinder
         )
         if generation_result.success?
           file_system_accessor.copy(output_locations.build_dir, output_locations.public_dir)
-          result = sitemap_writer.write(
-            bind_config.public_host,
-            bind_options.streams,
-            bind_config.broken_link_exclusions
-          )
+
+          result = broken_links_checker.find_broken_links(bind_config.broken_link_exclusions)
+          result.announce_broken_links(bind_options.streams)
 
           bind_options.streams[:success].puts "Bookbinder bound your book into #{output_locations.final_app_dir}"
 
@@ -113,7 +111,7 @@ module Bookbinder
         :output_locations,
         :preprocessor,
         :section_repository,
-        :sitemap_writer,
+        :broken_links_checker,
         :middleman_runner,
       )
 

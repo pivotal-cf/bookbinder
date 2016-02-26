@@ -4,8 +4,8 @@ require_relative '../../../template_app/rack_app'
 
 module Bookbinder
   module Postprocessing
-    class SitemapWriter
-      def self.build(logger, final_app_directory, port)
+    class BrokenLinksChecker
+      def self.build(final_app_directory, port)
         new(
           Spider.new(app_dir: final_app_directory),
           ServerDirector.new(
@@ -21,17 +21,10 @@ module Bookbinder
         @server_director = server_director
       end
 
-      def write(host_for_sitemap, streams, broken_link_exclusions)
+      def find_broken_links(broken_link_exclusions)
         server_director.use_server { |port|
-          spider.generate_sitemap(
-            host_for_sitemap,
-            port,
-            streams,
-            broken_link_exclusions: broken_link_exclusions
-          )
-        }.tap do |sitemap|
-          File.write(sitemap.to_path, sitemap.to_xml)
-        end
+          spider.find_broken_links(port, broken_link_exclusions: broken_link_exclusions)
+        }
       end
 
       private

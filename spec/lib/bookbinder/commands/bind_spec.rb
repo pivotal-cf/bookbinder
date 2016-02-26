@@ -5,7 +5,7 @@ require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/ingest/section_repository'
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
-require_relative '../../../../lib/bookbinder/postprocessing/sitemap_writer'
+require_relative '../../../../lib/bookbinder/postprocessing/broken_links_checker'
 require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
@@ -28,7 +28,7 @@ module Bookbinder
 
     use_fixture_repo
 
-    let(:null_sitemap_writer) { double('sitemap writer', write: double(has_broken_links?: false)) }
+    let(:null_broken_links_checker) { double('broken links checker', find_broken_links: double(announce_broken_links: nil, has_broken_links?: false)) }
     let(:null_fs_accessor) { double('fs accessor').as_null_object }
     let(:null_preprocessor) { instance_double('Bookbinder::Preprocessing::LinkToSiteGenDir', preprocess: nil) }
     let(:null_middleman_runner) { instance_double('Bookbinder::MiddlemanRunner', run: success) }
@@ -63,7 +63,7 @@ module Bookbinder
         config_decorator: partial_args.fetch(:archive_menu_config, archive_menu_config),
         file_system_accessor: partial_args.fetch(:file_system_accessor, null_fs_accessor),
         middleman_runner: partial_args.fetch(:middleman_runner, null_middleman_runner),
-        sitemap_writer: partial_args.fetch(:sitemap_writer, null_sitemap_writer),
+        broken_links_checker: partial_args.fetch(:broken_links_checker, null_broken_links_checker),
         preprocessor: partial_args.fetch(:preprocessor, null_preprocessor),
         cloner_factory: partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(null_streams, null_fs_accessor, GitFake.new)),
         section_repository: partial_args.fetch(:section_repository, Ingest::SectionRepository.new),
@@ -118,7 +118,7 @@ module Bookbinder
           config_decorator: double('decorator', generate: config),
           file_system_accessor: instance_double('LocalFilesystemAccessor', file_exist?: false),
           middleman_runner: instance_double('MiddlemanRunner', run: failure),
-          sitemap_writer: instance_double('Postprocessing::SitemapWriter'),
+          broken_links_checker: instance_double('Postprocessing::SitemapWriter'),
           preprocessor: preprocessor,
           cloner_factory: cloner_factory,
           section_repository: section_repository,
@@ -131,7 +131,7 @@ module Bookbinder
       generator = instance_double('Bookbinder::MiddlemanRunner')
       command = bind_cmd(file_system_accessor: fs,
         middleman_runner: generator,
-        sitemap_writer: double('sitemap writer').as_null_object)
+        broken_links_checker: double('broken links checker').as_null_object)
 
       allow(fs).to receive(:file_exist?).with('redirects.rb') { true }
       allow(fs).to receive(:copy)
@@ -147,7 +147,7 @@ module Bookbinder
       generator = instance_double('Bookbinder::MiddlemanRunner')
       command = bind_cmd(file_system_accessor: fs,
         middleman_runner: generator,
-        sitemap_writer: double('sitemap writer').as_null_object)
+        broken_links_checker: double('broken links checker').as_null_object)
 
       allow(fs).to receive(:file_exist?).with('redirects.rb') { false }
 
@@ -192,7 +192,7 @@ module Bookbinder
         config_decorator: double('decorator', generate: config),
         file_system_accessor: null_fs_accessor,
         middleman_runner: runner,
-        sitemap_writer: null_sitemap_writer,
+        broken_links_checker: null_broken_links_checker,
         preprocessor: null_preprocessor,
         cloner_factory: instance_double('Ingest::ClonerFactory', produce: cloner),
         section_repository: section_repository,
@@ -208,7 +208,7 @@ module Bookbinder
       command = bind_cmd(streams: streams,
                          file_system_accessor: fs,
                          middleman_runner: middleman_runner,
-                         sitemap_writer: double('disallowed sitemap writer'),
+                         broken_links_checker: double('disallowed broken links checker'),
                          section_repository: instance_double('Ingest::SectionRepository', fetch: []))
 
       allow(fs).to receive(:file_exist?) { false }
@@ -220,17 +220,18 @@ module Bookbinder
 
     it "writes required files to output directory and outputs success message" do
       fs = instance_double('Bookbinder::LocalFilesystemAccessor', file_exist?: false)
-      sitemap_writer = instance_double('Bookbinder::Postprocessing:SitemapWriter')
+      broken_links_checker = instance_double(Bookbinder::Postprocessing::BrokenLinksChecker)
 
       streams = { success: double('stream') }
+      result = double('result', has_broken_links?: false)
 
       output_locations = OutputLocations.new(final_app_dir: 'whatever_final_app', context_dir: ".")
       config = Config::Configuration.new({public_host: 'some.site.io'})
 
       expect(fs).to receive(:copy).with(output_locations.build_dir, output_locations.public_dir).ordered
-      expect(sitemap_writer).to receive(:write).with(config.public_host,
-                                                     streams.merge({ out: instance_of(Sheller::DevNull) }),
-                                                     config.broken_link_exclusions).ordered { double('result').as_null_object }
+      expect(broken_links_checker).to receive(:find_broken_links).with(config.broken_link_exclusions).ordered { result }
+
+      expect(result).to receive(:announce_broken_links).with(streams.merge({ out: instance_of(Sheller::DevNull) }))
 
       expect(streams[:success]).to receive(:puts).with(include(output_locations.final_app_dir.to_s))
 
@@ -241,7 +242,7 @@ module Bookbinder
         config_decorator: double('decorator', generate: config),
         file_system_accessor: fs,
         middleman_runner: instance_double('Bookbinder::MiddlemanRunner', run: success),
-        sitemap_writer: sitemap_writer,
+        broken_links_checker: broken_links_checker,
         preprocessor: null_preprocessor,
         cloner_factory: null_cloner_factory,
         section_repository: null_section_repository,
@@ -254,9 +255,9 @@ module Bookbinder
         output_locations = OutputLocations.new(final_app_dir: 'some_other_final_app', context_dir: ".")
         config = Config::Configuration.new({public_host: 'some.site.io'})
 
-        result = instance_double('Bookbinder::Spider::Result', has_broken_links?: true)
-        sitemap_writer = instance_double('Bookbinder::Postprocessing:SitemapWriter')
-        allow(sitemap_writer).to receive(:write) { result }
+        result = instance_double(Bookbinder::Spider::Result, announce_broken_links: nil, has_broken_links?: true)
+        broken_links_checker = instance_double(Bookbinder::Postprocessing::BrokenLinksChecker)
+        allow(broken_links_checker).to receive(:find_broken_links) { result }
 
         command = Commands::Bind.new(
           double('streams').as_null_object,
@@ -265,7 +266,7 @@ module Bookbinder
           config_decorator: double('decorator', generate: config),
           file_system_accessor: null_fs_accessor,
           middleman_runner: null_middleman_runner,
-          sitemap_writer: sitemap_writer,
+          broken_links_checker: broken_links_checker,
           preprocessor: null_preprocessor,
           cloner_factory: null_cloner_factory,
           section_repository: null_section_repository,
@@ -281,9 +282,9 @@ module Bookbinder
         output_locations = OutputLocations.new(final_app_dir: 'some_other_final_app', context_dir: ".")
         config = Config::Configuration.new({public_host: 'some.site.io'})
 
-        result = instance_double('Bookbinder::Spider::Result', has_broken_links?: false)
-        sitemap_writer = instance_double('Bookbinder::Postprocessing:SitemapWriter')
-        allow(sitemap_writer).to receive(:write) { result }
+        result = instance_double(Bookbinder::Spider::Result, announce_broken_links: nil, has_broken_links?: false)
+        broken_links_checker = instance_double(Bookbinder::Postprocessing::BrokenLinksChecker)
+        allow(broken_links_checker).to receive(:find_broken_links) { result }
 
         command = Commands::Bind.new(
           double('streams').as_null_object,
@@ -292,7 +293,7 @@ module Bookbinder
           config_decorator: double('decorator', generate: config),
           file_system_accessor: null_fs_accessor,
           middleman_runner: null_middleman_runner,
-          sitemap_writer: sitemap_writer,
+          broken_links_checker: broken_links_checker,
           preprocessor: null_preprocessor,
           cloner_factory: null_cloner_factory,
           section_repository: null_section_repository,
@@ -338,67 +339,6 @@ module Bookbinder
 
         index_html = File.read File.join('final_app', 'public', 'var-repo', 'variable_index.html')
         expect(index_html).to include 'My variable name is Spartacus.'
-      end
-    end
-
-    describe 'generating a site-map' do
-      context 'when configured with a single host' do
-        use_fixture_repo 'sitemap_tester'
-
-        def random_port
-          rand(49152..65535)
-        end
-
-        it 'contains the given pages in an XML sitemap' do
-          command = bind_cmd(
-            middleman_runner: real_middleman_runner,
-            file_system_accessor: real_fs_accessor,
-            sitemap_writer: Postprocessing::SitemapWriter.build(null_logger, File.absolute_path('final_app'), random_port),
-            preprocessor: real_preprocessor,
-            config_fetcher: double(
-              'config fetcher',
-              fetch_config: Config::Configuration.parse(
-                'sections' => [ {'repository' => {'name' => 'org/dogs-repo'}} ],
-                'book_repo' => 'fantastic/book',
-                'cred_repo' => 'my-org/my-creds',
-                'public_host' => 'docs.dogs.com'
-              )))
-
-          command.run(['remote'])
-
-          sitemap_path = Pathname('final_app').join('public', 'sitemap.xml')
-
-          expect(sitemap_path).to have_sitemap_locations %w(
-              http://docs.dogs.com/index.html
-              http://docs.dogs.com/dogs-repo/index.html
-              http://docs.dogs.com/dogs-repo/big_dogs/index.html
-              http://docs.dogs.com/dogs-repo/big_dogs/great_danes/index.html
-          )
-        end
-
-        matcher :have_sitemap_locations do |links|
-          match do |sitemap_path|
-            @doc = Nokogiri::XML(sitemap_path.open)
-            @doc.css('loc').map(&:text).map(&:to_s).sort == links.sort
-          end
-
-          failure_message do |sitemap_path|
-            <<-MESSAGE
-Expected sitemap to have the following links:
-#{links.sort.join("\n")}
-
-But it actually had these:
-#{@doc.css('loc').map(&:text).sort.join("\n")}
-
-* Sitemap *
-Path:
-#{sitemap_path}
-
-Content:
-#{sitemap_path.read}
-            MESSAGE
-          end
-        end
       end
     end
 
