@@ -48,8 +48,7 @@ module Bookbinder
         base_node = get_html(toc_md).css('html')
 
         nav_items(base_node).map do |element|
-          a = element.at_css('a')
-          href = a['href']
+          href = element['href']
           expanded_href = (source.dirname + href).relative_path_from(source_for_site_gen)
           next_source = absolute_source_from_path(expanded_href)
 
@@ -78,7 +77,7 @@ Current file: #{source}
       end
 
       def nav_items(base_node)
-        base_node.xpath('/html/body/h2[a[@href]]') # - base_node.css(*exclusions)
+        base_node.css('a.subnav') # - base_node.css(*exclusions)
       end
 
       def exclusions

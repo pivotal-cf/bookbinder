@@ -18,18 +18,18 @@ module Bookbinder
 title: Title for the Webz Page
 ---
 
-## [First Document](./cats/first-doc.html)
+## <a href="./cats/first-doc.html" class="subnav">First Document</a>
 
 Some Text
 
-## [Second Document](./second-doc.html)
+## <a href="./second-doc.html" class="subnav">Second Document</a>
 
 More text
 
 - list item
 - another list item
 
-## My Unlinked Header
+## <a href="./unlinked.html">My Unlinked Header</a>
 
 ## <a id='my-id'></a> My Quicklink
 
@@ -37,7 +37,7 @@ More text
         EOT
 
         first_doc = <<-EOT
-## [Nested Link](../nested-doc.html)
+## <a href="../nested-doc.html" class="subnav">Nested Link</a>
 
 Some Text
         EOT
@@ -98,13 +98,13 @@ Move along, nothing to see.
 title: Title for the Webz Page
 ---
 
-## [First Document](./first-doc.html)
+## <a href="./first-doc.html" class="subnav">First Document</a>
 
 Some Text
         EOT
 
         first_doc = <<-EOT
-## [Nested Link](./index.html)
+## <a href="./index.html" class="subnav">Nested Link</a>
 
 Some Text
         EOT
@@ -136,7 +136,7 @@ Some Text
 title: Title for the Webz Page
 ---
 
-## [Bogus Document](./bogus-doc.html)
+## <a href="./bogus-doc.html" class="subnav">Bogus Document</a>
 
 Some Text
         EOT
