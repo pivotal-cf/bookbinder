@@ -258,6 +258,35 @@ In the above example, the contents of the `bird-repo/scrub/jay` directory would 
 ### Markdown
 All markdown sections must be specified within the section key of the `config.yml`.
 
+#### YAML Front Matter
+
+Bookbinder supports YAML [frontmatter](https://middlemanapp.com/basics/frontmatter/). Frontmatter (or "front matter") allows you to include page-specific variables in YAML format at the top of a markdown file. 
+
+If you want to include front matter in a markdown file, create a block at the top of the file by adding two lines of triple hyphens: `---`. Inside this block, you can create new data accessible to Bookbinder using the `current_page.data` hash. For example, if you add `title: "My Title"`, Bookbinder can access `current_page.data.title` to read "My Title".
+
+Bookbinder currently the following front matter when binding books: 
+- `title:` Specifies the title of HTML page.
+- `owner:` Specifies the owner of a topic. This can be a single owner, or multiple owners.
+    
+    Example of front matter for a topic with one owner:
+
+    ```
+    ---
+    title: Understanding Cloud Foundry  
+    owner: Cloud Foundry Concepts Team
+    ---
+    ```
+    Example of front matter for a topic with three owners:
+    ```
+    ---
+    title: Using Cloud Foundry Services with the CLI 
+    owner: 
+      - Services Team
+      - Command Line Interface Team
+      - Documentation Team
+    ---
+    ```
+
 ### DITA
 
 Specify the following in the `config.yml`:
