@@ -1018,5 +1018,39 @@ HTML
         end
       end
     end
+
+    describe '#owners' do
+      subject(:owners) { klass.owners }
+      let(:klass) { OpenStruct.new(sitemap: sitemap).tap {|k| k.extend(Navigation::HelperMethods) } }
+      let(:sitemap) { instance_double('Middleman::Sitemap::Store', resources: resources) }
+      let(:resources) {
+        [
+          ['some/non/html/path', nil],
+          ['no/owner/for/this/path.html', nil],
+          ['one/owner.html', 'Alice'],
+          ['multiple/owners.html', %w[ Bob Charlie ]],
+        ].map {|path,owner| instance_double('Middleman::Sitemap::Resource', path: path, data: {'owner' => owner})}
+      }
+
+      before do
+        allow(klass).to receive(:sitemap).and_return(sitemap)
+      end
+
+      it 'should not include non-html files' do
+        expect(owners).not_to include('some/non/html/path')
+      end
+
+      it 'should include files without owners' do
+        expect(owners).to include('no/owner/for/this/path.html' => [])
+      end
+
+      it 'should return an array of owners even when there is only one' do
+        expect(owners).to include('one/owner.html' => ['Alice'])
+      end
+
+      it 'should include files with multiple owners' do
+        expect(owners).to include('multiple/owners.html' => %w[ Bob Charlie ])
+      end
+    end
   end
 end

@@ -110,6 +110,13 @@ module Bookbinder
         Redcarpet::Markdown.new(quicklinks_renderer).render(page_src)
       end
 
+      def owners
+        html_resources = sitemap.resources.select { |r| r.path.end_with?('.html') }
+        html_resources.each.with_object({}) { |resource, owners|
+          owners[resource.path] = Array(resource.data['owner'])
+        }
+      end
+
       private
 
       def subnav_template_name
