@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.bindir      = 'install_bin'
   s.executable  = 'bookbinder'
 
-  s.required_ruby_version = '>= 2.0'
+  s.required_ruby_version = '~> 2.3.0'
   s.add_runtime_dependency 'fog-aws', ['~> 0.7.1']
   s.add_runtime_dependency 'ansi', ['~> 1.4']
   s.add_runtime_dependency 'unf', ['~> 0.1']
