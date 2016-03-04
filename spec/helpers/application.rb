@@ -1,5 +1,5 @@
 require_relative '../helpers/redirection'
-require_relative '../../lib/bookbinder/cli'
+require_relative '../../lib/bookbinder/legacy/cli'
 require_relative '../helpers/use_fixture_repo'
 require_relative '../helpers/git_fake'
 require 'pathname'
@@ -11,7 +11,7 @@ module Bookbinder
 
     def initialize(git_client = GitFake.new)
       @git_client = git_client
-      @cli_client = Cli.new(git_client)
+      @cli_client = Legacy::Cli.new(git_client)
     end
 
     def bind_book_from_remote(book, silent: true, &expectation)

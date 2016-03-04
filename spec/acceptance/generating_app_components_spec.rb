@@ -18,7 +18,7 @@ module Bookbinder
 
     it 'generates a rack app' do
       swallow_stdout do
-        `#{gem_root}/install_bin/bookbinder publish local`
+        `#{gem_root}/install_bin/bookbinder bind local`
       end
 
       index_html = File.read File.join('final_app', 'public', 'foods', 'sweet', 'index.html')
@@ -27,7 +27,7 @@ module Bookbinder
 
     it 'respects subnav includes' do
       swallow_stdout do
-        `#{gem_root}/install_bin/bookbinder publish local`
+        `#{gem_root}/install_bin/bookbinder bind local`
       end
 
       dogs_index = File.read File.join('final_app', 'public', 'dogs', 'index.html')

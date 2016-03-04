@@ -1,14 +1,14 @@
-require_relative '../../../lib/bookbinder/cli'
-require_relative '../../../lib/bookbinder/ingest/git_accessor'
-require_relative '../../helpers/matchers'
-require_relative '../../helpers/redirection'
-require_relative '../../helpers/use_fixture_repo'
+require_relative '../../../../lib/bookbinder/legacy/cli'
+require_relative '../../../../lib/bookbinder/ingest/git_accessor'
+require_relative '../../../helpers/matchers'
+require_relative '../../../helpers/redirection'
+require_relative '../../../helpers/use_fixture_repo'
 
 module Bookbinder
-  describe Cli do
+  describe Legacy::Cli do
     include Redirection
 
-    let(:cli) { Cli.new(Ingest::GitAccessor.new) }
+    let(:cli) { Legacy::Cli.new(Ingest::GitAccessor.new) }
 
     def run
       cli.run arguments
@@ -113,10 +113,10 @@ module Bookbinder
     describe 'flags' do
       context 'when the input flag is --version' do
         it 'should log the gemspec version' do
-          gem_root = File.expand_path('../../../../', __FILE__)
+          gem_root = File.expand_path('../../../../../', __FILE__)
           expect(capture_stdout { cli.run(['--version']) }).
             to have_output(
-              "bookbinder #{Gem::Specification::load(File.join gem_root, "bookbinder.gemspec").version}"
+              "bookbinder #{Gem::Specification::load(File.join gem_root, 'bookbinder.gemspec').version}"
             )
         end
 

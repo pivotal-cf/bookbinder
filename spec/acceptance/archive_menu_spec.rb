@@ -1,4 +1,4 @@
-require_relative '../../lib/bookbinder/cli'
+require_relative '../../lib/bookbinder/legacy/cli'
 require_relative '../../lib/bookbinder/ingest/git_accessor'
 require_relative '../helpers/middleman'
 require_relative '../helpers/use_fixture_repo'
@@ -11,7 +11,7 @@ module Bookbinder
 
     before_all_in_fixture_repo('archive-menu-book') do
       silence_io_streams do
-        Cli.new(Ingest::GitAccessor.new).run(%w(bind local --verbose))
+        Legacy::Cli.new(Ingest::GitAccessor.new).run(%w(bind local --verbose))
       end
     end
 

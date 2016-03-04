@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
 require_relative '../lib/bookbinder/cli'
-require_relative '../lib/bookbinder/ingest/git_accessor'
 
-return_code = Bookbinder::Cli.new(Bookbinder::Ingest::GitAccessor.new).run ARGV
-exit return_code.to_i
+Bookbinder::CLI.start
