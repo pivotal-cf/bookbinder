@@ -761,7 +761,7 @@ window. It can be terminated by hitting `ctrl-c`.
 
 ### CI for books
 
-We recommend using [Concourse](http://concourse.ci/) for continuous intergration.
+We recommend using [Concourse](http://concourse.ci/) for continuous integration.
 
 #### CI Runner
 You will want a build that executes this shell command:
