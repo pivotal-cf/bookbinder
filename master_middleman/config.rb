@@ -23,6 +23,8 @@ set :images_dir, 'images'
 
 set :relative_links, false
 
+page '/owners.json', :layout => false
+
 activate :subdirectory_aware_assets
 
 activate :navigation
