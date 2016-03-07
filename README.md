@@ -57,7 +57,6 @@ Bookbinder also provides scripts for running on a Continuous Integration system
 that can detect when a documentation repository has been updated with new
 content, and that can verify a composed book is free of any dead links.
 
-### Creating a Book
 
 1. To create a new book on your local machine, run `bookbinder generate
     BOOKNAME`, replacing BOOKNAME with the name of your book. For example:
