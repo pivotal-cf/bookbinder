@@ -17,10 +17,6 @@ module Bookbinder
         config['subnav_root']
       end
 
-      def subnav_exclusions
-        config['subnav_exclusions'] || []
-      end
-
       def valid?
         (CONFIG_REQUIRED_KEYS - config.keys).empty?
       end

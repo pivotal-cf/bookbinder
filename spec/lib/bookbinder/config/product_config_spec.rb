@@ -42,14 +42,6 @@ module Bookbinder
 
         expect(ProductConfig.new(config).valid?).to be(false)
       end
-
-      describe 'subnav exclusions' do
-        it 'can return an array of html attributes to exclude' do
-          config = { 'subnav_exclusions' => ['this', '.that'] }
-
-          expect(ProductConfig.new(config).subnav_exclusions). to match_array(['this', '.that'])
-        end
-      end
     end
   end
 end

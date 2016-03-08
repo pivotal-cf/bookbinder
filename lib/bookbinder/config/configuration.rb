@@ -57,7 +57,7 @@ module Bookbinder
       end
 
       CONFIG_REQUIRED_KEYS = %w(book_repo public_host)
-      CONFIG_OPTIONAL_KEYS = %w(archive_menu book_repo_url cred_repo cred_repo_url repo_link_enabled repo_links feedback_enabled layout_repo layout_repo_ref layout_repo_url sections subnav_exclusions)
+      CONFIG_OPTIONAL_KEYS = %w(archive_menu book_repo_url cred_repo cred_repo_url repo_link_enabled repo_links feedback_enabled layout_repo layout_repo_ref layout_repo_url sections)
 
       CONFIG_REQUIRED_KEYS.each do |method_name|
         define_method(method_name) do
@@ -104,7 +104,6 @@ module Bookbinder
       def assemble_products
         if config[:products]
           config[:products].map do |product|
-            product.merge!({'subnav_exclusions' => subnav_exclusions})
             Config::ProductConfig.new(product)
           end
         end

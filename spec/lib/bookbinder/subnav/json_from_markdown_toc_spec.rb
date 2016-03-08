@@ -164,57 +164,7 @@ Some Text
         expect(fs).to receive(:find_files_extension_agnostically).with(Pathname('my/index'), output_locations.source_for_site_generator){[]}
 
         expect { JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations) }.to raise_error(JsonFromMarkdownToc::SubnavRootMissingError)
-
-
-
-
-
       end
-
-      xit 'does not include excluded html attributes' do
-        output_locations = OutputLocations.new(context_dir: '.')
-        subnav_config = Config::ProductConfig.new(
-          { 'subnav_exclusions' => ['.dog'],
-            'subnav_topics' => [
-            {
-              'title' => 'Puppy bowls are great',
-              'toc_path' => 'puppy-repo/puppy',
-            }
-          ]}
-        )
-
-        fs = instance_double(Bookbinder::LocalFilesystemAccessor)
-
-        toc_url_md =  <<-EOT
-
-## Some Menu Subtitle
-* [A Document](a-doc.html)
-
-<h2 class='dog'>Ignorable</h2
-<h2 class='nav-exclude'>Ignorable</h2
-<ol class='nav-exclude'>
-  <li><a href='ignore-this.html'>Ignorable Document</a></li>
-</ol>
-        EOT
-
-        some_json = {links: [
-          {text: 'Puppy bowls are great', title: true},
-          {url: '/puppy-repo/puppy.html', text: 'Puppy bowls are great'},
-          {text: 'Some Menu Subtitle'},
-          {url: '/puppy-repo/a-doc.html', text: 'A Document'}
-        ]}.to_json
-
-        toc_path = Pathname(output_locations.source_for_site_generator.join('puppy-repo', 'puppy.html.md.erb'))
-
-        allow(fs).to receive(:find_files_extension_agnostically).with(Pathname('puppy-repo/puppy'), output_locations.source_for_site_generator) { [toc_path] }
-
-        allow(fs).to receive(:read).with(toc_path) { toc_url_md }
-
-        expect(JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations)).
-          to eq(some_json)
-      end
-
-
     end
   end
 end

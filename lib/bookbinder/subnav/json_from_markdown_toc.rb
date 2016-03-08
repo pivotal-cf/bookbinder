@@ -77,15 +77,7 @@ Current file: #{source}
       end
 
       def nav_items(base_node)
-        base_node.css('a.subnav') # - base_node.css(*exclusions)
-      end
-
-      def exclusions
-        @exclusions ||= config.subnav_exclusions << '.nav-exclude'
-      end
-
-      def frontmatter_header?(element)
-        element.inner_html.include?('title: ')
+        base_node.css('a.subnav')
       end
     end
   end

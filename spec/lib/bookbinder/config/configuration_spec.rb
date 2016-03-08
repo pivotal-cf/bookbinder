@@ -142,19 +142,6 @@ module Bookbinder
             }
             expect(Configuration.parse(config).products).to eq([])
           end
-          it 'passes subnav exclusion to product configs' do
-            config = {
-              'subnav_exclusions' => ['.class-one', '#some-id'],
-              'products' => [
-                { 'id' => 'some_group'}
-              ]
-            }
-
-            expect(ProductConfig).to receive(:new).
-                with({'id' => 'some_group', 'subnav_exclusions' => ['.class-one', '#some-id']})
-
-            Configuration.parse(config)
-          end
         end
       end
     end
