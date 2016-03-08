@@ -15,7 +15,10 @@ module Bookbinder
               urls: Dir.glob("#{root}/**/*").map { |fn| fn.gsub(/^#{root}/, '')},
               root: root,
               index: 'index.html',
-              header_rules: [[:all, {'Cache-Control' => 'public, max-age=3600'}]]
+              header_rules: [[:all, {
+                'Cache-Control' => 'public, max-age=3600',
+                'Access-Control-Allow-Origin' => '*'
+              }]]
             }
           run NotFound.new("#{root}/404.html")
         end
