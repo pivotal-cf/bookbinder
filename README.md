@@ -488,7 +488,6 @@ This feature not currently supported for DITA, though the `subnav_template` key 
 **Requirements:**
 
 * In `config.yml`: a `product_id` key for each section to display the generated subnav, and a `products` section that defines each `product_id` (as key `id`) used for those sections.
-* In `master_middleman/source/subnavs`, a file `subnav_template.erb` that contains html to which the generated subnav json will be appended. The file must contain one div with class 'nav-content'.
 * Properly formatted page for each `subnav_root`
 
 ```yaml
@@ -512,23 +511,25 @@ products:
 * `id`: Links a given section to its product in the config. Should contain no spaces.
 * `subnav_root`: Root file to be parsed for to-be-generated subnavs.
  
-**Example Table of Contents page:**
+**Example subnav_root:**
 
-The parser only looks for `h2` elements with links on the specified `subnav_root` for generating the subnav.
+To generate a subnav, `bookbinder` starts spidering from the `subnav_root`, following `a` elements with the `subnav` class. This creates a JSON file with the subnav contents, described in more detail below.
 
 `reptiles/index.html.md`:
 ```markdown
-## [My First Nav Item](./thing-one.html)
+<a href="./thing-one.html" class="subnav">My First Nav Item</a>
 
 Some text that won't be in the Nav
 
-## [My Second Nav Item](./thing-two.html)
+## <a href="./thing-two.html" class="subnav">My Second Nav Item</a>
 ```
+
+Note that the links can be anywhere on the page (the second link is in an `h2`, for instance), but will be followed in order.
 
 `reptiles/thing-one.html`:
 ```markdown
 
-## [My Nested Nav Item](./nested-thing.html)
+- <a href="./nested-thing.html" class="subnav">My Nested Nav Item</a>
 
 ```
 
@@ -547,7 +548,7 @@ No more.
 
 **Generated JSON:**
 
-Upon binding, Bookbinder parses each of the subnav roots specified in the config and follows `h2`s with links to create the subnav tree.
+Upon binding, Bookbinder parses each of the subnav roots specified in the config to create the subnav tree.
 
 Bookbinder makes these subnav links available in a json format at `/subnavs/<your-subnav-name>.json`. It will have written the name of the file containing the links from subnav_template.erb at a data attribute called data-props-location on 'div.nav-content'.
 
