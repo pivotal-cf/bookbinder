@@ -2,16 +2,18 @@ require_relative '../errors/programmer_mistake'
 require_relative '../ingest/destination_directory'
 
 module Bookbinder
-  Section = Struct.new(:path_to_repository,
-                       :full_name,
-                       :desired_directory_name,
-                       :subnav_templ,
-                       :desired_subnav_name,
-                       :preprocessor_config,
-                       :at_repo_path,
-                       :repo_name,
-                       :source_ref,
-                       :pdf_output_filename) do
+  Section = Struct.new(
+    :path_to_repository,
+    :full_name,
+    :desired_directory_name,
+    :subnav_templ,
+    :desired_subnav_name,
+    :preprocessor_config,
+    :at_repo_path,
+    :repo_name,
+    :source_ref,
+    :pdf_output_filename,
+    :product_info) do
 
     def path_to_repo_dir
       at_repo_path.nil? ? path_to_repository : path_to_repository.join(at_repo_path)
@@ -26,8 +28,11 @@ module Bookbinder
     end
 
     def subnav
-      namespace = destination_directory.to_s.gsub('/', '_')
       {namespace => subnav_name}
+    end
+
+    def namespace
+      destination_directory.to_s.gsub('/', '_')
     end
 
     def subnav_name
@@ -39,7 +44,7 @@ module Bookbinder
     rescue NoMethodError => e
       raise Errors::ProgrammerMistake.new(
         "path_to_preprocessor_attribute assumes preprocessor_config is available, got nil.\n" +
-        "Original exception:\n\n#{e.inspect}\n\n#{e.backtrace.join("\n")}"
+          "Original exception:\n\n#{e.inspect}\n\n#{e.backtrace.join("\n")}"
       )
     end
 

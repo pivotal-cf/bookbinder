@@ -58,6 +58,7 @@ module Bookbinder
           cloner,
           ref_override: bind_options.ref_override
         )
+
         sections = section_repository.fetch(
           configured_sections: bind_config.sections,
           destination_dir: output_locations.cloned_preprocessing_dir,
@@ -75,6 +76,7 @@ module Bookbinder
         if file_system_accessor.file_exist?('redirects.rb')
           file_system_accessor.copy('redirects.rb', output_locations.final_app_dir)
         end
+
         generation_result = middleman_runner.run(
           ["build", bind_options.verbosity].compact.join(" "),
           streams: bind_options.streams,
@@ -117,6 +119,12 @@ module Bookbinder
 
       def subnavs(sections)
         sections.map(&:subnav).reduce({}, :merge)
+      end
+
+      def product_infos(sections)
+        sections.map do |section|
+          {section.namespace => section.product_info}
+        end
       end
     end
   end
