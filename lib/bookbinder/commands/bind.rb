@@ -83,7 +83,8 @@ module Bookbinder
           output_locations: output_locations,
           config: config_decorator.generate(bind_config, sections),
           local_repo_dir: bind_options.local_repo_dir,
-          subnavs: subnavs(sections)
+          subnavs: subnavs(sections),
+          product_info: product_infos(sections)
         )
         if generation_result.success?
           file_system_accessor.copy(output_locations.build_dir, output_locations.public_dir)
@@ -122,9 +123,11 @@ module Bookbinder
       end
 
       def product_infos(sections)
-        sections.map do |section|
-          {section.namespace => section.product_info}
+        temp = Hash.new
+        sections.each do |section|
+          temp[section.namespace] = section.product_info
         end
+        temp
       end
     end
   end

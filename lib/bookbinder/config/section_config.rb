@@ -63,14 +63,12 @@ module Bookbinder
       alias_method :subnav_name, :product_id
 
       def product_info
-        return nil if config['product_info'].nil?
-        ProductInfo.new(
-          config['product_info']['use_local_header'],
-          config['product_info']['latest_stable_version'],
-          config['product_info']['changelog_href'],
-          config['product_info']['local_header_img'],
-          config['product_info']['local_header_title']
-        )
+        return '' if config['product_info'].nil?
+        {'use_local_header' => config['product_info']['use_local_header'],
+          'latest_stable_version' => config['product_info']['latest_stable_version'],
+          'changelog_href' => config['product_info']['changelog_href'],
+          'local_header_img' => config['product_info']['local_header_img'],
+          'local_header_title' => config['product_info']['local_header_title']}
       end
 
       private

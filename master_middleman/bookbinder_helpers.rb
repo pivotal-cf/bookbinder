@@ -104,6 +104,19 @@ module Bookbinder
         OpenStruct.new config[:template_variables]
       end
 
+      def product_info
+        template_key = decreasingly_specific_namespaces.detect { |ns|
+          config[:subnav_templates].has_key?(ns)
+        }
+
+        if config[:product_info][template_key] == ""
+          default = {use_local_header: false, changelog_href: "", local_header_img: "", local_header_title: ""}
+          OpenStruct.new default
+        else
+          OpenStruct.new config[:product_info][template_key]
+        end
+      end
+
       def quick_links
         page_src = File.read(current_page.source_file)
         quicklinks_renderer = QuicklinksRenderer.new(vars)
