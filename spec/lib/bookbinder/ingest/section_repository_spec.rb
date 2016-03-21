@@ -96,8 +96,8 @@ module Bookbinder
 
         expect(sections).to eq(
           [
-            Section.new(Pathname('bar'), 'qux', 'my-desired-dir-name', nil, 'awesome_subnav_name', {'my' => 'stuff', 'to' => 'preprocess'}, nil, 'myorg/myrepo', 'mydesiredref', 'awesome_output_filename.awesome'),
-            Section.new(Pathname('b'), 'd', nil, 'specified_a_template', nil, {}, 'my/cool/path', 'myorg/myotherrepo', 'master', ),
+            Section.new(Pathname('bar'), 'qux', 'my-desired-dir-name', nil, 'awesome_subnav_name', {'my' => 'stuff', 'to' => 'preprocess'}, nil, 'myorg/myrepo', 'mydesiredref', 'awesome_output_filename.awesome', ''),
+            Section.new(Pathname('b'), 'd', nil, 'specified_a_template', nil, {}, 'my/cool/path', 'myorg/myotherrepo', 'master', nil, ''),
           ]
         )
       end

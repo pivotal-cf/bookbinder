@@ -60,6 +60,7 @@ module Bookbinder
       def inspect
         config.inspect
       end
+
       alias_method :subnav_name, :product_id
 
       def product_info
@@ -68,7 +69,9 @@ module Bookbinder
           'latest_stable_version' => config['product_info']['latest_stable_version'],
           'changelog_href' => config['product_info']['changelog_href'],
           'local_header_img' => config['product_info']['local_header_img'],
-          'local_header_title' => config['product_info']['local_header_title']}
+          'local_header_title' => config['product_info']['local_header_title'],
+          'local_header_links' => config['product_info']['local_header_links'],
+          'local_header_version_list' => config['product_info']['local_header_version_list']}
       end
 
       private

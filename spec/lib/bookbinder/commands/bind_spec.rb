@@ -183,7 +183,8 @@ module Bookbinder
           output_locations: output_locations,
           config: config,
           local_repo_dir: File.expand_path(".."),
-          subnavs: section.subnav) { failure }
+          subnavs: section.subnav,
+          product_info: {"bar"=>nil}) { failure }
 
       Commands::Bind.new(
         base_streams,
