@@ -94,6 +94,7 @@ module Bookbinder
       expect(fs.received_text_parsed).to eq(
         archive_menu: archive_menu,
         local_repo_dir: 'local',
+        product_info: nil,
         production_host: production_host,
         subnav_templates: { 'my_place_rocks' => 'my_subnav_template', 'fraggles_rock' => 'default' },
         template_variables: template_variables,

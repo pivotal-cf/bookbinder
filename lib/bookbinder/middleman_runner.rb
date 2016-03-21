@@ -15,7 +15,8 @@ module Bookbinder
             output_locations: nil,
             config: nil,
             local_repo_dir: nil,
-            subnavs: nil)
+            subnavs: nil,
+            product_info: nil)
       streams[:out].puts "\nRunning middleman...\n\n"
       Dir.chdir(output_locations.master_dir) do
         config = {
@@ -27,8 +28,10 @@ module Bookbinder
           workspace: output_locations.workspace_dir,
           feedback_enabled: config.feedback_enabled,
           repo_link_enabled: config.repo_link_enabled,
-          repo_links: config.repo_links
+          repo_links: config.repo_links,
+          product_info: product_info
         }
+
         fs.write(to: "bookbinder_config.yml", text: YAML.dump(config))
         sheller.run_command({'MM_ROOT' => output_locations.master_dir.to_s},
                             "middleman #{command}",

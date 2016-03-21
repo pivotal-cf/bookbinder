@@ -187,7 +187,7 @@ cloud_foundry:
         cfapps.io:
         - staging-route-subdomain
         - another-staging-route-subdomain
-    production:	
+    production:
       space: docs-production
       host:
         cfapps.io:
@@ -260,27 +260,27 @@ All markdown sections must be specified within the section key of the `config.ym
 
 #### YAML Front Matter
 
-Bookbinder supports YAML [frontmatter](https://middlemanapp.com/basics/frontmatter/). Frontmatter (or "front matter") allows you to include page-specific variables in YAML format at the top of a markdown file. 
+Bookbinder supports YAML [frontmatter](https://middlemanapp.com/basics/frontmatter/). Frontmatter (or "front matter") allows you to include page-specific variables in YAML format at the top of a markdown file.
 
 If you want to include front matter in a markdown file, create a block at the top of the file by adding two lines of triple hyphens: `---`. Inside this block, you can create new data accessible to Bookbinder using the `current_page.data` hash. For example, if you add `title: "My Title"`, Bookbinder can access `current_page.data.title` to read "My Title".
 
-Bookbinder currently the following front matter when binding books: 
+Bookbinder currently the following front matter when binding books:
 - `title:` Specifies the title of HTML page.
 - `owner:` Specifies the owner of a topic. This can be a single owner, or multiple owners.
-    
+
     Example of front matter for a topic with one owner:
 
     ```
     ---
-    title: Understanding Cloud Foundry  
+    title: Understanding Cloud Foundry
     owner: Cloud Foundry Concepts Team
     ---
     ```
     Example of front matter for a topic with three owners:
     ```
     ---
-    title: Using Cloud Foundry Services with the CLI 
-    owner: 
+    title: Using Cloud Foundry Services with the CLI
+    owner:
       - Services Team
       - Command Line Interface Team
       - Documentation Team
@@ -510,7 +510,7 @@ products:
 
 * `id`: Links a given section to its product in the config. Should contain no spaces.
 * `subnav_root`: Root file to be parsed for to-be-generated subnavs.
- 
+
 **Example subnav_root:**
 
 To generate a subnav, `bookbinder` starts spidering from the `subnav_root`, following `a` elements with the `subnav` class. This creates a JSON file with the subnav contents, described in more detail below.
@@ -537,7 +537,7 @@ Note that the links can be anywhere on the page (the second link is in an `h2`, 
 ```markdown
 ## Won't Show Up in the Nav
 Nothing to see here.
-```	
+```
 
 `reptiles/nested-thing.html`:
 ```markdown
@@ -557,17 +557,17 @@ An example of the json links using the config and subnav root file included abov
 ```json
 {
     'links': [
-        { 
+        {
             'url': 'reptiles/thing-one.html',
             'text': 'My First Nav Item',
             'nestedLinks': [
-                { 
+                {
                     'url': 'reptiles/nested-thing.html',
                     'text': 'My Nested Nav Item'
                 }
             ]
         },
-        { 
+        {
             'url': 'reptiles/thing-two.html',
             'text': 'My Second Nav Item'
         }
@@ -706,7 +706,7 @@ It takes one argument on the command line: `local` or `remote`.
 will find documentation repositories in directories that are siblings to your current directory.
 
         bin/bookbinder imprint remote
-        
+
 will find doc repos by downloading the latest version from git.
 
 Optionally and simliar to `bind`, it also takes `--verbose` and `--dita-flags`. There is a known bug with the `--dita-flags` flag that requires escaped quotes surrounding any passed arguments, like so: `--dita-flags=\"my=argument other=argument\"`.
