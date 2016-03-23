@@ -9,18 +9,18 @@ module Bookbinder
     end
 
     class Application
-      def initialize(root = 'public')
+      def initialize
         @app = Rack::Builder.new do
           use RackStatic, {
-              urls: Dir.glob("#{root}/**/*").map { |fn| fn.gsub(/^#{root}/, '')},
-              root: root,
+              urls: Dir.glob("public/**/*").map { |path| path.sub(/^public/, '')},
+              root: 'public',
               index: 'index.html',
               header_rules: [[:all, {
                 'Cache-Control' => 'public, max-age=3600',
                 'Access-Control-Allow-Origin' => '*'
               }]]
             }
-          run NotFound.new("#{root}/404.html")
+          run NotFound.new("public/404.html")
         end
       end
 
