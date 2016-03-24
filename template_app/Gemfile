@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 ruby '2.3.0'
 
-gem 'vienna'
+gem 'rack'
 gem 'rack-rewrite'
 gem 'therubyracer'
 gem 'sendgrid-ruby'

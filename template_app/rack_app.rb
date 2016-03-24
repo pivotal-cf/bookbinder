@@ -1,6 +1,6 @@
 require 'rack'
 require 'rack/rewrite'
-require_relative './lib/vienna_application'
+require_relative './lib/server'
 
 module Bookbinder
   class RackApp
@@ -14,12 +14,20 @@ module Bookbinder
       path = redirect_pathname
       client = mail_client
       auth = auth_required
-      Rack::Builder.new(Vienna) do
+      Rack::Builder.new do
         use ResolveRedirects, path
         use AuthorizeUser, auth
         map '/api/feedback' do
           use MailFeedback, client
-          run Vienna::NotFound.new('public/404.html')
+          run Bookbinder::NotFound.new('public/404.html')
+        end
+        if ENV['CUSTOM_ROOT']
+          map ENV['CUSTOM_ROOT'] do
+            run Bookbinder::Server
+          end
+          run Bookbinder::NotFound.new('public/404.html')
+        else
+          run Bookbinder::Server
         end
       end
     end
