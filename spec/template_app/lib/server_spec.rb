@@ -5,4 +5,9 @@ describe Bookbinder::Server do
     response = Bookbinder::Server.new.call({'PATH_INFO' => '/foo/path'})
     expect(response).to eq [301, {"Location"=>"://::0/foo/path/", "Content-Type"=>""}, []]
   end
+
+  it 'adds a / to an empty path' do
+    response = Bookbinder::Server.new.call({'PATH_INFO' => ''})
+    expect(response).to eq [301, {"Location"=>"://::0/", "Content-Type"=>""}, []]
+  end
 end
