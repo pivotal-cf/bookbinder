@@ -62,7 +62,8 @@ module Bookbinder
           config: config_decorator.generate(watch_config, sections),
           local_repo_dir: File.expand_path('..'),
           streams: streams,
-          subnavs: subnavs(sections)
+          subnavs: subnavs(sections),
+          product_info: product_infos(sections)
         ).exitstatus
       end
 
@@ -85,6 +86,13 @@ module Bookbinder
         sections.map(&:subnav).reduce({}, :merge)
       end
 
+      def product_infos(sections)
+        temp = Hash.new
+        sections.each do |section|
+          temp[section.namespace] = section.product_info
+        end
+        temp
+      end
     end
   end
 end

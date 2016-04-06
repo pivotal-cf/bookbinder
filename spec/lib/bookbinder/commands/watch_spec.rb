@@ -106,7 +106,8 @@ module Bookbinder
           config:           decorated_config,
           local_repo_dir:   File.expand_path(".."),
           streams:          streams,
-          subnavs:          section.subnav)
+          subnavs:          section.subnav,
+          product_info:     { section.namespace => section.product_info})
 
         Watch.new(
           streams,
