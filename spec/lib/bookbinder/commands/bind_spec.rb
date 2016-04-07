@@ -76,7 +76,7 @@ module Bookbinder
       output_locations = OutputLocations.new(context_dir: ".")
       preprocessor = instance_double('Preprocessing::Preprocessor')
       base_streams = { err: double('stream').as_null_object }
-      merged_streams = base_streams.merge({ out: instance_of(Sheller::DevNull) })
+      merged_streams = base_streams.merge({ out: instance_of(Streams::FilterStream) })
 
       cloner = instance_double('Ingest::Cloner')
       cloner_factory = instance_double('Ingest::ClonerFactory')
@@ -159,7 +159,7 @@ module Bookbinder
 
     it "runs Middleman build" do
       base_streams = { err: double('stream').as_null_object }
-      merged_streams = base_streams.merge({ out: instance_of(Sheller::DevNull) })
+      merged_streams = base_streams.merge({ out: instance_of(Streams::FilterStream) })
       output_locations = OutputLocations.new(context_dir: ".", final_app_dir: "foo")
       runner = instance_double('MiddlemanRunner')
 
@@ -178,7 +178,7 @@ module Bookbinder
           streams: base_streams
         ) { [section] }
 
-      expect(runner).to receive(:run).with("build",
+      expect(runner).to receive(:run).with("build --verbose",
           streams: merged_streams,
           output_locations: output_locations,
           config: config,
@@ -230,7 +230,7 @@ module Bookbinder
 
       expect(fs).to receive(:copy).with(output_locations.build_dir, output_locations.public_dir).ordered
       expect(broken_links_checker).to receive(:check!).with(config.broken_link_exclusions).ordered
-      expect(broken_links_checker).to receive(:announce).with(streams.merge({ out: instance_of(Sheller::DevNull)})).ordered
+      expect(broken_links_checker).to receive(:announce).with(streams.merge({ out: instance_of(Streams::FilterStream)})).ordered
 
       expect(streams[:success]).to receive(:puts).with(include(output_locations.final_app_dir.to_s))
 
@@ -340,14 +340,14 @@ module Bookbinder
     end
 
     context 'when the verbose flag is not set' do
-      it "sends a DevNull out stream to Middleman" do
+      it "sends a FilterStream out stream to Middleman" do
         middleman_runner = instance_double('Bookbinder::MiddlemanRunner')
         regular_stream = StringIO.new
 
         expect(middleman_runner).to receive(:run).with(
-          "build",
+          "build --verbose",
           hash_including(streams: {
-            out: instance_of(Sheller::DevNull),
+            out: instance_of(Streams::FilterStream),
             err: regular_stream,
             success: regular_stream,
           })) { failure }

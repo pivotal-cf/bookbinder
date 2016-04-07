@@ -1,4 +1,7 @@
 require_relative '../../sheller'
+require_relative '../../colorizer'
+require_relative '../../streams/colorized_stream'
+require_relative '../../streams/filter_stream'
 
 module Bookbinder
   module Commands
@@ -31,7 +34,8 @@ module Bookbinder
 
         def streams
           base_streams.merge(
-            out: verbosity ? base_streams[:out] : Sheller::DevNull.new,
+            out: verbosity ? base_streams[:out] :
+              Streams::FilterStream.new(/^\s*error/i, Streams::ColorizedStream.new(Colorizer::Colors.red, base_streams[:out])),
           )
         end
 

@@ -78,7 +78,7 @@ module Bookbinder
         end
 
         generation_result = middleman_runner.run(
-          ["build", bind_options.verbosity].compact.join(" "),
+          'build --verbose',
           streams: bind_options.streams,
           output_locations: output_locations,
           config: config_decorator.generate(bind_config, sections),

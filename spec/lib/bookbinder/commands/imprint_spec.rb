@@ -5,6 +5,7 @@ require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/config/section_config'
 require_relative '../../../../lib/bookbinder/config/configuration'
 require_relative '../../../../lib/bookbinder/values/section'
+require_relative '../../../../lib/bookbinder/streams/filter_stream'
 # Doubles
 require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/ingest/git_cloner'
@@ -17,7 +18,7 @@ module Bookbinder
   describe Commands::Imprint do
     it 'prepares directories and then preprocesses fetched sections' do
       base_streams = { success: double('stream').as_null_object }
-      merged_streams = base_streams.merge({ out: instance_of(Sheller::DevNull) })
+      merged_streams = base_streams.merge({ out: instance_of(Streams::FilterStream) })
       output_locations = OutputLocations.new(context_dir: ".")
       section_config = Config::SectionConfig.new({'directory' => 'foo'})
       config = Config::Configuration.new({book_repo: "some_book", sections: [section_config]})
