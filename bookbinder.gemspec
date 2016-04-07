@@ -17,7 +17,6 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '~> 2.3.0'
   s.add_runtime_dependency 'fog-aws', ['~> 0.7.1']
   s.add_runtime_dependency 'ansi', ['~> 1.4']
-  s.add_runtime_dependency 'unf', ['~> 0.1']
   s.add_runtime_dependency 'middleman', ['~> 3.4.0']
   s.add_runtime_dependency 'middleman-livereload', ['~> 3.4.3']
   s.add_runtime_dependency 'middleman-syntax', ['~> 2.0']
@@ -27,7 +26,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'css_parser'
   s.add_runtime_dependency 'puma'
   s.add_runtime_dependency 'rack-rewrite'
-  s.add_runtime_dependency 'therubyracer'
   s.add_runtime_dependency 'git', '~> 1.2.8'
   s.add_runtime_dependency 'nokogiri', ['1.6.7.2']
   s.add_runtime_dependency 'thor'
