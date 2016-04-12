@@ -6,8 +6,6 @@ require_relative 'naming'
 module Bookbinder
   module Commands
     class Bind
-      include Commands::Naming
-
       def initialize(base_streams,
                      output_locations: nil,
                      config_fetcher: nil,
@@ -39,11 +37,7 @@ module Bookbinder
       end
 
       def command_for?(test_command_name)
-        %w(bind publish).include?(test_command_name)
-      end
-
-      def deprecated_command_for?(command_name)
-        %w(publish).include?(command_name)
+        'bind' == test_command_name
       end
 
       def run(cli_arguments)

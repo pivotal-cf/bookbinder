@@ -4,8 +4,6 @@ require_relative 'naming'
 module Bookbinder
   module Commands
     class Punch
-      include Commands::Naming
-
       def initialize(streams, configuration_fetcher, version_control_system)
         @streams = streams
         @configuration_fetcher = configuration_fetcher
@@ -14,6 +12,10 @@ module Bookbinder
 
       def usage
         ["punch <git tag>", "Apply the specified <git tag> to your book, sections, and layout repo"]
+      end
+
+      def command_for?(test_command_name)
+        'punch' == test_command_name
       end
 
       def run((tag, *))

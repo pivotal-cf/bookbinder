@@ -1,5 +1,4 @@
 require_relative '../../../../lib/bookbinder/commands/watch'
-require_relative '../../../../lib/bookbinder/commands/help'
 require_relative '../../../../lib/bookbinder/middleman_runner'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/config/configuration'
@@ -15,12 +14,6 @@ module Bookbinder
       it "has a command name" do
         watch = Watch.new({})
         expect(watch).to be_command_for("watch")
-      end
-
-      it "is compatible with the help command" do
-        watch_cmd = Watch.new({})
-        help = Commands::Help.new(unused_dependency, [watch_cmd])
-        expect(help.usage_message).to include('watch')
       end
 
       it "prepares directories and then preprocesses fetched sections" do

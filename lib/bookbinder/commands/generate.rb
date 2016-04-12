@@ -3,8 +3,6 @@ require 'bundler'
 module Bookbinder
   module Commands
     class Generate
-      include Commands::Naming
-
       def initialize(fs, sheller, context_dir, streams)
         @fs = fs
         @sheller = sheller

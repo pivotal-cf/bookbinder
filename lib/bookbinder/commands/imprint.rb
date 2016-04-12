@@ -4,8 +4,6 @@ require_relative 'naming'
 module Bookbinder
   module Commands
     class Imprint
-      include Commands::Naming
-
       def initialize(base_streams,
                      output_locations: nil,
                      config_fetcher: nil,
@@ -25,6 +23,10 @@ module Bookbinder
 
       def usage
         ["imprint <local|remote> [--verbose] [--dita-flags=\\\"<dita-option>=<value>\\\"]", "Generate a PDF for a given book"]
+      end
+
+      def command_for?(test_command_name)
+        'imprint' == test_command_name
       end
 
       def run(cli_arguments)

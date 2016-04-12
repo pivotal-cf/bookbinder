@@ -6,7 +6,6 @@ require_relative '../commands/components/bind/directory_preparer'
 require_relative '../commands/components/imprint/directory_preparer'
 require_relative '../config/configuration_decorator'
 require_relative '../config/fetcher'
-require_relative '../config/remote_yaml_credential_provider'
 require_relative '../config/validator'
 require_relative '../config/yaml_loader'
 require_relative '../config/configuration'
@@ -42,26 +41,11 @@ module Bookbinder
         list.each(&block)
       end
 
-      def help
-        @help ||= Commands::Help.new(
-          logger,
-          [version] + standard_commands
-        )
-      end
-
       private
 
       attr_reader :logger, :streams, :version_control_system
 
       def list
-        standard_commands + flags
-      end
-
-      def flags
-        @flags ||= [ version, help ]
-      end
-
-      def standard_commands
         @standard_commands ||= [
           Commands::Generate.new(
             local_filesystem_accessor,
@@ -69,11 +53,7 @@ module Bookbinder
             Dir.pwd,
             streams
           ),
-          build_and_push_tarball,
           bind,
-          push_local_to,
-          Commands::PushToProd.new(streams, logger, configuration_fetcher(Config::Configuration), Dir.mktmpdir),
-          Commands::RunPublishCI.new(bind, push_local_to, build_and_push_tarball),
           Commands::Punch.new(streams, configuration_fetcher(Config::Configuration), version_control_system),
           Commands::UpdateLocalDocRepos.new(
             streams,
@@ -83,10 +63,6 @@ module Bookbinder
           watch,
           imprint
         ]
-      end
-
-      def version
-        @version ||= Commands::Version.new(logger)
       end
 
       def bind
@@ -134,7 +110,7 @@ module Bookbinder
       end
 
       def imprint
-        Commands::Imprint.new(
+        Bookbinder::Commands::Imprint.new(
           streams,
           output_locations: output_locations,
           config_fetcher: configuration_fetcher(Config::Imprint::Configuration),
@@ -145,26 +121,10 @@ module Bookbinder
         )
       end
 
-      def push_local_to
-        @push_local_to ||= Commands::PushFromLocal.new(
-          streams,
-          logger,
-          configuration_fetcher(Config::Configuration)
-        )
-      end
-
-      def build_and_push_tarball
-        @build_and_push_tarball ||= Commands::BuildAndPushTarball.new(
-          streams,
-          configuration_fetcher(Config::Configuration)
-        )
-      end
-
       def configuration_fetcher(config_class)
-        Config::Fetcher.new(
-          Config::Validator.new(local_filesystem_accessor),
+        Bookbinder::Config::Fetcher.new(
+          Bookbinder::Config::Validator.new(local_filesystem_accessor),
           config_loader,
-          Config::RemoteYamlCredentialProvider.new(logger, version_control_system),
           config_class
         ).tap do |fetcher|
           fetcher.set_config_file_path './config.yml'

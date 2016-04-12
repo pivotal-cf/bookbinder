@@ -84,15 +84,6 @@ sections:
         expect(commands.detect {|c| c.command_for?('generate')}).to be_a(Generate)
       end
 
-      it "is not a flag (used by help)" do
-        expect(generate_cmd).not_to be_flag
-      end
-
-      it "is compatible with the help command" do
-        help = Commands::Help.new(unused_logger, [generate_cmd])
-        expect(help.usage_message).to include('generate')
-      end
-
       it "logs what it's about to do, and successful result" do
         out = StringIO.new
         success = StringIO.new

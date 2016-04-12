@@ -4,8 +4,6 @@ require_relative 'naming'
 module Bookbinder
   module Commands
     class UpdateLocalDocRepos
-      include Commands::Naming
-
       def initialize(streams, configuration_fetcher, version_control_system)
         @streams = streams
         @configuration_fetcher = configuration_fetcher
@@ -15,6 +13,10 @@ module Bookbinder
       def usage
         [command_name,
          "Run `git pull` on all sections that exist at the same directory level as your book directory"]
+      end
+
+      def command_for?(test_command_name)
+        'update_local_doc_repos' == test_command_name
       end
 
       def run(_)

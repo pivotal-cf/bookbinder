@@ -25,12 +25,6 @@ module Bookbinder
       run_legacy_cli('generate', book_name)
     end
 
-    desc 'build_and_push_tarball', 'Create a tarball from the final_app directory and push to the S3 bucket specified in your credentials.yml'
-    def build_and_push_tarball
-      print_deploy_deprecation_message
-      run_legacy_cli('build_and_push_tarball')
-    end
-
     desc 'bind <local|remote> [--verbose] [--dita-flags=\"<dita-option>=<value>\"]', 'Bind the sections specified in config.yml from <local> or <remote> into the final_app directory'
     option :verbose, type: :boolean
     option 'dita-flags'
@@ -39,25 +33,6 @@ module Bookbinder
       args << '--verbose' if options[:verbose]
       args << "--dita-flags=\\\"#{options['dita-flags']}\\\""
       run_legacy_cli(*args)
-    end
-
-    desc 'push_local_to <environment>', 'Push the contents of final_app to the specified environment using the credentials.yml'
-    def push_local_to(environment)
-      print_deploy_deprecation_message
-      run_legacy_cli('push_local_to', environment)
-    end
-
-    desc 'push_to_prod [build_#]', 'Push latest or <build_#> from your S3 bucket to the production host specified in credentials.yml'
-    def push_to_prod(build_num=nil)
-      print_deploy_deprecation_message
-      args = ['push_to_prod', build_num].compact
-      run_legacy_cli(*args)
-    end
-
-    desc 'run_publish_ci', 'Run publish, push_local_to staging, and build_and_push_tarball for CI purposes'
-    def run_publish_ci
-      print_deploy_deprecation_message
-      run_legacy_cli('run_publish_ci')
     end
 
     desc 'punch <git tag>', 'Apply the specified <git tag> to your book, sections, and layout repo'
@@ -98,19 +73,6 @@ module Bookbinder
     def run_legacy_cli(*args)
       status = legacy_cli.run(args)
       exit status unless status.zero?
-    end
-
-    def print_deploy_deprecation_message
-      message = ANSI.red do
-        <<-EOM
-
-DEPRECATED: In a future version Bookbinder will no longer deploy to Cloud Foundry
-            The appropriate Concourse pipeline should be doing all deploys going forward.
-
-        EOM
-      end
-
-      puts message
     end
   end
 end

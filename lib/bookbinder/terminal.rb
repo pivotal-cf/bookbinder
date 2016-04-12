@@ -1,4 +1,3 @@
-require_relative 'command_validator'
 require_relative 'colorizer'
 
 module Bookbinder

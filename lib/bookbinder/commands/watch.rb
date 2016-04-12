@@ -3,8 +3,6 @@ require_relative 'naming'
 module Bookbinder
   module Commands
     class Watch
-      include Commands::Naming
-
       def initialize(streams,
                      middleman_runner: nil,
                      output_locations: nil,
@@ -30,6 +28,10 @@ module Bookbinder
       def usage
         ["watch",
          "Bind and serve a local book, watching for changes"]
+      end
+
+      def command_for?(test_command_name)
+        'watch' == test_command_name
       end
 
       def run(_)

@@ -7,18 +7,6 @@ module Bookbinder
         command_name == test_command_name
       end
 
-      def flag?
-        command_name.match(/^--/)
-      end
-
-      def command_type
-        if flag?
-          'flag'
-        else
-          'command'
-        end
-      end
-
       private
 
       def command_name
