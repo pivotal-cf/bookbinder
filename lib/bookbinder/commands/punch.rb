@@ -1,6 +1,3 @@
-require_relative '../errors/cli_error'
-require_relative 'naming'
-
 module Bookbinder
   module Commands
     class Punch
@@ -10,17 +7,7 @@ module Bookbinder
         @version_control_system = version_control_system
       end
 
-      def usage
-        ["punch <git tag>", "Apply the specified <git tag> to your book, sections, and layout repo"]
-      end
-
-      def command_for?(test_command_name)
-        'punch' == test_command_name
-      end
-
       def run((tag, *))
-        raise CliError::InvalidArguments unless tag
-
         urls(config).each do |url|
           version_control_system.remote_tag(url, tag, 'HEAD')
         end

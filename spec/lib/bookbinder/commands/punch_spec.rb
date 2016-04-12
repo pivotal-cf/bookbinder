@@ -48,12 +48,5 @@ module Bookbinder
           "loggity/book and its sections were tagged with my-great-tag\n"
         )
     end
-
-    context 'when no tag is supplied' do
-      it 'raises an error' do
-        punch = Commands::Punch.new(nil, nil, nil)
-        expect { punch.run [] }.to raise_error(CliError::InvalidArguments)
-      end
-    end
   end
 end

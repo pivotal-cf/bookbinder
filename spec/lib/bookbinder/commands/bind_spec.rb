@@ -10,7 +10,6 @@ require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../../lib/bookbinder/values/output_locations'
-require_relative '../../../../lib/bookbinder/errors/cli_error'
 require_relative '../../../helpers/git_fake'
 require_relative '../../../helpers/middleman'
 require_relative '../../../helpers/redirection'
@@ -106,7 +105,7 @@ module Bookbinder
       expect(preprocessor).to receive(:preprocess).with(
                                   sections,
                                   output_locations,
-                                  options: [],
+                                  options: { dita_flags: nil },
                                   output_streams: merged_streams,
                                   config: config
                               ).ordered
@@ -123,7 +122,7 @@ module Bookbinder
           cloner_factory: cloner_factory,
           section_repository: section_repository,
           directory_preparer: directory_preparer
-      ).run(['local'])
+      ).run('local')
     end
 
     it "copies a redirects file from the current directory to the final app directory, prior to site generation" do
@@ -139,7 +138,7 @@ module Bookbinder
       expect(fs).to receive(:copy).with('redirects.rb', Pathname(File.absolute_path('final_app'))).ordered
       expect(generator).to receive(:run).ordered { success }
 
-      command.run(['local'])
+      command.run('local')
     end
 
     it "doesn't attempt to copy the redirect file if it doesn't exist" do
@@ -154,7 +153,7 @@ module Bookbinder
       expect(generator).to receive(:run).ordered { success }
       expect(fs).to receive(:copy).ordered
 
-      command.run(['local'])
+      command.run('local')
     end
 
     it "runs Middleman build" do
@@ -198,7 +197,7 @@ module Bookbinder
         cloner_factory: instance_double('Ingest::ClonerFactory', produce: cloner),
         section_repository: section_repository,
         directory_preparer: null_directory_preparer
-      ).run(['local'])
+      ).run('local')
     end
 
     it "returns a nonzero exit code when Middleman fails" do
@@ -216,7 +215,7 @@ module Bookbinder
       allow(middleman_runner).to receive(:run) { failure }
 
       expect(streams[:err]).to receive(:puts).with(include('--verbose'))
-      expect(command.run(['local'])).to be_nonzero
+      expect(command.run('local')).to be_nonzero
     end
 
     it "writes required files to output directory and outputs success message" do
@@ -246,7 +245,7 @@ module Bookbinder
         cloner_factory: null_cloner_factory,
         section_repository: null_section_repository,
         directory_preparer: null_directory_preparer
-      ).run(['local'])
+      ).run('local')
     end
 
     context "with broken links" do
@@ -271,7 +270,7 @@ module Bookbinder
           directory_preparer: null_directory_preparer
         )
 
-        expect(command.run(['local'])).to be_nonzero
+        expect(command.run('local')).to be_nonzero
       end
     end
 
@@ -297,19 +296,7 @@ module Bookbinder
           directory_preparer: null_directory_preparer
         )
 
-        expect(command.run(['local'])).to be_zero
-      end
-    end
-
-    context 'when there are invalid arguments' do
-      it 'raises Cli::InvalidArguments' do
-        expect {
-          bind_cmd.run(['blah', 'blah', 'whatever'])
-        }.to raise_error(CliError::InvalidArguments)
-
-        expect {
-          bind_cmd.run([])
-        }.to raise_error(CliError::InvalidArguments)
+        expect(command.run('local')).to be_zero
       end
     end
 
@@ -332,7 +319,7 @@ module Bookbinder
           config_fetcher: double('config fetcher', fetch_config: config),
           file_system_accessor: real_fs_accessor,
           preprocessor: real_preprocessor
-        ).run(['remote'])
+        ).run('remote')
 
         index_html = File.read File.join('final_app', 'public', 'var-repo', 'variable_index.html')
         expect(index_html).to include 'My variable name is Spartacus.'
@@ -356,7 +343,7 @@ module Bookbinder
                  streams: { out: regular_stream,
                             err: regular_stream,
                             success: regular_stream }).
-        run(['local'])
+        run('local')
       end
     end
 
@@ -377,7 +364,7 @@ module Bookbinder
                  streams: { out: regular_stream,
                             err: regular_stream,
                             success: regular_stream }).
-        run(['local', '--verbose'])
+        run('local', true)
       end
     end
   end

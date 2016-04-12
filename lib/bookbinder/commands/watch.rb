@@ -1,5 +1,3 @@
-require_relative 'naming'
-
 module Bookbinder
   module Commands
     class Watch
@@ -25,16 +23,7 @@ module Bookbinder
         @directory_preparer = directory_preparer
       end
 
-      def usage
-        ["watch",
-         "Bind and serve a local book, watching for changes"]
-      end
-
-      def command_for?(test_command_name)
-        'watch' == test_command_name
-      end
-
-      def run(_)
+      def run
         watch_config = config_fetcher.fetch_config
 
         directory_preparer.prepare_directories(

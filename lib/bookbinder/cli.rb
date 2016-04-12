@@ -1,8 +1,9 @@
 require 'thor'
-require 'ansi/code'
 
 require_relative 'ingest/git_accessor'
-require_relative 'legacy/cli'
+require_relative 'streams/colorized_stream'
+require_relative 'colorizer'
+require_relative 'commands/collection'
 
 module Bookbinder
   class CLI < Thor
@@ -22,57 +23,65 @@ module Bookbinder
 
     desc 'generate <book_name>', 'Generate a skeleton book that can be bound with "bookbinder bind"'
     def generate(book_name)
-      run_legacy_cli('generate', book_name)
+      legacy_commands.generate.run(book_name)
     end
 
     desc 'bind <local|remote> [--verbose] [--dita-flags=\"<dita-option>=<value>\"]', 'Bind the sections specified in config.yml from <local> or <remote> into the final_app directory'
     option :verbose, type: :boolean
     option 'dita-flags'
     def bind(source)
-      args = ['bind', source]
-      args << '--verbose' if options[:verbose]
-      args << "--dita-flags=\\\"#{options['dita-flags']}\\\""
-      run_legacy_cli(*args)
+      legacy_commands.bind(source, options[:verbose], options['dita-flags'])
     end
 
     desc 'punch <git tag>', 'Apply the specified <git tag> to your book, sections, and layout repo'
     def punch(git_tag)
-      run_legacy_cli('punch', git_tag)
+      legacy_commands.punch(git_tag)
     end
 
     desc 'update_local_doc_repos', 'Run `git pull` on all sections that exist at the same directory level as your book directory'
     def update_local_doc_repos
-      run_legacy_cli('update_local_doc_repos')
+      legacy_commands.update_local_doc_repos
     end
 
     desc 'watch', 'Bind and serve a local book, watching for changes'
     def watch
-      run_legacy_cli('watch')
+      legacy_commands.watch
     end
 
     desc 'imprint <local|remote> [--verbose] [--dita-flags=\"<dita-option>=<value>\"]', 'Generate a PDF for a given book'
     option :verbose, type: :boolean
     option 'dita-flags'
     def imprint(source)
-      args = ['imprint', source]
-      args << '--verbose' if options[:verbose]
-      args << "--dita-flags=\\\"#{options['dita-flags']}\\\""
-      run_legacy_cli(*args)
+      legacy_commands.imprint(source, options[:verbose], options['dita-flags'])
+    end
+
+    def method_missing(command, *args)
+      puts "Unknown command '#{command}'"
+      puts ""
+      help
     end
 
     private
 
-    attr_reader :legacy_cli
+    attr_reader :legacy_commands
 
     def initialize(*)
       super
 
-      @legacy_cli = Legacy::Cli.new(Ingest::GitAccessor.new)
+      @legacy_commands = Bookbinder::Commands::Collection.new(colorized_streams, git)
     end
 
-    def run_legacy_cli(*args)
-      status = legacy_cli.run(args)
-      exit status unless status.zero?
+    def git
+      @git ||= Ingest::GitAccessor.new
+    end
+
+    def colorized_streams
+      @streams ||= {
+        err: Streams::ColorizedStream.new(Colorizer::Colors.red, $stderr),
+        out: $stdout,
+        success: Streams::ColorizedStream.new(Colorizer::Colors.green, $stdout),
+        warn: Streams::ColorizedStream.new(Colorizer::Colors.yellow, $stdout),
+      }
     end
   end
 end

@@ -1,5 +1,4 @@
 require_relative 'components/command_options'
-require_relative 'naming'
 
 module Bookbinder
   module Commands
@@ -21,16 +20,8 @@ module Bookbinder
         @directory_preparer = directory_preparer
       end
 
-      def usage
-        ["imprint <local|remote> [--verbose] [--dita-flags=\\\"<dita-option>=<value>\\\"]", "Generate a PDF for a given book"]
-      end
-
-      def command_for?(test_command_name)
-        'imprint' == test_command_name
-      end
-
-      def run(cli_arguments)
-        options        = Components::CommandOptions.new(cli_arguments, base_streams).tap(&:validate!)
+      def run(bind_type, verbose = false, dita_flags = nil)
+        options        = Components::CommandOptions.new([bind_type], base_streams, verbose)
         config         = config_fetcher.fetch_config
         cloner         = cloner_factory.produce(options.local_repo_dir)
 
@@ -47,7 +38,7 @@ module Bookbinder
         preprocessor.preprocess(
           sections,
           output_locations,
-          options: options.options,
+          options: { dita_flags: dita_flags },
           output_streams: options.streams,
           config: config
         )

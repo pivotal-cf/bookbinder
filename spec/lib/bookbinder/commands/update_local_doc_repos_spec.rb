@@ -30,7 +30,7 @@ module Bookbinder
       expect(vcs).to receive(:update).with(path_1) { Ingest::UpdateSuccess.new }
       expect(vcs).to receive(:update).with(path_2) { Ingest::UpdateSuccess.new }
 
-      update.run(nil)
+      update.run
     end
 
     it 'logs each successful pull, and each skip of an unsuccessful pull' do
@@ -51,7 +51,7 @@ module Bookbinder
       allow(vcs).to receive(:update).with(path_1) { Ingest::UpdateSuccess.new }
       allow(vcs).to receive(:update).with(path_2) { not_found }
 
-      update.run(nil)
+      update.run
 
       expect(out.tap(&:rewind).read).to eq(<<-MESSAGE)
 
@@ -67,7 +67,7 @@ Updating #{path_2}: skipping (potatoes)
                                                   success: StringIO.new},
                                                   configuration_fetcher,
                                                   double('vcs', update: Ingest::UpdateSuccess.new))
-      expect(update.run(nil)).to eq(0)
+      expect(update.run).to eq(0)
     end
   end
 end

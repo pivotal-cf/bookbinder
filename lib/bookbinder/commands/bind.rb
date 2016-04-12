@@ -1,7 +1,6 @@
 require 'middleman-syntax'
 
 require_relative 'components/command_options'
-require_relative 'naming'
 
 module Bookbinder
   module Commands
@@ -31,17 +30,8 @@ module Bookbinder
         @directory_preparer = directory_preparer
       end
 
-      def usage
-        ["bind <local|remote> [--verbose] [--dita-flags=\\\"<dita-option>=<value>\\\"]",
-         "Bind the sections specified in config.yml from <local> or <remote> into the final_app directory"]
-      end
-
-      def command_for?(test_command_name)
-        'bind' == test_command_name
-      end
-
-      def run(cli_arguments)
-        bind_options        = Components::CommandOptions.new(cli_arguments, base_streams).tap(&:validate!)
+      def run(bind_type, verbose = false, dita_flags = nil)
+        bind_options        = Components::CommandOptions.new([bind_type], base_streams, verbose)
         bind_config         = config_fetcher.fetch_config
         cloner              = cloner_factory.produce(bind_options.local_repo_dir)
 
@@ -63,7 +53,7 @@ module Bookbinder
         preprocessor.preprocess(
           sections,
           output_locations,
-          options: bind_options.options,
+          options: { dita_flags: dita_flags },
           output_streams: bind_options.streams,
           config: bind_config
         )

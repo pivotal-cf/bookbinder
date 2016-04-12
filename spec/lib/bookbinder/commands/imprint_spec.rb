@@ -46,7 +46,7 @@ module Bookbinder
       expect(preprocessor).to receive(:preprocess).with(
           sections,
           output_locations,
-          options: [],
+          options: { dita_flags: nil },
           output_streams: merged_streams,
           config: config
         ).ordered
@@ -59,7 +59,7 @@ module Bookbinder
         cloner_factory: cloner_factory,
         section_repository: section_repository,
         directory_preparer: directory_preparer
-      ).run(['local'])
+      ).run('local')
     end
   end
 end

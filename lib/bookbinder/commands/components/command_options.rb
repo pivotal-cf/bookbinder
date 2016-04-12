@@ -7,13 +7,10 @@ module Bookbinder
   module Commands
     module Components
       class CommandOptions
-        def initialize(opts, base_streams)
+        def initialize(opts, base_streams, verbose = false)
           @opts = opts
           @base_streams = base_streams
-        end
-
-        def validate!
-          raise CliError::InvalidArguments unless arguments_are_valid?
+          @verbosity = verbose
         end
 
         def bind_source
@@ -39,25 +36,9 @@ module Bookbinder
           )
         end
 
-        def verbosity
-          options.detect {|arg| arg == '--verbose'}
-        end
-
         private
 
-        attr_accessor :base_streams, :opts
-
-        def arguments_are_valid?
-          %w(local remote github).include?(bind_source) && flag_names.subset?(valid_options)
-        end
-
-        def valid_options
-          %w(--verbose --ignore-section-refs --dita-flags).to_set
-        end
-
-        def flag_names
-          options.map {|o| o.split('=').first}.to_set
-        end
+        attr_accessor :base_streams, :opts, :verbosity
       end
     end
   end

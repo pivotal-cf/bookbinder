@@ -59,7 +59,7 @@ module Bookbinder
           cloner: cloner,
           section_repository: section_repository,
           directory_preparer: directory_preparer
-        ).run([])
+        ).run
       end
 
       it "copies the redirect file if present before running middleman" do
@@ -81,7 +81,7 @@ module Bookbinder
           preprocessor: instance_double('Preprocessing::Preprocessor', preprocess: nil),
           section_repository: instance_double('Ingest::SectionRepository', fetch: []),
           directory_preparer: instance_double('Components::Bind::DirectoryPreparer', prepare_directories: nil)
-        ).run([])
+        ).run
       end
 
       it "runs the middleman server" do
@@ -113,7 +113,7 @@ module Bookbinder
           cloner: instance_double('Ingest::LocalFileSystemCloner'),
           section_repository: instance_double('Ingest::SectionRepository', fetch: [section]),
           directory_preparer: instance_double('Components::Bind::DirectoryPreparer', prepare_directories: nil)
-        ).run([])
+        ).run
       end
     end
   end

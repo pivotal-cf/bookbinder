@@ -1,10 +1,9 @@
 require_relative '../values/subnav_template'
 require_relative '../../../lib/bookbinder/subnav/json_from_html_toc'
-require_relative 'dita_preprocessor'
 
 module Bookbinder
   module Preprocessing
-    class DitaHTMLPreprocessor < DitaPreprocessor
+    class DitaHTMLPreprocessor
       DitaToHtmlLibraryFailure = Class.new(RuntimeError)
 
       ACCEPTED_IMAGE_FORMATS = %w(png jpeg jpg svg gif bmp tif tiff eps)
@@ -21,16 +20,14 @@ module Bookbinder
         section.subnav_template.include?('dita_subnav') if section.subnav_template
       end
 
-      def preprocess(sections, output_locations, options: [], output_streams: nil, **_)
+      def preprocess(sections, output_locations, options: {}, output_streams: nil, **_)
         @output_locations = output_locations
-
-        dita_options = dita_flags(options)
 
         sections.each do |section|
           if section.path_to_preprocessor_attribute('ditamap_location')
             convert_dita_files(section,
                                command_creator,
-                               dita_options,
+                               options[:dita_flags],
                                section_html_dir(section),
                                sheller,
                                output_streams)

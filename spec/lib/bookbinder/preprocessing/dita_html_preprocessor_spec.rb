@@ -131,7 +131,7 @@ module Bookbinder
                 nil,
                 {'ditamap_location' => 'fake-ditamap'})],
             OutputLocations.new(context_dir: "."),
-            options: ["--dita-flags=\"#{dita_options}\""]
+            options: { dita_flags: dita_options }
           )
         end
       end

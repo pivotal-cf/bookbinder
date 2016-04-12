@@ -4,7 +4,7 @@ require_relative '../../../../lib/bookbinder/commands/generate'
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/sheller'
 require_relative '../../../helpers/use_fixture_repo'
-
+require_relative '../../../helpers/dev_null'
 
 module Bookbinder
   module Commands
@@ -16,14 +16,12 @@ module Bookbinder
       UNUSED_FS = Object.new
       UNUSED_SHELLER = Object.new
       UNUSED_PATH = 'unused/path'
-      UNCHECKED_STREAMS = {out: StringIO.new, err: StringIO.new}
-      let(:unused_logger) { Object.new }
       let(:context_dir) { tmp_subdir('repositories') }
 
       def generate_cmd(fs: UNUSED_FS,
                        sheller: UNUSED_SHELLER,
                        context_dir: UNUSED_PATH,
-                       streams: UNCHECKED_STREAMS)
+                       streams: DevNull.get_streams)
         Generate.new(fs, sheller, context_dir, streams)
       end
 
@@ -75,13 +73,6 @@ sections:
           session.get '/'
           expect(session.last_response).to be_ok
         end
-      end
-
-      it "is available as a command" do
-        commands = Commands::Collection.new(
-          unused_logger, UNCHECKED_STREAMS, double('vcs')
-        )
-        expect(commands.detect {|c| c.command_for?('generate')}).to be_a(Generate)
       end
 
       it "logs what it's about to do, and successful result" do

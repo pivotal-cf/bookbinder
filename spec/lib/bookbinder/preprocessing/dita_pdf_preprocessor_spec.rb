@@ -83,7 +83,7 @@ module Bookbinder
                 'my-pdf-name.pdf')
             ],
             OutputLocations.new(context_dir: "."),
-            options: ["--dita-flags=\"#{dita_options}\""]
+            options: { dita_flags: dita_options }
           )
         end
 
@@ -116,7 +116,7 @@ module Bookbinder
                 'my-pdf-name.pdf'
               )],
             output_locations,
-            options: []
+            options: {}
           )
         end
       end

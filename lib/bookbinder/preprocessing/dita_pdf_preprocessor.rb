@@ -1,8 +1,6 @@
-require_relative 'dita_preprocessor'
-
 module Bookbinder
   module Preprocessing
-    class DitaPDFPreprocessor < DitaPreprocessor
+    class DitaPDFPreprocessor
       DitaToPDFLibraryFailure = Class.new(RuntimeError)
 
       def initialize(fs, command_creator, sheller)
@@ -15,11 +13,11 @@ module Bookbinder
         !!section.pdf_output_filename
       end
 
-      def preprocess(sections, output_locations, options: [], output_streams: nil, **_)
+      def preprocess(sections, output_locations, options: {}, output_streams: nil, **_)
         sections.each do |section|
           command = command_creator.convert_to_pdf_command(
             section,
-            dita_flags: dita_flags(options),
+            dita_flags: options[:dita_flags],
             write_to: output_locations.pdf_from_preprocessing_dir
           )
           status = sheller.run_command(command, output_streams.to_h)

@@ -6,7 +6,6 @@ require_relative '../../../../lib/bookbinder/subnav/subnav_generator_factory'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/values/section'
 require_relative '../../../../lib/bookbinder/config/configuration'
-require_relative '../../../../spec/helpers/nil_logger'
 
 module Bookbinder
   module Preprocessing

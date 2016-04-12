@@ -1,5 +1,6 @@
-require_relative '../../lib/bookbinder/legacy/cli'
+require_relative '../../lib/bookbinder/commands/collection'
 require_relative '../helpers/redirection'
+require_relative '../helpers/dev_null'
 require_relative '../helpers/use_fixture_repo'
 
 describe "watching a book" do
@@ -13,10 +14,10 @@ describe "watching a book" do
   end
 
   def run_watch
-    cli = Bookbinder::Legacy::Cli.new(double('vcs'))
+    commands = Bookbinder::Commands::Collection.new(DevNull.get_streams, double('vcs'))
     old_path = ENV['PATH']
     ENV['PATH'] = Dir.pwd
-    swallow_stdout { cli.run("watch") }
+    swallow_stdout { commands.watch }
   ensure
     ENV['PATH'] = old_path
   end

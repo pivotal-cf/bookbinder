@@ -1,7 +1,8 @@
 require_relative '../helpers/redirection'
-require_relative '../../lib/bookbinder/legacy/cli'
+require_relative '../../lib/bookbinder/commands/collection'
 require_relative '../helpers/use_fixture_repo'
 require_relative '../helpers/git_fake'
+require_relative '../helpers/dev_null'
 require 'pathname'
 require 'tmpdir'
 
@@ -10,28 +11,27 @@ module Bookbinder
     include Redirection
 
     def initialize(git_client = GitFake.new)
-      @git_client = git_client
-      @cli_client = Legacy::Cli.new(git_client)
+      @commands = Bookbinder::Commands::Collection.new(DevNull.get_streams, git_client)
     end
 
     def bind_book_from_remote(book, silent: true, &expectation)
-      command = Proc.new { cli_client.run(%w(bind remote --verbose)) }
+      command = Proc.new { commands.bind('remote', true) }
       execute_in_book(book, command, silent, expectation)
     end
 
     def bind_book_from_local(book, silent: true, &expectation)
-      command = Proc.new { cli_client.run(%w(bind local --verbose)) }
+      command = Proc.new {commands.bind('local', true) }
       execute_in_book(book, command, silent, expectation)
     end
 
     def bind_book_with_dita_options(book, silent: true, dita_options: nil, &expectation)
-      command = Proc.new { cli_client.run(%W(bind local --verbose --dita-flags="#{dita_options}")) }
+      command = Proc.new { commands.bind('local', true, dita_options) }
       execute_in_book(book, command, silent, expectation)
     end
 
     private
 
-    attr_reader :cli_client, :git_client
+    attr_reader :commands
 
     def execute_in_book(book, command, silent, block)
       repo_name = book.name

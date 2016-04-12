@@ -31,41 +31,37 @@ module Bookbinder
     class Collection
       include Enumerable
 
-      def initialize(logger, streams, version_control_system)
-        @logger = logger
+      def initialize(streams, version_control_system)
         @streams = streams
         @version_control_system = version_control_system
       end
 
-      def each(&block)
-        list.each(&block)
+      def generate(*args)
+        Commands::Generate.new(
+          local_filesystem_accessor,
+          sheller,
+          Dir.pwd,
+          streams
+        ).run(*args)
       end
 
-      private
-
-      attr_reader :logger, :streams, :version_control_system
-
-      def list
-        @standard_commands ||= [
-          Commands::Generate.new(
-            local_filesystem_accessor,
-            sheller,
-            Dir.pwd,
-            streams
-          ),
-          bind,
-          Commands::Punch.new(streams, configuration_fetcher(Config::Configuration), version_control_system),
-          Commands::UpdateLocalDocRepos.new(
-            streams,
-            configuration_fetcher(Config::Configuration),
-            version_control_system
-          ),
-          watch,
-          imprint
-        ]
+      def punch(*args)
+        Commands::Punch.new(
+          streams,
+          configuration_fetcher(Config::Configuration),
+          version_control_system
+        ).run(*args)
       end
 
-      def bind
+      def update_local_doc_repos
+        Commands::UpdateLocalDocRepos.new(
+          streams,
+          configuration_fetcher(Config::Configuration),
+          version_control_system
+        ).run
+      end
+
+      def bind(*args)
         @bind ||= Commands::Bind.new(
           streams,
           output_locations: output_locations,
@@ -87,11 +83,7 @@ module Bookbinder
           cloner_factory: Ingest::ClonerFactory.new(streams, local_filesystem_accessor, version_control_system),
           section_repository: Ingest::SectionRepository.new,
           directory_preparer: directory_preparer
-        )
-      end
-
-      def dita_command_creator
-        DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY'])
+        ).run(*args)
       end
 
       def watch
@@ -106,10 +98,10 @@ module Bookbinder
           cloner: local_file_system_cloner,
           section_repository: Ingest::SectionRepository.new,
           directory_preparer: directory_preparer
-        )
+        ).run
       end
 
-      def imprint
+      def imprint(*args)
         Bookbinder::Commands::Imprint.new(
           streams,
           output_locations: output_locations,
@@ -118,7 +110,15 @@ module Bookbinder
           cloner_factory: Ingest::ClonerFactory.new(streams, local_filesystem_accessor, version_control_system),
           section_repository: Ingest::SectionRepository.new,
           directory_preparer: Commands::Components::Imprint::DirectoryPreparer.new(local_filesystem_accessor)
-        )
+        ).run(*args)
+      end
+
+      private
+
+      attr_reader :streams, :version_control_system
+
+      def dita_command_creator
+        DitaCommandCreator.new(ENV['PATH_TO_DITA_OT_LIBRARY'])
       end
 
       def configuration_fetcher(config_class)

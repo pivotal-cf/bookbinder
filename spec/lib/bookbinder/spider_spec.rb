@@ -3,7 +3,6 @@ require_relative '../../../lib/bookbinder/server_director'
 require_relative '../../../lib/bookbinder/spider'
 require_relative '../../../lib/bookbinder/stabilimentum'
 require_relative '../../../template_app/rack_app'
-require_relative '../../helpers/nil_logger'
 require_relative '../../helpers/tmp_dirs'
 
 module Bookbinder
@@ -18,7 +17,6 @@ module Bookbinder
     let(:stylesheet) { File.join('spec', 'fixtures', 'stylesheet.css') }
     let(:present_image) { File.join('spec', 'fixtures', '$!.png') }
     let(:public_directory) { File.join(final_app_dir, 'public') }
-    let(:logger) { NilLogger.new }
     let(:final_app_dir) { tmp_subdir 'final_app' }
     let(:spider) { Spider.new(app_dir: final_app_dir) }
 

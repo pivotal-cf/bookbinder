@@ -1,5 +1,4 @@
 require_relative '../ingest/destination_directory'
-require_relative 'naming'
 
 module Bookbinder
   module Commands
@@ -10,16 +9,7 @@ module Bookbinder
         @version_control_system = version_control_system
       end
 
-      def usage
-        [command_name,
-         "Run `git pull` on all sections that exist at the same directory level as your book directory"]
-      end
-
-      def command_for?(test_command_name)
-        'update_local_doc_repos' == test_command_name
-      end
-
-      def run(_)
+      def run
         urls = configuration_fetcher.fetch_config.sections.map(&:repo_url)
         paths(urls).each do |path|
           streams[:out] << "\nUpdating #{path}:"

@@ -10,15 +10,6 @@ module Bookbinder
         @streams = streams
       end
 
-      def command_for?(name)
-        name == 'generate'
-      end
-
-      def usage
-        ["generate <book-name>",
-         "Generate a skeleton book that can be bound with 'bookbinder bind'"]
-      end
-
       def run((name))
         path = context_dir.join(name)
         streams[:out].puts "Generating book at #{path}…"
