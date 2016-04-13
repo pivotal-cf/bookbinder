@@ -11,11 +11,6 @@ module Bookbinder
       let(:untested_streams) { {} }
       let(:success) { double('process status', success?: true, exitstatus: 0) }
 
-      it "has a command name" do
-        watch = Watch.new({})
-        expect(watch).to be_command_for("watch")
-      end
-
       it "prepares directories and then preprocesses fetched sections" do
         streams = {out: "foo", success: "bar"}
         directory_preparer = instance_double('Components::Bind::DirectoryPreparer')
