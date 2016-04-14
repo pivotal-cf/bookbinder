@@ -39,7 +39,9 @@ module Bookbinder
                                 streams: {out: StringIO.new,
                                           success: StringIO.new,
                                           err: $stderr})
-        expect(generate.run(%w(mynewbook))).to be_zero
+
+        generate_result = generate.run('mynewbook', path: File.expand_path('../../../../..', __FILE__))
+        expect(generate_result).to be_zero
 
         expect(context_dir.join('mynewbook/Gemfile.lock').exist?).to be_truthy
 
@@ -82,7 +84,7 @@ sections:
                      sheller: double('sheller', run_command: double('status', success?: true)),
                      streams: {out: out, success: success, err: StringIO.new},
                      context_dir: 'my/context').
-        run(%w(foobar))
+        run('foobar')
         expect(out.tap(&:rewind).read).to match(<<-MESSAGE)
 Generating book at my/context/foobar…
         MESSAGE
@@ -95,7 +97,7 @@ Successfully generated book at my/context/foobar
         fs = double('fs')
         generate = generate_cmd(fs: fs, context_dir: 'context/dir')
         allow(fs).to receive(:file_exist?).with(Pathname('context/dir/existing')) { true }
-        expect(generate.run(%w(existing))).not_to be_zero
+        expect(generate.run('existing')).not_to be_zero
       end
 
       it "logs an error if requested dir exists" do
@@ -107,7 +109,7 @@ Successfully generated book at my/context/foobar
           streams: {out: StringIO.new, err: err}
         )
         allow(fs).to receive(:file_exist?) { true }
-        generate.run(%w(existing))
+        generate.run('existing')
 
         expect(err.tap(&:rewind).read).to eq(<<-MESSAGE)
 Cannot generate book: directory already exists

@@ -1,6 +1,6 @@
 language: ruby
 rvm:
-  - 2.3.0
+  - 2.0.0-p481
 script: "bundle exec rspec"
 env: SITEMAP_DEBUG=true
 sudo: false
