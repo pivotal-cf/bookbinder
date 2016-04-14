@@ -7,6 +7,10 @@ require_relative 'commands/collection'
 
 module Bookbinder
   class CLI < Thor
+    def self.exit_on_failure?
+      true
+    end
+
     map '--version' => :version
     map '--help' => :help
 
@@ -23,36 +27,42 @@ module Bookbinder
 
     desc 'generate <book_name>', 'Generate a skeleton book that can be bound with "bookbinder bind"'
     def generate(book_name)
-      legacy_commands.generate.run(book_name)
+      code = legacy_commands.generate(book_name)
+      raise Thor::Error, '' if code != 0
     end
 
     desc 'bind <local|remote> [--verbose] [--dita-flags=\"<dita-option>=<value>\"]', 'Bind the sections specified in config.yml from <local> or <remote> into the final_app directory'
     option :verbose, type: :boolean
     option 'dita-flags'
     def bind(source)
-      legacy_commands.bind(source, options[:verbose], options['dita-flags'])
+      code = legacy_commands.bind(source, options[:verbose], options['dita-flags'])
+      raise Thor::Error, '' if code != 0
     end
 
     desc 'punch <git tag>', 'Apply the specified <git tag> to your book, sections, and layout repo'
     def punch(git_tag)
-      legacy_commands.punch(git_tag)
+      code = legacy_commands.punch(git_tag)
+      raise Thor::Error, '' if code != 0
     end
 
     desc 'update_local_doc_repos', 'Run `git pull` on all sections that exist at the same directory level as your book directory'
     def update_local_doc_repos
-      legacy_commands.update_local_doc_repos
+      code = legacy_commands.update_local_doc_repos
+      raise Thor::Error, '' if code != 0
     end
 
     desc 'watch', 'Bind and serve a local book, watching for changes'
     def watch
-      legacy_commands.watch
+      code = legacy_commands.watch
+      raise Thor::Error, '' if code != 0
     end
 
     desc 'imprint <local|remote> [--verbose] [--dita-flags=\"<dita-option>=<value>\"]', 'Generate a PDF for a given book'
     option :verbose, type: :boolean
     option 'dita-flags'
     def imprint(source)
-      legacy_commands.imprint(source, options[:verbose], options['dita-flags'])
+      code = legacy_commands.imprint(source, options[:verbose], options['dita-flags'])
+      raise Thor::Error, '' if code != 0
     end
 
     def method_missing(command, *args)
