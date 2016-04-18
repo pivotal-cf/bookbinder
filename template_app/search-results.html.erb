@@ -1,0 +1,12 @@
+<form method="get">
+  <input name="q" value="<%= query %>"/>
+</form>
+
+<ul class="search-results">
+<% search_results.each do |result| %>
+  <li>
+    <a href="<%= result['_source']['url'] %>"><%= result['_source']['title'] %></a>
+    <p><%= result['highlight']['text'].first.strip %></p>
+  </li>
+<% end %>
+</ul>

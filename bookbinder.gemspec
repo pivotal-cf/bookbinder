@@ -30,6 +30,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'git', '~> 1.2.8'
   s.add_runtime_dependency 'nokogiri', ['1.6.7.2']
   s.add_runtime_dependency 'thor'
+  s.add_runtime_dependency 'elasticsearch'
 
   s.add_development_dependency 'license_finder'
   s.add_development_dependency 'pry-byebug'

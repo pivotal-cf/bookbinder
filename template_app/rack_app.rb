@@ -1,6 +1,7 @@
 require 'rack'
 require 'rack/rewrite'
 require_relative './lib/server'
+require_relative './lib/search'
 
 module Bookbinder
   class RackApp
@@ -20,6 +21,9 @@ module Bookbinder
         map '/api/feedback' do
           use MailFeedback, client
           run Bookbinder::NotFound.new('public/404.html')
+        end
+        map '/search' do
+          run Bookbinder::Search
         end
         if ENV['CUSTOM_ROOT']
           map ENV['CUSTOM_ROOT'] do

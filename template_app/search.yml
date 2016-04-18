@@ -1,0 +1,12 @@
+---
+query:
+  query_string:
+    query: ''
+    default_field: text
+_source:
+- url
+- title
+highlight:
+  fields:
+    text:
+      type: plain
