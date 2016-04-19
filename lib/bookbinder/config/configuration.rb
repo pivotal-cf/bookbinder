@@ -91,6 +91,10 @@ module Bookbinder
         !!config[key.to_sym]
       end
 
+      def elastic_search?
+        config.fetch(:elastic_search, false)
+      end
+
       def ==(o)
         o.class == self.class && o.instance_variable_get(:@config) == @config
       end

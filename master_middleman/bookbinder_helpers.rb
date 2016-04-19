@@ -39,6 +39,10 @@ module Bookbinder
         snippet.prepend("#{delimiter}#{language}\n").concat("\n#{delimiter}")
       end
 
+      def elastic_search?
+        !!config[:elastic_search]
+      end
+
       def yield_for_subnav
         partial "subnavs/#{subnav_template_name}"
       end

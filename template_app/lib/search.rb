@@ -26,7 +26,14 @@ module Bookbinder
 
     class Result < Struct.new(:query, :result_count, :search_results)
       def render(erb)
-        erb.result(binding)
+        bind = binding
+        render_layout do
+          erb.result(bind)
+        end
+      end
+
+      def render_layout
+        ERB.new(File.read(File.expand_path('../../public/search.html', __FILE__))).result(binding)
       end
     end
   end
