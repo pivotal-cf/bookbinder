@@ -94,9 +94,9 @@ module Bookbinder
     end
 
     def find_files_extension_agnostically(pattern, directory='.')
-      extensionless_pattern = pattern.to_s.split('.').first
+      extensionless_pattern = File.join(File.dirname(pattern), File.basename(pattern).split('.').first)
 
-      `find -L #{directory} -path '*/#{extensionless_pattern}.*'`.
+      `find -L #{directory} -path '*/#{extensionless_pattern}.*' -type f`.
         lines.
         map(&:chomp).
         map(&Pathname.method(:new))

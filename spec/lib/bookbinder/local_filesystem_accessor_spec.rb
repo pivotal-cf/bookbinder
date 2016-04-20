@@ -418,6 +418,19 @@ module Bookbinder
             to match_array([path.join("top-dir/nested/dir/foo.html")])
         end
       end
+
+      it 'finds paths in a directory with a .' do
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+          path.join("top-dir/nested/di.r").mkpath
+          path.join("top-dir/nested/di.r/foo.dir").mkpath
+          FileUtils.touch(path.join("top-dir/nested/di.r/foo.whatev"))
+          FileUtils.touch(path.join("top-dir/nested/di.t"))
+
+          expect(fs_accessor.find_files_extension_agnostically(Pathname('top-dir/nested/di.r/foo.html'), path)).
+            to match_array([path.join('top-dir/nested/di.r/foo.whatev')])
+        end
+      end
     end
 
     describe 'overwriting a file' do
