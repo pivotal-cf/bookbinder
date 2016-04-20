@@ -55,6 +55,8 @@ describe Bookbinder::Search do
 
     expect(mock_searcher).to have_received(:search).with({index: 'searching', body: {
       'query' => { 'query_string' => { 'query' => 'search', 'default_field' => 'text' }},
+      'from' => 0,
+      'size' => 10,
       '_source' => [ 'url', 'title' ], 'highlight' => { 'fields' => { 'text' => { 'type' => 'plain' }}}
     }})
   end
@@ -84,5 +86,54 @@ describe Bookbinder::Search do
     resulting_page = Bookbinder::Search.call({ 'QUERY_STRING' => 'foo=bar' })
 
     expect(resulting_page.last.first).to include('No Results')
+  end
+
+  it 'should get the specified page of results' do
+    allow(mock_searcher).to receive(:search) do
+      {
+        'hits' => {
+          'total' => 23,
+          'hits' => [
+            {
+              '_source' => {
+                'url' => 'hi.html',
+                'title' => 'Hi'
+              },
+              'highlight' => {
+                'text' => [' Im a highlight ']
+              }
+            },
+            {
+              '_source' => {
+                'url' => 'bye.html',
+                'title' => 'Bye'
+              },
+              'highlight' => {
+                'text' => [' Im bye highlight ']
+              }
+            },
+            {
+              '_source' => {
+                'url' => 'another.html',
+                'title' => 'Another'
+              },
+              'highlight' => {
+                'text' => [' Im another highlight ']
+              }
+            },
+          ]
+        }
+      }
+    end
+    resulting_page = Bookbinder::Search.call({ 'QUERY_STRING' => 'q=search&page=3' })
+
+    expect(resulting_page.last.first).to include('another')
+
+    expect(mock_searcher).to have_received(:search).with({index: 'searching', body: {
+      'query' => { 'query_string' => { 'query' => 'search', 'default_field' => 'text' }},
+      'from' => 20,
+      'size' => 10,
+      '_source' => [ 'url', 'title' ], 'highlight' => { 'fields' => { 'text' => { 'type' => 'plain' }}}
+    }})
   end
 end

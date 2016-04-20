@@ -6,6 +6,10 @@
   <% if result_count == 0 %>
     <p class="no-results">No Results</p>
   <% else %>
+    <div class="result-summary">
+      Showing <%= (page_number - 1) * 10 + 1 %> to <%= [(page_number - 1) * 10 + 10, result_count].min %> of <%= result_count %> results.
+    </div>
+
     <ul class="search-results-list">
       <% search_results.each do |result| %>
         <li>
@@ -14,5 +18,23 @@
         </li>
       <% end %>
     </ul>
+
+    <div class="pagination">
+      <% if page_number == 1 %>
+        <span class="disabled page first">First</span>
+        <span class="disabled page previous">Prev</span>
+      <% else %>
+        <a class="page first" href="/search?q=<%= query %>">First</a>
+        <a class="page previous" href="/search?q=<%= query %>&page=<%= page_number - 1 %>">Prev</a>
+      <% end %>
+
+      <% if page_number == last_page %>
+        <span class="disabled page next">Next</span>
+        <span class="disabled page last">Last</span>
+      <% else %>
+        <a class="page next" href="/search?q=<%= query %>&page=<%= page_number + 1 %>">Next</a>
+        <a class="page last" href="/search?q=<%= query %>&page=<%= last_page %>">Last</a>
+      <% end %>
+    </div>
   <% end %>
 </div>
