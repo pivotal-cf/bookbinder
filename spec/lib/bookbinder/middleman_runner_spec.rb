@@ -108,6 +108,7 @@ module Bookbinder
             'at_path' => 'whatever stuff'
           }
         },
+        elastic_search: false,
       )
     end
 

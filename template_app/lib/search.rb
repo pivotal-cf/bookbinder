@@ -24,7 +24,7 @@ module Bookbinder
       [500, {'Content-Type' => 'text/plain'}, [e.message + "\n" + e.backtrace.join("\n")]]
     end
 
-    class Result < Struct.new(:query, :result_count, :search_results)
+    Result = Struct.new(:query, :result_count, :search_results) do
       def render(erb)
         bind = binding
         render_layout do
