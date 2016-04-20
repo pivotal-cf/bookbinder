@@ -29,7 +29,8 @@ module Bookbinder
           feedback_enabled: config.feedback_enabled,
           repo_link_enabled: config.repo_link_enabled,
           repo_links: config.repo_links,
-          product_info: product_info
+          product_info: product_info,
+          elastic_search: config.elastic_search?
         }
 
         fs.write(to: "bookbinder_config.yml", text: YAML.dump(config))
