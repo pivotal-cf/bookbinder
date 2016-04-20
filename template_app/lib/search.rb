@@ -66,6 +66,21 @@ module Bookbinder
         (result_count / 10.0).ceil
       end
 
+      def page_window
+        window_start = [page_number - 2, 1].max
+        window_end = [window_start + 4, last_page].min
+        window = (window_start .. window_end).to_a
+
+        if window.length < 5 && window.last == last_page && window.first != 1
+          window.unshift(window.first - 1)
+          if window.length < 5
+            window.unshift(window.first - 1)
+          end
+        end
+
+        window
+      end
+
       def render_layout
         ERB.new(self.class.layout_content).result(binding)
       end

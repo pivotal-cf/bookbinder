@@ -4,7 +4,7 @@
   </form>
 
   <% if result_count == 0 %>
-    <p class="no-results">No Results</p>
+    <div class="no-results">No Results</div>
   <% else %>
     <div class="result-summary">
       Showing <%= (page_number - 1) * 10 + 1 %> to <%= [(page_number - 1) * 10 + 10, result_count].min %> of <%= result_count %> results.
@@ -14,7 +14,7 @@
       <% search_results.each do |result| %>
         <li>
           <a href="<%= result['_source']['url'] %>"><%= result['_source']['title'] %></a>
-          <p><%= result['highlight']['text'].first.strip %></p>
+          <div><%= result['highlight']['text'].first.strip %></div>
         </li>
       <% end %>
     </ul>
@@ -26,6 +26,14 @@
       <% else %>
         <a class="page first" href="/search?q=<%= query %>">First</a>
         <a class="page previous" href="/search?q=<%= query %>&page=<%= page_number - 1 %>">Prev</a>
+      <% end %>
+
+      <% page_window.each do |page| %>
+        <% if page == page_number %>
+          <span class="current page"><%= page %></span>
+        <% else %>
+          <a class="page" href="/search?q=<%= query %>&page=<%= page %>"><%= page %></a>
+        <% end %>
       <% end %>
 
       <% if page_number == last_page %>
