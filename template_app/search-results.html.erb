@@ -1,12 +1,18 @@
-<form method="get">
-  <input name="q" value="<%= query %>"/>
-</form>
+<div class="search-results">
+  <form method="get">
+    <input name="q" value="<%= query %>"/>
+  </form>
 
-<ul class="search-results">
-<% search_results.each do |result| %>
-  <li>
-    <a href="<%= result['_source']['url'] %>"><%= result['_source']['title'] %></a>
-    <p><%= result['highlight']['text'].first.strip %></p>
-  </li>
-<% end %>
-</ul>
+  <% if result_count == 0 %>
+    <p class="no-results">No Results</p>
+  <% else %>
+    <ul class="search-results-list">
+      <% search_results.each do |result| %>
+        <li>
+          <a href="<%= result['_source']['url'] %>"><%= result['_source']['title'] %></a>
+          <p><%= result['highlight']['text'].first.strip %></p>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>
