@@ -3,18 +3,18 @@
     <input name="q" value="<%= query %>"/>
   </form>
 
-  <% if result_count == 0 %>
+  <% if hit_count == 0 %>
     <div class="no-results">No Results</div>
   <% else %>
     <div class="result-summary">
-      Showing <%= (page_number - 1) * 10 + 1 %> to <%= [(page_number - 1) * 10 + 10, result_count].min %> of <%= result_count %> results.
+      Showing <%= (page_number - 1) * 10 + 1 %> to <%= [(page_number - 1) * 10 + 10, hit_count].min %> of <%= hit_count %> results.
     </div>
 
     <ul class="search-results-list">
-      <% search_results.each do |result| %>
+      <% hits.each do |hit| %>
         <li>
-          <a href="<%= result['_source']['url'] %>"><%= result['_source']['title'] %></a>
-          <div><%= result['highlight']['text'].first.strip %></div>
+          <a href="<%= hit.url %>"><%= hit.title %></a>
+          <div><%= hit.text %></div>
         </li>
       <% end %>
     </ul>

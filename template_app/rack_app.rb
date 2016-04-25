@@ -1,7 +1,7 @@
 require 'rack'
 require 'rack/rewrite'
 require_relative './lib/server'
-require_relative './lib/search'
+require_relative './lib/search/handler'
 
 module Bookbinder
   class RackApp
@@ -23,7 +23,7 @@ module Bookbinder
           run Bookbinder::NotFound.new('public/404.html')
         end
         map '/search' do
-          run Bookbinder::Search
+          run Bookbinder::Search::Handler.new
         end
         if ENV['CUSTOM_ROOT']
           map ENV['CUSTOM_ROOT'] do
