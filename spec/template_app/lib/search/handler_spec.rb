@@ -2,6 +2,79 @@ require_relative '../../../../template_app/lib/search/handler'
 
 module Bookbinder::Search
   describe Handler do
+    describe '#call' do
+      let(:mock_client) { double(:elastic_search) }
+      let(:mock_client_class) { double(:elastic_search_class, new: mock_client) }
+      let(:mock_services) do
+        {
+          searchly: [{
+            credentials: {
+              uri: 'foo.com'
+            }
+          }]
+        }
+      end
+      let(:handler) { Handler.new(mock_client_class, {'VCAP_SERVICES' => JSON.dump(mock_services)}) }
+
+      before do
+        allow(File).to receive(:read).and_call_original
+        allow(File).to receive(:read).with(end_with('public/search.html')) { '<%= yield %>' }
+      end
+
+      it 'renders the first page' do
+        allow(mock_client).to receive(:search) do
+          {
+            'hits' => {
+              'total' => 3,
+              'hits' => [
+                {
+                  '_source' => {
+                    'url' => 'hi.html',
+                    'title' => 'Hi'
+                  },
+                  'highlight' => {
+                    'text' => [' Im a highlight ']
+                  }
+                },
+                {
+                  '_source' => {
+                    'url' => 'bye.html',
+                    'title' => 'Bye'
+                  },
+                  'highlight' => {
+                    'text' => [' Im bye highlight ']
+                  }
+                },
+                {
+                  '_source' => {
+                    'url' => 'another.html',
+                    'title' => 'Another'
+                  },
+                  'highlight' => {
+                    'text' => [' Im another highlight ']
+                  }
+                },
+              ]
+            }
+          }
+        end
+
+        result = handler.call('QUERY_STRING' => 'q=foobar')
+        html = result.last.first
+
+        expect(html).to include('Hi')
+        expect(html).to include('Im a highlight')
+
+        expect(html).to include('Bye')
+        expect(html).to include('Im bye highlight')
+
+        expect(html).to include('Another')
+        expect(html).to include('Im another highlight')
+
+        expect(html).to include('1 to 3 of 3')
+      end
+    end
+
     describe '#extract_query_params' do
       it 'extracts all the query params' do
         handler = Handler.new

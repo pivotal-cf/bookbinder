@@ -1,5 +1,6 @@
 require 'elasticsearch'
 require 'cgi'
+require 'json'
 
 require_relative 'query'
 require_relative 'renderer'
@@ -7,7 +8,9 @@ require_relative 'renderer'
 module Bookbinder
   module Search
     class Handler
-      def initialize
+      def initialize(client_class = Elasticsearch::Client, environment = ENV)
+        @client_class = client_class
+        @environment = environment
         @renderer = Renderer.new
       end
 
@@ -33,14 +36,14 @@ module Bookbinder
 
       private
 
-      attr_reader :renderer
+      attr_reader :renderer, :client_class, :environment
 
       def elasticsearch_url
-        @elasticsearch_url ||= JSON.parse(ENV['VCAP_SERVICES'])['searchly'][0]['credentials']['uri']
+        @elasticsearch_url ||= JSON.parse(environment['VCAP_SERVICES'])['searchly'][0]['credentials']['uri']
       end
 
       def query
-        Query.new(Elasticsearch::Client.new(url: elasticsearch_url))
+        Query.new(client_class.new(url: elasticsearch_url))
       end
     end
   end
