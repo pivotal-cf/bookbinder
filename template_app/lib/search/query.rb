@@ -10,19 +10,21 @@ module Bookbinder
       end
 
       def search(params)
-        return Result.new(params['q'], 0, [], 1) if params['q'].nil?
+        query = params.fetch('q', '')
 
-        page_number = (params['page'] || 1).to_i
+        return Result.new(query, 0, [], 1) if query == ''
+
+        page_number = [params['page'].to_i, 1].max
 
         query_options = YAML.load_file(File.expand_path('../../../search.yml', __FILE__))
 
         query_options['from'] = (page_number - 1) * 10
-        query_options['query']['query_string']['query'] = params['q']
+        query_options['query']['query_string']['query'] = query
 
         results = client.search index: 'searching', body: query_options
 
         Result.new(
-          params['q'],
+          query,
           results['hits']['total'],
           results['hits']['hits'],
           page_number

@@ -68,7 +68,17 @@ module Bookbinder::Search
       it 'returns an empty result set for a blank query' do
         allow(mock_client).to receive(:search) { nil }
 
-        results = query.search('q' => nil)
+        results = query.search('q' => '')
+
+        expect(results.hit_count).to eq(0)
+
+        expect(mock_client).not_to have_received(:search)
+      end
+
+      it 'returns an empty result set for a missing query' do
+        allow(mock_client).to receive(:search) { nil }
+
+        results = query.search({})
 
         expect(results.hit_count).to eq(0)
 
@@ -139,6 +149,54 @@ module Bookbinder::Search
             }
           }
         })
+      end
+
+      it 'should fall back to the first page on an unknown page' do
+        allow(mock_client).to receive(:search) do
+          {
+            'hits' => {
+              'total' => 3,
+              'hits' => [
+                {
+                  '_source' => {
+                    'url' => 'hi.html',
+                    'title' => 'Hi'
+                  },
+                  'highlight' => {
+                    'text' => [' Im a highlight ']
+                  }
+                },
+                {
+                  '_source' => {
+                    'url' => 'bye.html',
+                    'title' => 'Bye'
+                  },
+                  'highlight' => {
+                    'text' => [' Im bye highlight ']
+                  }
+                },
+                {
+                  '_source' => {
+                    'url' => 'another.html',
+                    'title' => 'Another'
+                  },
+                  'highlight' => {
+                    'text' => [' Im another highlight ']
+                  }
+                },
+              ]
+            }
+          }
+        end
+
+        query.search('q' => 'search', 'page' => 'hi')
+
+        expect(mock_client).to have_received(:search).with({index: 'searching', body: {
+          'query' => {'query_string' => {'query' => 'search', 'default_field' => 'text'}},
+          'from' => 0,
+          'size' => 10,
+          '_source' => ['url', 'title'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
+        }})
       end
     end
   end

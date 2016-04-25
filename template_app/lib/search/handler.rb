@@ -1,4 +1,5 @@
 require 'elasticsearch'
+require 'cgi'
 
 require_relative 'query'
 require_relative 'renderer'
@@ -22,10 +23,12 @@ module Bookbinder
       end
 
       def extract_query_params(param_string)
-        params = (param_string || '').split('&').map do |param|
-          param.split('=')
+        parsed = CGI::parse(param_string || '')
+        parsed.keys.inject(Hash.new('')) do |params, key|
+          # CGI::parse returns values in an array
+          params[key] = parsed[key].first
+          params
         end
-        Hash[params]
       end
 
       private
