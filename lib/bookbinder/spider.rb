@@ -42,7 +42,7 @@ Found #{@broken_links.count} broken links!
     def find_broken_links(port, broken_link_exclusions: /(?!.*)/)
       temp_host = "localhost:#{port}"
       sieve = Sieve.new domain: "http://#{temp_host}"
-      links = crawl_from "http://#{temp_host}/index.html", sieve
+      links = crawl_from "http://#{temp_host}#{ENV['CUSTOM_ROOT']}/index.html", sieve
       broken_links = links.first
       public_broken_links = broken_links.reject {|l| l.match(broken_link_exclusions)}
 
