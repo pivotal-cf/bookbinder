@@ -1,4 +1,5 @@
 language: ruby
+cache: bundler
 rvm:
   - 2.0.0-p481
   - 2.3.0
