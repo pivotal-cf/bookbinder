@@ -138,6 +138,14 @@ module Bookbinder
         }
       end
 
+      def body_classes(path=current_path.dup, options={})
+        if path.is_a? Hash
+          options = path
+          path = current_path.dup
+        end
+        page_classes(path.gsub(/\./, '_'), options)
+      end
+
       private
 
       def subnav_template_name
@@ -149,7 +157,7 @@ module Bookbinder
       end
 
       def decreasingly_specific_namespaces
-        page_classes(numeric_prefix: numeric_class_prefix).
+        body_classes(numeric_prefix: numeric_class_prefix).
           split(' ').reverse.drop(1).
           map {|ns| ns.sub(/^#{numeric_class_prefix}/, '')}
       end

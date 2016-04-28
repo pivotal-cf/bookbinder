@@ -24,7 +24,7 @@ module Bookbinder
     end
 
     def call(env)
-      if env['PATH_INFO'] == '' || env['PATH_INFO'] =~ MATCH
+      if env['PATH_INFO'] == '' || env['PATH_INFO'] =~ MATCH || (env['PATH_INFO'] !~ /\/$/ && File.directory?(File.join('public', env['PATH_INFO'])))
         env['PATH_INFO'] += '/'
         [301, {'Location' => Rack::Request.new(env).url, 'Content-Type' => ''}, []]
       else

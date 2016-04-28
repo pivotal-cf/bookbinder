@@ -31,15 +31,6 @@ module Bookbinder
         end
       end
 
-      def read_file(filename, from_repo: nil, checkout: 'master')
-        Dir.mktmpdir do |dir|
-          path = Pathname(dir)
-          git = cached_clone(from_repo, temp_name("read-file"), path)
-          git.checkout(checkout)
-          path.join(temp_name("read-file"), filename).read
-        end
-      end
-
       def remote_tag(url, tagname, commit_or_object)
         Dir.mktmpdir do |dir|
           path = Pathname(dir)

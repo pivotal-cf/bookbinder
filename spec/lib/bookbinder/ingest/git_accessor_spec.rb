@@ -110,27 +110,6 @@ git commit -m "Create submodule"
         end
       end
 
-      it "can return the contents of a file in one step, using its own temp directory" do
-        Dir.mktmpdir do |dir|
-          path = Pathname(dir)
-          init_repo(at_dir: path.join('srcrepo'),
-                    file: 'Gemfile',
-                    contents: 'gemstuffz',
-                    commit_message: 'new railz plz',
-                    branch: 'newbranch')
-
-          git = GitAccessor.new
-
-          expect(
-            git.read_file(
-              "Gemfile",
-              from_repo: path.join('srcrepo'),
-              checkout: 'newbranch'
-            )
-          ).to eq("gemstuffz\n")
-        end
-      end
-
       it "can access the date of the last non-excluded commit for a given file in an existing repo" do
         require 'time'
         Dir.mktmpdir do |dir|

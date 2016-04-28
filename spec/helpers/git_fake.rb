@@ -26,14 +26,6 @@ module Bookbinder
       # no-op
     end
 
-    def read_file(filename, from_repo: nil, checkout: 'master')
-      Dir.mktmpdir do |dir|
-        path = Pathname(dir)
-        clone(from_repo, "read-file", path: path, checkout: checkout)
-        path.join("read-file", filename).read
-      end
-    end
-
     def received_clone_with_urls(git_urls)
       @git_urls == git_urls
     end

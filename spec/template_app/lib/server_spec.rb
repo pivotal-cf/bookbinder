@@ -10,4 +10,11 @@ describe Bookbinder::Server do
     response = Bookbinder::Server.new.call({'PATH_INFO' => ''})
     expect(response).to eq [301, {"Location"=>"://::0/", "Content-Type"=>""}, []]
   end
+
+  it 'does not add a / to an existing /' do
+    Dir.chdir(File.expand_path('../../../fixtures/static_file_checking', __FILE__)) do
+      response = Bookbinder::Server.new.call({'PATH_INFO' => '/'})
+      expect(response.first).not_to eq(301)
+    end
+  end
 end
