@@ -54,13 +54,16 @@ module Bookbinder
     end
 
     describe '#subnav' do
-      let(:section) do
-        Section.new('directory', 'full name', 'desired/dir', subnav_template)
-      end
       let(:subnav_template){ 'some_subnav_template' }
 
       it 'maps desired destination dir to subnav name' do
+        section = Section.new('directory', 'full name', 'desired/dir', subnav_template)
         expect(section.subnav).to eq({'desired_dir' => subnav_template})
+      end
+
+      it 'maps a . to an _ in the namespace of the subnav' do
+        section = Section.new('directory', 'full name', 'desired/dir.to/stuff', subnav_template)
+        expect(section.subnav).to eq({'desired_dir_to_stuff' => subnav_template})
       end
     end
 

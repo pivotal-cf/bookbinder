@@ -32,7 +32,7 @@ module Bookbinder
     end
 
     def namespace
-      destination_directory.to_s.gsub('/', '_')
+      destination_directory.to_s.gsub(%r{[./]}, '_')
     end
 
     def subnav_name
