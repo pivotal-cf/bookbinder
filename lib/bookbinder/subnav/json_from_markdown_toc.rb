@@ -9,8 +9,9 @@ module Bookbinder
       SubnavBrokenLinkError = Class.new(RuntimeError)
       SubnavRootMissingError = Class.new(RuntimeError)
 
-      def initialize(fs)
+      def initialize(fs, require_valid_subnav_links)
         @fs = fs
+        @require_valid_subnav_links = require_valid_subnav_links
         @renderer = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new)
       end
 
@@ -51,26 +52,28 @@ module Bookbinder
           href = element['href']
           expanded_href = (source.dirname + href).relative_path_from(source_for_site_gen)
           next_source = absolute_source_from_path(expanded_href)
+          nested_links = {}
 
-          raise SubnavBrokenLinkError.new(<<-ERROR) unless next_source
+          if @require_valid_subnav_links
+            raise SubnavBrokenLinkError.new(<<-ERROR) unless next_source
 Broken link found in subnav for product_id: #{config.id}
 
 Link: #{expanded_href}
 Source file: #{source}
-          ERROR
-          raise SubnavDuplicateLinkError.new(<<-ERROR) if @parsed_files.has_key?(next_source)
+            ERROR
+            raise SubnavDuplicateLinkError.new(<<-ERROR) if @parsed_files.has_key?(next_source)
 )
 Duplicate link found in subnav for product_id: #{config.id}
 
 Link: #{expanded_href}
 Original file: #{@parsed_files[next_source]}
 Current file: #{source}
-          ERROR
+            ERROR
 
-          @parsed_files[next_source] = source
-          nested_urls_and_texts = gather_urls_and_texts(next_source)
-          nested_links = {}
-          nested_links.merge!(nestedLinks: nested_urls_and_texts) unless nested_urls_and_texts.empty?
+            @parsed_files[next_source] = source
+            nested_urls_and_texts = gather_urls_and_texts(next_source)
+            nested_links.merge!(nestedLinks: nested_urls_and_texts) unless nested_urls_and_texts.empty?
+          end
 
           {url: '/' + expanded_href.to_s, text: element.inner_text}.merge(nested_links)
         end

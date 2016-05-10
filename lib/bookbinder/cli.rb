@@ -21,7 +21,7 @@ module Bookbinder
     end
 
     desc '--help', 'Print this message'
-    def help
+    def help(command=nil)
       super
     end
 
@@ -31,11 +31,12 @@ module Bookbinder
       raise Thor::Error, '' if code != 0
     end
 
-    desc 'bind <local|remote> [--verbose] [--dita-flags=\"<dita-option>=<value>\"]', 'Bind the sections specified in config.yml from <local> or <remote> into the final_app directory'
+    desc 'bind <local|remote> [options]', 'Bind the sections specified in config.yml from <local> or <remote> into the final_app directory'
     option :verbose, type: :boolean
-    option 'dita-flags'
+    option 'dita-flags', desc: '--dita-flags=\"<dita-option>=<value>\"'
+    option :require_valid_subnav_links, type: :boolean, desc: 'Check that subnav link targets exist, always true for remote'
     def bind(source)
-      code = legacy_commands.bind(source, options[:verbose], options['dita-flags'])
+      code = legacy_commands.bind(source, options[:verbose], options['dita-flags'], options[:require_valid_subnav_links])
       raise Thor::Error, '' if code != 0
     end
 
@@ -57,9 +58,9 @@ module Bookbinder
       raise Thor::Error, '' if code != 0
     end
 
-    desc 'imprint <local|remote> [--verbose] [--dita-flags=\"<dita-option>=<value>\"]', 'Generate a PDF for a given book'
+    desc 'imprint <local|remote> [options]', 'Generate a PDF for a given book'
     option :verbose, type: :boolean
-    option 'dita-flags'
+    option 'dita-flags', desc: '--dita-flags=\"<dita-option>=<value>\"'
     def imprint(source)
       code = legacy_commands.imprint(source, options[:verbose], options['dita-flags'])
       raise Thor::Error, '' if code != 0

@@ -14,8 +14,6 @@ module Bookbinder
         @base_config ||= read_config_file
         @optional_configs ||= read_optional_configs
 
-        # require 'pry'; binding.pry
-
         @config ||= validate(@base_config, @optional_configs)
       end
 

@@ -30,10 +30,12 @@ module Bookbinder
         @directory_preparer = directory_preparer
       end
 
-      def run(bind_type, verbose = false, dita_flags = nil)
+      def run(bind_type, verbose = false, dita_flags = nil, require_valid_subnav_links = false)
         bind_options        = Components::CommandOptions.new([bind_type], base_streams, verbose)
         bind_config         = config_fetcher.fetch_config
         cloner              = cloner_factory.produce(bind_options.local_repo_dir)
+
+        require_valid_subnav_links = true unless bind_type == 'local'
 
         directory_preparer.prepare_directories(
           bind_config,
@@ -53,7 +55,7 @@ module Bookbinder
         preprocessor.preprocess(
           sections,
           output_locations,
-          options: { dita_flags: dita_flags },
+          options: { dita_flags: dita_flags, require_valid_subnav_links: require_valid_subnav_links },
           output_streams: bind_options.streams,
           config: bind_config
         )

@@ -105,7 +105,7 @@ module Bookbinder
       expect(preprocessor).to receive(:preprocess).with(
                                   sections,
                                   output_locations,
-                                  options: { dita_flags: nil },
+                                  options: { dita_flags: nil, require_valid_subnav_links: false },
                                   output_streams: merged_streams,
                                   config: config
                               ).ordered
@@ -123,6 +123,20 @@ module Bookbinder
           section_repository: section_repository,
           directory_preparer: directory_preparer
       ).run('local')
+    end
+
+    it "can tell the preprossesor to check the links in the subnav when binding locally" do
+      bind_cmd.run('local', false, nil, true)
+
+      expect(null_preprocessor).to have_received(:preprocess).with(instance_of(Array), instance_of(OutputLocations),
+        hash_including(options: hash_including(require_valid_subnav_links: true)))
+    end
+
+    it "always tells the preprocessor to check the subnav links when binding remotely" do
+      bind_cmd.run('remote', false, nil, false)
+
+      expect(null_preprocessor).to have_received(:preprocess).with(instance_of(Array), instance_of(OutputLocations),
+      hash_including(options: hash_including(require_valid_subnav_links: true)))
     end
 
     it "copies a redirects file from the current directory to the final app directory, prior to site generation" do

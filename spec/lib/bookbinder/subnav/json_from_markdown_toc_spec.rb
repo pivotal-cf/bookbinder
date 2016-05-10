@@ -83,7 +83,7 @@ Move along, nothing to see.
         allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/second-doc.html.md.erb')) { second_doc }
         allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/nested-doc.html')) { nested_doc }
 
-        expect(JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations)).
+        expect(JsonFromMarkdownToc.new(fs, true).get_links(subnav_config, output_locations)).
           to eq(json_toc)
       end
 
@@ -119,7 +119,7 @@ Some Text
         allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/index.html')) { root_index }
         allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/first-doc.extension')) { first_doc }
 
-        expect { JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations) }.
+        expect { JsonFromMarkdownToc.new(fs, true).get_links(subnav_config, output_locations) }.
           to raise_error(JsonFromMarkdownToc::SubnavDuplicateLinkError) do |error|
             expect(error.message).to include('my/index.html')
         end
@@ -148,10 +148,45 @@ Some Text
 
         allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/index.html')) { root_index }
 
-        expect { JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations) }.
+        expect { JsonFromMarkdownToc.new(fs, true).get_links(subnav_config, output_locations) }.
           to raise_error(JsonFromMarkdownToc::SubnavBrokenLinkError) do |error|
           expect(error.message).to include('my/bogus-doc.html')
         end
+      end
+
+      it 'can include broken subnav links when told' do
+        output_locations = OutputLocations.new(context_dir: '/')
+        subnav_config = Config::ProductConfig.new({ 'subnav_root' => 'my/index' })
+
+        fs = instance_double(Bookbinder::LocalFilesystemAccessor)
+
+        root_index =  <<-EOT
+---
+title: Title for the Webz Page
+---
+
+## <a href="./bogus-doc.html" class="subnav">Bogus Document</a>
+
+Some Text
+        EOT
+
+        json_toc = {links:
+          [
+            {
+              url: '/my/bogus-doc.html',
+              text: 'Bogus Document'
+            }
+          ]
+        }.to_json
+
+        expect(fs).to receive(:find_files_extension_agnostically).
+          with(Pathname('my/index'), output_locations.source_for_site_generator) { [Pathname('/output/master_middleman/source/my/index.html')] }
+        expect(fs).to receive(:find_files_extension_agnostically).
+          with(Pathname('my/bogus-doc.html'), output_locations.source_for_site_generator) { [] }
+
+        allow(fs).to receive(:read).with(Pathname('/output/master_middleman/source/my/index.html')) { root_index }
+
+        expect(JsonFromMarkdownToc.new(fs, false).get_links(subnav_config, output_locations)).to eq(json_toc)
       end
 
       it 'barfs informatively if it cannot find a subnav root' do
@@ -163,7 +198,7 @@ Some Text
 
         expect(fs).to receive(:find_files_extension_agnostically).with(Pathname('my/index'), output_locations.source_for_site_generator){[]}
 
-        expect { JsonFromMarkdownToc.new(fs).get_links(subnav_config, output_locations) }.to raise_error(JsonFromMarkdownToc::SubnavRootMissingError)
+        expect { JsonFromMarkdownToc.new(fs, true).get_links(subnav_config, output_locations) }.to raise_error(JsonFromMarkdownToc::SubnavRootMissingError)
       end
     end
   end
