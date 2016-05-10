@@ -58,7 +58,7 @@ module Bookbinder::Search
         expect(results.hits[2].title).to eq('Another')
 
         expect(mock_client).to have_received(:search).with({index: 'searching', body: {
-          'query' => {'query_string' => {'query' => 'search', 'default_field' => 'text'}},
+          'query' => { 'bool' => { 'should' => {'query_string' => {'query' => 'search', 'default_field' => 'text'}}}},
           'from' => 0,
           'size' => 10,
           '_source' => ['url', 'title'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
@@ -132,9 +132,13 @@ module Bookbinder::Search
           index: 'searching',
           body: {
             'query' => {
-              'query_string' => {
-                'query' => 'search',
-                'default_field' => 'text'
+              'bool' => {
+                'should' => {
+                  'query_string' => {
+                    'query' => 'search',
+                    'default_field' => 'text'
+                  }
+                }
               }
             },
             'from' => 20,
@@ -192,7 +196,7 @@ module Bookbinder::Search
         query.search('q' => 'search', 'page' => 'hi')
 
         expect(mock_client).to have_received(:search).with({index: 'searching', body: {
-          'query' => {'query_string' => {'query' => 'search', 'default_field' => 'text'}},
+          'query' => { 'bool' => { 'should' => {'query_string' => {'query' => 'search', 'default_field' => 'text'}}}},
           'from' => 0,
           'size' => 10,
           '_source' => ['url', 'title'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}

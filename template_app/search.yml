@@ -1,8 +1,10 @@
 ---
 query:
-  query_string:
-    query: ''
-    default_field: text
+  bool:
+    should:
+      query_string:
+        query: ''
+        default_field: text
 from: 0
 size: 10
 _source:

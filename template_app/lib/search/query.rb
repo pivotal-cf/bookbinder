@@ -19,7 +19,7 @@ module Bookbinder
         query_options = YAML.load_file(File.expand_path('../../../search.yml', __FILE__))
 
         query_options['from'] = (page_number - 1) * 10
-        query_options['query']['query_string']['query'] = query
+        query_options['query']['bool']['should']['query_string']['query'] = query
 
         results = client.search index: 'searching', body: query_options
 
