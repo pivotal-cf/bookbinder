@@ -23,7 +23,7 @@ module Bookbinder
 
         raise SubnavRootMissingError.new('Subnav root not found at: ' + config.subnav_root) if root.nil?
 
-        @parsed_files = { Pathname(root) => '(root)'}
+        @parsed_files = {Pathname(root) => '(root)'}
 
         {links: gather_urls_and_texts(root)}.to_json
       end
@@ -54,22 +54,11 @@ module Bookbinder
           next_source = absolute_source_from_path(expanded_href)
           nested_links = {}
 
-          if @require_valid_subnav_links
-            raise SubnavBrokenLinkError.new(<<-ERROR) unless next_source
-Broken link found in subnav for product_id: #{config.id}
+          no_children = false
+          no_children ||= validate_no_broken_link(expanded_href, next_source, source)
+          no_children ||= validate_no_duplicate_link(expanded_href, next_source, source)
 
-Link: #{expanded_href}
-Source file: #{source}
-            ERROR
-            raise SubnavDuplicateLinkError.new(<<-ERROR) if @parsed_files.has_key?(next_source)
-)
-Duplicate link found in subnav for product_id: #{config.id}
-
-Link: #{expanded_href}
-Original file: #{@parsed_files[next_source]}
-Current file: #{source}
-            ERROR
-
+          unless no_children
             @parsed_files[next_source] = source
             nested_urls_and_texts = gather_urls_and_texts(next_source)
             nested_links.merge!(nestedLinks: nested_urls_and_texts) unless nested_urls_and_texts.empty?
@@ -77,6 +66,40 @@ Current file: #{source}
 
           {url: '/' + expanded_href.to_s, text: element.inner_text}.merge(nested_links)
         end
+      end
+
+      def validate_no_duplicate_link(expanded_href, next_source, source)
+        if @parsed_files.has_key?(next_source)
+          if @require_valid_subnav_links
+            raise SubnavDuplicateLinkError.new(<<-ERROR)
+)
+Duplicate link found in subnav for product_id: #{config.id}
+
+Link: #{expanded_href}
+Original file: #{@parsed_files[next_source]}
+Current file: #{source}
+            ERROR
+          else
+            no_children = true
+          end
+        end
+        no_children
+      end
+
+      def validate_no_broken_link(expanded_href, next_source, source)
+        unless next_source
+          if @require_valid_subnav_links
+            raise SubnavBrokenLinkError.new(<<-ERROR)
+Broken link found in subnav for product_id: #{config.id}
+
+Link: #{expanded_href}
+Source file: #{source}
+            ERROR
+          else
+            no_children = true
+          end
+        end
+        no_children
       end
 
       def nav_items(base_node)
