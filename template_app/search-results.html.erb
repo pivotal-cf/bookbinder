@@ -1,17 +1,24 @@
 <div class="search-results">
   <form method="get">
-    <input name="q" value="<%= query %>"/>
+    <h1 style="color: red; border: 3px dotted purple;">Filtering by: <%= product_name %> and <%= product_version %></h1>
+    <input name="q" value="<%= search_term %>"/>
+    <% unless product_name.nil? %>
+      <input type="hidden" name="product_name" value="<%= product_name %>"/>
+    <% end %>
+    <% unless product_version.nil? %>
+      <input type="hidden" name="product_version" value="<%= product_version %>"/>
+    <% end %>
   </form>
 
-  <% if hit_count == 0 %>
+  <% if result_count == 0 %>
     <div class="no-results">No Results</div>
   <% else %>
     <div class="result-summary">
-      Showing <%= (page_number - 1) * 10 + 1 %> to <%= [(page_number - 1) * 10 + 10, hit_count].min %> of <%= hit_count %> results.
+      Showing <%= (page_number - 1) * 10 + 1 %> to <%= [(page_number - 1) * 10 + 10, result_count].min %> of <%= result_count %> results.
     </div>
 
     <ul class="search-results-list">
-      <% hits.each do |hit| %>
+      <% result_list.each do |hit| %>
         <li>
           <a href="<%= hit.url %>"><%= hit.title %></a>
           <div><%= hit.text %></div>
@@ -20,19 +27,22 @@
     </ul>
 
     <div class="pagination">
+      <% search_query = "/search?q=#{ search_term }" %>
+      <% search_query << "&product_name=#{ product_name }" unless product_name.nil? %>
+      <% search_query << "&product_version=#{ product_version }" unless product_version.nil? %>
       <% if page_number == 1 %>
         <span class="disabled page first">First</span>
         <span class="disabled page previous">Prev</span>
       <% else %>
-        <a class="page first" href="/search?q=<%= query %>">First</a>
-        <a class="page previous" href="/search?q=<%= query %>&page=<%= page_number - 1 %>">Prev</a>
+        <a class="page first" href="<%= search_query %>">First</a>
+        <a class="page previous" href="<%= search_query %>&page=<%= page_number - 1 %>">Prev</a>
       <% end %>
 
       <% page_window.each do |page| %>
         <% if page == page_number %>
           <span class="current page"><%= page %></span>
         <% else %>
-          <a class="page" href="/search?q=<%= query %>&page=<%= page %>"><%= page %></a>
+          <a class="page" href="<%= search_query %>&page=<%= page %>"><%= page %></a>
         <% end %>
       <% end %>
 
@@ -40,8 +50,8 @@
         <span class="disabled page next">Next</span>
         <span class="disabled page last">Last</span>
       <% else %>
-        <a class="page next" href="/search?q=<%= query %>&page=<%= page_number + 1 %>">Next</a>
-        <a class="page last" href="/search?q=<%= query %>&page=<%= last_page %>">Last</a>
+        <a class="page next" href="<%= search_query %>&page=<%= page_number + 1 %>">Next</a>
+        <a class="page last" href="<%= search_query %>&page=<%= last_page %>">Last</a>
       <% end %>
     </div>
   <% end %>

@@ -5,6 +5,7 @@ query:
       query_string:
         query: ''
         default_field: text
+    minimum_should_match: 1
 from: 0
 size: 10
 _source:

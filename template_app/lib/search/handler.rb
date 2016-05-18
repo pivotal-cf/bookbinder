@@ -15,9 +15,10 @@ module Bookbinder
       end
 
       def call(request_env)
-        results = query.search(extract_query_params(request_env['QUERY_STRING']))
+        query = Query.new(extract_query_params(request_env['QUERY_STRING']))
+        query.get_results(client_class.new(url: elasticsearch_url))
 
-        [200, {'Content-Type' => 'text/html'}, [renderer.render_results(results)]]
+        [200, {'Content-Type' => 'text/html'}, [renderer.render_results(query)]]
       rescue Exception => e
         puts e.message
         puts e.backtrace.join("\n")
@@ -40,10 +41,6 @@ module Bookbinder
 
       def elasticsearch_url
         @elasticsearch_url ||= JSON.parse(environment['VCAP_SERVICES'])['searchly'][0]['credentials']['uri']
-      end
-
-      def query
-        Query.new(client_class.new(url: elasticsearch_url))
       end
     end
   end

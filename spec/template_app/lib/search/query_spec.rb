@@ -2,10 +2,86 @@ require_relative '../../../../template_app/lib/search/query'
 
 module Bookbinder::Search
   describe Query do
-    subject(:query) { Query.new(mock_client) }
-    let(:mock_client) { double(:mock_client) }
+    it 'extracts default params with search_term' do
+      query = Query.new('q' => 'foo')
+      expect(query.search_term).to eq('foo')
+      expect(query.product_name).to be_nil
+      expect(query.product_version).to be_nil
+      expect(query.page_number).to eq(1)
+    end
+
+    it 'extracts product name' do
+      query = Query.new('product_name' => 'hi there')
+      expect(query.product_name).to eq('hi there')
+    end
+
+    it 'extracts a product version when there is a product name' do
+      query = Query.new('product_name' => 'hello', 'product_version' => 'v2344')
+      expect(query.product_version).to eq('v2344')
+    end
+
+    it 'does not extract a product version without a product name' do
+      query = Query.new('product_version' => 'v532')
+      expect(query.product_version).to be_nil
+    end
+
+    it 'extracts a specific page number' do
+      query = Query.new('q' => 'foo', 'page' => '6')
+      expect(query.page_number).to eq(6)
+    end
+
+    it 'should fall back to the first page on an unknown page' do
+      query = Query.new('q' => 'foo', 'page' => 'hi')
+      expect(query.page_number).to eq(1)
+    end
+
+    it 'goes to the first page on an empty search term' do
+      query = Query.new('page' => '234')
+      expect(query.page_number).to eq(1)
+    end
+
+    it 'determines full query options' do
+      query = Query.new('q' => 'bar', 'product_name' => 'foo', 'product_version' => 'v2', 'page' => '34')
+      expect(query.query_options).to eq({
+        'query' => { 'bool' => {
+          'should' => {'query_string' => {'query' => 'bar', 'default_field' => 'text'}},
+          'filter' => { 'bool' => { 'must' => [{'term' => { 'product_name' => 'foo'}}, { 'term' => { 'product_version' => 'v2' }}]}}
+
+      }},
+        'from' => 330,
+        'size' => 10,
+        '_source' => ['url', 'title'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
+      })
+    end
+
+    it 'gets query options that only filter by product name' do
+      query = Query.new('q' => 'bar', 'product_name' => 'foo', 'page' => '34')
+      expect(query.query_options).to eq({
+        'query' => { 'bool' => {
+          'should' => {'query_string' => {'query' => 'bar', 'default_field' => 'text'}},
+          'filter' => { 'bool' => { 'must' => [{'term' => { 'product_name' => 'foo' }}]}}
+        }},
+        'from' => 330,
+        'size' => 10,
+        '_source' => ['url', 'title'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
+      })
+    end
+
+    it 'gets query options without a filter when no product name is given' do
+      query = Query.new('q' => 'bar', 'page' => '34')
+      expect(query.query_options).to eq({
+        'query' => { 'bool' => {
+          'should' => {'query_string' => {'query' => 'bar', 'default_field' => 'text'}}
+        }},
+        'from' => 330,
+        'size' => 10,
+        '_source' => ['url', 'title'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
+      })
+    end
 
     describe 'searching' do
+      let(:mock_client) { double(:mock_client, search: nil) }
+
       it 'returns search results' do
         allow(mock_client).to receive(:search) do
           {
@@ -44,163 +120,117 @@ module Bookbinder::Search
           }
         end
 
-        results = query.search('q' => 'search')
+        query = Query.new('q' => 'search')
+        query.get_results(mock_client)
 
-        expect(results.query).to eq('search')
-        expect(results.hit_count).to eq(3)
-        expect(results.page_number).to eq(1)
+        expect(query.result_count).to eq(3)
 
-        expect(results.hits[0].title).to eq('Hi')
-        expect(results.hits[0].url).to eq('hi.html')
-        expect(results.hits[0].text).to eq('Im a highlight')
+        expect(query.result_list[0].title).to eq('Hi')
+        expect(query.result_list[0].url).to eq('hi.html')
+        expect(query.result_list[0].text).to eq('Im a highlight')
 
-        expect(results.hits[1].title).to eq('Bye')
-        expect(results.hits[2].title).to eq('Another')
-
-        expect(mock_client).to have_received(:search).with({index: 'searching', body: {
-          'query' => { 'bool' => { 'should' => {'query_string' => {'query' => 'search', 'default_field' => 'text'}}}},
-          'from' => 0,
-          'size' => 10,
-          '_source' => ['url', 'title'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
-        }})
+        expect(query.result_list[1].title).to eq('Bye')
+        expect(query.result_list[2].title).to eq('Another')
       end
 
       it 'returns an empty result set for a blank query' do
-        allow(mock_client).to receive(:search) { nil }
+        query = Query.new('q' => '')
+        query.get_results(mock_client)
 
-        results = query.search('q' => '')
-
-        expect(results.hit_count).to eq(0)
+        expect(query.result_count).to eq(0)
 
         expect(mock_client).not_to have_received(:search)
       end
 
       it 'returns an empty result set for a missing query' do
-        allow(mock_client).to receive(:search) { nil }
+        query = Query.new({})
+        query.get_results(mock_client)
 
-        results = query.search({})
-
-        expect(results.hit_count).to eq(0)
+        expect(query.result_count).to eq(0)
 
         expect(mock_client).not_to have_received(:search)
       end
 
-      it 'should get a specific page of results' do
-        allow(mock_client).to receive(:search) do
-          {
-            'hits' => {
-              'total' => 23,
-              'hits' => [
-                {
-                  '_source' => {
-                    'url' => 'hi.html',
-                    'title' => 'Hi'
-                  },
-                  'highlight' => {
-                    'text' => [' Im a highlight ']
-                  }
-                },
-                {
-                  '_source' => {
-                    'url' => 'bye.html',
-                    'title' => 'Bye'
-                  },
-                  'highlight' => {
-                    'text' => [' Im bye highlight ']
-                  }
-                },
-                {
-                  '_source' => {
-                    'url' => 'another.html',
-                    'title' => 'Another'
-                  },
-                  'highlight' => {
-                    'text' => [' Im another highlight ']
-                  }
-                },
-              ]
-            }
-          }
-        end
-
-        results = query.search('q' => 'search', 'page' => '3')
-
-        expect(results.hit_count).to eq(23)
-        expect(results.page_number).to eq(3)
-
-        expect(mock_client).to have_received(:search).with({
-          index: 'searching',
-          body: {
-            'query' => {
-              'bool' => {
-                'should' => {
-                  'query_string' => {
-                    'query' => 'search',
-                    'default_field' => 'text'
-                  }
-                }
-              }
-            },
-            'from' => 20,
-            'size' => 10,
-            '_source' => [ 'url', 'title' ],
-            'highlight' => {
-              'fields' => {
-                'text' => {
-                  'type' => 'plain'
-                }
+      describe 'page_window' do
+        it 'shows a single page' do
+          allow(mock_client).to receive(:search) do
+            {
+              'hits' => {
+                'total' => 10,
+                'hits' => []
               }
             }
-          }
-        })
-      end
+          end
 
-      it 'should fall back to the first page on an unknown page' do
-        allow(mock_client).to receive(:search) do
-          {
-            'hits' => {
-              'total' => 3,
-              'hits' => [
-                {
-                  '_source' => {
-                    'url' => 'hi.html',
-                    'title' => 'Hi'
-                  },
-                  'highlight' => {
-                    'text' => [' Im a highlight ']
-                  }
-                },
-                {
-                  '_source' => {
-                    'url' => 'bye.html',
-                    'title' => 'Bye'
-                  },
-                  'highlight' => {
-                    'text' => [' Im bye highlight ']
-                  }
-                },
-                {
-                  '_source' => {
-                    'url' => 'another.html',
-                    'title' => 'Another'
-                  },
-                  'highlight' => {
-                    'text' => [' Im another highlight ']
-                  }
-                },
-              ]
-            }
-          }
+          query = Query.new('q' => 'foo', 'page' => '1')
+          query.get_results(mock_client)
+
+          expect(query.page_window).to eq([1])
         end
 
-        query.search('q' => 'search', 'page' => 'hi')
+        it 'shows the first 5 pages' do
+          allow(mock_client).to receive(:search) do
+            {
+              'hits' => {
+                'total' => 100,
+                'hits' => []
+              }
+            }
+          end
 
-        expect(mock_client).to have_received(:search).with({index: 'searching', body: {
-          'query' => { 'bool' => { 'should' => {'query_string' => {'query' => 'search', 'default_field' => 'text'}}}},
-          'from' => 0,
-          'size' => 10,
-          '_source' => ['url', 'title'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
-        }})
+          query = Query.new('q' => 'foo', 'page' => '1')
+          query.get_results(mock_client)
+
+          expect(query.page_window).to eq([1, 2, 3, 4, 5])
+        end
+
+        it 'shows the 5 surrounding pages' do
+          allow(mock_client).to receive(:search) do
+            {
+              'hits' => {
+                'total' => 100,
+                'hits' => []
+              }
+            }
+          end
+
+          query = Query.new('q' => 'foo', 'page' => '5')
+          query.get_results(mock_client)
+
+          expect(query.page_window).to eq([3, 4, 5, 6, 7])
+        end
+
+        it 'shows the last 5 pages when showing the last page' do
+          allow(mock_client).to receive(:search) do
+            {
+              'hits' => {
+                'total' => 100,
+                'hits' => []
+              }
+            }
+          end
+
+          query = Query.new('q' => 'foo', 'page' => '10')
+          query.get_results(mock_client)
+
+          expect(query.page_window).to eq([6, 7, 8, 9, 10])
+        end
+
+        it 'shows the last 5 pages on the second to last page' do
+          allow(mock_client).to receive(:search) do
+            {
+              'hits' => {
+                'total' => 100,
+                'hits' => []
+              }
+            }
+          end
+
+          query = Query.new('q' => 'foo', 'page' => '9')
+          query.get_results(mock_client)
+
+          expect(query.page_window).to eq([6, 7, 8, 9, 10])
+        end
       end
     end
   end
