@@ -1,6 +1,13 @@
 <div class="search-results">
   <form method="get">
-    <h1 style="color: red; border: 3px dotted purple;">Filtering by: <%= product_name %> and <%= product_version %></h1>
+
+    <% unless product_name.nil? %>
+      <h4 style="border: 1px solid #ccc; padding: 4px 20px;">
+        Filtering by: <%= product_name %>
+        <% unless product_version.nil? %>and <%= product_version %>
+        <% end %>
+      </h4>
+    <% end %>
     <input name="q" value="<%= search_term %>"/>
     <% unless product_name.nil? %>
       <input type="hidden" name="product_name" value="<%= product_name %>"/>
