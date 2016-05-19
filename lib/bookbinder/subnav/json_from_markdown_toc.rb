@@ -21,7 +21,13 @@ module Bookbinder
 
         root = absolute_source_from_path(Pathname(config.subnav_root))
 
-        raise SubnavRootMissingError.new('Subnav root not found at: ' + config.subnav_root) if root.nil?
+        if root.nil?
+          if @require_valid_subnav_links
+            raise SubnavRootMissingError.new('Subnav root not found at: ' + config.subnav_root)
+          else
+            return {links: []}.to_json
+          end
+        end
 
         @parsed_files = {Pathname(root) => '(root)'}
 

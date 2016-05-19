@@ -280,6 +280,17 @@ Some Text
 
         expect { JsonFromMarkdownToc.new(fs, true).get_links(subnav_config, output_locations) }.to raise_error(JsonFromMarkdownToc::SubnavRootMissingError)
       end
+
+      it 'can generate an empty subnav if it cannot find a subnav root' do
+        output_locations = OutputLocations.new(context_dir: '/')
+        subnav_config = Config::ProductConfig.new({ 'subnav_root' => 'my/index' })
+
+        fs = instance_double(Bookbinder::LocalFilesystemAccessor)
+
+        expect(fs).to receive(:find_files_extension_agnostically).with(Pathname('my/index'), output_locations.source_for_site_generator){[]}
+
+        expect(JsonFromMarkdownToc.new(fs, false).get_links(subnav_config, output_locations)).to eq({links: []}.to_json)
+      end
     end
   end
 end
