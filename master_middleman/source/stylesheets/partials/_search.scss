@@ -1,0 +1,78 @@
+.search-results {
+  .result-summary {
+    margin: 20px;
+  }
+
+  .search-results-list {
+    list-style: none;
+    padding-left: 20px;
+
+    li {
+      margin-top: 30px;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 50px 0;
+    border-bottom: 2px solid #F4F4F4;
+    font-size: 20px;
+    color: #66747B;
+    font-weight: bold;
+  }
+
+  .pagination {
+    margin-top: 30px;
+    text-align: center;
+
+    a.page {
+      border: 0;
+    }
+
+    .page {
+      display: inline-block;
+      margin: 0 8px;
+
+      &.disabled {
+        color: #D3D3D3;
+      }
+
+      &.current {
+        color: #808080;
+        border-bottom: 2px solid #808080;
+      }
+
+      &.first:before {
+        content: "\F053\F053";
+        font-family: FontAwesome;
+        font-size: 12px;
+        padding-right: 4px;
+      }
+
+      &.previous:before {
+        content: "\F053";
+        font-family: FontAwesome;
+        font-size: 12px;
+        padding-right: 4px;
+      }
+
+      &.next:after {
+        content: "\F054";
+        font-family: FontAwesome;
+        font-size: 12px;
+        padding-left: 4px;
+      }
+
+      &.last:after {
+        content: "\F054\F054";
+        font-family: FontAwesome;
+        font-size: 12px;
+        padding-left: 4px;
+      }
+    }
+  }
+}

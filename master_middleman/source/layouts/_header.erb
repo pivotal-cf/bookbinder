@@ -1,0 +1,34 @@
+<% if current_page.data.title %> <%# this is a proxy for if !homepage %>
+  <header class="header header-layout">
+    <h1 class="logo">
+      <a href="/"><%= vars.book_title || 'Default Book Title' %></a>
+    </h1>
+    <%= yield_for_archive_drop_down_menu %>
+    <div class="header-links js-bar-links">
+      <div class="btn-menu" data-behavior="MenuMobile"></div>
+      <%= vars.product_link %>
+      <div class="header-item">
+        <%= vars.support_link %>
+      </div>
+      <%= partial 'layouts/book-search' %>
+    </div>
+  </header>
+<% else %>
+  <header class="header-home">
+    <div class="home-links js-bar-links">
+      <div class="btn-menu" data-behavior="MenuMobile"></div>
+      <%= vars.product_link %>
+      <div class="header-item">
+        <%= vars.support_call_to_action %>
+      </div>
+      <%= partial 'layouts/book-search' %>
+    </div>
+    <h1 class="title-flashy">
+      <%= partial 'layouts/book-title' %>
+    </h1>
+
+    <h2 class="title-intro">
+      <%= vars.hero_text %>
+    </h2>
+  </header>
+<% end %>

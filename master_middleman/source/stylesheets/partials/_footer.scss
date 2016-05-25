@@ -1,0 +1,63 @@
+/*
+ * FILE: _footer.scss
+======================================================================== */
+.site-footer-links {
+  font-size: $font-size-xs;
+  clear: both;
+  padding: 1em 30px 4em 30px;
+  a {
+    color: $color-text;
+  }
+}
+
+.copyright {
+  @media (min-width: $bp-wide) {
+    float: left;
+  }
+}
+
+.support {
+  @media (min-width: $bp-wide) {
+    float: right;
+  }
+}
+
+#feedback {
+  #feedback-comments {
+    margin-top: 1em;
+    width: 49%;
+  }
+  #feedback-helpful {
+    border: none;
+    margin-top: 1em;
+  }
+  .feedback-option {
+    float: left;
+    margin-left: 2em;
+    margin-top: 0.5em;
+    width: 22%;
+  }
+  form fieldset {
+    width: 11em;
+    float: left;
+  }
+  textarea {
+    width: 100%;
+  }
+  input[type='submit'] {
+    background-color: transparentize($color-accent-bright, 0.8);
+    float: left;
+    margin-left: 1em;
+    margin-top: 2.5em;
+    padding: 1em;
+    width: 8em;
+  }
+}
+
+#repo-link {
+  border-bottom: solid 1px #eceae9;
+  border-top: solid 1px #eceae9;
+  text-align: center;
+  padding: 1em 0;
+  font-weight: bold;
+}

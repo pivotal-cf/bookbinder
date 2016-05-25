@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'nokogiri', ['1.6.7.2']
   s.add_runtime_dependency 'thor'
   s.add_runtime_dependency 'elasticsearch'
+  s.add_runtime_dependency 'font-awesome-sass'
 
   s.add_development_dependency 'license_finder'
   s.add_development_dependency 'pry-byebug'
