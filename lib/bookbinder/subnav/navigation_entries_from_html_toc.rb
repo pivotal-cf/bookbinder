@@ -3,7 +3,7 @@ require 'active_support/all'
 
 module Bookbinder
   module Subnav
-    class JsonFromHtmlToc
+    class NavigationEntriesFromHtmlToc
       def initialize(fs)
         @fs = fs
       end
@@ -14,9 +14,7 @@ module Bookbinder
         doc = parse_toc_file
         set_anchor_values(doc.css('a'))
 
-        {
-          links: gather_urls_and_texts(doc.css('body > ul'))
-        }.to_json
+        gather_urls_and_texts(doc.css('body > ul'))
       end
 
       private
@@ -47,7 +45,7 @@ module Bookbinder
           text = anchor.inner_text
           ul = li.css('> ul')
           if ul.size > 0
-            {url: href, text: text, nestedLinks: gather_urls_and_texts(ul)}
+            {url: href, text: text, nested_links: gather_urls_and_texts(ul)}
           else
             {url: href, text: text}
           end

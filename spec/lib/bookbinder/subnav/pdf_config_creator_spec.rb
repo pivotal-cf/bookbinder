@@ -10,12 +10,12 @@ module Bookbinder
         config = Config::ProductConfig.new({'pdf_config' => 'my-pdf.yml'})
         output_locations = OutputLocations.new(context_dir: '.')
 
-        json = { 'links' => [
-                  { 'url' => '/annie/dog.html' },
-                  { 'url' => '/sophie/pup.html' },
-                  { 'text' => 'ignore me' },
-                  { 'url' => 'yuki/pooch.html' }
-               ]}.to_json
+        navigation_entries = [
+          {url: '/annie/dog.html'},
+          {url: '/sophie/pup.html'},
+          {text: 'ignore me'},
+          {url: 'yuki/pooch.html'}
+        ]
 
         pdf_yml = <<-EOT
 ---
@@ -30,10 +30,9 @@ pages:
 
         fs = instance_double(Bookbinder::LocalFilesystemAccessor)
 
-        expect(fs).to receive(:read).with(output_locations.subnavs_for_layout_dir.join('my-props.json')) { json }
         expect(fs).to receive(:overwrite).with(to: output_locations.pdf_config_dir.join('my-pdf.yml'), text: pdf_yml)
 
-        PdfConfigCreator.new(fs, output_locations).create('my-props.json', config)
+        PdfConfigCreator.new(fs, output_locations).create(navigation_entries, config)
       end
     end
   end

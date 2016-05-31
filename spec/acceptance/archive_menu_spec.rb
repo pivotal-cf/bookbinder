@@ -10,8 +10,14 @@ module Bookbinder
     use_fixture_repo('archive-menu-book')
 
     before_all_in_fixture_repo('archive-menu-book') do
-      silence_io_streams do
-        Bookbinder::CLI.start(%w(bind local --verbose))
+      begin
+        silence_io_streams do
+          Bookbinder::CLI.start(%w(bind local --verbose))
+        end
+      rescue Exception => e
+        puts "Error running bookbinder bind"
+        puts e.message
+        puts e.backtrace.join("\n")
       end
     end
 

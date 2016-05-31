@@ -41,14 +41,10 @@ module Bookbinder
     end
 
     def exposes_subnav_links_for(dita_section)
-      props_location = "./output/master_middleman/source/subnavs/dita_subnav_#{dita_section.dir}-props.json"
+      topic_html = File.read(topics(dita_section).first.final_path)
+      doc = Nokogiri::HTML(topic_html)
 
-      File.exist?(props_location) && (
-        props_text = File.read(props_location)
-        props_hash = JSON.load(props_text)
-        links = props_hash['links']
-        links[0]['url'] == "/#{dita_section.dir}/some-guide.html"
-      )
+      doc.css('.nav-content li:nth-child(1) a').first['href'] == "/#{dita_section.dir}/some-guide.html"
     end
 
     def invokes_dita_option_for_css_path(dita_section, options)
@@ -94,15 +90,9 @@ module Bookbinder
     end
 
     def has_dita_subnav?(topic)
-      text = File.read topic.final_path
-      doc = Nokogiri::HTML(text)
+      doc = Nokogiri::HTML(File.read(topic.final_path))
 
-      text.include?('<div class="nav-content') &&
-          is_dita_subnav_props?(doc.css('.nav-content').first.attr('data-props-location'))
-    end
-
-    def is_dita_subnav_props?(json_filename)
-      Regexp.new(/^dita_subnav.*-props\.json$/).match(json_filename)
+      doc.css('.nav-content ul li').length > 0
     end
 
     def has_frontmatter?(topic)

@@ -2,7 +2,7 @@ require_relative '../../../../lib/bookbinder/config/section_config'
 require_relative '../../../../lib/bookbinder/preprocessing/dita_html_preprocessor'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 require_relative '../../../../lib/bookbinder/values/section'
-require_relative '../../../../lib/bookbinder/subnav/json_from_html_toc'
+require_relative '../../../../lib/bookbinder/subnav/navigation_entries_from_html_toc'
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/dita_html_for_middleman_formatter'
 require_relative '../../../../lib/bookbinder/preprocessing/dita_html_preprocessor'
@@ -67,7 +67,7 @@ module Bookbinder
           subnav_generator = instance_double(Bookbinder::Subnav::SubnavGenerator)
           subnav_generator_factory = instance_double(Bookbinder::Subnav::SubnavGeneratorFactory)
 
-          expect(subnav_generator_factory).to receive(:produce).with(instance_of(Bookbinder::Subnav::JsonFromHtmlToc)) { subnav_generator }
+          expect(subnav_generator_factory).to receive(:produce).with(instance_of(Bookbinder::Subnav::NavigationEntriesFromHtmlToc)) { subnav_generator }
           expect(subnav_generator).to receive(:generate).with(sections[0])
 
           DitaHTMLPreprocessor.new(double('fs').as_null_object,

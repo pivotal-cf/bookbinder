@@ -7,7 +7,7 @@
     {
       "url": "/sample-section/release-notes/release-notes.html",
       "text": "A. Pivotal GemFire XD 1.4 Release Notes",
-      "nestedLinks": [
+      "nested_links": [
         {
           "url": "/sample-section/release-notes/release-notes-gemfirexd-1.4.0.html",
           "text": "A.i. Pivotal GemFire XD 1.4.0 Release Notes"
@@ -15,11 +15,11 @@
         {
           "url": "/sample-section/release-notes/release-notes-gemfirexd-1.4.0.html",
           "text": "A.ii. Pivotal GemFire XD 1.4.0 Release Notes",
-          "nestedLinks": [
+          "nested_links": [
             {
               "url": "/sample-section/inner-notes/inner-release-notes-gemfirexd-1.4.0.html",
               "text": "B. Inner Pivotal GemFire XD 1.4.0 Release Notes",
-              "nestedLinks": [
+              "nested_links": [
                 {
                   "url": "/sample-section/inner-notes/inner-release-notes-gemfirexd-1.4.0.html",
                   "text": "Bi. Inner Pivotal GemFire XD 1.4.0 Release Notes"

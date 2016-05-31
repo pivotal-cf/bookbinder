@@ -42,12 +42,16 @@ module Bookbinder
       case link
         when data_uri then true
         when remote_uri then http_reachable?(link)
-        when absolute_uri then File.exists?(File.join('.', 'public', link))
+        when absolute_uri then File.exists?(File.join('.', 'public', path_info(link)))
         when relative_uri then
           dirs = dirs.split('/')[0...-1]
-          computed_uri = File.expand_path(File.join dirs, link)
+          computed_uri = File.expand_path(File.join dirs, path_info(link))
           File.exists?(computed_uri)
       end
+    end
+
+    def path_info(link)
+      link.sub(/[?#].+\z/, '')
     end
 
     def strip_location(id)

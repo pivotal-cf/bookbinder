@@ -1,5 +1,6 @@
 require 'json'
 require 'yaml'
+require 'nokogiri'
 
 require_relative '../helpers/use_fixture_repo'
 require_relative '../helpers/redirection'
@@ -136,34 +137,28 @@ YAML
       File.write('./config.yml', config.to_yaml)
     end
 
-    it 'generates nav html with json props file' do
+    it 'generates nav html' do
       swallow_stdout do
         `#{gem_root}/install_bin/bookbinder bind local`
       end
 
-      expect(Pathname(File.join('final_app', 'public', 'subnavs', 'doggies-props.json'))).to exist
-      expect(Pathname(File.join('final_app', 'public', 'subnavs', 'doctastic-props.json'))).to exist
+      pugs_index = File.read File.join('final_app', 'public', 'dogs', 'pugs', 'index.html')
+      pugs_doc = Nokogiri::HTML(pugs_index)
+      expect(pugs_doc.css('.nav-content ul li').size).to eq(2)
+      expect(pugs_doc.css('.nav-content ul li:nth-child(1)').text.strip).to eq('First pug')
+      expect(pugs_doc.css('.nav-content ul li:nth-child(1) a').first['href']).to eq('/dogs/pugs/index.html')
+      expect(pugs_doc.css('.nav-content ul li:nth-child(2)').text.strip).to eq('Second greyhound')
+      expect(pugs_doc.css('.nav-content ul li:nth-child(2) a').first['href']).to eq('/dogs/greyhounds/index.html')
 
-      index_one = File.read File.join('final_app', 'public', 'dogs', 'pugs', 'index.html')
-      expect(index_one).to include('<div class="nav-content" data-props-location="doggies-props.json">I am the default subnav!</div>')
+      greyhounds_index = File.read File.join('final_app', 'public', 'dogs', 'greyhounds', 'index.html')
+      greyhounds_doc = Nokogiri::HTML(greyhounds_index)
+      expect(greyhounds_doc.css('.nav-content ul li').size).to eq(2)
+      expect(greyhounds_doc.css('.nav-content ul li:nth-child(1)').text.strip).to eq('First pug')
+      expect(greyhounds_doc.css('.nav-content ul li:nth-child(2)').text.strip).to eq('Second greyhound')
 
-      index_one = File.read File.join('final_app', 'public', 'dogs', 'greyhounds', 'index.html')
-      expect(index_one).to include('<div class="nav-content" data-props-location="doggies-props.json">I am the default subnav!</div>')
-
-      index_two = File.read File.join('final_app', 'public', 'my-docs-repo', 'index.html')
-      expect(index_two).to include('<div class="nav-content" data-props-location="doctastic-props.json">I am the default subnav!</div>')
-    end
-
-    it 'properly formats the json props json' do
-      swallow_stdout do
-        `#{gem_root}/install_bin/bookbinder bind local`
-      end
-
-      json_props = File.read File.join('final_app', 'public', 'subnavs', 'doggies-props.json')
-      expect(JSON.parse(json_props)['links']).to match_array([
-            {'url' => '/dogs/pugs/index.html', 'text' => 'First pug'},
-            {'url' => '/dogs/greyhounds/index.html', 'text' => 'Second greyhound'}
-      ])
+      docs_repo_index = File.read File.join('final_app', 'public', 'my-docs-repo', 'index.html')
+      docs_repo_doc = Nokogiri::HTML(docs_repo_index)
+      expect(docs_repo_doc.css('.nav-content ul li').size).to eq(0)
     end
 
     context 'when pdf_config specified' do

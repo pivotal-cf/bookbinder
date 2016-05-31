@@ -83,11 +83,11 @@ Add <code>.header-layout</code> to header tag to get fixed positioning.
   }
 }
 .btn-menu {
-  @extend .fa-bars;
   float: right;
   position: relative;
   right: -1em;
   &:before {
+    content: $fa-var-bars;
     @extend .fa;
     padding-right: 0.4em;
     padding-top: 0.4em;
@@ -241,8 +241,8 @@ category: basics
 
 // search icon
 .search-icon {
-  @extend .fa-search;
   &:before {
+    content: $fa-var-search;
     color: #c7c7c7;
     @extend .fa;
   }

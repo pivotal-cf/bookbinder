@@ -49,6 +49,14 @@ module Bookbinder
           expect(menu.dropdown_links).to be_empty
         end
       end
+
+      context "with an empty config hash" do
+        it "provides nil title and empty dropdown links" do
+          menu = ArchiveDropDownMenu.new({}, current_path: 'index.html')
+          expect(menu.title).to be_nil
+          expect(menu.dropdown_links).to be_empty
+        end
+      end
     end
 
     describe "#empty?" do

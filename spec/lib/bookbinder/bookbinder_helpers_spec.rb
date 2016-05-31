@@ -26,7 +26,7 @@ module Bookbinder
 
         attr_reader :config, :template, :partial_options
 
-        def initialize(config)
+        def initialize(config = {})
           @config = config
         end
 
@@ -57,87 +57,40 @@ module Bookbinder
     end
 
     describe 'injecting customized drop down menu based on archive_menu key inside config' do
-      let(:source_dir) { tmp_subdir 'source' }
-      let(:source_file_content) { '<%= yield_for_archive_drop_down_menu %>' }
-      let(:source_file_under_test) { 'index.md.erb' }
-      let(:source_file_title) { 'Dogs' }
-      let(:output) { File.read File.join(tmpdir, 'build', 'index.html') }
-      let(:partial_content) do
-        '<div class="header-dropdown"><a class="header-dropdown-link"><%= menu_title %></a></div><div class="header-dropdown-content"><ul><% for link in dropdown_links %><li><a href="<%= link.values.first %>"><%= link.keys.first %></a></li><% end %></ul></div>'
-      end
-      let(:first_version) { 'v3.0.0.0' }
-      let(:past_versions) { { 'v2.0.0.0' => 'archives/pcf-docs-1.2.pdf' } }
       let(:archive_menu) do
-        { '.' => [ first_version, past_versions ] }
+        { '.' => [ 'v3.0.0.0', { 'v2.0.0.0' => 'archives/pcf-docs-1.2.pdf' } ] }
       end
+      let(:helper) { klass.new(archive_menu: archive_menu) }
+      let(:current_page) { double(:current_page, path: 'index.md.erb' ) }
 
       before do
-        FileUtils.cp_r 'master_middleman/.', tmpdir
-        FileUtils.mkdir_p source_dir
-        squelch_middleman_output
-        write_markdown_source_file source_file_under_test, source_file_title, source_file_content
+        allow(helper).to receive(:current_page) { current_page }
       end
 
-      context 'when the archive template does exist' do
-        before do
-          write_archive_menu_content "archive_menus/_default.erb", partial_content
-        end
+      context 'when the archive menu tag contains versions' do
+        it 'renders a default archive_menu template with the archive versions' do
+          helper.yield_for_archive_drop_down_menu
 
-        context 'when the archive menu tag contains versions' do
-          let(:expected_past_versions) { { 'v2.0.0.0' => '/archives/pcf-docs-1.2.pdf' } }
-
-          it 'renders a default archive_menu template with the archive versions' do
-            run_middleman(archive_menu: archive_menu)
-            doc = Nokogiri::HTML(output)
-            expect(doc.css('div .header-dropdown-link').text).to eq(first_version)
-            expect(doc.css('.header-dropdown-content').text).to eq(past_versions.keys.first)
-            expect(doc.css('.header-dropdown-content ul li a').first['href']).to eq("#{expected_past_versions.values.first}")
-          end
-        end
-
-        context 'when the optional archive menu key is not present' do
-          it 'should run middleman without including the key' do
-            expect do
-              original_mm_root = ENV['MM_ROOT']
-
-              Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
-              ENV['MM_ROOT'] = tmpdir.to_s
-              Dir.chdir(tmpdir) do
-                File.write('bookbinder_config.yml', YAML.dump({}))
-                build_command = Middleman::Cli::Build.new [], {:quiet => false}, {}
-                build_command.invoke :build, [], {:verbose => false}
-              end
-
-              ENV['MM_ROOT'] = original_mm_root
-
-            end.to_not raise_error
-          end
-        end
-
-        context 'when only one version is specified' do
-          let(:archive_menu) do
-            { '.' => [ first_version ] }
-          end
-
-          it 'renders an archive_menu template with the archive version' do
-            run_middleman(archive_menu: archive_menu)
-            doc = Nokogiri::HTML(output)
-            expect(doc.css('div .header-dropdown-link').text).to eq(first_version)
-          end
+          expect(helper.template).to eq('archive_menus/default')
+          expect(helper.partial_options).to eq({
+            :locals => {
+              :menu_title => 'v3.0.0.0',
+              :dropdown_links => [
+                {'v2.0.0.0' => '/archives/pcf-docs-1.2.pdf'}
+              ]
+            }
+          })
         end
       end
 
-      context 'when the archive template does not exist' do
-        context 'and no versions are specified' do
-          let(:archive_menu) do
-            { '.' => nil }
-          end
+      context 'when the optional archive menu key is not present' do
+        let(:helper) { klass.new }
 
-          it 'should not error' do
-            expect do
-              run_middleman(archive_menu: archive_menu)
-            end.to_not raise_error
-          end
+        it 'should not render the archive_menu partial' do
+          helper.yield_for_archive_drop_down_menu
+
+          expect(helper.template).to be_nil
+          expect(helper.partial_options).to be_nil
         end
       end
     end
@@ -179,160 +132,57 @@ module Bookbinder
     end
 
     describe '#modified_date' do
-      it 'returns the last modified date of the file' do
-        FileUtils.cp_r 'master_middleman/.', tmpdir
+      let(:helper) { klass.new({}) }
+      let(:git_accessor) { double(:git_accessor) }
+      let(:current_page) { double(:current_page, data: page_data) }
+      let(:page_data) { double(:page_data) }
 
-        original_date = ENV['GIT_AUTHOR_DATE']
-
-        begin
-          date = Time.new(1995, 1, 3, 2, 2, 2, "+02:00")
-          ENV['GIT_AUTHOR_DATE'] = date.iso8601
-
-          init_repo(at_dir: tmp_subdir('source/sections/section-repo'),
-                    contents: '<%= modified_date %>',
-                    file: 'index.html.md.erb')
-
-          squelch_middleman_output
-          run_middleman
-          output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
-
-          expect(output.chomp).to eq(
-            "<p>Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date.utc}\"></span></p>"
-          )
-        ensure
-          ENV['GIT_AUTHOR_DATE'] = original_date
-        end
+      before do
+        allow(Ingest::GitAccessor).to receive(:new) { git_accessor }
+        allow(helper).to receive(:current_page) { current_page }
       end
 
-      it 'copes with multiple git repos in same middleman app' do
-        FileUtils.cp_r 'master_middleman/.', tmpdir
+      it 'returns the last modified date of the file' do
+        date = Time.new(1995, 1, 3, 2, 2, 2, "+02:00")
+        allow(page_data).to receive(:dita) { false }
+        allow(current_page).to receive(:source_file) { 'index.html.md.erb' }
 
-        original_date = ENV['GIT_AUTHOR_DATE']
-
-        begin
-          date_one = Time.new(1995, 1, 3)
-          ENV['GIT_AUTHOR_DATE'] = date_one.iso8601
-          init_repo(at_dir: tmp_subdir('source/sections/section-repo-one'),
-            contents: '<%= modified_date %>',
-            file: 'index.html.md.erb')
-
-          date_two = Time.new(2005, 3, 8)
-          ENV['GIT_AUTHOR_DATE'] = date_two.iso8601
-          init_repo(at_dir: tmp_subdir('source/sections/section-repo-two'),
-            contents: '<%= modified_date %>',
-            file: 'index.html.md.erb')
-
-          squelch_middleman_output
-          run_middleman
-          output_one = tmpdir.join('build', 'sections', 'section-repo-one', 'index.html').read
-          output_two = tmpdir.join('build', 'sections', 'section-repo-two', 'index.html').read
-
-
-          expect(output_one.chomp).to eq("<p>Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date_one.utc}\"></span></p>")
-          expect(output_two.chomp).to eq("<p>Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date_two.utc}\"></span></p>")
-        ensure
-          ENV['GIT_AUTHOR_DATE'] = original_date
-        end
+        expect(git_accessor).to receive(:author_date).with('index.html.md.erb') { date }
+        expect(helper.modified_date).to eq(
+          "Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date.utc}\"></span>"
+        )
       end
 
       it 'finds the appropriate modification date for dita files' do
-        original_date = ENV['GIT_AUTHOR_DATE']
-        FileUtils.cp_r 'master_middleman/.', tmpdir
-
-        begin
           date = Time.new(1995, 1, 3)
+          allow(page_data).to receive(:dita) { true }
+          allow(current_page).to receive(:source_file) { 'foo/source/index.html.md.erb' }
 
-          ENV['GIT_AUTHOR_DATE'] = date.iso8601
-          init_repo(at_dir: tmp_subdir('output/preprocessing/sections/section-repo'),
-            contents: '<%= modified_date %>',
-            file: 'index.xml')
+          expect(git_accessor).to receive(:author_date).with('foo/output/preprocessing/sections/index.html.md.erb', dita: true) { date }
 
-          dita_frontmatter = <<-EOT
----
-dita: true
----
-          EOT
-
-          section_dir = tmp_subdir('source/section-repo')
-          FileUtils.mkdir_p section_dir
-          File.open(File.join(section_dir, 'index.html.md.erb'), "a") do |io|
-            io.write(dita_frontmatter)
-            io.write('<%= modified_date %>')
-          end
-
-          squelch_middleman_output
-          run_middleman
-          output = tmpdir.join('build', 'section-repo', 'index.html').read
-
-          expect(output.chomp).to eq("<p>Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date.utc}\"></span></p>")
-        ensure
-          ENV['GIT_AUTHOR_DATE'] = original_date
-        end
+          expect(helper.modified_date).to eq(
+            "Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date.utc}\"></span>"
+          )
       end
 
-      it 'returns nothing for a file not in version control' do
-        section_dir = tmp_subdir('source/sections/section-repo')
-        FileUtils.cp_r 'master_middleman/.', tmpdir
-        FileUtils.mkdir_p section_dir
-        File.open(File.join(section_dir, 'index.html.md.erb'), "a") do |io|
-          io.write('<%= modified_date %>')
-        end
+      it 'returns nothing for a file with no last modified date in git' do
+        allow(page_data).to receive(:dita) { false }
+        allow(current_page).to receive(:source_file) { 'index.html.md.erb' }
 
-        squelch_middleman_output
-        run_middleman
-        output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
-
-        expect(output.chomp).to eq('')
+        expect(git_accessor).to receive(:author_date).with('index.html.md.erb') { nil }
+        expect(helper.modified_date).to be_nil
       end
 
-      it 'returns nothing for a file that has no non-excluded commits and no user-provided date' do
-        FileUtils.cp_r 'master_middleman/.', tmpdir
+      it 'returns the user-provided date for a file with no last modified date in git' do
+        default_date = Time.new(1999, 12, 31)
 
-        begin
-          original_date = ENV['GIT_AUTHOR_DATE']
-          date = Time.new(1995, 1, 3)
+        allow(page_data).to receive(:dita) { false }
+        allow(current_page).to receive(:source_file) { 'index.html.md.erb' }
 
-          ENV['GIT_AUTHOR_DATE'] = date.iso8601
-          init_repo(at_dir: tmp_subdir('source/sections/section-repo'),
-            commit_message: '[exclude]',
-            contents: '<%= modified_date %>',
-            file: 'index.html.md.erb')
-
-          squelch_middleman_output
-          run_middleman
-          output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
-
-          expect(output.chomp).to eq('')
-        ensure
-          ENV['GIT_AUTHOR_DATE'] = original_date
-        end
-      end
-
-      it 'returns the user-provided date for a file that has no non-excluded commits' do
-        FileUtils.cp_r 'master_middleman/.', tmpdir
-
-        original_date = ENV['GIT_AUTHOR_DATE']
-
-        begin
-          date = Time.new(1995, 1, 3)
-          default_date = Time.new(1999, 12, 31)
-
-
-          ENV['GIT_AUTHOR_DATE'] = date.iso8601
-
-          init_repo(at_dir: tmp_subdir('source/sections/section-repo'),
-            contents: '<%= modified_date(default_date: "December 31, 1999") %>',
-            commit_message: '[exclude]',
-            file: 'index.html.md.erb')
-
-          squelch_middleman_output
-          run_middleman
-          output = tmpdir.join('build', 'sections', 'section-repo', 'index.html').read
-
-          expect(output.chomp).to eq("<p>Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{default_date.utc}\"></span></p>")
-        ensure
-          ENV['GIT_AUTHOR_DATE'] = original_date
-        end
+        expect(git_accessor).to receive(:author_date).with('index.html.md.erb') { nil }
+        expect(helper.modified_date(default_date: "December 31, 1999")).to eq(
+          "Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{default_date.utc}\"></span>"
+        )
       end
     end
 
@@ -674,82 +524,60 @@ MARKDOWN
     end
 
     describe '#yield_for_subnav' do
-      include_context 'tmp_dirs'
-
-      let(:source_dir) { tmp_subdir 'source' }
-      let(:source_file_content) { '<%= yield_for_subnav %>' }
-      let(:source_file_under_test) { 'index.md.erb' }
-      let(:source_file_title) { 'Dogs' }
-      let(:output) { File.read File.join(tmpdir, 'build', 'index.html') }
-      let(:breadcrumb_title) { nil }
+      let(:helper) { klass.new(subnav_templates: { 'foo' => 'bar.erb', 'baz' => 'quux.erb', '1' => '2.erb' }) }
 
       before do
-        FileUtils.cp_r 'master_middleman/.', tmpdir
-        FileUtils.mkdir_p source_dir
-        squelch_middleman_output
-        write_markdown_source_file source_file_under_test, source_file_title, source_file_content, breadcrumb_title
-        write_subnav_content "subnavs/default.erb", ''
+        allow(helper).to receive(:current_path) { 'foo/things.html' }
       end
 
-      context 'when invoked in the top-level index file' do
-        context 'and a subnav specified in the index markdown' do
-          let(:subnav_code) do
-            '<div id="sub-nav" class="js-sidenav" collapsible nav-container" role="navigation" data-behavior="Collapsible">
-  <a class="sidenav-title"" data-behavior="SubMenuMobile">Index Subnav</a>
-</div>'
-          end
+      it 'renders the first subnav for search' do
+        allow(helper).to receive(:current_path) { 'search.html' }
+        helper.yield_for_subnav
 
-          it 'populates with the specified index subnav' do
-            write_subnav_content "subnavs/default.erb", subnav_code
-            run_middleman
-            doc = Nokogiri::HTML(output)
-            expect(doc.css('div')[0].first[1]).to eq('sub-nav')
-            expect(doc.css('a').text).to eq('Index Subnav')
-          end
-        end
-
-        context 'and a subnav is not specified in the index markdown' do
-          let(:subnav_code) { '' }
-          it 'yields the empty "default" subnav' do
-            run_middleman
-            expect(output).to be_empty
-          end
-        end
+        expect(helper.template).to eq('subnavs/bar.erb')
       end
 
-      context 'when the page is a section page' do
-        let(:section_directory) { '1some-dir' }
-        let(:source_file_under_test) { "#{section_directory}/some-section.erb" }
-        let(:output) { File.read File.join(tmpdir, 'build', section_directory, 'some-section.html' ) }
-        let(:subnav) { 'section-subnav' }
-        let(:subnav_code) do
-          '<div id="sub-nav" class="js-sidenav" collapsible nav-container" role="navigation" data-behavior="Collapsible">
-  <a class="sidenav-title"" data-behavior="SubMenuMobile">Section Subnav</a>
-</div>'
-        end
+      it 'renders a matching subnav from the body classes' do
+        allow(helper).to receive(:page_classes) { 'flerb baz dingo' }
+        helper.yield_for_subnav
 
-        before do
-          write_markdown_source_file source_file_under_test, source_file_title, source_file_content
-        end
+        expect(helper.template).to eq('subnavs/quux.erb')
+      end
 
-        context 'and a subnav is specified' do
-          it 'inserts the subnav specified in the config' do
-            write_subnav_content "subnavs/#{subnav}.erb", subnav_code
-            run_middleman(subnav_templates: { section_directory => subnav })
-            doc = Nokogiri::HTML(output)
+      it 'allows subnav keys to start with a number' do
+        allow(helper).to receive(:page_classes).with('foo/things.html', {numeric_prefix: 'NUMERIC_CLASS_PREFIX'}) { 'blah NUMERIC_CLASS_PREFIX1 blerg' }
+        helper.yield_for_subnav
 
-            expect(doc.css('div')[0].first[1]).to eq('sub-nav')
-            expect(doc.css('a').text).to eq('Section Subnav')
-          end
-        end
+        expect(helper.template).to eq('subnavs/2.erb')
+      end
 
-        context 'and a subnav is not specified' do
-          let(:subnav){ nil }
-          it 'inserts the default subnav' do
-            run_middleman(subnav_templates: { section_directory => subnav })
-            expect(output).to be_empty
-          end
-        end
+      it 'corrects for .s in the directory for classnames' do
+        allow(helper).to receive(:current_path) {'many.folders/things.html'}
+        allow(helper).to receive(:page_classes) { 'blah 1 blerg' }
+        helper.yield_for_subnav
+
+        expect(helper).to have_received(:page_classes).with('many_folders/things.html', instance_of(Hash))
+      end
+
+      it 'finds the most specifically matching subnav' do
+        allow(helper).to receive(:page_classes) { 'bleh blah baz foo blah' }
+        helper.yield_for_subnav
+
+        expect(helper.template).to eq('subnavs/bar.erb')
+      end
+
+      it 'ignores a subnav just for the page' do
+        allow(helper).to receive(:page_classes) { 'baz blah foo' }
+        helper.yield_for_subnav
+
+        expect(helper.template).to eq('subnavs/quux.erb')
+      end
+
+      it 'uses the default subnav if no key matches' do
+        allow(helper).to receive(:page_classes) { 'bleh blah blubb' }
+        helper.yield_for_subnav
+
+        expect(helper.template).to eq('subnavs/default')
       end
     end
 
@@ -774,7 +602,8 @@ MARKDOWN
 
         it 'displays nothing' do
           run_middleman
-          expect(output).to be_empty
+          doc = Nokogiri::HTML(output)
+          expect(doc.css('ul.breadcrumbs').length).to eq(0)
         end
       end
 
@@ -790,21 +619,21 @@ MARKDOWN
         it 'creates a two level breadcrumb' do
           run_middleman
           doc = Nokogiri::HTML(output)
-          expect(doc.css('ul li').length).to eq(2)
+          expect(doc.css('ul.breadcrumbs li').length).to eq(2)
         end
 
         it 'creates entries for each level of the hierarchy' do
           run_middleman
           doc = Nokogiri::HTML(output)
-          expect(doc.css('ul li')[0].text).to eq('Dogs')
-          expect(doc.css('ul li')[1].text).to eq('Big Dogs')
+          expect(doc.css('ul.breadcrumbs li')[0].text).to eq('Dogs')
+          expect(doc.css('ul.breadcrumbs li')[1].text).to eq('Big Dogs')
         end
 
         it 'gives the last entry an "active" class' do
           run_middleman
           doc = Nokogiri::HTML(output)
-          expect(doc.css('ul li')[0]['class']).to be_nil
-          expect(doc.css('ul li')[1]['class']).to eq('active')
+          expect(doc.css('ul.breadcrumbs li')[0]['class']).to be_nil
+          expect(doc.css('ul.breadcrumbs li')[1]['class']).to eq('active')
         end
 
         context 'when the parent also has a breadcrumb title' do
@@ -812,8 +641,8 @@ MARKDOWN
           it 'uses the breadcrumb title instead of the title' do
             run_middleman
             doc = Nokogiri::HTML(output)
-            expect(doc.css('ul li')[0].text).to eq('Dogs')
-            expect(doc.css('ul li')[1].text).to eq('Fancy Schmancy New Title')
+            expect(doc.css('ul.breadcrumbs li')[0].text).to eq('Dogs')
+            expect(doc.css('ul.breadcrumbs li')[1].text).to eq('Fancy Schmancy New Title')
           end
         end
       end
@@ -831,7 +660,7 @@ MARKDOWN
         it 'does not create a breadcrumb' do
           run_middleman
           doc = Nokogiri::HTML(output)
-          expect(doc.css('ul li').length).to eq(0)
+          expect(doc.css('ul.breadcrumbs li').length).to eq(0)
         end
       end
     end

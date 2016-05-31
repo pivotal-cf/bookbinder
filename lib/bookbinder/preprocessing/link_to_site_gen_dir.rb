@@ -1,5 +1,5 @@
 require_relative '../subnav/subnav_generator'
-require_relative '../subnav/json_from_markdown_toc'
+require_relative '../subnav/navigation_entries_from_markdown_root'
 
 module Bookbinder
   module Preprocessing
@@ -30,7 +30,7 @@ module Bookbinder
       private
 
       def subnav_generator(require_valid_subnav_links)
-        @subnav_generator ||= subnav_generator_factory.produce(Subnav::JsonFromMarkdownToc.new(filesystem, require_valid_subnav_links))
+        @subnav_generator ||= subnav_generator_factory.produce(Subnav::NavigationEntriesFromMarkdownRoot.new(filesystem, require_valid_subnav_links))
       end
 
       attr_reader :filesystem, :subnav_generator_factory

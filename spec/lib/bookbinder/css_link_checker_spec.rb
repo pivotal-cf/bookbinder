@@ -99,6 +99,32 @@ module Bookbinder
           expect(broken_links).to be_empty
         end
       end
+
+      describe 'and the url contains query params' do
+        let(:query_param_path) { "../../all/themes/gopo13/images/pivotal-logo.png?foo=bar" }
+        let(:anchor_path) { "../../all/themes/gopo13/images/pivotal-logo.png#there" }
+        let(:test_css) {
+          "a.pivotal-logo {
+            background: url(#{query_param_path}) -1px -1px no-repeat;
+          }
+          a.pivotal-logo {
+            background: url(#{anchor_path}) -1px -1px no-repeat;
+          }"
+        }
+        before do
+          FileUtils.mkdir_p(File.join(tmp,'public/stylesheets/some/dir'))
+          File.open(File.join(tmp, 'public/stylesheets/some/dir/test.css'), 'w'){ |file| file.write(test_css) }
+        end
+
+        it 'correctly removes the query params and computes the path' do
+          broken_links = []
+          expect {
+            broken_links = CssLinkChecker.new.broken_links_in_all_stylesheets
+          }.not_to raise_error
+
+          expect(broken_links).to be_empty
+        end
+      end
     end
 
     describe 'when the remote URI does not respond' do

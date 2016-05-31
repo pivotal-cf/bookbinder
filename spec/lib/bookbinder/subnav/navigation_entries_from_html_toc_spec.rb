@@ -1,11 +1,11 @@
-require_relative '../../../../lib/bookbinder/subnav/json_from_html_toc'
+require_relative '../../../../lib/bookbinder/subnav/navigation_entries_from_html_toc'
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/values/section'
 require_relative '../../../../lib/bookbinder/values/output_locations'
 
 module Bookbinder
   module Subnav
-    describe JsonFromHtmlToc do
+    describe NavigationEntriesFromHtmlToc do
       describe 'formatting a subnav' do
         let(:toc_html) { <<-EOT
 <html>
@@ -23,25 +23,23 @@ module Bookbinder
         EOT
         }
 
-        let(:expected_json){
-          {
-            links: [
-              {
-                url: "/go-here-please/common/topics/pivotal-copyright.html",
-                text: "Copyright"
-              },
-              {
-                url: "/go-here-please/release-notes/release-notes.html",
-                text: "A. Pivotal GemFire XD 1.4 Release Notes",
-                nestedLinks: [
-                  {
-                    url: "/go-here-please/release-notes/release-notes-gemfirexd-1.4.0.html",
-                    text: "A.i. Pivotal GemFire XD 1.4.0 Release Notes"
-                  }
-                ]
-              }
-            ]
-          }.to_json
+        let(:expected_navigation) {
+          [
+            {
+              url: "/go-here-please/common/topics/pivotal-copyright.html",
+              text: "Copyright"
+            },
+            {
+              url: "/go-here-please/release-notes/release-notes.html",
+              text: "A. Pivotal GemFire XD 1.4 Release Notes",
+              nested_links: [
+                {
+                  url: "/go-here-please/release-notes/release-notes-gemfirexd-1.4.0.html",
+                  text: "A.i. Pivotal GemFire XD 1.4.0 Release Notes"
+                }
+              ]
+            }
+          ]
         }
 
         it 'applies the appropriate CSS classes, wraps divs, and creates anchor paths from root' do
@@ -57,7 +55,7 @@ module Bookbinder
               File.join(output_locations.html_from_preprocessing_dir,'go-here-please','index.html')
           ) { toc_html }
 
-          expect(JsonFromHtmlToc.new(fs).get_links(section, output_locations)).to eq(expected_json)
+          expect(NavigationEntriesFromHtmlToc.new(fs).get_links(section, output_locations)).to eq(expected_navigation)
         end
       end
     end

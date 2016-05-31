@@ -144,7 +144,7 @@ module Bookbinder
           path = current_path.dup
         end
         basename = File.basename(path)
-        dirname = File.dirname(path).gsub(/\./, '_')
+        dirname = File.dirname(path).gsub('.', '_')
         page_classes(File.join(dirname, basename), options)
       end
 

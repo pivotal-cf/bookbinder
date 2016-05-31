@@ -1,7 +1,7 @@
 module Bookbinder
   class ArchiveDropDownMenu
     def initialize(config, current_path: nil)
-      @config = config || default_config
+      @config = config_with_default(config)
       @current_path = current_path
     end
 
@@ -35,8 +35,8 @@ module Bookbinder
       File.dirname(current_path)
     end
 
-    def default_config
-      { root_menu_reference => empty_menu }
+    def config_with_default(config)
+      { root_menu_reference => empty_menu }.merge(config || {})
     end
 
     def empty_menu

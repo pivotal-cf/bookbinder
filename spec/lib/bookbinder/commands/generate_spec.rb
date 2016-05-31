@@ -53,13 +53,13 @@ sections:
     name: fantastic/dogs-repo
     ref: 'dog-sha'
   directory: dogs
-  subnav_template: dogs
             YAML
           end
 
           result = Sheller.new.run_command('bin/bookbinder bind local',
                                            out: StringIO.new,
                                            err: StringIO.new)
+
           expect(result).to be_success
         end
 
@@ -86,7 +86,7 @@ sections:
                      context_dir: 'my/context').
         run('foobar')
         expect(out.tap(&:rewind).read).to match(<<-MESSAGE)
-Generating book at my/context/foobar…
+Generating book at my/context/foobar...
         MESSAGE
         expect(success.tap(&:rewind).read).to match(<<-MESSAGE)
 Successfully generated book at my/context/foobar

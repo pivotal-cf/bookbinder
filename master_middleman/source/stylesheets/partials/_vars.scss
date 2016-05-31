@@ -20,17 +20,33 @@ $gray6: #fdfdfd;
 // Book-specific overrides
 @import "book-base-values.scss";
 
+$color-accent: $gray6;
+$color-accent-bright: $gray6;
+
+// text colors
+$color-header: $gray2;
+$color-text: $gray1;
+$color-text-dim: $gray3;
+
+// link colors
+$color-link: #b5292e;
+$color-link-border: #154896;
+
 // border colors
 $color-border-row: $gray5;
 $color-border: $gray4;
 $color-border-light: $gray4;
 $color-border-superlight: $gray4;
 $color-border-dark: $gray3;
+$color-border-tip: $gray1;
 
 // background-colors
 $color-bg: $gray5;
 $color-bg-light: $gray6;
 $color-bg-panel: $gray5;
+$color-bg-header: #b625ff;
+$color-bg-dark: #523f74;
+
 // ~SIZES
 // ===================================================
 $radius: 3px;

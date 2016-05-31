@@ -546,34 +546,6 @@ Nothing to see here.
 No more.
 ```
 
-**Generated JSON:**
-
-Upon binding, Bookbinder parses each of the subnav roots specified in the config to create the subnav tree.
-
-Bookbinder makes these subnav links available in a json format at `/subnavs/<your-subnav-name>.json`. It will have written the name of the file containing the links from subnav_template.erb at a data attribute called data-props-location on 'div.nav-content'.
-
-An example of the json links using the config and subnav root file included above:
-
-```json
-{
-    'links': [
-        {
-            'url': 'reptiles/thing-one.html',
-            'text': 'My First Nav Item',
-            'nestedLinks': [
-                {
-                    'url': 'reptiles/nested-thing.html',
-                    'text': 'My Nested Nav Item'
-                }
-            ]
-        },
-        {
-            'url': 'reptiles/thing-two.html',
-            'text': 'My Second Nav Item'
-        }
-    ]
-}
-```
 
 ### Code Snippets
 `<%= yield_for_code_snippet from: 'my-org/code-repo', at: 'myCodeSnippetA' %>` inserts code snippets extracted from code repositories.

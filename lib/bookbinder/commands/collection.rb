@@ -1,5 +1,5 @@
 Dir.glob(File.expand_path('../../commands/*.rb', __FILE__)).each do |command_file|
-  require command_file
+  require command_file unless command_file =~ /collection\.rb\z/
 end
 
 require_relative '../commands/components/bind/directory_preparer'

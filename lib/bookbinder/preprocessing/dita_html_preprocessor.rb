@@ -1,5 +1,5 @@
 require_relative '../values/subnav_template'
-require_relative '../../../lib/bookbinder/subnav/json_from_html_toc'
+require_relative '../../../lib/bookbinder/subnav/navigation_entries_from_html_toc'
 
 module Bookbinder
   module Preprocessing
@@ -43,7 +43,7 @@ module Bookbinder
 
       private
 
-      attr_reader :fs, :subnav_gen_factory, :dita_formatter, :command_creator, :sheller, :subnav_generator, :output_locations
+      attr_reader :fs, :subnav_gen_factory, :dita_formatter, :command_creator, :sheller, :output_locations
 
       def section_html_dir(section)
         output_locations.html_from_preprocessing_dir.join(section.destination_directory)
@@ -84,7 +84,7 @@ module Bookbinder
 
 
       def subnav_generator
-        @subnav_generator ||= subnav_gen_factory.produce(Subnav::JsonFromHtmlToc.new(fs))
+        @subnav_generator ||= subnav_gen_factory.produce(Subnav::NavigationEntriesFromHtmlToc.new(fs))
       end
     end
   end

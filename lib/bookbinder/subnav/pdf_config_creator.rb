@@ -1,5 +1,4 @@
 require 'yaml'
-require "json"
 
 module Bookbinder
   module Subnav
@@ -9,9 +8,8 @@ module Bookbinder
         @output_locations = output_locations
       end
 
-      def create(props_filename, subnav_config)
-        json = JSON.parse(fs.read(props_location(props_filename)))
-        @links = format_links(json['links'])
+      def create(navigation_entries, subnav_config)
+        @links = format_links(navigation_entries)
 
         fs.overwrite(to: output_locations.pdf_config_dir.join(subnav_config.pdf_config),
                      text: config_content)
@@ -26,7 +24,7 @@ module Bookbinder
       end
 
       def format_links(links)
-        links.map{|item| item['url'] }.compact.map{|link| link.sub(/^\//, '')}
+        links.map{|item| item[:url] }.compact.map{|link| link.sub(/^\//, '')}
       end
 
       def config_content

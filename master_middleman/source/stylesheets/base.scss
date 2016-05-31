@@ -1,4 +1,6 @@
-@import "font-awesome";
+@import "font-awesome/variables";
+@import "font-awesome/core";
+@import "font-awesome/path";
 
 @import "partials/vars";
 @import "partials/mixins";
@@ -10,6 +12,7 @@
 @import "partials/header";
 @import "partials/footer";
 @import "partials/search";
+
 
 // ~LAYOUT
 // ===================================================
@@ -256,8 +259,8 @@ category: basics
   margin: 1em 0;
   padding: 0.7em 1em 0.7em 2.3em;
   position: relative;
-  @extend .fa-lightbulb-o;
   &:before {
+    content: $fa-var-lightbulb-o;
     @extend .fa;
     color: #b9b781;
     font-size: 1.5em;
@@ -281,7 +284,7 @@ category: basics
 // Tips for first-time users
 .tip {
   background: #ffffff;
-  border-color: $blue2;
+  border-color: $color-border-tip;
   border-radius: 3px;
   border-style: solid;
   border-width: 1px;
@@ -327,7 +330,6 @@ category: basics
   opacity: 0;
   @include transition(all 0.2s linear);
   a {
-    @extend .fa-arrow-up;
     border: 0;
     bottom: 4em;
     position: fixed;
@@ -336,6 +338,7 @@ category: basics
       background: none;
     }
     &:before {
+      content: $fa-var-arrow-up;
       @extend .fa;
       background: $color-accent-bright;
       box-shadow: 0 0 9px rgba(153, 153, 153, 0.8);

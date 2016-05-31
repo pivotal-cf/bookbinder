@@ -4,7 +4,7 @@ require 'redcarpet'
 
 module Bookbinder
   module Subnav
-    class JsonFromMarkdownToc
+    class NavigationEntriesFromMarkdownRoot
       SubnavDuplicateLinkError = Class.new(RuntimeError)
       SubnavBrokenLinkError = Class.new(RuntimeError)
       SubnavRootMissingError = Class.new(RuntimeError)
@@ -25,13 +25,13 @@ module Bookbinder
           if @require_valid_subnav_links
             raise SubnavRootMissingError.new('Subnav root not found at: ' + config.subnav_root)
           else
-            return {links: []}.to_json
+            return []
           end
         end
 
         @parsed_files = {Pathname(root) => '(root)'}
 
-        {links: gather_urls_and_texts(root)}.to_json
+        gather_urls_and_texts(root)
       end
 
       attr_reader :fs, :source_for_site_gen, :renderer, :config
@@ -67,7 +67,7 @@ module Bookbinder
           unless no_children
             @parsed_files[next_source] = source
             nested_urls_and_texts = gather_urls_and_texts(next_source)
-            nested_links.merge!(nestedLinks: nested_urls_and_texts) unless nested_urls_and_texts.empty?
+            nested_links.merge!(nested_links: nested_urls_and_texts) unless nested_urls_and_texts.empty?
           end
 
           {url: '/' + expanded_href.to_s, text: element.inner_text}.merge(nested_links)

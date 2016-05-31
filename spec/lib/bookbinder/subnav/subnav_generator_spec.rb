@@ -1,5 +1,5 @@
 require_relative '../../../../lib/bookbinder/subnav/subnav_generator'
-require_relative '../../../../lib/bookbinder/subnav/json_props_creator'
+require_relative '../../../../lib/bookbinder/subnav/navigation_entries_from_html_toc'
 require_relative '../../../../lib/bookbinder/subnav/template_creator'
 require_relative '../../../../lib/bookbinder/subnav/pdf_config_creator'
 require_relative '../../../../lib/bookbinder/config/product_config'
@@ -7,19 +7,20 @@ require_relative '../../../../lib/bookbinder/config/product_config'
 module Bookbinder
   module Subnav
     describe SubnavGenerator do
+      let(:output_locations) { 'locations!' }
       context 'without pdf_config in config' do
         it 'creates a json props file and then creates the template and pdf configs' do
           product_config = Config::ProductConfig.new({})
-          props_filename = 'props.json'
+          navigation_entries = 'entries and stuff'
 
-          props_creator = instance_double(Bookbinder::Subnav::JsonPropsCreator)
+          navigation_entries_parser = instance_double(Bookbinder::Subnav::NavigationEntriesFromHtmlToc)
           template_creator = instance_double(Bookbinder::Subnav::TemplateCreator)
           pdf_config_creator = instance_double(Bookbinder::Subnav::PdfConfigCreator)
 
-          expect(props_creator).to receive(:create).with(product_config) { props_filename }
-          expect(template_creator).to receive(:create).with(props_filename, product_config)
+          expect(navigation_entries_parser).to receive(:get_links).with(product_config, output_locations) { navigation_entries }
+          expect(template_creator).to receive(:create).with(navigation_entries, product_config)
 
-          SubnavGenerator.new(props_creator, template_creator, pdf_config_creator)
+          SubnavGenerator.new(navigation_entries_parser, template_creator, pdf_config_creator, output_locations)
             .generate(product_config)
         end
       end
@@ -27,17 +28,17 @@ module Bookbinder
       context 'with pdf_config in config' do
         it 'creates a json props file and then creates the template and pdf configs' do
           product_config = Config::ProductConfig.new({'whatever' => 'thing', 'pdf_config' => 'blah'})
-          props_filename = 'props.json'
+          navigation_entries = 'entries and stuff'
 
-          props_creator = instance_double(Bookbinder::Subnav::JsonPropsCreator)
+          navigation_entries_parser = instance_double(Bookbinder::Subnav::NavigationEntriesFromHtmlToc)
           template_creator = instance_double(Bookbinder::Subnav::TemplateCreator)
           pdf_config_creator = instance_double(Bookbinder::Subnav::PdfConfigCreator)
 
-          expect(props_creator).to receive(:create).with(product_config) { props_filename }
-          expect(template_creator).to receive(:create).with(props_filename, product_config)
-          expect(pdf_config_creator).to receive(:create).with(props_filename, product_config)
+          expect(navigation_entries_parser).to receive(:get_links).with(product_config, output_locations) { navigation_entries }
+          expect(template_creator).to receive(:create).with(navigation_entries, product_config)
+          expect(pdf_config_creator).to receive(:create).with(navigation_entries, product_config)
 
-          SubnavGenerator.new(props_creator, template_creator, pdf_config_creator)
+          SubnavGenerator.new(navigation_entries_parser, template_creator, pdf_config_creator, output_locations)
             .generate(product_config)
         end
       end
@@ -47,7 +48,8 @@ module Bookbinder
           SubnavGenerator.new(
             double('props creator').as_null_object,
             double('template_creator').as_null_object,
-            double('pdf_config_creator').as_null_object).generate({})
+            double('pdf_config_creator').as_null_object,
+            output_locations).generate({})
         }.to_not raise_error
       end
     end

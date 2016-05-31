@@ -1,24 +1,20 @@
-require_relative '../../../lib/bookbinder/values/user_message'
-require_relative '../../../lib/bookbinder/colorizer'
-require_relative '../../../lib/bookbinder/terminal'
+require 'erb'
 
 module Bookbinder
   module Subnav
     class TemplateCreator
-      def initialize(fs, output_locations, html_doc_manipulator)
+      def initialize(fs, output_locations)
         @fs = fs
         @output_locations = output_locations
-        @html_doc_manipulator = html_doc_manipulator
       end
 
-      def create(props_filename, subnav_spec)
+      def create(navigation_entries, subnav_spec)
         template_content = fs.read(template_path)
-        nav_with_props = html_doc_manipulator.set_attribute(document: template_content,
-                                                            selector: 'div.nav-content',
-                                                            attribute: 'data-props-location',
-                                                            value: props_filename)
+        links_template = ERB.new(fs.read(subnavs_path.join('_nav-links.erb')))
 
-        fs.write(text: nav_with_props, to: subnav_destination(subnav_spec.subnav_name))
+        populated_nav = ERB.new(template_content).result(LinkHolder.new(navigation_entries, links_template).get_binding)
+
+        fs.write(text: populated_nav, to: subnav_destination(subnav_spec.subnav_name))
       end
 
       attr_reader :fs, :output_locations, :html_doc_manipulator
@@ -34,20 +30,36 @@ module Bookbinder
       end
 
       def template_path
-        deprecated_prefix = '_dita_' unless fs.file_exist?(subnavs_path.join('subnav_template.erb'))
-
-        if deprecated_prefix
-          Terminal.new(Colorizer.new).update(UserMessage.new(
-            "Use of '_dita_subnav_template.erb' is deprecated. " +
-              "The preferred template is 'subnav_template.erb'. Please rename your file.",
-            EscalationType.warn
-          ))
-        end
-        subnavs_path.join("#{deprecated_prefix}subnav_template.erb")
+        subnavs_path.join('_subnav_template.erb')
       end
 
       def subnav_destination(name)
         subnavs_path.join(filename(name))
+      end
+
+      class LinkHolder
+        def initialize(links, template)
+          @links = links
+          @template = template
+        end
+
+        attr_reader :links
+
+        def get_binding
+          binding
+        end
+
+        def render_links(some_links)
+          @template.result(LinkHolder.new(some_links, @template).get_binding)
+        end
+
+        def submenu_class(link)
+          'has_submenu' unless links?(link[:nested_links])
+        end
+
+        def links?(links)
+          (links || []).empty?
+        end
       end
     end
   end

@@ -1,0 +1,143 @@
+
+.sidenav-title {
+  border: 0;
+  color: $color-text;
+  display: block;
+  padding: 1em;
+  text-align: center;
+  text-transform: uppercase;
+  @media (min-width: $bp-wide) {
+    display: none;
+  }
+}
+.sidenav-title:after {
+  @extend .fa;
+  content: $fa-var-angle-down;
+  padding-left: 1.5em;
+}
+.sidenav-title:hover,
+.active .sidenav-title {
+  @include contrasted($color-accent-bright);
+  cursor: pointer;
+}
+.active .sidenav-title:after {
+  content: $fa-var-angle-up;
+}
+// ~SIDE NAVIGATION
+.nav-container {
+  background: $gray5;
+  @media (min-width: $bp-wide) {
+    padding: 1.9em 0 1.9em 1em;
+  }
+}
+.nav-content {
+  height: 0;
+  opacity: 0;
+  @include transition(all 0.2s linear);
+  overflow: hidden;
+  padding-left: 1em;
+  @media (min-width: $bp-wide) {
+    height: auto;
+    display: block;
+    opacity: 1;
+    padding-left: 0;
+  }
+  @media (min-width: $bp-widest) {
+    padding-left: 0.875em;
+  }
+}
+.active .nav-content {
+  border-top: 1px solid #ededed;
+  height: auto;
+  opacity: 1;
+  padding-bottom: 1.9em; // Allows nav to be hidden in mobile view.
+  padding-top: 1em;
+}
+.nav-content ul,
+.nav-content ol {
+  clear: both;
+  display: block;
+  margin: 0.5em 0;
+  padding: 0;
+}
+.nav-content li {
+  display: block;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+// navigation links
+.nav-content a {
+  border-width: 1px 0 1px 1px;
+  border-style: solid;
+  border-color: transparent;
+  color: $gray2;
+  font-size: 0.9rem; // Custom font-size
+  display: block;
+  float: left;
+  padding: .75em 30px .75em 2em;
+  text-decoration: none;
+  width: 100%;
+}
+.nav-content a:hover,
+.nav-content a:focus,
+.nav-content a:active {
+  border-color: #EEE;
+  background-color: #fff;
+  color: $color-text;
+}
+.nav-content .active,
+.nav-content .active:hover,
+.nav-content .active:focus {
+  background-color: transparentize($color-accent-bright, 0.8);
+  border-style: solid;
+  color: $gray1;
+  @extend %h-bold;
+}
+
+
+
+.nav-content {
+  .has_submenu {
+    cursor: pointer;
+
+    &:before {
+      @extend .fa;
+      content: $fa-var-angle-right;
+      float: left;
+      width: 1rem;
+      margin-top: 1em;
+      display: inline-block;
+      font-style: normal;
+      font-weight: normal;
+      line-height: 1;
+    }
+
+    > a {
+      margin-left: 1em;
+      float: none;
+      width: inherit;
+      padding-left: 1em;
+    }
+
+    > ul {
+      display: none;
+    }
+
+    li {
+      padding-left: 1em;
+    }
+
+    &.expanded {
+      &:before {
+        content: $fa-var-angle-down;
+      }
+
+      > ul {
+        display: block;
+      }
+    }
+  }
+}
+

@@ -12,7 +12,7 @@ module Bookbinder
 
       def run(name, special_bookbinder_gem_args={})
         path = context_dir.join(name)
-        streams[:out].puts "Generating book at #{path}…"
+        streams[:out].puts "Generating book at #{path}..."
         if fs.file_exist?(path)
           streams[:err].puts "Cannot generate book: directory already exists"
           1
