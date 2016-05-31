@@ -12,7 +12,7 @@ module Bookbinder
     def download(resource)
       spec_root.join("utilities").tap(&:mkpath).
           join(resource.tarball_filename).tap do |destination|
-        `curl -s #{resource.tarball_url} > #{destination}` unless destination.exist?
+        `curl #{resource.tarball_url} > #{destination}` unless destination.exist?
       end
     end
 
