@@ -2,7 +2,7 @@
   var isExpanded = /\bexpanded\b/;
 
   function openSubmenu(e) {
-    var el = e.srcElement;
+    var el = e.currentTarget;
     if (isExpanded.test(el.className)) {
       el.className = el.className.replace(isExpanded, '');
     } else {
