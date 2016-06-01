@@ -1,4 +1,4 @@
-git require 'base64'
+require 'base64'
 
 Gem::Specification.new do |s|
   s.name        = 'bookbindery'
