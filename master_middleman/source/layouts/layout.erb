@@ -18,11 +18,11 @@
   <%= stylesheet_link_tag 'book-styles', :media => 'screen, print' %>
   <link href='/images/favicon.ico' rel='shortcut icon'>
 
-  <script src="/javascripts/sidenav.js" />
+  <script src="/javascripts/sidenav.js"></script>
   <%= partial 'layouts/additional-scripts' %>
 </head>
 
-<body class="<%= defined?(body_classes) ? body_classes : page_classes %> <%= yield_for_subnav.empty? ? '' : 'has-subnav' %>">
+<body class="<%= body_classes %><%= yield_for_subnav.empty? ? '' : ' has-subnav' %>">
 
 <div class="viewport">
   <div class='wrap'>
