@@ -12,7 +12,7 @@ describe('sidenav', function() {
 
     expect(li.className).toContain('expanded');
 
-    li.click();
+    clickEl(li);
 
     expect(li.className).not.toContain('expanded');
   });
@@ -24,7 +24,7 @@ describe('sidenav', function() {
 
     Bookbinder.startSidenav(root);
     var li = root.querySelector('li');
-    li.click();
+    clickEl(li);
 
     expect(li.className).not.toContain('expanded');
   });
@@ -40,11 +40,11 @@ describe('sidenav', function() {
 
     Bookbinder.startSidenav(root);
     var li = root.querySelector('.li_child');
-    li.click();
+    clickEl(li);
 
     expect(li.className).toContain('expanded');
 
-    li.click();
+    clickEl(li);
 
     expect(li.className).not.toContain('expanded');
   });

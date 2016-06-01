@@ -23,3 +23,20 @@ function createDom(tagName, attributes, children) {
 
   return el;
 }
+
+function clickEl(el) {
+  var event = document.createEvent('MouseEvent');
+  event.initMouseEvent(
+    'click',
+    true, // bubble
+    true, // cancelable
+    window,
+    null,
+    0, 0, 0, 0, // coordinates
+    false, false, false, false, // modifier keys
+    0, // left
+    null
+  );
+
+  el.dispatchEvent(event);
+}
