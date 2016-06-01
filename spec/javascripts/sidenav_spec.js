@@ -17,27 +17,6 @@ describe('sidenav', function() {
     expect(li.className).not.toContain('expanded');
   });
 
-  it('expands and collapses subnavs with children', function() {
-    var root = createDom('div', {},
-      createDom('ul', {},
-        createDom('li', { className: 'has_submenu li_one' },
-          createDom('span', {}))
-      ));
-
-    Bookbinder.startSidenav(root);
-    var li = root.querySelector('.li_one');
-    var clickTarget = root.querySelector('span');
-    clickEl(clickTarget);
-
-    expect(li.className).toContain('expanded');
-    expect(clickTarget.className).not.toContain('expanded');
-
-    clickEl(clickTarget);
-
-    expect(li.className).not.toContain('expanded');
-    expect(clickTarget.className).not.toContain('expanded');
-  });
-
   it('does not try to expand when there is no subnav', function() {
     var root = createDom('div', {},
       createDom('ul', {},
@@ -122,26 +101,5 @@ describe('sidenav', function() {
     expect(root.querySelector('.li_parent').className).toContain('expanded');
 
     expect(root.querySelector('.li_collapsed').className).not.toContain('expanded');
-  });
-
-  it('scrolls the sidenav to the active link', function() {
-    var root = createDom('div', {},
-      createDom('ul', {},
-        createDom('li', {className: 'has_submenu li_collapsed'}),
-        createDom('li', {className: 'has_submenu li_grandparent'},
-          createDom('a', {href: '/foo/bar/baz.html'}),
-          createDom('ul', {},
-            createDom('li', {className: 'has_submenu li_parent'},
-              createDom('a', {href: '/bar/baz.html'}),
-              createDom('ul', {},
-                createDom('li', {}),
-                createDom('li', {}),
-                createDom('li', {}),
-                createDom('li', {}),
-                createDom('li', {},
-                  createDom('a', {href: '/bar/foo/baz.html'}))
-              ))))));
-
-    Bookbinder.startSidenav(root, '/bar/foo/baz.html');
   });
 });

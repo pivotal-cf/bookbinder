@@ -132,4 +132,5 @@ boot_files:
 # random: true
 #
 random: true
+show_console_log: true
 

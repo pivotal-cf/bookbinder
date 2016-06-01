@@ -11,12 +11,20 @@
     e.stopPropagation();
   }
 
+  function registerOnClick(el) {
+    if (el.addEventListener) {
+      el.addEventListener('click', openSubmenu);
+    } else {
+      el.onclick = openSubmenu;
+    }
+  }
+
   window.Bookbinder = {
     startSidenav: function(rootEl, currentPath) {
       var submenus = rootEl.querySelectorAll('.has_submenu');
 
       for (var i = 0; i < submenus.length; i++) {
-        submenus[i].onclick = openSubmenu;
+        registerOnClick(submenus[i]);
       }
 
       if (currentPath) {
