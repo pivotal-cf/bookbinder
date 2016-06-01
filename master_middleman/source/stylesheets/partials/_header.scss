@@ -202,6 +202,68 @@ category: basics
     margin-bottom: 0;
   }
 }
+/*doc
+---
+title: Title Flashy
+name: title_flashy
+category: basics
+---
+```html_example
+<h1 class="title-flashy">
+  <span class="title-deemph">Pivotal</span> Documentation
+</h1>
+```
+*/
+.title-flashy {
+  display: inline-block;
+  font-weight: 600;
+  font-size: $font-size-l;
+  text-align: left;
+  margin-left: 1rem;
+  img {
+    height: rem(61);
+    vertical-align: middle;
+    padding-right: .5rem;
+    float: left;
+    @media (min-width: $bp-wide) {
+      height: rem(45);
+      float: none;
+    }
+  }
+  @media (min-width: $bp-wide) {
+    font-size: $font-size-xxl;
+    margin-left: 0;
+    padding-left: 1.8em;
+    padding-top: 2rem;
+    text-align: center;
+  }
+}
+/*doc
+---
+title: Title Intro
+name: title_intro
+category: basics
+---
+```html_example
+<h2 class="title-intro">
+  Everything you need to know about Pivotal Software.
+</h2>
+```
+*/
+.title-intro {
+  font-size: $font-size-m;
+  font-weight: 300;
+  margin: 0 auto 0.5em;
+  max-width: 30em;
+  text-align: center;
+  @media (min-width: $bp-wide) {
+    font-size: $font-size-l;
+  }
+}
+
+.title-deemph {
+  font-weight: 300;
+}
 
 
 // ~HEADER SEARCH
