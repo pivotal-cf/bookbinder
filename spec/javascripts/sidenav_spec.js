@@ -8,7 +8,7 @@ describe('sidenav', function() {
 
     Bookbinder.startSidenav(root);
     var li = root.querySelector('.li_two');
-    li.click();
+    clickEl(li);
 
     expect(li.className).toContain('expanded');
 
