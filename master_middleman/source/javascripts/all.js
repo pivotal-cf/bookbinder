@@ -1,0 +1,2 @@
+//= require bookbinder
+//= require book

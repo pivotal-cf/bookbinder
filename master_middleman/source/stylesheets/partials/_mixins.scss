@@ -41,3 +41,13 @@
   }
   @return ($pxval / $base) * 1em;
 }
+
+@function rem($pxval, $base: $em-base) {
+  @if not unitless($pxval) {
+    $pxval: strip-units($pxval);
+  }
+  @if not unitless($base) {
+    $base: strip-units($base);
+  }
+  @return ($pxval / $base) * 1rem;
+}

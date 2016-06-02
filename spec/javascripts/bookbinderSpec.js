@@ -102,4 +102,42 @@ describe('sidenav', function() {
 
     expect(root.querySelector('.li_collapsed').className).not.toContain('expanded');
   });
+
+  it('hides and shows main menu', function() {
+    var root = createDom('div', {},
+      createDom('div', { className: 'parent' },
+        createDom('div', { className: 'clicker', 'data-behavior': 'MenuMobile' })));
+
+    Bookbinder.mobileMainMenu(root);
+
+    var parent = root.querySelector('.parent');
+    var clicker = root.querySelector('.clicker');
+
+    clickEl(clicker);
+
+    expect(parent.className).toContain('menu-active');
+
+    clickEl(clicker);
+
+    expect(parent.className).not.toContain('menu-active');
+  });
+
+  it('hides and shows side nav', function() {
+    var root = createDom('div', {},
+      createDom('div', { className: 'parent' },
+        createDom('div', { className: 'clicker', 'data-behavior': 'SubMenuMobile' })));
+
+    Bookbinder.mobileSubMenu(root);
+
+    var parent = root.querySelector('.parent');
+    var clicker = root.querySelector('.clicker');
+
+    clickEl(clicker);
+
+    expect(parent.className).toContain('active');
+
+    clickEl(clicker);
+
+    expect(parent.className).not.toContain('active');
+  });
 });
