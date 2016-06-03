@@ -17,6 +17,8 @@ module Bookbinder
                 <li><a href="release-notes/release-notes-gemfirexd-1.4.0.html">A.i. Pivotal GemFire XD 1.4.0 Release Notes</a></li>
             </ul>
         </li>
+        <li><a href="http://example.com">External link</a></li>
+        <li><a href="https://example.com">Https External link</a></li>
     </ul>
   </body>
 </html>
@@ -38,6 +40,14 @@ module Bookbinder
                   text: "A.i. Pivotal GemFire XD 1.4.0 Release Notes"
                 }
               ]
+            },
+            {
+              url: "http://example.com",
+              text: "External link"
+            },
+            {
+              url: "https://example.com",
+              text: "Https External link"
             }
           ]
         }

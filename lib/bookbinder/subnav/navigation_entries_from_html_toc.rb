@@ -6,6 +6,7 @@ module Bookbinder
     class NavigationEntriesFromHtmlToc
       def initialize(fs)
         @fs = fs
+        @external_link_check = %r{\Ahttps?://}
       end
 
       def get_links(section, output_locations)
@@ -33,7 +34,9 @@ module Bookbinder
 
       def set_anchor_values(anchors)
         anchors.each do |anchor|
-          anchor['href'] = "/#{section.destination_directory}/#{anchor['href']}"
+          unless @external_link_check.match(anchor['href'])
+            anchor['href'] = "/#{section.destination_directory}/#{anchor['href']}"
+          end
         end
       end
 
