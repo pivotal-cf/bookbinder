@@ -70,14 +70,9 @@ module Bookbinder
         current_page.add_metadata({page: {repo_link_disabled: true}})
       end
 
-      def render_repo_link(include_environments: [])
+      def render_repo_link
         if config[:repo_link_enabled] && repo_url && !current_page.metadata[:page][:repo_link_disabled]
-          id = 'repo-link'
-          whitelisted_envs = include_environments.join(" ")
-          default_display = 'display: none;'
-          display_text = 'View the source for this page in GitHub'
-
-          "<a id='#{id}' data-whitelist='#{whitelisted_envs}' style='#{default_display}' href='#{repo_url}'>#{display_text}</a>"
+          "<a id='repo-link' href='#{repo_url}'>View the source for this page in GitHub</a>"
         end
       end
 
@@ -92,7 +87,7 @@ module Bookbinder
 
         date = page_last_modified_date || parsed_default_date
 
-        "Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date}\"></span>" if date
+        "Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date.to_i}000\"></span>" if date
       end
 
       def breadcrumbs

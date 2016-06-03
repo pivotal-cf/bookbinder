@@ -18,6 +18,7 @@ module Bookbinder
       Rack::Builder.new do
         use ResolveRedirects, path
         use AuthorizeUser, auth
+        use Rack::Deflater
         map '/api/feedback' do
           use MailFeedback, client
           run Bookbinder::NotFound.new('public/404.html')
@@ -25,14 +26,7 @@ module Bookbinder
         map '/search' do
           run Bookbinder::Search::Handler.new
         end
-        if ENV['CUSTOM_ROOT']
-          map ENV['CUSTOM_ROOT'] do
-            run Bookbinder::Server
-          end
-          run Bookbinder::NotFound.new('public/404.html')
-        else
-          run Bookbinder::Server
-        end
+        run Bookbinder::Server
       end
     end
 

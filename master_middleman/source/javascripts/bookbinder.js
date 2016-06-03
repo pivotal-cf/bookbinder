@@ -1,4 +1,6 @@
 (function() {
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
   function toggleClass(el, className) {
     var check = new RegExp("\\b" + className + "\\b");
     if (check.test(el.className)) {
@@ -30,6 +32,13 @@
   function toggleSubMenu(e) {
     var el = e.currentTarget;
     toggleClass(el.parentNode, 'active');
+  }
+
+  function displayDate(millis) {
+    millis = parseInt(millis, 10);
+    var date = new Date(millis);
+
+    return [MONTHS[date.getMonth()], ' ', date.getDate(), ', ', date.getFullYear()].join('');
   }
 
   window.Bookbinder = {
@@ -73,10 +82,18 @@
         registerOnClick(subMenus[i], toggleSubMenu);
       }
     },
+    modifiedDates: function(root) {
+      var datesElements = root.querySelectorAll('[data-behavior=DisplayModifiedDate]');
+
+      for (var i = 0; i < datesElements.length; i++) {
+        datesElements[i].innerText = displayDate(datesElements[i].getAttribute('data-modified-date'));
+      }
+    },
     boot: function() {
       Bookbinder.startSidenav(document.querySelector('#sub-nav'), document.location.pathname);
       Bookbinder.mobileMainMenu(document);
       Bookbinder.mobileSubMenu(document);
+      Bookbinder.modifiedDates(document);
     }
   };
 })();
