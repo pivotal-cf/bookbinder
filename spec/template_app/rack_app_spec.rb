@@ -45,26 +45,6 @@ module Bookbinder
       end
     end
 
-    it 'can mount the content under a directory' do
-      begin
-        redirects = instance_double('Pathname', exist?: false)
-        ENV['CUSTOM_ROOT'] = '/foobar'
-
-        Dir.chdir(File.join(File.dirname(__FILE__), '..', 'fixtures', 'static_file_checking')) do
-          app = RackApp.new(redirects).app
-          session = Rack::Test::Session.new(app)
-
-          session.get('/foobar/foo.html')
-          expect(session.last_response.status).to eq(200)
-
-          session.get('/foo.html')
-          expect(session.last_response.status).to eq(404)
-        end
-      ensure
-        ENV['CUSTOM_ROOT'] = nil
-      end
-    end
-
     describe 'sending feedback' do
       let(:redirects) { instance_double('Pathname', exist?: false) }
       let(:mail_client) { double('mail client') }

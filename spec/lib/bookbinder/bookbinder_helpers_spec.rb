@@ -149,7 +149,7 @@ module Bookbinder
 
         expect(git_accessor).to receive(:author_date).with('index.html.md.erb') { date }
         expect(helper.modified_date).to eq(
-          "Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date.utc}\"></span>"
+          "Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date.utc.to_i}000\"></span>"
         )
       end
 
@@ -161,7 +161,7 @@ module Bookbinder
           expect(git_accessor).to receive(:author_date).with('foo/output/preprocessing/sections/index.html.md.erb', dita: true) { date }
 
           expect(helper.modified_date).to eq(
-            "Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date.utc}\"></span>"
+            "Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{date.utc.to_i}000\"></span>"
           )
       end
 
@@ -181,7 +181,7 @@ module Bookbinder
 
         expect(git_accessor).to receive(:author_date).with('index.html.md.erb') { nil }
         expect(helper.modified_date(default_date: "December 31, 1999")).to eq(
-          "Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{default_date.utc}\"></span>"
+          "Page last updated: <span data-behavior=\"DisplayModifiedDate\" data-modified-date=\"#{default_date.utc.to_i}000\"></span>"
         )
       end
     end
@@ -255,7 +255,7 @@ module Bookbinder
         context 'when the page url directories exactly match the desired dir' do
           it 'renders the repo link using the values from bookbinder config' do
             File.open(File.join(tmpdir, 'source', 'desired', 'dir', 'index.html.erb'), 'w') do |f|
-              f.write("<%= render_repo_link(include_environments: ['ocean-trench', 'martian-wasteland']) %>")
+              f.write("<%= render_repo_link %>")
             end
 
             squelch_middleman_output
@@ -271,7 +271,7 @@ module Bookbinder
 
             output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
 
-            expected_url = "<a id='repo-link' data-whitelist='ocean-trench martian-wasteland' style='display: none;' href='http://github.com/the-best-repo-evah/tree/awesome-ref/index.html.md.erb'>View the source for this page in GitHub</a>"
+            expected_url = "<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/awesome-ref/index.html.md.erb'>View the source for this page in GitHub</a>"
 
             expect(output).to include(expected_url)
           end
@@ -296,7 +296,7 @@ module Bookbinder
 
               output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
 
-              expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/tree/master/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
+              expect(output).to include("<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/master/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
             end
           end
 
@@ -318,7 +318,7 @@ module Bookbinder
 
               output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
 
-              expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/tree/master/nested/index.html.md.erb'>View the source for this page in GitHub</a>")
+              expect(output).to include("<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/master/nested/index.html.md.erb'>View the source for this page in GitHub</a>")
             end
           end
 
@@ -341,7 +341,7 @@ module Bookbinder
 
               output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
 
-              expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/tree/master/nested/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
+              expect(output).to include("<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/master/nested/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
             end
           end
 
@@ -378,7 +378,7 @@ dita: true
             )
 
             output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
-            expect(output).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/tree/master/nested/some/path/index.xml'>View the source for this page in GitHub</a>")
+            expect(output).to include("<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/master/nested/some/path/index.xml'>View the source for this page in GitHub</a>")
           end
         end
 
@@ -411,7 +411,7 @@ dita: true
 
           output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
 
-          expected_url = "<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/the-best-repo-evah/tree/awesome-ref'>View the source for this page in GitHub</a>"
+          expected_url = "<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/awesome-ref'>View the source for this page in GitHub</a>"
 
           expect(output).to include(expected_url)
         end
@@ -444,8 +444,8 @@ dita: true
           output_one = File.read(tmpdir.join('build', 'dir-one', 'index_one.html'))
           output_two = File.read(tmpdir.join('build', 'dir-two', 'index_two.html'))
 
-          expect(output_one).to_not include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/repo-one/tree/awesome-ref/dir-one/index_one.html.md.erb'>View the source for this page in GitHub</a>")
-          expect(output_two).to include("<a id='repo-link' data-whitelist='' style='display: none;' href='http://github.com/repo-two/tree/master/index_two.html.md.erb'>View the source for this page in GitHub</a>")
+          expect(output_one).to_not include("<a id='repo-link' href='http://github.com/repo-one/tree/awesome-ref/dir-one/index_one.html.md.erb'>View the source for this page in GitHub</a>")
+          expect(output_two).to include("<a id='repo-link' href='http://github.com/repo-two/tree/master/index_two.html.md.erb'>View the source for this page in GitHub</a>")
         end
 
         it 'does not render a link when binding locally' do
