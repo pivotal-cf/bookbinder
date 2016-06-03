@@ -17,6 +17,30 @@ describe('sidenav', function() {
     expect(li.className).not.toContain('expanded');
   });
 
+  it('does not expand or collapse subnav when a child link is clicked', function() {
+    var root = createDom('div', {},
+      createDom('ul', {},
+        createDom('li', { className: 'has_submenu li_one' },
+          createDom('a', { href: '#' }))
+      ));
+
+    Bookbinder.startSidenav(root);
+    var li = root.querySelector('.li_one');
+    var link = root.querySelector('a');
+    clickEl(link);
+
+    expect(li.className).not.toContain('expanded');
+
+    clickEl(li);
+    expect(li.className).toContain('expanded');
+
+    clickEl(link);
+    expect(li.className).toContain('expanded');
+
+    clickEl(li);
+    expect(li.className).not.toContain('expanded');
+  });
+
   it('does not try to expand when there is no subnav', function() {
     var root = createDom('div', {},
       createDom('ul', {},

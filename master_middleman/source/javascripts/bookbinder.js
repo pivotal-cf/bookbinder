@@ -11,9 +11,11 @@
   }
 
   function openSubmenu(e) {
-    var el = e.currentTarget;
-    toggleClass(el, 'expanded');
-    e.stopPropagation();
+    if (e.srcElement.tagName !== 'A') {
+      var el = e.currentTarget;
+      toggleClass(el, 'expanded');
+      e.stopPropagation();
+    }
   }
 
   function registerOnClick(el, handler) {
