@@ -64,7 +64,7 @@ module Bookbinder
       alias_method :subnav_name, :product_id
 
       def product_info
-        return '' if config['product_info'].nil?
+        return {} if config['product_info'].nil?
         config['product_info']
       end
 

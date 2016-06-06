@@ -104,14 +104,7 @@ module Bookbinder
       end
 
       def product_info
-        temp_template_key = template_key
-        if config[:product_info][temp_template_key] == ''
-          default = {use_local_header: false, changelog_href: '', local_header_img: '', local_header_title: '',
-            local_header_links: [''], local_header_version_list: ['']}
-          OpenStruct.new default
-        else
-          OpenStruct.new config[:product_info][temp_template_key]
-        end
+        config[:product_info].fetch(template_key, {})
       end
 
       def quick_links
