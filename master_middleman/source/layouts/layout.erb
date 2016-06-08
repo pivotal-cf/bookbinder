@@ -14,8 +14,8 @@
     <%= vars.book_title_short %>
   </title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <%= stylesheet_link_tag 'base', :media => 'screen, print' %>
-  <%= stylesheet_link_tag 'book-styles', :media => 'screen, print' %>
+  <%= stylesheet_link_tag 'all', :media => 'screen, print' %>
+  <%= stylesheet_link_tag 'print', :media => 'print' %>
   <link href='/images/favicon.ico' rel='shortcut icon'>
 
   <%= javascript_include_tag "all" %>
@@ -32,7 +32,6 @@
 
     <%= partial 'layouts/header' %>
 
-
     <div class="container">
 
       <!--googleoff: index-->
@@ -42,11 +41,7 @@
       <main class="content content-layout" id="js-content" role="main">
         <a id="top"></a>
         <%= partial 'layouts/local-header' %>
-        <% if current_page.data.title %>
-          <h1 class="title-container">
-            <%= current_page.data.title %>
-          </h1>
-        <% end %>
+        <%= partial 'layouts/title' %>
         <% if quick_links %>
           <div id="js-quick-links">
             <%= quick_links %>

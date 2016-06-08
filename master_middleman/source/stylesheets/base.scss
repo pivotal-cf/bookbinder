@@ -26,7 +26,15 @@
 .content-layout {
   padding: 2em 1.5em 2em 1.5em;
   @media (min-width: $bp-wide) {
-    padding-top: 4.2em;
+    padding-top: 0;
+  }
+
+  @media (min-width: $bp-wide) {
+    #top {
+      padding-bottom: 4em;
+      border: none;
+      display: block;
+    }
   }
 }
 .has-subnav .container {
@@ -41,7 +49,7 @@
 .has-subnav .content-layout {
   @media (min-width: $bp-wide) {
     max-width: 45em;
-    padding: 6.2em 2em 2em;
+    padding: 0 2em 2em;
   }
 }
 .nav-container {

@@ -291,12 +291,6 @@ category: basics
 .searchbar a:hover {
   border-bottom: 0;
 }
-.searchbar:hover,
-.active.searchbar {
-  @media (min-width: $bp-wide) {
-    //@include contrasted($color-accent-bright);
-  }
-}
 .search-input-inner {
   position: relative;
 }
@@ -321,7 +315,6 @@ category: basics
   //@include border-bottom-radius(3px);
   display: none;
   @media (min-width: $bp-wide) {
-    //@include contrasted($color-accent-bright);
     padding: 1em;
     position: absolute;
     right: 0;
@@ -413,9 +406,6 @@ category: basics
   color: $color-text;
   display: block;
   padding-left: 0.9em;
-  &:hover {
-    //@include contrasted($color-accent-bright);
-  }
 }
 .header-dropdown-content ol,
 .header-dropdown-content ul {
