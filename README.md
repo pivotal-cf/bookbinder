@@ -729,47 +729,6 @@ documentation website locally at
 documentation repos, we recommend leaving this running in a dedicated shell
 window. It can be terminated by hitting `ctrl-c`.
 
-## Continuous Integration
-
-### CI for books
-
-We recommend using [Concourse](http://concourse.ci/) for continuous integration.
-
-#### CI Runner
-You will want a build that executes this shell command:
-
-        bundle install --binstubs
-        bin/bookbinder run_publish_ci
-
-This will bind a book and push it to staging.
-
-## Deploying
-
-Bookbinder has the ability to deploy the finished product to either staging or production. The deployment scripts requires the Cloud Foundry command line interface (cf CLI).
-
-Download the cf CLI from [https://github.com/cloudfoundry/cli/releases](https://github.com/cloudfoundry/cli/releases). For more information and instructions, see the [cf CLI documentation](http://docs.cloudfoundry.org/devguide/cf-cli/index.html).
-
-### Setting up CF Apps
-
-Each book should have a dedicated CF space and host for its staging and production servers.
-The Cloud Foundry organization and spaces must be created manually and specified as values for "organization", "staging_space" and "production_space" in `config.yml`.
-Upon the first and second deploy, bookbinder will create two apps in the space to which it is deploying. The apps will be named `"app_name"-blue` and `"app_name"-green`.  These will be used for a [blue-green deployment](http://martinfowler.com/bliki/BlueGreenDeployment.html) scheme.  Upon successful deploy, the subdomain of `cfapps.io` specified by "staging_host" or "production_host" will point to the most recently deployed of these two apps.
-
-
-### Deploy to Staging
-Deploying to staging is not normally something a human needs to do: the book's CI script does this automatically every time a build passes.
-
-The following command will deploy the build in your local 'final_app' directory to staging:
-
-        bin/bookbinder push_local_to staging
-
-### Deploy to Production
-Deploying to prod is always done manually. It can be done from any machine with the book project checked out, but does not depend on the results from a local bind (or the contents of your `final_app` directory). Instead, it pulls the latest green build from S3, untars it locally, and then pushes it up to prod:
-
-        bin/bookbinder push_to_prod <build_number>
-
-If the build_number argument is left out, the latest green build will be deployed to production.
-
 ## Generating a Sitemap for Google Search Indexing
 
 The sitemap file `/sitemap.xml` is automatically regenerated when binding. When setting up a new docs website, make sure to add this sitemap's url in Google Webmaster Tools (for better reindexing?).

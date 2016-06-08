@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors     = ['Mike Grafton', 'Lucas Marks', 'Gavin Morgan', 'Nikhil Gajwani', 'Dan Wendorf', 'Brenda Chan', 'Matthew Boedicker', 'Andrew Bruce', 'Frank Kotsianas', 'Elena Sharma', 'Christa Hartsock', 'Michael Trestman', 'Alpha Chen', 'Sarah McAlear', 'Gregg Van Hove']
   s.email       = Base64.decode64('Z21vcmdhbkBnb3Bpdm90YWwuY29t') # Gavin's
 
-  s.files       = Dir['lib/**/*'] + Dir['template_app/**/*'] + Dir['master_middleman/**/*'] + Dir['install_bin/**/*'] + Dir['bookbinder.gemspec']
+  s.files       = Dir['lib/**/*'] + Dir['template_app/**/*'] + Dir['master_middleman/**/*'] + Dir['install_bin/bookbinder'] + Dir['bookbinder.gemspec']
   s.homepage    = 'https://github.com/pivotal-cf/bookbinder'
   s.license     = 'MIT'
   s.bindir      = 'install_bin'

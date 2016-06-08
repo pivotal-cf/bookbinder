@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+git fetch -t
+TAG=$(git tag -l | tail -1)
+git checkout ${TAG}
+
+bundle install
