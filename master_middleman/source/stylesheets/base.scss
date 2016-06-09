@@ -30,7 +30,8 @@
   }
 
   @media (min-width: $bp-wide) {
-    #top {
+    #top:before {
+      content: '';
       padding-bottom: 4em;
       border: none;
       display: block;

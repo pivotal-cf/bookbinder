@@ -127,6 +127,12 @@ describe('sidenav', function() {
     expect(root.querySelector('.li_collapsed').className).not.toContain('expanded');
   });
 
+  it('does not break with no subnav', function() {
+    expect(function() {
+      Bookbinder.startSidenav(null, 'bar/foo/baz.html');
+    }).not.toThrow();
+  });
+
   it('hides and shows main menu', function() {
     var root = createDom('div', {},
       createDom('div', { className: 'parent' },

@@ -45,6 +45,8 @@
 
   window.Bookbinder = {
     startSidenav: function(rootEl, currentPath) {
+      if (!rootEl) { return; }
+
       var submenus = rootEl.querySelectorAll('.has_submenu');
 
       for (var i = 0; i < submenus.length; i++) {
