@@ -10,10 +10,16 @@ module Bookbinder
     end
 
     def download(resource)
-      spec_root.join("utilities").tap(&:mkpath).
-          join(resource.tarball_filename).tap do |destination|
-        `curl #{resource.tarball_url} > #{destination}` unless destination.exist?
+      utilities_path = spec_root.join("utilities")
+      utilities_path.mkpath
+
+      destination = utilities_path.join(resource.tarball_filename)
+
+      data = Net::HTTP.get(URI(resource.tarball_url))
+      File.open(destination, 'w') do |f|
+        f.write(data)
       end
+      destination
     end
 
     def tar(opts, path)
