@@ -36,7 +36,7 @@ module Bookbinder
       end
 
       def most_recent_pdf(dir_path)
-        pdfs_by_modified_date = Dir.glob(dir_path + '*.pdf').sort_by{ |f| File.mtime(f) }
+        pdfs_by_modified_date = Dir.glob(dir_path + '*/*.pdf').sort_by{ |f| File.mtime(f) }
         pdfs_by_modified_date.last
       end
 
