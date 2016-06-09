@@ -11,7 +11,7 @@
   }
 
   function openSubmenu(e) {
-    if (e.srcElement.tagName !== 'A') {
+    if (e.target.tagName !== 'A') {
       var el = e.currentTarget;
       toggleClass(el, 'expanded');
       e.stopPropagation();
