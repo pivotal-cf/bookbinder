@@ -28,6 +28,10 @@
       <% result_list.each do |hit| %>
         <li>
           <a href="<%= hit.url %>"><%= hit.title %></a>
+          <% if hit.product_name %>
+            <br/>
+            <b><%= hit.product_name %> <%= hit.product_version %></b>
+          <% end %>
           <div><%= hit.text %></div>
         </li>
       <% end %>

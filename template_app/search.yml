@@ -13,6 +13,8 @@ size: 10
 _source:
 - url
 - title
+- product_name
+- product_version
 highlight:
   fields:
     text:
