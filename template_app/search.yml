@@ -2,9 +2,11 @@
 query:
   bool:
     should:
-      query_string:
+      simple_query_string:
         query: ''
-        default_field: text
+        fields:
+          - text
+          - title^10
     minimum_should_match: 1
 from: 0
 size: 10
