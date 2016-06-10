@@ -2,7 +2,7 @@
   <ul>
     <% @links.each do |link| %>
       <li class="<%= submenu_class(link) %>">
-        <a href="<%= link[:url] %>"><%= link[:text] %></a>
+        <a href="<%= link[:url] %>"><%= escape_html link[:text] %></a>
         <%= render_links link[:nested_links] %>
       </li>
     <% end %>

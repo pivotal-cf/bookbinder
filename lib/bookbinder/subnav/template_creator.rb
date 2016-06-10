@@ -1,4 +1,5 @@
 require 'erb'
+require 'rack/utils'
 
 module Bookbinder
   module Subnav
@@ -59,6 +60,10 @@ module Bookbinder
 
         def links?(links)
           (links || []).empty?
+        end
+
+        def escape_html(str)
+          Rack::Utils.escape_html(str)
         end
       end
     end
