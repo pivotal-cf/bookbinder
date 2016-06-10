@@ -60,4 +60,5 @@ $bp-superwide: 1340px/$em-base + 0em;
 $bp-widest: 900px/$em-base + 0em;
 $bp-wide: 700px/$em-base + 0em;
 
+@import "layout-vars.scss";
 @import "book-vars.scss";
