@@ -50,7 +50,7 @@ module Bookbinder::Search
       }},
         'from' => 330,
         'size' => 10,
-        '_source' => ['url', 'title', 'product_name', 'product_version'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
+        '_source' => ['url', 'title', 'summary', 'product_name', 'product_version'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
       })
     end
 
@@ -64,7 +64,7 @@ module Bookbinder::Search
         }},
         'from' => 330,
         'size' => 10,
-        '_source' => ['url', 'title', 'product_name', 'product_version'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
+        '_source' => ['url', 'title', 'summary', 'product_name', 'product_version'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
       })
     end
 
@@ -77,7 +77,7 @@ module Bookbinder::Search
         }},
         'from' => 330,
         'size' => 10,
-        '_source' => ['url', 'title', 'product_name', 'product_version'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
+        '_source' => ['url', 'title', 'summary', 'product_name', 'product_version'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
       })
     end
 

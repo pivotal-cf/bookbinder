@@ -42,8 +42,7 @@ Found #{@broken_links.count} broken links!
     def find_broken_links(port, broken_link_exclusions: /(?!.*)/)
       temp_host = "localhost:#{port}"
       sieve = Sieve.new domain: "http://#{temp_host}"
-      links = crawl_from "http://#{temp_host}#{ENV['CUSTOM_ROOT']}/index.html", sieve
-      broken_links = links.first
+      broken_links = crawl_from "http://#{temp_host}#{ENV['CUSTOM_ROOT']}/index.html", sieve
       public_broken_links = broken_links.reject {|l| l.match(broken_link_exclusions)}
 
       Result.new(public_broken_links)
@@ -55,22 +54,20 @@ Found #{@broken_links.count} broken links!
 
     def crawl_from(url, sieve)
       broken_links = []
-      sitemap = [url]
       2.times do |i|
         is_first_pass = (i==0)
 
-        Anemone.crawl(url) do |anemone|
+        Anemone.crawl(url, discard_page_bodies: true) do |anemone|
           dont_visit_fragments(anemone)
           anemone.on_every_page do |page|
             broken, working = sieve.links_from(Stabilimentum.new(page), is_first_pass)
             broken_links.concat broken
-            sitemap.concat working
           end
         end
       end
 
       broken_links.concat Dir.chdir(@app_dir) { CssLinkChecker.new.broken_links_in_all_stylesheets }
-      [broken_links.compact.uniq, sitemap.compact.uniq]
+      broken_links.compact.uniq
     end
 
     def dont_visit_fragments(anemone)
