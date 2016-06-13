@@ -57,6 +57,54 @@ module Bookbinder
         ).run
       end
 
+      it 'can optionally filter the sections' do
+        streams = {out: "foo", success: "bar"}
+        directory_preparer = instance_double('Components::Bind::DirectoryPreparer')
+        output_locations = OutputLocations.new(context_dir: ".")
+        preprocessor = instance_double('Preprocessing::Preprocessor')
+
+        section_config1 = Config::SectionConfig.new({'directory' => 'foo', 'repository' => { 'name' => 'dir/foo' }})
+        section_config2 = Config::SectionConfig.new({'directory' => 'bar', 'repository' => { 'name' => 'dir/bar' }})
+        config = Config::Configuration.new({book_repo: "some_book", sections: [section_config1, section_config2]})
+        sections = [Section.new('fake/path', 'foo/bar'), Section.new('other/path', 'cat/dog')]
+        section_repository = instance_double('Ingest::SectionRepository')
+        cloner = instance_double('Ingest::LocalFileSystemCloner')
+
+        allow(section_repository).to receive(:fetch).
+          with(configured_sections: [section_config1],
+               destination_dir: Pathname("output/preprocessing/sections"),
+               streams: streams,
+               cloner: cloner) { sections }
+
+        expect(directory_preparer).to receive(:prepare_directories).with(
+            config,
+            File.expand_path('../../../../', __dir__),
+            output_locations,
+            cloner
+        ).ordered
+
+        expect(preprocessor).to receive(:preprocess).with(
+            sections,
+            output_locations,
+            output_streams: streams,
+            config: config
+        ).ordered
+
+        Watch.new(
+          streams,
+          middleman_runner: instance_double('MiddlemanRunner', run: success),
+          output_locations: output_locations,
+          config_fetcher: instance_double('Bookbinder::Config::Fetcher', fetch_config: config),
+          config_decorator: double('decorator', generate: config),
+          file_system_accessor: instance_double('LocalFilesystemAccessor', file_exist?: false),
+          preprocessor: preprocessor,
+          cloner: cloner,
+          section_repository: section_repository,
+          directory_preparer: directory_preparer,
+          repo_restrictions: %w(foo)
+        ).run
+      end
+
       it "copies the redirect file if present before running middleman" do
         fs = instance_double("LocalFilesystemAccessor")
         allow(fs).to receive(:file_exist?).with("redirects.rb") { true }

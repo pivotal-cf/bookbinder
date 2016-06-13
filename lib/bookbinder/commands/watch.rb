@@ -10,7 +10,8 @@ module Bookbinder
                      preprocessor: nil,
                      cloner: nil,
                      section_repository: nil,
-                     directory_preparer: nil)
+                     directory_preparer: nil,
+                     repo_restrictions: [])
         @streams = streams
         @middleman_runner = middleman_runner
         @output_locations = output_locations
@@ -21,6 +22,7 @@ module Bookbinder
         @cloner = cloner
         @section_repository = section_repository
         @directory_preparer = directory_preparer
+        @repo_restrictions = repo_restrictions
       end
 
       def run
@@ -33,7 +35,7 @@ module Bookbinder
           cloner
         )
         sections = section_repository.fetch(
-          configured_sections: watch_config.sections,
+          configured_sections: filter_sections(watch_config.sections),
           destination_dir: output_locations.cloned_preprocessing_dir,
           cloner: cloner,
           streams: streams
@@ -83,6 +85,15 @@ module Bookbinder
           temp[section.namespace] = section.product_info
         end
         temp
+      end
+
+      def filter_sections(section_configs)
+        return section_configs if @repo_restrictions.nil? || @repo_restrictions.empty?
+
+        section_configs.select do |config|
+          repo_name = (config.repo_name || '').split('/').last
+          @repo_restrictions.include?(repo_name)
+        end
       end
     end
   end

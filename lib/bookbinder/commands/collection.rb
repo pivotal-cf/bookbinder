@@ -64,11 +64,11 @@ module Bookbinder
       def bind(*args)
         @bind ||= Commands::Bind.new(
           streams,
+          middleman_runner: runner,
           output_locations: output_locations,
           config_fetcher: configuration_fetcher(Config::Configuration),
           config_decorator: Config::ConfigurationDecorator.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           file_system_accessor: local_filesystem_accessor,
-          middleman_runner: runner,
           broken_links_checker: Postprocessing::BrokenLinksChecker.build(final_app_directory, sitemap_port),
           preprocessor: Preprocessing::Preprocessor.new(
             Preprocessing::DitaHTMLPreprocessor.new(
@@ -86,7 +86,7 @@ module Bookbinder
         ).run(*args)
       end
 
-      def watch
+      def watch(repos=[])
         @watch ||= Commands::Watch.new(
           streams,
           middleman_runner: runner,
@@ -97,7 +97,8 @@ module Bookbinder
           preprocessor: Preprocessing::Preprocessor.new(Preprocessing::LinkToSiteGenDir.new(local_filesystem_accessor, subnav_generator_factory)),
           cloner: local_file_system_cloner,
           section_repository: Ingest::SectionRepository.new,
-          directory_preparer: directory_preparer
+          directory_preparer: directory_preparer,
+          repo_restrictions: repos
         ).run
       end
 

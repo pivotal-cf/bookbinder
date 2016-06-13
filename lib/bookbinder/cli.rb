@@ -52,9 +52,15 @@ module Bookbinder
       raise Thor::Error, '' if code != 0
     end
 
-    desc 'watch', 'Bind and serve a local book, watching for changes'
-    def watch
-      code = legacy_commands.watch
+    desc 'watch [repo1 [repo2]]', 'Bind and serve a local book, watching for changes'
+    long_desc <<-LONG_DESC
+Bind and serve a local book, watching for changes
+
+Optionally, you can provide a subset of the repositories in the book to be watched.
+This will exclude any repositories not specified from being available in the bound book, even if they exist on your file system.
+    LONG_DESC
+    def watch(*repos)
+      code = legacy_commands.watch(repos)
       raise Thor::Error, '' if code != 0
     end
 
