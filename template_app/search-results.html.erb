@@ -1,3 +1,9 @@
+<%
+def escape_html(str)
+  Rack::Utils.escape_html(str)
+end
+%>
+
 <div class="search-results">
   <form method="get">
 
@@ -8,12 +14,12 @@
         <% end %>
       </h4>
     <% end %>
-    <input name="q" value="<%= search_term %>"/>
+    <input name="q" value="<%= escape_html search_term %>"/>
     <% unless product_name.nil? %>
-      <input type="hidden" name="product_name" value="<%= product_name %>"/>
+      <input type="hidden" name="product_name" value="<%= escape_html product_name %>"/>
     <% end %>
     <% unless product_version.nil? %>
-      <input type="hidden" name="product_version" value="<%= product_version %>"/>
+      <input type="hidden" name="product_version" value="<%= escape_html product_version %>"/>
     <% end %>
   </form>
 
