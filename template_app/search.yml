@@ -13,6 +13,7 @@ size: 10
 _source:
 - url
 - title
+- summary
 - product_name
 - product_version
 highlight:

@@ -8,7 +8,11 @@ module Bookbinder
         @product_name = source_fields['product_name']
         @product_version = source_fields['product_version']
 
-        @text = attrs.fetch('highlight').fetch('text').first.strip
+        if attrs.has_key?('highlight')
+          @text = attrs.fetch('highlight').fetch('text').first.strip
+        else
+          @text = source_fields.fetch('summary')
+        end
       end
 
       attr_reader :title, :url, :text, :product_name, :product_version
