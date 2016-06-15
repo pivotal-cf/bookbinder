@@ -43,7 +43,7 @@
         <%= partial 'layouts/local-header' %>
         <%= partial 'layouts/title' %>
         <% if quick_links %>
-          <div id="js-quick-links">
+          <div id="js-quick-links" <%= 'class="list-style-none"' if data.page.list_style_none %>>
             <%= quick_links %>
           </div>
         <% end %>
