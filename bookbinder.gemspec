@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'middleman-syntax', ['~> 2.0']
   s.add_runtime_dependency 'rouge', '!= 1.9.1'
   s.add_runtime_dependency 'redcarpet', ['~> 3.2.3']
-  s.add_runtime_dependency 'anemone'
   s.add_runtime_dependency 'css_parser'
   s.add_runtime_dependency 'puma'
   s.add_runtime_dependency 'rack-rewrite'
@@ -37,6 +36,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'pry-byebug'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
-  s.add_development_dependency 'sendgrid-ruby'
+  s.add_development_dependency 'sendgrid-ruby', '< 3.0'
   s.add_development_dependency 'jasmine'
 end
