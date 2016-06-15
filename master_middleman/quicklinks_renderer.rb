@@ -45,6 +45,7 @@ class QuicklinksRenderer < Redcarpet::Render::Base
     doc = Nokogiri::HTML(text)
     target_anchor = doc.css('a').first
     return unless target_anchor && target_anchor['id']
+    return if (target_anchor['class'] || '').match(/\bno-quick-link\b/)
 
     anchor = Nokogiri::XML::Node.new('a', document)
     anchor['href'] = "##{target_anchor['id']}"

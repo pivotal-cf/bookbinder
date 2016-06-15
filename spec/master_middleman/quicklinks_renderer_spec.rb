@@ -20,6 +20,22 @@ EOT
       expect(Redcarpet::Markdown.new(quicklinks_renderer).render(page_src)).to eq(expected_html.chomp)
     end
 
+    it 'excludes marked headers' do
+      expected_html = <<EOT
+<div class="quick-links"><ul><li>
+<a href="#id2">Text2</a><ul><li><a href="#id3">Text3</a></li></ul>
+</li></ul></div>
+EOT
+
+      page_src = <<-EOT
+### <a id="iddd" class="no-quick-link"></a>Text Excluded
+## <a id="id2"></a>Text2
+### <a id="id3"></a>Text3
+## <a id="idX" class="no-quick-link"></a>Header Excluded
+      EOT
+      expect(Redcarpet::Markdown.new(quicklinks_renderer).render(page_src)).to eq(expected_html.chomp)
+    end
+
     context 'when an h3 is included before any h2s' do
       it 'raises a BadHeadingLevelError' do
         expected_error = <<EOT
