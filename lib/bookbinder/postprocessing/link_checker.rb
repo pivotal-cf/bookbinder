@@ -1,0 +1,122 @@
+require 'nokogiri'
+require_relative '../css_link_checker'
+
+module Bookbinder
+  module Postprocessing
+    class LinkChecker
+      def initialize(fs, root_path, output_streams)
+        @fs = fs
+        @root_path = root_path
+        @output_streams = output_streams
+        @broken_link_count = 0
+        @redirect_regexes = {}
+        @redirect_strings = {}
+
+        @convert_to_relative = %r{\A.*#{root_path.to_s}/public}
+        @default_link_exclusions = %r{\A(?:https?://|javascript:|mailto:)}
+        @excluded_pages = %r{\A/(?:404\.html|subnavs|javascripts|stylesheets|style_guide)}
+      end
+
+      def check!(link_exclusions = /(?!.*)/)
+        @output_streams[:out].puts "\nChecking for broken links..."
+        load_redirects!
+        load_page_links
+
+        @page_links.each do |page, links|
+          links.each do |link|
+            next if skip?(link, link_exclusions)
+
+            absolute_link, fragment = normalize_link(link, page)
+
+            if !page_exists?(absolute_link) && !file_exists?(absolute_link)
+              @broken_link_count += 1
+              err "#{page} => #{absolute_link}#{fragment ? "##{fragment}" : ''}"
+            end
+          end
+        end
+
+        broken_css_links = Dir.chdir(@root_path) { CssLinkChecker.new.broken_links_in_all_stylesheets }
+
+        @broken_link_count += broken_css_links.size
+        broken_css_links.each do |link|
+          err link
+        end
+
+        if has_errors?
+          err "\nFound #{@broken_link_count} broken links!"
+        else
+          out "\nNo broken links!"
+        end
+      end
+
+      def has_errors?
+        @broken_link_count > 0
+      end
+
+      private
+
+      def skip?(link_path, link_exclusions)
+        @default_link_exclusions.match(link_path) || link_path.match(link_exclusions)
+      end
+
+      def page_exists?(link)
+        @page_links.has_key?(link) ||
+          @redirect_strings.has_key?(link) ||
+          @redirect_regexes.keys.detect {|reg| reg.match(link)}
+      end
+
+      def normalize_link(link, page)
+        return [page, link.sub(/\A#/, '')] if link[0] == '#'
+
+        absolute_link = link[0] == '/' ? link : File.expand_path(link, File.dirname(page))
+        absolute_link.split('#')
+      end
+
+      def file_exists?(link)
+        @fs.file_exist?(File.join(@root_path, 'public', link))
+      end
+
+      def load_page_links
+        files = @fs.find_files_with_ext('html', File.join(@root_path, 'public'))
+
+        @page_links = files.each.with_object({}) do |file_path, links|
+          public_path = file_path.sub(@convert_to_relative, '')
+
+          if !@excluded_pages.match(public_path)
+            html = Nokogiri::HTML(@fs.read(file_path))
+
+            links[public_path] = html.css('a[href]').map { |link| link['href'] }
+          end
+        end
+      end
+
+      def load_redirects!
+        redirects_path = File.join(@root_path, 'redirects.rb')
+        if @fs.file_exist?(redirects_path)
+          contents = @fs.read(redirects_path)
+          instance_eval contents
+        end
+      end
+
+      def out(str)
+        @output_streams[:out].puts(str)
+      end
+
+      def err(str)
+        @output_streams[:err].puts(str)
+      end
+
+      def r301(source, dest, options={})
+        return if options.has_key?(:if)
+
+        case source
+        when Regexp
+          @redirect_regexes[source] = dest
+        when String
+          @redirect_strings[source] = dest
+        end
+      end
+      alias r302 r301
+    end
+  end
+end

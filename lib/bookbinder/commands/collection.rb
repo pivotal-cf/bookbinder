@@ -17,7 +17,7 @@ require_relative '../ingest/cloner_factory'
 require_relative '../ingest/section_repository'
 require_relative '../local_filesystem_accessor'
 require_relative '../middleman_runner'
-require_relative '../postprocessing/broken_links_checker'
+require_relative '../postprocessing/link_checker'
 require_relative '../preprocessing/dita_html_preprocessor'
 require_relative '../preprocessing/dita_pdf_preprocessor'
 require_relative '../preprocessing/link_to_site_gen_dir'
@@ -69,7 +69,7 @@ module Bookbinder
           config_fetcher: configuration_fetcher(Config::Configuration),
           config_decorator: Config::ConfigurationDecorator.new(loader: config_loader, config_filename: 'bookbinder.yml'),
           file_system_accessor: local_filesystem_accessor,
-          broken_links_checker: Postprocessing::BrokenLinksChecker.build(final_app_directory, sitemap_port),
+          link_checker: Postprocessing::LinkChecker.new(local_filesystem_accessor, final_app_directory, streams),
           preprocessor: Preprocessing::Preprocessor.new(
             Preprocessing::DitaHTMLPreprocessor.new(
               local_filesystem_accessor,

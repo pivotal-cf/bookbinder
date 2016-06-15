@@ -1,5 +1,4 @@
 require 'css_parser'
-require_relative 'spider'
 
 module Bookbinder
   class CssLinkChecker
@@ -24,7 +23,7 @@ module Bookbinder
       css.each_selector do |s, declaration, sp|
         contents_of_url_value = /url\((.*?)\)/
         file_url = declaration.match contents_of_url_value
-        localized_uris << Spider.prepend_location(stylesheet, file_url[1]) if file_url
+        localized_uris << "#{URI(stylesheet).path} => #{file_url[1]}" if file_url
       end
 
       localized_uris

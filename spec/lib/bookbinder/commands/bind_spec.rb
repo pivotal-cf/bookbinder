@@ -5,7 +5,6 @@ require_relative '../../../../lib/bookbinder/ingest/cloner_factory'
 require_relative '../../../../lib/bookbinder/ingest/section_repository'
 require_relative '../../../../lib/bookbinder/local_filesystem_accessor'
 require_relative '../../../../lib/bookbinder/middleman_runner'
-require_relative '../../../../lib/bookbinder/postprocessing/broken_links_checker'
 require_relative '../../../../lib/bookbinder/preprocessing/link_to_site_gen_dir'
 require_relative '../../../../lib/bookbinder/server_director'
 require_relative '../../../../lib/bookbinder/sheller'
@@ -27,7 +26,7 @@ module Bookbinder
 
     use_fixture_repo
 
-    let(:null_broken_links_checker) { double('broken links checker', check!: nil, announce: nil, has_broken_links?: false) }
+    let(:null_link_checker) { double('link checker', check!: nil, has_errors?: false) }
     let(:null_fs_accessor) { double('fs accessor').as_null_object }
     let(:null_preprocessor) { instance_double('Bookbinder::Preprocessing::LinkToSiteGenDir', preprocess: nil) }
     let(:null_middleman_runner) { instance_double('Bookbinder::MiddlemanRunner', run: success) }
@@ -62,7 +61,7 @@ module Bookbinder
         config_decorator: partial_args.fetch(:archive_menu_config, archive_menu_config),
         file_system_accessor: partial_args.fetch(:file_system_accessor, null_fs_accessor),
         middleman_runner: partial_args.fetch(:middleman_runner, null_middleman_runner),
-        broken_links_checker: partial_args.fetch(:broken_links_checker, null_broken_links_checker),
+        link_checker: partial_args.fetch(:link_checker, null_link_checker),
         preprocessor: partial_args.fetch(:preprocessor, null_preprocessor),
         cloner_factory: partial_args.fetch(:cloner_factory, Ingest::ClonerFactory.new(null_streams, null_fs_accessor, GitFake.new)),
         section_repository: partial_args.fetch(:section_repository, Ingest::SectionRepository.new),
@@ -117,7 +116,7 @@ module Bookbinder
           config_decorator: double('decorator', generate: config),
           file_system_accessor: instance_double('LocalFilesystemAccessor', file_exist?: false),
           middleman_runner: instance_double('MiddlemanRunner', run: failure),
-          broken_links_checker: instance_double('Postprocessing::SitemapWriter'),
+          link_checker: null_link_checker,
           preprocessor: preprocessor,
           cloner_factory: cloner_factory,
           section_repository: section_repository,
@@ -144,7 +143,7 @@ module Bookbinder
       generator = instance_double('Bookbinder::MiddlemanRunner')
       command = bind_cmd(file_system_accessor: fs,
         middleman_runner: generator,
-        broken_links_checker: double('broken links checker').as_null_object)
+        link_checker: null_link_checker)
 
       allow(fs).to receive(:file_exist?).with('redirects.rb') { true }
       allow(fs).to receive(:copy)
@@ -160,7 +159,7 @@ module Bookbinder
       generator = instance_double('Bookbinder::MiddlemanRunner')
       command = bind_cmd(file_system_accessor: fs,
         middleman_runner: generator,
-        broken_links_checker: double('broken links checker').as_null_object)
+        link_checker: null_link_checker)
 
       allow(fs).to receive(:file_exist?).with('redirects.rb') { false }
 
@@ -206,7 +205,7 @@ module Bookbinder
         config_decorator: double('decorator', generate: config),
         file_system_accessor: null_fs_accessor,
         middleman_runner: runner,
-        broken_links_checker: null_broken_links_checker,
+        link_checker: null_link_checker,
         preprocessor: null_preprocessor,
         cloner_factory: instance_double('Ingest::ClonerFactory', produce: cloner),
         section_repository: section_repository,
@@ -222,7 +221,7 @@ module Bookbinder
       command = bind_cmd(streams: streams,
                          file_system_accessor: fs,
                          middleman_runner: middleman_runner,
-                         broken_links_checker: double('disallowed broken links checker'),
+                         link_checker: null_link_checker,
                          section_repository: instance_double('Ingest::SectionRepository', fetch: []))
 
       allow(fs).to receive(:file_exist?) { false }
@@ -234,7 +233,6 @@ module Bookbinder
 
     it "writes required files to output directory and outputs success message" do
       fs = instance_double('Bookbinder::LocalFilesystemAccessor', file_exist?: false)
-      broken_links_checker = instance_double(Bookbinder::Postprocessing::BrokenLinksChecker, has_broken_links?: false)
 
       streams = { success: double('stream') }
 
@@ -242,8 +240,7 @@ module Bookbinder
       config = Config::Configuration.new({public_host: 'some.site.io'})
 
       expect(fs).to receive(:copy).with(output_locations.build_dir, output_locations.public_dir).ordered
-      expect(broken_links_checker).to receive(:check!).with(config.broken_link_exclusions).ordered
-      expect(broken_links_checker).to receive(:announce).with(streams.merge({ out: instance_of(Streams::FilterStream)})).ordered
+      expect(null_link_checker).to receive(:check!).with(config.broken_link_exclusions).ordered
 
       expect(streams[:success]).to receive(:puts).with(include(output_locations.final_app_dir.to_s))
 
@@ -254,7 +251,7 @@ module Bookbinder
         config_decorator: double('decorator', generate: config),
         file_system_accessor: fs,
         middleman_runner: instance_double('Bookbinder::MiddlemanRunner', run: success),
-        broken_links_checker: broken_links_checker,
+        link_checker: null_link_checker,
         preprocessor: null_preprocessor,
         cloner_factory: null_cloner_factory,
         section_repository: null_section_repository,
@@ -267,8 +264,8 @@ module Bookbinder
         output_locations = OutputLocations.new(final_app_dir: 'some_other_final_app', context_dir: ".")
         config = Config::Configuration.new({public_host: 'some.site.io'})
 
-        broken_links_checker = instance_double(Postprocessing::BrokenLinksChecker, check!: nil, announce: nil)
-        allow(broken_links_checker).to receive(:has_broken_links?) { true }
+        link_checker = double(:link_checker, check!: nil)
+        allow(link_checker).to receive(:has_errors?) { true }
 
         command = Commands::Bind.new(
           double('streams').as_null_object,
@@ -277,7 +274,7 @@ module Bookbinder
           config_decorator: double('decorator', generate: config),
           file_system_accessor: null_fs_accessor,
           middleman_runner: null_middleman_runner,
-          broken_links_checker: broken_links_checker,
+          link_checker: link_checker,
           preprocessor: null_preprocessor,
           cloner_factory: null_cloner_factory,
           section_repository: null_section_repository,
@@ -293,8 +290,8 @@ module Bookbinder
         output_locations = OutputLocations.new(final_app_dir: 'some_other_final_app', context_dir: ".")
         config = Config::Configuration.new({public_host: 'some.site.io'})
 
-        broken_links_checker = instance_double(Postprocessing::BrokenLinksChecker, check!: nil, announce: nil)
-        allow(broken_links_checker).to receive(:has_broken_links?) { false }
+        link_checker = double(:link_checker, check!: nil)
+        allow(link_checker).to receive(:has_errors?) { false }
 
         command = Commands::Bind.new(
           double('streams').as_null_object,
@@ -303,7 +300,7 @@ module Bookbinder
           config_decorator: double('decorator', generate: config),
           file_system_accessor: null_fs_accessor,
           middleman_runner: null_middleman_runner,
-          broken_links_checker: broken_links_checker,
+          link_checker: link_checker,
           preprocessor: null_preprocessor,
           cloner_factory: null_cloner_factory,
           section_repository: null_section_repository,

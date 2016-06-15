@@ -11,7 +11,7 @@ module Bookbinder
                      config_decorator: nil,
                      file_system_accessor: nil,
                      middleman_runner: nil,
-                     broken_links_checker: nil,
+                     link_checker: nil,
                      preprocessor: nil,
                      cloner_factory: nil,
                      section_repository: nil,
@@ -23,7 +23,7 @@ module Bookbinder
         @config_decorator = config_decorator
         @file_system_accessor = file_system_accessor
         @middleman_runner = middleman_runner
-        @broken_links_checker = broken_links_checker
+        @link_checker = link_checker
         @preprocessor = preprocessor
         @cloner_factory = cloner_factory
         @section_repository = section_repository
@@ -75,12 +75,11 @@ module Bookbinder
         if generation_result.success?
           file_system_accessor.copy(output_locations.build_dir, output_locations.public_dir)
 
-          broken_links_checker.check!(bind_config.broken_link_exclusions)
-          broken_links_checker.announce(bind_options.streams)
+          link_checker.check!(bind_config.broken_link_exclusions)
 
           bind_options.streams[:success].puts "Bookbinder bound your book into #{output_locations.final_app_dir}"
 
-          broken_links_checker.has_broken_links? ? 1 : 0
+          link_checker.has_errors? ? 1 : 0
         else
           bind_options.streams[:err].puts "Your bind failed. Rerun with --verbose to troubleshoot."
           1
@@ -100,7 +99,7 @@ module Bookbinder
         :output_locations,
         :preprocessor,
         :section_repository,
-        :broken_links_checker,
+        :link_checker,
         :middleman_runner,
       )
 

@@ -58,7 +58,7 @@ sections:
 
           result = Sheller.new.run_command('bin/bookbinder bind local',
                                            out: StringIO.new,
-                                           err: StringIO.new)
+                                           err: $stderr)
 
           expect(result).to be_success
         end

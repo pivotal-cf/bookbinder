@@ -1,6 +1,5 @@
 require 'find'
 require 'pathname'
-require 'nokogiri'
 require_relative 'errors/programmer_mistake'
 
 module Bookbinder
