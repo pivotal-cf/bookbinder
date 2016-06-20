@@ -10,6 +10,22 @@ describe FakeFilesystemAccessor do
     expect(fs.file_exist?('/foo/bar/quux.html')).to be false
   end
 
+  it 'knows if something is a file' do
+    fs = FakeFilesystemAccessor.new({ 'foo' => { 'bar' => { 'baz.html' => 'hi' }}})
+
+    expect(fs.is_file?('/foo')).to be false
+    expect(fs.is_dir?('/foo')).to be true
+
+    expect(fs.is_file?('/foo/bar/baz.html')).to be true
+    expect(fs.is_dir?('/foo/bar/baz.html')).to be false
+
+    expect(fs.is_file?('/quux')).to be false
+    expect(fs.is_dir?('/quux')).to be false
+
+    expect(fs.is_file?('/foo/bar/quux.html')).to be false
+    expect(fs.is_dir?('/foo/bar/quux.html')).to be false
+  end
+
   it 'reads the contents of a file' do
     fs = FakeFilesystemAccessor.new({ 'foo' => { 'bar' => { 'baz.html' => 'hi' }}})
 

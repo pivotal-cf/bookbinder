@@ -15,6 +15,20 @@ class FakeFilesystemAccessor
     false
   end
 
+  def is_file?(path)
+    entry = entry_from_path(path)
+    entry.has_key?(:contents)
+  rescue NotFound
+    false
+  end
+
+  def is_dir?(path)
+    entry = entry_from_path(path)
+    entry.has_key?(:children)
+  rescue NotFound
+    false
+  end
+
   def write(to: nil, text: nil)
     raise NotFaked
   end

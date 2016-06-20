@@ -64,7 +64,9 @@ module Bookbinder
 
         checker.check!
 
-        expect(streams[:err].tap(&:rewind).read).to eq('')
+        errors = streams[:err].tap(&:rewind).read
+        expect(errors).not_to include('index.html')
+        expect(errors).not_to include('/foo.html =>')
         expect(checker).not_to have_errors
         expect(streams[:out].tap(&:rewind).read).to include('No broken links!')
       end
@@ -152,7 +154,9 @@ module Bookbinder
 
         checker.check!
 
-        expect(streams[:err].tap(&:rewind).read).to eq('')
+        errors = streams[:err].tap(&:rewind).read
+        expect(errors).not_to include '/thing.html =>'
+        expect(errors).not_to include '/think.html =>'
         expect(checker).not_to have_errors
         expect(streams[:out].tap(&:rewind).read).to include('No broken links!')
       end
@@ -214,6 +218,49 @@ module Bookbinder
         expect(streams[:err].tap(&:rewind).read).to eq('')
         expect(checker).not_to have_errors
         expect(streams[:out].tap(&:rewind).read).to include('No broken links!')
+      end
+
+      it 'reports an orphaned page' do
+        fs = FakeFilesystemAccessor.new({
+          'finnish_app' => {
+            'public' => {
+              'index.html' => '<div><a href="/thing.html">foo</a></div>',
+              'thing.html' => '<div></div>',
+              'stuff.html' => '<div></div>'
+            }
+          }
+        })
+        checker = LinkChecker.new(fs, Pathname('/finnish_app'), streams)
+
+        checker.check!
+
+        expect(checker).not_to have_errors
+        errors = streams[:err].tap(&:rewind).read
+        expect(errors).not_to include('index.html')
+        expect(errors).not_to include('thing.html')
+        expect(errors).to include('No links to => /stuff.html')
+      end
+
+      it 'finds an index.html for a folder link' do
+        fs = FakeFilesystemAccessor.new({
+          'finnish_app' => {
+            'public' => {
+              'index.html' => '<div><a href="/thing/">foo</a></div>',
+              'stuff.html' => '<div><a href="/">index</a></div>',
+              'thing' => {
+                'not_index.html' => '<div></div>'
+              }
+            }
+          }
+        })
+        checker = LinkChecker.new(fs, Pathname('/finnish_app'), streams)
+
+        checker.check!
+
+        expect(checker).to have_errors
+        errors = streams[:err].tap(&:rewind).read
+        expect(errors).to include("/index.html => /thing/")
+        expect(errors).not_to include("/stuff.html =>")
       end
     end
   end

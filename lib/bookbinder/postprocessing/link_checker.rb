@@ -22,6 +22,23 @@ module Bookbinder
         load_redirects!
         load_page_links
 
+        report_broken_links!(link_exclusions)
+        report_orphaned_pages!
+
+        if has_errors?
+          err "\nFound #{@broken_link_count} broken links!"
+        else
+          out "\nNo broken links!"
+        end
+      end
+
+      def has_errors?
+        @broken_link_count > 0
+      end
+
+      private
+
+      def report_broken_links!(link_exclusions)
         @page_links.each do |page, links|
           links.each do |link|
             next if skip?(link, link_exclusions)
@@ -41,19 +58,23 @@ module Bookbinder
         broken_css_links.each do |link|
           err link
         end
+      end
 
-        if has_errors?
-          err "\nFound #{@broken_link_count} broken links!"
-        else
-          out "\nNo broken links!"
+      def report_orphaned_pages!
+        linked_pages = @page_links.map do |page, links|
+          links.map do |link|
+            normalize_link(link, page)[0]
+          end
+        end.flatten.uniq
+
+        orphaned_pages = @page_links.keys.reject { |page| page == '/index.html' || linked_pages.include?(page) }
+        if orphaned_pages.size > 0
+          err "\nOrphaned pages"
+          orphaned_pages.each do |page|
+            err "No links to => #{page}"
+          end
         end
       end
-
-      def has_errors?
-        @broken_link_count > 0
-      end
-
-      private
 
       def skip?(link_path, link_exclusions)
         @default_link_exclusions.match(link_path) || link_path.match(link_exclusions)
@@ -73,7 +94,8 @@ module Bookbinder
       end
 
       def file_exists?(link)
-        @fs.file_exist?(File.join(@root_path, 'public', link))
+        full_path = File.join(@root_path, 'public', link)
+        @fs.is_file?(full_path) || (@fs.is_dir?(full_path) && @fs.is_file?(File.join(full_path, 'index.html')))
       end
 
       def load_page_links
@@ -92,7 +114,7 @@ module Bookbinder
 
       def load_redirects!
         redirects_path = File.join(@root_path, 'redirects.rb')
-        if @fs.file_exist?(redirects_path)
+        if @fs.is_file?(redirects_path)
           contents = @fs.read(redirects_path)
           instance_eval contents
         end

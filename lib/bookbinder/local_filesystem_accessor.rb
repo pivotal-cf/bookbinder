@@ -9,6 +9,14 @@ module Bookbinder
       File.exist?(path)
     end
 
+    def is_file?(path)
+      File.file?(path)
+    end
+
+    def is_dir?(path)
+      Dir.exists?(path)
+    end
+
     def write(to: nil, text: nil)
       make_directory(File.dirname to)
 
