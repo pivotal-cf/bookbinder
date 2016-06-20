@@ -18,7 +18,8 @@ module Bookbinder
         link!(
           source_repo_name,
           Pathname(user_repo_dir).join(source_repo_name.split('/').last),
-          Pathname(destination_parent_dir).join(DestinationDirectory.new(source_repo_name, destination_dir_name))
+          Pathname(destination_parent_dir).join(DestinationDirectory.new(source_repo_name, destination_dir_name)),
+          source_ref
         )
       end
 
@@ -26,7 +27,7 @@ module Bookbinder
 
       attr_reader :streams, :filesystem, :user_repo_dir
 
-      def link!(source_repo_name, source_dir, dest_dir)
+      def link!(source_repo_name, source_dir, dest_dir, source_ref)
         source_exists = filesystem.file_exist?(source_dir)
 
         if source_exists && filesystem.file_exist?(dest_dir)
@@ -34,6 +35,7 @@ module Bookbinder
           WorkingCopy.new(
             copied_to: dest_dir,
             full_name: source_repo_name,
+            ref: source_ref
           )
         elsif source_exists
           announce(source_dir)
@@ -41,6 +43,7 @@ module Bookbinder
           WorkingCopy.new(
             copied_to: dest_dir,
             full_name: source_repo_name,
+            ref: source_ref
           )
         else
           streams[:out].puts "  skipping (not found) #{source_dir}"
