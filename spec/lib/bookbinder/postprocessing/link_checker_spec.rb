@@ -138,13 +138,14 @@ module Bookbinder
         redirects = <<-RUBY
         r301 '/foo\.html', '/index.html'
         r302 %r{ba.\.html}, '/index.html'
+        rewrite '/thing', '/index.html'
         RUBY
 
         fs = FakeFilesystemAccessor.new({
           'finnish_app' => {
             'redirects.rb' => redirects,
             'public' => {
-              'index.html' => '<div><a href="/foo.html">foo</a></div>',
+              'index.html' => '<div><a href="/foo.html">foo</a><a href="/thing">Thing</a></div>',
               'thing.html' => '<div><a href="/bar.html">foo</a></div>',
               'think.html' => '<div><a href="/baz.html">foo</a></div>',
             }

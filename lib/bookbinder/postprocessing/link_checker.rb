@@ -139,6 +139,7 @@ module Bookbinder
         end
       end
       alias r302 r301
+      alias rewrite r301
     end
   end
 end
