@@ -7,11 +7,11 @@ module Bookbinder
       end
 
       def puts(line)
-        stream.puts(line) if line.match(matcher_regex)
+        stream.puts(line.gsub("\n", '')) if line.match(matcher_regex)
       end
 
       def <<(line)
-        stream << line if line.match(matcher_regex)
+        stream << line.gsub("\n", '') if line.match(matcher_regex)
       end
 
       private

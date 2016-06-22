@@ -32,7 +32,7 @@ module Bookbinder
         def streams
           base_streams.merge(
             out: verbosity ? base_streams[:out] :
-              Streams::FilterStream.new(/^\s*error/i, Streams::ColorizedStream.new(Colorizer::Colors.red, base_streams[:out])),
+              Streams::FilterStream.new(/^(?:\s*error|Invalid CSS|Undefined mixin|\/)/i, Streams::ColorizedStream.new(Colorizer::Colors.red, base_streams[:out])),
           )
         end
 
