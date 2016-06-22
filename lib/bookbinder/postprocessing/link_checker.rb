@@ -1,5 +1,6 @@
 require 'nokogiri'
 require_relative '../css_link_checker'
+require_relative 'redirection'
 
 module Bookbinder
   module Postprocessing
@@ -9,8 +10,6 @@ module Bookbinder
         @root_path = root_path
         @output_streams = output_streams
         @broken_link_count = 0
-        @redirect_regexes = {}
-        @redirect_strings = {}
 
         @convert_to_relative = %r{\A.*#{root_path.to_s}/public}
         @default_link_exclusions = %r{\A(?:https?://|javascript:|mailto:)}
@@ -19,7 +18,7 @@ module Bookbinder
 
       def check!(link_exclusions = /(?!.*)/)
         @output_streams[:out].puts "\nChecking for broken links..."
-        load_redirects!
+        @redirects = Redirection.new(@fs, File.join(@root_path, 'redirects.rb'))
         load_page_links
 
         report_broken_links!(link_exclusions)
@@ -53,6 +52,7 @@ module Bookbinder
         end
 
         broken_css_links = Dir.chdir(@root_path) { CssLinkChecker.new.broken_links_in_all_stylesheets }
+        broken_css_links.reject! { |link| link_exclusions.match(link) }
 
         @broken_link_count += broken_css_links.size
         broken_css_links.each do |link|
@@ -81,9 +81,7 @@ module Bookbinder
       end
 
       def page_exists?(link)
-        @page_links.has_key?(link) ||
-          @redirect_strings.has_key?(link) ||
-          @redirect_regexes.keys.detect {|reg| reg.match(link)}
+        @page_links.has_key?(link) || @redirects.redirected?(link)
       end
 
       def normalize_link(link, page)
@@ -107,16 +105,11 @@ module Bookbinder
           if !@excluded_pages.match(public_path)
             html = Nokogiri::HTML(@fs.read(file_path))
 
-            links[public_path] = html.css('a[href]').map { |link| link['href'] }
+            links[public_path] = [
+              html.css('a[href]').map { |link| link['href'] },
+              html.css('img').map { |image| image['src'] }
+            ].flatten
           end
-        end
-      end
-
-      def load_redirects!
-        redirects_path = File.join(@root_path, 'redirects.rb')
-        if @fs.is_file?(redirects_path)
-          contents = @fs.read(redirects_path)
-          instance_eval contents
         end
       end
 
@@ -127,19 +120,6 @@ module Bookbinder
       def err(str)
         @output_streams[:err].puts(str)
       end
-
-      def r301(source, dest, options={})
-        return if options.has_key?(:if)
-
-        case source
-        when Regexp
-          @redirect_regexes[source] = dest
-        when String
-          @redirect_strings[source] = dest
-        end
-      end
-      alias r302 r301
-      alias rewrite r301
     end
   end
 end

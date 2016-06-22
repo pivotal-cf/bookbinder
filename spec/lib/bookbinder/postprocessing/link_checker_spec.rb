@@ -263,6 +263,28 @@ module Bookbinder
         expect(errors).to include("/index.html => /thing/")
         expect(errors).not_to include("/stuff.html =>")
       end
+
+      it 'finds broken images' do
+        fs = FakeFilesystemAccessor.new({
+          'finnish_app' => {
+            'public' => {
+              'index.html' => '<div><img src="/images/foo.png" /></div>',
+              'stuff.html' => '<div><img src="notfound.gif" /></div>',
+              'images' => {
+                'foo.png' => ''
+              }
+            }
+          }
+        })
+        checker = LinkChecker.new(fs, Pathname('/finnish_app'), streams)
+
+        checker.check!
+
+        expect(checker).to have_errors
+        errors = streams[:err].tap(&:rewind).read
+        expect(errors).to include("/stuff.html => /notfound.gif")
+        expect(errors).not_to include("index.html =>")
+      end
     end
   end
 end
