@@ -72,4 +72,63 @@ describe FakeFilesystemAccessor do
       '/foo/quux/bar.baz'
     ])
   end
+
+  it 'can make a directory' do
+    fs = FakeFilesystemAccessor.new({})
+
+    fs.make_directory('/foo/bar/baz')
+
+    expect(fs.is_dir?('/foo')).to be true
+    expect(fs.is_dir?('/foo/bar')).to be true
+    expect(fs.is_dir?('/foo/bar/baz')).to be true
+  end
+
+  it 'can make a directory where some ancestors exist' do
+    fs = FakeFilesystemAccessor.new({
+      'foo' => {
+        'keep' => {},
+        'bar' => {
+          'baz' => {}
+        }
+      }
+    })
+
+    fs.make_directory('/foo/bar/quux')
+
+    expect(fs.is_dir?('/foo')).to be true
+    expect(fs.is_dir?('/foo/keep')).to be true
+    expect(fs.is_dir?('/foo/bar')).to be true
+    expect(fs.is_dir?('/foo/bar/baz')).to be true
+    expect(fs.is_dir?('/foo/bar/quux')).to be true
+  end
+
+  context 'creating symlinks' do
+    it 'has children available at the symlinked location' do
+      fs = FakeFilesystemAccessor.new({
+        'foo' => {
+          'bar' => {
+            'baz' => 'quux'
+          }
+        }
+      })
+
+      fs.link_creating_intermediate_dirs('/foo', '/place')
+
+      expect(fs.is_dir?('/place')).to be true
+      expect(fs.is_file?('/place/bar/baz')).to be true
+    end
+
+    it 'raises an error if the target already exists' do
+      fs = FakeFilesystemAccessor.new({
+        'foo' => {
+          'bar' => {},
+          'baz' => {}
+        }
+      })
+
+      expect do
+      fs.link_creating_intermediate_dirs('/foo/bar', '/foo/baz')
+      end.to raise_exception(/already exists/)
+    end
+  end
 end

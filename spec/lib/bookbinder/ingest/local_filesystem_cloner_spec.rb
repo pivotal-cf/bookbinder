@@ -1,4 +1,5 @@
 require_relative '../../../../lib/bookbinder/ingest/local_filesystem_cloner'
+require_relative '../../../helpers/fake_filesystem_accessor'
 
 module Bookbinder
   module Ingest
@@ -85,6 +86,27 @@ module Bookbinder
           expect(result).not_to be_available
           expect(result.full_name).to eq('myorg/myrepo')
           expect(out.tap(&:rewind).read).to match(%r{ skipping .*/my/repo/dir})
+        end
+      end
+
+      context 'when the local repo directory name includes the ref' do
+        it 'links to the correct file' do
+          fs = FakeFilesystemAccessor.new({
+            "user_repo_dir" => {
+              "repo-ref" => {}
+            },
+            "destination" => {}
+          })
+          out = StringIO.new
+          cloner = LocalFilesystemCloner.new({out: out}, fs, "/user_repo_dir")
+
+          result = cloner.call(source_repo_name: "myorg/repo",
+                               source_ref: "ref",
+                               destination_parent_dir: "/destination",
+                               destination_dir_name: "reps")
+
+          expect(fs.file_exist?(result.path)).to be true
+          expect(out.tap(&:rewind).read).to match(%r{ copying\s*/user_repo_dir/repo-ref})
         end
       end
     end

@@ -29,30 +29,28 @@ module Bookbinder
 
       def link!(source_repo_name, source_dir, dest_dir, source_ref)
         source_exists = filesystem.file_exist?(source_dir)
+        unless source_exists
+          source_dir_with_ref = "#{source_dir}-#{source_ref}"
+          source_exists = filesystem.file_exist?(source_dir_with_ref)
+          source_dir = source_dir_with_ref if source_exists
+        end
 
-        if source_exists && filesystem.file_exist?(dest_dir)
-          announce(source_dir)
-          WorkingCopy.new(
-            copied_to: dest_dir,
-            full_name: source_repo_name,
-            ref: source_ref
-          )
-        elsif source_exists
-          announce(source_dir)
-          filesystem.link_creating_intermediate_dirs(source_dir, dest_dir)
-          WorkingCopy.new(
-            copied_to: dest_dir,
-            full_name: source_repo_name,
-            ref: source_ref
-          )
-        else
+        if !source_exists
           streams[:out].puts "  skipping (not found) #{source_dir}"
           MissingWorkingCopy.new(source_repo_name, source_dir)
-        end
-      end
+        else
+          streams[:out].puts "  copying #{source_dir}"
 
-      def announce(source_dir)
-        streams[:out].puts "  copying #{source_dir}"
+          unless filesystem.file_exist?(dest_dir)
+            filesystem.link_creating_intermediate_dirs(source_dir, dest_dir)
+          end
+
+          WorkingCopy.new(
+            copied_to: dest_dir,
+            full_name: source_repo_name,
+            ref: source_ref
+          )
+        end
       end
     end
   end

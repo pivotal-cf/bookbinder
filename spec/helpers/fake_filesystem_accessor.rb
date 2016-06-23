@@ -5,7 +5,7 @@ class FakeFilesystemAccessor
   NotFound = Class.new(Exception)
 
   def initialize(files = {})
-    @files = { children: process(files) }
+    @files = { full_path: '', children: process(files) }
   end
 
   def file_exist?(path)
@@ -50,7 +50,9 @@ class FakeFilesystemAccessor
   end
 
   def make_directory(path)
-    raise NotFaked
+    dirs = path_parts(path)
+
+    make_dir_if_not_exist(dirs)
   end
 
   def copy(src, dest)
@@ -70,7 +72,15 @@ class FakeFilesystemAccessor
   end
 
   def link_creating_intermediate_dirs(src, dest)
-    raise NotFaked
+    make_directory(File.dirname(dest))
+
+    source_dir = entry_from_path(src)
+    dest_dir = entry_from_path(File.dirname(dest))
+
+    dest_name = File.basename(dest)
+
+    raise "Destination #{dest} already exists" if dest_dir[:children].has_key?(dest_name)
+    dest_dir[:children][dest_name] = source_dir
   end
 
   def rename_file(path, new_name)
@@ -111,14 +121,16 @@ class FakeFilesystemAccessor
     end
   end
 
-  def entry_from_path(path)
+  def path_parts(path)
+    raise "#{path} is not an absolute path" unless path.to_s[0] == '/'
+
     path_split = path.to_s.split('/')
-    fs_root = if path_split[0] == ''
-                path_split = path_split[1..-1]
-                @files
-              else
-                raise "#{path} is not an absolute path"
-              end
+    path_split[1..-1] || []
+  end
+
+  def entry_from_path(path)
+    path_split = path_parts(path)
+    fs_root = @files
 
     path_split.inject(fs_root) do |parent, dir_name|
       parent[:children].fetch(dir_name) { raise NotFound, dir_name }
@@ -145,5 +157,22 @@ class FakeFilesystemAccessor
 
       kids.merge(name => entry)
     end
+  end
+
+  def make_dir_if_not_exist(dirs, parent=@files)
+    return unless dirs.size > 0
+
+    this_one = parent[:children][dirs[0]]
+    full_path = File.join(parent[:full_path], dirs[0])
+
+    unless this_one
+      this_one = parent[:children][dirs[0]] = {
+        type: :folder,
+        full_path: full_path,
+        children: {}
+      }
+    end
+
+    make_dir_if_not_exist(dirs[1..-1], this_one)
   end
 end
