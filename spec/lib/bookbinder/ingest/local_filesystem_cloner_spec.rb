@@ -108,6 +108,27 @@ module Bookbinder
           expect(fs.file_exist?(result.path)).to be true
           expect(out.tap(&:rewind).read).to match(%r{ copying\s*/user_repo_dir/repo-ref})
         end
+
+        context 'and does not have a specific name' do
+          it 'links to the folder with the org in it' do
+            fs = FakeFilesystemAccessor.new({
+              "user_repo_dir" => {
+                "docs-org-name-ruff" => {}
+              },
+              "destination" => {}
+            })
+            out = StringIO.new
+            cloner = LocalFilesystemCloner.new({out: out}, fs, "/user_repo_dir")
+
+            result = cloner.call(source_repo_name: "org-name/docs",
+                                 source_ref: "ruff",
+                                 destination_parent_dir: "/destination",
+                                 destination_dir_name: "reps")
+
+            expect(fs.file_exist?(result.path)).to be true
+            expect(out.tap(&:rewind).read).to match(%r{ copying\s*/user_repo_dir/docs-org-name-ruff})
+          end
+        end
       end
     end
   end

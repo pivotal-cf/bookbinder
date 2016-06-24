@@ -19,7 +19,8 @@ module Bookbinder
           source_repo_name,
           Pathname(user_repo_dir).join(source_repo_name.split('/').last),
           Pathname(destination_parent_dir).join(DestinationDirectory.new(source_repo_name, destination_dir_name)),
-          source_ref
+          source_ref,
+          source_repo_name.split('/').first
         )
       end
 
@@ -27,12 +28,20 @@ module Bookbinder
 
       attr_reader :streams, :filesystem, :user_repo_dir
 
-      def link!(source_repo_name, source_dir, dest_dir, source_ref)
+      def link!(source_repo_name, source_dir, dest_dir, source_ref, source_org)
         source_exists = filesystem.file_exist?(source_dir)
         unless source_exists
           source_dir_with_ref = "#{source_dir}-#{source_ref}"
           source_exists = filesystem.file_exist?(source_dir_with_ref)
-          source_dir = source_dir_with_ref if source_exists
+
+          if source_exists
+            source_dir = source_dir_with_ref
+          else
+            source_dir_with_org_and_ref = "#{source_dir}-#{source_org}-#{source_ref}"
+            source_exists = filesystem.file_exist?(source_dir_with_org_and_ref)
+
+            source_dir = source_dir_with_org_and_ref if source_exists
+          end
         end
 
         if !source_exists
