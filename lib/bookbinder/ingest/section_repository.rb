@@ -19,11 +19,13 @@ module Bookbinder
 
           if section_config.dependent_sections.any?
             section_config.dependent_sections.map do |dependent_config|
-              streams[:success].puts("Gathering #{dependent_config.repo_name}")
-              cloner.call(source_repo_name: dependent_config.repo_name,
-                          source_ref: ref_override || dependent_config.repo_ref,
-                          destination_parent_dir: "#{destination_dir}/#{section_config.desired_directory_name}",
-                          destination_dir_name: dependent_config.desired_directory_name)
+              unless dependent_config.no_docs?
+                streams[:success].puts("Gathering #{dependent_config.repo_name}")
+                cloner.call(source_repo_name: dependent_config.repo_name,
+                            source_ref: ref_override || dependent_config.repo_ref,
+                            destination_parent_dir: "#{destination_dir}/#{section_config.desired_directory_name}",
+                            destination_dir_name: dependent_config.desired_directory_name)
+              end
             end
           end
 

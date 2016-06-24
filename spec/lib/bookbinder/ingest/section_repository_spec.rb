@@ -162,6 +162,39 @@ module Bookbinder
             streams: streams
           )
         end
+
+        it 'skips a dependent section with no docs' do
+          streams = { success: double('stream').as_null_object }
+
+          expect(null_cloner).to receive(:call).with(source_repo_name: 'foo/section',
+                                                source_ref: 'master',
+                                                destination_parent_dir: 'some/place',
+                                                destination_dir_name: 'parent_dir') { double('working copy').as_null_object}
+
+          expect(null_cloner).not_to receive(:call).with(source_repo_name: 'my/first-dependent-repo',
+                                                source_ref: 'master',
+                                                destination_parent_dir: 'some/place/parent_dir',
+                                                destination_dir_name: 'first_dependent_dir')
+
+          SectionRepository.new.fetch(
+            configured_sections: [
+              Config::SectionConfig.new(
+                'repository' => {'name' => 'foo/section'},
+                'directory' => 'parent_dir',
+                'dependent_sections' => [
+                  {
+                    'repository' => {'name' => 'my/first-dependent-repo'},
+                    'directory' => 'first_dependent_dir',
+                    'no_docs' => true
+                  }
+                ]
+              )
+            ],
+            destination_dir: 'some/place',
+            cloner: null_cloner,
+            streams: streams
+          )
+        end
       end
     end
   end

@@ -39,6 +39,10 @@ module Bookbinder
         repo['at_path']
       end
 
+      def no_docs?
+        config.fetch('no_docs', false)
+      end
+
       def dependent_sections
         @sections ||= (config['dependent_sections'] || []).map do |dep_section|
           SectionConfig.new(dep_section)
