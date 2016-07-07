@@ -33,10 +33,11 @@ module Bookbinder
 
     desc 'bind <local|remote> [options]', 'Bind the sections specified in config.yml from <local> or <remote> into the final_app directory'
     option :verbose, type: :boolean
+    option :proof, type: :boolean, default: false, desc:'Shows author proof details'
     option 'dita-flags', desc: '--dita-flags=\"<dita-option>=<value>\"'
     option :require_valid_subnav_links, type: :boolean, desc: 'Check that subnav link targets exist, always true for remote'
     def bind(source)
-      code = legacy_commands.bind(source, options[:verbose], options['dita-flags'], options[:require_valid_subnav_links])
+      code = legacy_commands.bind(source, options[:verbose], options['dita-flags'], options[:require_valid_subnav_links], options[:proof])
       raise Thor::Error, '' if code != 0
     end
 

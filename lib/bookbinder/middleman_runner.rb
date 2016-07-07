@@ -16,7 +16,8 @@ module Bookbinder
             config: nil,
             local_repo_dir: nil,
             subnavs: nil,
-            product_info: nil)
+            product_info: nil,
+            proof: false)
       streams[:out].puts "\nRunning middleman...\n\n"
       Dir.chdir(output_locations.master_dir) do
         config = {
@@ -30,7 +31,8 @@ module Bookbinder
           repo_link_enabled: config.repo_link_enabled,
           repo_links: config.repo_links,
           product_info: product_info,
-          elastic_search: config.elastic_search?
+          elastic_search: config.elastic_search?,
+          proof: proof
         }
 
         fs.write(to: "bookbinder_config.yml", text: YAML.dump(config))

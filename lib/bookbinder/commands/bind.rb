@@ -30,7 +30,7 @@ module Bookbinder
         @directory_preparer = directory_preparer
       end
 
-      def run(bind_type, verbose = false, dita_flags = nil, require_valid_subnav_links = false)
+      def run(bind_type, verbose = false, dita_flags = nil, require_valid_subnav_links = false, proof = false)
         bind_options        = Components::CommandOptions.new([bind_type], base_streams, verbose)
         bind_config         = config_fetcher.fetch_config
         cloner              = cloner_factory.produce(bind_options.local_repo_dir)
@@ -70,7 +70,8 @@ module Bookbinder
           config: config_decorator.generate(bind_config, sections),
           local_repo_dir: bind_options.local_repo_dir,
           subnavs: subnavs(sections),
-          product_info: product_infos(sections)
+          product_info: product_infos(sections),
+          proof: proof
         )
         if generation_result.success?
           file_system_accessor.copy(output_locations.build_dir, output_locations.public_dir)
