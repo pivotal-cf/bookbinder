@@ -109,6 +109,7 @@ module Bookbinder
           }
         },
         elastic_search: false,
+        proof: false,
       )
     end
 

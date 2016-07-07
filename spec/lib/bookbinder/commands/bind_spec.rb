@@ -196,6 +196,7 @@ module Bookbinder
           config: config,
           local_repo_dir: File.expand_path(".."),
           subnavs: section.subnav,
+          proof: false,
           product_info: {"bar"=>nil}) { failure }
 
       Commands::Bind.new(
