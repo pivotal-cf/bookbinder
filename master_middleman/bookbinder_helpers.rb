@@ -9,14 +9,14 @@ require_relative 'quicklinks_renderer'
 I18n.enforce_available_locales = false
 
 module Bookbinder
-  module Navigation
-    class << self
-      def registered(app)
-        app.helpers HelperMethods
-      end
+  class Helpers < ::Middleman::Extension
+    # class << self
+    #   def registered(app)
+    #     app.helpers HelperMethods
+    #   end
 
-      alias :included :registered
-    end
+    #   alias :included :registered
+    # end
 
     module HelperMethods
 
@@ -117,6 +117,10 @@ module Bookbinder
 
       def product_info
         config[:product_info].fetch(template_key, {})
+      end
+
+      def production_host
+        config[:production_host]
       end
 
       def quick_links
@@ -266,6 +270,9 @@ module Bookbinder
         content_tag :li, link, :class => css_class
       end
     end
+    
+    helpers HelperMethods
+    
   end
 end
-::Middleman::Extensions.register(:navigation, Bookbinder::Navigation)
+::Middleman::Extensions.register(:bookbinder, Bookbinder::Helpers)

@@ -8,8 +8,8 @@
   <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300italic,400italic,400,600' rel='stylesheet' type='text/css'>
   <!-- Use title if it's in the page YAML frontmatter -->
   <title>
-    <% if data.page.title %>
-      <%= data.page.title %> |
+    <% if current_page.data.title %>
+      <%= current_page.data.title %> |
     <% end %>
     <%= vars.book_title_short %>
   </title>
@@ -43,7 +43,7 @@
         <%= partial 'layouts/local-header' %>
         <%= partial 'layouts/title' %>
         <% if quick_links %>
-          <div id="js-quick-links" <%= 'class="list-style-none"' if data.page.list_style_none %>>
+          <div id="js-quick-links" <%= 'class="list-style-none"' if current_page.data.list_style_none %>>
             <%= quick_links %>
           </div>
         <% end %>

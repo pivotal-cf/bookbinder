@@ -20,7 +20,7 @@ describe 'binding a book locally' do
 
   it 'provides the production host to the ERB templates' do
     swallow_stdout do
-      `#{gem_root}/install_bin/bookbinder bind local`
+      `#{gem_root}/install_bin/bookbinder bind local --verbose`
     end
 
     index = File.read File.join('final_app', 'public', 'index.html')
@@ -102,7 +102,7 @@ YAML
       end
 
       index = File.read File.join('final_app', 'public', 'dogs', 'index.html')
-      expect(index).to include('<p><img src="images/breeds.png" /></p>')
+      expect(index).to include('<p><img src="images/breeds.png" alt="Breeds" /></p>')
     end
   end
 

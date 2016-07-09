@@ -17,9 +17,9 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.0.0'
   s.add_runtime_dependency 'fog-aws', ['~> 0.7.1']
   s.add_runtime_dependency 'ansi', ['~> 1.4']
-  s.add_runtime_dependency 'middleman', ['~> 3.4.0']
-  s.add_runtime_dependency 'middleman-livereload', ['~> 3.4.3']
-  s.add_runtime_dependency 'middleman-syntax', ['~> 2.0']
+  s.add_runtime_dependency 'middleman'
+  s.add_runtime_dependency 'middleman-livereload'
+  s.add_runtime_dependency 'middleman-syntax'
   s.add_runtime_dependency 'rouge', '!= 1.9.1'
   s.add_runtime_dependency 'redcarpet', ['~> 3.2.3']
   s.add_runtime_dependency 'css_parser'
@@ -31,6 +31,8 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'thor'
   s.add_runtime_dependency 'elasticsearch'
   s.add_runtime_dependency 'font-awesome-sass'
+  s.add_runtime_dependency 'middleman-sprockets'
+  s.add_runtime_dependency 'middleman-compass'
 
   s.add_development_dependency 'license_finder'
   s.add_development_dependency 'pry-byebug'
@@ -38,4 +40,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'sendgrid-ruby', '< 3.0'
   s.add_development_dependency 'jasmine'
+  s.add_development_dependency 'rack-test'
 end

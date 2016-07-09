@@ -1,7 +1,10 @@
 require 'i18n'
 require 'middleman'
-require 'middleman-core/cli'
+require 'thor'
+require 'middleman-core'
+require 'middleman-core/builder'
 require 'middleman-core/profiling'
+require 'middleman-compass'
 require 'ostruct'
 require 'redcarpet'
 require 'yaml'
@@ -15,14 +18,14 @@ require_relative '../../helpers/git_repo'
 require './master_middleman/bookbinder_helpers'
 
 module Bookbinder
-  describe Navigation::HelperMethods do
+  describe Helpers do
     include Bookbinder::SpecHelperMethods
     include Bookbinder::GitRepo
     include_context 'tmp_dirs'
 
     let(:klass) do
       Class.new do
-        include Navigation::HelperMethods
+        include Helpers::HelperMethods
 
         attr_reader :config, :template, :partial_options
 
@@ -40,20 +43,23 @@ module Bookbinder
     def run_middleman(template_variables: {}, subnav_templates: {}, archive_menu: {}, feedback_enabled: false, repo_link_enabled: false, repo_links: {})
       original_mm_root = ENV['MM_ROOT']
 
-      Middleman::Cli::Build.instance_variable_set(:@_shared_instance, nil)
-      ENV['MM_ROOT'] = tmpdir.to_s
       Dir.chdir(tmpdir) do
-        build_command = Middleman::Cli::Build.new [], {:quiet => false}, {}
         File.write('bookbinder_config.yml', YAML.dump(template_variables: template_variables,
                                                       subnav_templates: subnav_templates,
                                                       archive_menu: archive_menu,
                                                       feedback_enabled: feedback_enabled,
                                                       repo_link_enabled: repo_link_enabled,
                                                       repo_links: repo_links))
-        build_command.invoke :build, [], {:verbose => true}
+        app = Middleman::Application.new do
+          config[:mode] = :build
+          config[:show_exceptions] = true
+          config[:cli_options] = {
+            verbose: true
+          }
+        end
+        build_command = Middleman::Builder.new(app, glob: nil, clean: true, parallel: true)
+        build_command.run!
       end
-
-      ENV['MM_ROOT'] = original_mm_root
     end
 
     describe 'injecting customized drop down menu based on archive_menu key inside config' do
@@ -596,7 +602,7 @@ MARKDOWN
       let(:breadcrumb_title) { nil }
 
       context 'when invoked in the top-level index file' do
-        let(:source_file_under_test) { 'index.md.erb' }
+        let(:source_file_under_test) { 'index.html.md.erb' }
         let(:source_file_title) { 'Dogs' }
         let(:output) { File.read File.join(tmpdir, 'build', 'index.html') }
 
@@ -608,12 +614,12 @@ MARKDOWN
       end
 
       context 'when invoked in an index file in a sub-dir, when the parent has a title' do
-        let(:source_file_under_test) { File.join('big-dogs', 'index.md.erb') }
+        let(:source_file_under_test) { File.join('big-dogs', 'index.html.md.erb') }
         let(:source_file_title) { 'Big Dogs' }
         let(:output) { File.read File.join(tmpdir, 'build', 'big-dogs', 'index.html') }
 
         before do
-          write_markdown_source_file 'index.md.erb', 'Dogs'
+          write_markdown_source_file 'index.html.md.erb', 'Dogs'
         end
 
         it 'creates a two level breadcrumb' do
@@ -648,7 +654,7 @@ MARKDOWN
       end
 
       context 'when invoked in an index file in a sub-dir, when the parent is not markdown' do
-        let(:source_file_under_test) { File.join('big-dogs', 'index.md.erb') }
+        let(:source_file_under_test) { File.join('big-dogs', 'index.html.md.erb') }
         let(:source_file_title) { 'Big Dogs' }
         let(:output) { File.read File.join(tmpdir, 'build', 'big-dogs', 'index.html') }
 
@@ -679,7 +685,7 @@ MARKDOWN
       let(:source_file_content) { '<%= vars.var_name %>' }
 
       context 'when the variable is defined' do
-        let(:source_file_under_test) { 'index.md.erb' }
+        let(:source_file_under_test) { 'index.html.md.erb' }
         let(:source_file_title) { 'Dogs' }
         let(:output) { File.read File.join(tmpdir, 'build', 'index.html') }
 
@@ -850,7 +856,7 @@ HTML
 
     describe '#owners' do
       subject(:owners) { klass.owners }
-      let(:klass) { OpenStruct.new(sitemap: sitemap).tap {|k| k.extend(Navigation::HelperMethods) } }
+      let(:klass) { OpenStruct.new(sitemap: sitemap).tap {|k| k.extend(Helpers::HelperMethods) } }
       let(:sitemap) { instance_double('Middleman::Sitemap::Store', resources: resources) }
       let(:resources) {
         [

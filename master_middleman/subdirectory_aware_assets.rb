@@ -1,15 +1,6 @@
 class SubdirectoryAwareAssets < ::Middleman::Extension
-  def initialize(app, options_hash={}, &block)
-    super
-
-    # After compass is setup, make it use the registered cache buster
-    app.compass_config do |config|
-      config.relative_assets = true
-    end if app.respond_to?(:compass_config)
-  end
-
   helpers do
-    def asset_url(path, prefix="", options={})
+    def asset_path(path, prefix="", options={})
       url = super(path, prefix, options)
 
       unless global_asset_at? url
@@ -43,5 +34,3 @@ class SubdirectoryAwareAssets < ::Middleman::Extension
 end
 
 ::Middleman::Extensions.register(:subdirectory_aware_assets, SubdirectoryAwareAssets)
-
-

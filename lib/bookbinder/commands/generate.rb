@@ -71,7 +71,7 @@ gem "bookbindery"#{bookbinder_config}
       def init_index(path)
         fs.write(
           text: '# Empty book',
-          to: path.join('master_middleman/source/index.md.erb')
+          to: path.join('master_middleman/source/index.html.md.erb')
         )
       end
 
