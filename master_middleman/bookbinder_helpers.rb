@@ -39,20 +39,8 @@ module Bookbinder
         snippet.prepend("#{delimiter}#{language}\n").concat("\n#{delimiter}")
       end
 
-      def partial(template, *args)
-        if proofing?
-          %Q{<div class="partial-notice">BEGIN PARTIAL #{template}:</div>#{super}<div class="partial-notice">END PARTIAL #{template}</div>}
-        else
-          super
-        end
-      end
-
       def elastic_search?
         !!config[:elastic_search]
-      end
-
-      def proofing?
-        !!config[:proof]
       end
 
       def yield_for_subnav

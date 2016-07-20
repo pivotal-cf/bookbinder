@@ -380,5 +380,9 @@ category: basics
 
 .partial-notice {
   color: red;
-  font-size: $font-size-l;
+  font-size: $font-size-m;
+
+  ul {
+    font-size: $font-size-s;
+  }
 }

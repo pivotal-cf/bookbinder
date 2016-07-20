@@ -1,4 +1,5 @@
 require 'bookbinder_helpers'
+require 'proof'
 require 'middleman-syntax'
 require 'middleman-livereload'
 require 'middleman-sprockets'
@@ -29,6 +30,8 @@ set :relative_links, false
 page '/owners.json', :layout => false
 
 activate :bookbinder
+
+activate :proof
 
 activate :syntax
 
