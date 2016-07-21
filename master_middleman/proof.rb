@@ -35,7 +35,7 @@ module Bookbinder
             list = page.create_element('ul')
             all_files_using_partial.each do |file_name|
               li = list.add_child(page.create_element('li'))
-              li.add_child(page.create_element('a', file_name, href: "/#{file_name}"))
+              link = li.add_child(page.create_element('a', file_name, href: "/#{file_name}"))
             end
 
             node.add_child(list)

@@ -705,7 +705,7 @@ MARKDOWN
       before { allow(an_instance).to receive(:current_page).and_return(current_page) }
 
       let(:sample_markdown) do
-<<MARKDOWN
+<<-MARKDOWN
 title: Dummy title
 #####
 
@@ -734,7 +734,7 @@ MARKDOWN
       end
 
       let(:expected_output) do
-<<HTML
+<<-HTML
 <div class=\"quick-links\"><ul>
 <li><a href=\"#target\">Target run.pivotal.io</a></li>
 <li><a href=\"#hug\">Target run.pivotal.io with a hug</a></li>
@@ -756,7 +756,7 @@ HTML
 
       context 'when smaller headers follow larger headers' do
         let(:sample_markdown) do
-<<MARKDOWN
+<<-MARKDOWN
 ## <a id='prepare-app'></a>Prepare Your Own Application for Deployment ##
 
 ## <a id='parent'></a>AKA, the Nest ##
@@ -771,7 +771,7 @@ MARKDOWN
         end
 
         let(:expected_output) do
-          <<HTML
+          <<-HTML
 <div class=\"quick-links\"><ul>
 <li><a href=\"#prepare-app\">Prepare Your Own Application for Deployment</a></li>
 <li>
@@ -792,7 +792,7 @@ HTML
 
       context 'when a header contains no anchors' do
         let(:sample_markdown) do
-<<MARKDOWN
+<<-MARKDOWN
 ## <a id='my-id'></a> With an anchor
 ## <a></a> Without an id
 ## Without an anchor
@@ -800,7 +800,7 @@ MARKDOWN
         end
 
         let(:expected_output) do
-<<HTML
+<<-HTML
 <div class=\"quick-links\"><ul><li><a href=\"#my-id\">With an anchor</a></li></ul></div>
 HTML
         end
@@ -812,7 +812,7 @@ HTML
 
       context 'when there are no headers' do
         let(:sample_markdown) do
-<<MARKDOWN
+<<-MARKDOWN
 ## <a></a> Without an id
 ## Without an anchor
 MARKDOWN
