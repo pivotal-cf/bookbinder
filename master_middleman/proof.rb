@@ -21,14 +21,13 @@ module Bookbinder
       return unless proofing?
       @partials.values.each(&:uniq!)
       @pages.values.each(&:uniq!)
-      # for each key, on the key's page, list the values after/before the partial
 
       @pages.each do |page_path, partials|
         full_path = File.join(app.config.build_dir, page_path)
         page = File.open(full_path) {|file| Nokogiri::HTML file}
 
         page.css('.partial-notice').each do |node|
-          if node.text =~ /\ABEGIN PARTIAL (.+):\z/
+          if node.text =~ /\ABEGIN PARTIAL (.+)\. Partial appears in these topics:\z/
             partial_name = $1
             all_files_using_partial = @partials[partial_name]
 
@@ -60,7 +59,7 @@ module Bookbinder
           template_path = template_obj.relative_path.to_s
 
           if track_partial(template_path, current_resource.path)
-            contents.unshift %Q{<div class="partial-notice">BEGIN PARTIAL #{template_path}:</div>}
+            contents.unshift %Q{<div class="partial-notice">BEGIN PARTIAL #{template_path}. Partial appears in these topics:</div>}
             contents.push %Q{<div class="partial-notice">END PARTIAL #{template_path}</div>}
           end
         end
