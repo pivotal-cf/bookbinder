@@ -3,7 +3,7 @@
 set -e
 
 git fetch -t
-TAG=$(git tag -l | tail -1)
+TAG=$(git tag -l | grep -e '^v' | sort -t. -k 1,1n -k 2,2n -k 3,3n | tail -1)
 git checkout ${TAG}
 
 bundle install
