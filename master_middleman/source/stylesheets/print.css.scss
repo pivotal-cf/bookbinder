@@ -38,10 +38,6 @@ pre, pre code {
   overflow: visible;
 }
 
-.pivotalcf .logo {
-  background: none;
-  padding-left: 0;
-}
 
 .quick-links,
 .nav-container,
@@ -56,3 +52,5 @@ h1 {
   font-size: $font-size-l;
 }
 
+@import "print-layout-styles";
+@import "print-book-styles";
