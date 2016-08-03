@@ -1,6 +1,7 @@
 require 'json'
 require 'yaml'
 
+require_relative '../helpers/environment_setups'
 require_relative '../helpers/use_fixture_repo'
 require_relative '../helpers/redirection'
 
@@ -8,6 +9,8 @@ describe 'binding a book locally' do
   include Bookbinder::Redirection
 
   use_fixture_repo('dita-book')
+
+  around_in_dita_ot_env(ENV)
 
   let(:pdf_config) do <<-YAML
 - repository:
