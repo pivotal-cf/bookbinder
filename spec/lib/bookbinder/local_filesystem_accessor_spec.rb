@@ -431,6 +431,19 @@ module Bookbinder
             to match_array([path.join('top-dir/nested/di.r/foo.whatev')])
         end
       end
+
+      it 'only match files with the full path' do
+        Dir.mktmpdir do |dir|
+          path = Pathname(dir)
+          path.join("nested").mkpath
+          path.join("dir/nested").mkpath
+          FileUtils.touch(path.join("nested/foo.whatev"))
+          FileUtils.touch(path.join("dir/nested/foo.whatev"))
+
+          expect(fs_accessor.find_files_extension_agnostically(Pathname('nested/foo.html'), path)).
+              to match_array([path.join("nested/foo.whatev")])
+        end
+      end
     end
 
     describe 'overwriting a file' do
