@@ -119,7 +119,7 @@ module Bookbinder
     end
 
     it "sets the MM root for invocation" do
-      expect(sheller).to receive(:run_command).with({'MM_ROOT' => context_dir.join('output/master_middleman').to_s},
+      expect(sheller).to receive(:run_command).with(hash_including('MM_ROOT' => context_dir.join('output/master_middleman').to_s),
                                                     anything,
                                                     anything)
       run_middleman
