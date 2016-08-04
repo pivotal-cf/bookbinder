@@ -143,11 +143,7 @@ module Bookbinder
       private
 
       def subnav_template_name
-        if current_path == 'search.html'
-          config[:subnav_templates].values.first
-        else
-          config[:subnav_templates][template_key] || 'default'
-        end
+        config[:subnav_templates][template_key] || 'default'
       end
 
       def decreasingly_specific_namespaces

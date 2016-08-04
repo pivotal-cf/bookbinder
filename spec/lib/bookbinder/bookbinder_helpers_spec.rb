@@ -536,13 +536,6 @@ MARKDOWN
         allow(helper).to receive(:current_path) { 'foo/things.html' }
       end
 
-      it 'renders the first subnav for search' do
-        allow(helper).to receive(:current_path) { 'search.html' }
-        helper.yield_for_subnav
-
-        expect(helper.template).to eq('subnavs/bar.erb')
-      end
-
       it 'renders a matching subnav from the body classes' do
         allow(helper).to receive(:page_classes) { 'flerb baz dingo' }
         helper.yield_for_subnav
