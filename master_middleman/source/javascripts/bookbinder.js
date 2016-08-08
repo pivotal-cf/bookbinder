@@ -43,6 +43,17 @@
     return [MONTHS[date.getMonth()], ' ', date.getDate(), ', ', date.getFullYear()].join('');
   }
 
+  function maybeOpenNewWindow(e) {
+    var el = e.currentTarget;
+    var href = el.href;
+
+    if (Bookbinder.needsNewWindow(e, href, window.location.host)) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.open(href);
+    }
+  }
+
   window.Bookbinder = {
     startSidenav: function(rootEl, currentPath) {
       if (!rootEl) { return; }
@@ -93,11 +104,27 @@
         datesElements[i].innerText = displayDate(datesElements[i].getAttribute('data-modified-date'));
       }
     },
+    externalLinks: function(root) {
+      var links = root.querySelectorAll('a[href]');
+
+      for (var i = 0; i < links.length; i++) {
+        registerOnClick(links[i], maybeOpenNewWindow);
+      }
+    },
+    needsNewWindow: function(e, destinationUrl, currentDomain) {
+      if (e.button !== 0 || e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) {
+        return false;
+      }
+
+      var destinationDomain = destinationUrl.replace(/^https?:\/\//, '').split('/')[0];
+      return destinationDomain !== currentDomain;
+    },
     boot: function() {
       Bookbinder.startSidenav(document.querySelector('#sub-nav'), document.location.pathname);
       Bookbinder.mobileMainMenu(document);
       Bookbinder.mobileSubMenu(document);
       Bookbinder.modifiedDates(document);
+      Bookbinder.externalLinks(document);
     }
   };
 })();

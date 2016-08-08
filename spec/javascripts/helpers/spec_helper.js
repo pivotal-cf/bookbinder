@@ -24,7 +24,14 @@ function createDom(tagName, attributes, children) {
   return el;
 }
 
-function clickEl(el) {
+function clickEvent(options) {
+  options = options || {};
+  options.mouseButton = options.mouseButton || 0; // left
+  options.ctrlKey = options.ctrlKey || false;
+  options.shiftKey = options.shiftKey || false;
+  options.altKey = options.altKey || false;
+  options.metaKey = options.metaKey || false;
+
   var event = document.createEvent('MouseEvent');
   event.initMouseEvent(
     'click',
@@ -33,10 +40,17 @@ function clickEl(el) {
     window,
     null,
     0, 0, 0, 0, // coordinates
-    false, false, false, false, // modifier keys
-    0, // left
+    options.ctrlKey,
+    options.altKey,
+    options.shiftKey,
+    options.metaKey,
+    options.mouseButton,
     null
   );
 
-  el.dispatchEvent(event);
+  return event;
+}
+
+function clickEl(el) {
+  el.dispatchEvent(clickEvent());
 }
