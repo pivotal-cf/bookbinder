@@ -9,7 +9,7 @@ module Bookbinder::Search
         {
           searchly: [{
             credentials: {
-              uri: 'foo.com'
+              sslUri: 'foo.com'
             }
           }]
         }
