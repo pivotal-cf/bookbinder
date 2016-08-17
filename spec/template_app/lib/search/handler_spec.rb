@@ -112,5 +112,61 @@ module Bookbinder::Search
         expect(handler.extract_query_params('q=foo+bar%20baz%2Bquux')).to eq({ 'q' => 'foo bar baz+quux'})
       end
     end
+
+    describe '#extract_elasticsearch_url' do
+      it 'gets a searchly provided url' do
+        handler = Handler.new
+
+        url = handler.extract_elasticsearch_url({ 'searchly' => [{'credentials' => {'sslUri' => 'https://searchly.example.com'}}] })
+        expect(url).to eq('https://searchly.example.com')
+      end
+
+      it 'gets a user provided url' do
+        handler = Handler.new
+
+        url = handler.extract_elasticsearch_url({ 'user-provided' => [
+            {'name' => 'things', 'credentials' => {'sslUri' => 'https://things.example.com'}},
+            {'name' => 'elastic.co', 'credentials' => {'sslUri' => 'https://elastic.example.com'}},
+            {'name' => 'stuff', 'credentials' => {'sslUri' => 'https://stuff.example.com'}}
+        ] })
+        expect(url).to eq('https://elastic.example.com')
+      end
+
+      it 'prefers user provided elastic search over searchly' do
+        handler = Handler.new
+
+        url = handler.extract_elasticsearch_url({
+            'searchly' => [
+                {'credentials' => {'sslUri' => 'https://searchly.example.com'}}
+            ],
+            'user-provided' => [
+                {'name' => 'elastic.co', 'credentials' => {'sslUri' => 'https://elastic.example.com'}}
+            ]
+        })
+
+        expect(url).to eq('https://elastic.example.com')
+      end
+
+      it 'uses searchly if no user provided service is for elastic search' do
+        handler = Handler.new
+
+        url = handler.extract_elasticsearch_url({
+          'searchly' => [
+              {'credentials' => {'sslUri' => 'https://searchly.example.com'}}
+          ],
+          'user-provided' => [
+              {'name' => 'skipme', 'credentials' => {'sslUri' => 'https://elastic.example.com'}}
+          ]
+        })
+
+        expect(url).to eq('https://searchly.example.com')
+      end
+
+      it 'raises an error when no elastic search is bound' do
+        handler = Handler.new
+
+        expect { handler.extract_elasticsearch_url({}) }.to raise_error('No Elasticsearch configured!')
+      end
+    end
   end
 end

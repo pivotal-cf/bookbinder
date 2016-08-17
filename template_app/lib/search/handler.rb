@@ -35,12 +35,38 @@ module Bookbinder
         end
       end
 
+      def extract_elasticsearch_url(services_hash)
+        user_provided = get_user_provided(services_hash)
+        return user_provided if user_provided
+
+        searchly = get_searchly(services_hash)
+        return searchly if searchly
+
+        raise 'No Elasticsearch configured!'
+      end
+
       private
 
       attr_reader :renderer, :client_class, :environment
 
       def elasticsearch_url
-        @elasticsearch_url ||= JSON.parse(environment['VCAP_SERVICES'])['searchly'][0]['credentials']['uri']
+        @elasticsearch_url ||= extract_elasticsearch_url(JSON.parse(environment['VCAP_SERVICES']))
+      end
+
+      def get_user_provided(services_hash)
+        return nil unless services_hash.has_key?('user-provided')
+
+        elastic = services_hash['user-provided'].detect { |service| service['name'] == 'elastic.co' }
+
+        return nil unless elastic
+
+        elastic['credentials']['sslUri']
+      end
+
+      def get_searchly(services_hash)
+        return nil unless services_hash.has_key?('searchly')
+
+        services_hash['searchly'][0]['credentials']['sslUri']
       end
     end
   end
