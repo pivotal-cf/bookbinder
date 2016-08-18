@@ -1,6 +1,12 @@
 <%
+require 'rack'
+require 'uri'
 def escape_html(str)
   Rack::Utils.escape_html(str)
+end
+
+def uri_escape(str)
+  URI.escape(str, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
 end
 %>
 
@@ -44,9 +50,9 @@ end
     </ul>
 
     <div class="pagination">
-      <% search_query = "/search?q=#{ search_term }" %>
-      <% search_query << "&product_name=#{ product_name }" unless product_name.nil? %>
-      <% search_query << "&product_version=#{ product_version }" unless product_version.nil? %>
+      <% search_query = "/search?q=#{ uri_escape search_term }" %>
+      <% search_query << "&product_name=#{ uri_escape product_name }" unless product_name.nil? %>
+      <% search_query << "&product_version=#{ uri_escape product_version }" unless product_version.nil? %>
       <% if page_number == 1 %>
         <span class="disabled page first">First</span>
         <span class="disabled page previous">Prev</span>
