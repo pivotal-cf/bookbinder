@@ -3,7 +3,7 @@
 set -e
 
 git fetch -t
-TAG=$(git tag --sort v:refname)
+TAG=$(git tag --sort v:refname | tail -1)
 git checkout ${TAG}
 
 bundle install
