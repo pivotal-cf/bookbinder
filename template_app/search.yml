@@ -2,7 +2,7 @@
 query:
   bool:
     should:
-      match:
+      simple_query_string:
         query: ''
         fields:
           - text
