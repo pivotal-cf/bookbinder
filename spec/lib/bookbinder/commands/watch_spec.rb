@@ -137,7 +137,7 @@ module Bookbinder
         decorated_config = Config::Configuration.new(book_repo: "best_book", public_host: "a_host")
         allow(config_decorator).to receive(:generate).with(config, [section]) { decorated_config }
 
-        expect(runner).to receive(:run).with("server --force-polling --latency=5.0",
+        expect(runner).to receive(:run).with("server --watcher-force-polling --watcher-latency=5.0",
           output_locations: output_locations,
           config:           decorated_config,
           local_repo_dir:   File.expand_path(".."),
