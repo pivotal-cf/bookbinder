@@ -44,7 +44,7 @@ module Bookbinder::Search
       query = Query.new('q' => 'bar', 'product_name' => 'foo', 'product_version' => 'v2', 'page' => '34')
       expect(query.query_options).to eq({
         'query' => { 'bool' => {
-          'should' => {'match' => {'query' => 'bar', 'fields' => ['text', 'title^10']}},
+          'should' => {'simple_query_string' => {'query' => 'bar', 'fields' => ['text', 'title^10']}},
           'filter' => { 'bool' => { 'must' => [{'term' => { 'product_name' => 'foo'}}, { 'term' => { 'product_version' => 'v2' }}]}},
           'minimum_should_match' => 1
       }},
@@ -58,7 +58,7 @@ module Bookbinder::Search
       query = Query.new('q' => 'bar', 'product_name' => 'foo', 'page' => '34')
       expect(query.query_options).to eq({
         'query' => { 'bool' => {
-          'should' => {'match' => {'query' => 'bar', 'fields' => ['text', 'title^10']}},
+          'should' => {'simple_query_string' => {'query' => 'bar', 'fields' => ['text', 'title^10']}},
           'filter' => { 'bool' => { 'must' => [{'term' => { 'product_name' => 'foo' }}]}},
           'minimum_should_match' => 1
         }},
@@ -72,7 +72,7 @@ module Bookbinder::Search
       query = Query.new('q' => 'bar', 'page' => '34')
       expect(query.query_options).to eq({
         'query' => { 'bool' => {
-          'should' => {'match' => {'query' => 'bar', 'fields' => ['text', 'title^10']}},
+          'should' => {'simple_query_string' => {'query' => 'bar', 'fields' => ['text', 'title^10']}},
           'minimum_should_match' => 1
         }},
         'from' => 330,
