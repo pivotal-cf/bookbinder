@@ -57,8 +57,6 @@ Bookbinder also provides scripts for running on a Continuous Integration system
 that can detect when a documentation repository has been updated with new
 content, and that can verify a composed book is free of any dead links.
 
-### Creating a Book
-
 1. To create a new book on your local machine, run `bookbinder generate
     BOOKNAME`, replacing BOOKNAME with the name of your book. For example:
 
@@ -373,6 +371,22 @@ If you include the line below in your `source/layouts/layout.erb`, the feedback 
 ```
 
 To specifically exclude the repo link from being rendered on a page, add the line `<% exclude_repo_link %>` to the desired page.
+
+## Page Styles
+
+You can add CSS styles directly to a page using traditional `<style>` tags directly below the page frontmatter (immediately before the page content).
+
+    ---
+    title: A Christmas Carol, Stave One
+    ---
+
+    <style>
+        h1.unusual {
+            font-size: x-small;
+        }
+    </style>
+
+    Marley was dead: to begin with. There is no doubt whatever about that. The register of his burial was signed by the clergyman, the clerk, the undertaker, and the chief mourner. Scrooge signed it. And Scrooge's name was good upon 'Change, for anything he chose to put his hand to.
 
 
 ## Feedback Form
