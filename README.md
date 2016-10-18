@@ -377,7 +377,7 @@ To specifically exclude the repo link from being rendered on a page, add the lin
 You can add CSS styles directly to a page using traditional `<style>` tags directly below the page frontmatter (immediately before the page content).
 
     ---
-    title: A Christmas Carol, Stave One
+    title: Creating a Foo
     ---
 
     <style>
@@ -386,7 +386,7 @@ You can add CSS styles directly to a page using traditional `<style>` tags direc
         }
     </style>
 
-    Marley was dead: to begin with. There is no doubt whatever about that. The register of his burial was signed by the clergyman, the clerk, the undertaker, and the chief mourner. Scrooge signed it. And Scrooge's name was good upon 'Change, for anything he chose to put his hand to.
+    To create a Foo, you will need Bar installed on your local Bas.
 
 
 ## Feedback Form
