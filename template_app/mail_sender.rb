@@ -25,20 +25,15 @@ module Bookbinder
 
     def assemble_body(helpful: nil, comments: nil, date: nil, page_url: nil)
       <<-EOT
-Dear docs writer,
-
-You just received new feedback.
-
-The sender thought the document was #{helpfulness(helpful)}.
-
 Date: #{date}
 
 Page URL: #{page_url}
 
-Comments:
-#{comments || "None given"}
+Helpful: #{helpful}
 
-Happy editing!
+Comments:
+#{comments}
+
       EOT
     end
 
@@ -62,8 +57,5 @@ Happy editing!
       config.merge({text: @body, subject: @subject})
     end
 
-    def helpfulness(was_helpful)
-      was_helpful ? 'helpful' : 'not helpful'
-    end
   end
 end
