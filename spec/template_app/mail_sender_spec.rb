@@ -69,10 +69,10 @@ module Bookbinder
 
         expect(sender.assemble_body(
           helpful: true,
-          comments: 'This is the actual feedback',
+          comments: 'This is the comment',
           date: 'Feb 14, 2050',
           page_url: 'http://some/page.html'
-        )).to include('was helpful', 'This is the actual feedback', 'Feb 14, 2050', 'http://some/page.html')
+        )).to include('true', 'This is the comment', 'Feb 14, 2050', 'http://some/page.html')
       end
     end
   end
