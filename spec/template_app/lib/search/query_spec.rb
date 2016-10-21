@@ -43,8 +43,11 @@ module Bookbinder::Search
     it 'determines full query options' do
       query = Query.new('q' => 'bar', 'product_name' => 'foo', 'product_version' => 'v2', 'page' => '34')
       expect(query.query_options).to eq({
-        'query' => { 'match' => {'query' => 'bar', 'fields' => ['text', 'title^10']},
-          'filter' => { 'bool' => { 'must' => [{'term' => { 'product_name' => 'foo'}}, { 'term' => { 'product_version' => 'v2' }}]}}},
+        'query' => { 'bool' => {
+          'should' => {'simple_query_string' => {'query' => 'bar', 'fields' => ['text', 'title^10']}},
+          'filter' => { 'bool' => { 'must' => [{'term' => { 'product_name' => 'foo'}}, { 'term' => { 'product_version' => 'v2' }}]}},
+          'minimum_should_match' => 1
+      }},
         'from' => 330,
         'size' => 10,
         '_source' => ['url', 'title', 'summary', 'product_name', 'product_version'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
@@ -54,22 +57,28 @@ module Bookbinder::Search
     it 'gets query options that only filter by product name' do
       query = Query.new('q' => 'bar', 'product_name' => 'foo', 'page' => '34')
       expect(query.query_options).to eq({
-        'query' => { 'match' => {'query' => 'bar', 'fields' => ['text', 'title^10']},
-          'filter' => { 'bool' => { 'must' => [{'term' => { 'product_name' => 'foo' }}]}}},
+        'query' => { 'bool' => {
+          'should' => {'simple_query_string' => {'query' => 'bar', 'fields' => ['text', 'title^10']}},
+          'filter' => { 'bool' => { 'must' => [{'term' => { 'product_name' => 'foo' }}]}},
+          'minimum_should_match' => 1
+        }},
         'from' => 330,
         'size' => 10,
-        '_source' => ['url', 'title', 'summary', 'product_name', 'product_version'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}}
-      )
+        '_source' => ['url', 'title', 'summary', 'product_name', 'product_version'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
+      })
     end
 
     it 'gets query options without a filter when no product name is given' do
       query = Query.new('q' => 'bar', 'page' => '34')
       expect(query.query_options).to eq({
-        'query' => { 'match' => {'query' => 'bar', 'fields' => ['text', 'title^10']}},
+        'query' => { 'bool' => {
+          'should' => {'simple_query_string' => {'query' => 'bar', 'fields' => ['text', 'title^10']}},
+          'minimum_should_match' => 1
+        }},
         'from' => 330,
         'size' => 10,
-        '_source' => ['url', 'title', 'summary', 'product_name', 'product_version'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}}
-      )
+        '_source' => ['url', 'title', 'summary', 'product_name', 'product_version'], 'highlight' => {'fields' => {'text' => {'type' => 'plain'}}}
+      })
     end
 
     describe 'searching' do
