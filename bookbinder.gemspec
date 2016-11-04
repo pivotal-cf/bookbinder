@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.0.0'
   s.add_runtime_dependency 'fog-aws', ['~> 0.7.1']
   s.add_runtime_dependency 'ansi', ['~> 1.4']
-  s.add_runtime_dependency 'middleman'
+  s.add_runtime_dependency 'middleman', ['4.1.10']
   s.add_runtime_dependency 'middleman-livereload'
   s.add_runtime_dependency 'middleman-syntax'
   s.add_runtime_dependency 'rouge', '!= 1.9.1'
