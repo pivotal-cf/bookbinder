@@ -1,8 +1,7 @@
 language: ruby
 cache: bundler
 rvm:
-  - 2.0.0-p481
-  - 2.3.0
+  - 2.3.3
 script: "bundle exec rake"
 env: SITEMAP_DEBUG=true
 sudo: false
