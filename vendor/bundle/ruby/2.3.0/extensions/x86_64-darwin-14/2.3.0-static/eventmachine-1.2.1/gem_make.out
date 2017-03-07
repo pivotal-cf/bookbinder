@@ -1,0 +1,20 @@
+current directory: /Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/eventmachine-1.2.1/ext/fastfilereader
+/Users/pivotal/.rubies/ruby-2.3.0/bin/ruby -r ./siteconf20170307-23819-cfj9vd.rb extconf.rb
+creating Makefile
+
+To see why this extension failed to compile, please check the mkmf.log which can be found here:
+
+  /Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/extensions/x86_64-darwin-14/2.3.0-static/eventmachine-1.2.1/mkmf.log
+
+current directory: /Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/eventmachine-1.2.1/ext/fastfilereader
+make "DESTDIR=" clean
+
+current directory: /Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/eventmachine-1.2.1/ext/fastfilereader
+make "DESTDIR="
+compiling mapper.cpp
+compiling rubymain.cpp
+linking shared-object fastfilereaderext.bundle
+
+current directory: /Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/eventmachine-1.2.1/ext/fastfilereader
+make "DESTDIR=" install
+/usr/bin/install -c -m 0755 fastfilereaderext.bundle ./.gem.20170307-23819-1sspmgp

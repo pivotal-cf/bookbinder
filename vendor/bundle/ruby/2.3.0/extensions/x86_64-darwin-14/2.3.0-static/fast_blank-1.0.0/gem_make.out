@@ -1,0 +1,15 @@
+current directory: /Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/fast_blank-1.0.0/ext/fast_blank
+/Users/pivotal/.rubies/ruby-2.3.0/bin/ruby -r ./siteconf20170307-23819-eif9w4.rb extconf.rb
+creating Makefile
+
+current directory: /Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/fast_blank-1.0.0/ext/fast_blank
+make "DESTDIR=" clean
+
+current directory: /Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/fast_blank-1.0.0/ext/fast_blank
+make "DESTDIR="
+compiling fast_blank.c
+linking shared-object fast_blank.bundle
+
+current directory: /Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/fast_blank-1.0.0/ext/fast_blank
+make "DESTDIR=" install
+/usr/bin/install -c -m 0755 fast_blank.bundle ./.gem.20170307-23819-g0fft8

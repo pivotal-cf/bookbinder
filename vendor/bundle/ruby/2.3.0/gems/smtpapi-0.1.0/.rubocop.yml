@@ -1,0 +1,32 @@
+# Allow "set_" and "get_" for prefix of method
+AccessorMethodName:
+  Enabled: false
+
+# Increase max line number of method
+MethodLength:
+  CountComments: true  # count full line comments?
+  Max: 20
+
+# Increase the number of params
+ParameterLists:
+  Max: 6
+  CountKeywordArgs: true
+
+# Increase the max AbcSize
+AbcSize:
+  Max: 34
+
+# Increase max number of "/" in %r
+RegexpLiteral:
+  MaxSlashes: 0
+
+# Increase the max line number of class
+ClassLength:
+  Max: 200
+  CountComments: true
+
+CyclomaticComplexity:
+  Max: 11
+
+PerceivedComplexity:
+  Max: 11

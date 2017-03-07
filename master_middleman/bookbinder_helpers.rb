@@ -72,7 +72,7 @@ module Bookbinder
 
       def render_repo_link
         if config[:repo_link_enabled] && repo_url && !current_page.metadata[:page][:repo_link_disabled]
-          "<a id='repo-link' href='#{repo_url}'>View the source for this page in GitHub</a>"
+          "<a id='repo-link' href='#{repo_url}'>Create a pull request or raise an issue on the source for this page in GitHub</a>"
         end
       end
 

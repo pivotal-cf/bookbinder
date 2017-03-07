@@ -1,0 +1,5 @@
+/Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/libv8-3.16.14.17/patches/disable-building-tests.patch
+/Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/libv8-3.16.14.17/patches/disable-werror-on-osx.patch
+/Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/libv8-3.16.14.17/patches/do-not-imply-vfp3-and-armv7.patch
+/Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/libv8-3.16.14.17/patches/do-not-use-vfp2.patch
+/Users/pivotal/workspace/bookbinder/vendor/bundle/ruby/2.3.0/gems/libv8-3.16.14.17/patches/fPIC-for-static.patch

@@ -277,7 +277,7 @@ module Bookbinder
 
             output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
 
-            expected_url = "<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/awesome-ref/index.html.md.erb'>View the source for this page in GitHub</a>"
+            expected_url = "<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/awesome-ref/index.html.md.erb'>Create a pull request or raise an issue on the source for this page in GitHub</a>"
 
             expect(output).to include(expected_url)
           end
@@ -302,7 +302,7 @@ module Bookbinder
 
               output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
 
-              expect(output).to include("<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/master/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
+              expect(output).to include("<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/master/some/path/index.html.md.erb'>Create a pull request or raise an issue on the source for this page in GitHub</a>")
             end
           end
 
@@ -324,7 +324,7 @@ module Bookbinder
 
               output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
 
-              expect(output).to include("<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/master/nested/index.html.md.erb'>View the source for this page in GitHub</a>")
+              expect(output).to include("<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/master/nested/index.html.md.erb'>Create a pull request or raise an issue on the source for this page in GitHub</a>")
             end
           end
 
@@ -347,7 +347,7 @@ module Bookbinder
 
               output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
 
-              expect(output).to include("<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/master/nested/some/path/index.html.md.erb'>View the source for this page in GitHub</a>")
+              expect(output).to include("<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/master/nested/some/path/index.html.md.erb'>Create a pull request or raise an issue on the source for this page in GitHub</a>")
             end
           end
 
@@ -384,7 +384,7 @@ dita: true
             )
 
             output = File.read(tmpdir.join('build', 'desired', 'dir', 'nested', 'index.html'))
-            expect(output).to include("<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/master/nested/some/path/index.xml'>View the source for this page in GitHub</a>")
+            expect(output).to include("<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/master/nested/some/path/index.xml'>Create a pull request or raise an issue on the source for this page in GitHub</a>")
           end
         end
 
@@ -417,7 +417,7 @@ dita: true
 
           output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
 
-          expected_url = "<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/awesome-ref'>View the source for this page in GitHub</a>"
+          expected_url = "<a id='repo-link' href='http://github.com/the-best-repo-evah/tree/awesome-ref'>Create a pull request or raise an issue on the source for this page in GitHub</a>"
 
           expect(output).to include(expected_url)
         end
@@ -450,8 +450,8 @@ dita: true
           output_one = File.read(tmpdir.join('build', 'dir-one', 'index_one.html'))
           output_two = File.read(tmpdir.join('build', 'dir-two', 'index_two.html'))
 
-          expect(output_one).to_not include("<a id='repo-link' href='http://github.com/repo-one/tree/awesome-ref/dir-one/index_one.html.md.erb'>View the source for this page in GitHub</a>")
-          expect(output_two).to include("<a id='repo-link' href='http://github.com/repo-two/tree/master/index_two.html.md.erb'>View the source for this page in GitHub</a>")
+          expect(output_one).to_not include("<a id='repo-link' href='http://github.com/repo-one/tree/awesome-ref/dir-one/index_one.html.md.erb'>Create a pull request or raise an issue on the source for this page in GitHub</a>")
+          expect(output_two).to include("<a id='repo-link' href='http://github.com/repo-two/tree/master/index_two.html.md.erb'>Create a pull request or raise an issue on the source for this page in GitHub</a>")
         end
 
         it 'does not render a link when binding locally' do
@@ -469,7 +469,7 @@ dita: true
 
           output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
 
-          expect(output).to_not include("View the source for this page in GitHub")
+          expect(output).to_not include("Create a pull request or raise an issue on the source for this page in GitHub")
         end
       end
 
@@ -486,7 +486,7 @@ dita: true
 
           output = File.read(tmpdir.join('build', 'desired', 'dir', 'index.html'))
 
-          expect(output).to_not include("View the source for this page in GitHub")
+          expect(output).to_not include("Create a pull request or raise an issue on the source for this page in GitHub")
         end
       end
     end
