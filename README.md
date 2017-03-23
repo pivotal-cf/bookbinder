@@ -307,11 +307,11 @@ dita_sections:
     ditaval_location: path/to/my-special-ditaval-location.ditaval  #optional
 
  - repository:
- 	 name: org-name/dependent-section
- 	 ref: 165c28e967d58e6ff23a882689c123998a7b577e                 #optional
+     name: org-name/dependent-section
+     ref: 165c28e967d58e6ff23a882689c123998a7b577e                 #optional
     directory: dependent-section
-	ditamap_location: path/to/other-ditamap.ditamap
-	ditaval_location: path/to/other-ditamap.ditaval                 #optional
+      ditamap_location: path/to/other-ditamap.ditamap
+      ditaval_location: path/to/other-ditamap.ditaval                 #optional
 ```
 
 **Note**: You'll need to have properly installed and specified the [DITA-OT](#user-content-dita-ot) library.
