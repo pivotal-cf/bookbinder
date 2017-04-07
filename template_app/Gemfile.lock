@@ -39,8 +39,5 @@ DEPENDENCIES
   sendgrid-ruby (< 3.0)
   therubyracer
 
-RUBY VERSION
-   ruby 2.3.3
-
 BUNDLED WITH
    1.12.5
