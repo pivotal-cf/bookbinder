@@ -283,6 +283,15 @@ category: basics
   }
 }
 
+.note.warning {
+  background-color: #fdd;
+  border-color: #fbb
+}
+
+.note.warning:before {
+  color: #f99;
+}
+
 /*doc
 ---
 title: Content Helper - New User Tip
