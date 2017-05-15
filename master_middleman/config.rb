@@ -17,7 +17,8 @@ set :markdown, :layout_engine => :erb,
                :tables => true,
                :autolink => true,
                :smartypants => true,
-               :fenced_code_blocks => true
+               :fenced_code_blocks => true,
+               :with_toc_data => true
 
 set :css_dir, 'stylesheets'
 
