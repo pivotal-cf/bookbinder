@@ -24,7 +24,7 @@ See the [Bookbinder wiki](https://github.com/pivotal-cf/bookbinder/wiki) for det
 
 ## <a id='install-ditaot'> Installation
 
-**Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
+**Note**: Bookbinder requires Ruby version 2.3.0.
 
 Follow the instructions below to install Bookbinder:
 
@@ -80,12 +80,24 @@ content, and that can verify a composed book is free of any dead links.
 1. After running `bookbinder generate`, run `bookbinder bind local` to assemble
     your book from the repos specified in the `config.yml` file.
 
-    **Note**: At this point, unless you've added anything to the `config.yml`,
+    **Note 1**: At this point, unless you've added anything to the `config.yml`,
     the `config.yml` contains no references to any repos, and so bookbinder will
-    bind a book with no content.
+    throw an error stating that sections need to be added under appropriate keys.
+    An example of a `config.yml` can be found [here](https://github.com/cloudfoundry/docs-book-cloudfoundry/blob/master/config.yml)
+
+    **Note 2**: Make sure to create the topic repository to a directory that is a sibling to this book repository. So, for example, if you are contributing content to the Buildpack documentation, your folder structure would look like this:
+
+  <pre>
+    |
+    +-- cloud-documentation
+    |
+    +-- docs-buildpacks
+    |
+  </pre>
 
 1. Run the following commands to start up the web site locally:
     * `cd final_app`
+    * `bundle install`
     * `rackup`
 
 1. Launch a web browser to `http://localhost:9292/` to view your book.
@@ -100,6 +112,23 @@ The `bind local` command performs this operation by gathering local sections
 from sibling directories of your book.
 These sections' directories must have the same name as their remote git
 repositories, but don't need to be git repositories for all commands.
+
+### Using `bundle exec bookbinder watch`
+Run bookbinder on your local changes:
+
+  <pre>
+    $ cd cloud-documentation
+    $ bundle install
+    $ bundle exec bookbinder watch
+  </pre>
+
+Bookbinder attempts to assemble the doc set from your local copies.
+It skips any topic repositories that you do not have checked out.
+
+Point your browser at <code>localhost:4567</code> to preview your changes. On save, your browser will reload with any additional changes you make.
+
+**Note**: Using the watch command allows access to the route`localhost:4567/__watchman`, which shows the resources and routes that are available inside the static site. This is useful for first time users of bookbinder.
+
 
 ### Adding Basic Auth to Your Served Book
 
