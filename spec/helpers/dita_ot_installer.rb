@@ -65,7 +65,7 @@ module Bookbinder
 
   class DitaOTDownload
     def tarball_url
-      "http://heanet.dl.sourceforge.net/project/dita-ot/DITA-OT%20Stable%20Release/DITA%20Open%20Toolkit%201.7/DITA-OT#{version}_full_easy_install_bin.tar.gz"
+      "https://svwh.dl.sourceforge.net/project/dita-ot/DITA-OT%20Stable%20Release/DITA%20Open%20Toolkit%201.7/DITA-OT#{version}_full_easy_install_bin.tar.gz"
     end
 
     def tarball_filename
