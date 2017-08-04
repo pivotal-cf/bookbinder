@@ -6,7 +6,9 @@ query:
         query: ''
         fields:
           - text
-          - title^10
+          - title^20
+          - h2^10
+          - h3^10
     minimum_should_match: 1
 from: 0
 size: 10
