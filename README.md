@@ -266,28 +266,31 @@ Bookbinder supports YAML [frontmatter](https://middlemanapp.com/basics/frontmatt
 
 If you want to include front matter in a markdown file, create a block at the top of the file by adding two lines of triple hyphens: `---`. Inside this block, you can create new data accessible to Bookbinder using the `current_page.data` hash. For example, if you add `title: "My Title"`, Bookbinder can access `current_page.data.title` to read "My Title".
 
-Bookbinder currently the following front matter when binding books:
-- `title:` Specifies the title of HTML page.
-- `owner:` Specifies the owner of a topic. This can be a single owner, or multiple owners.
+Bookbinder currently supports the following front matter when binding books:
 
-    Example of front matter for a topic with one owner:
+  - `title:` Specifies the title of HTML page.
+  - `owner:` Specifies the owner of a topic. This can be a single owner, or multiple owners.
 
-    ```
-    ---
-    title: Understanding Cloud Foundry
-    owner: Cloud Foundry Concepts Team
-    ---
-    ```
-    Example of front matter for a topic with three owners:
-    ```
-    ---
-    title: Using Cloud Foundry Services with the CLI
-    owner:
-      - Services Team
-      - Command Line Interface Team
-      - Documentation Team
-    ---
-    ```
+Example of front matter for a topic with one owner:
+
+```
+---
+title: Understanding Cloud Foundry
+owner: Cloud Foundry Concepts Team
+---
+```
+    
+Example of front matter for a topic with three owners:
+
+```
+---
+title: Using Cloud Foundry Services with the CLI
+owner:
+  - Services Team
+  - Command Line Interface Team
+  - Documentation Team
+---
+```
 
 ### DITA
 
@@ -375,6 +378,46 @@ If you include the line below in your `source/layouts/layout.erb`, the feedback 
 ```
 
 To specifically exclude the repo link from being rendered on a page, add the line `<% exclude_repo_link %>` to the desired page.
+
+### Product Name Variables
+
+For flexibility, the product name (a long version and a short one) and version are defined as variables. Here's how to use them:
+
+**Define these three variables in `config.yml`:**
+
+```
+template_variables:
+  - product_name_long: Apache Geode
+  - product_name: Geode
+  - product_version: 1.2
+
+```
+
+**Use the following Ruby syntax to refer to these variables everywhere _except_ in `title:` lines:**
+
+    <%=vars.product_name %>
+    <%=vars.product_name_long %>
+    <%=vars.product_version %>
+    
+**You can't use these variables in `title:` lines. Here's the workaround:**
+
+Instead of:
+
+    ---
+    title: Apache Geode 1.2 Documentation
+    ---
+    
+Do this:
+
+    <% set_title(product_name_long, product_version, "Documentation") %>
+
+Why? Because the `title:` construct is not Ruby code, it's YAML, and it cannot interpret Ruby variables.
+
+**Cautions:**
+
+  - Begin with `<%`, not `<%=`. (We're invoking a function, not printing its value.)
+  - Do not put a space before the opening parenthesis (use `set_title()` not `set_title ()`.)
+  - **Do not** quote the three product variable names (`product_name`, `product_name_long`, and `product_version`). **Do** quote all other text.
 
 ## Page Styles
 
