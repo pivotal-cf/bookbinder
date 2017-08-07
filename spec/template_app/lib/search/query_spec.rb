@@ -44,9 +44,9 @@ module Bookbinder::Search
       query = Query.new('q' => 'bar', 'product_name' => 'foo', 'product_version' => 'v2', 'page' => '34')
       expect(query.query_options).to eq({
         'query' => { 'bool' => {
-          'should' => {'simple_query_string' => {'query' => 'bar', 'fields' => ['text', 'title^20']}},
+          'should' => {'simple_query_string' => {'query' => 'bar', 'fields' => ['text', 'title^20', 'h2^10', 'h3^10']}},
           'filter' => { 'bool' => { 'must' => [{'term' => { 'product_name' => 'foo'}}, { 'term' => { 'product_version' => 'v2' }}]}},
-          'minimum_should_match' => 75%
+          'minimum_should_match' => '75%'
       }},
         'from' => 330,
         'size' => 10,
@@ -58,9 +58,9 @@ module Bookbinder::Search
       query = Query.new('q' => 'bar', 'product_name' => 'foo', 'page' => '34')
       expect(query.query_options).to eq({
         'query' => { 'bool' => {
-          'should' => {'simple_query_string' => {'query' => 'bar', 'fields' => ['text', 'title^20']}},
+          'should' => {'simple_query_string' => {'query' => 'bar', 'fields' => ['text', 'title^20', 'h2^10', 'h3^10']}},
           'filter' => { 'bool' => { 'must' => [{'term' => { 'product_name' => 'foo' }}]}},
-          'minimum_should_match' => 75%
+          'minimum_should_match' => '75%'
         }},
         'from' => 330,
         'size' => 10,
@@ -72,8 +72,8 @@ module Bookbinder::Search
       query = Query.new('q' => 'bar', 'page' => '34')
       expect(query.query_options).to eq({
         'query' => { 'bool' => {
-          'should' => {'simple_query_string' => {'query' => 'bar', 'fields' => ['text', 'title^20']}},
-          'minimum_should_match' => 75%
+          'should' => {'simple_query_string' => {'query' => 'bar', 'fields' => ['text', 'title^20', 'h2^10', 'h3^10']}},
+          'minimum_should_match' => '75%'
         }},
         'from' => 330,
         'size' => 10,
