@@ -104,15 +104,15 @@ module Bookbinder
       end
 
       def product_name
-        current_page.data.title= vars.product_name
+        return vars.product_name
       end
 
       def product_name_long
-        current_page.data.title= vars.product_name_long
+        return vars.product_name_long
       end
 
       def product_version
-        current_page.data.title= vars.product_version
+        return vars.product_version
       end
 
       def set_title(*args)
