@@ -2,7 +2,7 @@ require 'base64'
 
 Gem::Specification.new do |s|
   s.name        = 'bookbindery'
-  s.version     = '10.1.7'
+  s.version     = '10.1.8'
   s.summary     = 'Markdown to Rackup application documentation generator'
   s.description = 'A command line utility to be run in Book repositories to stitch together their constituent Markdown repos into a static-HTML-serving application'
   s.authors     = ['Mike Grafton', 'Lucas Marks', 'Gavin Morgan', 'Nikhil Gajwani', 'Dan Wendorf', 'Brenda Chan', 'Matthew Boedicker', 'Andrew Bruce', 'Frank Kotsianas', 'Elena Sharma', 'Christa Hartsock', 'Michael Trestman', 'Alpha Chen', 'Sarah McAlear', 'Gregg Van Hove', 'Jess B Heron']
@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'ansi', ['~> 1.4']
   s.add_runtime_dependency 'middleman', ['4.1.10']
   s.add_runtime_dependency 'middleman-livereload'
-  s.add_runtime_dependency 'middleman-syntax'
+  s.add_runtime_dependency 'middleman-syntax', ['2.1.0']
   s.add_runtime_dependency 'rouge', '!= 1.9.1'
   s.add_runtime_dependency 'redcarpet', ['~> 3.2.3']
   s.add_runtime_dependency 'css_parser'
