@@ -484,7 +484,7 @@ The `modified_date` helper uses the date of the most recent commit that does not
 
 ### Diagram (using [Mermaid](https://github.com/knsv/mermaid))
 
-The `mermaid_diagram` helper accepts a block including text formatted to generate [Mermaid diagrams](http://knsv.github.io/mermaid/usage.html). In order to use this helper, include [the Mermaid package](http://knsv.github.io/mermaid/usage.html#installation) in your book.
+The `mermaid_diagram` helper accepts a block including text formatted to generate [Mermaid diagrams](https://mermaidjs.github.io/). In order to use this helper, include [the Mermaid package](https://mermaidjs.github.io/usage.html#installation) in your book.
 
 ```
 <% mermaid_diagram do%>
