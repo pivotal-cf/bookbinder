@@ -15,8 +15,8 @@ end
 
     <% unless product_name.nil? %>
       <h4 style="border: 1px solid #ccc; padding: 4px 20px;">
-        Filtering by: <%= product_name %>
-        <% unless product_version.nil? %>and <%= product_version %>
+        Filtering by: <%= escape_html product_name %>
+        <% unless product_version.nil? %>and <%= escape_html product_version %>
         <% end %>
       </h4>
     <% end %>

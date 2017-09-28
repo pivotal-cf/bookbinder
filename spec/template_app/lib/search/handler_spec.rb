@@ -73,6 +73,32 @@ module Bookbinder::Search
 
         expect(html).to include('1 to 3 of 3')
       end
+
+      it 'properly escapes user input (product name and version)' do
+        allow(mock_client).to receive(:search) do
+          {
+            'hits' => {
+              'total' => 1,
+              'hits' => [
+                {
+                  '_source' => {
+                    'url' => 'hi.html',
+                    'title' => 'Hi'
+                  },
+                  'highlight' => {
+                    'text' => [' Im a highlight ']
+                  }
+                },
+              ]
+            }
+          }
+        end
+
+        result = handler.call('QUERY_STRING' => 'q=%3Cscript%3Ealert%28%22hi%22%29%3B%3C/script%3E&product_name=product_name=%3Cscript%3Ealert%28%22hi%22%29%3B%3C/script%3E&product_version=product_name=%3Cscript%3Ealert%28%22hi%22%29%3B%3C/script%3E')
+        html = result.last.first
+
+        expect(html).not_to include('<script>')
+      end
     end
 
     describe '#extract_query_params' do
