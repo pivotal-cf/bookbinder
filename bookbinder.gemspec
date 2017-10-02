@@ -2,10 +2,10 @@ require 'base64'
 
 Gem::Specification.new do |s|
   s.name        = 'bookbindery'
-  s.version     = '10.1.9'
+  s.version     = '10.1.10'
   s.summary     = 'Markdown to Rackup application documentation generator'
   s.description = 'A command line utility to be run in Book repositories to stitch together their constituent Markdown repos into a static-HTML-serving application'
-  s.authors     = ['Mike Grafton', 'Lucas Marks', 'Gavin Morgan', 'Nikhil Gajwani', 'Dan Wendorf', 'Brenda Chan', 'Matthew Boedicker', 'Andrew Bruce', 'Frank Kotsianas', 'Elena Sharma', 'Christa Hartsock', 'Michael Trestman', 'Alpha Chen', 'Sarah McAlear', 'Gregg Van Hove', 'Jess B Heron']
+  s.authors     = ['Mike Grafton', 'Lucas Marks', 'Gavin Morgan', 'Nikhil Gajwani', 'Dan Wendorf', 'Brenda Chan', 'Matthew Boedicker', 'Andrew Bruce', 'Frank Kotsianas', 'Elena Sharma', 'Christa Hartsock', 'Michael Trestman', 'Alpha Chen', 'Sarah McAlear', 'Gregg Van Hove', 'Jess B Heron', "Rajan Agaskar"]
   s.email       = Base64.decode64('Z21vcmdhbkBnb3Bpdm90YWwuY29t') # Gavin's
 
   s.files       = Dir['lib/**/*'] + Dir['template_app/**/*'] + Dir['master_middleman/**/*'] + Dir['install_bin/bookbinder'] + Dir['bookbinder.gemspec']
