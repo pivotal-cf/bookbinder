@@ -18,7 +18,7 @@ module Bookbinder
         options = YAML.load_file(File.expand_path('../../../search.yml', __FILE__))
 
         options['from'] = (page_number - 1) * 10
-        options['query']['bool']['should']['simple_query_string']['query'] = search_term
+        options['query']['bool']['must']['simple_query_string']['query'] = search_term
 
         unless product_name.nil?
           filters = [{

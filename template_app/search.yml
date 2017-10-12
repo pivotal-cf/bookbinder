@@ -1,7 +1,7 @@
 ---
 query:
   bool:
-    should:
+    must:
       simple_query_string:
         query: ''
         fields:
@@ -9,7 +9,6 @@ query:
           - title^20
           - h2^10
           - h3^10
-    minimum_should_match: 75%
 from: 0
 size: 10
 _source:
