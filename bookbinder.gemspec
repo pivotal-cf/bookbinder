@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'rack-rewrite'
   s.add_runtime_dependency 'therubyracer'
   s.add_runtime_dependency 'git', '~> 1.2.8'
-  s.add_runtime_dependency 'nokogiri', ['1.6.7.2']
+  s.add_runtime_dependency 'nokogiri', ['1.8.1']
   s.add_runtime_dependency 'thor', ['0.19.1']
   s.add_runtime_dependency 'elasticsearch'
   s.add_runtime_dependency 'font-awesome-sass'
