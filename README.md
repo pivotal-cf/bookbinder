@@ -3,9 +3,13 @@
 # IMPORTANT: This project is currently inactive, with no current plans to make any changes to the code.
 
 
-# Bookbinder
+# Bookbinder / Bookbindery
 
-**Note**: The Bookbinder gem is now named `bookbindery`, and this GitHub repository is no longer a supported gem source for the gem. To use the Bookbinder gem, include the following in your book's Gemfile:
+This is the repo for 'bookbinder' and 'bookbindery' gems. On 2015/01/07 the 'bookbinder' gem was renamed to 'bookbindery' gem.
+
+**Note**: This GitHub repository is no longer supported.
+
+To use the Bookbindery gem, include the following in your book's Gemfile:
 
 ```
 source 'https://rubygems.org'
