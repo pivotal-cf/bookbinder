@@ -1,8 +1,5 @@
 [![Code Climate](https://codeclimate.com/github/pivotal-cf/docs-bookbinder.png)](https://codeclimate.com/github/pivotal-cf/bookbinder) [![Build Status](https://pubtools.ci.cf-app.com/pipelines/pubtools/jobs/bookbinder/badge)](https://pubtools.ci.cf-app.com/pipelines/pubtools/jobs/bookbinder)
 
-# IMPORTANT: This project is currently inactive, with no current plans to make any changes to the code.
-
-
 # Bookbinder / Bookbindery
 
 This is the repo for 'bookbinder' and 'bookbindery' gems. On 2015/01/07 the 'bookbinder' gem was renamed to 'bookbindery' gem.
