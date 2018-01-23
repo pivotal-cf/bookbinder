@@ -52,6 +52,36 @@ Follow the instructions below to install Bookbinder:
     **Note**: Ensure that the version of the DITA-OT library that you install
     supports the DITA version in which your documents are written.
 
+
+### Installation on a mac
+
+1. Install ruby and needed dependencies
+```
+gem install bundler
+
+brew install v8
+gem install therubyracer
+gem install libv8 -v '3.16.14.7' -- --with-system-v8
+brew install ant
+```
+
+1. Install Dita-OT, version 1.7.5, full easy from http://www.dita-ot.org/download 
+```
+cat >> ~/.bash_profile << EOF
+export PATH_TO_DITA_OT_LIBRARY="/Users/pivotal/workspace/DITA-OT1.7.5"
+EOF
+export PATH_TO_DITA_OT_LIBRARY="/Users/pivotal/workspace/DITA-OT1.7.5"
+```
+
+1. Build the book
+```
+bundle exec bookbinder bind local
+
+cd final_app/
+bundle install
+rackup
+```
+
 ## Usage
 
 Bookbinder is meant to be used from within a project called a **book**.
