@@ -50,53 +50,53 @@ Follow the instructions below to install Bookbinder:
     supports the DITA version in which your documents are written.
 
 
-### Installation on a mac
+### Install on Mac OS
 
-1. Install ruby and needed dependencies
-```
-gem install bundler
+1. Install Ruby and needed dependencies
 
-brew install v8
-gem install therubyracer
-gem install libv8 -v '3.16.14.7' -- --with-system-v8
-brew install ant
-```
+    ```
+    gem install bundler
+    brew install v8
+    gem install therubyracer
+    gem install libv8 -v '3.16.14.7' -- --with-system-v8
+    brew install ant
+    ```
 
 1. Install Dita-OT, version 1.7.5, full easy from http://www.dita-ot.org/download 
-```
-cat >> ~/.bash_profile << EOF
-export PATH_TO_DITA_OT_LIBRARY="/Users/pivotal/workspace/DITA-OT1.7.5"
-EOF
-export PATH_TO_DITA_OT_LIBRARY="/Users/pivotal/workspace/DITA-OT1.7.5"
-```
 
-1. Build the book
-```
-bundle exec bookbinder bind local
+    ```
+    cat >> ~/.bash_profile << EOF
+    export PATH_TO_DITA_OT_LIBRARY="/Users/pivotal/workspace/DITA-OT1.7.5"
+    EOF
+    export PATH_TO_DITA_OT_LIBRARY="/Users/pivotal/workspace/DITA-OT1.7.5"
+    ```
 
-cd final_app/
-bundle install
-rackup
-```
+1. Build the book and view it
+
+    ```
+    bundle exec bookbinder bind local
+
+   cd final_app/
+   rackup
+   ```
 
 ## Usage
 
-Bookbinder is meant to be used from within a project called a **book**.
-The book includes a configuration file that describes which documentation
-repositories to use as source materials.
+Bookbinder is intended to be used from within a project called a **book**.
+The book includes a configuration file. the `config.yml`, that describes which documentation repositories to use as 
+source materials.
 
-The bookbindery gem provides a set of scripts to aggregate those repositories
+The **bookbindery** gem provides a set of scripts to aggregate those repositories
 and publish them to various locations.
 
-Bookbinder also provides scripts for running on a Continuous Integration system
-that can detect when a documentation repository has been updated with new
-content, and that can verify a composed book is free of any dead links.
+Bookbinder also provides scripts for running on a Continuous Integration system that can detect when a documentation 
+repository has been updated with newcontent, and that can verify a composed book is free of any dead links.
 
 1. To create a new book on your local machine, run `bookbinder generate
     BOOKNAME`, replacing BOOKNAME with the name of your book. For example:
 
     ```
-    $ bundle exec bookbinder generate cloud-documentation
+    bundle exec bookbinder generate cloud-documentation
     ```
 
     The `bookbinder generate BOOKNAME` command creates a directory named
@@ -121,23 +121,22 @@ content, and that can verify a composed book is free of any dead links.
 
 1. Launch a web browser to `http://localhost:9292/` to view your book.
 
-As typically used, the disparate source materials of a book are organized into
-separate git repositories.
+As typically used, the disparate source materials of a book are organized into separate git repositories.
 
 When writing documentation on your local machine, however, we recommend that you
 add uncommitted changes to the preview web site that you serve on your machine.
 
-The `bind local` command performs this operation by gathering local sections
-from sibling directories of your book.
-These sections' directories must have the same name as their remote git
-repositories, but don't need to be git repositories for all commands.
+The `bind local` command performs this operation by gathering local sections from sibling directories of your book.
+These sections' directories must have the same name as their remote git repositories, but don't need to be git repositories 
+for all commands.
 
 ### Adding Basic Auth to Your Served Book
 
-You can optionally require a username and password to access any book served by running `rackup` in `final_app` by setting the following environment variables:
+You can optionally require a username and password to access any book served by running `rackup` in `final_app` by setting 
+the following environment variables:
 
-* 	`$ export SITE_AUTH_USERNAME=<your-book-username>`
-*	`$ export SITE_AUTH_PASSWORD=<your-book-password>`
+* 	`export SITE_AUTH_USERNAME=<your-book-username>`
+*	`export SITE_AUTH_PASSWORD=<your-book-password>`
 
 If these environment variables are not set, basic auth is not enabled.
 
@@ -464,7 +463,7 @@ You can add CSS styles directly to a page using traditional `<style>` tags direc
         }
     </style>
 
-    Marley was dead: to begin with. There is no doubt whatever about that. The register of his burial was signed by the clergyman, the clerk, the undertaker, and the chief mourner. Scrooge signed it. And Scrooge's name was good upon 'Change, for anything he chose to put his hand to.
+    Your text here.
 
 
 ## Feedback Form
@@ -642,8 +641,10 @@ No more.
 ### Code Snippets
 `<%= yield_for_code_snippet from: 'my-org/code-repo', at: 'myCodeSnippetA' %>` inserts code snippets extracted from code repositories.
 
-To delimit where a code snippet begins and ends, you must use the format of `code_snippet MARKER_OF_YOUR_CHOOSING start OPTIONAL_LANGUAGE`, followed by the code, and then finished with `code_snippet MARKER_OF_YOUR_CHOOSING end`:
-If the `OPTIONAL_LANGUAGE` is omitted, your snippet will still be formatted as code but will not have any syntax highlighting.
+To delimit where a code snippet begins and ends, you must use the format of 
+`code_snippet MARKER_OF_YOUR_CHOOSING start OPTIONAL_LANGUAGE`, followed by the code, and then finishing with 
+`code_snippet MARKER_OF_YOUR_CHOOSING end`.
+If you omit the `OPTIONAL_LANGUAGE`, your snippet will still be formatted as code but will not have any syntax highlighting.
 
 Code snippet example:
 
@@ -657,6 +658,29 @@ Code snippet example:
 ; code_snippet myCodeSnippetA end
 
 ```
+
+To insert a code snippet from a GitHub repository, you must add the repository as a **dependent section** resource in the 
+`config.yml` of the book. The `dependent section` in the `config.yml` must end with a `no-docs: true` statement.
+
+Example excerpt from a `config.yml`:
+
+```
+- repository:
+    name: cloudfoundry/docs-buildpacks
+  directory: buildpacks
+  dependent_sections:
+  - repository:
+      name: cloudfoundry-samples/pong_matcher_grails
+  - repository:
+      name: cloudfoundry-samples/pong_matcher_groovy
+  - repository:
+      name: cloudfoundry-samples/pong_matcher_spring
+  - repository:
+      name: cloudfoundry-samples/pong_matcher_ruby
+    no-docs: true
+```
+
+The above YAML adds four GitHub repositories as "dependent sections" to `docs-buildpacks` in the `docs-book-cloudfoundry` book. These are the repositories referenced by the `yield_for_code_snippet` in the buildpack topics. 
 
 ### Archive Menu
 
