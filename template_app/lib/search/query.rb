@@ -5,9 +5,17 @@ require_relative 'hit'
 module Bookbinder
   module Search
     class Query
-      attr_reader :search_term, :product_name, :product_version, :page_number, :result_list, :result_count, :last_page, :page_window
+      attr_accessor :result_count, :message
+      attr_reader :search_term, :product_name, :product_version, :page_number, :result_list, :last_page, :page_window
 
-      def initialize(params)
+      def self.empty_query(message)
+        new.tap do |q|
+          q.result_count = 0
+          q.message = message
+        end
+      end
+
+      def initialize(params={})
         @search_term = params.fetch('q', '')
         @product_name = params.fetch('product_name', nil)
         @product_version = @product_name && params.fetch('product_version', nil)
