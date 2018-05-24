@@ -21,9 +21,10 @@ A simple Dockerfile for executing bookbinder on your system.
 
 5. Execute bookbinder commands to build or review your work, such as:
 
-    * `bundle exec bookbinder bind local`
-    * `bundle exec bookbinder watch`
-    * `rackup` from a `/final_app` directory
+    * `bundle exec bookbinder watch` - publishes book to `localhost:4567`
+    * `bundle exec bookbinder bind local` - creates book app in directory `final_app` using local source files 
+    * `bundle exec bookbinder bind remote` - creates book app in `final_app` based on source from remote Github repos
+    * `rackup` from a `/final_app` directory - publishes book app to `localhost:9292`
 
 ## Limitations
 
