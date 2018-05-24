@@ -9,7 +9,7 @@ A simple Dockerfile for executing bookbinder on your system.
     ```
 3. Run the image using a command similar to:
     ``` bash
-    $ docker run -it -p 9292:9292 -p 1234:1234 -v /my/workspace:/github docs/bb
+    $ docker run -it -p 9292:9292 -p 4567:4567 -v /my/workspace:/github docs/bb
     ```
 
     Substitute your workspace, the local directory that you clone Github repositories into, for `/my/workspace` in the above command.
