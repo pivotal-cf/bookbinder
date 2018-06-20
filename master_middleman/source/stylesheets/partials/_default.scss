@@ -116,7 +116,9 @@ ol {
   padding: 0 0 0 1.4em;
 }
 ul ul,
-ol ol {
+ol ol,
+ul ol,
+ol ul {
   margin-top: 1em;
   padding-bottom: 0
 }
