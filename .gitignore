@@ -7,3 +7,4 @@ tags
 bin
 spec/utilities
 vendor/
+.idea
