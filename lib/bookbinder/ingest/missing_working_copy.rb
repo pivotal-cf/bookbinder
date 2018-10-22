@@ -12,7 +12,7 @@ module Bookbinder
       end
 
       def path
-        Pathname(@source_dir)
+        @source_dir
       end
 
       def ref

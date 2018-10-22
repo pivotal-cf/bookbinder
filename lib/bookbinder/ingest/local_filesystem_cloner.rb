@@ -18,7 +18,7 @@ module Bookbinder
         link!(
           source_repo_name,
           Pathname(user_repo_dir).join(source_repo_name.split('/').last),
-          Pathname(destination_parent_dir).join(DestinationDirectory.new(source_repo_name, destination_dir_name)),
+          Pathname(destination_parent_dir).join(DestinationDirectory.new(source_repo_name, destination_dir_name).to_s),
           source_ref,
           source_repo_name.split('/').first
         )
@@ -28,26 +28,22 @@ module Bookbinder
 
       attr_reader :streams, :filesystem, :user_repo_dir
 
-      def link!(source_repo_name, source_dir, dest_dir, source_ref, source_org)
-        source_exists = filesystem.file_exist?(source_dir)
-        unless source_exists
-          source_dir_with_ref = "#{source_dir}-#{source_ref}"
-          source_exists = filesystem.file_exist?(source_dir_with_ref)
-
-          if source_exists
-            source_dir = source_dir_with_ref
-          else
-            source_dir_with_org_and_ref = "#{source_dir}-#{source_org}-#{source_ref}"
-            source_exists = filesystem.file_exist?(source_dir_with_org_and_ref)
-
-            source_dir = source_dir_with_org_and_ref if source_exists
-          end
+      def link!(source_repo_name, original_source_dir, dest_dir, source_ref, source_org)
+        source_dir = [
+            original_source_dir,
+            [original_source_dir, source_ref].join('-'),
+            [original_source_dir, source_org, source_ref]. join('-'),
+            Dir["#{original_source_dir.to_s.chomp('/')}*"].sort_by(&:length).first
+        ].compact.find do |dir|
+          filesystem.file_exist?(dir)
         end
 
-        if !source_exists
-          streams[:out].puts "  skipping (not found) #{source_dir}"
-          MissingWorkingCopy.new(source_repo_name, source_dir)
+
+        if !source_dir
+          streams[:out].puts "  skipping (not found) #{original_source_dir}"
+          MissingWorkingCopy.new(source_repo_name, original_source_dir)
         else
+          source_dir = Pathname(source_dir)
           streams[:out].puts "  copying #{source_dir}"
 
           unless filesystem.file_exist?(dest_dir)
@@ -59,6 +55,7 @@ module Bookbinder
             full_name: source_repo_name,
             ref: source_ref
           )
+
         end
       end
     end

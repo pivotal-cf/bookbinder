@@ -42,4 +42,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'sinatra', '1.4.8'
   s.add_development_dependency 'jasmine'
   s.add_development_dependency 'rack-test'
+  s.add_development_dependency 'fakefs'
 end
