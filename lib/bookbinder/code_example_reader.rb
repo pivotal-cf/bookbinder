@@ -77,7 +77,7 @@ module Bookbinder
           end
         }.
         map(&:first).
-        detect ->{""} {|text| text}
+        detect(Proc.new {""}) {|text| text}
     end
 
     def pattern_for(marker)

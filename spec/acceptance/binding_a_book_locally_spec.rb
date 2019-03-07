@@ -213,7 +213,7 @@ YAML
       end
 
       after do
-        FileUtils.rmdir('./config')
+        FileUtils.rm_rf('./config')
       end
 
       it 'should succeed' do
