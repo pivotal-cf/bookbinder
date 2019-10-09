@@ -119,6 +119,10 @@ module Bookbinder
         current_page.data.title= args.join(' ')
       end
 
+      def set_title_no_spaces(*args)
+        current_page.data.title= args.join
+      end
+
       def product_info
         config[:product_info].fetch(template_key, {})
       end
