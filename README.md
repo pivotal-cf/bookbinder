@@ -23,7 +23,7 @@ that you can deploy to Cloud Foundry.
 
 See the [Bookbinder wiki](https://github.com/pivotal-cf/bookbinder/wiki) for detailed information and instructions, such as how to configure [credentials for multiple git services](https://github.com/pivotal-cf/bookbinder/wiki/Credentials-for-multiple-git-services).
 
-## <a id='install-ditaot'> Installation
+## <a id='install-ditaot'></a>Installation
 
 **Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
 
@@ -603,6 +603,7 @@ products:
 To generate a subnav, `bookbinder` starts spidering from the `subnav_root`, following `a` elements with the `subnav` class. This creates a JSON file with the subnav contents, described in more detail below.
 
 `reptiles/index.html.md`:
+
 ```markdown
 <a href="./thing-one.html" class="subnav">My First Nav Item</a>
 
@@ -614,6 +615,7 @@ Some text that won't be in the Nav
 Note that the links can be anywhere on the page (the second link is in an `h2`, for instance), but will be followed in order.
 
 `reptiles/thing-one.html`:
+
 ```markdown
 
 - <a href="./nested-thing.html" class="subnav">My Nested Nav Item</a>
@@ -621,12 +623,14 @@ Note that the links can be anywhere on the page (the second link is in an `h2`, 
 ```
 
 `reptiles/thing-two.html`:
+
 ```markdown
 ## Won't Show Up in the Nav
 Nothing to see here.
 ```
 
 `reptiles/nested-thing.html`:
+
 ```markdown
 ## End of the line
 
