@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'font-awesome-sass', ['4.7.0']
   s.add_runtime_dependency 'middleman-sprockets'
   s.add_runtime_dependency 'middleman-compass'
+  s.add_runtime_dependency 'sprockets', '3.7.2'
 
   s.add_development_dependency 'license_finder'
   s.add_development_dependency 'pry-byebug'
