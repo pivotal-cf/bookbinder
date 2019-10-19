@@ -238,7 +238,7 @@ By default, the `bookbinder bind remote` command binds the most current versions
 
 #### Section Repository Ref
 
-Bookbinder supports a `ref` key to enable use of an alternate version of a repository. The value of this key can be the name of a branch (e.g., `develop`), a SHA, or a tag (`v19`).
+Bookbinder supports a `ref` key to enable use of an alternate version of a repository. The value of this key can be the name of a branch (e.g., `develop`), a SHA, or a tag (`v19`). If the value is a numeric branch name, like `2.2`, it's safest, if not always necessary, to put the branch name between single quotes.
 
 ```
 sections:
@@ -262,7 +262,7 @@ Bookbinder supports a `layout_repo_ref` key to enable use of an alternate versio
 
 ```
 layout_repo: cloudfoundry/my-doc-layout
-layout_repo_ref: v19
+layout_repo_ref: 'v19'
 ```
 
 **Note**: Bookbinder only uses the <code>ref</code> key when binding 'remote'. The <code>bookbinder bind local</code> command ignores the <code>ref</code> key.
