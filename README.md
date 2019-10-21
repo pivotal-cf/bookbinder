@@ -258,7 +258,7 @@ sections:
 
 #### Layout Repository Ref
 
-Bookbinder supports a `layout_repo_ref` key to enable use of an alternate version of a layout repository. The value of this key can be the name of a branch (e.g., `develop`), a SHA, or a tag (`v19`).
+Bookbinder supports a `layout_repo_ref` key to enable use of an alternate version of a layout repository. The value of this key can be the name of a branch (e.g., `develop`), a SHA, or a tag (`v19`).  If the value is a numeric branch name, like `2.2`, it's safest to put the branch name between single quotes thusly: `'2.2'`.
 
 ```
 layout_repo: cloudfoundry/my-doc-layout
