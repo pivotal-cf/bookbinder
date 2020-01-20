@@ -24,9 +24,6 @@ GEM
       mimemagic
       smtpapi (~> 0.1)
     smtpapi (0.1.0)
-    therubyracer (0.12.2)
-      libv8 (~> 3.16.14.0)
-      ref
 
 PLATFORMS
   ruby
@@ -37,7 +34,6 @@ DEPENDENCIES
   rack
   rack-rewrite
   sendgrid-ruby (< 3.0)
-  therubyracer
 
 RUBY VERSION
    ruby 2.5.3p105
