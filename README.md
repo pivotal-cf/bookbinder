@@ -56,9 +56,6 @@ Follow the instructions below to install Bookbinder:
 
     ```
     gem install bundler
-    brew install v8
-    gem install therubyracer
-    gem install libv8 -v '3.16.14.7' -- --with-system-v8
     brew install ant
     ```
 
