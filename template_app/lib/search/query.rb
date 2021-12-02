@@ -46,7 +46,7 @@ module Bookbinder
           @last_page = 1
         else
           results = elasticsearch_client.search index: 'searching', body: query_options
-          @result_count = results['hits']['total']
+          @result_count = results['hits']['hits'].count
           @result_list = results['hits']['hits'].map { |h| Hit.new(h) }
           @last_page = (result_count / 10.0).ceil
         end
