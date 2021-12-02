@@ -1,48 +1,48 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    elasticsearch (2.0.2)
-      elasticsearch-api (= 2.0.2)
-      elasticsearch-transport (= 2.0.2)
-    elasticsearch-api (2.0.2)
+    elasticsearch (7.5.0)
+      elasticsearch-api (= 7.5.0)
+      elasticsearch-transport (= 7.5.0)
+    elasticsearch-api (7.5.0)
       multi_json
-    elasticsearch-transport (2.0.2)
-      faraday
+    elasticsearch-transport (7.5.0)
+      faraday (>= 0.14, < 1)
       multi_json
-    faraday (0.15.4)
+    faraday (0.17.4)
       multipart-post (>= 1.2, < 3)
-    libv8 (3.16.14.15)
-    mimemagic (0.3.9)
+    libv8 (3.16.14.19)
+    mimemagic (0.3.10)
       nokogiri (~> 1)
       rake
-    mini_portile2 (2.5.0)
-    multi_json (1.13.1)
-    multipart-post (2.0.0)
-    nio4r (2.5.7)
-    nokogiri (1.11.2)
-      mini_portile2 (~> 2.5.0)
+    mini_portile2 (2.6.1)
+    multi_json (1.15.0)
+    multipart-post (2.1.1)
+    nio4r (2.5.8)
+    nokogiri (1.12.5)
+      mini_portile2 (~> 2.6.1)
       racc (~> 1.4)
-    puma (4.3.8)
+    puma (5.5.2)
       nio4r (~> 2.0)
-    racc (1.5.2)
-    rack (2.1.4)
+    racc (1.6.0)
+    rack (2.2.3)
     rack-rewrite (1.5.1)
-    rake (13.0.3)
+    rake (13.0.6)
     ref (2.0.0)
     sendgrid-ruby (1.1.6)
       faraday (~> 0.9)
       mimemagic
       smtpapi (~> 0.1)
-    smtpapi (0.1.0)
-    therubyracer (0.12.2)
-      libv8 (~> 3.16.14.0)
+    smtpapi (0.1.9)
+    therubyracer (0.12.3)
+      libv8 (~> 3.16.14.15)
       ref
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  elasticsearch (~> 2.0.0)
+  elasticsearch
   mimemagic (~> 0.3.7)
   puma
   rack
