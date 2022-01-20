@@ -25,7 +25,13 @@ See the [Bookbinder wiki](https://github.com/pivotal-cf/bookbinder/wiki) for det
 
 ## <a id='install-ditaot'></a>Installation
 
-**Note**: Bookbinder requires Ruby version 2.0.0-p195 or higher.
+**Note**: Bookbinder has been tested on the following Ruby versions:
+
+* 2.5.3 
+* 2.5.5
+* 2.6.3
+* 2.6.6
+* 2.6.8
 
 Follow the instructions below to install Bookbinder:
 

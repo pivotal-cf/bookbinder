@@ -1,9 +1,10 @@
 source 'http://rubygems.org'
 
-ruby '~> 2.5.0'
+ruby '~> 2.6.7'
 
 gem 'rack'
 gem 'rack-rewrite'
 gem 'puma'
 gem 'sendgrid-ruby', '< 3.0'
-gem 'elasticsearch', '~> 2.0.0'
+gem 'elasticsearch'
+gem 'mimemagic', '~> 0.3.7'
