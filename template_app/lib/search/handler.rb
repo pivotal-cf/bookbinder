@@ -15,6 +15,12 @@ module Bookbinder
       end
 
       def call(request_env)
+        unless elasticsearch_url
+          puts "Configuration Warning: ElasticSearch URL not configured"
+          query = Query.empty_query('Search is currently disabled. Please try again later')
+          return [200, {'Content-Type' => 'text/html'}, [renderer.render_results(query)]]
+        end
+
         query = Query.new(extract_query_params(request_env['QUERY_STRING']))
         query.get_results(client_class.new(url: elasticsearch_url))
 
@@ -41,8 +47,6 @@ module Bookbinder
 
         searchly = get_searchly(services_hash)
         return searchly if searchly
-
-        raise 'No Elasticsearch configured!'
       end
 
       private
@@ -50,7 +54,8 @@ module Bookbinder
       attr_reader :renderer, :client_class, :environment
 
       def elasticsearch_url
-        @elasticsearch_url ||= extract_elasticsearch_url(JSON.parse(environment['VCAP_SERVICES']))
+        vcap_services = environment['VCAP_SERVICES']
+        @elasticsearch_url ||= vcap_services ? extract_elasticsearch_url(JSON.parse(vcap_services)) : nil
       end
 
       def get_user_provided(services_hash)

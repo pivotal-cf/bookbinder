@@ -11,6 +11,9 @@ end
 %>
 
 <div class="search-results">
+  <% if message %>
+    <p><%= message %></p>
+  <% end %>
   <form method="get">
 
     <% unless product_name.nil? %>

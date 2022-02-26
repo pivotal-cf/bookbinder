@@ -99,6 +99,15 @@ module Bookbinder::Search
 
         expect(html).not_to include('<script>')
       end
+
+      it 'renders the search page with a warning message' do
+        handler = Handler.new(mock_client_class, {})
+        result = handler.call('QUERY_STRING' => 'q=%3Cunconfigured_search%3E&')
+        html = result.last.first
+
+        expect(html).to include('Search is currently disabled. Please try again later')
+      end
+
     end
 
     describe '#extract_query_params' do
@@ -188,10 +197,10 @@ module Bookbinder::Search
         expect(url).to eq('https://searchly.example.com')
       end
 
-      it 'raises an error when no elastic search is bound' do
+      it 'returns nil when no elastic search is bound' do
         handler = Handler.new
 
-        expect { handler.extract_elasticsearch_url({}) }.to raise_error('No Elasticsearch configured!')
+        expect(handler.extract_elasticsearch_url({})).to be_nil
       end
     end
   end
