@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'css_parser'
   s.add_runtime_dependency 'puma'
   s.add_runtime_dependency 'rack-rewrite'
-  s.add_runtime_dependency 'git', '~> 1.2.8'
+  s.add_runtime_dependency 'git', '>= 1.2.8', '< 1.19.0'
   s.add_runtime_dependency 'nokogiri', ['1.10.1']
   s.add_runtime_dependency 'thor', ['0.19.1']
   s.add_runtime_dependency 'elasticsearch'
