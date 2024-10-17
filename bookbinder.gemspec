@@ -22,17 +22,18 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'middleman-syntax', ['2.1.0']
   s.add_runtime_dependency 'rouge', '!= 1.9.1'
   s.add_runtime_dependency 'redcarpet', ['~> 3.2.3']
-  s.add_runtime_dependency 'css_parser'
-  s.add_runtime_dependency 'puma'
-  s.add_runtime_dependency 'rack-rewrite'
+  s.add_runtime_dependency 'css_parser', ['1.11.0']
+  s.add_runtime_dependency 'puma', ['5.6.2']
+  s.add_runtime_dependency 'rack-rewrite', ['1.5.1']
   s.add_runtime_dependency 'git', '~> 1.2.8'
   s.add_runtime_dependency 'nokogiri', ['1.10.1']
   s.add_runtime_dependency 'thor', ['0.19.1']
-  s.add_runtime_dependency 'elasticsearch'
+  s.add_runtime_dependency 'elasticsearch', ['7.5.0']
   s.add_runtime_dependency 'font-awesome-sass', ['4.7.0']
-  s.add_runtime_dependency 'middleman-sprockets'
-  s.add_runtime_dependency 'middleman-compass'
+  s.add_runtime_dependency 'middleman-sprockets', ['4.1.1']
+  s.add_runtime_dependency 'middleman-compass', ['4.0.1']
   s.add_runtime_dependency 'sprockets', '3.7.2'
+  s.add_runtime_dependency 'ffi', '1.15.5'
 
   s.add_development_dependency 'license_finder'
   s.add_development_dependency 'pry-byebug'
