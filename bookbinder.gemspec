@@ -34,6 +34,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'middleman-compass', ['4.0.1']
   s.add_runtime_dependency 'sprockets', '3.7.2'
   s.add_runtime_dependency 'ffi', '1.15.5'
+  s.add_runtime_dependency 'haml', ['>= 4.0.5', '< 6.0']
 
   s.add_development_dependency 'license_finder'
   s.add_development_dependency 'pry-byebug'
